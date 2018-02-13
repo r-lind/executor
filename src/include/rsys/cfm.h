@@ -62,7 +62,7 @@ struct cfir_t
 #define CFIR_TYPE(cfir) (CB(CFIR_TYPE_X(cfir)))
 
 #define CFIR_LOCATION_X(cfir) ((cfir)->fragment_location)
-#define CFIR_LOCATION(cfir) (CL(CFIR_LOCATION_X(cfir)))
+#define CFIR_LOCATION(cfir) CFIR_LOCATION_X(cfir)
 
 #define CFIR_LENGTH_X(cfir) ((cfir)->cfir_length)
 #define CFIR_LENGTH(cfir) (CW(CFIR_LENGTH_X(cfir)))

@@ -347,9 +347,7 @@ capable of color.",
       opt_no_arg, "" },
 #endif
 
-#if defined(powerpc) || defined(__ppc__)
     { "ppc", "try to execute the PPC native code if possible (UNSUPPORTED)", opt_no_arg, "" },
-#endif
 
 #if defined(CYGWIN32)
     { "realmodecd", "try to use real-mode cd-rom driver", opt_no_arg, "" },
