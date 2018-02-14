@@ -177,7 +177,7 @@ set(num_sources bindec.cpp float4.cpp float5.cpp float7.cpp floatnext.cpp toolma
 source_group(Numerics FILES ${num_sources})
 
 set(misc_sources
-  traps.cpp logging.cpp
+  traps.cpp logging.cpp builtinlibs.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp trapname.cpp font.cpp
   gestalt.cpp globals.cpp iu.cpp launch.cpp main.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
   osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
@@ -243,6 +243,7 @@ set(include_sources hintemplate.h
                   include/rsys/autorefresh.h
                   include/rsys/blockdev.h
                   include/rsys/blockinterrupts.h
+                  include/rsys/builtinlibs.h
                   include/rsys/byteswap.h
                   include/rsys/cfm.h
                   include/rsys/check_structs.h

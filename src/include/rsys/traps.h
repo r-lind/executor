@@ -77,12 +77,13 @@ public:
 
     virtual void init() override;
 
-    WrappedFunction(const char* name);
+    WrappedFunction(const char* name, const char* exportToLib = nullptr);
 
     using UPPType = UPP<Ret (Args...), CallConv>;
 protected:
     UPPType guestFP;
     const char *name;
+    const char *libname;
 };
 
 template<typename F, F* fptr, int trapno, typename CallConv = callconv::Pascal>
@@ -104,7 +105,7 @@ public:
     
     virtual void init() override;
 
-    TrapFunction(const char* name) : WrappedFunction<Ret(Args...),fptr,CallConv>(name) {}
+    TrapFunction(const char* name, const char* exportToLib = nullptr) : WrappedFunction<Ret(Args...),fptr,CallConv>(name, exportToLib) {}
 
     bool isPatched() const { return tableEntry() != originalFunction; }
     Ret invokeViaTrapTable(Args...) const;
@@ -128,7 +129,7 @@ class SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv> : public 
 {
 public:
     Ret operator()(Args... args) const { return fptr(args...); }
-    SubTrapFunction(const char* name, GenericDispatcherTrap& dispatcher);
+    SubTrapFunction(const char* name, GenericDispatcherTrap& dispatcher, const char* exportToLib = nullptr);
     virtual void init() override;
 private:
     GenericDispatcherTrap& dispatcher;
@@ -155,21 +156,21 @@ private:
 
 #define COMMA ,
 #define PASCAL_TRAP(NAME, TRAP) \
-    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), TrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP>)
+    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, "InterfaceLib"), TrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP>)
 #define REGISTER_TRAP(NAME, TRAP, ...) \
-    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), TrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP COMMA callconv::Register<__VA_ARGS__>>)
+    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, "InterfaceLib"), TrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP COMMA callconv::Register<__VA_ARGS__>>)
 #define REGISTER_TRAP2(NAME, TRAP, ...) \
-    CREATE_FUNCTION_WRAPPER(stub_##NAME, &NAME, (#NAME), TrapFunction<decltype(NAME) COMMA &NAME COMMA TRAP COMMA callconv::Register<__VA_ARGS__>>)
+    CREATE_FUNCTION_WRAPPER(stub_##NAME, &NAME, (#NAME, "InterfaceLib"), TrapFunction<decltype(NAME) COMMA &NAME COMMA TRAP COMMA callconv::Register<__VA_ARGS__>>)
 
 #define PASCAL_SUBTRAP(NAME, TRAP, SELECTOR, TRAPNAME) \
-    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, TRAPNAME), SubTrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP COMMA SELECTOR>)
+    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, TRAPNAME, "InterfaceLib"), SubTrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP COMMA SELECTOR>)
 #define REGISTER_SUBTRAP(NAME, TRAP, SELECTOR, TRAPNAME, ...) \
-    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, TRAPNAME), SubTrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP COMMA SELECTOR COMMA callconv::Register<__VA_ARGS__>>)
+    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, TRAPNAME, "InterfaceLib"), SubTrapFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA TRAP COMMA SELECTOR COMMA callconv::Register<__VA_ARGS__>>)
 #define REGISTER_SUBTRAP2(NAME, TRAP, SELECTOR, TRAPNAME, ...) \
-    CREATE_FUNCTION_WRAPPER(stub_##NAME, &NAME, (#NAME, TRAPNAME), SubTrapFunction<decltype(NAME) COMMA &NAME COMMA TRAP COMMA SELECTOR COMMA callconv::Register<__VA_ARGS__>>)
+    CREATE_FUNCTION_WRAPPER(stub_##NAME, &NAME, (#NAME, TRAPNAME, "InterfaceLib"), SubTrapFunction<decltype(NAME) COMMA &NAME COMMA TRAP COMMA SELECTOR COMMA callconv::Register<__VA_ARGS__>>)
 
 #define NOTRAP_FUNCTION(NAME) \
-    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME>)
+    CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, "InterfaceLib"), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME>)
 #define PASCAL_FUNCTION(NAME) \
     CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME>)
 #define RAW_68K_FUNCTION(NAME) \

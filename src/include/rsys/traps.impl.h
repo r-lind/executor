@@ -9,6 +9,11 @@
 
 namespace Executor
 {
+namespace builtinlibs
+{
+    void addPPCEntrypoint(const char *library, const char *function, void *ppc_code);
+}
+
 namespace traps
 {
 
@@ -59,8 +64,8 @@ struct StackWLookahead
 } /* end namespace selectors */
 
 template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename CallConv>
-WrappedFunction<Ret (Args...), fptr, CallConv>::WrappedFunction(const char* name)
-    : name(name)
+WrappedFunction<Ret (Args...), fptr, CallConv>::WrappedFunction(const char* name, const char *exportToLib)
+    : name(name), libname(exportToLib)
 {
 }
 
@@ -76,6 +81,11 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
             callfrom68K::Invoker<Ret (Args...), fptr, CallConv>
                 ::invokeFrom68K, nullptr));    
+
+    if(libname)
+    {
+        builtinlibs::addPPCEntrypoint(libname, name, nullptr);
+    }
 }
 
 template<typename Ret, typename... Args, Ret (*fptr)(Args...), int trapno, typename CallConv>
@@ -95,15 +105,16 @@ void TrapFunction<Ret (Args...), fptr, trapno, CallConv>::init()
 }
 
 template<typename Ret, typename... Args, Ret (*fptr)(Args...), int trapno, uint32_t selector, typename CallConv>
-SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::SubTrapFunction(const char* name, GenericDispatcherTrap& dispatcher)
-    : WrappedFunction<Ret(Args...),fptr,CallConv>(name), dispatcher(dispatcher)
+SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::SubTrapFunction(
+    const char* name, GenericDispatcherTrap& dispatcher, const char *exportToLib)
+    : WrappedFunction<Ret(Args...),fptr,CallConv>(name, exportToLib), dispatcher(dispatcher)
 {
 }
 
 template<typename Ret, typename... Args, Ret (*fptr)(Args...), int trapno, uint32_t selector, typename CallConv>
 void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
 {
-    logging::namedThings[(void*) fptr] = this->name;
+    WrappedFunction<Ret(Args...),fptr,CallConv>::init();
     if(logging::enabled())
         dispatcher.addSelector(selector, callfrom68K::Invoker<Ret (Args...), &logging::LoggedFunction<Ret (Args...),fptr,CallConv>::call, CallConv>
                 ::invokeFrom68K);

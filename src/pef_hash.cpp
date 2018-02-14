@@ -150,7 +150,7 @@ update_export_hash_table(uint32_t *hashp, int hash_index, int first_index,
 }
 
 PEFLoaderInfoHeader_t *
-ROMlib_build_pef_hash(const map_entry_t table[], int count)
+Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
 {
     PEFLoaderInfoHeader_t *retval;
     uint32_t hash_power;
@@ -220,7 +220,7 @@ ROMlib_build_pef_hash(const map_entry_t table[], int count)
             sorted[i].hash_index = PEFHashTableIndex(sorted[i].hash_word,
                                                      hash_power);
             sorted[i].class_and_name_x = CL((kPEFTVectSymbol << 24) | name_offset);
-            sorted[i].value = guest_cast<void *>(RM(&table[i].value)); // ### ???
+            sorted[i].value = guest_cast<void *>(RM(table[i].value));
             length = strlen(table[i].symbol_name);
             memcpy(string_tablep + name_offset, table[i].symbol_name, length);
             name_offset += length;

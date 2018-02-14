@@ -27,6 +27,7 @@
 #include "rsys/launch.h"
 #include "rsys/hfs.h"
 #include "rsys/string.h"
+#include <rsys/builtinlibs.h>
 
 using namespace Executor;
 
@@ -559,12 +560,20 @@ OSErr Executor::C_GetSharedLibrary(Str63 library, OSType arch,
 
         if(retval != noErr)
         {
-            /*if(EqualString(library, (unsigned char*)"\7MathLib", false, true))
-                retval = ROMlib_GetMathLib(library, arch, loadflags, cidp,
-                                           mainaddrp, errName);
+           /* if(EqualString(library, (unsigned char*)"\7MathLib", false, true))
+                //retval = ROMlib_GetMathLib(library, arch, loadflags, cidp,
+                //                           mainaddrp, errName);
+                printf("Mathlib\n");
             else if(EqualString(library, (unsigned char*)"\14InterfaceLib", false, true))
-                retval = ROMlib_GetInterfaceLib(library, arch, loadflags, cidp,
-                                                mainaddrp, errName);*/
+                //retval = ROMlib_GetInterfaceLib(library, arch, loadflags, cidp,
+                //                                mainaddrp, errName);
+                printf("InterfaceLib\n");*/
+            if(ConnectionID cid = builtinlibs::getBuiltinLib(library))
+            {
+                *cidp = RM(cid);
+                *mainaddrp = nullptr;
+                retval = noErr;
+            }
         }
     }
     return retval;
