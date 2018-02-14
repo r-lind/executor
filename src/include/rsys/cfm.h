@@ -184,7 +184,7 @@ extern char *ROMlib_p2cstr(StringPtr str);
 struct section_info_t
 {
     GUEST_STRUCT;
-    GUEST<syn68k_addr_t> start;
+    GUEST<void*> start;
     GUEST<uint32_t> length;
     GUEST<uint32_t> ref_count;
     GUEST<uint8_t> perms;
@@ -218,7 +218,7 @@ struct lib_t
 };
 
 #define LIB_CID_X(l) ((l)->cid)
-#define LIB_CID(l) (CL(LIB_CID_X(l)))
+#define LIB_CID(l) (MR(LIB_CID_X(l)))
 
 #define LIB_N_SYMBOLS_X(l) ((l)->n_symbols)
 #define LIB_N_SYMBOLS(l) (CL(LIB_N_SYMBOLS_X(l)))

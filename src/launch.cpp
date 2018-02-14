@@ -422,12 +422,14 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
         if(CFIR_LOCATION(cfirp) == kOnDiskFlat)
         {
             // #warning were ignoring a lot of the cfir attributes
-            GetDiskFragment(fsp, CFIR_OFFSET_TO_FRAGMENT(cfirp),
+           OSErr err = GetDiskFragment(fsp, CFIR_OFFSET_TO_FRAGMENT(cfirp),
                             CFIR_FRAGMENT_LENGTH(cfirp), empty,
                             kLoadLib,
                             &c_id,
                             &mainAddr,
                             errName);
+            fprintf(stderr, "GetDiskFragment -> err == %d\n", err);
+
         }
         else if(CFIR_LOCATION(cfirp) == kOnDiskSegmented)
         {
@@ -444,14 +446,18 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
 
             fprintf(stderr, "Memory leak from segmented fragment\n");
         }
-        /*{
-            uint32_t new_toc;
-            void *new_pc;
+        {
+            void *mainAddr1 = (void*) MR(mainAddr);
+            uint32_t new_toc = CL( ((GUEST<uint32_t>*)mainAddr1)[0] );
+            void *new_pc = MR( ((GUEST<void*>*)mainAddr1)[1] );
 
-            new_toc = ((uint32_t *)mainAddr)[1];
+            printf("ppc start: r2 = %08x, %p\n", new_toc, new_pc);
+            /*new_toc = ((uint32_t *)mainAddr)[1];
             new_pc = ((void **)mainAddr)[0];
-            ppc_call(new_toc, new_pc, 0);
-        }*/
+            ppc_call(new_toc, new_pc, 0);*/
+            
+            
+        }
     }
 
     C_ExitToShell();

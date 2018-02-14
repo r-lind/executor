@@ -394,7 +394,7 @@ OSErr Executor::C_FindSymbol(ConnectionID connID, Str255 symName,
                 break;
             default:
             {
-                GUEST<uint32_t> sect_start = connID->sects[section_index].start;
+                GUEST<void*> sect_start = connID->sects[section_index].start;
                 *symAddr = RM(val + MR(guest_cast<Ptr>(sect_start)));
             }
             break;
