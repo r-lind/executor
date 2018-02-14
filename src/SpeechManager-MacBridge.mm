@@ -48,6 +48,10 @@ static dispatch_block_t initSpeechBlock= ^{
       NSNumber *synthesizerID = voiceDict[@"VoiceSynthesizerNumericID"];
       NSNumber *voiceID = voiceDict[@"VoiceNumericID"];
       
+      if (!synthesizerID || !voiceID) {
+        continue;
+      }
+      
       [tmpVoices addObject:@{VoiceNameKey: aVoice,
                              VoiceCreatorIDKey: synthesizerID,
                              VoiceIDKey: voiceID}];
