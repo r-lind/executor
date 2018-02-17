@@ -93,7 +93,7 @@ typedef struct
         else if((name).status == TEMP_ALLOC_DISPOSHANDLE) \
         {                                                 \
             HUnlock((name).u.handle);                     \
-            DisposHandle((name).u.handle);                \
+            DisposeHandle((name).u.handle);                \
         }                                                 \
         (name).u.ptr = 0;                                 \
     } while(0)

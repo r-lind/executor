@@ -264,15 +264,15 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         else
         {
             retval = MR(rr->rhand);
-            ReallocHandle(retval, uncompressed_size + dcmp_offset);
+            ReallocateHandle(retval, uncompressed_size + dcmp_offset);
         }
         err = MemError();
         xxx = STARH(retval) + uncompressed_size + dcmp_offset - dlen;
         if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll(Hx(map, resfn), &dlen, xxx))))
         {
             if(dcmp_workspace)
-                DisposPtr(dcmp_workspace);
-            DisposHandle(MR(rr->rhand));
+                DisposePtr(dcmp_workspace);
+            DisposeHandle(MR(rr->rhand));
             rr->rhand = NULL;
             retval = NULL;
         }
@@ -291,7 +291,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
                 SetHandleSize(retval, uncompressed_size);
                 HSetState(dcmp_handle, state);
                 if(dcmp_workspace)
-                    DisposPtr(dcmp_workspace);
+                    DisposePtr(dcmp_workspace);
             }
         }
     }
@@ -463,12 +463,12 @@ void Executor::C_CloseResFile(INTEGER rn)
             {
                 if(*h)
                     HClrRBit(h);
-                DisposHandle(h);
+                DisposeHandle(h);
             }
         }
         EWALKTANDR(tr, rr)
 
-        DisposHandle((Handle)map);
+        DisposeHandle((Handle)map);
         FSClose(rn);
         ROMlib_setreserr(save_ResErr);
     }
@@ -583,7 +583,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
     ROMlib_setreserr(SetFPos(f, fsFromStart, Cx(hd.rmapoff)));
     if(LM(ResErr) != CWC(noErr))
     {
-        DisposHandle((Handle)map);
+        DisposeHandle((Handle)map);
         FSClose(f);
         return (-1);
     }
@@ -591,7 +591,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
     ROMlib_setreserr(FSReadAll(f, &lc, (Ptr)STARH(map)));
     if(LM(ResErr) != CWC(noErr))
     {
-        DisposHandle((Handle)map);
+        DisposeHandle((Handle)map);
         FSClose(f);
         return (-1);
     }
@@ -623,7 +623,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
             )
     {
         ROMlib_setreserr(mapReadErr);
-        DisposHandle((Handle)map);
+        DisposeHandle((Handle)map);
         FSClose(f);
         return (-1);
     }

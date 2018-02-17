@@ -154,7 +154,7 @@ Executor::ROMlib_right_to_left_key_map(uint16_t what)
  * NOTE: we figure out the value for a down keystroke, then we just remember
  * what we figured out and return that value on the up.  This probably isn't
  * how the Mac does it, but it's probably close enough.  Largely this
- * routine is just a wrapper for KeyTrans now.  See IMV for an explanation
+ * routine is just a wrapper for KeyTranslate now.  See IMV for an explanation
  * of what's going on here.
  */
 
@@ -170,7 +170,7 @@ Executor::ROMlib_xlate(INTEGER virt, INTEGER modifiers, bool down_p)
     {
         static LONGINT state;
 
-        retval = KeyTrans(ROMlib_kchr_ptr(),
+        retval = KeyTranslate(ROMlib_kchr_ptr(),
                           modifiers | (virt & VIRT_MASK), &state);
         down_value[virt & VIRT_MASK] = (retval >> 16
                                             ? retval >> 16
@@ -470,7 +470,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
                     AEPutPtr(list, i, typeFSS, (Ptr)&spec, sizeof spec);
                 }
 
-                AEPutKeyDesc(aevt, keyDirectObject, list);
+                AEPutParamDesc(aevt, keyDirectObject, list);
 
                 AESend(aevt,
                        /* dummy */ NULL,

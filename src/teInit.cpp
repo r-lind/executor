@@ -86,7 +86,7 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
 
 void Executor::C_TEDispose(TEHandle teh)
 {
-    DisposHandle((Handle)TEHIDDENH(teh));
-    DisposHandle(TE_HTEXT(teh));
-    DisposHandle((Handle)teh);
+    DisposeHandle((Handle)TEHIDDENH(teh));
+    DisposeHandle(TE_HTEXT(teh));
+    DisposeHandle((Handle)teh);
 }

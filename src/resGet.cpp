@@ -244,7 +244,7 @@ static void ROMlib_init_xdefs(void)
         oldhandle = newhandle;
         newhandle = NewHandle(NUM_ROMLIB_DEFS * sizeof(ROMlib_defs[0]));
         if(oldhandle)
-            DisposHandle(oldhandle);
+            DisposeHandle(oldhandle);
     } while(!acceptable((*newhandle).raw()) && --timeout);
 #if !defined(NDEBUG)
     if(!timeout)
@@ -517,7 +517,7 @@ void Executor::C_ReleaseResource(Handle res)
     h = MR(rr->rhand);
     if(*h)
         HClrRBit(h);
-    DisposHandle(h);
+    DisposeHandle(h);
     rr->rhand = 0;
 }
 

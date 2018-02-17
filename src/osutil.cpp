@@ -85,7 +85,7 @@ OSErr Executor::PtrToXHand(Ptr p, Handle h, LONGINT s)
     OSErr err;
 
     /*
- * DO *NOT* use ReallocHandle here.  It will fail if the handle is locked.
+ * DO *NOT* use ReallocateHandle here.  It will fail if the handle is locked.
  */
     SetHandleSize(h, s);
     if((err = MemError()))
@@ -324,7 +324,7 @@ void Executor::ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len)
         *p = base[U(*p)];
 }
 
-void Executor::UprString(StringPtr s, BOOLEAN diac)
+void Executor::UpperString(StringPtr s, BOOLEAN diac)
 {
     ROMlib_UprString(s + 1, diac, (INTEGER)(unsigned char)s[0]);
 }
@@ -600,7 +600,7 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
  * NOTE: not callable from the outside world directly
  */
 
-void Executor::Date2Secs(DateTimeRec *d, ULONGINT *s)
+void Executor::DateToSeconds(DateTimeRec *d, ULONGINT *s)
 {
     long long l;
 
@@ -609,7 +609,7 @@ void Executor::Date2Secs(DateTimeRec *d, ULONGINT *s)
     *s = (ULONGINT)l;
 }
 
-void Executor::Secs2Date(ULONGINT mactime, DateTimeRec *d)
+void Executor::SecondsToDate(ULONGINT mactime, DateTimeRec *d)
 {
     date_to_swapped_fields((unsigned long)mactime, &d->year, &d->month,
                            &d->day, &d->hour, &d->minute, &d->second,
@@ -621,14 +621,14 @@ void Executor::GetTime(DateTimeRec *d)
     GUEST<ULONGINT> secs;
 
     GetDateTime(&secs);
-    Secs2Date(CL(secs), d);
+    SecondsToDate(CL(secs), d);
 }
 
 void Executor::SetTime(DateTimeRec *d)
 {
     ULONGINT secs;
 
-    Date2Secs(d, &secs);
+    DateToSeconds(d, &secs);
     SetDateTime(secs);
 }
 

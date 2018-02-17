@@ -122,18 +122,18 @@ PASCAL_TRAP(DisposeMenu, 0xA932);
 extern void C_AppendMenu(MenuHandle mh, StringPtr str);
 PASCAL_TRAP(AppendMenu, 0xA933);
 
-extern void C_AddResMenu(MenuHandle mh, ResType restype);
-PASCAL_TRAP(AddResMenu, 0xA94D);
+extern void C_AppendResMenu(MenuHandle mh, ResType restype);
+PASCAL_TRAP(AppendResMenu, 0xA94D);
 
-extern void C_DelMenuItem(MenuHandle mh,
+extern void C_DeleteMenuItem(MenuHandle mh,
                                       INTEGER item);
-PASCAL_TRAP(DelMenuItem, 0xA952);
+PASCAL_TRAP(DeleteMenuItem, 0xA952);
 extern void C_InsertResMenu(MenuHandle mh, ResType restype,
                                         INTEGER after);
 PASCAL_TRAP(InsertResMenu, 0xA951);
-extern void C_InsMenuItem(MenuHandle mh, StringPtr str,
+extern void C_InsertMenuItem(MenuHandle mh, StringPtr str,
                                       INTEGER after);
-PASCAL_TRAP(InsMenuItem, 0xA826);
+PASCAL_TRAP(InsertMenuItem, 0xA826);
 extern void C_InsertMenu(MenuHandle mh, INTEGER before);
 PASCAL_TRAP(InsertMenu, 0xA935);
 
@@ -200,8 +200,8 @@ PASCAL_TRAP(GetItemStyle, 0xA941);
 extern INTEGER C_CountMItems(MenuHandle mh);
 PASCAL_TRAP(CountMItems, 0xA950);
 
-extern MenuHandle C_GetMHandle(INTEGER mid);
-PASCAL_TRAP(GetMHandle, 0xA949);
+extern MenuHandle C_GetMenuHandle(INTEGER mid);
+PASCAL_TRAP(GetMenuHandle, 0xA949);
 
 extern void C_SetMenuFlash(INTEGER i);
 PASCAL_TRAP(SetMenuFlash, 0xA94A);
@@ -223,14 +223,14 @@ extern LONGINT C_PopUpMenuSelect(MenuHandle mh, INTEGER top,
                                              INTEGER left, INTEGER item);
 PASCAL_TRAP(PopUpMenuSelect, 0xA80B);
 
-extern void C_DelMCEntries(INTEGER, INTEGER);
-PASCAL_TRAP(DelMCEntries, 0xAA60);
+extern void C_DeleteMCEntries(INTEGER, INTEGER);
+PASCAL_TRAP(DeleteMCEntries, 0xAA60);
 extern MCTableHandle C_GetMCInfo();
 PASCAL_TRAP(GetMCInfo, 0xAA61);
 extern void C_SetMCInfo(MCTableHandle);
 PASCAL_TRAP(SetMCInfo, 0xAA62);
-extern void C_DispMCInfo(MCTableHandle);
-PASCAL_TRAP(DispMCInfo, 0xAA63);
+extern void C_DisposeMCInfo(MCTableHandle);
+PASCAL_TRAP(DisposeMCInfo, 0xAA63);
 extern MCEntryPtr C_GetMCEntry(INTEGER, INTEGER);
 PASCAL_TRAP(GetMCEntry, 0xAA64);
 extern void C_SetMCEntries(INTEGER, MCTablePtr);

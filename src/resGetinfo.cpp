@@ -165,7 +165,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
     return retval;
 }
 
-LONGINT Executor::C_SizeResource(Handle res)
+LONGINT Executor::C_GetResourceSizeOnDisk(Handle res)
 {
     return ROMlib_SizeResource(res, true);
 }

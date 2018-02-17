@@ -36,7 +36,7 @@ void Executor::AppendDITL(DialogPtr dp, Handle new_items_h, DITLMethod method)
 
         method = -method;
 
-        GetDItem(dp, method, &item_type, &item_h, &item_rect);
+        GetDialogItem(dp, method, &item_type, &item_h, &item_rect);
 
         resize_p = false;
         base_pt.v = CW(item_rect.top);
@@ -201,7 +201,7 @@ void Executor::ShortenDITL(DialogPtr dp, int16_t n_items)
                         DIALOG_EDIT_OPEN_X(dp) = CWC(0);
                     }
 
-                    DisposHandle((Handle)MR(itemp->itmhand));
+                    DisposeHandle((Handle)MR(itemp->itmhand));
                     /* when editText items are drawn, the box around
 		      them is inset `-3', so we also need to do that
 		      when erasing */

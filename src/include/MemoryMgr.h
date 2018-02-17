@@ -158,7 +158,7 @@ REGISTER_TRAP2(_MaxMem_flags, 0xA11D, D0 (Out<A0,Size>, TrapBit<SYSBIT>));
 extern Size _CompactMem_flags(Size sizeneeded, bool sys_p);
 REGISTER_TRAP2(_CompactMem_flags, 0xA04C, D0 (D0, TrapBit<SYSBIT>));
 
-#define ResrvMem(needed) (_ResrvMem_flags(needed, false))
+#define ReserveMem(needed) (_ResrvMem_flags(needed, false))
 #define ResrvMemSys(needed) (_ResrvMem_flags(needed, true))
 extern void _ResrvMem_flags(Size needed, bool sys_p);
 REGISTER_TRAP2(_ResrvMem_flags, 0xA040, void (D0, TrapBit<SYSBIT>), callconv::ReturnMemErr<D0>);
@@ -216,18 +216,18 @@ extern THz GetZone(void);
 REGISTER_TRAP2(GetZone, 0xA11A, A0 (), ReturnMemErr<D0>);
 extern void SetZone(THz hz);
 REGISTER_TRAP2(SetZone, 0xA01B, void (A0), ReturnMemErr<D0>);
-extern void DisposHandle(Handle h);
-REGISTER_TRAP2(DisposHandle, 0xA023, void (A0), ReturnMemErr<D0>);
+extern void DisposeHandle(Handle h);
+REGISTER_TRAP2(DisposeHandle, 0xA023, void (A0), ReturnMemErr<D0>);
 extern Size GetHandleSize(Handle h);
 REGISTER_TRAP2(GetHandleSize, 0xA025, D0 (A0), ReturnMemErrConditional<D0>);
 extern void SetHandleSize(Handle h, Size newsize);
 REGISTER_TRAP2(SetHandleSize, 0xA024, void (A0, D0), ReturnMemErr<D0>);
 extern THz HandleZone(Handle h);
 REGISTER_TRAP2(HandleZone, 0xA126, A0 (A0), ReturnMemErr<D0>);
-extern void ReallocHandle(Handle h, Size size);
-REGISTER_TRAP2(ReallocHandle, 0xA027, void (A0, D0), ReturnMemErr<D0>);
-extern void DisposPtr(Ptr p);
-REGISTER_TRAP2(DisposPtr, 0xA01F, void (A0), ReturnMemErr<D0>);
+extern void ReallocateHandle(Handle h, Size size);
+REGISTER_TRAP2(ReallocateHandle, 0xA027, void (A0, D0), ReturnMemErr<D0>);
+extern void DisposePtr(Ptr p);
+REGISTER_TRAP2(DisposePtr, 0xA01F, void (A0), ReturnMemErr<D0>);
 extern Size GetPtrSize(Ptr p);
 REGISTER_TRAP2(GetPtrSize, 0xA021, D0 (A0), ReturnMemErrConditional<D0>);
 extern void SetPtrSize(Ptr p, Size newsize);
@@ -253,7 +253,7 @@ extern void EmptyHandle(Handle h);
 REGISTER_TRAP2(EmptyHandle, 0xA02B, void (A0), ReturnMemErr<D0>);
 
 extern THz SystemZone(void);
-extern THz ApplicZone(void);
+extern THz ApplicationZone(void);
 
 extern Size StackSpace(void);
 REGISTER_TRAP2(StackSpace, 0xA065, D0 ());

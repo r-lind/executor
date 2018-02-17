@@ -2069,7 +2069,7 @@
 0xA806	SndControl
 0xA807	SndNewChannel
 0xA808	InitProcMenu
-0xA809	GetCVariant
+0xA809	GetControlVariant
 0xA80A	GetWVariant
 0xA80B	PopUpMenuSelect
 0xA80C	RGetResource
@@ -2082,7 +2082,7 @@
 0xA813	TEAutoView
 0xA814	SetFractEnable
 0xA815	SCSIDispatch
-0xA816	Pack8 AESetInteractionAllowed AEDisposeDesc AEResetTimer AEGetTheCurrentEvent AEProcessAppleEvent AEGetInteractionAllowed AESuspendTheCurrentEvent AESetTheCurrentEvent AEDisposeToken AEDuplicateDesc AECountItems AEDeleteItem AEDeleteKeyDesc AEManagerInfo AEInstallSpecialHandler AERemoveSpecialHandler AEGetSpecialHandler AEResolve AECoerceDesc AEPutDesc AEPutKeyDesc AEInteractWithUser AEPutAttributeDesc AECreateList AERemoveEventHandler AERemoveCoercionHandler AERemoveObjectAccessor AEGetKeyDesc AEResumeTheCurrentEvent AECreateDesc AEGetAttributeDesc AESizeOfAttribute AESizeOfKeyDesc AESizeOfNthItem AEInstallEventHandler AEGetEventHandler AEInstallObjectAccessor AEGetObjectAccessor AECoercePtr AEPutPtr AEGetNthDesc AEPutKeyPtr AEPutAttributePtr AEInstallCoercionHandler AEPutArray AECreateAppleEvent AEGetCoercionHandler AECallObjectAccessor AEGetArray AESend AEGetKeyPtr AEGetAttributePtr AESetObjectCallbacks AEGetNthPtr AEDeleteParam AEPutParamDesc AEGetParamPtr AEDeleteAttribute _AE_hdlr_delete _AE_hdlr_install _AE_hdlr_lookup _AE_hdlr_table_alloc
+0xA816	Pack8 AESetInteractionAllowed AEDisposeDesc AEResetTimer AEGetTheCurrentEvent AEProcessAppleEvent AEGetInteractionAllowed AESuspendTheCurrentEvent AESetTheCurrentEvent AEDisposeToken AEDuplicateDesc AECountItems AEDeleteItem AEDeleteParam AEManagerInfo AEInstallSpecialHandler AERemoveSpecialHandler AEGetSpecialHandler AEResolve AECoerceDesc AEPutDesc AEPutParamDesc AEInteractWithUser AEPutAttributeDesc AECreateList AERemoveEventHandler AERemoveCoercionHandler AERemoveObjectAccessor AEGetParamDesc AEResumeTheCurrentEvent AECreateDesc AEGetAttributeDesc AESizeOfAttribute AESizeOfParam AESizeOfNthItem AEInstallEventHandler AEGetEventHandler AEInstallObjectAccessor AEGetObjectAccessor AECoercePtr AEPutPtr AEGetNthDesc AEPutParamPtr AEPutAttributePtr AEInstallCoercionHandler AEPutArray AECreateAppleEvent AEGetCoercionHandler AECallObjectAccessor AEGetArray AESend AEGetParamPtr AEGetAttributePtr AESetObjectCallbacks AEGetNthPtr AEDeleteParam AEPutParamDesc AEGetParamPtr AEDeleteAttribute _AE_hdlr_delete _AE_hdlr_install _AE_hdlr_lookup _AE_hdlr_table_alloc
 0xA817	CopyMask
 0xA818	FixAtan2
 0xA819	
@@ -2093,14 +2093,14 @@
 0xA81E	
 0xA81F	Get1Resource
 0xA820	Get1NamedResource
-0xA821	MaxSizeRsrc
+0xA821	GetMaxResourceSize
 0xA822	ResourceDispatch ReadPartialResource WritePartialResource SetResourceSize GetNextFOND
 0xA823	AliasDispatch FindFolder NewAlias ResolveAlias MatchAlias UpdateAlias GetAliasInfo NewAliasMinimal NewAliasMinimalFromFullPath ResolveAliasFile
 0xA824	
 0xA825	
-0xA826	InsMenuItem
-0xA827	HideDItem
-0xA828	ShowDItem
+0xA826	InsertMenuItem
+0xA827	HideDialogItem
+0xA828	ShowDialogItem
 0xA829	
 0xA82A	ComponentDispatch
 0xA82B	Pack9
@@ -2121,8 +2121,8 @@
 0xA83A	ZoomWindow
 0xA83B	TrackBox
 0xA83C	TEGetOffset
-0xA83D	TEDispatch TEStylPaste TESetStyle TEReplaceStyle TEGetStyle GetStylHandle SetStylHandle GetStylScrap TEStylInsert TEGetPoint TEGetHeight TEContinuousStyle SetStylScrap TECustomHook TENumStyles TEFeatureFlag
-0xA83E	TEStylNew
+0xA83D	TEDispatch TEStylePaste TESetStyle TEReplaceStyle TEGetStyle TEGetStyleHandle TESetStyleHandle TEGetStyleScrapHandle TEStyleInsert TEGetPoint TEGetHeight TEContinuousStyle TEUseStyleScrap TECustomHook TENumStyles TEFeatureFlag
+0xA83E	TEStyleNew
 0xA83F	Long2Fix
 0xA840	Fix2Long
 0xA841	Fix2Frac
@@ -2241,7 +2241,7 @@
 0xA8B2	EraseRoundRect
 0xA8B3	InvertRoundRect
 0xA8B4	FillRoundRect
-0xA8B5	ScriptUtil FontScript IntlScript KeyScript Font2Script GetEnvirons SetEnvirons GetScript SetScript CharByte CharType Pixel2Char Char2Pixel Transliterate FindWord HiliteText DrawJust MeasureJust ParseTable FindScriptRun VisibleLength PixelToChar CharToPixel DrawJustified NMeasureJust PortionText ReplaceText TruncText TruncString NFindWord ValidDate FormatStr2X FormatX2Str Format2Str Str2Format ToggleDate LongSecs2Date LongDate2Secs String2Time String2Date InitDateCache IntlTokenize GetFormatOrder StyledLineBreak FillParseTable CharacterByteType CharacterType TransliterateText LowercaseText StripDiacritics UppercaseText UppercaseStripDiacritics TruncString StringToExtended ExtendedToString StringToFormatRec PortionLine
+0xA8B5	ScriptUtil FontScript IntlScript KeyScript FontToScript GetScriptManagerVariable SetScriptManagerVariable GetScriptVariable SetScriptVariable CharByte CharType Pixel2Char Char2Pixel Transliterate FindWord HiliteText DrawJust MeasureJust ParseTable FindScriptRun VisibleLength PixelToChar CharToPixel DrawJustified MeasureJustified PortionText ReplaceText TruncText TruncString NFindWord ValidDate StringToExtended ExtendedToString FormatRecToString StringToFormatRec ToggleDate LongSecondsToDate LongDateToSeconds StringToTime StringToDate InitDateCache IntlTokenize GetFormatOrder StyledLineBreak FillParseTable CharacterByteType CharacterType TransliterateText LowercaseText StripDiacritics UppercaseText UppercaseStripDiacritics TruncString StringToExtended ExtendedToString StringToFormatRec PortionLine
 0xA8B6	StdOval
 0xA8B7	FrameOval
 0xA8B8	PaintOval
@@ -2389,41 +2389,41 @@
 0xA946	GetItem
 0xA947	SetItem
 0xA948	CalcMenuSize
-0xA949	GetMHandle
+0xA949	GetMenuHandle
 0xA94A	SetMenuFlash
 0xA94B	PlotIcon
 0xA94C	FlashMenuBar
-0xA94D	AddResMenu
+0xA94D	AppendResMenu
 0xA94E	PinRect
 0xA94F	DeltaPoint
 0xA950	CountMItems
 0xA951	InsertResMenu
-0xA952	DelMenuItem
-0xA953	UpdtControl
+0xA952	DeleteMenuItem
+0xA953	UpdateControls
 0xA954	NewControl
 0xA955	DisposeControl
 0xA956	KillControls
 0xA957	ShowControl
 0xA958	HideControl
 0xA959	MoveControl
-0xA95A	GetCRefCon
-0xA95B	SetCRefCon
+0xA95A	GetControlReference
+0xA95B	SetControlReference
 0xA95C	SizeControl
 0xA95D	HiliteControl
-0xA95E	GetCTitle
-0xA95F	SetCTitle
-0xA960	GetCtlValue
-0xA961	GetCtlMin
-0xA962	GetCtlMax
-0xA963	SetCtlValue
-0xA964	SetCtlMin
-0xA965	SetCtlMax
+0xA95E	GetControlTitle
+0xA95F	SetControlTitle
+0xA960	GetControlValue
+0xA961	GetControlMinimum
+0xA962	GetControlMaximum
+0xA963	SetControlValue
+0xA964	SetControlMinimum
+0xA965	SetControlMaximum
 0xA966	TestControl
 0xA967	DragControl
 0xA968	TrackControl
 0xA969	DrawControls
-0xA96A	GetCtlAction
-0xA96B	SetCtlAction
+0xA96A	GetControlAction
+0xA96B	SetControlAction
 0xA96C	FindControl
 0xA96D	Draw1Control
 0xA96E	Dequeue
@@ -2436,19 +2436,19 @@
 0xA975	TickCount
 0xA976	GetKeys
 0xA977	WaitMouseUp
-0xA978	UpdtDialog
+0xA978	UpdateDialog
 0xA979	CouldDialog
 0xA97A	FreeDialog
 0xA97B	InitDialogs
 0xA97C	GetNewDialog
 0xA97D	NewDialog
-0xA97E	SelIText
+0xA97E	SelectDialogItemText
 0xA97F	IsDialogEvent
 0xA980	DialogSelect
 0xA981	DrawDialog
 0xA982	CloseDialog
-0xA983	DisposDialog
-0xA984	FindDItem
+0xA983	DisposeDialog
+0xA984	FindDialogItem
 0xA985	Alert
 0xA986	StopAlert
 0xA987	NoteAlert
@@ -2457,10 +2457,10 @@
 0xA98A	FreeAlert
 0xA98B	ParamText
 0xA98C	ErrorSound
-0xA98D	GetDItem
-0xA98E	SetDItem
-0xA98F	SetIText
-0xA990	GetIText
+0xA98D	GetDialogItem
+0xA98E	SetDialogItem
+0xA98F	SetDialogItemText
+0xA990	GetDialogItemText
 0xA991	ModalDialog
 0xA992	DetachResource
 0xA993	SetResPurge
@@ -2481,7 +2481,7 @@
 0xA9A2	LoadResource
 0xA9A3	ReleaseResource
 0xA9A4	HomeResFile
-0xA9A5	SizeResource
+0xA9A5	GetResourceSizeOnDisk
 0xA9A6	GetResAttrs
 0xA9A7	SetResAttrs
 0xA9A8	GetResInfo
@@ -2489,7 +2489,7 @@
 0xA9AA	ChangedResource
 0xA9AB	AddResource
 0xA9AC	AddReference
-0xA9AD	RmveResource
+0xA9AD	RemoveResource
 0xA9AE	RmveReference
 0xA9AF	ResError
 0xA9B0	WriteResource
@@ -2511,11 +2511,11 @@
 0xA9C0	GetNewMBar
 0xA9C1	UniqueID
 0xA9C2	SystemEdit
-0xA9C3	KeyTrans
+0xA9C3	KeyTranslate
 0xA9C4	OpenRFPerm
 0xA9C5	RsrcMapEntry
-0xA9C6	Secs2Date
-0xA9C7	Date2Secs
+0xA9C6	SecondsToDate
+0xA9C7	DateToSeconds
 0xA9C8	SysBeep
 0xA9C9	SysError
 0xA9CA	
@@ -2523,7 +2523,7 @@
 0xA9CB	TEGetText
 0xA9CC	TEInit
 0xA9CD	TEDispose
-0xA9CE	TextBox
+0xA9CE	TETextBox
 0xA9CF	TESetText
 0xA9D0	TECalText
 0xA9D1	TESetSelect
@@ -2540,7 +2540,7 @@
 0xA9DC	TEKey
 0xA9DD	TEScroll
 0xA9DE	TEInsert
-0xA9DF	TESetJust
+0xA9DF	TESetAlignment
 0xA9E0	Munger
 0xA9E1	HandToHand
 0xA9E2	PtrToXHand
@@ -2548,13 +2548,13 @@
 0xA9E4	HandAndHand
 0xA9E5	InitPack
 0xA9E6	InitAllPacks
-0xA9E7	Pack0 LActivate LAddColumn LAddRow LAddToCell LAutoScroll LCellSize LClick LClrCell LDelColumn LDelRow LDispose LDoDraw LDraw LFind LGetCell LGetSelect LLastClick LNew LNextCell LRect LScroll LSearch LSetCell LSetSelect LSize LUpdate
+0xA9E7	Pack0 LActivate LAddColumn LAddRow LAddToCell LAutoScroll LCellSize LClick LClrCell LDelColumn LDelRow LDispose LSetDrawingMode LDraw LGetCellDataLocation LGetCell LGetSelect LLastClick LNew LNextCell LRect LScroll LSearch LSetCell LSetSelect LSize LUpdate
 0xA9E8	Pack1
 0xA9E9	Pack2 DIBadMount DILoad DIUnload DIFormat DIVerify DIZero
 0xA9EA	Pack3 SFPutFile SFGetFile SFPPutFile SFPGetFile StandardPutFile StandardGetFile CustomPutFile CustomGetFile
 0xA9EB	Pack4 ROMlib_Faddx ROMlib_Fsetenv ROMlib_Fsubx ROMlib_Fgetenv ROMlib_Fmulx ROMlib_Fdivx ROMlib_Fcmpx ROMlib_Fdec2x ROMlib_FcpXx ROMlib_Fx2dec ROMlib_Fremx ROMlib_FnegX ROMlib_Fx2X ROMlib_FabsX ROMlib_FX2x ROMlib_Fcpysgnx ROMlib_FsqrtX ROMlib_FrintX ROMlib_FtintX ROMlib_Fprocentry ROMlib_FscalbX ROMlib_Fprocexit ROMlib_FlogbX ROMlib_Ftestxcp ROMlib_Fclassx
 0xA9EC	Pack5 ROMlib_FlnX ROMlib_Flog2X ROMlib_Fln1X ROMlib_Flog21X ROMlib_FexpX ROMlib_Fexp2X ROMlib_Fexp1X ROMlib_Fexp21X ROMlib_Fxpwri ROMlib_Fxpwry ROMlib_Fcompound ROMlib_Fannuity ROMlib_FsinX ROMlib_FcosX ROMlib_FtanX ROMlib_FatanX ROMlib_FrandX
-0xA9ED	Pack6 IUDateString IUTimeString IUMetric IUGetIntl IUSetIntl IUMagString IUMagIDString IUDatePString IUTimePString IUMystery IULDateString IULTimeString IUClearCache IUMagPString IUMagIDPString IUScriptOrder IULangOrder IUTextOrder IUGetItlTable
+0xA9ED	Pack6 IUDateString IUTimeString IsMetric GetIntlResource SetIntlResource IUMagString IUMagIDString IUDatePString IUTimePString IUMystery IULDateString IULTimeString ClearIntlResourceCache IUMagPString IUMagIDPString IUScriptOrder IULangOrder IUTextOrder GetIntlResourceTable
 0xA9EE	Pack7	ROMlib_Fpstr2dec ROMlib_Fdec2str ROMlib_Fcstr2dec NumToString StringToNum
 0xA9EF	PtrAndHand
 0xA9F0	_LoadSeg
@@ -2578,11 +2578,11 @@
 0xAA01	InitCPort
 0xAA02	CloseCPort
 0xAA03	NewPixMap
-0xAA04	DisposPixMap
+0xAA04	DisposePixMap
 0xAA05	CopyPixMap
 0xAA06	SetPortPix
 0xAA07	NewPixPat
-0xAA08	DisposPixPat
+0xAA08	DisposePixPat
 0xAA09	CopyPixPat
 0xAA0A	PenPixPat
 0xAA0B	BackPixPat
@@ -2610,9 +2610,9 @@
 0xAA21	OpColor
 0xAA22	HiliteColor
 0xAA23	CharExtra
-0xAA24	DisposCTable
+0xAA24	DisposeCTable
 0xAA25	DisposeCIcon
-0xAA26	DisposCCursor
+0xAA26	DisposeCCursor
 0xAA27	GetMaxDevice
 0xAA28	GetCTSeed
 0xAA29	GetDeviceList
@@ -2622,7 +2622,7 @@
 0xAA2D	SetDeviceAttribute
 0xAA2E	InitGDevice
 0xAA2F	NewGDevice
-0xAA30	DisposGDevice
+0xAA30	DisposeGDevice
 0xAA31	SetGDevice
 0xAA32	GetGDevice
 0xAA33	Color2Index
@@ -2641,15 +2641,15 @@
 0xAA40	QDError
 0xAA41	SetWinColor
 0xAA42	GetAuxWin
-0xAA43	SetCtlColor
-0xAA44	GetAuxCtl
+0xAA43	SetControlColor
+0xAA44	GetAuxiliaryControlRecord
 0xAA45	NewCWindow
 0xAA46	GetNewCWindow
 0xAA47	SetDeskCPat
 0xAA48	GetCWMgrPort
 0xAA49	SaveEntries
 0xAA4A	RestoreEntries
-0xAA4B	NewCDialog
+0xAA4B	NewColorDialog
 0xAA4C	DelSearch
 0xAA4D	DelComp
 0xAA4E	SetStdCProcs
@@ -2670,10 +2670,10 @@
 0xAA5D	
 0xAA5E	
 0xAA5F	
-0xAA60	DelMCEntries
+0xAA60	DeleteMCEntries
 0xAA61	GetMCInfo
 0xAA62	SetMCInfo
-0xAA63	DispMCInfo
+0xAA63	DisposeMCInfo
 0xAA64	GetMCEntry
 0xAA65	SetMCEntries
 0xAA66	MenuChoice

@@ -243,7 +243,7 @@ STUB(Frac2X)
                                                              \
     uw = EM_D1 << 8;                                         \
     uw |= cpu_state.regs[2].uw.n;                            \
-    EM_D0 = (KeyTrans(NULL, uw, (LONGINT *)0) >> 16) & 0xFF; \
+    EM_D0 = (KeyTranslate(NULL, uw, (LONGINT *)0) >> 16) & 0xFF; \
     RTS();
 
 STUB(Key1Trans);
@@ -346,7 +346,7 @@ STUB(RelString)
     RTS();
 }
 
-STUB(UprString)
+STUB(UpperString)
 {
     long savea0;
 

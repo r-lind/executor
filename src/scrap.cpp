@@ -84,7 +84,7 @@ LONGINT Executor::C_LoadScrap()
             return (retval);
 
         HUnlock(MR(LM(ScrapHandle)));
-        ReallocHandle(MR(LM(ScrapHandle)), (Size)Cx(LM(ScrapSize)));
+        ReallocateHandle(MR(LM(ScrapHandle)), (Size)Cx(LM(ScrapSize)));
         if(LM(MemErr) != CWC(noErr))
             /*-->*/ return Cx(LM(MemErr));
         HLock(MR(LM(ScrapHandle)));
@@ -225,7 +225,7 @@ get_scrap_helper(void *vh, void *lp, int len, bool convert_text)
     else
         new_len = len;
     h = (Handle)vh;
-    ReallocHandle(h, new_len);
+    ReallocateHandle(h, new_len);
     if(LM(MemErr) != CWC(noErr))
         retval = -1;
     else
@@ -240,7 +240,7 @@ get_scrap_helper(void *vh, void *lp, int len, bool convert_text)
 }
 #endif
 
-#define RETURN(x) return (temph ? (DisposHandle(temph), 0) : 0), x
+#define RETURN(x) return (temph ? (DisposeHandle(temph), 0) : 0), x
 
 LONGINT Executor::C_GetScrap(Handle h, ResType rest, GUEST<LONGINT> *off)
 {
@@ -302,7 +302,7 @@ LONGINT Executor::C_GetScrap(Handle h, ResType rest, GUEST<LONGINT> *off)
             FSClose(f);
             /*-->*/ RETURN(noTypeErr);
         }
-        ReallocHandle(h, s);
+        ReallocateHandle(h, s);
         if(LM(MemErr) != CWC(noErr))
             /*-->*/ RETURN(CW(LM(MemErr)));
         HLock(h);
@@ -621,7 +621,7 @@ get_scrap_helper_dib(void *vh, void *lp)
     DisposeGWorld(gp);
     h = (Handle)vh;
     len = GetHandleSize((Handle)pich);
-    ReallocHandle(h, len);
+    ReallocateHandle(h, len);
     if(LM(MemErr) != CWC(noErr))
         retval = -1;
     else
@@ -629,7 +629,7 @@ get_scrap_helper_dib(void *vh, void *lp)
         memcpy(STARH(h), STARH(pich), len);
         retval = len;
     }
-    DisposHandle((Handle)pich);
+    DisposeHandle((Handle)pich);
     return retval;
 }
 
@@ -656,7 +656,7 @@ pict_from_lp(const void *lp)
             else
             {
                 warning_unexpected(NULL_STRING);
-                DisposHandle((Handle)retval);
+                DisposeHandle((Handle)retval);
                 retval = NULL;
             }
         }
@@ -782,7 +782,7 @@ put_scrap_helper_dib(void *lp)
             }
             DisposeGWorld(gp);
         }
-        DisposHandle((Handle)pich);
+        DisposeHandle((Handle)pich);
     }
 }
 

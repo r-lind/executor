@@ -12,7 +12,7 @@
 
 using namespace Executor;
 
-LONGINT Executor::C_MaxSizeRsrc(Handle h) /* IMIV-16 */
+LONGINT Executor::C_GetMaxResourceSize(Handle h) /* IMIV-16 */
 {
     resmaphand map;
     typref *tr;

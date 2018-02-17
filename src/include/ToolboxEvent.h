@@ -24,9 +24,9 @@ const LowMemGlobal<INTEGER> JournalFlag { 0x8DE }; // ToolboxEvent IMI-261 (fals
 const LowMemGlobal<INTEGER> JournalRef { 0x8E8 }; // ToolboxEvent IMI-261 (false);
 
 extern void ROMlib_alarmoffmbar(void);
-extern LONGINT C_KeyTrans(Ptr mapp, unsigned short code,
+extern LONGINT C_KeyTranslate(Ptr mapp, unsigned short code,
                                       LONGINT *state);
-PASCAL_TRAP(KeyTrans, 0xA9C3);
+PASCAL_TRAP(KeyTranslate, 0xA9C3);
 extern BOOLEAN C_GetNextEvent(INTEGER em,
                                           EventRecord *evt);
 PASCAL_TRAP(GetNextEvent, 0xA970);

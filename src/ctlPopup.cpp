@@ -475,8 +475,8 @@ int32_t Executor::C_cdef1008(int16_t var, ControlHandle ctl, int16_t message,
             data = (popup_data_handle)CTL_DATA(ctl);
 
             DeleteMenu(POPUP_MENU_ID(data));
-            DisposHandle((Handle)POPUP_MENU(data));
-            DisposHandle((Handle)data);
+            DisposeHandle((Handle)POPUP_MENU(data));
+            DisposeHandle((Handle)data);
             break;
         }
 

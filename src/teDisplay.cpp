@@ -17,7 +17,7 @@
 
 using namespace Executor;
 
-void Executor::C_TESetJust(INTEGER j, TEHandle teh)
+void Executor::C_TESetAlignment(INTEGER j, TEHandle teh)
 {
     TE_SLAM(teh);
     HxX(teh, just) = CW(j);
@@ -41,7 +41,7 @@ void Executor::C_TEUpdate(Rect *r, TEHandle te)
     TE_SLAM(te);
 }
 
-void Executor::C_TextBox(Ptr p, int32_t ln, Rect *r, int16_t j)
+void Executor::C_TETextBox(Ptr p, int32_t ln, Rect *r, int16_t j)
 {
     TEHandle teh;
     Rect viewrect;
@@ -61,7 +61,7 @@ void Executor::C_TextBox(Ptr p, int32_t ln, Rect *r, int16_t j)
 
     teh = TENew(r, &viewrect);
     TESetText(p, ln, teh);
-    TESetJust(j, teh);
+    TESetAlignment(j, teh);
     if(!ROMlib_emptyvis)
         EraseRect(r);
     TEUpdate(r, teh);

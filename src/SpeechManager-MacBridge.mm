@@ -120,7 +120,7 @@ Executor::OSErr MacBridge::DisposeSpeechChannel(Executor::SpeechChannel chan)
   //BeginSpeech();
   Executor::LONGINT ourDat = chan->data[0];
   NSSpeechSynthesizer *synth = synthesizerMap[ourDat];
-  Executor::DisposPtr((Executor::Ptr)chan);
+  Executor::DisposePtr((Executor::Ptr)chan);
   [synth release];
   Executor::OSErr toRet = Executor::noErr;
   synthesizerMap.erase(ourDat);

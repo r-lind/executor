@@ -332,14 +332,14 @@ extern void C_HiliteColor(RGBColor *);
 PASCAL_TRAP(HiliteColor, 0xAA22);
 extern PixMapHandle C_NewPixMap();
 PASCAL_TRAP(NewPixMap, 0xAA03);
-extern void C_DisposPixMap(PixMapHandle);
-PASCAL_TRAP(DisposPixMap, 0xAA04);
+extern void C_DisposePixMap(PixMapHandle);
+PASCAL_TRAP(DisposePixMap, 0xAA04);
 extern void C_CopyPixMap(PixMapHandle, PixMapHandle);
 PASCAL_TRAP(CopyPixMap, 0xAA05);
 extern PixPatHandle C_NewPixPat();
 PASCAL_TRAP(NewPixPat, 0xAA07);
-extern void C_DisposPixPat(PixPatHandle);
-PASCAL_TRAP(DisposPixPat, 0xAA08);
+extern void C_DisposePixPat(PixPatHandle);
+PASCAL_TRAP(DisposePixPat, 0xAA08);
 extern void C_CopyPixPat(PixPatHandle, PixPatHandle);
 PASCAL_TRAP(CopyPixPat, 0xAA09);
 
@@ -459,8 +459,8 @@ PASCAL_SUBTRAP(GetColor, 0xA82E, 0x0009, Pack12);
 
 extern CTabHandle C_GetCTable(INTEGER);
 PASCAL_TRAP(GetCTable, 0xAA18);
-extern void C_DisposCTable(CTabHandle);
-PASCAL_TRAP(DisposCTable, 0xAA24);
+extern void C_DisposeCTable(CTabHandle);
+PASCAL_TRAP(DisposeCTable, 0xAA24);
 
 extern void C_InitPalettes();
 PASCAL_TRAP(InitPalettes, 0xAA90);
@@ -504,8 +504,8 @@ extern CCrsrHandle C_GetCCursor(INTEGER);
 PASCAL_TRAP(GetCCursor, 0xAA1B);
 extern void C_SetCCursor(CCrsrHandle);
 PASCAL_TRAP(SetCCursor, 0xAA1C);
-extern void C_DisposCCursor(CCrsrHandle);
-PASCAL_TRAP(DisposCCursor, 0xAA26);
+extern void C_DisposeCCursor(CCrsrHandle);
+PASCAL_TRAP(DisposeCCursor, 0xAA26);
 extern void C_AllocCursor(void);
 PASCAL_TRAP(AllocCursor, 0xAA1D);
 

@@ -213,7 +213,7 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
     EWALKTR(tr)
 }
 
-void Executor::C_RmveResource(Handle res)
+void Executor::C_RemoveResource(Handle res)
 {
     resmaphand map;
     typref *tr;
@@ -435,7 +435,7 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
         } else if (!sp->rrptr->rhand || !*(Handle)CL(sp->rrptr->rhand)) {
 	    getdat(fn, datoff, sp->diskoff, &h);
 	    putdat(fn, datoff, &doff,  h);
-	    DisposHandle(h);
+	    DisposeHandle(h);
 	} else if (doff != sp->diskoff)
 	    putdat(fn, datoff, &doff, (Handle) CL(sp->rrptr->rhand));
         else
@@ -464,7 +464,7 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
             getdat(fn, datoff, sp->diskoff, &h);
             putdat(fn, datoff, &doff, h);
             HSetState(h, HGetState(h) & ~RSRCBIT);
-            DisposHandle(h);
+            DisposeHandle(h);
         }
 #endif
         sp++;
@@ -497,7 +497,7 @@ static void compactdata(resmaphand map)
     HxX(map, resfatr).raw_and(CWC(~mapCompact));
     HxX(map, rh.rmapoff) = CL(sizeof(reshead) + sizeof(rsrvrec) + datlen);
     HxX(map, rh.datlen) = CL(datlen);
-    DisposHandle((Handle)st);
+    DisposeHandle((Handle)st);
 }
 
 void Executor::C_UpdateResFile(INTEGER rn)

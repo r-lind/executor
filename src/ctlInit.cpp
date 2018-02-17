@@ -36,7 +36,7 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
     temph = RM(GetResource(TICK("CDEF"), procid >> 4));
     if(!(HxX(retval, contrlDefProc) = temph))
     {
-        DisposHandle((Handle)retval);
+        DisposeHandle((Handle)retval);
         return 0;
     }
 
@@ -122,11 +122,11 @@ ControlHandle Executor::C_GetNewControl(INTEGER cid, WindowPtr wst) /* IMI-321 *
                         Hx(wh, _cmax), Hx(wh, _cprocid),
                         CL(*(GUEST<LONGINT> *)((char *)&HxX(wh, _crect) + 18))); /* _crefcon */
     if(ctab_res_h)
-        SetCtlColor(retval, (CCTabHandle)ctab_res_h);
+        SetControlColor(retval, (CCTabHandle)ctab_res_h);
     return retval;
 }
 
-void Executor::C_SetCtlColor(ControlHandle ctl, CCTabHandle ctab)
+void Executor::C_SetControlColor(ControlHandle ctl, CCTabHandle ctab)
 {
     AuxCtlHandle aux_c;
 
@@ -189,10 +189,10 @@ void Executor::C_DisposeControl(ControlHandle c) /* IMI-321 */
     {
         saveauxh = STARH(auxhp);
         (*auxhp) = STARH(STARH(auxhp))->acNext;
-        DisposHandle((Handle)saveauxh);
+        DisposeHandle((Handle)saveauxh);
     }
 
-    DisposHandle((Handle)c);
+    DisposeHandle((Handle)c);
 }
 
 void Executor::C_KillControls(WindowPtr w) /* IMI-321 */

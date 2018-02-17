@@ -315,9 +315,9 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
 
 void Executor::C_DisposeCIcon(CIconHandle icon)
 {
-    DisposHandle(CICON_DATA(icon));
-    DisposHandle((Handle)MR(CICON_PMAP(icon).pmTable));
-    DisposHandle((Handle)icon);
+    DisposeHandle(CICON_DATA(icon));
+    DisposeHandle((Handle)MR(CICON_PMAP(icon).pmTable));
+    DisposeHandle((Handle)icon);
 }
 
 #define large_bw_icon 0
@@ -550,7 +550,7 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
              /* #### fix up the need for this cast */
              (Rect *)rect);
 
-    DisposCTable(color_table);
+    DisposeCTable(color_table);
 
     ICON_RETURN_ERROR(noErr);
 }
@@ -691,12 +691,12 @@ OSErr Executor::C_DisposeIconSuite(Handle suite, Boolean dispose_data_p)
                 if(icon_state & RSRCBIT)
                     ;
                 else
-                    DisposHandle(icons[i]);
+                    DisposeHandle(icons[i]);
             }
         }
     }
 
-    DisposHandle(suite);
+    DisposeHandle(suite);
 
     ICON_RETURN_ERROR(noErr);
 }

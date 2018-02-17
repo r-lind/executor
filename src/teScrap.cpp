@@ -46,12 +46,12 @@ Handle Executor::TEScrapHandle()
     return MR(LM(TEScrpHandle));
 }
 
-int32_t Executor::TEGetScrapLen()
+int32_t Executor::TEGetScrapLength()
 {
     return CW(LM(TEScrpLength));
 }
 
-void Executor::TESetScrapLen(int32_t ln)
+void Executor::TESetScrapLength(int32_t ln)
 {
     LM(TEScrpLength) = CW(ln);
 }

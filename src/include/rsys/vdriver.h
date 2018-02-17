@@ -26,7 +26,7 @@ namespace Executor
     struct                                                     \
     {                                                          \
         int continuous_range_p; /* 2 entry inclusive range? */ \
-        int num_sizes; /* Length of size[] array.  */          \
+        int num_sizes; /* StrLength of size[] array.  */          \
         struct                                                 \
         {                                                      \
             short width, height;                               \

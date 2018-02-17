@@ -386,9 +386,9 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
             }
         }
         HLock(nh);
-        TextBox(STARH(nh), GetHandleSize(nh), &r, teFlushDefault);
+        TETextBox(STARH(nh), GetHandleSize(nh), &r, teFlushDefault);
         HUnlock(nh);
-        DisposHandle(nh);
+        DisposeHandle(nh);
     }
     else if(CB(ip->itmtype) & editText)
     {
@@ -397,7 +397,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
         text_h = MR(ip->itmhand);
         {
             HLockGuard guard(text_h);
-            TextBox(STARH(text_h), GetHandleSize(text_h),
+            TETextBox(STARH(text_h), GetHandleSize(text_h),
                     &r, teFlushDefault);
         }
 
@@ -486,7 +486,7 @@ void Executor::C_DrawDialog(DialogPtr dp) /* IMI-418 */
     }
 }
 
-INTEGER Executor::C_FindDItem(DialogPtr dp, Point pt) /* IMIV-60 */
+INTEGER Executor::C_FindDialogItem(DialogPtr dp, Point pt) /* IMIV-60 */
 {
     GUEST<INTEGER> *intp;
     INTEGER i, inum;
@@ -500,7 +500,7 @@ INTEGER Executor::C_FindDItem(DialogPtr dp, Point pt) /* IMIV-60 */
     return -1;
 }
 
-void Executor::C_UpdtDialog(DialogPtr dp, RgnHandle rgn) /* IMIV-60 */
+void Executor::C_UpdateDialog(DialogPtr dp, RgnHandle rgn) /* IMIV-60 */
 {
     GUEST<INTEGER> *intp;
     INTEGER i, inum;
@@ -638,25 +638,25 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
     return retval;
 }
 
-void Executor::DlgCut(DialogPtr dp) /* IMI-418 */
+void Executor::DialogCut(DialogPtr dp) /* IMI-418 */
 {
     if((((DialogPeek)dp)->editField) != CWC(-1))
         TECut(MR(((DialogPeek)dp)->textH));
 }
 
-void Executor::DlgCopy(DialogPtr dp) /* IMI-418 */
+void Executor::DialogCopy(DialogPtr dp) /* IMI-418 */
 {
     if((((DialogPeek)dp)->editField) != CWC(-1))
         TECopy(MR(((DialogPeek)dp)->textH));
 }
 
-void Executor::DlgPaste(DialogPtr dp) /* IMI-418 */
+void Executor::DialogPaste(DialogPtr dp) /* IMI-418 */
 {
     if((((DialogPeek)dp)->editField) != CWC(-1))
         TEPaste(MR(((DialogPeek)dp)->textH));
 }
 
-void Executor::DlgDelete(DialogPtr dp) /* IMI-418 */
+void Executor::DialogDelete(DialogPtr dp) /* IMI-418 */
 {
     if((((DialogPeek)dp)->editField) != CWC(-1))
         TEDelete(MR(((DialogPeek)dp)->textH));

@@ -142,9 +142,9 @@ void Executor::C_IUDatePString(LONGINT date, DateForm form, StringPtr p,
     int abbrev;
 
     if(!h)
-        h = IUGetIntl(form == shortDate ? 0 : 1);
+        h = GetIntlResource(form == shortDate ? 0 : 1);
 
-    Secs2Date(date, &dtr);
+    SecondsToDate(date, &dtr);
     op = (char *)p + 1;
     if(form == shortDate)
     {
@@ -201,7 +201,7 @@ void Executor::C_IUDatePString(LONGINT date, DateForm form, StringPtr p,
     p[0] = op - (char *)p - 1;
 }
 
-Handle Executor::C_IUGetIntl(INTEGER id) /* IMI-505 */
+Handle Executor::C_GetIntlResource(INTEGER id) /* IMI-505 */
 {
     INTEGER oldres;
     Handle retval;
@@ -238,7 +238,7 @@ Handle Executor::C_IUGetIntl(INTEGER id) /* IMI-505 */
 void Executor::C_IUDateString(LONGINT date, DateForm form,
                               StringPtr p) /* IMI-504 */
 {
-    IUDatePString(date, form, p, IUGetIntl(form == shortDate ? 0 : 1));
+    IUDatePString(date, form, p, GetIntlResource(form == shortDate ? 0 : 1));
 }
 
 void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
@@ -250,12 +250,12 @@ void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
     char *ip, *ep;
 
     if(!h)
-        h = IUGetIntl(0);
+        h = GetIntlResource(0);
 
     op = (char *)p + 1;
     if(h && (int0p = (Intl0Ptr)STARH(h)))
     {
-        Secs2Date(date, &dtr);
+        SecondsToDate(date, &dtr);
         if(int0p->timeCycle)
             outn((CW(dtr.hour) % 12) == 0 ? 12 : CW(dtr.hour) % 12,
                  Cx(int0p->timeFmt) & hrLeadingZ, &op);
@@ -290,18 +290,18 @@ void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
 void Executor::C_IUTimeString(LONGINT date, BOOLEAN secs,
                               StringPtr p) /* IMI-505 */
 {
-    IUTimePString(date, secs, p, IUGetIntl(0));
+    IUTimePString(date, secs, p, GetIntlResource(0));
 }
 
-BOOLEAN Executor::C_IUMetric() /* IMI-505 */
+BOOLEAN Executor::C_IsMetric() /* IMI-505 */
 {
     Handle h;
 
-    h = IUGetIntl(0);
+    h = GetIntlResource(0);
     return h ? ((Intl0Ptr)STARH(h))->metricSys : false;
 }
 
-void Executor::C_IUSetIntl(INTEGER rn, INTEGER id, Handle newh) /* IMI-506 */
+void Executor::C_SetIntlResource(INTEGER rn, INTEGER id, Handle newh) /* IMI-506 */
 {
     INTEGER oldcurmap;
     Handle h;
@@ -310,7 +310,7 @@ void Executor::C_IUSetIntl(INTEGER rn, INTEGER id, Handle newh) /* IMI-506 */
     UseResFile(rn);
     if(LM(ResErr) == CWC(noErr))
     {
-        h = IUGetIntl(id);
+        h = GetIntlResource(id);
         if(h && HomeResFile(h) == rn)
         {
             if(id == 0)
@@ -526,7 +526,7 @@ static INTEGER iuhelper(Ptr ptr1, Ptr ptr2, INTEGER len1, INTEGER len2,
     locp = 0;
 #endif /* LETGCCWAIL */
 
-    if((h = (Intl0Hndl)IUGetIntl(0)) && *h)
+    if((h = (Intl0Hndl)GetIntlResource(0)) && *h)
     {
         switch((Hx(h, intl0Vers) >> 8) & 0xFF)
         {
@@ -631,7 +631,7 @@ void Executor::C_IULTimeString(LongDateTime *datetimep, BOOLEAN wantseconds,
     ROMlib_hook(iu_unimplementednumber);
 }
 
-void Executor::C_IUClearCache()
+void Executor::C_ClearIntlResourceCache()
 {
 }
 
@@ -674,7 +674,7 @@ INTEGER Executor::C_IUTextOrder(Ptr ptra, Ptr ptrb, INTEGER lena, INTEGER lenb,
     return 0;
 }
 
-void Executor::C_IUGetItlTable(ScriptCode script, INTEGER tablecode,
+void Executor::C_GetIntlResourceTable(ScriptCode script, INTEGER tablecode,
                                Handle *itlhandlep, LONGINT *offsetp,
                                LONGINT *lengthp)
 {

@@ -155,7 +155,7 @@ void Executor::ROMlib_alarmoffmbar()
         ROMlib_togglealarm();
 }
 
-LONGINT Executor::C_KeyTrans(Ptr mapp, unsigned short code, LONGINT *state)
+LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, LONGINT *state)
 {
     LONGINT ascii;
     int table_num;
@@ -225,7 +225,7 @@ void Executor::ROMlib_circledefault(DialogPtr dp)
 
     saveport = thePort;
     SetPort(dp);
-    GetDItem(dp, 1, &type, &h, &r);
+    GetDialogItem(dp, 1, &type, &h, &r);
     PenSize(3, 3);
     InsetRect(&r, -4, -4);
     if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
@@ -262,7 +262,7 @@ void modstate(DialogPtr dp, INTEGER tomod, modstate_t mod)
     ControlHandle ch;
     Rect r;
 
-    GetDItem(dp, tomod, &type, &ch_s, &r);
+    GetDialogItem(dp, tomod, &type, &ch_s, &r);
     ch = (ControlHandle)MR(ch_s);
     if(type & CWC(ctrlItem))
     {
@@ -275,7 +275,7 @@ void modstate(DialogPtr dp, INTEGER tomod, modstate_t mod)
                 newvalue = 0;
                 break;
             case FLIPSTATE:
-                newvalue = GetCtlValue(ch) ? 0 : 1;
+                newvalue = GetControlValue(ch) ? 0 : 1;
                 break;
 #if !defined(LETGCCWAIL)
             default:
@@ -285,11 +285,11 @@ void modstate(DialogPtr dp, INTEGER tomod, modstate_t mod)
         }
         if(type & CWC(itemDisable))
         {
-            SetCtlValue(ch, 0);
+            SetControlValue(ch, 0);
             HiliteControl(ch, 255);
         }
         else
-            SetCtlValue(ch, newvalue);
+            SetControlValue(ch, newvalue);
     }
 }
 
@@ -299,8 +299,8 @@ INTEGER getvalue(DialogPtr dp, INTEGER toget)
     GUEST<ControlHandle> ch;
     Rect r;
 
-    GetDItem(dp, toget, &type, (GUEST<Handle> *)&ch, &r);
-    return (type & CWC(ctrlItem)) ? GetCtlValue(MR(ch)) : 0;
+    GetDialogItem(dp, toget, &type, (GUEST<Handle> *)&ch, &r);
+    return (type & CWC(ctrlItem)) ? GetControlValue(MR(ch)) : 0;
 }
 
 typedef struct depth
@@ -362,8 +362,8 @@ void setedittext(DialogPtr dp, INTEGER itemno, StringPtr str)
     Rect r;
     GUEST<Handle> h;
 
-    GetDItem(dp, itemno, &type, &h, &r);
-    SetIText(MR(h), str);
+    GetDialogItem(dp, itemno, &type, &h, &r);
+    SetDialogItemText(MR(h), str);
 }
 
 void setedittextnum(DialogPtr dp, INTEGER itemno, INTEGER value)
@@ -399,9 +399,9 @@ INTEGER getedittext(DialogPtr dp, INTEGER itemno)
     Rect r;
     LONGINT l;
 
-    GetDItem(dp, itemno, &type, &h_s, &r);
+    GetDialogItem(dp, itemno, &type, &h_s, &r);
     h = MR(h_s);
-    GetIText(h, str);
+    GetDialogItemText(h, str);
     StringToNum(str, &l);
     return (INTEGER)l;
 }
@@ -512,9 +512,9 @@ void update_string_from_edit_text(char **strp, DialogPtr dp, INTEGER itemno)
     GUEST<INTEGER> type;
     Rect r;
 
-    GetDItem(dp, itemno, &type, &h_s, &r);
+    GetDialogItem(dp, itemno, &type, &h_s, &r);
     h = MR(h_s);
-    GetIText(h, str);
+    GetDialogItemText(h, str);
     if(*strp)
         free(*strp);
     *strp = (char *)malloc(str[0] + 1);
@@ -718,14 +718,14 @@ static void mod_item_enableness(DialogPtr dp, INTEGER item,
     ControlHandle ch;
     Rect r;
 
-    GetDItem(dp, item, &type_s, &tmpH, &r);
+    GetDialogItem(dp, item, &type_s, &tmpH, &r);
     type = CW(type_s);
     h = MR(tmpH);
     if(((type & itemDisable) && enableness_wanted == enable)
        || (!(type & itemDisable) && enableness_wanted == disable))
     {
         type ^= itemDisable;
-        SetDItem(dp, item, type, h, &r);
+        SetDialogItem(dp, item, type, h, &r);
     }
     ch = (ControlHandle)h;
     if(Hx(ch, contrlHilite) == 255 && enableness_wanted == enable)
@@ -746,8 +746,8 @@ set_sound_on_string(DialogPtr dp)
                          (SOUND_SILENT_P()
                               ? "On (silent)"
                               : "On"));
-    GetDItem(dp, PREFSOUNDONITEM, &junk1, &h, &junk2);
-    SetCTitle((ControlHandle)MR(h), sound_string);
+    GetDialogItem(dp, PREFSOUNDONITEM, &junk1, &h, &junk2);
+    SetControlTitle((ControlHandle)MR(h), sound_string);
 }
 
 /*
@@ -882,7 +882,7 @@ static void dopreferences(void)
                     if(ihit == PREFSAVEITEM)
                         saveprefvalues(ROMlib_configfilename.c_str(), 0, 0);
                 }
-                DisposDialog(dp);
+                DisposeDialog(dp);
                 am_already_here = false;
             }
         }

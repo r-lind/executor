@@ -57,7 +57,7 @@ void Executor::canonicalize_bogo_map_cleanup(const BitMap *bogo_map,
             HSetState(info->data.handle, info->h_state);
             break;
         case Executor::cleanup_info::cleanup_free:
-            DisposHandle(info->data.handle);
+            DisposeHandle(info->data.handle);
             break;
         case Executor::cleanup_info::cleanup_unlock_gworld_pixels:
             UnlockPixels(info->data.pixmap_handle);

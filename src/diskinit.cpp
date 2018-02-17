@@ -215,7 +215,7 @@ end_track_buffering_for_write(our_file_info_t *ofitp)
         retval = flush_buffer(ofitp);
     else
         retval = noErr;
-    DisposPtr(track_bufp);
+    DisposePtr(track_bufp);
     track_bufp = 0;
     return retval;
 }

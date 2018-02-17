@@ -47,7 +47,7 @@ void Executor::C_InitDialogs(ProcPtr rp) /* IMI-411 */
     LM(DAStrings)[3] = RM(tmp);
 }
 
-void Executor::SetDAFont(INTEGER i) /* IMI-412 */
+void Executor::SetDialogFont(INTEGER i) /* IMI-412 */
 {
     LM(DlgFont) = CW(i);
 }

@@ -714,7 +714,7 @@ void Executor::C_PrCloseDoc(TPPrPort port)
 
 #endif
     if(port->fOurPtr)
-        DisposPtr((Ptr)port);
+        DisposePtr((Ptr)port);
 #if defined(QUESTIONABLE_FIX_FOR_LOGBOOK_THAT_BREAKS_PRINTING_UNDER_TESTGEN)
     LM(FractEnable) = save_FractEnable;
 #endif

@@ -52,31 +52,31 @@ static Ptr NewPtr_aligned_4(Size size, INTEGER align)
         shim = 0;
         while(p)
         {
-            DisposPtr(p);
+            DisposePtr(p);
             p2 = NewPtr(++shim);
             p = NewPtr(size);
             p3 = NewPtr(shim);
-            DisposPtr(p3);
+            DisposePtr(p3);
             if(((LONGINT)p & 3) == align)
             {
-                DisposPtr(p2);
+                DisposePtr(p2);
                 return p;
             }
             else
             {
-                DisposPtr(p);
-                DisposPtr(p2);
+                DisposePtr(p);
+                DisposePtr(p2);
                 p2 = NewPtr(shim + 1);
                 p = NewPtr(size);
                 p3 = NewPtr(shim + 1);
-                DisposPtr(p3);
+                DisposePtr(p3);
                 if(((LONGINT)p & 3) == align)
                 {
-                    DisposPtr(p2);
+                    DisposePtr(p2);
                     return p;
                 }
                 else
-                    DisposPtr(p2);
+                    DisposePtr(p2);
             }
         }
         return p;
@@ -527,7 +527,7 @@ Executor::hfsPBMountVol(ParmBlkPtr pb, LONGINT floppyfd, LONGINT offset, LONGINT
 #endif
                         ((VCBExtra *)vcbp2)->unixname = ((VCBExtra *)vcbp)->unixname;
                         ((VCBExtra *)vcbp2)->u.hfs.fd = ((VCBExtra *)vcbp)->u.hfs.fd;
-                        DisposPtr((Ptr)vcbp);
+                        DisposePtr((Ptr)vcbp);
                         alreadythere = true;
                         vcbp = vcbp2;
                         break;
@@ -992,10 +992,10 @@ OSErr Executor::hfsPBUnmountVol(ParmBlkPtr pb)
         closeallvcbfiles(vcbp);
         err = ROMlib_flushvcbp(vcbp);
         Dequeue((QElemPtr)vcbp, &LM(VCBQHdr));
-        DisposPtr(MR(vcbp->vcbMAdr));
-        DisposPtr(MR(vcbp->vcbBufAdr));
-        DisposPtr(MR(vcbp->vcbCtlBuf));
-        DisposPtr((Ptr)vcbp);
+        DisposePtr(MR(vcbp->vcbMAdr));
+        DisposePtr(MR(vcbp->vcbBufAdr));
+        DisposePtr(MR(vcbp->vcbCtlBuf));
+        DisposePtr((Ptr)vcbp);
     }
     else
         err = nsvErr;
@@ -1019,11 +1019,11 @@ static OSErr offlinehelper(VolumeParam *pb, HVCB *vcbp)
             iop.ioRefNum = vcbp->vcbCTRef;
             err2 = PBClose((ParmBlkPtr)&iop, false);
 #if 1
-            DisposPtr(MR(vcbp->vcbMAdr));
+            DisposePtr(MR(vcbp->vcbMAdr));
             vcbp->vcbMAdr = 0;
-            DisposPtr(MR(vcbp->vcbBufAdr));
+            DisposePtr(MR(vcbp->vcbBufAdr));
             vcbp->vcbBufAdr = 0;
-            DisposPtr(MR(vcbp->vcbCtlBuf));
+            DisposePtr(MR(vcbp->vcbCtlBuf));
             vcbp->vcbCtlBuf = 0;
 #endif
             vcbp->vcbDrvNum = 0;

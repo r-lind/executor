@@ -92,6 +92,6 @@ void Executor::C_TempHUnlock(Handle h, GUEST<OSErr> *result_code)
 
 void Executor::C_TempDisposeHandle(Handle h, GUEST<OSErr> *result_code)
 {
-    DisposHandle(h);
+    DisposeHandle(h);
     *result_code = LM(MemErr);
 }

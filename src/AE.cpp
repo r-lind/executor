@@ -69,7 +69,7 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
 
     if(err != noErr)
     {
-        DisposHandle(evt_data);
+        DisposeHandle(evt_data);
         AE_RETURN_ERROR(errAEEventNotHandled);
     }
 
@@ -397,7 +397,7 @@ OSErr Executor::C_AECoercePtr(DescType data_type, Ptr data, Size data_size,
     AE_RETURN_ERROR(noErr);
 }
 
-#define AEGetParamDesc AEGetKeyDesc
+#define AEGetParamDesc AEGetParamDesc
 
 static OSErr
 parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
@@ -452,7 +452,7 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
                     }
                 }
                 if(retval != noErr)
-                    DisposHandle(h);
+                    DisposeHandle(h);
                 else
                 {
                     desc_out->descriptorType = CLC(TICK("appa"));

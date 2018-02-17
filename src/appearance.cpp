@@ -123,7 +123,7 @@ AddResourceRN(INTEGER rn, Handle h, ResType type, INTEGER id, Str255 name)
 
             save_hand = h;
             HandToHand(&hh);
-            DisposHandle(save_hand);
+            DisposeHandle(save_hand);
         }
         savern = CurResFile();
         UseResFile(rn);

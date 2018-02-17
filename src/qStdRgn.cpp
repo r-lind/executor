@@ -422,7 +422,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
                     Ptr raw = HxX(xh, raw_pat_bits_mem);
                     if(raw)
                     {
-                        DisposPtr(raw);
+                        DisposePtr(raw);
                         HxX(xh, raw_pat_bits_mem) = NULL;
                     }
                 }

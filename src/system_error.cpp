@@ -129,8 +129,8 @@ event_loop(void)
                             FrameRect(&buttons[i].hilite_rect);
                     }
 
-                /* ### `TextBox ()' should be const */
-                TextBox((Ptr)message, strlen(message), &message_rect,
+                /* ### `TETextBox ()' should be const */
+                TETextBox((Ptr)message, strlen(message), &message_rect,
                         teFlushLeft);
 
                 EndUpdate(msg_window);

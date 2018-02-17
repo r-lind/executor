@@ -101,7 +101,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
                || item_ctab_res_h);
     if(color_p)
         dp = ((DialogPeek)
-                  NewCDialog(NULL, &adjusted_rect,
+                  NewColorDialog(NULL, &adjusted_rect,
                              (StringPtr) "", false, dBoxProc,
                              (WindowPtr)-1, false, 0L, h));
     else
@@ -142,7 +142,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
 
         alert_extra_icon_id = -32768;
 
-        DisposHandle(icon_item_h);
+        DisposeHandle(icon_item_h);
     }
 
     ShowWindow((WindowPtr)dp);
@@ -167,7 +167,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
         ModalDialog(fp, &hit);
     }
     HSetState(DIALOG_ITEMS(dp), flags);
-    DisposDialog((DialogPtr)dp);
+    DisposeDialog((DialogPtr)dp);
 
     return CW(hit);
 }

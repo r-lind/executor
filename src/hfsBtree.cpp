@@ -17,7 +17,7 @@
 
 /*
  * NOTES: They use 32-bit allocation block numbers, an allocation block is
- *        a power of 2 >= 512.  512 is the logical block size, but most
+ *        a pow of 2 >= 512.  512 is the logical block size, but most
  *        things are probably done in terms of allocation blocks
  *
  * TECHNOTE CONCERNING ALLOCATION:
@@ -1796,7 +1796,7 @@ static OSErr restorebusybuffers(GUEST<saverec_t *> *savehandle)
             retval = err;
     }
     HUnlock((Handle)savehandle);
-    DisposHandle((Handle)savehandle);
+    DisposeHandle((Handle)savehandle);
     fs_err_hook(retval);
     return retval;
 }

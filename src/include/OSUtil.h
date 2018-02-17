@@ -178,17 +178,17 @@ extern INTEGER RelString(StringPtr s1, StringPtr s2,
 extern BOOLEAN EqualString(StringPtr s1, StringPtr s2,
                                    BOOLEAN casesig, BOOLEAN diacsig);
 extern void ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len);
-extern void UprString(StringPtr s, BOOLEAN diac);
+extern void UpperString(StringPtr s, BOOLEAN diac);
 extern void GetDateTime(GUEST<ULONGINT> *mactimepointer);
 
 extern OSErr ReadDateTime(GUEST<ULONGINT> *secs);
 REGISTER_TRAP2(ReadDateTime, 0xA039, D0(A0));
 extern OSErr SetDateTime(ULONGINT mactime);
 REGISTER_TRAP2(SetDateTime, 0xA03A, D0(D0));
-extern void Date2Secs(DateTimeRec *d, ULONGINT *s);
-REGISTER_TRAP2(Date2Secs, 0xA9C7, void(A0, Out<D0, ULONGINT>), SaveA1D1D2);
-extern void Secs2Date(ULONGINT mactime, DateTimeRec *d);
-REGISTER_TRAP2(Secs2Date, 0xA9C6, void(D0,A0), SaveA1D1D2);
+extern void DateToSeconds(DateTimeRec *d, ULONGINT *s);
+REGISTER_TRAP2(DateToSeconds, 0xA9C7, void(A0, Out<D0, ULONGINT>), SaveA1D1D2);
+extern void SecondsToDate(ULONGINT mactime, DateTimeRec *d);
+REGISTER_TRAP2(SecondsToDate, 0xA9C6, void(D0,A0), SaveA1D1D2);
 
 extern void GetTime(DateTimeRec *d);
 extern void SetTime(DateTimeRec *d);

@@ -49,7 +49,7 @@ UniversalProcPtr Executor::C_NewRoutineDescriptor(
 
 void Executor::C_DisposeRoutineDescriptor(UniversalProcPtr ptr)
 {
-    DisposPtr((Ptr)ptr);
+    DisposePtr((Ptr)ptr);
     warning_trace_info(NULL_STRING);
 }
 
