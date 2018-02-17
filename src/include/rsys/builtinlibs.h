@@ -2,11 +2,15 @@
 
 #include <rsys/cfm.h>
 
+class PowerCore;
+
 namespace Executor
 {
     namespace builtinlibs
     {
-        void addPPCEntrypoint(const char *library, const char *function, void *ppc_code);
+        uint32_t handleSC(PowerCore& cpu);
+
+        void addPPCEntrypoint(const char *library, const char *function, uint32_t (*code)(PowerCore&));
 
         ConnectionID getBuiltinLib(Str255 libname);
     }

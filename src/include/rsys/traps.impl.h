@@ -11,7 +11,7 @@ namespace Executor
 {
 namespace builtinlibs
 {
-    void addPPCEntrypoint(const char *library, const char *function, void *ppc_code);
+    void addPPCEntrypoint(const char *library, const char *function, uint32_t (*code)(PowerCore&));
 }
 
 namespace traps
@@ -84,7 +84,7 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
 
     if(libname)
     {
-        builtinlibs::addPPCEntrypoint(libname, name, nullptr);
+        builtinlibs::addPPCEntrypoint(libname, name, &callfromPPC::Invoker<Ret (Args...), fptr>::invokeFromPPC);
     }
 }
 

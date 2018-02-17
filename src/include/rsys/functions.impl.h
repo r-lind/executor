@@ -6,6 +6,9 @@
 #include <rsys/byteswap.h>
 
 #include <string.h>
+#include <tuple>
+
+#include <PowerCore.h>
 
 namespace Executor
 {
@@ -397,6 +400,135 @@ namespace callto68K
             return POPADDR();   // ###
         }
     };
+}
+
+namespace callfromPPC
+{
+
+    struct ParameterPasser
+    {
+        PowerCore& cpu;
+        uint8_t *paramPtr;
+        int gprIndex = 3;
+        int fprIndex = 1;
+
+        template<typename T>
+        T get();
+        template<typename T>
+        void set(const T&);
+        
+        template<typename T>
+        ParameterPasser operator<<(const T& arg);
+
+            // FIXME: this should be operator>> instead of operator%.
+            // clang 5.0.0 has a bug (PR32563) which prevents the use
+            // of operator>> in fold expressions.
+            // Change to operator>> when clang 5.0 is no longer relevant.
+        template<typename T>
+        ParameterPasser operator%(T& arg);
+
+        template<typename T>
+        constexpr ParameterPasser operator+(const T& arg);
+    };
+
+    template<typename T>
+    ParameterPasser ParameterPasser::operator<<(const T& arg)
+    {
+        set(arg);
+        return *this + arg;
+    }
+
+    template<typename T>
+    ParameterPasser ParameterPasser::operator%(T& arg)
+    {
+        arg = get<T>();
+        return *this + arg;
+    }
+
+    template<typename T>
+    constexpr ParameterPasser ParameterPasser::operator+(const T&)
+    {
+        static_assert(sizeof(GUEST<T>) <= 4, "parameter too large");
+        return ParameterPasser { cpu, paramPtr + 4, gprIndex + 1, fprIndex };
+    }
+    template<>
+    constexpr ParameterPasser ParameterPasser::operator+ <float>(const float&)
+    {
+        static_assert(sizeof(float) == 4, "unexpected sizeof(float)");
+        return ParameterPasser { cpu, paramPtr + 4, gprIndex + 1, fprIndex + 1 };
+    }
+    template<>
+    constexpr ParameterPasser ParameterPasser::operator+ <double>(const double&)
+    {
+        static_assert(sizeof(double) == 8, "unexpected sizeof(double)");
+        return ParameterPasser { cpu, paramPtr + 1, gprIndex + 2, fprIndex + 1 };
+    }
+ 
+    template<typename T>
+    T ParameterPasser::get()
+    {
+        static_assert(sizeof(GUEST<T>) <= 4, "parameter too large");
+        if(gprIndex <= 10)
+            return GuestTypeTraits<T>::reg_to_host(cpu.r[gprIndex]);
+        else
+        {
+            using GuestType = typename GuestTypeTraits<T>::GuestType;
+            auto p = reinterpret_cast<GuestType *>
+                (paramPtr + 4-sizeof(GuestType));
+            return GuestTypeTraits<T>::guest_to_host(*p);
+        }
+    }
+    template<typename T>
+    void ParameterPasser::set(const T& arg)
+    {
+        static_assert(sizeof(GUEST<T>) <= 4, "parameter too large");
+        if(gprIndex <= 10)
+            cpu.r[gprIndex] = GuestTypeTraits<T>::host_to_reg(arg);
+        else
+        {
+            using GuestType = typename GuestTypeTraits<T>::GuestType;
+            auto p = reinterpret_cast<GuestType *>
+                (paramPtr + 4-sizeof(GuestType));
+            *p = GuestTypeTraits<T>::host_to_guest(arg);
+        }
+    }
+
+    template<typename Ret, typename... Args>
+    void invokeRet(PowerCore& cpu, Ret (*fptr)(Args...), Args... args)
+    {
+        Ret ret = fptr(args...);
+        ParameterPasser{cpu,nullptr}.set(ret);
+    }
+    template<typename... Args>
+    void invokeRet(PowerCore& cpu, void (*fptr)(Args...), Args... args)
+    {
+        fptr(args...);
+    }
+
+    template<typename Ret, typename... Args, size_t... Is>
+    void invokeFromPPCHelper(PowerCore& cpu, Ret (*fptr)(Args...), std::index_sequence<Is...>)
+    {
+        std::tuple<Args...> args;
+        ParameterPasser argGetter{cpu, GuestTypeTraits<uint8_t*>::reg_to_host(cpu.r[1]+24)};
+
+        (argGetter % ... % std::get<Is>(args));
+        invokeRet(cpu, fptr, std::get<Is>(args)...);
+    }
+
+    template<typename F, F *fptr>
+    struct Invoker;
+
+    template<typename Ret, typename... Args, Ret (*fptr)(Args...)>
+    struct Invoker<Ret (Args...), fptr>
+    {
+        static uint32_t invokeFromPPC(PowerCore& cpu)
+        {
+            invokeFromPPCHelper(cpu, fptr, std::index_sequence_for<Args...>());
+            return cpu.lr;
+        }
+    };
+
+
 }
 
 template<typename Ret, typename... Args, typename CallConv>

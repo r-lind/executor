@@ -8,5 +8,6 @@ if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
 endif()
 
 add_subdirectory(syn68k)
+add_subdirectory(PowerCore)
 add_subdirectory(src)
 

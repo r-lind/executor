@@ -1,6 +1,6 @@
 project(Executor)
 cmake_minimum_required(VERSION 3.9)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 find_program(PERL_COMMAND perl)
 
@@ -414,5 +414,5 @@ else()
     target_link_libraries(executor ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k)
+target_link_libraries(executor Threads::Threads syn68k PowerCore)
 

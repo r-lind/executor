@@ -79,6 +79,9 @@
 
 #include "rsys/logging.h"
 
+#include <rsys/builtinlibs.h>
+#include <PowerCore.h>
+
 using namespace Executor;
 
 static bool ppc_launch_p = false;
@@ -448,15 +451,24 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
         }
         {
             void *mainAddr1 = (void*) MR(mainAddr);
-            uint32_t new_toc = CL( ((GUEST<uint32_t>*)mainAddr1)[0] );
-            void *new_pc = MR( ((GUEST<void*>*)mainAddr1)[1] );
+            uint32_t new_toc = CL( ((GUEST<uint32_t>*)mainAddr1)[1] );
+            uint32_t new_pc = CL( ((GUEST<uint32_t>*)mainAddr1)[0] );
 
-            printf("ppc start: r2 = %08x, %p\n", new_toc, new_pc);
-            /*new_toc = ((uint32_t *)mainAddr)[1];
-            new_pc = ((void **)mainAddr)[0];
-            ppc_call(new_toc, new_pc, 0);*/
-            
-            
+            printf("ppc start: r2 = %08x, %08x\n", new_toc, new_pc);
+
+            PowerCore cpu;
+            cpu.r[2] = new_toc;
+            cpu.r[1] = EM_A7-1024;
+            cpu.lr = 0xFFFFFFFC;
+            cpu.CIA = new_pc;
+
+            cpu.syscall = &builtinlibs::handleSC;
+
+            cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
+            cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
+            cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
+            cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
+            cpu.interpret1();
         }
     }
 
