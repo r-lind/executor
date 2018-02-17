@@ -21,6 +21,7 @@ namespace
         GUEST<GUEST<uint32_t>*> codePtr;
         GUEST<uint32_t> rtoc;
         GUEST<uint32_t> sc;
+        const char* name;
         uint32_t (*implementation)(PowerCore&);
     };
 
@@ -35,7 +36,13 @@ uint32_t builtinlibs::handleSC(PowerCore& cpu)
     int index = cb - callbacks;
     if(index >= 0 && index < nCallbacks)
     {
+        if(cb->implementation)
         return cb->implementation(cpu);
+        else
+        {
+            std::cerr << "Unimplemented PPC entrypoint: " << cb->name << std::endl << std::flush;
+            std::abort();
+    }
     }
     else
     {
@@ -51,8 +58,20 @@ void builtinlibs::addPPCEntrypoint(const char *library, const char *function, ui
     callback.sc = CL(0x44000002);
     callback.codePtr = RM(&callback.sc);
     callback.implementation = code;
+    callback.name = function;
 
     builtins[library].push_back({function, &callback});
+}
+
+Ptr builtinlibs::makeUndefinedSymbolStub(const char *name)
+{
+    assert(nCallbacks < NELEM(callbacks));
+    PPCCallback& callback = callbacks[nCallbacks++];
+    callback.sc = CL(0x44000002);
+    callback.codePtr = RM(&callback.sc);
+    callback.implementation = nullptr;
+    callback.name = name;
+    return (Ptr) &callback;
 }
 
 ConnectionID builtinlibs::getBuiltinLib(Str255 libname)

@@ -622,8 +622,10 @@ symbol_lookup(uint32_t *indexp, GUEST<Ptr> *valp, uint8_t imports[][4],
                 err = FindSymbol(LIB_CID(l), sym255, valp, 0);
                 if(err != noErr)
                 {
-                    // if(flags & 8) ###
-                    *valp = kUnresolvedCFragSymbolAddress;
+                    if(flags & 8)   // weak symbol
+                        *valp = kUnresolvedCFragSymbolAddress;
+                    else
+                        *valp = RM(builtinlibs::makeUndefinedSymbolStub(symbol_name));
                 }
                 /*-->*/ break;
             }
