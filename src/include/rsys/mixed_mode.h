@@ -35,6 +35,13 @@ enum
     kSpecialCase,
 };
 
+struct PPCProcDescriptor
+{
+    GUEST_STRUCT;
+    GUEST<uint32_t> code;
+    GUEST<uint32_t> rtoc;
+};
+
 typedef uint8_t RDFlagsType;
 
 struct RoutineRecord

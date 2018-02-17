@@ -87,7 +87,7 @@ RAW_68K_TRAP(Microseconds, 0xA193);
 RAW_68K_TRAP(Gestalt, 0xA1AD);
 RAW_68K_TRAP(LoadSeg, 0xA9F0);
 RAW_68K_TRAP(CommToolboxDispatch, 0xA08B);
-RAW_68K_FUNCTION(modeswitch);
+RAW_68K_TRAP(modeswitch, 0xAAFE);
 RAW_68K_TRAP(WackyQD32Trap, 0xAB03);
 RAW_68K_FUNCTION(Key1Trans);
 RAW_68K_FUNCTION(Key2Trans);

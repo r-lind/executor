@@ -61,6 +61,11 @@
 #include "rsys/cfm.h"
 #include "rsys/mixed_mode.h"
 
+#include <PowerCore.h>
+#include <rsys/builtinlibs.h>
+#include <algorithm>
+#include <cassert>
+
 namespace Executor
 {
 #define RTS() return POPADDR()
@@ -682,6 +687,159 @@ STUB(IMVI_ReadXPRam)
  * instead we pick up the return address from the stack
  */
 
+struct PowerPCSwitchFrame
+{
+    GUEST<uint32_t> backChain;
+    GUEST<uint32_t> saveCR;
+    GUEST<uint32_t> saveLR;
+    GUEST<uint32_t> reserved1;
+    GUEST<uint32_t> reserved2;
+    GUEST<uint32_t> saveRTOC;
+    GUEST<uint32_t> parameters[8];
+};
+
+STUB(modeswitch)
+{
+    const RoutineDescriptor& rp = *ptr_from_longint<RoutineDescriptor*>(POPADDR() - 2);
+    const RoutineRecord *beginRoutines = &rp.routineRecords[0],
+                        *endRoutines = &rp.routineRecords[CW(rp.routineCount) + 1];
+    const RoutineRecord* routine =
+        std::find_if(beginRoutines, endRoutines,
+              [](const RoutineRecord& rr) { return rr.ISA == CBC(kPowerPCISA); });
+
+    if(routine == endRoutines)
+    {
+        fprintf(stderr, "*** bad modeswitch***\n");
+        std::exit(1);
+    }
+    
+
+    ProcInfoType procinfo = CL(routine->procInfo);
+    int convention = procinfo & 0xf;
+
+    int nParameters = 0;
+    constexpr int maxParameters = 13;
+    int paramSizes[maxParameters];
+    int paramRegs[maxParameters];
+
+    uint32_t pascalArgSize = 0;
+
+    switch(convention)
+    {
+        case kRegisterBased:
+            for(uint32_t field = 11; field <= 27; field += 5)
+            {
+                uint32_t argsize = (procinfo >> field) & 0x3;
+                if(argsize)
+                {
+                    paramRegs[nParameters] = (procinfo >> (field + 2)) & 0x7;
+                    paramSizes[nParameters++] = argsize;
+                }
+                else
+                    break;
+            }
+            break;
+        case kPascalStackBased:
+            for(uint32_t field = 6; field <= 30; field += 2)
+            {
+                uint32_t argsize = (procinfo >> field) & 0x3;
+                if(argsize)
+                {
+                    paramSizes[nParameters++] = argsize;
+                    pascalArgSize += argsize == 3 ? 4 : 2;
+                }
+                else
+                    break;
+            }
+            break;
+        default:
+            fprintf(stderr,"modeswitch: unimplemented/invalid convention %d (procinfo = %08x)\n", convention, procinfo);
+            std::exit(1);
+    }
+
+    uint8_t *pascalArgPtr = ptr_from_longint<uint8_t*>(EM_A7 + 4 + pascalArgSize);
+    uint8_t *pascalResultPtr = pascalArgPtr;
+
+    PUSHADDR(EM_A6);
+    uint32_t backChain = EM_A7;
+    uint32_t frame_size = std::max(8, nParameters) * 4 + 24;
+    EM_A7 -= frame_size;
+    PowerPCSwitchFrame& frame = *ptr_from_longint<PowerPCSwitchFrame*>(EM_A7);
+    frame.backChain = CL(backChain | 0x1);
+
+    PowerCore cpu;
+    cpu.r[1] = EM_A7;
+    cpu.lr = 0xFFFFFFFC;
+
+    cpu.syscall = &builtinlibs::handleSC;
+
+    cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
+    cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
+    cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
+    cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
+
+
+    assert(convention == kPascalStackBased);
+    for(int i = 0; i < nParameters; i++)
+    {
+        uint32_t argsize = paramSizes[i];
+        uint32_t arg;
+        switch(argsize)
+        {
+            case 1:
+                pascalArgPtr -= 2;
+                arg = *pascalArgPtr;
+                break;
+            case 2:
+                pascalArgPtr -= 2;
+                arg = CW(*(GUEST<uint16_t>*) pascalArgPtr);
+                break;
+            case 3:
+                pascalArgPtr -= 4;
+                arg = CL(*(GUEST<uint32_t>*) pascalArgPtr);
+                break;
+        }
+
+        if(i < 8)
+            cpu.r[i+3] = arg;
+        else
+            frame.parameters[i] = CL(arg);
+    }
+
+
+    PPCProcDescriptor& proc = *(PPCProcDescriptor*) MR(routine->procDescriptor);
+    cpu.CIA = CL(proc.code);
+    cpu.r[2] = CL(proc.rtoc);
+    cpu.interpret1();
+    EM_A7 = backChain;
+    EM_A6 = POPADDR();
+    uint32_t retaddr = POPADDR();
+    EM_A7 += pascalArgSize;
+    
+    switch(convention)
+    {
+        case kPascalStackBased:
+            if(uint32_t resultSize = (procinfo >> 4) & 0x3)
+            {
+                switch(resultSize)
+                {
+                    case 1:
+                        *pascalResultPtr = cpu.r[3];
+                        break;
+                    case 2:
+                        *(GUEST<uint16_t>*)pascalResultPtr = CW((uint16_t)cpu.r[3]);
+                        break;
+                    case 3:
+                        *(GUEST<uint32_t>*)pascalResultPtr = CL(cpu.r[3]);
+                        break;
+                }
+            }
+            break;
+    }
+    return retaddr;
+}
+
+#if 0
 STUB(modeswitch)
 {
     syn68k_addr_t retaddr;
@@ -822,5 +980,6 @@ STUB(modeswitch)
     }
     return retaddr;
 }
+#endif
 
 }
