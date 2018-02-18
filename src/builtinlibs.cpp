@@ -6,6 +6,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
+#include <functional>
 
 #include <PowerCore.h>
 
@@ -22,7 +23,7 @@ namespace
         GUEST<uint32_t> rtoc;
         GUEST<uint32_t> sc;
         const char* name;
-        uint32_t (*implementation)(PowerCore&);
+        std::function<uint32_t (PowerCore&)> implementation;
     };
 
     PPCCallback callbacks[4096];
@@ -51,7 +52,7 @@ uint32_t builtinlibs::handleSC(PowerCore& cpu)
     }
 }
 
-void builtinlibs::addPPCEntrypoint(const char *library, const char *function, uint32_t (*code)(PowerCore&))
+void builtinlibs::addPPCEntrypoint(const char *library, const char *function, std::function<uint32_t (PowerCore&)> code)
 {
     assert(nCallbacks < NELEM(callbacks));
     PPCCallback& callback = callbacks[nCallbacks++];

@@ -492,36 +492,48 @@ namespace callfromPPC
             *p = GuestTypeTraits<T>::host_to_guest(arg);
         }
     }
+    template<class Ret>
+    struct InvokerRet;
 
     template<typename Ret, typename... Args>
-    void invokeRet(PowerCore& cpu, Ret (*fptr)(Args...), Args... args)
+    struct InvokerRet<Ret (Args...)>
     {
-        Ret ret = fptr(args...);
-        ParameterPasser{cpu,nullptr}.set(ret);
-    }
+        template<typename F>
+        static void invokeRet(PowerCore& cpu, const F& fptr, Args... args)
+        {
+            Ret ret = fptr(args...);
+            ParameterPasser{cpu,nullptr}.set(ret);
+        }
+    };
+
     template<typename... Args>
-    void invokeRet(PowerCore& cpu, void (*fptr)(Args...), Args... args)
+    struct InvokerRet<void (Args...)>
     {
-        fptr(args...);
-    }
+        template<typename F>
+        static void invokeRet(PowerCore& cpu, const F& fptr, Args... args)
+        {
+            fptr(args...);
+        }
+    };
 
-    template<typename Ret, typename... Args, size_t... Is>
-    void invokeFromPPCHelper(PowerCore& cpu, Ret (*fptr)(Args...), std::index_sequence<Is...>)
-    {
-        std::tuple<Args...> args;
-        ParameterPasser argGetter{cpu, GuestTypeTraits<uint8_t*>::reg_to_host(cpu.r[1]+24)};
-
-        (argGetter % ... % std::get<Is>(args));
-        invokeRet(cpu, fptr, std::get<Is>(args)...);
-    }
-
-    template<typename F, F *fptr>
+    template<typename F>
     struct Invoker;
 
-    template<typename Ret, typename... Args, Ret (*fptr)(Args...)>
-    struct Invoker<Ret (Args...), fptr>
+    template<typename Ret, typename... Args>
+    struct Invoker<Ret (Args...)>
     {
-        static uint32_t invokeFromPPC(PowerCore& cpu)
+        template<typename F, size_t... Is>
+        static void invokeFromPPCHelper(PowerCore& cpu, const F& fptr, std::index_sequence<Is...>)
+        {
+            std::tuple<Args...> args;
+            ParameterPasser argGetter{cpu, GuestTypeTraits<uint8_t*>::reg_to_host(cpu.r[1]+24)};
+
+            (argGetter % ... % std::get<Is>(args));
+            InvokerRet<Ret (Args...)>::invokeRet(cpu, fptr, std::get<Is>(args)...);
+        }
+        
+        template<typename F>
+        static uint32_t invokeFromPPC(PowerCore& cpu, const F& fptr)
         {
             invokeFromPPCHelper(cpu, fptr, std::index_sequence_for<Args...>());
             return cpu.lr;

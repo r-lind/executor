@@ -135,6 +135,23 @@ private:
     GenericDispatcherTrap& dispatcher;
 };
 
+template<typename Trap, typename F, bool... flags>
+struct TrapVariant;
+
+template<typename Trap, typename Ret, typename... Args, bool... flags>
+struct TrapVariant<Trap, Ret (Args...), flags...>  : public internal::DeferredInit
+{
+public:
+    Ret operator()(Args... args) const { return trap(args..., flags...); }
+
+    virtual void init() override;
+    TrapVariant(const Trap& trap, const char* name, const char* exportToLib = nullptr);
+private:
+    const Trap& trap;
+    const char *name;
+    const char *libname;
+};
+
 #define EXTERN_FUNCTION_WRAPPER(NAME, FPTR, INIT, ...) \
     extern Executor::traps::__VA_ARGS__ NAME
 #define EXTERN_DISPATCHER_TRAP(NAME, TRAP, SELECTOR) \
@@ -179,6 +196,12 @@ private:
 #define RAW_68K_TRAP(NAME, TRAP) \
     syn68k_addr_t _##NAME(syn68k_addr_t, void *); \
     CREATE_FUNCTION_WRAPPER(stub_##NAME, &_##NAME, (#NAME), TrapFunction<decltype(_##NAME) COMMA &_##NAME COMMA TRAP COMMA callconv::Raw>)
+
+
+#define TRAP_VARIANT(NAME, IMPL_NAME, ...) \
+    CREATE_FUNCTION_WRAPPER(NAME, , (stub_##IMPL_NAME, #NAME, "InterfaceLib"), TrapVariant<decltype(stub_##IMPL_NAME), __VA_ARGS__>)
+#define REGISTER_FLAG_TRAP(IMPL_NAME, BIT, NAME0, NAME1, TRAP, ...)
+#define REGISTER_2FLAG_TRAP(IMPL_NAME, NAME00, NAME01, NAME10, NAME11, TRAP, ...)
 
 
 #define ASYNCBIT (1 << 10)

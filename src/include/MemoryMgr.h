@@ -136,12 +136,13 @@ REGISTER_TRAP2(_NewHandle_flags, 0xA122, A0 (D0, TrapBit<SYSBIT>, TrapBit<CLRBIT
 extern Handle _RecoverHandle_flags(Ptr p, bool sys_p);
 REGISTER_TRAP2(_RecoverHandle_flags, 0xA128, A0 (A0, TrapBit<SYSBIT>), callconv::ReturnMemErr<D0>);
 
-#define NewPtr(size) (_NewPtr_flags(size, false, false))
+//#define NewPtr(size) (_NewPtr_flags(size, false, false))
 #define NewPtrSys(size) (_NewPtr_flags(size, true, false))
 #define NewPtrClear(size) (_NewPtr_flags(size, false, true))
 #define NewPtrSysClear(size) (_NewPtr_flags(size, true, true))
 extern Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p);
 REGISTER_TRAP2(_NewPtr_flags, 0xA11E, A0 (D0, TrapBit<SYSBIT>, TrapBit<CLRBIT>), callconv::ReturnMemErr<D0>);
+TRAP_VARIANT(NewPtr, _NewPtr_flags, Ptr(Size), false, false);
 
 #define FreeMem() (_FreeMem_flags(false))
 #define FreeMemSys() (_FreeMem_flags(true))

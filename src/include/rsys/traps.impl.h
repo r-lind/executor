@@ -6,12 +6,13 @@
 
 #include <cassert>
 #include <iostream>
+#include <functional>
 
 namespace Executor
 {
 namespace builtinlibs
 {
-    void addPPCEntrypoint(const char *library, const char *function, uint32_t (*code)(PowerCore&));
+    void addPPCEntrypoint(const char *library, const char *function, std::function<uint32_t (PowerCore&)> code);
 }
 
 namespace traps
@@ -84,7 +85,8 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
 
     if(libname)
     {
-        builtinlibs::addPPCEntrypoint(libname, name, &callfromPPC::Invoker<Ret (Args...), fptr>::invokeFromPPC);
+        builtinlibs::addPPCEntrypoint(libname, name,
+            [](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, fptr); });
     }
 }
 
@@ -160,6 +162,27 @@ void DispatcherTrap<SelectorConvention>::init()
         }
     }
 }
+
+template<typename Trap, typename Ret, typename... Args, bool... flags>
+void TrapVariant<Trap, Ret (Args...), flags...>::init()
+{
+    if(libname)
+    {
+        builtinlibs::addPPCEntrypoint(libname, name,
+            [this](PowerCore& cpu)
+            {
+                return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu,
+                    [this](Args... args) -> Ret { return (*this)(args...); });
+            });
+    }
+}
+
+template<typename Trap, typename Ret, typename... Args, bool... flags>
+TrapVariant<Trap, Ret (Args...), flags...>::TrapVariant(const Trap& trap, const char* name, const char* exportToLib)
+    : trap(trap), name(name), libname(exportToLib)
+{
+}
+
 
 }
 }
