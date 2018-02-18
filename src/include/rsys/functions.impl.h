@@ -538,7 +538,7 @@ namespace callfromPPC
             std::tuple<Args...> args;
             ParameterPasser argGetter{cpu, GuestTypeTraits<uint8_t*>::reg_to_host(cpu.r[1]+24)};
 
-            (argGetter % ... % std::get<Is>(args));
+            (void)((argGetter % ... % std::get<Is>(args)));
             InvokerRet<Ret (Args...)>::invokeRet(cpu, fptr, std::get<Is>(args)...);
         }
         
