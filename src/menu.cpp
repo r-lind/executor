@@ -1451,7 +1451,7 @@ LONGINT Executor::C_MenuKey(CharParameter thec)
     return (0L);
 }
 
-void Executor::C_SetItem(MenuHandle mh, INTEGER item, StringPtr str)
+void Executor::C_SetMenuItemText(MenuHandle mh, INTEGER item, StringPtr str)
 {
     int oldsize, newsize, growth;
     Size hsize, nbyte;
@@ -1489,7 +1489,7 @@ void Executor::C_SetItem(MenuHandle mh, INTEGER item, StringPtr str)
     }
 }
 
-void Executor::C_GetItem(MenuHandle mh, INTEGER item, StringPtr str)
+void Executor::C_GetMenuItemText(MenuHandle mh, INTEGER item, StringPtr str)
 {
     StringPtr stashstring;
 

@@ -3754,7 +3754,7 @@ static map_entry_t
             "GetString", C_GetString,
         },
         {
-            "GetMenuItemText", C_GetItem,
+            "GetMenuItemText", C_GetMenuItemText,
         },
         {
             "OffsetRect", C_OffsetRect,
@@ -3874,7 +3874,7 @@ static map_entry_t
             "EnableIdle", EnableIdle_nop,
         },
         {
-            "SetMenuItemText", C_SetItem,
+            "SetMenuItemText", C_SetMenuItemText,
         },
         {
             "AEGetNthPtr", C_AEGetNthPtr,

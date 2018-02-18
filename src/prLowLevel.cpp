@@ -279,7 +279,7 @@ find_item_key(DialogPtr dlg, INTEGER itemno)
 
     ch = GetDControl(dlg, itemno);
     mh = GetPopUpMenu(ch);
-    GetItem(mh, GetControlValue(ch), text);
+    GetMenuItemText(mh, GetControlValue(ch), text);
     retval = cstring_from_str255(text);
     return retval;
 }

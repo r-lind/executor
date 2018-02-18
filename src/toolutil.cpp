@@ -138,7 +138,7 @@ StringHandle Executor::C_GetString(INTEGER i)
     return retval;
 }
 
-void Executor::GetIndString(StringPtr s, INTEGER sid, INTEGER index)
+void Executor::C_GetIndString(StringPtr s, INTEGER sid, INTEGER index)
 {
     Handle retval;
     char *p, *ep, *op;

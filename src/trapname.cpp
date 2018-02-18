@@ -2404,8 +2404,8 @@ const char *trap_name_array[0x1000] = {
     "GetItemMark", /* 0xA943 */
     "SetItemMark", /* 0xA944 */
     "CheckItem", /* 0xA945 */
-    "GetItem", /* 0xA946 */
-    "SetItem", /* 0xA947 */
+    "GetMenuItemText", /* 0xA946 */
+    "SetMenuItemText", /* 0xA947 */
     "CalcMenuSize", /* 0xA948 */
     "GetMenuHandle", /* 0xA949 */
     "SetMenuFlash", /* 0xA94A */
@@ -3428,8 +3428,8 @@ const char *trap_name_array[0x1000] = {
     "GetItemMark", /* 0xAD43 */
     "SetItemMark", /* 0xAD44 */
     "CheckItem", /* 0xAD45 */
-    "GetItem", /* 0xAD46 */
-    "SetItem", /* 0xAD47 */
+    "GetMenuItemText", /* 0xAD46 */
+    "SetMenuItemText", /* 0xAD47 */
     "CalcMenuSize", /* 0xAD48 */
     "GetMenuHandle", /* 0xAD49 */
     "SetMenuFlash", /* 0xAD4A */

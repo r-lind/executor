@@ -164,12 +164,12 @@ PASCAL_TRAP(FlashMenuBar, 0xA94C);
 extern LONGINT C_MenuKey(CharParameter thec);
 PASCAL_TRAP(MenuKey, 0xA93E);
 
-extern void C_SetItem(MenuHandle mh, INTEGER item,
+extern void C_SetMenuItemText(MenuHandle mh, INTEGER item,
                                   StringPtr str);
-PASCAL_TRAP(SetItem, 0xA947);
-extern void C_GetItem(MenuHandle mh, INTEGER item,
+PASCAL_TRAP(SetMenuItemText, 0xA947);
+extern void C_GetMenuItemText(MenuHandle mh, INTEGER item,
                                   StringPtr str);
-PASCAL_TRAP(GetItem, 0xA946);
+PASCAL_TRAP(GetMenuItemText, 0xA946);
 extern void C_DisableItem(MenuHandle mh, INTEGER item);
 PASCAL_TRAP(DisableItem, 0xA93A);
 

@@ -2386,8 +2386,8 @@
 0xA943	GetItemMark
 0xA944	SetItemMark
 0xA945	CheckItem
-0xA946	GetItem
-0xA947	SetItem
+0xA946	GetMenuItemText
+0xA947	SetMenuItemText
 0xA948	CalcMenuSize
 0xA949	GetMenuHandle
 0xA94A	SetMenuFlash
