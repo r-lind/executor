@@ -184,7 +184,7 @@ namespace stack
 
 namespace callfrom68K
 {
-    template<typename F, F *fptr, typename CallConv>
+    template<typename F, typename CallConv>
     struct Invoker;
 
     template<typename... Xs> struct List;
@@ -195,7 +195,8 @@ namespace callfrom68K
     template<typename Ret, typename... Args>
     struct PascalInvoker<Ret (Args...), List<Args...>, List<>>
     {
-        static void invokeFrom68K(Ret (*fptr)(Args...), Args... args)
+        template<typename F>
+        static void invokeFrom68K(const F& fptr, Args... args)
         {
             Ret retval = fptr(args...);
             *ptr_from_longint<GUEST<Ret>*>(EM_A7) = RM(retval);
@@ -205,7 +206,8 @@ namespace callfrom68K
     template<typename... Args>
     struct PascalInvoker<void (Args...), List<Args...>, List<>>
     {
-        static void invokeFrom68K(void (*fptr)(Args...), Args... args)
+        template<typename F>
+        static void invokeFrom68K(const F& fptr, Args... args)
         {
             fptr(args...);
         }
@@ -214,7 +216,8 @@ namespace callfrom68K
     template<typename F, typename... Args, typename Arg, typename... ToDoArgs>
     struct PascalInvoker<F, List<Args...>, List<Arg, ToDoArgs...>>
     {
-        static void invokeFrom68K(F* fptr, Args... args)
+        template<typename F1>
+        static void invokeFrom68K(const F1& fptr, Args... args)
         {
             Arg arg = callconv::stack::pop<Arg>();
             PascalInvoker<F, List<Arg, Args...>, List<ToDoArgs...>>::invokeFrom68K(fptr, arg, args...);
@@ -236,10 +239,11 @@ namespace callfrom68K
         using type = List<Ys...>;
     };
     
-    template<typename Ret, typename... Args, Ret (*fptr)(Args...)>
-    struct Invoker<Ret (Args...), fptr, callconv::Pascal>
+    template<typename Ret, typename... Args>
+    struct Invoker<Ret (Args...), callconv::Pascal>
     {
-        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, void *)
+        template<typename F>
+        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, const F& fptr)
         {
             syn68k_addr_t retaddr = callconv::stack::pop<syn68k_addr_t>();
             PascalInvoker<Ret (Args...), List<>, typename Reverse<List<Args...>>::type>::invokeFrom68K(fptr);
@@ -247,67 +251,73 @@ namespace callfrom68K
         }
     };
 
-    template<syn68k_addr_t (*fptr)(syn68k_addr_t, void*)>
-    struct Invoker<syn68k_addr_t (syn68k_addr_t addr, void *), fptr, callconv::Raw>
+    template<>
+    struct Invoker<syn68k_addr_t (syn68k_addr_t addr, void *), callconv::Raw>
     {
-        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, void * refcon)
+        template<typename F>
+        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, const F& fptr)
         {
-            return fptr(addr, refcon);
+            return fptr(addr, nullptr);
         }
     };
 
-    template<typename F, F *fptr, typename DoneArgs, typename ToDoArgs, typename ToDoCC>
+    template<typename F, typename DoneArgs, typename ToDoArgs, typename ToDoCC>
     struct RegInvoker;
 
-    template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename... DoneArgs>
-    struct RegInvoker<Ret (Args...), fptr, List<DoneArgs...>, List<>, List<>>
+    template<typename Ret, typename... Args, typename... DoneArgs>
+    struct RegInvoker<Ret (Args...), List<DoneArgs...>, List<>, List<>>
     {
-        static Ret invokeFrom68K(syn68k_addr_t addr, void *refcon, DoneArgs... args)
+        template<typename F>
+        static Ret invokeFrom68K(syn68k_addr_t addr, const F& fptr, DoneArgs... args)
         {
             return fptr(args...);
         }
     };
 
-    template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename... DoneArgs, typename Arg, typename... TodoArgs, typename CC, typename... TodoCC>
-    struct RegInvoker<Ret (Args...), fptr, List<DoneArgs...>, List<Arg, TodoArgs...>, List<CC, TodoCC...>>
+    template<typename Ret, typename... Args, typename... DoneArgs, typename Arg, typename... TodoArgs, typename CC, typename... TodoCC>
+    struct RegInvoker<Ret (Args...), List<DoneArgs...>, List<Arg, TodoArgs...>, List<CC, TodoCC...>>
     {
-        static Ret invokeFrom68K(syn68k_addr_t addr, void *refcon, DoneArgs... args)
+        template<typename F>
+        static Ret invokeFrom68K(syn68k_addr_t addr, const F& fptr, DoneArgs... args)
         {
             CC newarg;
-            return RegInvoker<Ret (Args...),fptr,List<DoneArgs...,Arg>,List<TodoArgs...>,List<TodoCC...>>
-                ::invokeFrom68K(addr, refcon, args..., newarg);
+            return RegInvoker<Ret (Args...),List<DoneArgs...,Arg>,List<TodoArgs...>,List<TodoCC...>>
+                ::invokeFrom68K(addr, fptr, args..., newarg);
         }
     };
 
-    template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename RetConv, typename... ArgConvs>
-    struct Invoker<Ret (Args...), fptr, callconv::Register<RetConv (ArgConvs...)>>
+    template<typename Ret, typename... Args, typename RetConv, typename... ArgConvs>
+    struct Invoker<Ret (Args...), callconv::Register<RetConv (ArgConvs...)>>
     {
-        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, void *refcon)
+        template<typename F>
+        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, const F& fptr)
         {
             syn68k_addr_t retaddr = POPADDR();
-            Ret retval = RegInvoker<Ret (Args...), fptr, List<>, List<Args...>, List<ArgConvs...>>::invokeFrom68K(addr, refcon);
+            Ret retval = RegInvoker<Ret (Args...), List<>, List<Args...>, List<ArgConvs...>>::invokeFrom68K(addr, fptr);
             RetConv::set(retval);  // ### double conversion?
             return retaddr;
         }
     };
-    template<typename... Args, void (*fptr)(Args...), typename RetConv, typename... ArgConvs>
-    struct Invoker<void (Args...), fptr, callconv::Register<RetConv (ArgConvs...)>>
+    template<typename... Args, typename RetConv, typename... ArgConvs>
+    struct Invoker<void (Args...), callconv::Register<RetConv (ArgConvs...)>>
     {
-        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, void *refcon)
+        template<typename F>
+        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, const F& fptr)
         {
             syn68k_addr_t retaddr = POPADDR();
-            RegInvoker<void (Args...), fptr, List<>, List<Args...>, List<ArgConvs...>>::invokeFrom68K(addr, refcon);
+            RegInvoker<void (Args...), List<>, List<Args...>, List<ArgConvs...>>::invokeFrom68K(addr, fptr);
             return retaddr;
         }
     };
 
-    template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename RetArgConv, typename Extra1, typename... Extras>
-    struct Invoker<Ret (Args...), fptr, callconv::Register<RetArgConv, Extra1, Extras...>>
+    template<typename Ret, typename... Args, typename RetArgConv, typename Extra1, typename... Extras>
+    struct Invoker<Ret (Args...), callconv::Register<RetArgConv, Extra1, Extras...>>
     {
-        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, void *refcon)
+        template<typename F>
+        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, const F& fptr)
         {
             Extra1 state;
-            syn68k_addr_t retval = Invoker<Ret(Args...), fptr, callconv::Register<RetArgConv, Extras...>>::invokeFrom68K(addr,refcon);
+            syn68k_addr_t retval = Invoker<Ret(Args...), callconv::Register<RetArgConv, Extras...>>::invokeFrom68K(addr,fptr);
             return state.afterwards(retval);
         }
     };

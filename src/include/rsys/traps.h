@@ -5,6 +5,7 @@
 #include <unordered_map>
 
 #include <rsys/functions.h>
+#include <functional>
 
 namespace Executor
 {
@@ -41,9 +42,9 @@ namespace internal
 class GenericDispatcherTrap : public internal::DeferredInit
 {
 public:
-    virtual void addSelector(uint32_t sel, callback_handler_t handler) = 0;
+    virtual void addSelector(uint32_t sel, std::function<syn68k_addr_t(syn68k_addr_t)> handler) = 0;
 protected:
-    std::unordered_map<uint32_t, callback_handler_t> selectors;
+    std::unordered_map<uint32_t, std::function<syn68k_addr_t(syn68k_addr_t)>> selectors;
 };
 
 template<class SelectorConvention>
@@ -54,7 +55,7 @@ class DispatcherTrap : public GenericDispatcherTrap
     uint16_t trapno;
 public:
     virtual void init() override;
-    virtual void addSelector(uint32_t sel, callback_handler_t handler) override;
+    virtual void addSelector(uint32_t sel, std::function<syn68k_addr_t(syn68k_addr_t)> handler) override;
     DispatcherTrap(const char* name, uint16_t trapno) : name(name), trapno(trapno) {}
 };
 
