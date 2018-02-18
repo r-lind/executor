@@ -86,13 +86,12 @@ WrappedFunction<Ret (Args...), fptr, CallConv>::WrappedFunction(const char* name
 template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename CallConv>
 void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
 {
-    logging::namedThings[(void*) fptr] = name;
     if(logging::enabled())
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
-                [](syn68k_addr_t addr)
+                [this](syn68k_addr_t addr)
                 { 
                     return callfrom68K::Invoker<Ret (Args...), CallConv>
-                        ::invokeFrom68K(addr, &logging::LoggedFunction<Ret (Args...),fptr,CallConv>::call);
+                        ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(name, fptr));
                 }
             ));    
     else
@@ -106,8 +105,14 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
 
     if(libname)
     {
-        builtinlibs::addPPCEntrypoint(libname, name,
-            [](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, fptr); });
+        if(logging::enabled())
+            builtinlibs::addPPCEntrypoint(libname, name,
+                [this](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, logging::makeLoggedFunction(name, fptr)); }
+            );
+        else
+            builtinlibs::addPPCEntrypoint(libname, name,
+                [](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, fptr); }
+            );
     }
 }
 
@@ -140,10 +145,10 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
     WrappedFunction<Ret(Args...),fptr,CallConv>::init();
     if(logging::enabled())
         dispatcher.addSelector(selector,
-            [](syn68k_addr_t addr)
+            [this](syn68k_addr_t addr)
             {
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
-                    ::invokeFrom68K(addr, &logging::LoggedFunction<Ret (Args...),fptr,CallConv>::call);
+                    ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(this->name, fptr));
             }
         );
     else

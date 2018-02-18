@@ -5,7 +5,6 @@ using namespace Executor;
 
 int logging::nestingLevel = 0;
 static bool loggingEnabled = false;
-std::unordered_map<void*, const char*> logging::namedThings;
 
 void logging::resetNestingLevel()
 {
@@ -29,7 +28,7 @@ void logging::setEnabled(bool e)
 
 bool logging::loggingActive()
 {
-    return nestingLevel == 0;
+    return nestingLevel <= 1;
 }
 
 void logging::logEscapedChar(unsigned char c)
@@ -179,27 +178,24 @@ void logging::dumpRegsAndStack()
     std::cout << std::dec;
 }
 
-
-syn68k_addr_t logging::untypedLoggedFunction(syn68k_addr_t (*fptr)(syn68k_addr_t, void *), syn68k_addr_t addr, void * param)
+void logging::logUntypedArgs(const char *name)
 {
-    const char *fname = namedThings.at((void*)fptr);
     if(loggingActive())
     {
         std::cout.clear();
         indent();
-        std::cout << fname << " ";
+        std::cout << name << " ";
         dumpRegsAndStack();
         std::cout << std::endl;
     }
-    nestingLevel++;
-    syn68k_addr_t retaddr = (*fptr)(addr, param);
-    nestingLevel--;
+}
+void logging::logUntypedReturn(const char *name)
+{
     if(loggingActive())
     {
         indent();
-        std::cout << "returning: " << fname << " ";
+        std::cout << "returning: " << name << " ";
         dumpRegsAndStack();
         std::cout << std::endl << std::flush;
     }
-    return retaddr;
 }
