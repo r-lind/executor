@@ -61,6 +61,7 @@
 #include "rsys/cfm.h"
 #include "rsys/mixed_mode.h"
 
+#include <rsys/cpu.h>
 #include <PowerCore.h>
 #include <rsys/builtinlibs.h>
 #include <algorithm>
@@ -767,7 +768,7 @@ STUB(modeswitch)
     PowerPCSwitchFrame& frame = *ptr_from_longint<PowerPCSwitchFrame*>(EM_A7);
     frame.backChain = CL(backChain | 0x1);
 
-    PowerCore cpu;
+    PowerCore& cpu = getPowerCore();
     cpu.r[1] = EM_A7;
     cpu.lr = 0xFFFFFFFC;
 

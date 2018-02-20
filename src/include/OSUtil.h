@@ -230,5 +230,9 @@ extern LONGINT StripAddress(LONGINT l);
 
 extern void C_DebugStr(StringPtr p);
 PASCAL_TRAP(DebugStr, 0xABFF);
+
+extern void C_Debugger();
+PASCAL_TRAP(Debugger, 0xA9FF);
+
 }
 #endif /* __OSUTIL__ */

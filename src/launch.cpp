@@ -80,6 +80,7 @@
 #include "rsys/logging.h"
 
 #include <rsys/builtinlibs.h>
+#include <rsys/cpu.h>
 #include <PowerCore.h>
 
 using namespace Executor;
@@ -456,7 +457,7 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
 
             printf("ppc start: r2 = %08x, %08x\n", new_toc, new_pc);
 
-            PowerCore cpu;
+            PowerCore& cpu = getPowerCore();
             cpu.r[2] = new_toc;
             cpu.r[1] = EM_A7-1024;
             cpu.lr = 0xFFFFFFFC;

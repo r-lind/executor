@@ -943,13 +943,3 @@ LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
 {
     return l;
 }
-
-void Executor::C_DebugStr(StringPtr p)
-{
-    int i;
-
-    fprintf(stderr, "debugstr: ");
-    for(i = *p++; i-- > 0; fprintf(stderr, "%c", (LONGINT)*p++))
-        ;
-    fprintf(stderr, "\n");
-}

@@ -9,5 +9,5 @@ endif()
 
 add_subdirectory(syn68k)
 add_subdirectory(PowerCore)
+add_subdirectory(cxmon)
 add_subdirectory(src)
-

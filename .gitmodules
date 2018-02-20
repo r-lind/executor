@@ -4,3 +4,6 @@
 [submodule "PowerCore"]
 	path = PowerCore
 	url = https://github.com/autc04/PowerCore.git
+[submodule "cxmon"]
+	path = cxmon
+	url = https://github.com/autc04/cxmon.git

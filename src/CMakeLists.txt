@@ -178,6 +178,7 @@ source_group(Numerics FILES ${num_sources})
 
 set(misc_sources
   traps.cpp logging.cpp builtinlibs.cpp
+  debugger.cpp cpu.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp trapname.cpp font.cpp
   gestalt.cpp globals.cpp iu.cpp launch.cpp main.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
   osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
@@ -251,6 +252,7 @@ set(include_sources hintemplate.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/common.h
                   include/rsys/commonevt.h
+                  include/rsys/cpu.h
                   include/rsys/cquick.h
                   include/rsys/crc.h
                   include/rsys/ctl.h
@@ -414,5 +416,5 @@ else()
     target_link_libraries(executor ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k PowerCore)
+target_link_libraries(executor Threads::Threads syn68k PowerCore mon)
 
