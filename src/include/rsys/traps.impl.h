@@ -208,7 +208,10 @@ void TrapVariant<Trap, Ret (Args...), flags...>::init()
             [this](PowerCore& cpu)
             {
                 return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu,
-                    [this](Args... args) -> Ret { return (*this)(args...); });
+                    logging::makeLoggedFunction1<Ret (Args...)>(name, 
+                        [this](Args... args) -> Ret { return (*this)(args...); }
+                    )
+                );
             });
     }
 }
