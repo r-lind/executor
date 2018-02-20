@@ -13,7 +13,7 @@ void logging::resetNestingLevel()
 void logging::indent()
 {
     for(int i = 0; i < nestingLevel; i++)
-        std::cout << "  ";
+        std::clog << "  ";
 }
 
 bool logging::enabled()
@@ -34,11 +34,11 @@ bool logging::loggingActive()
 void logging::logEscapedChar(unsigned char c)
 {
     if(c == '\'' || c == '\"' || c == '\\')
-        std::cout << '\\' << c;
+        std::clog << '\\' << c;
     else if(std::isprint(c))
-        std::cout << c;
+        std::clog << c;
     else
-        std::cout << "\\0" << std::oct << (unsigned)c << std::dec;
+        std::clog << "\\0" << std::oct << (unsigned)c << std::dec;
 }
 
 bool logging::canConvertBack(const void* p)
@@ -92,101 +92,101 @@ bool logging::validAddress(syn68k_addr_t p)
 
 void logging::logValue(char x)
 {
-    std::cout << (int)x;
-    std::cout << " = '";
+    std::clog << (int)x;
+    std::clog << " = '";
     logEscapedChar(x);
-    std::cout << '\'';
+    std::clog << '\'';
 }
 void logging::logValue(unsigned char x)
 {
-    std::cout << (int)x;
+    std::clog << (int)x;
     if(std::isprint(x))
-        std::cout << " = '" << x << '\'';
+        std::clog << " = '" << x << '\'';
 }
 void logging::logValue(signed char x)
 {
-    std::cout << (int)x;
+    std::clog << (int)x;
     if(std::isprint(x))
-        std::cout << " = '" << x << '\'';
+        std::clog << " = '" << x << '\'';
 }
-void logging::logValue(int16_t x) { std::cout << x; }
-void logging::logValue(uint16_t x) { std::cout << x; }
+void logging::logValue(int16_t x) { std::clog << x; }
+void logging::logValue(uint16_t x) { std::clog << x; }
 void logging::logValue(int32_t x)
 {
-    std::cout << x << " = '";
+    std::clog << x << " = '";
     logEscapedChar((x >> 24) & 0xFF);
     logEscapedChar((x >> 16) & 0xFF);
     logEscapedChar((x >> 8) & 0xFF);
     logEscapedChar(x & 0xFF);
-    std::cout << "'";
+    std::clog << "'";
 }
 void logging::logValue(uint32_t x)
 {
-    std::cout << x << " = '";
+    std::clog << x << " = '";
     logEscapedChar((x >> 24) & 0xFF);
     logEscapedChar((x >> 16) & 0xFF);
     logEscapedChar((x >> 8) & 0xFF);
     logEscapedChar(x & 0xFF);
-    std::cout << "'";
+    std::clog << "'";
 }
 void logging::logValue(unsigned char* p)
 {
-    std::cout << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
+    std::clog << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
     if(validAddress(p) && validAddress(p+256))
     {
-        std::cout << " = \"\\p";
+        std::clog << " = \"\\p";
         for(int i = 1; i <= p[0]; i++)
             logEscapedChar(p[i]);
-        std::cout << '"';
+        std::clog << '"';
     }
 }
 void logging::logValue(const void* p)
 {
     if(canConvertBack(p))
-        std::cout << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
+        std::clog << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
     else
-        std::cout << "?";
+        std::clog << "?";
 }
 void logging::logValue(void* p)
 {
     if(canConvertBack(p))
-        std::cout << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
+        std::clog << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
     else
-        std::cout << "?";
+        std::clog << "?";
 }
 void logging::logValue(ProcPtr p)
 {
     if(canConvertBack(p))
-        std::cout << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
+        std::clog << "0x" << std::hex << US_TO_SYN68K_CHECK0_CHECKNEG1(p) << std::dec;
     else
-        std::cout << "?";
+        std::clog << "?";
 }
 
 
 void logging::dumpRegsAndStack()
 {
-    std::cout << std::hex << /*std::showbase <<*/ std::setfill('0');
-    std::cout << "D0=" << std::setw(8) << EM_D0 << " ";
-    std::cout << "D1=" << std::setw(8) << EM_D1 << " ";
-    std::cout << "A0=" << std::setw(8) << EM_A0 << " ";
-    std::cout << "A1=" << std::setw(8) << EM_A1 << " ";
-    //std::cout << std::noshowbase;
-    std::cout << "Stack: ";
+    std::clog << std::hex << /*std::showbase <<*/ std::setfill('0');
+    std::clog << "D0=" << std::setw(8) << EM_D0 << " ";
+    std::clog << "D1=" << std::setw(8) << EM_D1 << " ";
+    std::clog << "A0=" << std::setw(8) << EM_A0 << " ";
+    std::clog << "A1=" << std::setw(8) << EM_A1 << " ";
+    //std::clog << std::noshowbase;
+    std::clog << "Stack: ";
     uint8_t *p = (uint8_t*)SYN68K_TO_US(EM_A7);
     for(int i = 0; i < 12; i++)
-        std::cout << std::setfill('0') << std::setw(2) << (unsigned)p[i] << " ";
-    std::cout << std::dec;
+        std::clog << std::setfill('0') << std::setw(2) << (unsigned)p[i] << " ";
+    std::clog << std::dec;
 }
 
 void logging::logUntypedArgs(const char *name)
 {
     if(loggingActive())
     {
-        std::cout.clear();
+        std::clog.clear();
         indent();
-        std::cout << name << " ";
+        std::clog << name << " ";
         dumpRegsAndStack();
-        std::cout << std::endl;
+        std::clog << std::endl;
     }
 }
 void logging::logUntypedReturn(const char *name)
@@ -194,8 +194,8 @@ void logging::logUntypedReturn(const char *name)
     if(loggingActive())
     {
         indent();
-        std::cout << "returning: " << name << " ";
+        std::clog << "returning: " << name << " ";
         dumpRegsAndStack();
-        std::cout << std::endl << std::flush;
+        std::clog << std::endl << std::flush;
     }
 }
