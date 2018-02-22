@@ -811,7 +811,7 @@ STUB(modeswitch)
     PPCProcDescriptor& proc = *(PPCProcDescriptor*) MR(routine->procDescriptor);
     cpu.CIA = CL(proc.code);
     cpu.r[2] = CL(proc.rtoc);
-    cpu.interpret1();
+    cpu.execute();
     EM_A7 = backChain;
     EM_A6 = POPADDR();
     uint32_t retaddr = POPADDR();

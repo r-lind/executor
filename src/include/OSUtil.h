@@ -234,5 +234,10 @@ PASCAL_TRAP(DebugStr, 0xABFF);
 extern void C_Debugger();
 PASCAL_TRAP(Debugger, 0xA9FF);
 
+extern void
+C_MakeDataExecutable(void *ptr, uint32_t sz);
+NOTRAP_FUNCTION(MakeDataExecutable);
+
+
 }
 #endif /* __OSUTIL__ */

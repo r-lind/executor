@@ -1079,18 +1079,6 @@ do_pef_section(ConnectionID connp, const void *addr,
     return retval;
 }
 
-/*
- * NOTE: it would be nice if someone else provided code to flush the
- * instruction cache.  I'm a little nervous that my code below will fail on 
- * multi-processor systems.
- */
-
-static void
-cacheflush(void *start, uint32_t length)
-{
-
-}
-
 static OSErr
 do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
                 syn68k_addr_t *mainAddrp, OSType arch)
@@ -1110,7 +1098,6 @@ do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
                                 mainAddrp, arch);
 // #warning need to back out cleanly if a section fails to load
 
-#if 0
     if(retval == noErr)
     {
         int i;
@@ -1119,16 +1106,17 @@ do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
         {
             if(connp->sects[i].length)
             {
-                int prot;
-
-                prot = 0;
                 if(connp->sects[i].perms & executable_section)
                 {
-                    cacheflush(SYN68K_TO_US(connp->sects[i].start),
-                               connp->sects[i].length);
-                    prot |= PROT_EXEC;
+                    MakeDataExecutable(
+                        MR(connp->sects[i].start),
+                        CL(connp->sects[i].length));
                 }
-                if(connp->sects[i].perms & readable_section)
+
+#if 0
+                int prot;
+                prot = 0;
+                if((connp->sects[i].perms & readable_section) || (connp->sects[i].perms & executable_section))
                     prot |= PROT_READ;
                 if(connp->sects[i].perms & writable_section)
                     prot |= PROT_WRITE;
@@ -1139,10 +1127,10 @@ do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
                             prot)
                    != 0)
                     warning_unexpected("%d", errno);
+#endif                    
             }
         }
     }
-#endif
 
     return retval;
 }

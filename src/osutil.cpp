@@ -27,6 +27,8 @@
 #include "rsys/toolevent.h"
 #include "rsys/stdfile.h"
 #include "rsys/syncint.h"
+#include "rsys/cpu.h"
+#include <PowerCore.h>
 
 using namespace Executor;
 
@@ -942,4 +944,10 @@ void Executor::SwapMMUMode(Byte *bp) /* IMV-593 */
 LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
 {
     return l;
+}
+
+
+void Executor::C_MakeDataExecutable(void *ptr, uint32_t sz)
+{
+    getPowerCore().flushCache(US_TO_SYN68K(ptr), sz);    
 }
