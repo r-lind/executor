@@ -469,6 +469,8 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
             cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
             cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
+
+            C_Debugger();
             cpu.execute();
         }
     }

@@ -545,8 +545,11 @@ namespace callfromPPC
         template<typename F>
         static uint32_t invokeFromPPC(PowerCore& cpu, const F& fptr)
         {
+            uint32_t saveLR = cpu.lr;
+            EM_A7 = cpu.r[1];
             invokeFromPPCHelper(cpu, fptr, std::index_sequence_for<Args...>());
-            return cpu.lr;
+            cpu.r[1] = EM_A7;
+            return saveLR; //cpu.lr;
         }
     };
 

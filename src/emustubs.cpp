@@ -769,16 +769,6 @@ STUB(modeswitch)
     frame.backChain = CL(backChain | 0x1);
 
     PowerCore& cpu = getPowerCore();
-    cpu.r[1] = EM_A7;
-    cpu.lr = 0xFFFFFFFC;
-
-    cpu.syscall = &builtinlibs::handleSC;
-
-    cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
-    cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
-    cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
-    cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
-
 
     assert(convention == kPascalStackBased);
     for(int i = 0; i < nParameters; i++)
@@ -807,11 +797,19 @@ STUB(modeswitch)
             frame.parameters[i] = CL(arg);
     }
 
+    cpu.r[1] = EM_A7;
+    //frame.saveLR = CL(cpu.lr);
+    frame.saveRTOC = CL(cpu.r[2]);
+    cpu.lr = 0xFFFFFFFC;
 
     PPCProcDescriptor& proc = *(PPCProcDescriptor*) MR(routine->procDescriptor);
     cpu.CIA = CL(proc.code);
     cpu.r[2] = CL(proc.rtoc);
     cpu.execute();
+
+    cpu.r[2] = CL(frame.saveRTOC);
+    //cpu.lr = CL(frame.saveLR);
+
     EM_A7 = backChain;
     EM_A6 = POPADDR();
     uint32_t retaddr = POPADDR();
