@@ -821,7 +821,7 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
                                 {
                                     uint32_t offset;
 
-                                    offset = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[0][2]) << 8 | (reloc_instrs[0][3]));
+                                    offset = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[1][0]) << 8 | (reloc_instrs[1][1]));
 
                                     relocAddress
                                         = (uint8_t *)
@@ -835,7 +835,7 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
                                 {
                                     GUEST<Ptr> symbol_val;
 
-                                    importIndex = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[0][2]) << 8 | (reloc_instrs[0][3]));
+                                    importIndex = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[1][0]) << 8 | (reloc_instrs[1][1]));
                                     retval = symbol_lookup(&importIndex, &symbol_val,
                                                            imports, symbol_names,
                                                            closure_id);
@@ -1204,7 +1204,6 @@ OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
                                   GUEST<Ptr> *mainAddrp, Str255 errname)
 {
     OSErr retval;
-    int context;
 
     warning_unimplemented("ignoring flags = 0x%x\n", flags);
 
@@ -1213,8 +1212,6 @@ OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
     retval = FSpOpenDF(fsp, fsRdPerm, &rn);
     if(retval == noErr)
     {
-        void *addr;
-
         LONGINT len;
             
         retval = GetEOF(CW(rn), &len);
@@ -1222,7 +1219,6 @@ OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
         Ptr p = NewPtr(len);
         FSRead(CW(rn), &len, p);
 
-      //  addr = (char *)cp->addr + offset - cp->offset_act;
         retval = GetMemFragment(p, len, fragname, flags, connp,
                                 mainAddrp, errname);
     }

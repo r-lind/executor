@@ -127,7 +127,7 @@ static OSErr initcache(HVCB *vcbp)
 
     savezone = LM(TheZone);
     LM(TheZone) = LM(SysZone);
-    align = ((char *)&cachep->buf - (char *)&cachep) & 3;
+    align = offsetof(cacheentry,buf) & 3;
     vcbp->vcbCtlBuf = RM(NewPtr_aligned_4(sizeof(cachehead) + NCACHEENTRIES * sizeof(cacheentry), align));
     if(!vcbp->vcbCtlBuf)
         return MemError();

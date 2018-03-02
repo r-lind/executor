@@ -137,10 +137,10 @@ private:
 };
 
 template<typename Trap, typename F, bool... flags>
-struct TrapVariant;
+class TrapVariant;
 
 template<typename Trap, typename Ret, typename... Args, bool... flags>
-struct TrapVariant<Trap, Ret (Args...), flags...>  : public internal::DeferredInit
+class TrapVariant<Trap, Ret (Args...), flags...>  : public internal::DeferredInit
 {
 public:
     Ret operator()(Args... args) const { return trap(args..., flags...); }

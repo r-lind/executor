@@ -308,7 +308,7 @@ OSErr Executor::ROMlib_PBGetSetFInfoD(ParmBlkPtr pb, BOOLEAN a,
     OSErr err;
     char *pathname, *filename, *endname, *rpathname;
     char savechar;
-    struct stat datasbuf, resourcesbuf, parentsbuf;
+    struct stat datasbuf, parentsbuf;
     GUEST<LONGINT> longzero(0);
     VCBExtra *vcbp;
     GUEST<THz> savezone;
@@ -488,6 +488,7 @@ OSErr Executor::ROMlib_PBGetSetFInfoD(ParmBlkPtr pb, BOOLEAN a,
             }
         }
 #if 0
+        struct stat resourcesbuf;
         if(Ustat(rpathname, &resourcesbuf) < 0)
         {
             pb->fileParam.ioFlRPyLen = 0;

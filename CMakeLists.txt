@@ -1,5 +1,5 @@
-project(Executor)
 cmake_minimum_required(VERSION 3.9)
+project(Executor)
 
 if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
     message( FATAL_ERROR

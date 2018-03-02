@@ -245,7 +245,6 @@ public:
     void keyEvent(QKeyEvent *ev, bool down_p)
     {
         unsigned char mkvkey;
-        uint16_t mod;
         LONGINT keywhat;
         int32_t when;
         Point where;

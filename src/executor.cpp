@@ -275,7 +275,6 @@ syn68k_addr_t Executor::alinehandler(syn68k_addr_t pc, void *ignored)
 {
     syn68k_addr_t retval;
     unsigned short trapno, status;
-    uint32_t savea0, savea1, savea2, saved1, saved2;
     unsigned short trapword;
     syn68k_addr_t togoto;
 #if defined(MEMORY_WATCH)
@@ -351,6 +350,8 @@ syn68k_addr_t Executor::alinehandler(syn68k_addr_t pc, void *ignored)
 #if defined(SHORTCIRCUIT_TRAPS)        
         if(togoto == osstuff[trapno].orig)
         {
+            uint32_t savea0, savea1, savea2, saved1, saved2;
+            
             saved1 = EM_D1;
             saved2 = EM_D2;
             savea1 = EM_A1;
