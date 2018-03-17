@@ -619,7 +619,10 @@ symbol_lookup(uint32_t *indexp, GUEST<Ptr> *valp, uint8_t imports[][4],
 
                 sym255[0] = MIN(strlen(symbol_name), 255);
                 memcpy(sym255 + 1, symbol_name, sym255[0]);
-                err = FindSymbol(LIB_CID(l), sym255, valp, 0);
+                if(LIB_CID(l))
+                    err = FindSymbol(LIB_CID(l), sym255, valp, 0);
+                else
+                    err = -1;//###
                 if(err != noErr)
                 {
                     if(flags & 8)   // weak symbol
