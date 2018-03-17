@@ -160,10 +160,10 @@ const LowMemGlobal<Byte> MMU32Bit { 0xCB2 }; // OSUtil IMV-592 (true-b);
 const LowMemGlobal<QHdr> DTQueue { 0xD92 }; // OSUtil IMV-466 (false);
 const LowMemGlobal<ProcPtr> JDTInstall { 0xD9C }; // OSUtil IMV (false);
 
-extern OSErr HandToHand(Handle *h);
-REGISTER_TRAP2(HandToHand, 0xA9E1, D0(InOut<A0,Handle>), SaveA1D1D2, CCFromD0);
-extern OSErr PtrToHand(Ptr p, Handle *h, LONGINT s);
-REGISTER_TRAP2(PtrToHand, 0xA9E3, D0(A0, Out<A0,Handle>, D0), SaveA1D1D2, CCFromD0);
+extern OSErr HandToHand(GUEST<Handle> *h);
+REGISTER_TRAP2(HandToHand, 0xA9E1, D0(InOut<Handle,A0>), SaveA1D1D2, CCFromD0);
+extern OSErr PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s);
+REGISTER_TRAP2(PtrToHand, 0xA9E3, D0(A0, Out<Handle,A0>, D0), SaveA1D1D2, CCFromD0);
 extern OSErr PtrToXHand(Ptr p, Handle h, LONGINT s);
 REGISTER_TRAP2(PtrToXHand, 0xA9E2, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD0);
 extern OSErr HandAndHand(Handle h1, Handle h2);
@@ -185,8 +185,8 @@ extern OSErr ReadDateTime(GUEST<ULONGINT> *secs);
 REGISTER_TRAP2(ReadDateTime, 0xA039, D0(A0));
 extern OSErr SetDateTime(ULONGINT mactime);
 REGISTER_TRAP2(SetDateTime, 0xA03A, D0(D0));
-extern void DateToSeconds(DateTimeRec *d, ULONGINT *s);
-REGISTER_TRAP2(DateToSeconds, 0xA9C7, void(A0, Out<D0, ULONGINT>), SaveA1D1D2);
+extern void DateToSeconds(DateTimeRec *d, GUEST<ULONGINT> *s);
+REGISTER_TRAP2(DateToSeconds, 0xA9C7, void(A0, Out<ULONGINT,D0>), SaveA1D1D2);
 extern void SecondsToDate(ULONGINT mactime, DateTimeRec *d);
 REGISTER_TRAP2(SecondsToDate, 0xA9C6, void(D0,A0), SaveA1D1D2);
 
@@ -209,8 +209,8 @@ extern LONGINT NGetTrapAddress(INTEGER n, INTEGER ttype);
 extern void SetTrapAddress(LONGINT addr,
                            INTEGER n);
 
-extern void Delay(LONGINT n, LONGINT *ftp);
-REGISTER_TRAP2(Delay, 0xA03B, void(A0,Out<D0,LONGINT>));
+extern void Delay(LONGINT n, GUEST<LONGINT> *ftp);
+REGISTER_TRAP2(Delay, 0xA03B, void(A0,Out<LONGINT,D0>));
 
 extern void C_SysBeep(INTEGER i);
 PASCAL_TRAP(SysBeep, 0xA9C8);

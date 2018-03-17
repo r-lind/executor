@@ -78,10 +78,10 @@ INTEGER Executor::C_FixRound(Fixed x)
 
 StringHandle Executor::C_NewString(StringPtr s)
 {
-    Handle retval;
+    GUEST<Handle> retval;
 
     PtrToHand((Ptr)s, &retval, (LONGINT)U(s[0]) + 1);
-    return ((StringHandle)retval);
+    return ((StringHandle)MR(retval));
 }
 
 void Executor::C_SetString(StringHandle h, StringPtr s)

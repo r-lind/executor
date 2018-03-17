@@ -397,13 +397,13 @@ INTEGER getedittext(DialogPtr dp, INTEGER itemno)
     Handle h;
     GUEST<INTEGER> type;
     Rect r;
-    LONGINT l;
+    GUEST<LONGINT> l;
 
     GetDialogItem(dp, itemno, &type, &h_s, &r);
     h = MR(h_s);
     GetDialogItemText(h, str);
     StringToNum(str, &l);
-    return (INTEGER)l;
+    return (INTEGER)CL(l);
 }
 
 #define C_STRING_FROM_SYSTEM_VERSION()        \
@@ -1098,7 +1098,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
     if(!retval && ROMlib_delay)
     {
         TRACE(30);
-        Delay((LONGINT)ROMlib_delay, (LONGINT *)0);
+        Delay((LONGINT)ROMlib_delay, nullptr);
     }
 done:
     ALLOCAEND
@@ -1177,7 +1177,7 @@ BOOLEAN Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
             }
             else if(sleep > 0)
             {
-                Delay(MIN(sleep, 4), (LONGINT *)0);
+                Delay(MIN(sleep, 4), nullptr);
                 sleep -= 4;
             }
             saved_h = p.h;

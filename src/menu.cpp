@@ -804,21 +804,21 @@ Handle Executor::C_GetNewMBar(INTEGER mbarid)
 
 Handle Executor::C_GetMenuBar()
 {
-    Handle retval;
+    GUEST<Handle> retval;
 
-    retval = MR(LM(MenuList));
+    retval = LM(MenuList);
     HandToHand(&retval);
-    return retval;
+    return MR(retval);
 }
 
 void Executor::C_SetMenuBar(Handle ml)
 {
-    Handle temph;
+    GUEST<Handle> temph;
 
     DisposeHandle(MR(LM(MenuList)));
-    temph = ml;
+    temph = RM(ml);
     HandToHand(&temph);
-    LM(MenuList) = RM(temph);
+    LM(MenuList) = temph;
 }
 
 enum
@@ -1257,20 +1257,20 @@ out:
             {
                 for(i = 0; i < Cx(LM(MenuFlash)); i++)
                 {
-                    Delay(3L, (LONGINT *)0);
+                    Delay(3L, nullptr);
                     PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
                     PORT_TX_FONT_X(MR(wmgr_port)) = CWC(0);
                     item_swapped = CW(tempi);
                     MENUCALL(mChooseMsg, mh, &r, pt, &item_swapped);
                     tempi = CW(item_swapped);
-                    Delay(3L, (LONGINT *)0);
+                    Delay(3L, nullptr);
                     PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
                     PORT_TX_FONT_X(MR(wmgr_port)) = CWC(0);
                     item_swapped = CW(tempi);
                     MENUCALL(mChooseMsg, mh, &r, tempp, &item_swapped);
                     tempi = CW(item_swapped);
                 }
-                Delay(3L, (LONGINT *)0);
+                Delay(3L, nullptr);
             }
 #endif
         }

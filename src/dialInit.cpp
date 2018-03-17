@@ -36,15 +36,15 @@ void Executor::C_InitDialogs(ProcPtr rp) /* IMI-411 */
     LM(DlgFont) = CWC(systemFont);
     LM(ResumeProc) = RM(rp);
     ErrorSound(&ROMlib_mysound);
-    Handle tmp;
+    GUEST<Handle> tmp;
     PtrToHand(nothing, &tmp, (LONGINT)1);
-    LM(DAStrings)[0] = RM(tmp);
+    LM(DAStrings)[0] = tmp;
     PtrToHand(nothing, &tmp, (LONGINT)1);
-    LM(DAStrings)[1] = RM(tmp);
+    LM(DAStrings)[1] = tmp;
     PtrToHand(nothing, &tmp, (LONGINT)1);
-    LM(DAStrings)[2] = RM(tmp);
+    LM(DAStrings)[2] = tmp;
     PtrToHand(nothing, &tmp, (LONGINT)1);
-    LM(DAStrings)[3] = RM(tmp);
+    LM(DAStrings)[3] = tmp;
 }
 
 void Executor::SetDialogFont(INTEGER i) /* IMI-412 */

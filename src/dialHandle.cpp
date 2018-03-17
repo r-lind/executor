@@ -54,7 +54,7 @@ BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                 if((when = ROMlib_when) != WriteNever)
                     ROMlib_WriteWhen(WriteInBltrgn);
                 HiliteControl(c, inButton);
-                Delay((LONGINT)5, (LONGINT *)0);
+                Delay(5, nullptr);
                 HiliteControl(c, 0);
                 HSetState(MR(((DialogPeek)dp)->items), flags);
                 ROMlib_WriteWhen(when);
@@ -362,6 +362,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
     r = ip->itmr;
     if(CB(ip->itmtype) & statText)
     {
+        GUEST<Handle> nh_s;
         Handle nh;
         LONGINT l;
         char subsrc[2], *sp;
@@ -369,14 +370,15 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
 
         *subsrc = '^';
         sp = subsrc + 1;
-        nh = (Handle)MR(ip->itmhand);
+        
+        nh_s = ip->itmhand;
+        HandToHand(&nh_s);
+        nh = MR(nh_s);
 
-        HandToHand(&nh);
-
-        for(*sp = '0', hp = (GUEST<Handle> *)LM(DAStrings);
+        for(*sp = '0', hp = LM(DAStrings);
             *sp != '4'; ++*sp, hp++)
         {
-            if(hp)
+            if(*hp)
             {
                 for(l = 0; l >= 0;
                     l = Munger(nh, l,

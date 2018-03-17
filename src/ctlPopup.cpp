@@ -46,14 +46,14 @@ init(ControlHandle ctl)
     mh = GetMenu(mid);
     InsertMenu(mh, -1);
     {
-        Handle hh;
+        GUEST<Handle> hh;
 
-        hh = (Handle)mh;
+        hh = RM((Handle)mh);
         HandToHand(&hh);
         flags = CTL_VALUE(ctl);
 
         POPUP_MENU_ID_X(data) = CW(mid);
-        POPUP_MENU_X(data) = RM((MenuHandle)hh);
+        POPUP_MENU_X(data) = guest_cast<MenuHandle>(hh);
     }
     /* private fields */
     POPUP_TITLE_WIDTH(data) = CTL_MAX(ctl);

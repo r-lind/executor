@@ -403,10 +403,10 @@ ROMlib_new_window_common(WindowPeek w,
     LM(AuxWinHead) = RM(t_aux_w);
 
     {
-        Handle t;
+        GUEST<Handle> t;
 
         PtrToHand((Ptr)title, &t, (LONGINT)title[0] + 1);
-        WINDOW_TITLE_X(w) = RM((StringHandle)t);
+        WINDOW_TITLE_X(w) = guest_cast<StringHandle>(t);
     }
 
     if(cwindow_p)

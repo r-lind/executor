@@ -36,15 +36,13 @@ Size Executor::C_TempMaxMem(GUEST<Size> *grow_s)
     return 0;
 #else
     int32_t sysfree, applmax, retval;
-    Size grow;
-
+    
     {
         TheZoneGuard guard(LM(ApplZone));
 
-        applmax = MaxMem(&grow);
+        GUEST<Size> tmp;
+        applmax = MaxMem(grow_s ? grow_s : &tmp);
     }
-    if(grow_s)
-        *grow_s = CL(grow);
     sysfree = FreeMemSys();
     retval = MAX(applmax, sysfree);
     return retval;

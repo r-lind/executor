@@ -114,9 +114,9 @@ AddResourceRN(INTEGER rn, Handle h, ResType type, INTEGER id, Str255 name)
     else
     {
         INTEGER savern;
-        Handle hh;
+        GUEST<Handle> hh;
 
-        hh = h;
+        hh = RM(h);
         if(HandleZone(h) != MR(LM(SysZone)))
         {
             Handle save_hand;
@@ -127,7 +127,7 @@ AddResourceRN(INTEGER rn, Handle h, ResType type, INTEGER id, Str255 name)
         }
         savern = CurResFile();
         UseResFile(rn);
-        AddResource(hh, type, id, name);
+        AddResource(MR(hh), type, id, name);
         UseResFile(savern);
     }
 }

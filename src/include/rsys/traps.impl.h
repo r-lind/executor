@@ -26,6 +26,13 @@ struct D0
     static const uint32_t selectorMask = mask;
     static uint32_t get() { return EM_D0 & mask; }
 };
+template <uint32_t mask>
+struct D1
+{
+    static const uint32_t selectorMask = mask;
+    static uint32_t get() { return EM_D1 & mask; }
+};
+
 
 template <uint32_t mask>
 struct StackWMasked

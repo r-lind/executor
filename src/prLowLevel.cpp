@@ -107,7 +107,11 @@ GetDILong(DialogPtr dp, INTEGER item, LONGINT _default)
     if(str[0] == 0 || str[1] < '0' || str[1] > '9')
         retval = _default;
     else
-        StringToNum(str, &retval);
+    {
+        GUEST<LONGINT> tmp;
+        StringToNum(str, &tmp);
+        retval = CL(tmp);
+    }
     return retval;
 }
 

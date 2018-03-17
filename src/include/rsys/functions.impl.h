@@ -69,29 +69,29 @@ struct D0LowWord
     static void afterCall(T) {}    
 };
 
-template<typename Loc, typename T> struct Out
+template<typename T, typename Loc> struct Out
 {
-    T temp;
+    GUEST<T> temp;
 
-    operator T*() { return &temp; }
+    operator GUEST<T>*() { return &temp; }
 
-    ~Out() { Loc::set(temp); }
+    ~Out() { Loc::set(temp.raw_host_order()); }
 
-    static void set(T* p) {}
-    static void afterCall(T* p) { *p = Loc(); }
+    static void set(GUEST<T>* p) {}
+    static void afterCall(GUEST<T>* p) { p->raw_host_order(Loc()); }
 };
 
-template<typename Loc, typename T> struct InOut
+template<typename T, typename InLoc, typename OutLoc> struct InOut
 {
-    T temp;
+    GUEST<T> temp;
 
-    operator T*() { return &temp; }
+    operator GUEST<T>*() { return &temp; }
 
-    InOut() { temp = Loc(); }
-    ~InOut() { Loc::set(temp); }
+    InOut() { temp.raw_host_order(InLoc()); }
+    ~InOut() { OutLoc::set(temp.raw_host_order()); }
 
-    static void set(T* p) { Loc::set(*p); }
-    static void afterCall(T* p) { *p = Loc(); }
+    static void set(GUEST<T>* p) { InLoc::set(p->raw_host_order()); }
+    static void afterCall(GUEST<T>* p) { p->raw_host_order(OutLoc()); }
 };
 
 

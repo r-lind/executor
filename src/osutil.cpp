@@ -37,7 +37,7 @@ using namespace Executor;
  *	 Hence, the handle that hp points to is not swapped.
  */
 
-OSErr Executor::HandToHand(Handle *hp)
+OSErr Executor::HandToHand(GUEST<Handle> *hp)
 {
     Handle nh;
     Size s;
@@ -49,7 +49,7 @@ OSErr Executor::HandToHand(Handle *hp)
         /*-->*/ return nilHandleErr;
     }
 
-    s = GetHandleSize(*hp);
+    s = GetHandleSize(MR(*hp));
     if((err = MemError()))
         /*-->*/ return (err);
 
@@ -57,8 +57,8 @@ OSErr Executor::HandToHand(Handle *hp)
     if((err = MemError()))
         /*-->*/ return (err);
 
-    BlockMove(STARH(*hp), STARH(nh), s);
-    *hp = nh;
+    BlockMove(STARH(MR(*hp)), STARH(nh), s);
+    *hp = RM(nh);
     return noErr;
 }
 
@@ -67,7 +67,7 @@ OSErr Executor::HandToHand(Handle *hp)
  *	 h points to isn't swapped.
  */
 
-OSErr Executor::PtrToHand(Ptr p, Handle *h, LONGINT s)
+OSErr Executor::PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s)
 {
     Handle nh;
     OSErr err;
@@ -78,7 +78,7 @@ OSErr Executor::PtrToHand(Ptr p, Handle *h, LONGINT s)
     BlockMove(p, STARH(nh), s);
     if((err = MemError()))
         return (err);
-    *h = nh;
+    *h = RM(nh);
     return (noErr);
 }
 
@@ -602,13 +602,13 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
  * NOTE: not callable from the outside world directly
  */
 
-void Executor::DateToSeconds(DateTimeRec *d, ULONGINT *s)
+void Executor::DateToSeconds(DateTimeRec *d, GUEST<ULONGINT> *s)
 {
     long long l;
 
     l = ROMlib_long_long_secs(CW(d->year), CW(d->month), CW(d->day),
                               CW(d->hour), CW(d->minute), CW(d->second));
-    *s = (ULONGINT)l;
+    *s = CL((ULONGINT)l);
 }
 
 void Executor::SecondsToDate(ULONGINT mactime, DateTimeRec *d)
@@ -628,10 +628,10 @@ void Executor::GetTime(DateTimeRec *d)
 
 void Executor::SetTime(DateTimeRec *d)
 {
-    ULONGINT secs;
+    GUEST<ULONGINT> secs;
 
     DateToSeconds(d, &secs);
-    SetDateTime(secs);
+    SetDateTime(CL(secs));
 }
 
 typedef enum { Read,
@@ -849,7 +849,7 @@ void Executor::C_ROMlib_wakeup()
 
 /* argument n is in 1/60ths of a second */
 
-void Executor::Delay(LONGINT n, LONGINT *ftp) /* IMII-384 */
+void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
 {
     if(n > 0)
     {
@@ -870,9 +870,8 @@ void Executor::Delay(LONGINT n, LONGINT *ftp) /* IMII-384 */
         RmvTime((QElemPtr)&tm);
     }
 
-    /* Note:  we're really called from a stub, so no CL() is needed here. */
     if(ftp)
-        *ftp = TickCount();
+        *ftp = CL(TickCount());
 }
 
 void Executor::C_SysBeep(INTEGER i) /* SYSTEM DEPENDENT */

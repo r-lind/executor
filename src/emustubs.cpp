@@ -574,7 +574,7 @@ STUB(SetTrapAddress)
     EM_D0 = 0;
     RTS();
 }
-
+#if 0
 STUB(Gestalt)
 {
     GUEST<LONGINT> l;
@@ -606,7 +606,7 @@ STUB(Gestalt)
     }
     RTS();
 }
-
+#endif
 /* unlike the 68k version, every unknown trap gets vectored to
    `Unimplemented ()' */
 

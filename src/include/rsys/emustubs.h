@@ -84,7 +84,7 @@ RAW_68K_TRAP(UpperString, 0xA054);
 RAW_68K_TRAP(StripAddress, 0xA055);
 RAW_68K_TRAP(ADBOp, 0xA07C);
 RAW_68K_TRAP(Microseconds, 0xA193);
-RAW_68K_TRAP(Gestalt, 0xA1AD);
+//RAW_68K_TRAP(Gestalt, 0xA1AD);
 RAW_68K_TRAP(LoadSeg, 0xA9F0);
 RAW_68K_TRAP(CommToolboxDispatch, 0xA08B);
 RAW_68K_TRAP(modeswitch, 0xAAFE);

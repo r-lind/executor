@@ -405,9 +405,10 @@ static void fillpixpat(PixPatHandle ph)
 {
     if(CGrafPort_p(thePort))
     {
-        HandToHand((Handle *)&ph);
+        GUEST<Handle> tmp = RM((Handle)ph);
+        HandToHand(&tmp);
 
-        CPORT_FILL_PIXPAT_X(theCPort) = RM(ph);
+        CPORT_FILL_PIXPAT_X(theCPort) = guest_cast<PixPatHandle>(tmp);
     }
 }
 

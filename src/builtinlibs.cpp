@@ -38,12 +38,12 @@ uint32_t builtinlibs::handleSC(PowerCore& cpu)
     if(index >= 0 && index < nCallbacks)
     {
         if(cb->implementation)
-        return cb->implementation(cpu);
+            return cb->implementation(cpu);
         else
         {
             std::cerr << "Unimplemented PPC entrypoint: " << cb->name << std::endl << std::flush;
             std::abort();
-    }
+        }
     }
     else
     {

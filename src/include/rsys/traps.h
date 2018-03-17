@@ -16,6 +16,7 @@ namespace traps
 namespace selectors
 {
     template <uint32_t mask> struct D0;
+    template <uint32_t mask> struct D1;
     using D0W = D0<0xFFFF>;
     using D0L = D0<0xFFFFFFFF>;
     template <uint32_t mask = 0xFFFF> struct StackWMasked;

@@ -1370,7 +1370,7 @@ int32_t _FreeMem_flags(bool sys_p)
     return freespace;
 }
 
-Size _MaxMem_flags(Size *growp, bool sys_p)
+Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
 {
     block_header_t *b;
     GUEST<THz> save_zone;
@@ -1471,7 +1471,7 @@ Size _MaxMem_flags(Size *growp, bool sys_p)
 
     LM(TheZone) = save_zone;
 
-    *growp = grow;
+    *growp = CL(grow);
     SET_MEM_ERR(noErr);
     MM_SLAM("exit");
     return biggestfree;
@@ -1589,7 +1589,6 @@ void _ResrvMem_flags(Size needed, bool sys_p)
     GUEST<THz> save_zone;
     THz current_zone;
     block_header_t *b;
-    Size free;
     long avail;
     bool already_maxed_p;
 
@@ -1624,7 +1623,9 @@ again:
         }
     }
 
-    avail = MaxMem(&free);
+    GUEST<Size> free_s;
+    avail = MaxMem(&free_s);
+    Size free = CL(free_s);
     if(avail >= needed && !already_maxed_p)
     {
         already_maxed_p = true;
@@ -1810,7 +1811,7 @@ int32_t _MaxBlock_flags(bool sys_p)
     return MAX(total_free, max_free) - HDRSIZE;
 }
 
-void _PurgeSpace_flags(Size *total_out, Size *contig_out, bool sys_p)
+void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys_p)
 {
     GUEST<THz> save_zone;
     THz current_zone;
@@ -1855,8 +1856,8 @@ void _PurgeSpace_flags(Size *total_out, Size *contig_out, bool sys_p)
     LM(TheZone) = save_zone;
 
     SET_MEM_ERR(noErr);
-    *total_out = total_free - HDRSIZE;
-    *contig_out = MAX(this_contig, max_contig) - HDRSIZE;
+    *total_out = CL(total_free - HDRSIZE);
+    *contig_out = CL(MAX(this_contig, max_contig) - HDRSIZE);
     MM_SLAM("exit");
 }
 

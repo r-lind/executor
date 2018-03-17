@@ -154,8 +154,8 @@ REGISTER_TRAP2(_FreeMem_flags, 0xA01C, D0 (TrapBit<SYSBIT>));
 
 #define MaxMem(growp) (_MaxMem_flags(growp, false))
 #define MaxMemSys(growp) (_MaxMem_flags(growp, true))
-extern Size _MaxMem_flags(Size *growp, bool sys_p);
-REGISTER_TRAP2(_MaxMem_flags, 0xA11D, D0 (Out<A0,Size>, TrapBit<SYSBIT>));
+extern Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p);
+REGISTER_TRAP2(_MaxMem_flags, 0xA11D, D0 (Out<Size,A0>, TrapBit<SYSBIT>));
 
 #define CompactMem(needed) (_CompactMem_flags(needed, false))
 #define CompactMemSys(needed) (_CompactMem_flags(needed, true))
@@ -181,8 +181,8 @@ REGISTER_TRAP2(_MaxBlock_flags, 0xA061, D0 (TrapBit<SYSBIT>));
     (_PurgeSpace_flags(totalp, contigp, false))
 #define PurgeSpaceSys(totalp, congtigp) \
     (_PurgeSpace_flags(totalp, contigp, true))
-extern void _PurgeSpace_flags(Size *totalp, Size *contigp, bool sys_p);
-REGISTER_TRAP2(_PurgeSpace_flags, 0xA062, void (Out<D0,int32_t>, Out<A0,int32_t>, TrapBit<SYSBIT>));
+extern void _PurgeSpace_flags(GUEST<Size> *totalp, GUEST<Size> *contigp, bool sys_p);
+REGISTER_TRAP2(_PurgeSpace_flags, 0xA062, void (Out<int32_t,D0>, Out<int32_t,A0>, TrapBit<SYSBIT>));
 
 /* ### cliff bogofunc; should go away */
 extern void ROMlib_installhandle(Handle sh, Handle dh);
