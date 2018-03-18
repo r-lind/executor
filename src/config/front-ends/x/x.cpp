@@ -2406,7 +2406,7 @@ int Executor::GetScrapX(OSType type, Handle h)
             for(i = 10;
                 (--i >= 0
                  && !XCheckTypedEvent(x_dpy, SelectionNotify, &xevent));
-                Delay(10L, (LONGINT *)0))
+                Delay(10L, nullptr))
                 ;
             if(i >= 0 && xevent.xselection.property != None)
             {
