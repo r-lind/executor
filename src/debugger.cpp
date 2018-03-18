@@ -12,6 +12,7 @@ namespace
 {
 bool mon_inited = false;
 bool singlestep = false;
+uint32_t singlestepFromAddr;
 
 void InitDebugger();
 void EnterDebugger();
@@ -29,7 +30,12 @@ void InitDebugger()
     cpu.debugger = [](PowerCore& cpu) { EnterDebugger(); };
     cpu.getNextBreakpoint = [](uint32_t addr) {
         if(singlestep)
-            return addr;
+        {
+            if(addr == singlestepFromAddr)
+                return addr + 4;
+            else
+                return addr;
+        }
         
         auto breakpoint_it = active_break_points.lower_bound(addr);
         if(breakpoint_it == active_break_points.end())
@@ -38,7 +44,7 @@ void InitDebugger()
             return *breakpoint_it;
     };
 
-    mon_add_command("es", [] { ExitToShell(); }, "Exit To Shell");
+    mon_add_command("es", [] { ExitToShell(); }, "Exit To Shell\n");
 
     mon_add_command("r", [] {
         PowerCore& cpu = getPowerCore();
@@ -62,12 +68,15 @@ void InitDebugger()
                 fprintf(monout, "  ");
         }
         
-    }, "show ppc registers");
+    }, "show ppc registers\n");
 
     mon_add_command("s", [] {
+        PowerCore& cpu = getPowerCore();
+
         mon_exit_requested = true;
         singlestep = true;
-    }, "single step");
+        singlestepFromAddr = cpu.CIA;
+    }, "single step\n");
 
     mon_inited = true;
 }
@@ -79,6 +88,8 @@ void EnterDebugger()
     singlestep = false;
     const char *args[] = {"mon", "-m", "-r", nullptr};
     mon(3,args);
+
+    getPowerCore().flushCache();
 }
 
 }
