@@ -44,7 +44,9 @@ void InitDebugger()
             return *breakpoint_it;
     };
 
-    mon_add_command("es", [] { ExitToShell(); }, "Exit To Shell\n");
+    mon_add_command("es", [] { 
+        ExitToShell(); 
+    }, "es                       Exit To Shell\n");
 
     mon_add_command("r", [] {
         PowerCore& cpu = getPowerCore();
@@ -68,7 +70,7 @@ void InitDebugger()
                 fprintf(monout, "  ");
         }
         
-    }, "show ppc registers\n");
+    }, "r                        show ppc registers\n");
 
     mon_add_command("s", [] {
         PowerCore& cpu = getPowerCore();
@@ -76,7 +78,7 @@ void InitDebugger()
         mon_exit_requested = true;
         singlestep = true;
         singlestepFromAddr = cpu.CIA;
-    }, "single step\n");
+    }, "s                        single step\n");
 
     mon_inited = true;
 }
