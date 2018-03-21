@@ -1996,25 +1996,40 @@ void ROMlib_installhandle(Handle sh, Handle dh)
     MM_SLAM("exit");
 }
 
-OSErr MemError(void)
+OSErr C_MemError(void)
 {
     MM_SLAM("entry");
 
     return CW(LM(MemErr));
 }
 
-THz SystemZone(void)
+THz C_SystemZone(void)
 {
     MM_SLAM("entry");
 
     return MR(LM(SysZone));
 }
 
-THz ApplicationZone(void)
+THz C_ApplicationZone(void)
 {
     MM_SLAM("entry");
 
     return MR(LM(ApplZone));
+}
+
+Ptr C_GetApplLimit()
+{
+    return MR(LM(ApplLimit));
+}
+
+Ptr C_TopMem()
+{
+    return MR(LM(MemTop));
+}
+
+Handle C_GZSaveHnd()
+{
+    return MR(LM(GZRootHnd));
 }
 
 /* Like NewHandle, but fills in the newly allocated memory by copying
