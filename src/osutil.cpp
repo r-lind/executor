@@ -27,6 +27,7 @@
 #include "rsys/toolevent.h"
 #include "rsys/stdfile.h"
 #include "rsys/syncint.h"
+#include "rsys/emustubs.h"
 #include "rsys/cpu.h"
 #include <PowerCore.h>
 
@@ -828,16 +829,6 @@ OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
     return retval;
 }
 
-LONGINT Executor::NGetTrapAddress(INTEGER n, INTEGER ttype) /* IMII-384 */
-{
-    LONGINT retval;
-
-    retval = (LONGINT)((ttype == OSTrap) ? ostraptable[n & (NOSENTRIES - 1)]
-                                         : tooltraptable[n & (NTOOLENTRIES - 1)]);
-    warning_trace_info("n = 0x%x, ttype = %d, retval = %8x", (uint16_t)n, ttype,
-                       (unsigned)retval);
-    return retval;
-}
 
 
 static BOOLEAN shouldbeawake;
@@ -949,4 +940,66 @@ LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
 void Executor::C_MakeDataExecutable(void *ptr, uint32_t sz)
 {
     getPowerCore().flushCache(US_TO_SYN68K(ptr), sz);    
+}
+
+
+
+LONGINT Executor::C_NGetTrapAddress(INTEGER n, TrapType ttype) /* IMII-384 */
+{
+    return ttype == kOSTrapType ? GetOSTrapAddress(n) : GetToolTrapAddress(n);
+}
+
+void Executor::C_NSetTrapAddress(LONGINT addr, INTEGER trapnum, TrapType typ)
+{
+    switch(typ)
+    {
+        case kOSTrapType:
+            trapnum &= 0xff;
+            ostraptable[trapnum] = (addr);
+            break;
+        case kToolboxTrapType:
+            trapnum &= 0x3ff;
+            tooltraptable[trapnum] = (addr);
+            break;
+        default:
+            warning_unexpected("%d", typ);
+            break;
+    }
+    warning_trace_info(NULL_STRING);
+}
+
+void Executor::C_SetOSTrapAddress(LONGINT addr, INTEGER trapnum)
+{
+    warning_trace_info(NULL_STRING);
+    NSetTrapAddress(addr, trapnum, kOSTrapType);
+}
+void Executor::C_SetToolTrapAddress(LONGINT addr, INTEGER trapnum)
+{
+    warning_trace_info(NULL_STRING);
+    NSetTrapAddress(addr, trapnum, kToolboxTrapType);
+}
+
+
+LONGINT Executor::C_GetToolTrapAddress(INTEGER trap_no)
+{
+    LONGINT retval;
+    uint32_t d0, a0;
+
+    d0 = trap_no;
+    ROMlib_GetTrapAddress_helper(&d0, 0xA746, &a0);
+    retval = (LONGINT)a0;
+    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    return retval;
+}
+
+LONGINT Executor::C_GetOSTrapAddress(INTEGER trap_no)
+{
+    LONGINT retval;
+    uint32_t d0, a0;
+
+    d0 = trap_no;
+    ROMlib_GetTrapAddress_helper(&d0, 0xA346, &a0);
+    retval = (LONGINT)a0;
+    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    return retval;
 }

@@ -574,39 +574,7 @@ STUB(SetTrapAddress)
     EM_D0 = 0;
     RTS();
 }
-#if 0
-STUB(Gestalt)
-{
-    GUEST<LONGINT> l;
-    SelectorFunctionUPP oldp;
 
-    switch(EM_D1 & 0xFFFF)
-    {
-        case 0xA1AD:
-        default:
-            l = CLC(0);
-            EM_D0 = Gestalt(EM_D0, &l);
-            EM_A0 = CL(l);
-            break;
-        case 0xA3AD:
-            if(EM_D0 == DONGLE_GESTALT)
-                EM_D0 = Gestalt(EM_D0, (GUEST<LONGINT> *)SYN68K_TO_US_CHECK0(EM_A0));
-            else
-                EM_D0 = NewGestalt(EM_D0, (SelectorFunctionUPP)SYN68K_TO_US_CHECK0(EM_A0));
-            break;
-        case 0xA5AD:
-            EM_D0 = ReplaceGestalt(EM_D0, (SelectorFunctionUPP)SYN68K_TO_US_CHECK0(EM_A0),
-                                   &oldp);
-            EM_A0 = US_TO_SYN68K_CHECK0((void *)oldp);
-            break;
-        case 0xA7AD:
-            gui_abort();
-            /* GetGestaltProcPtr(); no docs on this call */
-            break;
-    }
-    RTS();
-}
-#endif
 /* unlike the 68k version, every unknown trap gets vectored to
    `Unimplemented ()' */
 

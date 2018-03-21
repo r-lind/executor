@@ -133,11 +133,14 @@ enum
     envVersTooBig = (-5502),
 };
 
+typedef SignedByte TrapType;
+
 enum
 {
-    OSTrap = 0,
-    ToolTrap = 1,
+    kOSTrapType,
+    kToolboxTrapType,
 };
+
 
 const LowMemGlobal<INTEGER> SysVersion { 0x15A }; // OSUtil ThinkC (true);
 const LowMemGlobal<Byte> SPValid { 0x1F8 }; // OSUtil IMII-392 (true);
@@ -204,10 +207,31 @@ REGISTER_TRAP2(Enqueue, 0xA96F, void(A0,A1), SaveA1D1D2);
 extern OSErr Dequeue(QElemPtr e, QHdrPtr h);
 REGISTER_TRAP2(Dequeue, 0xA96E, D0(A0,A1), SaveA1D1D2);
 
-extern LONGINT GetTrapAddress(INTEGER n);
-extern LONGINT NGetTrapAddress(INTEGER n, INTEGER ttype);
-extern void SetTrapAddress(LONGINT addr,
-                           INTEGER n);
+//extern LONGINT GetTrapAddress(INTEGER n); // 68K in emustubs, not supported on ppc
+//extern void SetTrapAddress(LONGINT addr,
+//                           INTEGER n);
+
+extern LONGINT C_NGetTrapAddress(INTEGER n, TrapType ttype);
+NOTRAP_FUNCTION(NGetTrapAddress);
+extern void C_NSetTrapAddress(LONGINT addr, INTEGER n, TrapType ttype);
+NOTRAP_FUNCTION(NSetTrapAddress);
+
+// trap implementation in emustubs for historical reasons (TODO: clean this up)
+extern LONGINT C_GetOSTrapAddress(INTEGER n);
+NOTRAP_FUNCTION(GetOSTrapAddress);
+extern void C_SetOSTrapAddress(LONGINT addr, INTEGER n);
+NOTRAP_FUNCTION(SetOSTrapAddress);
+extern LONGINT C_GetToolTrapAddress(INTEGER n);
+NOTRAP_FUNCTION(GetToolTrapAddress);
+extern void C_SetToolTrapAddress(LONGINT addr, INTEGER n);
+NOTRAP_FUNCTION(SetToolTrapAddress);
+inline LONGINT C_GetToolboxTrapAddress(INTEGER n)
+    { return C_GetToolTrapAddress(n); }
+NOTRAP_FUNCTION(GetToolboxTrapAddress);
+inline void C_SetToolboxTrapAddress(LONGINT addr, INTEGER n)
+    { C_SetToolTrapAddress(addr,n); }
+NOTRAP_FUNCTION(SetToolboxTrapAddress);
+
 
 extern void Delay(LONGINT n, GUEST<LONGINT> *ftp);
 REGISTER_TRAP2(Delay, 0xA03B, void(A0,Out<LONGINT,D0>));

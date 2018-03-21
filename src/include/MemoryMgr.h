@@ -241,9 +241,11 @@ REGISTER_TRAP2(PtrZone, 0xA148, A0 (A0), ReturnMemErr<D0>);
 
 
 extern void BlockMove_the_trap(Ptr src, Ptr dst, Size cnt, bool flush_p);
-extern void BlockMove(Ptr src, Ptr dst, Size cnt);
-extern void BlockMoveData(Ptr src, Ptr dst, Size cnt);
+extern void C_BlockMove(Ptr src, Ptr dst, Size cnt);
+extern void C_BlockMoveData(Ptr src, Ptr dst, Size cnt);
 REGISTER_TRAP2(BlockMove_the_trap, 0xA02E, void(A0,A1,D0,TrapBit<0x200>), ReturnMemErr<D0>);
+NOTRAP_FUNCTION(BlockMove);
+NOTRAP_FUNCTION(BlockMoveData);
 
 extern void MaxApplZone(void);
 REGISTER_TRAP2(MaxApplZone, 0xA063, void (), ReturnMemErr<D0>);

@@ -1718,12 +1718,12 @@ BlockMove_and_possibly_flush_cache(Ptr src, Ptr dst, Size cnt,
     LM(MemErr) = CWC(noErr);
 }
 
-void BlockMove(Ptr src, Ptr dst, Size cnt)
+void C_BlockMove(Ptr src, Ptr dst, Size cnt)
 {
     BlockMove_and_possibly_flush_cache(src, dst, cnt, true);
 }
 
-void BlockMoveData(Ptr src, Ptr dst, Size cnt)
+void C_BlockMoveData(Ptr src, Ptr dst, Size cnt)
 {
     BlockMove_and_possibly_flush_cache(src, dst, cnt, false);
 }
