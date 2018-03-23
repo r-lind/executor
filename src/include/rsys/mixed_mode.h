@@ -170,5 +170,10 @@ PASCAL_SUBTRAP(SaveMixedModeState, 0xAA59, 0x0003, MixedModeDispatch);
 extern OSErr C_RestoreMixedModeState(void *statep, uint32_t vers);
 PASCAL_SUBTRAP(RestoreMixedModeState, 0xAA59, 0x0004, MixedModeDispatch);
 
+extern LONGINT C_CallUniversalProc(UniversalProcPtr theProcPtr, ProcInfoType procInfo);
+NOTRAP_FUNCTION(CallUniversalProc);
+
+extern uint32_t ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType procInfo, ISAType fromISA);
+
 }
 #endif

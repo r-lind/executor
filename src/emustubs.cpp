@@ -669,6 +669,10 @@ struct PowerPCSwitchFrame
 
 STUB(modeswitch)
 {
+    RoutineDescriptor *theProcPtr = ptr_from_longint<RoutineDescriptor*>(POPADDR() - 2);
+    uint32_t retaddr = ModeSwitch(theProcPtr, 0, kM68kISA);
+    return retaddr;
+#if 0
     const RoutineDescriptor& rp = *ptr_from_longint<RoutineDescriptor*>(POPADDR() - 2);
     const RoutineRecord *beginRoutines = &rp.routineRecords[0],
                         *endRoutines = &rp.routineRecords[CW(rp.routineCount) + 1];
@@ -804,6 +808,7 @@ STUB(modeswitch)
             break;
     }
     return retaddr;
+#endif
 }
 
 #if 0
