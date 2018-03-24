@@ -129,7 +129,7 @@ OSErr Executor::ROMlib_maperrno() /* INTERNAL */
     return retval;
 }
 
-OSErr Executor::FSOpen(StringPtr filen, INTEGER vrn, INTEGER *rn) /* IMIV-109 */
+OSErr Executor::FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
 {
     ParamBlockRec pbr;
     OSErr temp;
@@ -140,12 +140,12 @@ OSErr Executor::FSOpen(StringPtr filen, INTEGER vrn, INTEGER *rn) /* IMIV-109 */
     pbr.ioParam.ioPermssn = fsCurPerm;
     pbr.ioParam.ioMisc = 0;
     temp = PBOpen(&pbr, 0);
-    *rn = CW(pbr.ioParam.ioRefNum);
+    *rn = pbr.ioParam.ioRefNum;
     fs_err_hook(temp);
     return (temp);
 }
 
-OSErr Executor::OpenRF(StringPtr filen, INTEGER vrn, INTEGER *rn) /* IMIV-109 */
+OSErr Executor::OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
 {
     ParamBlockRec pbr;
     OSErr temp;
@@ -156,58 +156,57 @@ OSErr Executor::OpenRF(StringPtr filen, INTEGER vrn, INTEGER *rn) /* IMIV-109 */
     pbr.ioParam.ioPermssn = fsCurPerm;
     pbr.ioParam.ioMisc = 0;
     temp = PBOpenRF(&pbr, 0);
-    *rn = CW(pbr.ioParam.ioRefNum);
+    *rn = pbr.ioParam.ioRefNum;
     fs_err_hook(temp);
     return (temp);
 }
 
-OSErr Executor::FSRead(INTEGER rn, LONGINT *count, Ptr buffp) /* IMIV-109 */
+OSErr Executor::FSRead(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp) /* IMIV-109 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
     pbr.ioParam.ioRefNum = CW(rn);
     pbr.ioParam.ioBuffer = RM(buffp);
-    pbr.ioParam.ioReqCount = CL(*count);
+    pbr.ioParam.ioReqCount = *count;
     pbr.ioParam.ioPosMode = CWC(fsAtMark);
     temp = PBRead(&pbr, 0);
-    *count = CL(pbr.ioParam.ioActCount);
+    *count = pbr.ioParam.ioActCount;
     fs_err_hook(temp);
     return (temp);
 }
 
 OSErr
-Executor::FSReadAll(INTEGER rn, LONGINT *countp, Ptr buffp)
+Executor::FSReadAll(INTEGER rn, GUEST<LONGINT> *countp, Ptr buffp)
 {
-    LONGINT orig_count;
     OSErr retval;
 
-    orig_count = *countp;
+    GUEST<LONGINT> orig_count = *countp;
     retval = FSRead(rn, countp, buffp);
     if(retval == noErr && *countp != orig_count)
         retval = eofErr;
     return retval;
 }
 
-OSErr Executor::FSWrite(INTEGER rn, LONGINT *count, Ptr buffp) /* IMIV-110 */
+OSErr Executor::FSWrite(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp) /* IMIV-110 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
     pbr.ioParam.ioRefNum = CW(rn);
     pbr.ioParam.ioBuffer = RM(buffp);
-    pbr.ioParam.ioReqCount = CL(*count);
+    pbr.ioParam.ioReqCount = *count;
     pbr.ioParam.ioPosMode = CWC(fsAtMark);
     temp = PBWrite(&pbr, 0);
-    *count = CL(pbr.ioParam.ioActCount);
+    *count = pbr.ioParam.ioActCount;
     fs_err_hook(temp);
     return (temp);
 }
 
 OSErr
-Executor::FSWriteAll(INTEGER rn, LONGINT *countp, Ptr buffp)
+Executor::FSWriteAll(INTEGER rn, GUEST<LONGINT> *countp, Ptr buffp)
 {
-    LONGINT orig_count;
+    GUEST<LONGINT> orig_count;
     OSErr retval;
 
     orig_count = *countp;
@@ -217,14 +216,14 @@ Executor::FSWriteAll(INTEGER rn, LONGINT *countp, Ptr buffp)
     return retval;
 }
 
-OSErr Executor::GetFPos(INTEGER rn, LONGINT *filep) /* IMIV-110 */
+OSErr Executor::GetFPos(INTEGER rn, GUEST<LONGINT> *filep) /* IMIV-110 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
     pbr.ioParam.ioRefNum = CW(rn);
     temp = PBGetFPos(&pbr, 0);
-    *filep = CL(pbr.ioParam.ioPosOffset);
+    *filep = pbr.ioParam.ioPosOffset;
     fs_err_hook(temp);
     return (temp);
 }
@@ -243,14 +242,14 @@ OSErr Executor::SetFPos(INTEGER rn, INTEGER posmode,
     return err;
 }
 
-OSErr Executor::GetEOF(INTEGER rn, LONGINT *eof) /* IMIV-111 */
+OSErr Executor::GetEOF(INTEGER rn, GUEST<LONGINT> *eof) /* IMIV-111 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
     pbr.ioParam.ioRefNum = Cx(rn);
     temp = PBGetEOF(&pbr, 0);
-    *eof = CL(pbr.ioParam.ioMisc);
+    *eof = pbr.ioParam.ioMisc;
     fs_err_hook(temp);
     return (temp);
 }

@@ -1215,14 +1215,14 @@ OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
     retval = FSpOpenDF(fsp, fsRdPerm, &rn);
     if(retval == noErr)
     {
-        LONGINT len;
+        GUEST<LONGINT> len;
             
         retval = GetEOF(CW(rn), &len);
 
-        Ptr p = NewPtr(len);
+        Ptr p = NewPtr(CL(len));
         FSRead(CW(rn), &len, p);
 
-        retval = GetMemFragment(p, len, fragname, flags, connp,
+        retval = GetMemFragment(p, CL(len), fragname, flags, connp,
                                 mainAddrp, errname);
     }
     return retval;

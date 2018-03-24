@@ -65,7 +65,7 @@ OSErr Executor::GetFInfo(StringPtr filen, INTEGER vrn,
     return temp;
 }
 
-OSErr HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name, FInfo *fndrinfo)
+OSErr Executor::HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name, FInfo *fndrinfo)
 {
     HParamBlockRec pbr;
     OSErr retval;

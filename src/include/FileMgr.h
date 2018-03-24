@@ -575,34 +575,51 @@ const LowMemGlobal<INTEGER> FSFCBLen { 0x3F6 }; // FileMgr IMIV-97 (true);
 
 #pragma pack(pop)
 
-// the output parameters point to NATIVE values
-// there are no traps for these functions,
-// they are implemented again in glue code in Mac apps
-extern OSErr FSOpen(StringPtr filen, INTEGER vrn, INTEGER *rn);
-extern OSErr OpenRF(StringPtr filen, INTEGER vrn, INTEGER *rn);
-extern OSErr FSRead(INTEGER rn, LONGINT *count, Ptr buffp);
-extern OSErr FSWrite(INTEGER rn, LONGINT *count, Ptr buffp);
-extern OSErr GetFPos(INTEGER rn, LONGINT *filep);
+extern OSErr FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
+NOTRAP_FUNCTION2(FSOpen);
+extern OSErr OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
+NOTRAP_FUNCTION2(OpenRF);
+extern OSErr FSRead(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
+NOTRAP_FUNCTION2(FSRead);
+extern OSErr FSWrite(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
+NOTRAP_FUNCTION2(FSWrite);
+extern OSErr GetFPos(INTEGER rn, GUEST<LONGINT> *filep);
+NOTRAP_FUNCTION2(GetFPos);
 extern OSErr SetFPos(INTEGER rn, INTEGER posmode, LONGINT possoff);
-extern OSErr GetEOF(INTEGER rn, LONGINT *eof);
+NOTRAP_FUNCTION2(SetFPos);
+
+extern OSErr GetEOF(INTEGER rn, GUEST<LONGINT> *eof);
+NOTRAP_FUNCTION2(GetEOF);
 extern OSErr SetEOF(INTEGER rn, LONGINT eof);
+NOTRAP_FUNCTION2(SetEOF);
 extern OSErr Allocate(INTEGER rn, GUEST<LONGINT> *count);
+NOTRAP_FUNCTION2(Allocate);
 extern OSErr AllocContig(INTEGER rn, GUEST<LONGINT> *count);
+NOTRAP_FUNCTION2(AllocContig);
 extern OSErr FSClose(INTEGER rn);
+NOTRAP_FUNCTION2(FSClose);
 
 extern void ROMlib_rewinddir(void);
 extern OSErr Create(StringPtr filen, INTEGER vrn, OSType creator,
                     OSType filtyp);
+NOTRAP_FUNCTION2(Create);
 extern OSErr FSDelete(StringPtr filen, INTEGER vrn);
+NOTRAP_FUNCTION2(FSDelete);
 extern OSErr GetFInfo(StringPtr filen, INTEGER vrn, FInfo *fndrinfo);
+NOTRAP_FUNCTION2(GetFInfo);
 extern OSErr HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name,
                        FInfo *fndrinfo);
+NOTRAP_FUNCTION2(HGetFInfo);
 extern OSErr SetFInfo(StringPtr filen, INTEGER vrn,
                       FInfo *fndrinfo);
+NOTRAP_FUNCTION2(SetFInfo);
 extern OSErr SetFLock(StringPtr filen, INTEGER vrn);
+NOTRAP_FUNCTION2(SetFLock);
 extern OSErr RstFLock(StringPtr filen, INTEGER vrn);
+NOTRAP_FUNCTION2(RstFLock);
 extern OSErr Rename(StringPtr filen, INTEGER vrn,
                     StringPtr newf);
+NOTRAP_FUNCTION2(Rename);
 extern unsigned char ROMlib_fromhex(unsigned char c);
 extern INTEGER ROMlib_UNIX7_to_Mac(char *name, INTEGER length);
 extern void FInitQueue(void);
@@ -613,13 +630,18 @@ extern OSErr GetVInfo(INTEGER drv, StringPtr voln,
                       GUEST<INTEGER> *vrn, GUEST<LONGINT> *freeb);
 extern OSErr GetVRefNum(INTEGER prn, GUEST<INTEGER> *vrn);
 extern OSErr GetVol(StringPtr voln, GUEST<INTEGER> *vrn);
+NOTRAP_FUNCTION2(GetVol);
 extern OSErr SetVol(StringPtr voln, INTEGER vrn);
+NOTRAP_FUNCTION2(SetVol);
 extern OSErr FlushVol(StringPtr voln, INTEGER vrn);
+NOTRAP_FUNCTION2(FlushVol);
 extern OSErr UnmountVol(StringPtr voln, INTEGER vrn);
+NOTRAP_FUNCTION2(UnmountVol);
 extern OSErr Eject(StringPtr voln, INTEGER vrn);
+NOTRAP_FUNCTION2(Eject);
 
 extern OSErr PBAllocContig(ParmBlkPtr pb, BOOLEAN async);
-
+// TODO: Trap?
 
 extern OSErr PBOpen(ParmBlkPtr pb, BOOLEAN async);
 extern OSErr PBHOpen(HParmBlkPtr pb, BOOLEAN async);
@@ -847,6 +869,8 @@ PASCAL_TRAP(HCreateResFile, 0xA81B);
 
 extern OSErr HCreate(INTEGER vref, LONGINT dirid, Str255 name, OSType creator,
                      OSType type);
+NOTRAP_FUNCTION2(HCreate);
+
 extern OSErr HOpenRF(INTEGER vref, LONGINT dirid, Str255 name,
                      SignedByte perm, /*NATIVE*/ INTEGER *refp);
 

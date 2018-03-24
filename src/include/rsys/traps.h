@@ -190,6 +190,8 @@ private:
 
 #define NOTRAP_FUNCTION(NAME) \
     CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME, "InterfaceLib"), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME>)
+#define NOTRAP_FUNCTION2(NAME) \
+    CREATE_FUNCTION_WRAPPER(stub_##NAME, &NAME, (#NAME, "InterfaceLib"), WrappedFunction<decltype(NAME) COMMA &NAME>)
 #define PASCAL_FUNCTION(NAME) \
     CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME>)
 #define RAW_68K_FUNCTION(NAME) \

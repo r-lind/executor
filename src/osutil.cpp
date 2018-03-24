@@ -440,7 +440,7 @@ daysinyears(ULONGINT year)
 
 static BOOLEAN isleap(ULONGINT);
 static void setdefaults();
-static OSErr openparam(INTEGER *);
+static OSErr openparam(GUEST<INTEGER> *);
 static void deriveglobals();
 
 static BOOLEAN isleap(ULONGINT year)
@@ -654,7 +654,7 @@ static void setdefaults()
     LM(SPMisc2) = 0x4C;
 }
 
-static OSErr openparam(INTEGER *rnp)
+static OSErr openparam(GUEST<INTEGER> *rnp)
 {
     static char paramname[] = PARAMRAMMACNAME;
     OSErr err;
@@ -706,9 +706,9 @@ static void deriveglobals()
 
 OSErr Executor::InitUtil() /* IMII-380 */
 {
-    INTEGER rn;
+    GUEST<INTEGER> rn;
     SysParmType sp;
-    LONGINT count;
+    GUEST<LONGINT> count;
     OSErr err;
     BOOLEAN badread;
 
@@ -717,8 +717,8 @@ OSErr Executor::InitUtil() /* IMII-380 */
 #endif
     if((err = openparam(&rn)) == noErr)
     {
-        count = sizeof(sp);
-        if(FSRead(rn, &count, (Ptr)&sp) == noErr && sp.valid == VALID && count == sizeof(sp))
+        count = CLC(sizeof(sp));
+        if(FSRead(CW(rn), &count, (Ptr)&sp) == noErr && sp.valid == VALID && count == CLC(sizeof(sp)))
         {
             LM(SPValid) = sp.valid;
             LM(SPATalkA) = sp.aTalkA;
@@ -744,7 +744,7 @@ OSErr Executor::InitUtil() /* IMII-380 */
     if(err)
         err = prInitErr;
     else
-        err = FSClose(rn);
+        err = FSClose(CW(rn));
     return err;
 }
 
@@ -761,7 +761,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
     OSErr err, err2;
 
     err = prWrErr;
-    if(openparam(&rn) == noErr)
+    if(openparam(GuestRef(rn)) == noErr)
     {
         sp.valid = LM(SPValid);
         sp.aTalkA = LM(SPATalkA);
@@ -775,7 +775,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
         sp.volClik = CW((short)(LM(SPVolCtl) << 8) | (LM(SPClikCaret) & 0xff));
         sp.misc = CW(LM(SPMisc2));
         count = sizeof(sp);
-        if(FSWrite(rn, &count, (Ptr)&sp) == noErr && count == sizeof(sp))
+        if(FSWrite(rn, GuestRef(count), (Ptr)&sp) == noErr && count == sizeof(sp))
             err = noErr;
         deriveglobals();
         ROMlib_beepedonce = false;

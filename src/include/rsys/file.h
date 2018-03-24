@@ -451,8 +451,8 @@ extern void HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
                                   OSType creator, OSType type,
                                   ScriptCode script);
 
-extern OSErr FSReadAll(INTEGER rn, LONGINT *count, Ptr buffp);
-extern OSErr FSWriteAll(INTEGER rn, LONGINT *count, Ptr buffp);
+extern OSErr FSReadAll(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
+extern OSErr FSWriteAll(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
 
 extern int ROMlib_no_dot_files;
 extern LONGINT ROMlib_magic_offset;

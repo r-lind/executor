@@ -129,14 +129,14 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
 			     [1] == compressedResourceTag, 
 			     [2] == typeFlags,
 			     [3] == uncompressedSize */
-            LONGINT master_save_pos;
+            GUEST<LONGINT> master_save_pos;
 
             lc = sizeof(l);
             GetFPos(Hx(map, resfn), &master_save_pos);
-            ROMlib_setreserr(FSReadAll(Hx(map, resfn), &lc, (Ptr)l));
+            ROMlib_setreserr(FSReadAll(Hx(map, resfn), GuestRef(lc), (Ptr)l));
             if(LM(ResErr) != CWC(noErr) || l[1] != CLC(COMPRESSED_TAG))
             {
-                SetFPos(Hx(map, resfn), fsFromStart, master_save_pos);
+                SetFPos(Hx(map, resfn), fsFromStart, CL(master_save_pos));
                 goto not_compressed_after_all;
             }
             else
@@ -155,7 +155,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
         not_compressed_after_all:
             lc = sizeof(retval);
             GUEST<Size> tmpRet;
-            ROMlib_setreserr(FSReadAll(Hx(map, resfn), &lc, (Ptr)&tmpRet));
+            ROMlib_setreserr(FSReadAll(Hx(map, resfn), GuestRef(lc), (Ptr)&tmpRet));
             retval = CL(tmpRet);
             if(LM(ResErr) != CWC(noErr))
                 /*-->*/ return -1;

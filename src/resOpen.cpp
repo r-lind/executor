@@ -24,7 +24,7 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
                                 OSType creator, OSType type, ScriptCode script)
 {
     INTEGER f;
-    LONGINT leof, lc;
+    LONGINT lc;
     empty_resource_template_t buf;
 
     ROMlib_setreserr(HCreate(vrefnum, parid, name, creator, type)); /* ????
@@ -35,6 +35,8 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
     ROMlib_setreserr(HOpenRF(vrefnum, parid, name, fsRdWrPerm, &f));
     if(LM(ResErr) != CWC(noErr))
         return;
+    
+    GUEST<LONGINT> leof;
     ROMlib_setreserr(GetEOF(f, &leof));
     if(LM(ResErr) != CWC(noErr))
     {
@@ -55,7 +57,7 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
     buf.bmap.typoff = CWC(sizeof(resmap));
     buf.negone = CWC(-1); /* zero types (0 - 1) */
     lc = sizeof(buf);
-    ROMlib_setreserr(FSWriteAll(f, &lc, (Ptr)&buf));
+    ROMlib_setreserr(FSWriteAll(f, GuestRef(lc), (Ptr)&buf));
     if(LM(ResErr) != CWC(noErr))
         return;
     ROMlib_setreserr(FSClose(f));
@@ -127,7 +129,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
     OSErr err;
     LONGINT len;
     dcomp_info_t info;
-    LONGINT master_save_pos;
+    GUEST<LONGINT> master_save_pos;
 
     *final_sizep = *dlenp;
     *offsetp = 0;
@@ -136,7 +138,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
 
     GetFPos(rn, &master_save_pos);
     len = sizeof info;
-    err = FSReadAll(rn, &len, (Ptr)&info);
+    err = FSReadAll(rn, GuestRef(len), (Ptr)&info);
 
     /*
    * If we can't read the entire header in or if we don't get the correct tag
@@ -146,7 +148,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
 
     if(err != noErr || info.compressedResourceTag != CLC(COMPRESSED_TAG))
     {
-        SetFPos(rn, fsFromStart, master_save_pos);
+        SetFPos(rn, fsFromStart, CL(master_save_pos));
         ROMlib_setreserr(noErr);
         /*->*/ return false;
     }
@@ -155,11 +157,11 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
         retval = false;
     else
     {
-        LONGINT save_pos;
+        GUEST<LONGINT> save_pos;
 
         GetFPos(rn, &save_pos);
         *dcmp_handlep = GetResource(TICK("dcmp"), CW(info.dcmpID));
-        SetFPos(rn, fsFromStart, save_pos);
+        SetFPos(rn, fsFromStart, CL(save_pos));
 
         if(!*dcmp_handlep)
             retval = false;
@@ -268,7 +270,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         }
         err = MemError();
         xxx = STARH(retval) + uncompressed_size + dcmp_offset - dlen;
-        if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll(Hx(map, resfn), &dlen, xxx))))
+        if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll(Hx(map, resfn), GuestRef(dlen), xxx))))
         {
             if(dcmp_workspace)
                 DisposePtr(dcmp_workspace);
@@ -335,7 +337,7 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
             GUEST<int32_t> dlen_s; /* length on disk (remaining) */
 
             lc = sizeof(Size);
-            err = FSReadAll(Hx(map, resfn), &lc, (Ptr)&dlen_s);
+            err = FSReadAll(Hx(map, resfn), GuestRef(lc), (Ptr)&dlen_s);
             ROMlib_setreserr(err);
             if(LM(ResErr) != CWC(noErr))
                 retval = NULL;
@@ -566,7 +568,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     f = CW(pbr.ioParam.ioRefNum);
     lc = sizeof(hd);
-    ROMlib_setreserr(FSReadAll(f, &lc, (Ptr)&hd));
+    ROMlib_setreserr(FSReadAll(f, GuestRef(lc), (Ptr)&hd));
     if(LM(ResErr) != CWC(noErr))
     {
         FSClose(f);
@@ -588,7 +590,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     }
     lc = CL(hd.maplen);
-    ROMlib_setreserr(FSReadAll(f, &lc, (Ptr)STARH(map)));
+    ROMlib_setreserr(FSReadAll(f, GuestRef(lc), (Ptr)STARH(map)));
     if(LM(ResErr) != CWC(noErr))
     {
         DisposeHandle((Handle)map);
