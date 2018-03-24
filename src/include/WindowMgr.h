@@ -185,6 +185,10 @@ const LowMemGlobal<PixPatHandle> DeskCPat { 0xCD8 }; // WindowMgr SysEqua.a (tru
 
 LOWMEM_ACCESSOR(CurActivate);
 LOWMEM_ACCESSOR(CurDeactive);
+LOWMEM_ACCESSOR(GrayRgn);
+
+inline RgnHandle GetGrayRgn() { return MR(LM(GrayRgn)); }
+NOTRAP_FUNCTION2(GetGrayRgn);
 
 extern void C_SetWTitle(WindowPtr w, StringPtr t);
 PASCAL_TRAP(SetWTitle, 0xA91A);
