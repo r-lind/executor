@@ -1771,6 +1771,12 @@ void MoveHHi(Handle h)
     SET_MEM_ERR(noErr);
 }
 
+void C_HLockHi(Handle h)
+{
+    MoveHHi(h);
+    HLock(h);
+}
+
 int32_t _MaxBlock_flags(bool sys_p)
 {
     GUEST<THz> save_zone;

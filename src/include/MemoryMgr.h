@@ -238,6 +238,9 @@ REGISTER_TRAP2(SetGrowZone, 0xA04B, void (A0), ReturnMemErr<D0>);
 extern void EmptyHandle(Handle h);
 REGISTER_TRAP2(EmptyHandle, 0xA02B, void (A0), ReturnMemErr<D0>);
 
+extern void C_HLockHi(Handle h);
+NOTRAP_FUNCTION(HLockHi);
+
 extern THz C_SystemZone(void);
 NOTRAP_FUNCTION(SystemZone);
 extern THz C_ApplicationZone(void);
