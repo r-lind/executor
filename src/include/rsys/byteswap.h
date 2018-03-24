@@ -177,6 +177,28 @@ int32_t ptr_to_longint(TT p)
     // FIXME: needless back-and-forth endian conversion
     return CL(guest_cast<int32_t>(RM(p)));
 }
+
+template<class T>
+class GuestRef
+{
+    T& native;
+    GUEST<T> guest;
+public:
+    GuestRef(T& x)
+        : native(x)
+    {
+        guest = RM(x);
+    }
+
+    operator GUEST<T>*() { return &guest; }
+    operator GUEST<T>&() { return guest; }
+
+    ~GuestRef()
+    {
+        native = MR(guest);
+    }
+};
+
 }
 
 #endif /* !_BYTESWAP_H_ */
