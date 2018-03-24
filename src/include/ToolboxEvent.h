@@ -23,6 +23,8 @@ const LowMemGlobal<Byte> ScrDmpEnb { 0x2F8 }; // ToolboxEvent IMI-258 (true);
 const LowMemGlobal<INTEGER> JournalFlag { 0x8DE }; // ToolboxEvent IMI-261 (false);
 const LowMemGlobal<INTEGER> JournalRef { 0x8E8 }; // ToolboxEvent IMI-261 (false);
 
+LOWMEM_ACCESSOR(DoubleTime);
+
 extern void ROMlib_alarmoffmbar(void);
 extern LONGINT C_KeyTranslate(Ptr mapp, unsigned short code,
                                       LONGINT *state);

@@ -235,6 +235,12 @@ private:
             &NAME##_##HNAME, TRAP, \
             callconv::Register<D0 (A0, TrapBit<ASYNCBIT>, TrapBit<HFSBIT>)>>)
 
+#define LOWMEM_ACCESSOR(NAME) \
+    inline decltype(NAME)::type LMGet##NAME() { return MR(LM(NAME)); } \
+    inline void LMSet##NAME(decltype(NAME)::type val) { LM(NAME) = RM(val); } \
+    NOTRAP_FUNCTION2(LMGet##NAME); \
+    NOTRAP_FUNCTION2(LMSet##NAME)
+
 void init(bool enableLogging);
 
 }

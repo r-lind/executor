@@ -183,6 +183,9 @@ const LowMemGlobal<WindowPtr> GhostWindow { 0xA84 }; // WindowMgr IMI-287 (true)
 const LowMemGlobal<AuxWinHandle> AuxWinHead { 0xCD0 }; // WindowMgr IMV-200 (true);
 const LowMemGlobal<PixPatHandle> DeskCPat { 0xCD8 }; // WindowMgr SysEqua.a (true);
 
+LOWMEM_ACCESSOR(CurActivate);
+LOWMEM_ACCESSOR(CurDeactive);
+
 extern void C_SetWTitle(WindowPtr w, StringPtr t);
 PASCAL_TRAP(SetWTitle, 0xA91A);
 
