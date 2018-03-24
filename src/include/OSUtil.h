@@ -183,6 +183,7 @@ extern BOOLEAN EqualString(StringPtr s1, StringPtr s2,
 extern void ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len);
 extern void UpperString(StringPtr s, BOOLEAN diac);
 extern void GetDateTime(GUEST<ULONGINT> *mactimepointer);
+NOTRAP_FUNCTION2(GetDateTime);
 
 extern OSErr ReadDateTime(GUEST<ULONGINT> *secs);
 REGISTER_TRAP2(ReadDateTime, 0xA039, D0(A0));
@@ -262,6 +263,10 @@ extern void
 C_MakeDataExecutable(void *ptr, uint32_t sz);
 NOTRAP_FUNCTION(MakeDataExecutable);
 
+extern LONGINT SetCurrentA5();
+NOTRAP_FUNCTION2(SetCurrentA5);
+extern LONGINT SetA5(LONGINT newA5);
+NOTRAP_FUNCTION2(SetA5);
 
 }
 #endif /* __OSUTIL__ */

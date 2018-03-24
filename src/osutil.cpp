@@ -1003,3 +1003,17 @@ LONGINT Executor::C_GetOSTrapAddress(INTEGER trap_no)
     warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
     return retval;
 }
+
+LONGINT Executor::SetCurrentA5()
+{
+    long oldA5 = EM_A5;
+    EM_A5 = LM(CurrentA5).raw_host_order();
+    return oldA5;
+}
+
+LONGINT Executor::SetA5(LONGINT newA5)
+{
+    long oldA5 = EM_A5;
+    EM_A5 = newA5;
+    return oldA5;
+}
