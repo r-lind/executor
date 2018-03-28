@@ -242,6 +242,23 @@ private:
     TRAP_VARIANT(HNAME##Sync, NAME, OSErr(ParmBlkPtr), false, true); \
     TRAP_VARIANT(HNAME##Async, NAME, OSErr(ParmBlkPtr), true, true)
 
+#define HFS_SUBTRAP(NAME, HNAME, PBTYPE, TRAP, SELECTOR, TRAPNAME) \
+    inline OSErr NAME##_##HNAME(ParmBlkPtr pb, Boolean async, Boolean hfs) \
+    { \
+        return hfs ? HNAME((PBTYPE)pb, async) : NAME(pb, async); \
+    } \
+    CREATE_FUNCTION_WRAPPER(stub_##NAME, &NAME##_##HNAME, \
+        (#NAME "/" #HNAME, TRAPNAME), \
+        SubTrapFunction<decltype(NAME##_##HNAME), \
+            &NAME##_##HNAME, TRAP, SELECTOR, \
+            callconv::Register<D0 (A0, TrapBit<ASYNCBIT>, TrapBit<HFSBIT>)>>); \
+    TRAP_VARIANT(NAME##Sync, NAME, OSErr(ParmBlkPtr), false, false); \
+    TRAP_VARIANT(NAME##Async, NAME, OSErr(ParmBlkPtr), true, false); \
+    TRAP_VARIANT(HNAME##Sync, NAME, OSErr(ParmBlkPtr), false, true); \
+    TRAP_VARIANT(HNAME##Async, NAME, OSErr(ParmBlkPtr), true, true)
+
+
+
 #define LOWMEM_ACCESSOR(NAME) \
     inline decltype(NAME)::type LMGet##NAME() { return MR(LM(NAME)); } \
     inline void LMSet##NAME(decltype(NAME)::type val) { LM(NAME) = RM(val); } \

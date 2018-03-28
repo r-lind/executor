@@ -32,7 +32,7 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
 								    be wrong */
     if(LM(ResErr) != CWC(noErr) && Cx(LM(ResErr)) != dupFNErr)
         return;
-    ROMlib_setreserr(HOpenRF(vrefnum, parid, name, fsRdWrPerm, &f));
+    ROMlib_setreserr(HOpenRF(vrefnum, parid, name, fsRdWrPerm, GuestRef(f)));
     if(LM(ResErr) != CWC(noErr))
         return;
     

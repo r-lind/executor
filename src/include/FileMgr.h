@@ -787,9 +787,9 @@ FILE_SUBTRAP(PBExchangeFiles, ParmBlkPtr, 0xA260, 0x17, FSDispatch);
 extern OSErr PBCatSearch(ParmBlkPtr pb, BOOLEAN async);
 FILE_SUBTRAP(PBCatSearch, ParmBlkPtr, 0xA260, 0x18, FSDispatch);
 
-extern OSErr PBOpenDF(HParmBlkPtr pb, BOOLEAN async);
-FILE_SUBTRAP(PBOpenDF, HParmBlkPtr, 0xA260, 0x1A, FSDispatch);
-
+extern OSErr PBOpenDF(ParmBlkPtr pb, BOOLEAN async);
+extern OSErr PBHOpenDF(HParmBlkPtr pb, BOOLEAN async);
+HFS_SUBTRAP(PBOpenDF, PBHOpenDF, HParmBlkPtr, 0xA260, 0x1A, FSDispatch);
 
 extern OSErr PBHGetVolParms(HParmBlkPtr pb, BOOLEAN async);
 FILE_SUBTRAP(PBHGetVolParms, HParmBlkPtr, 0xA260, 0x30, FSDispatch);
@@ -872,9 +872,19 @@ extern OSErr HCreate(INTEGER vref, LONGINT dirid, Str255 name, OSType creator,
 NOTRAP_FUNCTION2(HCreate);
 
 extern OSErr HOpenRF(INTEGER vref, LONGINT dirid, Str255 name,
-                     SignedByte perm, /*NATIVE*/ INTEGER *refp);
+                     SignedByte perm, GUEST<INTEGER> *refp);
+NOTRAP_FUNCTION2(HOpenRF);
+extern OSErr HOpen(INTEGER vref, LONGINT dirid, Str255 name,
+                     SignedByte perm, GUEST<INTEGER> *refp);
+NOTRAP_FUNCTION2(HOpen);
+extern OSErr HOpenDF(INTEGER vref, LONGINT dirid, Str255 name,
+                     SignedByte perm, GUEST<INTEGER> *refp);
+NOTRAP_FUNCTION2(HOpenDF);
 
 extern OSErr GetWDInfo(INTEGER wd, GUEST<INTEGER> *vrefp, GUEST<LONGINT> *dirp,
                        GUEST<LONGINT> *procp);
+
+
+
 }
 #endif /* _FILEMGR_H_ */
