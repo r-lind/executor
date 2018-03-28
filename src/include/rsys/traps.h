@@ -218,11 +218,14 @@ private:
 #define ASYNCBIT (1 << 10)
 #define HFSBIT (1 << 9)
 
-#define FILE_TRAP(NAME, TRAP) \
-    REGISTER_TRAP2(NAME, TRAP, D0 (A0, TrapBit<ASYNCBIT>))
+#define FILE_TRAP(NAME, PBTYPE, TRAP) \
+    REGISTER_FLAG_TRAP(NAME, NAME##Sync, NAME##Async, TRAP, OSErr(PBTYPE), D0 (A0, TrapBit<ASYNCBIT>))
 
-#define FILE_SUBTRAP(NAME, TRAP, SELECTOR, TRAPNAME) \
-    REGISTER_SUBTRAP2(NAME, TRAP, SELECTOR, TRAPNAME, D0 (A0, TrapBit<ASYNCBIT>))
+#define FILE_SUBTRAP(NAME, PBTYPE, TRAP, SELECTOR, TRAPNAME) \
+    REGISTER_SUBTRAP2(NAME, TRAP, SELECTOR, TRAPNAME, D0 (A0, TrapBit<ASYNCBIT>)); \
+    TRAP_VARIANT(NAME##Sync, NAME, OSErr(PBTYPE), false); \
+    TRAP_VARIANT(NAME##Async, NAME, OSErr(PBTYPE), true)
+
 
 #define HFS_TRAP(NAME, HNAME, PBTYPE, TRAP) \
     inline OSErr NAME##_##HNAME(ParmBlkPtr pb, Boolean async, Boolean hfs) \
@@ -233,7 +236,11 @@ private:
         (#NAME "/" #HNAME), \
         TrapFunction<decltype(NAME##_##HNAME), \
             &NAME##_##HNAME, TRAP, \
-            callconv::Register<D0 (A0, TrapBit<ASYNCBIT>, TrapBit<HFSBIT>)>>)
+            callconv::Register<D0 (A0, TrapBit<ASYNCBIT>, TrapBit<HFSBIT>)>>); \
+    TRAP_VARIANT(NAME##Sync, NAME, OSErr(ParmBlkPtr), false, false); \
+    TRAP_VARIANT(NAME##Async, NAME, OSErr(ParmBlkPtr), true, false); \
+    TRAP_VARIANT(HNAME##Sync, NAME, OSErr(ParmBlkPtr), false, true); \
+    TRAP_VARIANT(HNAME##Async, NAME, OSErr(ParmBlkPtr), true, true)
 
 #define LOWMEM_ACCESSOR(NAME) \
     inline decltype(NAME)::type LMGet##NAME() { return MR(LM(NAME)); } \

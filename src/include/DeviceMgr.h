@@ -157,9 +157,9 @@ extern OSErr PBControl(ParmBlkPtr pbp, BOOLEAN a);
 extern OSErr PBStatus(ParmBlkPtr pbp, BOOLEAN a);
 extern OSErr PBKillIO(ParmBlkPtr pbp, BOOLEAN a);
 
-FILE_TRAP(PBControl, 0xA004);
-FILE_TRAP(PBStatus, 0xA005);
-FILE_TRAP(PBKillIO, 0xA006);
+FILE_TRAP(PBControl, ParmBlkPtr, 0xA004);
+FILE_TRAP(PBStatus, ParmBlkPtr, 0xA005);
+FILE_TRAP(PBKillIO, ParmBlkPtr, 0xA006);
 
 extern OSErr OpenDriver(StringPtr name, GUEST<INTEGER> *rnp);
 extern OSErr CloseDriver(INTEGER rn);
