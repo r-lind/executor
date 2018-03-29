@@ -32,7 +32,7 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
 								    be wrong */
     if(LM(ResErr) != CWC(noErr) && Cx(LM(ResErr)) != dupFNErr)
         return;
-    ROMlib_setreserr(HOpenRF(vrefnum, parid, name, fsRdWrPerm, GuestRef(f)));
+    ROMlib_setreserr(HOpenRF(vrefnum, parid, name, fsRdWrPerm, guestref(f)));
     if(LM(ResErr) != CWC(noErr))
         return;
     
@@ -57,7 +57,7 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
     buf.bmap.typoff = CWC(sizeof(resmap));
     buf.negone = CWC(-1); /* zero types (0 - 1) */
     lc = sizeof(buf);
-    ROMlib_setreserr(FSWriteAll(f, GuestRef(lc), (Ptr)&buf));
+    ROMlib_setreserr(FSWriteAll(f, guestref(lc), (Ptr)&buf));
     if(LM(ResErr) != CWC(noErr))
         return;
     ROMlib_setreserr(FSClose(f));
@@ -138,7 +138,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
 
     GetFPos(rn, &master_save_pos);
     len = sizeof info;
-    err = FSReadAll(rn, GuestRef(len), (Ptr)&info);
+    err = FSReadAll(rn, guestref(len), (Ptr)&info);
 
     /*
    * If we can't read the entire header in or if we don't get the correct tag
@@ -270,7 +270,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         }
         err = MemError();
         xxx = STARH(retval) + uncompressed_size + dcmp_offset - dlen;
-        if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll(Hx(map, resfn), GuestRef(dlen), xxx))))
+        if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll(Hx(map, resfn), guestref(dlen), xxx))))
         {
             if(dcmp_workspace)
                 DisposePtr(dcmp_workspace);
@@ -337,7 +337,7 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
             GUEST<int32_t> dlen_s; /* length on disk (remaining) */
 
             lc = sizeof(Size);
-            err = FSReadAll(Hx(map, resfn), GuestRef(lc), (Ptr)&dlen_s);
+            err = FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)&dlen_s);
             ROMlib_setreserr(err);
             if(LM(ResErr) != CWC(noErr))
                 retval = NULL;
@@ -568,7 +568,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     f = CW(pbr.ioParam.ioRefNum);
     lc = sizeof(hd);
-    ROMlib_setreserr(FSReadAll(f, GuestRef(lc), (Ptr)&hd));
+    ROMlib_setreserr(FSReadAll(f, guestref(lc), (Ptr)&hd));
     if(LM(ResErr) != CWC(noErr))
     {
         FSClose(f);
@@ -590,7 +590,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     }
     lc = CL(hd.maplen);
-    ROMlib_setreserr(FSReadAll(f, GuestRef(lc), (Ptr)STARH(map)));
+    ROMlib_setreserr(FSReadAll(f, guestref(lc), (Ptr)STARH(map)));
     if(LM(ResErr) != CWC(noErr))
     {
         DisposeHandle((Handle)map);

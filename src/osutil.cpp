@@ -761,7 +761,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
     OSErr err, err2;
 
     err = prWrErr;
-    if(openparam(GuestRef(rn)) == noErr)
+    if(openparam(guestref(rn)) == noErr)
     {
         sp.valid = LM(SPValid);
         sp.aTalkA = LM(SPATalkA);
@@ -775,7 +775,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
         sp.volClik = CW((short)(LM(SPVolCtl) << 8) | (LM(SPClikCaret) & 0xff));
         sp.misc = CW(LM(SPMisc2));
         count = sizeof(sp);
-        if(FSWrite(rn, GuestRef(count), (Ptr)&sp) == noErr && count == sizeof(sp))
+        if(FSWrite(rn, guestref(count), (Ptr)&sp) == noErr && count == sizeof(sp))
             err = noErr;
         deriveglobals();
         ROMlib_beepedonce = false;

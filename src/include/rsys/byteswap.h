@@ -189,6 +189,7 @@ public:
     {
         guest = RM(x);
     }
+    GuestRef(const GuestRef<T>&) = delete;
 
     operator GUEST<T>*() { return &guest; }
     operator GUEST<T>&() { return guest; }
@@ -198,6 +199,8 @@ public:
         native = MR(guest);
     }
 };
+template<class T>
+GuestRef<T> guestref(T& x) { return GuestRef<T>(x); }
 
 }
 
