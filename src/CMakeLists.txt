@@ -34,7 +34,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     #                    anonymous enums in the headers.
     #                    Code like (blah ? noErr : paramErr) triggers the enum-compare warning.
 
-    add_definitions(
+    add_compile_flags(
         -Wall
         -Wno-unused-but-set-variable
         -Wno-sign-compare
