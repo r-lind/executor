@@ -78,6 +78,8 @@
 #include "rsys/text.h"
 #include "rsys/appearance.h"
 #include "rsys/hfs_plus.h"
+#include "rsys/cpu.h"
+#include <PowerCore.h>
 
 #include "rsys/check_structs.h"
 
@@ -629,6 +631,8 @@ setup_trap_vectors(void)
     /* Set up the trap vector for the timer interrupt. */
     timer_callback = callback_install(catchalarm, NULL);
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = CL(timer_callback);
+
+    getPowerCore().handleInterrupt = &catchalarmPowerPC;
 
     /* Fill in unhandled trap vectors so they cause graceful deaths.
    * Skip over those trap vectors which are known to have legitimate
