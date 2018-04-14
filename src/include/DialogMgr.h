@@ -194,8 +194,8 @@ extern DialogPtr C_GetNewDialog(INTEGER id,
 PASCAL_TRAP(GetNewDialog, 0xA97C);
 extern void C_CloseDialog(DialogPtr dp);
 PASCAL_TRAP(CloseDialog, 0xA982);
-extern void C_DisposDialog(DialogPtr dp);
-PASCAL_TRAP(DisposDialog, 0xA983);
+extern void C_DisposeDialog(DialogPtr dp);
+PASCAL_TRAP(DisposeDialog, 0xA983);
 extern BOOLEAN C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                                       GUEST<INTEGER> *ith);
 PASCAL_FUNCTION(ROMlib_myfilt);
@@ -208,55 +208,55 @@ extern BOOLEAN C_IsDialogEvent(
 PASCAL_TRAP(IsDialogEvent, 0xA97F);
 extern void C_DrawDialog(DialogPtr dp);
 PASCAL_TRAP(DrawDialog, 0xA981);
-extern INTEGER C_FindDItem(DialogPtr dp,
+extern INTEGER C_FindDialogItem(DialogPtr dp,
                                        Point pt);
-PASCAL_TRAP(FindDItem, 0xA984);
-extern void C_UpdtDialog(DialogPtr dp,
+PASCAL_TRAP(FindDialogItem, 0xA984);
+extern void C_UpdateDialog(DialogPtr dp,
                                      RgnHandle rgn);
-PASCAL_TRAP(UpdtDialog, 0xA978);
+PASCAL_TRAP(UpdateDialog, 0xA978);
 extern BOOLEAN C_DialogSelect(
     EventRecord *evt, GUEST<DialogPtr> *dpp, GUEST<INTEGER> *item);
 PASCAL_TRAP(DialogSelect, 0xA980);
-extern void DlgCut(DialogPtr dp);
-extern void DlgCopy(DialogPtr dp);
-extern void DlgPaste(DialogPtr dp);
-extern void DlgDelete(DialogPtr dp);
+extern void DialogCut(DialogPtr dp);
+extern void DialogCopy(DialogPtr dp);
+extern void DialogPaste(DialogPtr dp);
+extern void DialogDelete(DialogPtr dp);
 extern void C_ROMlib_mysound(INTEGER i);
 PASCAL_FUNCTION(ROMlib_mysound);
 extern void C_ErrorSound(SoundProcPtr sp);
 PASCAL_TRAP(ErrorSound, 0xA98C);
 extern void C_InitDialogs(ProcPtr rp);
 PASCAL_TRAP(InitDialogs, 0xA97B);
-extern void SetDAFont(INTEGER i);
+extern void SetDialogFont(INTEGER i);
 extern void C_ParamText(StringPtr p0,
                                     StringPtr p1, StringPtr p2, StringPtr p3);
 PASCAL_TRAP(ParamText, 0xA98B);
-extern void C_GetDItem(DialogPtr dp,
+extern void C_GetDialogItem(DialogPtr dp,
                                    INTEGER itemno, GUEST<INTEGER> *itype, GUEST<Handle> *item, Rect *r);
-PASCAL_TRAP(GetDItem, 0xA98D);
-extern void C_SetDItem(DialogPtr dp,
+PASCAL_TRAP(GetDialogItem, 0xA98D);
+extern void C_SetDialogItem(DialogPtr dp,
                                    INTEGER itemno, INTEGER itype, Handle item, Rect *r);
-PASCAL_TRAP(SetDItem, 0xA98E);
-extern void C_GetIText(Handle item,
+PASCAL_TRAP(SetDialogItem, 0xA98E);
+extern void C_GetDialogItemText(Handle item,
                                    StringPtr text);
-PASCAL_TRAP(GetIText, 0xA990);
-extern void C_SetIText(Handle item,
+PASCAL_TRAP(GetDialogItemText, 0xA990);
+extern void C_SetDialogItemText(Handle item,
                                    StringPtr text);
-PASCAL_TRAP(SetIText, 0xA98F);
-extern void C_SelIText(DialogPtr dp,
+PASCAL_TRAP(SetDialogItemText, 0xA98F);
+extern void C_SelectDialogItemText(DialogPtr dp,
                                    INTEGER itemno, INTEGER start, INTEGER stop);
-PASCAL_TRAP(SelIText, 0xA97E);
-extern INTEGER GetAlrtStage(void);
-extern void ResetAlrtStage(void);
-extern void C_HideDItem(DialogPtr dp,
+PASCAL_TRAP(SelectDialogItemText, 0xA97E);
+extern INTEGER GetAlertStage(void);
+extern void ResetAlertStage(void);
+extern void C_HideDialogItem(DialogPtr dp,
                                     INTEGER item);
-PASCAL_TRAP(HideDItem, 0xA827);
-extern void C_ShowDItem(DialogPtr dp,
+PASCAL_TRAP(HideDialogItem, 0xA827);
+extern void C_ShowDialogItem(DialogPtr dp,
                                     INTEGER item);
-PASCAL_TRAP(ShowDItem, 0xA828);
+PASCAL_TRAP(ShowDialogItem, 0xA828);
 
-extern CDialogPtr C_NewCDialog(Ptr, Rect *, StringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT, Handle);
-PASCAL_TRAP(NewCDialog, 0xAA4B);
+extern CDialogPtr C_NewColorDialog(Ptr, Rect *, StringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT, Handle);
+PASCAL_TRAP(NewColorDialog, 0xAA4B);
 
 extern OSErr C_GetStdFilterProc(GUEST<ProcPtr> *proc);
 PASCAL_SUBTRAP(GetStdFilterProc, 0xAA68, 0x0203, DialogDispatch);

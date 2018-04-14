@@ -61,6 +61,12 @@
 #include "rsys/cfm.h"
 #include "rsys/mixed_mode.h"
 
+#include <rsys/cpu.h>
+#include <PowerCore.h>
+#include <rsys/builtinlibs.h>
+#include <algorithm>
+#include <cassert>
+
 namespace Executor
 {
 #define RTS() return POPADDR()
@@ -243,7 +249,7 @@ STUB(Frac2X)
                                                              \
     uw = EM_D1 << 8;                                         \
     uw |= cpu_state.regs[2].uw.n;                            \
-    EM_D0 = (KeyTrans(NULL, uw, (LONGINT *)0) >> 16) & 0xFF; \
+    EM_D0 = (KeyTranslate(NULL, uw, (LONGINT *)0) >> 16) & 0xFF; \
     RTS();
 
 STUB(Key1Trans);
@@ -346,7 +352,7 @@ STUB(RelString)
     RTS();
 }
 
-STUB(UprString)
+STUB(UpperString)
 {
     long savea0;
 
@@ -569,38 +575,6 @@ STUB(SetTrapAddress)
     RTS();
 }
 
-STUB(Gestalt)
-{
-    GUEST<LONGINT> l;
-    SelectorFunctionUPP oldp;
-
-    switch(EM_D1 & 0xFFFF)
-    {
-        case 0xA1AD:
-        default:
-            l = CLC(0);
-            EM_D0 = Gestalt(EM_D0, &l);
-            EM_A0 = CL(l);
-            break;
-        case 0xA3AD:
-            if(EM_D0 == DONGLE_GESTALT)
-                EM_D0 = Gestalt(EM_D0, (GUEST<LONGINT> *)SYN68K_TO_US_CHECK0(EM_A0));
-            else
-                EM_D0 = NewGestalt(EM_D0, (SelectorFunctionUPP)SYN68K_TO_US_CHECK0(EM_A0));
-            break;
-        case 0xA5AD:
-            EM_D0 = ReplaceGestalt(EM_D0, (SelectorFunctionUPP)SYN68K_TO_US_CHECK0(EM_A0),
-                                   &oldp);
-            EM_A0 = US_TO_SYN68K_CHECK0((void *)oldp);
-            break;
-        case 0xA7AD:
-            gui_abort();
-            /* GetGestaltProcPtr(); no docs on this call */
-            break;
-    }
-    RTS();
-}
-
 /* unlike the 68k version, every unknown trap gets vectored to
    `Unimplemented ()' */
 
@@ -684,142 +658,8 @@ STUB(IMVI_ReadXPRam)
 
 STUB(modeswitch)
 {
-    syn68k_addr_t retaddr;
-    RoutineDescriptor *rp;
-    va_list unused;
-    ProcInfoType procinfo;
-    int convention;
-    int n_routines;
-    int i;
-
-    EM_A7 += 4;
-    retaddr = POPADDR();
-    rp = (RoutineDescriptor *)(SYN68K_TO_US(ignoreme)); /* UGH! */
-
-    n_routines = CW(rp->routineCount) + 1;
-    for(i = 0;
-        i < n_routines && rp->routineRecords[i].ISA != CBC(kPowerPCISA);
-        ++i)
-        ;
-    if(i == n_routines)
-    {
-        fprintf(stderr, "*** bad modeswitch***\n");
-        return retaddr;
-    }
-
-    procinfo = CL(rp->routineRecords[i].procInfo);
-    convention = procinfo & 0xf;
-
-    if(convention == kRegisterBased)
-    {
-        uint32_t retval;
-        int retwidth;
-        int ret_reg;
-        uint32_t mask;
-
-        warning_trace_info("calling universal from mixed mode using "
-                           "register conventions");
-#if 0
-        retval = CallUniversalProc_from_native_common(unused, args_via_68k_regs,
-                                                      MR(rp->routineRecords[i].procDescriptor),
-                                                      procinfo);
-#else
-        retval = 0;
-#endif
-        retwidth = (procinfo >> 4) & 3;
-        ret_reg = (procinfo >> 6) & 31;
-        switch(retwidth)
-        {
-            default:
-            case 0:
-                mask = 0;
-                break;
-            case 1:
-                mask = 0xff;
-                break;
-            case 2:
-                mask = 0xffff;
-                break;
-            case 3:
-                mask = 0xffffffff;
-                break;
-        }
-        if(ret_reg <= kRegisterA6)
-        {
-            if(mask)
-            {
-                uint32_t *regp;
-                static int map[] = {
-                    0, /* kRegisterD0,  0 */
-                    1, /* kRegisterD1,  1 */
-                    2, /* kRegisterD2,  2 */
-                    3, /* kRegisterD3,  3 */
-                    8, /* kRegisterA0,  4 */
-                    9, /* kRegisterA1,  5 */
-                    10, /* kRegisterA2,  6 */
-                    11, /* kRegisterA3,  7 */
-                    4, /* kRegisterD4,  8 */
-                    5, /* kRegisterD5,  9 */
-                    6, /* kRegisterD6, 10 */
-                    7, /* kREgisterD7, 11 */
-                    12, /* kRegisterA4, 12 */
-                    13, /* kRegisterA5, 13 */
-                    14, /* kRegisterA6, 14 */
-                };
-
-                regp = &cpu_state.regs[map[ret_reg]].ul.n;
-                *regp &= ~mask;
-                *regp |= retval & mask;
-            }
-        }
-        else
-        {
-            switch(ret_reg)
-            {
-                case kCCRegisterCBit:
-                case kCCRegisterVBit:
-                case kCCRegisterZBit:
-                case kCCRegisterNBit:
-                case kCCRegisterXBit:
-                    warning_unimplemented("ret_reg = %d", ret_reg);
-                    break;
-            }
-        }
-    }
-    else if(convention > kRegisterBased)
-    {
-        warning_unimplemented("ignoring convention %d\n", convention);
-    }
-    else
-    {
-        int rettype;
-        uint32_t retval;
-
-        warning_trace_info("calling universal from mixed mode");
-#if 0
-        retval = CallUniversalProc_from_native_common(unused, args_via_68k_stack,
-                                                      MR(rp->routineRecords[i].procDescriptor),
-                                                      procinfo);
-#else
-        retval = 0;
-#endif
-        warning_trace_info("just got back from calling universal from mixed mode");
-        rettype = (procinfo >> kCallingConventionWidth)
-            & ((1 << kResultSizeWidth) - 1);
-        switch(rettype)
-        {
-            case kOneByteCode:
-                WRITEUW(EM_A7, 0);
-                WRITEUB(EM_A7, retval);
-                break;
-            case kTwoByteCode:
-                WRITEUW(EM_A7, retval);
-                break;
-            case kFourByteCode:
-                WRITEUL(EM_A7, retval);
-                break;
-        }
-    }
+    RoutineDescriptor *theProcPtr = ptr_from_longint<RoutineDescriptor*>(POPADDR() - 2);
+    uint32_t retaddr = ModeSwitch(theProcPtr, 0, kM68kISA);
     return retaddr;
 }
 

@@ -9,6 +9,7 @@
  */
 #include "host-arch-config.h"
 #include <stdint.h>
+#include <cstring>
 #include <type_traits>
 #include <syn68k_public.h>
 
@@ -66,9 +67,12 @@ struct Aligner<signed char>
 };
 
 #if defined(BIGENDIAN)
-#define SwapTyped(x) (x)
-#else
+template<typename T>
+T SwapTyped(T x) { return x; }
 
+inline Point SwapPoint(Point x) { return x; }
+
+#else
 inline unsigned char SwapTyped(unsigned char x)
 {
     return x;
@@ -81,6 +85,11 @@ inline int16_t SwapTyped(int16_t x) { return swap16((uint16_t)x); }
 
 inline uint32_t SwapTyped(uint32_t x) { return swap32(x); }
 inline int32_t SwapTyped(int32_t x) { return swap32((uint32_t)x); }
+
+inline uint64_t SwapTyped(uint64_t x) { return swap64(x); }
+inline int64_t SwapTyped(int64_t x) { return swap64((uint64_t)x); }
+
+inline Point SwapPoint(Point x) { return Point { SwapTyped(x.v), SwapTyped(x.h) }; }
 #endif
 
 inline uint16_t *SYN68K_TO_US_CHECK0_CHECKNEG1(syn68k_addr_t addr)
@@ -98,6 +107,93 @@ inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(const void* addr)
     else
         return US_TO_SYN68K_CHECK0(addr);
 }
+
+template<typename T, typename = void>
+struct GuestTypeTraits;
+
+template<typename T>
+struct GuestTypeTraits<T, std::enable_if_t<std::is_integral_v<T>>>
+{
+    using HostType = T;
+    using GuestType = T;
+
+    static GuestType host_to_guest(HostType x) { return SwapTyped(x); }
+    static HostType guest_to_host(GuestType x) { return SwapTyped(x); }
+
+    static std::enable_if_t<sizeof(T) <= 4, uint32_t> host_to_reg(HostType x) { return (uint32_t)x; }
+    static HostType reg_to_host(std::enable_if_t<sizeof(T) <= 4, uint32_t> x) { return (HostType)x; }
+};
+
+template<typename T>
+struct GuestTypeTraits<T*>
+{
+    using HostType = T*;
+    using GuestType = uint32_t;
+
+    static GuestType host_to_guest(HostType x) { return SwapTyped(US_TO_SYN68K_CHECK0_CHECKNEG1(x)); }
+    static HostType guest_to_host(GuestType x) { return (HostType)SYN68K_TO_US_CHECK0_CHECKNEG1(SwapTyped(x)); }
+
+    static uint32_t host_to_reg(HostType x) { return US_TO_SYN68K_CHECK0_CHECKNEG1(x); }
+    static HostType reg_to_host(uint32_t x) { return (HostType)SYN68K_TO_US_CHECK0_CHECKNEG1(x); }
+};
+
+template<typename T>
+struct GuestTypeTraits<UPP<T>>
+{
+    using HostType = UPP<T>;
+    using GuestType = uint32_t;
+
+    static GuestType host_to_guest(HostType x) { return SwapTyped(US_TO_SYN68K_CHECK0_CHECKNEG1((void*)x)); }
+    static HostType guest_to_host(GuestType x) { return (HostType)SYN68K_TO_US_CHECK0_CHECKNEG1(SwapTyped(x)); }
+
+    static uint32_t host_to_reg(HostType x) { return US_TO_SYN68K_CHECK0_CHECKNEG1((void*)x); }
+    static HostType reg_to_host(uint32_t x) { return (HostType)SYN68K_TO_US_CHECK0_CHECKNEG1(x); }
+};
+
+template<typename To, typename From>
+To reinterpret_bits_cast(From x)
+{
+    To y;
+    static_assert(sizeof(x) == sizeof(y), "illegal reinterpret_bits_cast");
+    std::memcpy(&y, &x, sizeof(x));
+    return y;
+}
+
+template<>
+struct GuestTypeTraits<float>
+{
+    using HostType = float;
+    using GuestType = uint32_t;
+
+    static GuestType host_to_guest(HostType x) { return SwapTyped(reinterpret_bits_cast<GuestType>(x)); }
+    static HostType guest_to_host(GuestType x) { return reinterpret_bits_cast<HostType>(SwapTyped(x)); }
+
+    static uint32_t host_to_reg(HostType x) { return reinterpret_bits_cast<GuestType>(x); }
+    static HostType reg_to_host(uint32_t x) { return (HostType)reinterpret_bits_cast<HostType>(x); }
+};
+
+template<>
+struct GuestTypeTraits<double>
+{
+    using HostType = double;
+    using GuestType = uint64_t;
+
+    static GuestType host_to_guest(HostType x) { return SwapTyped(reinterpret_bits_cast<GuestType>(x)); }
+    static HostType guest_to_host(GuestType x) { return reinterpret_bits_cast<HostType>(SwapTyped(x)); }
+};
+template<>
+struct GuestTypeTraits<Point>
+{
+    using HostType = Point;
+    using GuestType = uint32_t;
+
+    static GuestType host_to_guest(HostType x) { return reinterpret_bits_cast<uint32_t>(SwapPoint(x)); }
+    static HostType guest_to_host(GuestType x) { return SwapPoint(reinterpret_bits_cast<Point>(x)); }
+    
+    static uint32_t host_to_reg(HostType x) { return ((uint32_t)x.v << 16) | (x.h & 0xFFFFU); }
+    static HostType reg_to_host(uint32_t x) { return Point{ int16_t(x >> 16), int16_t(x & 0xFFFF) }; }
+};
+
 
 template<typename ActualType>
 union HiddenValue

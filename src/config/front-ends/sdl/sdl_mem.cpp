@@ -16,7 +16,7 @@ using namespace Executor;
 
 char *sdl_ReallocHandle(Executor::Handle mem, int len)
 {
-    ReallocHandle(mem, len);
+    ReallocateHandle(mem, len);
     if(LM(MemErr) != CWC(noErr))
         return NULL;
     else

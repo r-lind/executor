@@ -423,7 +423,7 @@ te_add_attrs_to_range(TEHandle te,
     te_style_combine_runs(te_style);
 }
 
-TEHandle Executor::C_TEStylNew(Rect *dst, Rect *view)
+TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
 {
     FontInfo font_info;
     int16_t font_height;
@@ -498,26 +498,26 @@ TEHandle Executor::C_TEStylNew(Rect *dst, Rect *view)
     stp->scrpHeight = CW(font_height);
     stp->scrpAscent = font_info.ascent;
 
-    SetStylHandle(te_style, teh);
+    TESetStyleHandle(te_style, teh);
 
     TE_SLAM(teh);
 
     return teh;
 }
 
-void Executor::C_SetStylHandle(TEStyleHandle theHandle, TEHandle teh)
+void Executor::C_TESetStyleHandle(TEStyleHandle theHandle, TEHandle teh)
 {
     if(!TE_STYLIZED_P(teh))
         return;
     *(GUEST<TEStyleHandle> *)&HxX(teh, txFont) = RM(theHandle);
 }
 
-TEStyleHandle Executor::C_GetStylHandle(TEHandle teh)
+TEStyleHandle Executor::C_TEGetStyleHandle(TEHandle teh)
 {
     return TE_GET_STYLE(teh);
 }
 
-StScrpHandle Executor::C_GetStylScrap(TEHandle te)
+StScrpHandle Executor::C_TEGetStyleScrapHandle(TEHandle te)
 {
     StScrpHandle scrap;
     StyleRun *runs;
@@ -579,7 +579,7 @@ StScrpHandle Executor::C_GetStylScrap(TEHandle te)
     return scrap;
 }
 
-void Executor::C_TEStylInsert(Ptr text, LONGINT length, StScrpHandle hST,
+void Executor::C_TEStyleInsert(Ptr text, LONGINT length, StScrpHandle hST,
                               TEHandle te)
 {
     TE_SLAM(te);
@@ -700,7 +700,7 @@ void Executor::C_TEGetStyle(int16_t sel, TextStyle *attrs,
     }
 }
 
-void Executor::C_TEStylPaste(TEHandle te)
+void Executor::C_TEStylePaste(TEHandle te)
 {
     Handle hText;
     GUEST<int32_t> dummy;
@@ -713,7 +713,7 @@ void Executor::C_TEStylPaste(TEHandle te)
     if(length < 0)
     {
         /* error, there is no scrap element */
-        DisposHandle(hText);
+        DisposeHandle(hText);
 
         /* remove the selected text */
         ROMlib_tedoitall(te, NULL, 0, false, NULL);
@@ -724,7 +724,7 @@ void Executor::C_TEStylPaste(TEHandle te)
     retval = GetScrap((Handle)scrap, TICK("styl"), &dummy);
     if(retval < 0)
     {
-        DisposHandle((Handle)scrap);
+        DisposeHandle((Handle)scrap);
         scrap = NULL;
     }
 
@@ -734,8 +734,8 @@ void Executor::C_TEStylPaste(TEHandle te)
         ROMlib_tedoitall(te, STARH(hText), length, false, scrap);
     }
     if(scrap)
-        DisposHandle((Handle)scrap);
-    DisposHandle(hText);
+        DisposeHandle((Handle)scrap);
+    DisposeHandle(hText);
 }
 
 static void
@@ -1065,7 +1065,7 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
     }
 }
 
-void Executor::C_SetStylScrap(int32_t start, int32_t stop,
+void Executor::C_TEUseStyleScrap(int32_t start, int32_t stop,
                               StScrpHandle newstyles, BOOLEAN redraw,
                               TEHandle teh)
 {

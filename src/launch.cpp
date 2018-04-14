@@ -79,6 +79,10 @@
 
 #include "rsys/logging.h"
 
+#include <rsys/builtinlibs.h>
+#include <rsys/cpu.h>
+#include <PowerCore.h>
+
 using namespace Executor;
 
 static bool ppc_launch_p = false;
@@ -409,24 +413,27 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
     cfirp = ROMlib_find_cfrg(cfrg0, desired_arch, kApplicationCFrag,
                              (StringPtr) "");
 
-#if(defined(powerpc) || defined(__ppc__)) && !defined(CFM_PROBLEMS)
     if(cfirp)
     {
-        Ptr mainAddr;
+        GUEST<Ptr> mainAddr;
         Str255 errName;
-        ConnectionID c_id;
+        GUEST<ConnectionID> c_id;
 
-        ROMlib_release_tracking_values();
+        unsigned char empty[] = { 0 };
+
+        //ROMlib_release_tracking_values();
 
         if(CFIR_LOCATION(cfirp) == kOnDiskFlat)
         {
             // #warning were ignoring a lot of the cfir attributes
-            GetDiskFragment(fsp, CFIR_OFFSET_TO_FRAGMENT(cfirp),
-                            CFIR_FRAGMENT_LENGTH(cfirp), "",
+           OSErr err = GetDiskFragment(fsp, CFIR_OFFSET_TO_FRAGMENT(cfirp),
+                            CFIR_FRAGMENT_LENGTH(cfirp), empty,
                             kLoadLib,
                             &c_id,
                             &mainAddr,
                             errName);
+            fprintf(stderr, "GetDiskFragment -> err == %d\n", err);
+
         }
         else if(CFIR_LOCATION(cfirp) == kOnDiskSegmented)
         {
@@ -438,21 +445,35 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             id = CFIR_FRAGMENT_LENGTH(cfirp);
             h = GetResource(typ, id);
             HLock(h);
-            GetMemFragment(STARH(h), GetHandleSize(h), "", kLoadLib,
+            GetMemFragment(STARH(h), GetHandleSize(h), empty, kLoadLib,
                            &c_id, &mainAddr, errName);
 
             fprintf(stderr, "Memory leak from segmented fragment\n");
         }
         {
-            uint32_t new_toc;
-            void *new_pc;
+            void *mainAddr1 = (void*) MR(mainAddr);
+            uint32_t new_toc = CL( ((GUEST<uint32_t>*)mainAddr1)[1] );
+            uint32_t new_pc = CL( ((GUEST<uint32_t>*)mainAddr1)[0] );
 
-            new_toc = ((uint32_t *)mainAddr)[1];
-            new_pc = ((void **)mainAddr)[0];
-            ppc_call(new_toc, new_pc, 0);
+            printf("ppc start: r2 = %08x, %08x\n", new_toc, new_pc);
+
+            PowerCore& cpu = getPowerCore();
+            cpu.r[2] = new_toc;
+            cpu.r[1] = EM_A7-1024;
+            cpu.lr = 0xFFFFFFFC;
+            cpu.CIA = new_pc;
+
+            cpu.syscall = &builtinlibs::handleSC;
+
+            cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
+            cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
+            cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
+            cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
+
+            //C_Debugger();
+            cpu.execute();
         }
     }
-#endif
 
     C_ExitToShell();
 }

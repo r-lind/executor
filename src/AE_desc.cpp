@@ -750,7 +750,7 @@ OSErr Executor::C_AECreateDesc(DescType type, Ptr data, Size data_size,
 
 OSErr Executor::C_AEDisposeDesc(AEDesc *desc)
 {
-    DisposHandle(DESC_DATA(desc));
+    DisposeHandle(DESC_DATA(desc));
 
     AE_RETURN_ERROR(noErr);
 }
@@ -912,7 +912,7 @@ OSErr Executor::C_AESizeOfNthItem(AEDescList *list, int32_t index,
 
 /* descriptor functions for key pair records */
 
-OSErr Executor::C_AEGetKeyDesc(AERecord *record, AEKeyword keyword,
+OSErr Executor::C_AEGetParamDesc(AERecord *record, AEKeyword keyword,
                                DescType desired_type, AEDesc *desc_out)
 {
     descriptor_t *desc;
@@ -928,7 +928,7 @@ OSErr Executor::C_AEGetKeyDesc(AERecord *record, AEKeyword keyword,
     AE_RETURN_ERROR(AECoerceDesc(desc, desired_type, desc_out));
 }
 
-OSErr Executor::C_AEPutKeyDesc(AERecord *record, AEKeyword keyword,
+OSErr Executor::C_AEPutParamDesc(AERecord *record, AEKeyword keyword,
                                AEDesc *desc)
 {
     if(!RECORD_CLASS_P(record))
@@ -940,7 +940,7 @@ OSErr Executor::C_AEPutKeyDesc(AERecord *record, AEKeyword keyword,
         AE_RETURN_ERROR(memFullErr);
 }
 
-OSErr Executor::C_AEGetKeyPtr(AERecord *record, AEKeyword keyword,
+OSErr Executor::C_AEGetParamPtr(AERecord *record, AEKeyword keyword,
                               DescType desired_type, GUEST<DescType> *type_out,
                               Ptr data, Size max_size, GUEST<Size> *size_out)
 {
@@ -964,7 +964,7 @@ OSErr Executor::C_AEGetKeyPtr(AERecord *record, AEKeyword keyword,
     AE_RETURN_ERROR(AEDisposeDesc(coerced_desc));
 }
 
-OSErr Executor::C_AEPutKeyPtr(AERecord *record, AEKeyword keyword,
+OSErr Executor::C_AEPutParamPtr(AERecord *record, AEKeyword keyword,
                               DescType type, Ptr data, Size data_size)
 {
     descriptor_t *desc;
@@ -986,7 +986,7 @@ OSErr Executor::C_AEPutKeyPtr(AERecord *record, AEKeyword keyword,
     AE_RETURN_ERROR(retval);
 }
 
-OSErr Executor::C_AEDeleteKeyDesc(AERecord *record, AEKeyword keyword)
+OSErr Executor::C_AEDeleteParam(AERecord *record, AEKeyword keyword)
 {
     if(!RECORD_CLASS_P(record))
         AE_RETURN_ERROR(errAEWrongDataType);
@@ -997,7 +997,7 @@ OSErr Executor::C_AEDeleteKeyDesc(AERecord *record, AEKeyword keyword)
         AE_RETURN_ERROR(noErr);
 }
 
-OSErr Executor::C_AESizeOfKeyDesc(AERecord *record, AEKeyword keyword,
+OSErr Executor::C_AESizeOfParam(AERecord *record, AEKeyword keyword,
                                   GUEST<DescType> *type_out,
                                   GUEST<Size> *size_out)
 {

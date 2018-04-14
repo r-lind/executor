@@ -75,7 +75,7 @@ invalidate_all_widths(void)
     hp = (GUEST<Handle> *)STARH(wlh);
     for(i = 0; i < n_entries; ++i)
     {
-        DisposHandle(MR(hp[i]));
+        DisposeHandle(MR(hp[i]));
         hp[i] = nullptr;
     }
     HUnlock(wlh);
@@ -672,7 +672,7 @@ static void newwidthtable(FMInput *fmip)
                       sizeof(todelete), (Ptr) "", 0)
                < 0)
             {
-                DisposHandle((Handle)MR(STARH(WIDTHLISTHAND)[MAXTABLES]));
+                DisposeHandle((Handle)MR(STARH(WIDTHLISTHAND)[MAXTABLES]));
                 SetHandleSize(MR(LM(WidthListHand)),
                               (Size)sizeof(GUEST<Handle>) * MAXTABLES);
             }

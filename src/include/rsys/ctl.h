@@ -68,7 +68,7 @@ extern int32_t C_cdef1008(int16_t var, ControlHandle ctl, int16_t mess,
                           int32_t param);
 PASCAL_FUNCTION(cdef1008);
 
-#define VAR(w) (GetCVariant((w)))
+#define VAR(w) (GetControlVariant((w)))
 
 extern BOOLEAN ROMlib_dirtyvariant;
 

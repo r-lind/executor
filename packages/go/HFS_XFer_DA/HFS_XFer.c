@@ -697,7 +697,7 @@ doitem (long choice, int rn)
       else
 	{
 #if	0
-	  GetItem (drvrmenu, LoWord (choice), (StringPtr) & apname);
+	  GetMenuItemText (drvrmenu, LoWord (choice), (StringPtr) & apname);
 	  OpenDeskAcc (apname);
 #endif
 	}

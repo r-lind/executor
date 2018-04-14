@@ -238,28 +238,28 @@ DISPATCHER_TRAP(ScriptUtil, 0xA8B5, StackL);
 extern LONGINT C_VisibleLength(Ptr textp, LONGINT len);
 PASCAL_SUBTRAP(VisibleLength, 0xA8B5, 0x84080028, ScriptUtil);
 
-extern void C_LongDate2Secs(LongDateRec *ldatep,
+extern void C_LongDateToSeconds(LongDateRec *ldatep,
                                         GUEST<ULONGINT> *secs_outp);
-PASCAL_SUBTRAP(LongDate2Secs, 0xA8B5, 0x8008FFF2, ScriptUtil);
+PASCAL_SUBTRAP(LongDateToSeconds, 0xA8B5, 0x8008FFF2, ScriptUtil);
 
-extern void C_LongSecs2Date(GUEST<ULONGINT> *secs_inp,
+extern void C_LongSecondsToDate(GUEST<ULONGINT> *secs_inp,
                                         LongDateRec *ldatep);
-PASCAL_SUBTRAP(LongSecs2Date, 0xA8B5, 0x8008FFF0, ScriptUtil);
+PASCAL_SUBTRAP(LongSecondsToDate, 0xA8B5, 0x8008FFF0, ScriptUtil);
 
-extern LONGINT C_GetEnvirons(INTEGER verb);
-PASCAL_SUBTRAP(GetEnvirons, 0xA8B5, 0x84020008, ScriptUtil);
+extern LONGINT C_GetScriptManagerVariable(INTEGER verb);
+PASCAL_SUBTRAP(GetScriptManagerVariable, 0xA8B5, 0x84020008, ScriptUtil);
 
-extern OSErr C_SetEnvirons(INTEGER verb, LONGINT param);
-PASCAL_SUBTRAP(SetEnvirons, 0xA8B5, 0x8206000A, ScriptUtil);
+extern OSErr C_SetScriptManagerVariable(INTEGER verb, LONGINT param);
+PASCAL_SUBTRAP(SetScriptManagerVariable, 0xA8B5, 0x8206000A, ScriptUtil);
 
-extern LONGINT C_GetScript(INTEGER script, INTEGER verb);
-PASCAL_SUBTRAP(GetScript, 0xA8B5, 0x8404000C, ScriptUtil);
+extern LONGINT C_GetScriptVariable(INTEGER script, INTEGER verb);
+PASCAL_SUBTRAP(GetScriptVariable, 0xA8B5, 0x8404000C, ScriptUtil);
 
-extern OSErr C_SetScript(INTEGER script, INTEGER verb,
+extern OSErr C_SetScriptVariable(INTEGER script, INTEGER verb,
                                      LONGINT param);
-PASCAL_SUBTRAP(SetScript, 0xA8B5, 0x8208000E, ScriptUtil);
-extern INTEGER C_Font2Script(INTEGER fontnum);
-PASCAL_SUBTRAP(Font2Script, 0xA8B5, 0x82020006, ScriptUtil);
+PASCAL_SUBTRAP(SetScriptVariable, 0xA8B5, 0x8208000E, ScriptUtil);
+extern INTEGER C_FontToScript(INTEGER fontnum);
+PASCAL_SUBTRAP(FontToScript, 0xA8B5, 0x82020006, ScriptUtil);
 
 extern INTEGER C_Transliterate(Handle srch, Handle dsth,
                                            INTEGER target, LONGINT srcmask);
@@ -294,23 +294,23 @@ PASCAL_SUBTRAP(HiliteText, 0xA8B5, 0x800E001C, ScriptUtil);
 extern void C_DrawJust(Ptr textbufp, INTEGER length,
                                    INTEGER slop);
 PASCAL_SUBTRAP(DrawJust, 0xA8B5, 0x8008001E, ScriptUtil);
-extern String2DateStatus C_String2Time(Ptr textp,
+extern String2DateStatus C_StringToTime(Ptr textp,
                                                    LONGINT len, Ptr cachep, GUEST<LONGINT> *lenusedp, GUEST<Ptr> *datetimep);
-PASCAL_SUBTRAP(String2Time, 0xA8B5, 0x8214FFF4, ScriptUtil);
+PASCAL_SUBTRAP(StringToTime, 0xA8B5, 0x8214FFF4, ScriptUtil);
 extern INTEGER GetMBarHeight(void);
-extern INTEGER GetSysJust(void);
-extern void SetSysJust(INTEGER just);
+extern INTEGER GetSysDirection(void);
+extern void SetSysDirection(INTEGER just);
 extern OSErr C_InitDateCache(DateCachePtr theCache);
 PASCAL_SUBTRAP(InitDateCache, 0xA8B5, 0x8204FFF8, ScriptUtil);
 
 extern INTEGER C_CharByte(Ptr textBuf, INTEGER textOffset);
 PASCAL_SUBTRAP(CharByte, 0xA8B5, 0x82060010, ScriptUtil);
 
-extern String2DateStatus C_String2Date(Ptr text, int32_t length,
+extern String2DateStatus C_StringToDate(Ptr text, int32_t length,
                                                    DateCachePtr cache,
                                                    GUEST<int32_t> *length_used_ret,
                                                    LongDatePtr date_time);
-PASCAL_SUBTRAP(String2Date, 0xA8B5, 0x8214FFF6, ScriptUtil);
+PASCAL_SUBTRAP(StringToDate, 0xA8B5, 0x8214FFF6, ScriptUtil);
 extern StyledLineBreakCode C_StyledLineBreak(Ptr textp, int32_t length,
                                                          int32_t text_start, int32_t text_end,
                                                          int32_t flags,
@@ -318,11 +318,11 @@ extern StyledLineBreakCode C_StyledLineBreak(Ptr textp, int32_t length,
                                                          GUEST<int32_t> *text_offset);
 PASCAL_SUBTRAP(StyledLineBreak, 0xA8B5, 0x821CFFFE, ScriptUtil);
 
-extern void C_NMeasureJust(Ptr text, int32_t length,
+extern void C_MeasureJustified(Ptr text, int32_t length,
                                        Fixed slop, Ptr charLocs,
                                        JustStyleCode run_pos,
                                        Point numer, Point denom);
-PASCAL_SUBTRAP(NMeasureJust, 0xA8B5, 0x801A0034, ScriptUtil);
+PASCAL_SUBTRAP(MeasureJustified, 0xA8B5, 0x801A0034, ScriptUtil);
 
 extern Boolean C_ParseTable(CharByteTable table);
 PASCAL_SUBTRAP(ParseTable, 0xA8B5, 0x82040022, ScriptUtil);

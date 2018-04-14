@@ -27,14 +27,6 @@
 
 using namespace Executor;
 
-#define _PtrToHand(ptr, hand, len)                  \
-    do {                                            \
-        Handle __temp_handle;                       \
-                                                    \
-        PtrToHand((Ptr)(ptr), &__temp_handle, len); \
-        *(hand) = RM(__temp_handle);                \
-    } while(0)
-
 void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
                                   int item_no, Point base_pt)
 {
@@ -129,7 +121,7 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
                         memcpy(STARH(color_table), color_table_base,
                                color_table_bytes);
 
-                        SetCtlColor(ctl, color_table);
+                        SetControlColor(ctl, color_table);
                     }
                 }
             }
@@ -137,7 +129,7 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
     }
     else if(CB(dst->itmtype) & (statText | editText))
     {
-        _PtrToHand(data, &dst->itmhand, dst->itmlen);
+        PtrToHand((Ptr)data, &dst->itmhand, dst->itmlen);
         if((CB(dst->itmtype) & editText)
            && DIALOG_EDIT_FIELD(dp) == -1)
             ROMlib_dpntoteh(dp, item_no);
@@ -217,7 +209,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
         HxX(aux_win_h, dialogCItem) = RM(item_color_table_h);
     }
 
-    // FIXME: #warning We no longer call TEStylNew, this helps LB password
+    // FIXME: #warning We no longer call TEStyleNew, this helps LB password
 
     ThePortGuard guard((GrafPtr)dp);
 
@@ -238,14 +230,14 @@ ROMlib_new_dialog_common(DialogPtr dp,
 
         /************************ DO NOT CHECK THIS IN ****************
 	 if (color_p && item_color_table_h)
-	   te = TEStylNew (&emptyrect, &emptyrect);
+	   te = TEStyleNew (&emptyrect, &emptyrect);
 	 else
 	 ***************************************************************/
         te = TENew(&emptyrect, &emptyrect);
 
         DIALOG_TEXTH_X(dp) = RM(te);
         TEAutoView(true, te);
-        DisposHandle(TE_HTEXT(te));
+        DisposeHandle(TE_HTEXT(te));
         TE_HTEXT_X(te) = CLC_NULL;
     }
 
@@ -284,7 +276,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
 }
 
 /* IM-MTE calls this NewColorDialog () */
-CDialogPtr Executor::C_NewCDialog(Ptr storage, Rect *bounds, StringPtr title,
+CDialogPtr Executor::C_NewColorDialog(Ptr storage, Rect *bounds, StringPtr title,
                                   BOOLEAN visible_p, INTEGER proc_id,
                                   WindowPtr behind, BOOLEAN go_away_flag,
                                   LONGINT ref_con, Handle items) /* IMI-412 */
@@ -440,26 +432,26 @@ void Executor::C_CloseDialog(DialogPtr dp) /* IMI-413 */
         while(i-- >= 0)
         {
             if(CB(itp->itmtype) & (editText | statText))
-                DisposHandle((Handle)MR(itp->itmhand));
+                DisposeHandle((Handle)MR(itp->itmhand));
             BUMPIP(itp);
         }
     }
     CloseWindow((WindowPtr)dp);
 }
 
-void Executor::C_DisposDialog(DialogPtr dp) /* IMI-415 */
+void Executor::C_DisposeDialog(DialogPtr dp) /* IMI-415 */
 {
     TEHandle teh;
 
     CloseDialog(dp);
-    DisposHandle(MR(((DialogPeek)dp)->items));
+    DisposeHandle(MR(((DialogPeek)dp)->items));
     teh = DIALOG_TEXTH(dp);
 
     /* accounted for elsewhere */
     TE_HTEXT_X(teh) = NULL;
     TEDispose(teh);
 
-    DisposPtr((Ptr)dp);
+    DisposePtr((Ptr)dp);
 }
 
 /* see dialAlert.c for CouldDialog, FreeDialog */

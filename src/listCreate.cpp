@@ -118,7 +118,7 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     temph = RM(GetResource(TICK("LDEF"), proc));
     if(!(HxX(retval, listDefProc) = temph))
     {
-        DisposHandle((Handle)retval);
+        DisposeHandle((Handle)retval);
         /*-->*/ return 0; /* spooey list definition proc */
     }
 
@@ -210,7 +210,7 @@ void Executor::C_LDispose(ListHandle list) /* IMIV-271 */
                  0, list);
         LISTEND(list);
 
-        DisposHandle((Handle)HxP(list, cells));
+        DisposeHandle((Handle)HxP(list, cells));
         if(HxP(list, hScroll))
             DisposeControl(HxP(list, hScroll));
         if(HxP(list, vScroll))

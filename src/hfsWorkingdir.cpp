@@ -65,7 +65,7 @@ OSErr Executor::ROMlib_mkwd(WDPBPtr pb, HVCB *vcbp, LONGINT dirid,
         else
         {
             BlockMoveData(MR(LM(WDCBsPtr)), newptr, n_wd_bytes);
-            DisposPtr(MR(LM(WDCBsPtr)));
+            DisposePtr(MR(LM(WDCBsPtr)));
             LM(WDCBsPtr) = RM(newptr);
             *(GUEST<INTEGER> *)newptr = CW(new_n_wd_bytes);
             firstfreep = (wdentry *)(newptr + n_wd_bytes);

@@ -45,6 +45,7 @@ int Executor::syncint_init(void)
                     last_interrupt = scheduled_interrupt;
 
                     interrupt_generate(M68K_TIMER_PRIORITY);
+                    getPowerCore().requestInterrupt();
                     wake_cond.notify_all();
                 }
             }
@@ -82,11 +83,14 @@ void Executor::syncint_post(std::chrono::microseconds usecs, bool fromLast)
 #include <iostream>
 #include <unistd.h>
 #include <sys/time.h>
+#include "rsys/cpu.h"
+#include <PowerCore.h>
 
 static void
 handle_itimer_tick(int n)
 {
     interrupt_generate(M68K_TIMER_PRIORITY);
+    getPowerCore().requestInterrupt();
 }
 
 int Executor::syncint_init(void)

@@ -17,6 +17,8 @@
 #include "rsys/hook.h"
 #include "rsys/refresh.h"
 #include "rsys/soundopts.h"
+#include "rsys/cpu.h"
+#include <PowerCore.h>
 
 using namespace Executor;
 
@@ -93,6 +95,9 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
     M68kReg saved_regs[16];
     CCRElement saved_ccnz, saved_ccn, saved_ccc, saved_ccv, saved_ccx;
     unsigned long now_msecs;
+
+    cpu_state.interrupt_pending[M68K_TIMER_PRIORITY] = false;
+    getPowerCore().cancelInterrupt();
 
     /* We save the 68k registers and cc bits away. */
     memcpy(saved_regs, &cpu_state.regs, sizeof saved_regs);
@@ -197,6 +202,24 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
 
     return MAGIC_RTE_ADDRESS;
 }
+
+void Executor::catchalarmPowerPC(PowerCore&)
+{
+    auto& cpu = getPowerCore();
+
+    PowerCoreState saveState = (PowerCoreState&)cpu;
+
+    // TODO: save registers, and so on
+
+    cpu.r[1] -= 128;
+    EM_A7 = cpu.r[1];
+    catchalarm(0,0);
+    cpu.r[1] += 128;
+    EM_A7 = cpu.r[1];
+
+    (PowerCoreState&)cpu = saveState;
+}
+
 
 static void ROMlib_PrimeTime(QElemPtr taskp, LONGINT count)
 {

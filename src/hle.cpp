@@ -38,8 +38,8 @@ void Executor::hle_reset(void)
     if(current_hle_msg == NULL)
         return;
 
-    DisposPtr(MR(guest_cast<Ptr>(current_hle_msg->theMsgEvent.when)));
-    DisposPtr((Ptr)current_hle_msg);
+    DisposePtr(MR(guest_cast<Ptr>(current_hle_msg->theMsgEvent.when)));
+    DisposePtr((Ptr)current_hle_msg);
 
     current_hle_msg = NULL;
 }
@@ -63,7 +63,7 @@ bool Executor::hle_get_event(EventRecord *evt, bool remflag)
         if(remflag)
         {
             hle_q = hle_q->next;
-            DisposPtr((Ptr)t);
+            DisposePtr((Ptr)t);
         }
 
         return true;
@@ -143,7 +143,7 @@ OSErr Executor::C_PostHighLevelEvent(EventRecord *evt, Ptr receiver_id,
     if(MemError() != noErr)
     {
         retval = MemError();
-        DisposPtr((Ptr)hle_msg);
+        DisposePtr((Ptr)hle_msg);
         goto done;
     }
     memcpy(msg_buf_copy, msg_buf, msg_length);
@@ -159,8 +159,8 @@ OSErr Executor::C_PostHighLevelEvent(EventRecord *evt, Ptr receiver_id,
     if(MemError() != noErr)
     {
         retval = MemError();
-        DisposPtr(MR(guest_cast<Ptr>(hle_msg->theMsgEvent.when)));
-        DisposPtr((Ptr)hle_msg);
+        DisposePtr(MR(guest_cast<Ptr>(hle_msg->theMsgEvent.when)));
+        DisposePtr((Ptr)hle_msg);
         goto done;
     }
 

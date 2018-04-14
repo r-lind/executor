@@ -202,10 +202,15 @@ enum
 
 using SelectorFunctionUPP = UPP<OSErr(OSType, GUEST<LONGINT> *)>;
 
-extern OSErr Gestalt(OSType selector, GUEST<LONGINT> *responsep);
-extern OSErr NewGestalt(OSType selector, SelectorFunctionUPP selFunc);
-extern OSErr ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
-                                    SelectorFunctionUPP *oldSelFuncp);
+DISPATCHER_TRAP(GestaltDispatch, 0xA1AD,  D1<0x0600>);
+
+extern OSErr C_Gestalt(OSType selector, GUEST<LONGINT> *responsep);
+REGISTER_SUBTRAP(Gestalt, 0xA1AD, 0x000, GestaltDispatch, D0(D0,Out<LONGINT,A0>));
+extern OSErr C_NewGestalt(OSType selector, SelectorFunctionUPP selFunc);
+REGISTER_SUBTRAP(NewGestalt, 0xA1AD, 0x200, GestaltDispatch, D0(D0,A0));
+extern OSErr C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
+                                    GUEST<SelectorFunctionUPP> *oldSelFuncp);
+REGISTER_SUBTRAP(ReplaceGestalt, 0xA1AD, 0x400, GestaltDispatch, D0(D0,A0,Out<SelectorFunctionUPP,A0>));
 
 extern OSErr C_GestaltTablesOnly(OSType selector,
                                          GUEST<LONGINT> *responsep);

@@ -1031,7 +1031,7 @@ static void restorecloseanddispose(hiddenh h)
     close(HxX(h, fd));
     Uunlink(lockname);
 #endif
-    DisposHandle((Handle)h);
+    DisposeHandle((Handle)h);
 }
 
 OSErr Executor::ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */

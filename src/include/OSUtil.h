@@ -133,11 +133,14 @@ enum
     envVersTooBig = (-5502),
 };
 
+typedef SignedByte TrapType;
+
 enum
 {
-    OSTrap = 0,
-    ToolTrap = 1,
+    kOSTrapType,
+    kToolboxTrapType,
 };
+
 
 const LowMemGlobal<INTEGER> SysVersion { 0x15A }; // OSUtil ThinkC (true);
 const LowMemGlobal<Byte> SPValid { 0x1F8 }; // OSUtil IMII-392 (true);
@@ -160,10 +163,10 @@ const LowMemGlobal<Byte> MMU32Bit { 0xCB2 }; // OSUtil IMV-592 (true-b);
 const LowMemGlobal<QHdr> DTQueue { 0xD92 }; // OSUtil IMV-466 (false);
 const LowMemGlobal<ProcPtr> JDTInstall { 0xD9C }; // OSUtil IMV (false);
 
-extern OSErr HandToHand(Handle *h);
-REGISTER_TRAP2(HandToHand, 0xA9E1, D0(InOut<A0,Handle>), SaveA1D1D2, CCFromD0);
-extern OSErr PtrToHand(Ptr p, Handle *h, LONGINT s);
-REGISTER_TRAP2(PtrToHand, 0xA9E3, D0(A0, Out<A0,Handle>, D0), SaveA1D1D2, CCFromD0);
+extern OSErr HandToHand(GUEST<Handle> *h);
+REGISTER_TRAP2(HandToHand, 0xA9E1, D0(InOut<Handle,A0>), SaveA1D1D2, CCFromD0);
+extern OSErr PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s);
+REGISTER_TRAP2(PtrToHand, 0xA9E3, D0(A0, Out<Handle,A0>, D0), SaveA1D1D2, CCFromD0);
 extern OSErr PtrToXHand(Ptr p, Handle h, LONGINT s);
 REGISTER_TRAP2(PtrToXHand, 0xA9E2, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD0);
 extern OSErr HandAndHand(Handle h1, Handle h2);
@@ -178,17 +181,18 @@ extern INTEGER RelString(StringPtr s1, StringPtr s2,
 extern BOOLEAN EqualString(StringPtr s1, StringPtr s2,
                                    BOOLEAN casesig, BOOLEAN diacsig);
 extern void ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len);
-extern void UprString(StringPtr s, BOOLEAN diac);
+extern void UpperString(StringPtr s, BOOLEAN diac);
 extern void GetDateTime(GUEST<ULONGINT> *mactimepointer);
+NOTRAP_FUNCTION2(GetDateTime);
 
 extern OSErr ReadDateTime(GUEST<ULONGINT> *secs);
 REGISTER_TRAP2(ReadDateTime, 0xA039, D0(A0));
 extern OSErr SetDateTime(ULONGINT mactime);
 REGISTER_TRAP2(SetDateTime, 0xA03A, D0(D0));
-extern void Date2Secs(DateTimeRec *d, ULONGINT *s);
-REGISTER_TRAP2(Date2Secs, 0xA9C7, void(A0, Out<D0, ULONGINT>), SaveA1D1D2);
-extern void Secs2Date(ULONGINT mactime, DateTimeRec *d);
-REGISTER_TRAP2(Secs2Date, 0xA9C6, void(D0,A0), SaveA1D1D2);
+extern void DateToSeconds(DateTimeRec *d, GUEST<ULONGINT> *s);
+REGISTER_TRAP2(DateToSeconds, 0xA9C7, void(A0, Out<ULONGINT,D0>), SaveA1D1D2);
+extern void SecondsToDate(ULONGINT mactime, DateTimeRec *d);
+REGISTER_TRAP2(SecondsToDate, 0xA9C6, void(D0,A0), SaveA1D1D2);
 
 extern void GetTime(DateTimeRec *d);
 extern void SetTime(DateTimeRec *d);
@@ -204,13 +208,34 @@ REGISTER_TRAP2(Enqueue, 0xA96F, void(A0,A1), SaveA1D1D2);
 extern OSErr Dequeue(QElemPtr e, QHdrPtr h);
 REGISTER_TRAP2(Dequeue, 0xA96E, D0(A0,A1), SaveA1D1D2);
 
-extern LONGINT GetTrapAddress(INTEGER n);
-extern LONGINT NGetTrapAddress(INTEGER n, INTEGER ttype);
-extern void SetTrapAddress(LONGINT addr,
-                           INTEGER n);
+//extern LONGINT GetTrapAddress(INTEGER n); // 68K in emustubs, not supported on ppc
+//extern void SetTrapAddress(LONGINT addr,
+//                           INTEGER n);
 
-extern void Delay(LONGINT n, LONGINT *ftp);
-REGISTER_TRAP2(Delay, 0xA03B, void(A0,Out<D0,LONGINT>));
+extern LONGINT C_NGetTrapAddress(INTEGER n, TrapType ttype);
+NOTRAP_FUNCTION(NGetTrapAddress);
+extern void C_NSetTrapAddress(LONGINT addr, INTEGER n, TrapType ttype);
+NOTRAP_FUNCTION(NSetTrapAddress);
+
+// trap implementation in emustubs for historical reasons (TODO: clean this up)
+extern LONGINT C_GetOSTrapAddress(INTEGER n);
+NOTRAP_FUNCTION(GetOSTrapAddress);
+extern void C_SetOSTrapAddress(LONGINT addr, INTEGER n);
+NOTRAP_FUNCTION(SetOSTrapAddress);
+extern LONGINT C_GetToolTrapAddress(INTEGER n);
+NOTRAP_FUNCTION(GetToolTrapAddress);
+extern void C_SetToolTrapAddress(LONGINT addr, INTEGER n);
+NOTRAP_FUNCTION(SetToolTrapAddress);
+inline LONGINT C_GetToolboxTrapAddress(INTEGER n)
+    { return C_GetToolTrapAddress(n); }
+NOTRAP_FUNCTION(GetToolboxTrapAddress);
+inline void C_SetToolboxTrapAddress(LONGINT addr, INTEGER n)
+    { C_SetToolTrapAddress(addr,n); }
+NOTRAP_FUNCTION(SetToolboxTrapAddress);
+
+
+extern void Delay(LONGINT n, GUEST<LONGINT> *ftp);
+REGISTER_TRAP2(Delay, 0xA03B, void(A0,Out<LONGINT,D0>));
 
 extern void C_SysBeep(INTEGER i);
 PASCAL_TRAP(SysBeep, 0xA9C8);
@@ -230,5 +255,18 @@ extern LONGINT StripAddress(LONGINT l);
 
 extern void C_DebugStr(StringPtr p);
 PASCAL_TRAP(DebugStr, 0xABFF);
+
+extern void C_Debugger();
+PASCAL_TRAP(Debugger, 0xA9FF);
+
+extern void
+C_MakeDataExecutable(void *ptr, uint32_t sz);
+NOTRAP_FUNCTION(MakeDataExecutable);
+
+extern LONGINT SetCurrentA5();
+NOTRAP_FUNCTION2(SetCurrentA5);
+extern LONGINT SetA5(LONGINT newA5);
+NOTRAP_FUNCTION2(SetA5);
+
 }
 #endif /* __OSUTIL__ */

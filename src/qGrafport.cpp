@@ -148,12 +148,12 @@ void Executor::C_ClosePort(GrafPtr p)
         {
             if(CGrafPort_p(p))
             {
-                DisposPixPat(CPORT_BK_PIXPAT(p));
-                DisposPixPat(CPORT_PEN_PIXPAT(p));
-                DisposPixPat(CPORT_FILL_PIXPAT(p));
-                DisposHandle((Handle)CPORT_PIXMAP(p)); /* NOT DisposPixMap */
+                DisposePixPat(CPORT_BK_PIXPAT(p));
+                DisposePixPat(CPORT_PEN_PIXPAT(p));
+                DisposePixPat(CPORT_FILL_PIXPAT(p));
+                DisposeHandle((Handle)CPORT_PIXMAP(p)); /* NOT DisposePixMap */
 
-                DisposHandle((Handle)CPORT_GRAFVARS(p));
+                DisposeHandle((Handle)CPORT_GRAFVARS(p));
             }
         }
     }

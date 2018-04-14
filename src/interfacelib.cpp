@@ -1279,7 +1279,7 @@ CDialogPtr
 NewCDialog_SYSV4(Ptr p, Rect *rp, StringPtr sp, BOOLEAN b1, INTEGER i,
                  WindowPtr wp, BOOLEAN b2, const newcdialog_aixtosysv4 *pbp)
 {
-    return NewCDialog(p, rp, sp, b1, i, wp, b2, pbp->l, pbp->h);
+    return NewColorDialog(p, rp, sp, b1, i, wp, b2, pbp->l, pbp->h);
 }
 
 DialogPtr
@@ -1573,7 +1573,7 @@ LFind_PC(INTEGER *offsetp, INTEGER *lenp, CellAsLong cellAL, ListHandle list)
     warning_trace_info(NULL_STRING);
     cell.h = cellAL;
     cell.v = cellAL >> 16;
-    LFind(offsetp, lenp, cell, list);
+    LGetCellDataLocation(offsetp, lenp, cell, list);
 }
 
 static void
@@ -2346,7 +2346,7 @@ static void
 ReserveMem_wrapper(Size size)
 {
     warning_trace_info(NULL_STRING);
-    ResrvMem(size);
+    ReserveMem(size);
 }
 
 static uint32_t
@@ -2955,10 +2955,10 @@ static map_entry_t
             "PBGetEOFSync", PBGetEOFSync,
         },
         {
-            "DisposeHandle", DisposHandle,
+            "DisposeHandle", DisposeHandle,
         },
         {
-            "UpdateDialog", C_UpdtDialog,
+            "UpdateDialog", C_UpdateDialog,
         },
         {
             "TestDeviceAttribute", C_TestDeviceAttribute,
@@ -2969,10 +2969,10 @@ static map_entry_t
         },
 #endif
         {
-            "GetControlReference", C_GetCRefCon,
+            "GetControlReference", C_GetControlReference,
         },
         {
-            "RemoveResource", C_RmveResource,
+            "RemoveResource", C_RemoveResource,
         },
         {
             "EndUpdate", C_EndUpdate,
@@ -2990,7 +2990,7 @@ static map_entry_t
             "HideControl", C_HideControl,
         },
         {
-            "SetControlTitle", C_SetCTitle,
+            "SetControlTitle", C_SetControlTitle,
         },
         {
             "BeginUpdate", C_BeginUpdate,
@@ -3017,7 +3017,7 @@ static map_entry_t
             "UpdateResFile", C_UpdateResFile,
         },
         {
-            "GetControlTitle", C_GetCTitle,
+            "GetControlTitle", C_GetControlTitle,
         },
         {
             "FindWindow", FindWindow_PC,
@@ -3069,7 +3069,7 @@ static map_entry_t
             "FlushEvents", FlushEvents,
         },
         {
-            "GetDialogItem", C_GetDItem,
+            "GetDialogItem", C_GetDialogItem,
         },
         {
             "CountResources", C_CountResources,
@@ -3096,7 +3096,7 @@ static map_entry_t
             "GetClip", C_GetClip,
         },
         {
-            "SetDialogItem", C_SetDItem,
+            "SetDialogItem", C_SetDialogItem,
         },
         ///////  { "DebugStr", C_DebugStr, },
         {
@@ -3160,7 +3160,7 @@ static map_entry_t
         },
         //  { "AERemoveSpecialHandler", C_AERemoveSpecialHandler, },
         {
-            "GetResourceSizeOnDisk", C_SizeResource,
+            "GetResourceSizeOnDisk", C_GetResourceSizeOnDisk,
         },
         //  { "HoldMemory", C_HoldMemory, },
         {
@@ -3200,7 +3200,7 @@ static map_entry_t
             "HCreate", HCreate,
         },
         {
-            "SetControlMaximum", C_SetCtlMax,
+            "SetControlMaximum", C_SetControlMaximum,
         },
         {
             "NewPtr", NewPtr_wrapper,
@@ -3219,7 +3219,7 @@ static map_entry_t
             "PBSetFPosSync", PBSetFPosSync,
         },
         {
-            "GetControlMaximum", C_GetCtlMax,
+            "GetControlMaximum", C_GetControlMaximum,
         },
         {
             "EqualString", EqualString,
@@ -3288,7 +3288,7 @@ static map_entry_t
             "GetWRefCon", C_GetWRefCon,
         },
         {
-            "GetDialogItemText", C_GetIText,
+            "GetDialogItemText", C_GetDialogItemText,
         },
         {
             "RGBBackColor", C_RGBBackColor,
@@ -3333,7 +3333,7 @@ static map_entry_t
         },
         //  { "FSRead", C_FSRead, },
         {
-            "SelectDialogItemText", C_SelIText,
+            "SelectDialogItemText", C_SelectDialogItemText,
         },
         {
             "GetIndResource", C_GetIndResource,
@@ -3363,7 +3363,7 @@ static map_entry_t
             "GetBackColor", C_GetBackColor,
         },
         {
-            "DisposeDialog", C_DisposDialog,
+            "DisposeDialog", C_DisposeDialog,
         },
         {
             "LMSetResErr", LMSetResErr,
@@ -3388,7 +3388,7 @@ static map_entry_t
             "SetFPos", SetFPos,
         },
         {
-            "GetScriptManagerVariable", C_GetEnvirons,
+            "GetScriptManagerVariable", C_GetScriptManagerVariable,
         },
         //  { "FSDelete", C_FSDelete, },
         //  { "AEGetSpecialHandler", C_AEGetSpecialHandler, },
@@ -3422,7 +3422,7 @@ static map_entry_t
             "MaxBlock", MaxBlock_wrapper,
         },
         {
-            "ShowDialogItem", C_ShowDItem,
+            "ShowDialogItem", C_ShowDialogItem,
         },
         {
             "FSMakeFSSpec", C_FSMakeFSSpec,
@@ -3472,7 +3472,7 @@ static map_entry_t
             "SetWTitle", C_SetWTitle,
         },
         {
-            "HideDialogItem", C_HideDItem,
+            "HideDialogItem", C_HideDialogItem,
         },
         {
             "HUnlock", HUnlock,
@@ -3485,10 +3485,10 @@ static map_entry_t
             "BackColor", C_BackColor,
         },
         {
-            "DisposePtr", DisposPtr,
+            "DisposePtr", DisposePtr,
         },
         {
-            "SetControlValue", C_SetCtlValue,
+            "SetControlValue", C_SetControlValue,
         },
         {
             "LMSetHeapEnd", LMSetHeapEnd,
@@ -3552,7 +3552,7 @@ static map_entry_t
             "SelectWindow", C_SelectWindow,
         },
         {
-            "SetDialogItemText", C_SetIText,
+            "SetDialogItemText", C_SetDialogItemText,
         },
         {
             "InlineGetHandleSize", GetHandleSize,
@@ -3655,10 +3655,10 @@ static map_entry_t
             "TEGetHeight", C_TEGetHeight,
         },
         {
-            "DisposePixPat", C_DisposPixPat,
+            "DisposePixPat", C_DisposePixPat,
         },
         {
-            "TEStyleNew", C_TEStylNew,
+            "TEStyleNew", C_TEStyleNew,
         },
         {
             "InvertRect", C_InvertRect,
@@ -3754,7 +3754,7 @@ static map_entry_t
             "GetString", C_GetString,
         },
         {
-            "GetMenuItemText", C_GetItem,
+            "GetMenuItemText", C_GetMenuItemText,
         },
         {
             "OffsetRect", C_OffsetRect,
@@ -3769,13 +3769,13 @@ static map_entry_t
             "InsetRgn", C_InsetRgn,
         },
         {
-            "DisposePixMap", C_DisposPixMap,
+            "DisposePixMap", C_DisposePixMap,
         },
         {
             "AppendMenu", C_AppendMenu,
         },
         {
-            "GetControlValue", C_GetCtlValue,
+            "GetControlValue", C_GetControlValue,
         },
         {
             "SetDepth", C_SetDepth,
@@ -3835,7 +3835,7 @@ static map_entry_t
             "PrintDefault", C_PrintDefault,
         },
         {
-            "InsertMenuItem", C_InsMenuItem,
+            "InsertMenuItem", C_InsertMenuItem,
         },
         {
             "DisposeControl", C_DisposeControl,
@@ -3874,7 +3874,7 @@ static map_entry_t
             "EnableIdle", EnableIdle_nop,
         },
         {
-            "SetMenuItemText", C_SetItem,
+            "SetMenuItemText", C_SetMenuItemText,
         },
         {
             "AEGetNthPtr", C_AEGetNthPtr,
@@ -3901,13 +3901,13 @@ static map_entry_t
             "DisableItem", C_DisableItem,
         },
         {
-            "AEGetParamDesc", C_AEGetKeyDesc,
+            "AEGetParamDesc", C_AEGetParamDesc,
         },
         {
             "GetTime", GetTime,
         },
         {
-            "DisposeCTable", C_DisposCTable,
+            "DisposeCTable", C_DisposeCTable,
         },
         {
             "FrameRgn", C_FrameRgn,
@@ -3926,7 +3926,7 @@ static map_entry_t
             "GetMouse", C_GetMouse,
         },
         {
-            "TEStyleInsert", C_TEStylInsert,
+            "TEStyleInsert", C_TEStyleInsert,
         },
         {
             "GetResInfo", C_GetResInfo,
@@ -3965,7 +3965,7 @@ static map_entry_t
             "DisposeWindow", C_DisposeWindow,
         },
         {
-            "AppendResMenu", C_AddResMenu,
+            "AppendResMenu", C_AppendResMenu,
         },
         {
             "c2pstr", c2pstr,
@@ -4037,7 +4037,7 @@ static map_entry_t
             "TEAutoView", C_TEAutoView,
         },
         {
-            "TETextBox", C_TextBox,
+            "TETextBox", C_TETextBox,
         },
         {
             "CheckItem", C_CheckItem,
@@ -4286,7 +4286,7 @@ static map_entry_t
             "PrSetError", C_PrSetError,
         },
         {
-            "AEGetParamPtr", C_AEGetKeyPtr,
+            "AEGetParamPtr", C_AEGetParamPtr,
         },
         {
             "GetLastEditionContainerUsed", C_GetLastEditionContainerUsed,
@@ -4295,7 +4295,7 @@ static map_entry_t
             "NewWindow", C_NewWindow,
         },
         {
-            "GetScript", C_GetScript,
+            "GetScriptVariable", C_GetScriptVariable,
         },
         {
             "CreateResFile", C_CreateResFile,
@@ -4356,7 +4356,7 @@ static map_entry_t
             "FixMul", C_FixMul,
         },
         {
-            "FontToScript", C_Font2Script,
+            "FontToScript", C_FontToScript,
         },
         {
             "GetApplLimit", LMGetApplLimit,
@@ -4395,13 +4395,13 @@ static map_entry_t
             "GetFInfo", GetFInfo,
         },
         {
-            "GetMenuHandle", C_GetMHandle,
+            "GetMenuHandle", C_GetMenuHandle,
         },
         {
             "LNextCell", C_LNextCell,
         },
         {
-            "GetControlMinimum", C_GetCtlMin,
+            "GetControlMinimum", C_GetControlMinimum,
         },
         {
             "OpenDriver", OpenDriver,
@@ -4453,7 +4453,7 @@ static map_entry_t
             "CloseEdition", C_CloseEdition,
         },
         {
-            "SetControlMinimum", C_SetCtlMin,
+            "SetControlMinimum", C_SetControlMinimum,
         },
         //  { "NBPExtract", C_NBPExtract, },
         {
@@ -4476,7 +4476,7 @@ static map_entry_t
         },
         //  { "Frac2X", C_Frac2X, },
         {
-            "GetIntlResource", C_IUGetIntl,
+            "GetIntlResource", C_GetIntlResource,
         },
         {
             "TextWidth", C_TextWidth,
@@ -4578,7 +4578,7 @@ static map_entry_t
             "GetCaretTime", GetCaretTime,
         },
         {
-            "AEPutParamDesc", C_AEPutKeyDesc,
+            "AEPutParamDesc", C_AEPutParamDesc,
         },
         {
             "GetGrayRgn", LMGetGrayRgn,
@@ -4587,10 +4587,10 @@ static map_entry_t
             "TESetText", C_TESetText,
         },
         {
-            "DisposeCCursor", C_DisposCCursor,
+            "DisposeCCursor", C_DisposeCCursor,
         },
         {
-            "DialogCut", DlgCut,
+            "DialogCut", DialogCut,
         },
         {
             "GetGWorld", C_GetGWorld,
@@ -4642,10 +4642,10 @@ static map_entry_t
             "AECreateList", C_AECreateList,
         },
         {
-            "SecondsToDate", Secs2Date,
+            "SecondsToDate", SecondsToDate,
         },
         {
-            "DeleteMenuItem", C_DelMenuItem,
+            "DeleteMenuItem", C_DeleteMenuItem,
         },
         {
             "SetApplLimit", SetApplLimit,
@@ -4657,7 +4657,7 @@ static map_entry_t
             "EmptyRgn", C_EmptyRgn,
         },
         {
-            "GetMaxResourceSize", C_MaxSizeRsrc,
+            "GetMaxResourceSize", C_GetMaxResourceSize,
         },
         {
             "GetGWorldPixMap", C_GetGWorldPixMap,
@@ -4680,7 +4680,7 @@ static map_entry_t
             "GetEditionInfo", C_GetEditionInfo,
         },
         {
-            "DateToSeconds", Date2Secs,
+            "DateToSeconds", DateToSeconds,
         },
         {
             "AEGetAttributePtr", C_AEGetAttributePtr,
@@ -4689,7 +4689,7 @@ static map_entry_t
             "IUTimeString", C_IUTimeString,
         },
         {
-            "KeyTranslate", C_KeyTrans,
+            "KeyTranslate", C_KeyTranslate,
         },
         //  { "PKillNBP", C_PKillNBP, },
         {
@@ -4735,7 +4735,7 @@ static map_entry_t
             "ReserveMem", ReserveMem_wrapper,
         },
         {
-            "LSetDrawingMode", C_LDoDraw,
+            "LSetDrawingMode", C_LSetDrawingMode,
         },
         {
             "GetOSEvent", GetOSEvent,
@@ -4866,10 +4866,10 @@ static map_entry_t
             "SetCCursor", C_SetCCursor,
         },
         {
-            "ReallocateHandle", ReallocHandle,
+            "ReallocateHandle", ReallocateHandle,
         },
         {
-            "DialogDelete", DlgDelete,
+            "DialogDelete", DialogDelete,
         },
         {
             "DIBadMount", DIBadMount_PC,
@@ -4884,10 +4884,10 @@ static map_entry_t
             "SetPtrSize", SetPtrSize,
         },
         {
-            "UpdateControls", C_UpdtControl,
+            "UpdateControls", C_UpdateControls,
         },
         {
-            "DialogPaste", DlgPaste,
+            "DialogPaste", DialogPaste,
         },
         {
             "DrawChar", C_DrawChar,
@@ -4896,7 +4896,7 @@ static map_entry_t
             "MovePortTo", C_MovePortTo,
         },
         {
-            "DialogCopy", DlgCopy,
+            "DialogCopy", DialogCopy,
         },
         {
             "PtrToXHand", PtrToXHand,
@@ -5029,7 +5029,7 @@ static map_entry_t
             "FSpDelete", C_FSpDelete,
         },
         {
-            "TESetAlignment", C_TESetJust,
+            "TESetAlignment", C_TESetAlignment,
         },
         //  { "ptinrect", C_ptinrect, },
         {
@@ -5131,7 +5131,7 @@ static map_entry_t
         //  { "SameProcess", C_SameProcess, },
         //  { "setvol", C_setvol, },
         {
-            "ResetAlertStage", ResetAlrtStage,
+            "ResetAlertStage", ResetAlertStage,
         },
         {
             "GetWVariant", C_GetWVariant,
@@ -5156,7 +5156,7 @@ static map_entry_t
 
         //  { "DirCreate", C_DirCreate, }, /* photoshop 5.5 demo */
         {
-            "SetControlColor", C_SetCtlColor,
+            "SetControlColor", C_SetControlColor,
         },
         {
             "LMGetGZRootHnd", LMGetGZRootHnd,
@@ -5277,11 +5277,11 @@ static map_entry_t
             "QDDone", C_QDDone,
         },
         {
-            "UpperString", UprString,
+            "UpperString", UpperString,
         },
         //  { "NBPExtract", C_NBPExtract, },
         {
-            "TESetWordBreak", SetWordBreak,
+            "TESetWordBreak", TESetWordBreak,
         },
         {
             "LMGetCurActivate", LMGetCurActivate,
@@ -5306,7 +5306,7 @@ static map_entry_t
             "SetMCEntries", C_SetMCEntries,
         },
         {
-            "IsMetric", C_IUMetric,
+            "IsMetric", C_IsMetric,
         },
         //  { "GetDCtlEntry", C_GetDCtlEntry, },
         {
@@ -5345,7 +5345,7 @@ static map_entry_t
             "AEPutAttributePtr", C_AEPutAttributePtr,
         },
         {
-            "GetScriptVariable", C_GetScript,
+            "GetScriptVariable", C_GetScriptVariable,
         },
         {
             "FSpOpenRF", C_FSpOpenRF,
@@ -5386,7 +5386,7 @@ static map_entry_t
         },
         //  { "FindNextComponent", C_FindNextComponent, },
         {
-            "GetControlVariant", C_GetCVariant,
+            "GetControlVariant", C_GetControlVariant,
         },
         //  { "POpenATPSkt", C_POpenATPSkt, },
         {
@@ -5476,13 +5476,13 @@ static map_entry_t
         },
         //  { "PBControlAsync", C_PBControlAsync, },
         {
-            "LongDateToSeconds", C_LongDate2Secs,
+            "LongDateToSeconds", C_LongDateToSeconds,
         },
         {
-            "LongSecondsToDate", C_LongSecs2Date,
+            "LongSecondsToDate", C_LongSecondsToDate,
         },
         {
-            "SetControlReference", C_SetCRefCon,
+            "SetControlReference", C_SetControlReference,
         },
         //  { "IUEqualString", C_IUEqualString, },
         {
@@ -5527,7 +5527,7 @@ static map_entry_t
             "SystemEvent", C_SystemEvent,
         },
         {
-            "AEDeleteParam", C_AEDeleteKeyDesc,
+            "AEDeleteParam", C_AEDeleteParam,
         },
         //  { "PCloseATPSkt", C_PCloseATPSkt, },
         {
@@ -5596,7 +5596,7 @@ static map_entry_t
         //  { "SetControlColor", C_SetControlColor, },
         //  { "IdleUpdate", C_IdleUpdate, },
         {
-            "TESetScrapLength", TESetScrapLen,
+            "TESetScrapLength", TESetScrapLength,
         },
         {
             "BackPat", C_BackPat,
@@ -5659,14 +5659,14 @@ static map_entry_t
             "SndSetSysBeepState", C_SndSetSysBeepState,
         },
         {
-            "TESetClickLoop", SetClikLoop,
+            "TESetClickLoop", TESetClickLoop,
         },
         {
             "GetAuxWin", C_GetAuxWin,
         },
         //  { "PBSetFPosAsync", C_PBSetFPosAsync, },
         {
-            "TEGetScrapLength", TEGetScrapLen,
+            "TEGetScrapLength", TEGetScrapLength,
         },
         //  { "CloseComponent", C_CloseComponent, },
         {
@@ -5690,7 +5690,7 @@ static map_entry_t
             "MaxMem", MaxMem_wrapper,
         },
         {
-            "GetAuxiliaryControlRecord", C_GetAuxCtl,
+            "GetAuxiliaryControlRecord", C_GetAuxiliaryControlRecord,
         },
         {
             "SetEntryColor", C_SetEntryColor,
@@ -5755,7 +5755,7 @@ static map_entry_t
             "HMGetIndHelpMsg", HMGetIndHelpMsg_AIX,
         },
         {
-            "NewCDialog", NewCDialog_AIX,
+            "NewColorDialog", NewCDialog_AIX,
         },
         {
             "OutlineMetrics", OutlineMetrics_AIX,
@@ -5860,7 +5860,7 @@ static map_entry_t
             "FMSwapFont", C_FMSwapFont,
         },
         {
-            "FindDialogItem", C_FindDItem,
+            "FindDialogItem", C_FindDialogItem,
         },
         {
             "GetDefaultOutputVolume", C_GetDefaultOutputVolume,
@@ -5903,19 +5903,19 @@ static map_entry_t
             "FrameArc", C_FrameArc,
         },
         {
-            "SetScriptManagerVariable", C_SetEnvirons,
+            "SetScriptManagerVariable", C_SetScriptManagerVariable,
         },
         {
-            "SetScriptVariable", C_SetScript,
+            "SetScriptVariable", C_SetScriptVariable,
         },
         {
-            "SetIntlResource", C_IUSetIntl,
+            "SetIntlResource", C_SetIntlResource,
         },
         {
-            "ClearIntlResourceCache", C_IUClearCache,
+            "ClearIntlResourceCache", C_ClearIntlResourceCache,
         },
         {
-            "GetIntlResourceTable", C_IUGetItlTable,
+            "GetIntlResourceTable", C_GetIntlResourceTable,
         },
         {
             "SetSysDirection", LMSetTESysJust,
@@ -6019,7 +6019,7 @@ static map_entry_t
             "RGB2CMY", C_RGB2CMY,
         },
         {
-            "DisposCTable", C_DisposCTable,
+            "DisposeCTable", C_DisposeCTable,
         },
         {
             "InitPalettes", C_InitPalettes,
@@ -6043,7 +6043,7 @@ static map_entry_t
             "Palette2CTab", C_Palette2CTab,
         },
         {
-            "DisposCCursor", C_DisposCCursor,
+            "DisposeCCursor", C_DisposeCCursor,
         },
         {
             "AllocCursor", C_AllocCursor,
@@ -6272,7 +6272,7 @@ static map_entry_t
             "MenuChoice", C_MenuChoice,
         },
         {
-            "DeleteMCEntries", C_DelMCEntries,
+            "DeleteMCEntries", C_DeleteMCEntries,
         },
         {
             "GetMCInfo", C_GetMCInfo,
@@ -6281,7 +6281,7 @@ static map_entry_t
             "SetMCInfo", C_SetMCInfo,
         },
         {
-            "DisposeMCInfo", C_DispMCInfo,
+            "DisposeMCInfo", C_DisposeMCInfo,
         },
 
         {
@@ -6303,7 +6303,7 @@ static map_entry_t
             "CalcMask", C_CalcMask,
         },
         {
-            "DisposPixPat", C_DisposPixPat,
+            "DisposePixPat", C_DisposePixPat,
         },
         {
             "ScalePt", C_ScalePt,
@@ -6384,7 +6384,7 @@ static map_entry_t
             "AEInstallCoercionHandler", C_AEInstallCoercionHandler,
         },
         {
-            "AEPutParamPtr", C_AEPutKeyPtr,
+            "AEPutParamPtr", C_AEPutParamPtr,
         },
         {
             "AERemoveCoercionHandler", C_AERemoveCoercionHandler,
@@ -6393,7 +6393,7 @@ static map_entry_t
             "AEGetCoercionHandler", C_AEGetCoercionHandler,
         },
         {
-            "LFind", LFind_PC,
+            "LGetCellDataLocation", LFind_PC,
         },
         {
             "LRect", LRect_PC,
@@ -6427,10 +6427,10 @@ static map_entry_t
         },
 
         {
-            "StringToTime", C_String2Time,
+            "StringToTime", C_StringToTime,
         },
         {
-            "StringToDate", C_String2Date,
+            "StringToDate", C_StringToDate,
         },
         {
             "MacReplaceText", C_ReplaceText,
@@ -6506,10 +6506,10 @@ static map_entry_t
             "LMGetBufPtr", LMGetBufPtr,
         },
         {
-            "SetControlAction", C_SetCtlAction,
+            "SetControlAction", C_SetControlAction,
         },
         {
-            "GetControlAction", C_GetCtlAction,
+            "GetControlAction", C_GetControlAction,
         },
         {
             "SetOSTrapAddress", SetOSTrapAddress,

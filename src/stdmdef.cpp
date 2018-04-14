@@ -793,6 +793,6 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
             break;
     }
     HUnlock((Handle)th);
-    DisposHandle((Handle)th);
+    DisposeHandle((Handle)th);
     SetPort(saveport);
 }

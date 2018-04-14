@@ -11,9 +11,11 @@
 
 #define swap16(v) _byteswap_ushort(v)
 #define swap32(v) _byteswap_ulong(v)
+#define swap64(v) _byteswap_uint64(v)
 #else
 #define swap16(v) ((uint16_t)__builtin_bswap16((uint32_t)(v)))
-#define swap32(v) ((uint32_t)__builtin_bswap32((int32_t)(v)))
+#define swap32(v) ((uint32_t)__builtin_bswap32((uint32_t)(v)))
+#define swap64(v) ((uint64_t)__builtin_bswap64((uint64_t)(v)))
 #endif
 
 #endif /* !defined (__arch_x86_64_h__) */

@@ -181,7 +181,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
             INTEGER min, max;
 
             ROMlib_hminmax(&min, &max, STARH(list));
-            SetCtlMax(control, max);
+            SetControlMaximum(control, max);
         }
     }
     {
@@ -192,7 +192,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
             INTEGER min, max;
 
             ROMlib_vminmax(&min, &max, STARH(list));
-            SetCtlMax(control, max);
+            SetControlMaximum(control, max);
         }
     }
 }

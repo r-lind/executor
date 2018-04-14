@@ -216,7 +216,7 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
     }
 }
 
-void Executor::C_DisposCTable(CTabHandle ctab)
+void Executor::C_DisposeCTable(CTabHandle ctab)
 {
-    DisposHandle((Handle)ctab);
+    DisposeHandle((Handle)ctab);
 }

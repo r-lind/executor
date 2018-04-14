@@ -77,7 +77,7 @@ GetDControl(DialogPtr dp, INTEGER itemno)
     ControlHandle retval;
     GUEST<INTEGER> unused;
 
-    GetDItem(dp, itemno, &unused, &h, NULL);
+    GetDialogItem(dp, itemno, &unused, &h, NULL);
     retval = (ControlHandle)MR(h);
     return retval;
 }
@@ -89,7 +89,7 @@ GetDIText(DialogPtr dp, INTEGER itemno)
     Handle retval;
     GUEST<INTEGER> unused;
 
-    GetDItem(dp, itemno, &unused, &h, NULL);
+    GetDialogItem(dp, itemno, &unused, &h, NULL);
     retval = MR(h);
 
     return retval;
@@ -103,11 +103,15 @@ GetDILong(DialogPtr dp, INTEGER item, LONGINT _default)
     Handle h;
 
     h = GetDIText(dp, item);
-    GetIText(h, str);
+    GetDialogItemText(h, str);
     if(str[0] == 0 || str[1] < '0' || str[1] > '9')
         retval = _default;
     else
-        StringToNum(str, &retval);
+    {
+        GUEST<LONGINT> tmp;
+        StringToNum(str, &tmp);
+        retval = CL(tmp);
+    }
     return retval;
 }
 
@@ -127,7 +131,7 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
 
             hPrint = MR(((TPPrDlg)dp)->hPrintUsr);
             ch = GetDControl(dp, PRINT_ALL_RADIO_NO);
-            if(GetCtlValue(ch))
+            if(GetControlValue(ch))
             {
                 HxX(hPrint, prJob.iFstPage) = CWC(1);
                 HxX(hPrint, prJob.iLstPage) = CWC(9999);
@@ -175,13 +179,13 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
             ControlHandle ch;
 
             ch = GetDControl(dp, PRINT_ALL_RADIO_NO);
-            SetCtlValue(ch, itemno == PRINT_ALL_RADIO_NO ? 1 : 0);
+            SetControlValue(ch, itemno == PRINT_ALL_RADIO_NO ? 1 : 0);
             ch = GetDControl(dp, PRINT_FROM_RADIO_NO);
-            SetCtlValue(ch, itemno == PRINT_ALL_RADIO_NO ? 0 : 1);
+            SetControlValue(ch, itemno == PRINT_ALL_RADIO_NO ? 0 : 1);
             if(itemno == PRINT_ALL_RADIO_NO)
             {
-                SetIText(GetDIText(dp, PRINT_FIRST_BOX_NO), (StringPtr) "");
-                SetIText(GetDIText(dp, PRINT_LAST_BOX_NO), (StringPtr) "");
+                SetDialogItemText(GetDIText(dp, PRINT_FIRST_BOX_NO), (StringPtr) "");
+                SetDialogItemText(GetDIText(dp, PRINT_LAST_BOX_NO), (StringPtr) "");
             }
         }
         default:;
@@ -197,9 +201,9 @@ add_orientation_icons_to_update_region(DialogPtr dp)
 
     gp = thePort;
     SetPort(dp);
-    GetDItem(dp, LAYOUT_PORTRAIT_NO, &unused, NULL, &r);
+    GetDialogItem(dp, LAYOUT_PORTRAIT_NO, &unused, NULL, &r);
     InvalRect(&r);
-    GetDItem(dp, LAYOUT_LANDSCAPE_NO, &unused, NULL, &r);
+    GetDialogItem(dp, LAYOUT_LANDSCAPE_NO, &unused, NULL, &r);
     InvalRect(&r);
     SetPort(gp);
 }
@@ -279,7 +283,7 @@ find_item_key(DialogPtr dlg, INTEGER itemno)
 
     ch = GetDControl(dlg, itemno);
     mh = GetPopUpMenu(ch);
-    GetItem(mh, GetCtlValue(ch), text);
+    GetMenuItemText(mh, GetControlValue(ch), text);
     retval = cstring_from_str255(text);
     return retval;
 }
@@ -381,7 +385,7 @@ get_popup_bounding_box(Rect *rp, DialogPtr dp, INTEGER itemno)
 {
     GUEST<INTEGER> unused;
 
-    GetDItem(dp, itemno, &unused, NULL, rp);
+    GetDialogItem(dp, itemno, &unused, NULL, rp);
     rp->left = CW(CW(rp->left) - 1);
     rp->bottom = CW(CW(rp->bottom) + 3);
 }
@@ -419,21 +423,21 @@ update_port(DialogPtr dp)
 
             get_popup_bounding_box(&r, dp, LAYOUT_PORT_MENU_NO);
             EraseRect(&r);
-            HideDItem(dp, LAYOUT_PORT_LABEL_NO);
-            HideDItem(dp, LAYOUT_PORT_MENU_NO);
+            HideDialogItem(dp, LAYOUT_PORT_LABEL_NO);
+            HideDialogItem(dp, LAYOUT_PORT_MENU_NO);
             vdriver_flush_display();
 #endif
-            ShowDItem(dp, LAYOUT_FILENAME_LABEL_NO);
+            ShowDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
             if(!filename_chosen_p)
             {
                 Str255 str;
 
                 unique_file_name(ROMlib_spool_template.c_str(), "execout*.ps", str);
-                SetIText(GetDIText(dp, LAYOUT_FILENAME_NO), str);
+                SetDialogItemText(GetDIText(dp, LAYOUT_FILENAME_NO), str);
                 filename_chosen_p = true;
             }
-            ShowDItem(dp, LAYOUT_FILENAME_NO);
-            SelIText(dp, LAYOUT_FILENAME_NO, 0, 32767);
+            ShowDialogItem(dp, LAYOUT_FILENAME_NO);
+            SelectDialogItemText(dp, LAYOUT_FILENAME_NO, 0, 32767);
             print_where = PRINT_TO_FILE;
         }
     }
@@ -446,10 +450,10 @@ update_port(DialogPtr dp)
 
             get_popup_bounding_box(&r, dp, LAYOUT_PORT_MENU_NO);
             EraseRect(&r);
-            HideDItem(dp, LAYOUT_PORT_LABEL_NO);
-            HideDItem(dp, LAYOUT_PORT_MENU_NO);
-            HideDItem(dp, LAYOUT_FILENAME_LABEL_NO);
-            HideDItem(dp, LAYOUT_FILENAME_NO);
+            HideDialogItem(dp, LAYOUT_PORT_LABEL_NO);
+            HideDialogItem(dp, LAYOUT_PORT_MENU_NO);
+            HideDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
+            HideDialogItem(dp, LAYOUT_FILENAME_NO);
             vdriver_flush_display();
             print_where = PRINT_TO_WIN32;
         }
@@ -459,14 +463,14 @@ update_port(DialogPtr dp)
     {
         if(print_where != PRINT_TO_PORT)
         {
-            HideDItem(dp, LAYOUT_FILENAME_LABEL_NO);
-            HideDItem(dp, LAYOUT_FILENAME_NO);
+            HideDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
+            HideDialogItem(dp, LAYOUT_FILENAME_NO);
 #if !defined(LINUX)
             {
                 Rect r;
 
-                ShowDItem(dp, LAYOUT_PORT_LABEL_NO);
-                ShowDItem(dp, LAYOUT_PORT_MENU_NO);
+                ShowDialogItem(dp, LAYOUT_PORT_LABEL_NO);
+                ShowDialogItem(dp, LAYOUT_PORT_MENU_NO);
                 get_popup_bounding_box(&r, dp, LAYOUT_PORT_MENU_NO);
                 InvalRect(&r);
             }
@@ -587,7 +591,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
             GlobalToLocal(&glocalp);
             localp = glocalp.get();
             SetPort(gp);
-            GetDItem(dlg, OK, &unused, &h, &r);
+            GetDialogItem(dlg, OK, &unused, &h, &r);
             if(PtInRect(localp, &r))
             {
                 ControlHandle ch;
@@ -673,8 +677,8 @@ set_userItem(DialogPtr dp, INTEGER itemno, UserItemProcPtr funcp)
     Rect r;
     GUEST<INTEGER> unused;
 
-    GetDItem(dp, itemno, &unused, NULL, &r);
-    SetDItem(dp, itemno, userItem, (Handle)(void*)funcp, &r);
+    GetDialogItem(dp, itemno, &unused, NULL, &r);
+    SetDialogItem(dp, itemno, userItem, (Handle)(void*)funcp, &r);
 }
 
 static void
@@ -683,13 +687,13 @@ adjust_num_copies(TPPrDlg dlg, THPrint hPrint)
     Str255 text;
 
     NumToString(Hx(hPrint, prJob.iCopies), text);
-    SetIText(GetDIText((DialogPtr)dlg, PRINT_COPIES_BOX_NO), text);
-    SelIText((DialogPtr)dlg, PRINT_COPIES_BOX_NO, 0, 100);
+    SetDialogItemText(GetDIText((DialogPtr)dlg, PRINT_COPIES_BOX_NO), text);
+    SelectDialogItemText((DialogPtr)dlg, PRINT_COPIES_BOX_NO, 0, 100);
 #if defined(CYGWIN32)
     if(strcmp(ROMlib_printer, WIN32_TOKEN) == 0)
     {
-        HideDItem((DialogPtr)dlg, PRINT_COPIES_LABEL_NO);
-        HideDItem((DialogPtr)dlg, PRINT_COPIES_BOX_NO);
+        HideDialogItem((DialogPtr)dlg, PRINT_COPIES_LABEL_NO);
+        HideDialogItem((DialogPtr)dlg, PRINT_COPIES_BOX_NO);
     }
 #endif
 }
@@ -700,7 +704,7 @@ adjust_print_range_controls(TPPrDlg dlg, THPrint hPrint)
     ControlHandle ch;
 
     ch = GetDControl((DialogPtr)dlg, PRINT_ALL_RADIO_NO);
-    SetCtlValue(ch, 1);
+    SetControlValue(ch, 1);
 }
 
 static ini_key_t
@@ -789,7 +793,7 @@ adjust_print_name(DialogPtr dp)
         str255assignc(name, ROMlib_spool_file);
     else
         str255assignc(name, ROMlib_printer.c_str());
-    SetIText(GetDIText(dp, 3), name);
+    SetDialogItemText(GetDIText(dp, 3), name);
 }
 
 TPPrDlg Executor::C_PrJobInit(THPrint hPrint)
@@ -822,7 +826,7 @@ TPPrDlg Executor::C_PrJobInit(THPrint hPrint)
         }
         else
         {
-            DisposPtr((Ptr)retval);
+            DisposePtr((Ptr)retval);
             retval = 0;
         }
     }
@@ -836,7 +840,7 @@ void Executor::C_ROMlib_circle_ok(DialogPtr dp, INTEGER which)
     Rect r;
     GUEST<INTEGER> unused;
 
-    GetDItem(dp, which, &unused, NULL, &r);
+    GetDialogItem(dp, which, &unused, NULL, &r);
     PenNormal();
     PenSize(3, 3);
     InsetRect(&r, -4, -4);
@@ -851,7 +855,7 @@ void Executor::C_ROMlib_orientation(DialogPtr dp, INTEGER which)
     Rect r;
     GUEST<INTEGER> unused;
 
-    GetDItem(dp, which, &unused, NULL, &r);
+    GetDialogItem(dp, which, &unused, NULL, &r);
     PenNormal();
     PenSize(1, 1);
     InsetRect(&r, 1, 1);
@@ -928,15 +932,15 @@ adjust_menu_common(TPPrDlg dlg, INTEGER item, heading_t heading, ini_key_t defke
                     Rect r;
                     GUEST<INTEGER> unused;
 
-                    GetDItem((DialogPtr)dlg, item, &unused, &h, &r);
+                    GetDialogItem((DialogPtr)dlg, item, &unused, &h, &r);
                     r.right = CW(CW(r.left) + max_wid + 38);
-                    SetDItem((DialogPtr)dlg, item, ctrlItem, MR(h), &r);
+                    SetDialogItem((DialogPtr)dlg, item, ctrlItem, MR(h), &r);
                     SizeControl(ch, CW(r.right) - CW(r.left),
                                 CW(r.bottom) - CW(r.top));
                 }
-                SetCtlMax(ch, i);
+                SetControlMaximum(ch, i);
                 if(default_index > -1)
-                    SetCtlValue(ch, default_index + 1);
+                    SetControlValue(ch, default_index + 1);
                 SetPort(gp);
             }
         }
@@ -961,8 +965,8 @@ adjust_port(TPPrDlg dlg)
 #if !defined(LINUX)
     adjust_menu_common(dlg, LAYOUT_PORT_MENU_NO, "Port", ROMlib_port);
 #else
-    HideDItem((DialogPtr)dlg, LAYOUT_PORT_LABEL_NO);
-    HideDItem((DialogPtr)dlg, LAYOUT_PORT_MENU_NO);
+    HideDialogItem((DialogPtr)dlg, LAYOUT_PORT_LABEL_NO);
+    HideDialogItem((DialogPtr)dlg, LAYOUT_PORT_MENU_NO);
     ROMlib_port = "";
 #endif
 }
@@ -1006,8 +1010,8 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
             filename_chosen_p = false;
             print_where = PRINT_TO_PORT;
 
-            HideDItem((DialogPtr)retval, LAYOUT_FILENAME_LABEL_NO);
-            HideDItem((DialogPtr)retval, LAYOUT_FILENAME_NO);
+            HideDialogItem((DialogPtr)retval, LAYOUT_FILENAME_LABEL_NO);
+            HideDialogItem((DialogPtr)retval, LAYOUT_FILENAME_NO);
 
             set_userItem((DialogPtr)retval, LAYOUT_CIRCLE_OK_NO,
                          &ROMlib_circle_ok);
@@ -1074,21 +1078,21 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
                 str255_from_c_string(new_printer_name, ROMlib_new_printer_name ? ROMlib_new_printer_name : NEW_PRINTER_NAME);
                 str255_from_c_string(new_type_label, ROMlib_new_label ? ROMlib_new_label : NEW_TYPE_LABEL);
 
-                GetDItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
+                GetDialogItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
                          &item_type, &hh, &r);
 
                 h = MR(hh);
-                GetIText(h, str);
+                GetDialogItemText(h, str);
                 orig = StringWidth(str);
                 new1 = StringWidth(new_type_label);
                 HUnlock(h);
 
                 r.left = CW(CW(r.left) + orig - new1);
-                SetDItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
+                SetDialogItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
                          CW(item_type), h, &r);
-                SetIText(GetDIText((DialogPtr)retval, LAYOUT_PRINTER_NAME_NO),
+                SetDialogItemText(GetDIText((DialogPtr)retval, LAYOUT_PRINTER_NAME_NO),
                          new_printer_name);
-                SetIText(GetDIText((DialogPtr)retval,
+                SetDialogItemText(GetDIText((DialogPtr)retval,
                                    LAYOUT_PRINTER_TYPE_LABEL_NO),
                          new_type_label);
             }
@@ -1105,7 +1109,7 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
         }
         else
         {
-            DisposPtr((Ptr)retval);
+            DisposePtr((Ptr)retval);
             retval = 0;
         }
     }
@@ -1180,7 +1184,7 @@ BOOLEAN Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
         else
             retval = false;
         CloseDialog((DialogPtr)prrecptr);
-        DisposPtr((Ptr)prrecptr);
+        DisposePtr((Ptr)prrecptr);
     }
 #if defined(MACOSX_)
     ROMlib_updatemacpagerect(&HxX(hPrint, rPaper),

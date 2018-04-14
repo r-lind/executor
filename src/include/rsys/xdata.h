@@ -20,7 +20,7 @@ typedef struct
 typedef struct _xdata_t
 {
     int log2_bpp; /* Log base 2 of bits per pixel [0, 5].	     */
-    int row_bytes; /* Bytes per row, power of 2, >= 4.	     */
+    int row_bytes; /* Bytes per row, pow of 2, >= 4.	     */
     int log2_row_bytes; /* Log base 2 of row_bytes.		     */
     int row_bits_minus_1; /* row_bytes * 8 - 1.			     */
     int height_minus_1; /* Number of rows in this pattern, minus 1.  */
@@ -46,7 +46,7 @@ typedef struct _xdata_t
     uint32_t pat_value; /* For short, narrow patterns.		     */
     uint32_t *pat_bits; /* For tall and/or wide patterns (else NULL).*/
 
-    Ptr raw_pat_bits_mem; /* Might not == pat_bits; for DisposPtr.     */
+    Ptr raw_pat_bits_mem; /* Might not == pat_bits; for DisposePtr.     */
 
     const void ***stub_table_for_mode; /* Host-specific table. */
 } xdata_t;

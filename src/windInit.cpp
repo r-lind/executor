@@ -386,7 +386,7 @@ ROMlib_new_window_common(WindowPeek w,
         if(!WINDOW_DEF_PROC_X(w))
         {
             if(allocated_p)
-                DisposPtr((Ptr)w);
+                DisposePtr((Ptr)w);
             /* fatal_error ("no window (?)"); */
             gui_fatal("Unable to find WDEF.");
         }
@@ -403,10 +403,10 @@ ROMlib_new_window_common(WindowPeek w,
     LM(AuxWinHead) = RM(t_aux_w);
 
     {
-        Handle t;
+        GUEST<Handle> t;
 
         PtrToHand((Ptr)title, &t, (LONGINT)title[0] + 1);
-        WINDOW_TITLE_X(w) = RM((StringHandle)t);
+        WINDOW_TITLE_X(w) = guest_cast<StringHandle>(t);
     }
 
     if(cwindow_p)
@@ -639,7 +639,7 @@ void Executor::C_CloseWindow(WindowPtr w)
     DisposeRgn(WINDOW_STRUCT_REGION(w));
     DisposeRgn(WINDOW_CONT_REGION(w));
     DisposeRgn(WINDOW_UPDATE_REGION(w));
-    DisposHandle((Handle)WINDOW_TITLE(w));
+    DisposeHandle((Handle)WINDOW_TITLE(w));
     for(auxhp = (GUEST<AuxWinHandle> *)&LM(AuxWinHead);
         *auxhp && STARH(STARH(auxhp))->awOwner != RM(w);
         auxhp = (GUEST<AuxWinHandle> *)&STARH(STARH(auxhp))->awNext)
@@ -648,13 +648,13 @@ void Executor::C_CloseWindow(WindowPtr w)
     {
         saveauxh = STARH(auxhp);
         *auxhp = STARH(STARH(auxhp))->awNext;
-        DisposHandle((Handle)saveauxh);
+        DisposeHandle((Handle)saveauxh);
     }
 
 #if defined(NOTAGOODIDEA)
     // FIXME: #warning "what the hell does this mean?! DANGER WILL ROBINSON!"
     Cx (*(Ptr *)Cx)(((WindowPeek)w)->windowDefProc) = 0;
-    DisposHandle(Cx(((WindowPeek)w)->windowDefProc));
+    DisposeHandle(Cx(((WindowPeek)w)->windowDefProc));
 #endif /* NOTAGOODIDEA */
 
 /*
@@ -670,9 +670,9 @@ void Executor::C_CloseWindow(WindowPtr w)
         t = c;
         c = HxP(c, nextControl);
 #if 0
-	DisposHandle(Hx(t, contrlDefProc));
+	DisposeHandle(Hx(t, contrlDefProc));
 #endif /* 0 */
-        DisposHandle((Handle)t);
+        DisposeHandle((Handle)t);
     }
 #else /* 0 */
     KillControls(w);
@@ -694,5 +694,5 @@ void Executor::C_CloseWindow(WindowPtr w)
 void Executor::C_DisposeWindow(WindowPtr w)
 {
     CloseWindow(w);
-    DisposPtr((Ptr)w);
+    DisposePtr((Ptr)w);
 }

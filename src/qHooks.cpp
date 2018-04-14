@@ -194,7 +194,7 @@ Executor::ROMlib_CALLTXMEAS(INTEGER bc, Ptr bufp, GUEST<Point> *nump, GUEST<Poin
        && (pp = MR(gp->txMeasProc)) != &StdTxMeas)
     {
         ROMlib_hook(q_txmeasprocnumber);
-        pp(bc, bufp, nump, denp, fip);
+        retval = pp(bc, bufp, nump, denp, fip);
     }
     else
         retval = C_StdTxMeas(bc, bufp, nump, denp, fip);

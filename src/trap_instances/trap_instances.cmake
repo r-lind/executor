@@ -6,6 +6,7 @@ set(trap_instance_sources
 		trap_instances/ControlMgr.cpp
 		trap_instances/CQuickDraw.cpp
 		trap_instances/DeskMgr.cpp
+		trap_instances/DeviceMgr.cpp
 		trap_instances/DialogMgr.cpp
 		trap_instances/DiskInit.cpp
 		trap_instances/EditionMgr.cpp

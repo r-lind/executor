@@ -304,7 +304,7 @@ void Executor::C_DisposeMenu(MenuHandle mh)
     {
         ReleaseResource((Handle)mh);
         if(Cx(LM(ResErr)) == resNotFound)
-            DisposHandle((Handle)mh);
+            DisposeHandle((Handle)mh);
     }
 }
 
@@ -351,7 +351,7 @@ static void app(StringPtr str, char icon, char marker, char style,
     newsize = eip->menoff + SIZEOFMEXT + 1 + U(str[0]);
     SetHandleSize((Handle)eip->menh, newsize);
     /*
- * The following lines were put in because Virex 4.0 calls AddResMenu with
+ * The following lines were put in because Virex 4.0 calls AppendResMenu with
  * a locked handle that happens to have a locked block past it, hence it
  * can't grow.  It's unclear what we should do about this sort of thing
  * in general, but this hack will suffice for now.
@@ -482,7 +482,7 @@ static void handleinsert(Handle h, StringPtr strp)
     Munger(h, sp - (StringPtr)STARH(h), (Ptr)0, 0, (Ptr)strp, strp[0] + 1);
 }
 
-void Executor::C_AddResMenu(MenuHandle mh, ResType restype)
+void Executor::C_AppendResMenu(MenuHandle mh, ResType restype)
 {
     if(mh)
     {
@@ -527,7 +527,7 @@ void Executor::C_AddResMenu(MenuHandle mh, ResType restype)
             sp += sp[0] + 1;
         }
         HUnlock(temph);
-        DisposHandle(temph);
+        DisposeHandle(temph);
         SetResLoad(true); /* IMI-353 says to do this. */
         dirtymenusize(mh);
     }
@@ -566,7 +566,7 @@ mextp Executor::ROMlib_mitemtop(MenuHandle mh, INTEGER item,
     return retval;
 }
 
-void Executor::C_DelMenuItem(MenuHandle mh, INTEGER item) /* IMIV-56 */
+void Executor::C_DeleteMenuItem(MenuHandle mh, INTEGER item) /* IMIV-56 */
 {
     if(mh)
     {
@@ -608,7 +608,7 @@ static void xInsertResMenu(MenuHandle mh, StringPtr str, ResType restype,
             if(str)
                 AppendMenu(mh, str);
             else
-                AddResMenu(mh, restype);
+                AppendResMenu(mh, restype);
         else
         {
             oldeflags = Hx(mh, enableFlags) & ~(((LONGINT)1 << (after + 1)) - 1);
@@ -629,7 +629,7 @@ static void xInsertResMenu(MenuHandle mh, StringPtr str, ResType restype,
             if(str)
                 AppendMenu(mh, str);
             else
-                AddResMenu(mh, restype);
+                AppendResMenu(mh, restype);
             SetHandleSize((Handle)mh, GetHandleSize((Handle)mh) + hsize - 1);
             sp = (char *)STARH(h);
             toend(mh, &endinf);
@@ -638,13 +638,13 @@ static void xInsertResMenu(MenuHandle mh, StringPtr str, ResType restype,
             while(sp != ep)
                 *dp++ = *sp++;
             HxX(mh, enableFlags) = CL(Hx(mh, enableFlags) | oldeflags << (endinf.menitem - after));
-#if 0 /* RagTime suggests that at least for InsMenuItem */
+#if 0 /* RagTime suggests that at least for InsertMenuItem */
 	/* CalcMenuSize shouldn't be called */
 	CalcMenuSize(mh);
 #else
             dirtymenusize(mh);
 #endif
-            DisposHandle(h);
+            DisposeHandle(h);
         }
     }
 }
@@ -655,7 +655,7 @@ void Executor::C_InsertResMenu(MenuHandle mh, ResType restype, INTEGER after)
         xInsertResMenu(mh, (StringPtr)0, restype, after);
 }
 
-void Executor::C_InsMenuItem(MenuHandle mh, StringPtr str,
+void Executor::C_InsertMenuItem(MenuHandle mh, StringPtr str,
                              INTEGER after) /* IMIV-55 */
 {
     if(mh)
@@ -804,21 +804,21 @@ Handle Executor::C_GetNewMBar(INTEGER mbarid)
 
 Handle Executor::C_GetMenuBar()
 {
-    Handle retval;
+    GUEST<Handle> retval;
 
-    retval = MR(LM(MenuList));
+    retval = LM(MenuList);
     HandToHand(&retval);
-    return retval;
+    return MR(retval);
 }
 
 void Executor::C_SetMenuBar(Handle ml)
 {
-    Handle temph;
+    GUEST<Handle> temph;
 
-    DisposHandle(MR(LM(MenuList)));
-    temph = ml;
+    DisposeHandle(MR(LM(MenuList)));
+    temph = RM(ml);
     HandToHand(&temph);
-    LM(MenuList) = RM(temph);
+    LM(MenuList) = temph;
 }
 
 enum
@@ -1257,20 +1257,20 @@ out:
             {
                 for(i = 0; i < Cx(LM(MenuFlash)); i++)
                 {
-                    Delay(3L, (LONGINT *)0);
+                    Delay(3L, nullptr);
                     PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
                     PORT_TX_FONT_X(MR(wmgr_port)) = CWC(0);
                     item_swapped = CW(tempi);
                     MENUCALL(mChooseMsg, mh, &r, pt, &item_swapped);
                     tempi = CW(item_swapped);
-                    Delay(3L, (LONGINT *)0);
+                    Delay(3L, nullptr);
                     PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
                     PORT_TX_FONT_X(MR(wmgr_port)) = CWC(0);
                     item_swapped = CW(tempi);
                     MENUCALL(mChooseMsg, mh, &r, tempp, &item_swapped);
                     tempi = CW(item_swapped);
                 }
-                Delay(3L, (LONGINT *)0);
+                Delay(3L, nullptr);
             }
 #endif
         }
@@ -1451,7 +1451,7 @@ LONGINT Executor::C_MenuKey(CharParameter thec)
     return (0L);
 }
 
-void Executor::C_SetItem(MenuHandle mh, INTEGER item, StringPtr str)
+void Executor::C_SetMenuItemText(MenuHandle mh, INTEGER item, StringPtr str)
 {
     int oldsize, newsize, growth;
     Size hsize, nbyte;
@@ -1489,7 +1489,7 @@ void Executor::C_SetItem(MenuHandle mh, INTEGER item, StringPtr str)
     }
 }
 
-void Executor::C_GetItem(MenuHandle mh, INTEGER item, StringPtr str)
+void Executor::C_GetMenuItemText(MenuHandle mh, INTEGER item, StringPtr str)
 {
     StringPtr stashstring;
 
@@ -1590,7 +1590,7 @@ INTEGER Executor::C_CountMItems(MenuHandle mh)
         return 0;
 }
 
-MenuHandle Executor::C_GetMHandle(INTEGER mid)
+MenuHandle Executor::C_GetMenuHandle(INTEGER mid)
 {
     MenuHandle retval;
 

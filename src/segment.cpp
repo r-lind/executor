@@ -474,7 +474,7 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
                 firstcolon = 0; /* this will break us out of the loop */
             else
             {
-                DisposPtr((Ptr)fullpathname);
+                DisposePtr((Ptr)fullpathname);
                 fullpathname = 0;
             }
         }
@@ -508,7 +508,7 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
     HxX(fh, count) = 0;
     HxX(fh, message) = ROMlib_print ? CWC(appPrint) : CWC(appOpen);
     if(fullpathname && fullpathname != argv[0])
-        DisposPtr((Ptr)fullpathname);
+        DisposePtr((Ptr)fullpathname);
     while(--argc > 0)
     {
         ++argv;

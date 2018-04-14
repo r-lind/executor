@@ -121,7 +121,7 @@ Executor::OSErr MacBridge::DisposeSpeechChannel(Executor::SpeechChannel chan)
   //BeginSpeech();
   Executor::LONGINT ourDat = chan->data[0];
   NSSpeechSynthesizer *synth = synthesizerMap[ourDat];
-  Executor::DisposPtr((Executor::Ptr)chan);
+  Executor::DisposePtr((Executor::Ptr)chan);
   [synth release];
   Executor::OSErr toRet = Executor::noErr;
   synthesizerMap.erase(ourDat);
@@ -196,8 +196,6 @@ Executor::OSErr MacBridge::GetIndVoice (int16_t index, Executor::VoiceSpec *voic
   return Executor::noErr;
 }
 
-using Executor::_NewPtr_flags;
-
 Executor::OSErr MacBridge::NewSpeechChannel (Executor::VoiceSpec *voice, Executor::SpeechChannel *chan)
 {
   static Executor::LONGINT speechChanData = 0;
@@ -225,7 +223,7 @@ Executor::OSErr MacBridge::NewSpeechChannel (Executor::VoiceSpec *voice, Executo
     Executor::SpeechChannelRecord aChan;
     aChan.data[0] = ++speechChanData;
     
-    *chan = (Executor::SpeechChannel)NewPtr(sizeof(Executor::SpeechChannelRecord));
+    *chan = (Executor::SpeechChannel)Executor::NewPtr(sizeof(Executor::SpeechChannelRecord));
     
     **chan = aChan;
     NSSpeechSynthesizer *NSsynth = [[NSSpeechSynthesizer alloc] initWithVoice:voiceID];

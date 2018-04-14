@@ -94,7 +94,7 @@ static itmp htoip(Handle h, WindowPeek *wp_return, int16_t *nop_return,
     return NULL;
 }
 
-void Executor::C_GetDItem(DialogPtr dp, INTEGER itemno, GUEST<INTEGER> *itype,
+void Executor::C_GetDialogItem(DialogPtr dp, INTEGER itemno, GUEST<INTEGER> *itype,
                           GUEST<Handle> *item, Rect *r) /* IMI-421 */
 {
     SignedByte flags;
@@ -254,7 +254,7 @@ settexth(DialogPeek dp, itmp ip, int item_no)
     DIALOG_EDIT_OPEN_X(dp) = CW(!(ITEM_TYPE(ip) & itemDisable));
 }
 
-void Executor::C_SetDItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
+void Executor::C_SetDialogItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
                           Handle item, Rect *r) /* IMI-421 */
 {
 
@@ -280,7 +280,7 @@ void Executor::C_SetDItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
     HSetState(MR(((DialogPeek)dp)->items), flags);
 }
 
-void Executor::C_GetIText(Handle item, StringPtr text) /* IMI-422 */
+void Executor::C_GetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
 {
     Size hs;
 
@@ -299,7 +299,7 @@ void Executor::C_GetIText(Handle item, StringPtr text) /* IMI-422 */
     }
 }
 
-void Executor::C_SetIText(Handle item, StringPtr text) /* IMI-422 */
+void Executor::C_SetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
 {
     if(item) /* put this test in for Golf 6.0's sake */
     {
@@ -381,24 +381,24 @@ void Executor::ROMlib_dpntoteh(DialogPeek dp, INTEGER no) /* INTERNAL */
     HSetState(MR(((DialogPeek)dp)->items), flags);
 }
 
-void Executor::C_SelIText(DialogPtr dp, INTEGER itemno, INTEGER start,
+void Executor::C_SelectDialogItemText(DialogPtr dp, INTEGER itemno, INTEGER start,
                           INTEGER stop) /* IMI-422 */
 {
     ROMlib_dpntoteh((DialogPeek)dp, itemno);
     TESetSelect(start, stop, DIALOG_TEXTH(dp));
 }
 
-INTEGER Executor::GetAlrtStage() /* IMI-422 */
+INTEGER Executor::GetAlertStage() /* IMI-422 */
 {
     return Cx(LM(ACount));
 }
 
-void Executor::ResetAlrtStage() /* IMI-423 */
+void Executor::ResetAlertStage() /* IMI-423 */
 {
     LM(ACount) = 0;
 }
 
-void Executor::C_HideDItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
+void Executor::C_HideDialogItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
 {
     itmp ip;
     Rect r;
@@ -437,7 +437,7 @@ void Executor::C_HideDItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
     HSetState(DIALOG_ITEMS(dp), flags);
 }
 
-void Executor::C_ShowDItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
+void Executor::C_ShowDialogItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
 {
     itmp ip;
     Rect r;

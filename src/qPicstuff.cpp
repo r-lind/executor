@@ -405,9 +405,10 @@ static void fillpixpat(PixPatHandle ph)
 {
     if(CGrafPort_p(thePort))
     {
-        HandToHand((Handle *)&ph);
+        GUEST<Handle> tmp = RM((Handle)ph);
+        HandToHand(&tmp);
 
-        CPORT_FILL_PIXPAT_X(theCPort) = RM(ph);
+        CPORT_FILL_PIXPAT_X(theCPort) = guest_cast<PixPatHandle>(tmp);
     }
 }
 
@@ -534,7 +535,7 @@ end_assoc(void)
     for(p = assoc_headp; p; p = nextp)
     {
         nextp = p->nextp;
-        DisposPtr((Ptr)p->str);
+        DisposePtr((Ptr)p->str);
         free(p);
     }
     assoc_headp = 0;
@@ -1261,7 +1262,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
             else
             {
                 nextbytep += length;
-                DisposHandle(temph);
+                DisposeHandle(temph);
             }
         }
         *freep = true;
@@ -1367,7 +1368,7 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
             else
             {
                 nextbytep += length;
-                DisposHandle(temph);
+                DisposeHandle(temph);
             }
         }
     }
@@ -1456,7 +1457,7 @@ static void eatPixPat(PixPatHandle pixpat)
         PIXPAT_DATA_X(pixpat) = RM(temph);
         PtrToXHand(BITMAP_BASEADDR(patmap_ptr), temph, datasize);
         if(free)
-            DisposHandle(RecoverHandle(BITMAP_BASEADDR(patmap_ptr)));
+            DisposeHandle(RecoverHandle(BITMAP_BASEADDR(patmap_ptr)));
 
         HASSIGN_3(pixpat,
                   patXMap, nullptr,
@@ -1608,9 +1609,9 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     /* Free these up now, since they are no longer used. */
     if(CGrafPort_p(the_port))
     {
-        DisposPixPat(junk_pen_pixpat);
-        DisposPixPat(junk_bk_pixpat);
-        DisposPixPat(junk_fill_pixpat);
+        DisposePixPat(junk_pen_pixpat);
+        DisposePixPat(junk_bk_pixpat);
+        DisposePixPat(junk_fill_pixpat);
     }
 
     PORT_PEN_LOC(the_port).h = destrp->left; /* This is a guess, based on */
@@ -1780,7 +1781,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                         if(!hand)
                             hand = NewHandle(sizeof(PixPat));
                         else
-                            ReallocHandle(hand, sizeof(PixPat));
+                            ReallocateHandle(hand, sizeof(PixPat));
                         memset(STARH(hand), 0, sizeof(PixPat));
                         eatPixPat((PixPatHandle)hand);
                         break;
@@ -1838,7 +1839,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                         else
                         {
                             if(hand)
-                                DisposHandle(hand);
+                                DisposeHandle(hand);
                             hand = NULL;
                         }
 
@@ -1856,11 +1857,11 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                                  &rects[0], &rects[1],
                                  words[1], (RgnHandle)hand);
                         if(packed)
-                            DisposHandle(RecoverHandle(BITMAP_BASEADDR(bmp)));
+                            DisposeHandle(RecoverHandle(BITMAP_BASEADDR(bmp)));
                         if(words[0] & 0x8000)
-                            DisposHandle((Handle)MR(pm.pmTable));
+                            DisposeHandle((Handle)MR(pm.pmTable));
                         else if(!packed && procp)
-                            DisposHandle(RecoverHandle(BITMAP_BASEADDR(bmp)));
+                            DisposeHandle(RecoverHandle(BITMAP_BASEADDR(bmp)));
                         break;
 
                     default:
@@ -2027,12 +2028,12 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
 
     HSetState((Handle)pic, state);
     if(hand)
-        DisposHandle(hand);
+        DisposeHandle(hand);
     if(CGrafPort_p(the_port))
     {
-        DisposPixPat(CPORT_PEN_PIXPAT(the_cport));
-        DisposPixPat(CPORT_BK_PIXPAT(the_cport));
-        DisposPixPat(CPORT_FILL_PIXPAT(the_cport));
+        DisposePixPat(CPORT_PEN_PIXPAT(the_cport));
+        DisposePixPat(CPORT_BK_PIXPAT(the_cport));
+        DisposePixPat(CPORT_FILL_PIXPAT(the_cport));
     }
 
     do_textend(); /* in case some clowns included a textbegin without

@@ -42,7 +42,6 @@ static icon_item_template_t icon_item_template = {
 INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
 {
     alth ah;
-    Handle h;
     Handle ih;
     INTEGER n, defbut;
     GUEST<INTEGER> hit;
@@ -76,7 +75,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
     LoadResource(ih);
     alert_ctab_res_h = ROMlib_getrestid(TICK("actb"), Hx(ah, altiid));
     item_ctab_res_h = ROMlib_getrestid(TICK("ictb"), Hx(ah, altiid));
-    h = ih;
+    GUEST<Handle> h = RM(ih);
     HandToHand(&h);
 
     TheGDeviceGuard guard(MR(LM(MainDevice)));
@@ -101,14 +100,14 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
                || item_ctab_res_h);
     if(color_p)
         dp = ((DialogPeek)
-                  NewCDialog(NULL, &adjusted_rect,
+                  NewColorDialog(NULL, &adjusted_rect,
                              (StringPtr) "", false, dBoxProc,
-                             (WindowPtr)-1, false, 0L, h));
+                             (WindowPtr)-1, false, 0L, MR(h)));
     else
         dp = ((DialogPeek)
                   NewDialog(NULL, &adjusted_rect,
                             (StringPtr) "", false, dBoxProc,
-                            (WindowPtr)-1, false, 0L, h));
+                            (WindowPtr)-1, false, 0L, MR(h)));
 
     if(color_p)
     {
@@ -142,7 +141,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
 
         alert_extra_icon_id = -32768;
 
-        DisposHandle(icon_item_h);
+        DisposeHandle(icon_item_h);
     }
 
     ShowWindow((WindowPtr)dp);
@@ -167,7 +166,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
         ModalDialog(fp, &hit);
     }
     HSetState(DIALOG_ITEMS(dp), flags);
-    DisposDialog((DialogPtr)dp);
+    DisposeDialog((DialogPtr)dp);
 
     return CW(hit);
 }

@@ -27,10 +27,11 @@
 #include "rsys/launch.h"
 #include "rsys/hfs.h"
 #include "rsys/string.h"
+#include <rsys/builtinlibs.h>
 
 using namespace Executor;
 
-#if 1
+#if 0
 
 OSErr Executor::C_CloseConnection(ConnectionID *cidp)
 {
@@ -67,11 +68,12 @@ ROMlib_new_connection(uint32_t n_sects)
 }
 
 #else
-typedef enum {
+enum {
     process_share = 1,
     global_share = 4,
     protected_share = 5,
-} share_kind_t;
+};
+typedef int share_kind_t;
 
 enum
 {
@@ -86,53 +88,13 @@ enum
     traceback_section_type,
 };
 
-#undef roundup
-#define roundup(n, m)           \
-    ({                          \
-        decltype(n) __n;        \
-        decltype(m) __m;        \
-                                \
-        __n = (n);              \
-        __m = (m);              \
-        (__n + __m - 1) / m *m; \
-    })
-
-#undef rounddown
-#define rounddown(n, m)  \
-    ({                   \
-        decltype(n) __n; \
-        decltype(m) __m; \
-                         \
-        __n = (n);       \
-        __m = (m);       \
-        __n / m *m;      \
-    })
-
 static OSErr
 try_to_get_memory(void **addrp, syn68k_addr_t default_syn_address,
                   uint32_t total_size, int alignment)
 {
-    OSErr retval;
-#if !defined(linux)
-    retval = paramErr;
-#else
-    void *default_address;
-    void *received_address;
-
-    default_address = SYN68K_TO_US(default_syn_address);
-    total_size = roundup(total_size, getpagesize());
-    received_address = mmap(default_address, total_size,
-                            PROT_EXEC | PROT_READ | PROT_WRITE,
-                            MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
-    if(received_address == (void *)-1)
-        retval = memFullErr;
-    else
-    {
-        retval = noErr;
-        *addrp = received_address;
-    }
-#endif
-    return retval;
+    // TODO: alignment
+    *addrp = NewPtr(total_size);
+    return 0;
 }
 
 enum
@@ -488,7 +450,7 @@ check_file(INTEGER vref, LONGINT dirid, Str255 file, bool shlb_test_p,
 }
 
 static OSErr
-check_vanddir(GUEST<INTEGER> vref, GUEST<LONGINT> dirid, int descend_count, Str63 library,
+check_vanddir(INTEGER vref, LONGINT dirid, int descend_count, Str63 library,
               OSType arch, LoadFlags loadflags, GUEST<ConnectionID> *cidp,
               GUEST<Ptr> *mainaddrp, Str255 errName)
 {
@@ -501,7 +463,7 @@ check_vanddir(GUEST<INTEGER> vref, GUEST<LONGINT> dirid, int descend_count, Str6
 
     retval = fragLibNotFound;
     pb.hFileInfo.ioNamePtr = RM(&s[0]);
-    pb.hFileInfo.ioVRefNum = vref;
+    pb.hFileInfo.ioVRefNum = CW(vref);
     err = noErr;
     errcount = 0;
     for(dirindex = 1;
@@ -509,7 +471,7 @@ check_vanddir(GUEST<INTEGER> vref, GUEST<LONGINT> dirid, int descend_count, Str6
         dirindex++)
     {
         pb.hFileInfo.ioFDirIndex = CW(dirindex);
-        pb.hFileInfo.ioDirID = dirid;
+        pb.hFileInfo.ioDirID = CL(dirid);
         err = PBGetCatInfo(&pb, false);
         if(err)
         {
@@ -526,7 +488,7 @@ check_vanddir(GUEST<INTEGER> vref, GUEST<LONGINT> dirid, int descend_count, Str6
             {
                 if(descend_count > 0)
                 {
-                    retval = check_vanddir(vref, pb.hFileInfo.ioDirID,
+                    retval = check_vanddir(vref, CL(pb.hFileInfo.ioDirID),
                                            descend_count - 1, library,
                                            arch, loadflags, cidp, mainaddrp,
                                            errName);
@@ -591,19 +553,27 @@ OSErr Executor::C_GetSharedLibrary(Str63 library, OSType arch,
             if(FindFolder(0, kExtensionFolderType, false, &extensions_vref,
                           &extensions_dirid)
                == noErr)
-                retval = check_vanddir(extensions_vref, extensions_dirid, 1,
+                retval = check_vanddir(CW(extensions_vref), CL(extensions_dirid), 1,
                                        library, arch, loadflags, cidp,
                                        mainaddrp, errName);
         }
 
         if(retval != noErr)
         {
-            if(EqualString(library, "\7MathLib", false, true))
-                retval = ROMlib_GetMathLib(library, arch, loadflags, cidp,
-                                           mainaddrp, errName);
-            else if(EqualString(library, "\14InterfaceLib", false, true))
-                retval = ROMlib_GetInterfaceLib(library, arch, loadflags, cidp,
-                                                mainaddrp, errName);
+           /* if(EqualString(library, (unsigned char*)"\7MathLib", false, true))
+                //retval = ROMlib_GetMathLib(library, arch, loadflags, cidp,
+                //                           mainaddrp, errName);
+                printf("Mathlib\n");
+            else if(EqualString(library, (unsigned char*)"\14InterfaceLib", false, true))
+                //retval = ROMlib_GetInterfaceLib(library, arch, loadflags, cidp,
+                //                                mainaddrp, errName);
+                printf("InterfaceLib\n");*/
+            if(ConnectionID cid = builtinlibs::getBuiltinLib(library))
+            {
+                *cidp = RM(cid);
+                *mainaddrp = nullptr;
+                retval = noErr;
+            }
         }
     }
     return retval;
@@ -615,58 +585,8 @@ OSErr Executor::C_CloseConnection(ConnectionID *cidp)
     return noErr;
 }
 
-#if 0
-enum
-{
-    tracking_val_start = 0x88123456
-};
-static uint32_t num_tracking_vals;
-static char **tracking_symbols;
-
-static void
-tracking_handler(int signum, struct sigcontext sc)
-{
-    uint32_t r12;
-    uint32_t val;
-
-    r12 = sc.regs->gpr[PT_R12];
-    val = r12 - (uint32_t)tracking_val_start;
-    if(val < num_tracking_vals)
-        fprintf(stderr, "Need glue for '%s'\n", tracking_symbols[val]);
-    ExitToShell();
-}
-
-void
-ROMlib_release_tracking_values(void)
-{
-    if(num_tracking_vals > 0)
-    {
-        int i;
-
-        for(i = 0; i < num_tracking_vals; ++i)
-            free(tracking_symbols[i]);
-        tracking_symbols = realloc(tracking_symbols, 0);
-        num_tracking_vals = 0;
-    }
-    signal(SIGSEGV, (void *)tracking_handler);
-}
-
-static uint32_t
-tracking_value(const char *symbol_name)
-{
-    uint32_t retval;
-
-    tracking_symbols = realloc(tracking_symbols,
-                               (num_tracking_vals + 1) * sizeof *tracking_symbols);
-    tracking_symbols[num_tracking_vals] = strdup(symbol_name);
-    retval = tracking_val_start + num_tracking_vals++;
-    warning_trace_info("name = '%s' (%p)\n", symbol_name, (Ptr)retval);
-    return retval;
-}
-#endif
-
 static OSErr
-symbol_lookup(uint32_t *indexp, Ptr *valp, uint8_t imports[][4],
+symbol_lookup(uint32_t *indexp, GUEST<Ptr> *valp, uint8_t imports[][4],
               const char *symbol_names, CFragClosureID closure_id)
 {
     OSErr retval;
@@ -699,13 +619,16 @@ symbol_lookup(uint32_t *indexp, Ptr *valp, uint8_t imports[][4],
 
                 sym255[0] = MIN(strlen(symbol_name), 255);
                 memcpy(sym255 + 1, symbol_name, sym255[0]);
-                err = FindSymbol(LIB_CID(l), sym255, valp, 0);
+                if(LIB_CID(l))
+                    err = FindSymbol(LIB_CID(l), sym255, valp, 0);
+                else
+                    err = -1;//###
                 if(err != noErr)
                 {
-                    if(flags & 8)
+                    if(flags & 8)   // weak symbol
                         *valp = kUnresolvedCFragSymbolAddress;
                     else
-                        *valp = (Ptr)tracking_value(symbol_name);
+                        *valp = RM(builtinlibs::makeUndefinedSymbolStub(symbol_name));
                 }
                 /*-->*/ break;
             }
@@ -800,14 +723,14 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
                         case 5: /* RelocImportRun */
                             while(retval == noErr && run_length-- > 0)
                             {
-                                Ptr symbol_val;
+                                GUEST<Ptr> symbol_val;
 
                                 retval = symbol_lookup(&importIndex, &symbol_val,
                                                        imports, symbol_names,
                                                        closure_id);
                                 if(retval == noErr)
                                     repeatedly_relocate(1, &relocAddress,
-                                                        (uint32_t)symbol_val);
+                                                        CL(guest_cast<uint32_t>(symbol_val)));
                             }
                             break;
                         default:
@@ -821,7 +744,7 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
                 {
                     int sub_op;
                     int index;
-                    Ptr symbol_val;
+                    GUEST<Ptr> symbol_val;
 
                     sub_op = (msb >> 1) & 0xf;
                     index = (((msb & 1) << 8)
@@ -835,15 +758,15 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
                                                    closure_id);
                             if(retval == noErr)
                                 repeatedly_relocate(1, &relocAddress,
-                                                    (uint32_t)symbol_val);
+                                                    CL(guest_cast<uint32_t>(symbol_val)));
                             break;
                         case 1:
-                            sectionC = connp->sects[index].start;
+                            sectionC = ptr_to_longint(MR(connp->sects[index].start));
                             warning_unimplemented("RelocSmSetSectC not tested much");
                             assert(0);
                             break;
                         case 2:
-                            sectionD = connp->sects[index].start;
+                            sectionD = ptr_to_longint(MR(connp->sects[index].start));
                             warning_unimplemented("RelocSmSetSectD not tested much");
                             break;
                         case 3:
@@ -901,11 +824,11 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
                                 {
                                     uint32_t offset;
 
-                                    offset = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[0][2]) << 8 | (reloc_instrs[0][3]));
+                                    offset = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[1][0]) << 8 | (reloc_instrs[1][1]));
 
                                     relocAddress
                                         = (uint8_t *)
-                                              SYN68K_TO_US(connp->sects[section].start)
+                                              MR(connp->sects[section].start)
                                         + offset;
                                 }
                                     --reloc_count;
@@ -913,15 +836,15 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
                                     break;
                                 case 0x29:
                                 {
-                                    Ptr symbol_val;
+                                    GUEST<Ptr> symbol_val;
 
-                                    importIndex = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[0][2]) << 8 | (reloc_instrs[0][3]));
+                                    importIndex = ((msb & 3) << 24 | (reloc_instrs[0][1]) << 16 | (reloc_instrs[1][0]) << 8 | (reloc_instrs[1][1]));
                                     retval = symbol_lookup(&importIndex, &symbol_val,
                                                            imports, symbol_names,
                                                            closure_id);
                                     if(retval == noErr)
                                         repeatedly_relocate(1, &relocAddress,
-                                                            (uint32_t)symbol_val);
+                                                            CL(guest_cast<uint32_t>(symbol_val)));
                                 }
                                     --reloc_count;
                                     ++reloc_instrs;
@@ -967,7 +890,7 @@ begin_closure(uint32_t n_libs, PEFImportedLibrary_t *libs,
     for(err = noErr, i = 0; /* err == noErr && */ i < n_libs; ++i)
     {
         Str63 libName;
-        Ptr mainAddr;
+        GUEST<Ptr> mainAddr;
         Str255 errName;
         int offset;
         const char *cname;
@@ -982,7 +905,7 @@ begin_closure(uint32_t n_libs, PEFImportedLibrary_t *libs,
         if(err != noErr)
         {
             warning_unexpected("%.*s", libName[0], libName + 1);
-            LIB_CID_X(&retval->libs[i]) = (void *)0x12348765;
+            LIB_CID_X(&retval->libs[i]) = nullptr;//### v(void *)0x12348765;
         }
         LIB_N_SYMBOLS_X(&retval->libs[i]) = PEFIL_SYMBOL_COUNT_X(&libs[i]);
         LIB_FIRST_SYMBOL_X(&retval->libs[i]) = PEFIL_FIRST_SYMBOL_X(&libs[i]);
@@ -1014,7 +937,7 @@ load_loader_section(const void *addr,
 
     loader_section_bytes = (char *)addr + section_offset;
     lihp = (PEFLoaderInfoHeader_t *)loader_section_bytes;
-    connp->lihp = lihp;
+    connp->lihp = RM(lihp);
     n_libs = PEFLIH_IMPORTED_LIBRARY_COUNT(lihp);
     libs = (PEFImportedLibrary_t *)&lihp[1];
     n_imports = PEFLIH_IMPORTED_SYMBOL_COUNT(lihp);
@@ -1022,7 +945,7 @@ load_loader_section(const void *addr,
     n_reloc_headers = PEFLIH_RELOC_SECTION_COUNT(lihp);
     reloc_headers = (PEFLoaderRelocationHeader_t *)imports[n_imports];
 
-    relocation_area = (char *)(loader_section_bytes + PEFLIH_RELOC_INSTR_OFFSET(lihp));
+    relocation_area = (uint8_t *)(loader_section_bytes + PEFLIH_RELOC_INSTR_OFFSET(lihp));
 
     symbol_names = (decltype(symbol_names))(loader_section_bytes + PEFLIH_STRINGS_OFFSET(lihp));
 
@@ -1042,21 +965,19 @@ load_loader_section(const void *addr,
                           reloc_instrs, imports, symbol_names,
                           closure_id, connp);
     }
-    if(retval == noErr && lihp->initSection != 0xffffffff)
+    if(retval == noErr && lihp->initSection != CL(0xffffffff))
     {
-        uint32_t *init_addr;
-        uint32_t init_toc;
-        uint32_t (*init_routine)(uint32_t);
+        GUEST<uint32_t> *init_addr;
         InitBlock init_block;
 
         warning_unimplemented("register preservation, bad init_block");
         // #warning this code has a lot of problems (register preservation, bad init_block)
 
-        init_addr = (uint32_t *)SYN68K_TO_US(connp->sects[PEFLIH_INIT_SECTION(lihp)].start + PEFLIH_INIT_OFFSET(lihp));
+        init_addr = (GUEST<uint32_t> *)SYN68K_TO_US(CL(guest_cast<uint32_t>(connp->sects[PEFLIH_INIT_SECTION(lihp)].start)) + PEFLIH_INIT_OFFSET(lihp));
 
         memset(&init_block, 0xFA, sizeof init_block);
-        init_routine = (uint32_t(*)(uint32_t))SYN68K_TO_US(init_addr[0]);
-        init_toc = (uint32_t)SYN68K_TO_US(init_addr[1]);
+        //init_routine = (uint32_t(*)(uint32_t))SYN68K_TO_US(init_addr[0]);
+        //init_toc = (uint32_t)SYN68K_TO_US(init_addr[1]);
 #if defined(powerpc) || defined(__ppc__)
         retval = ppc_call(init_toc, init_routine, (uint32_t)&init_block);
 #else
@@ -1070,7 +991,7 @@ load_loader_section(const void *addr,
         }
     }
     if(retval == noErr)
-        *mainAddrp = (connp->sects[PEFLIH_MAIN_SECTION(lihp)].start + PEFLIH_MAIN_OFFSET(lihp));
+        *mainAddrp = (CL(guest_cast<uint32_t>(connp->sects[PEFLIH_MAIN_SECTION(lihp)].start)) + PEFLIH_MAIN_OFFSET(lihp));
     return retval;
 }
 
@@ -1161,56 +1082,6 @@ do_pef_section(ConnectionID connp, const void *addr,
     return retval;
 }
 
-/*
- * NOTE: it would be nice if someone else provided code to flush the
- * instruction cache.  I'm a little nervous that my code below will fail on 
- * multi-processor systems.
- */
-
-typedef enum { ICACHE } flush_type_t;
-
-static void
-cacheflush(void *start, uint32_t length, flush_type_t flush)
-{
-#if defined(powerpc) || defined(__ppc__)
-    enum
-    {
-        CACHE_LINE_SIZE = 32,
-    };
-    char *p, *ep;
-
-    switch(flush)
-    {
-        case ICACHE:
-            for(p = start, ep = p + roundup(length, CACHE_LINE_SIZE);
-                p != ep;
-                p += CACHE_LINE_SIZE)
-            {
-                asm volatile("dcbf 0,%0"
-                             :
-                             : "r"(p)
-                             : "memory");
-                asm volatile("sync"
-                             :
-                             :
-                             : "memory");
-                asm volatile("icbi 0,%0"
-                             :
-                             : "r"(p)
-                             : "memory");
-            }
-            asm volatile("isync"
-                         :
-                         :
-                         : "memory");
-            break;
-        default:
-            warning_unexpected("%d", flush);
-            break;
-    }
-#endif
-}
-
 static OSErr
 do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
                 syn68k_addr_t *mainAddrp, OSType arch)
@@ -1220,7 +1091,7 @@ do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
     int n_sects;
     int i;
 
-    n_sects = connp->n_sects;
+    n_sects = CL(connp->n_sects);
     sections = (decltype(sections))((char *)headp + sizeof *headp);
 
     memset(connp->sects, 0, sizeof connp->sects[0] * n_sects);
@@ -1230,7 +1101,6 @@ do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
                                 mainAddrp, arch);
 // #warning need to back out cleanly if a section fails to load
 
-#if defined(linux)
     if(retval == noErr)
     {
         int i;
@@ -1239,16 +1109,17 @@ do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
         {
             if(connp->sects[i].length)
             {
-                int prot;
-
-                prot = 0;
                 if(connp->sects[i].perms & executable_section)
                 {
-                    cacheflush(SYN68K_TO_US(connp->sects[i].start),
-                               connp->sects[i].length, ICACHE);
-                    prot |= PROT_EXEC;
+                    MakeDataExecutable(
+                        MR(connp->sects[i].start),
+                        CL(connp->sects[i].length));
                 }
-                if(connp->sects[i].perms & readable_section)
+
+#if 0
+                int prot;
+                prot = 0;
+                if((connp->sects[i].perms & readable_section) || (connp->sects[i].perms & executable_section))
                     prot |= PROT_READ;
                 if(connp->sects[i].perms & writable_section)
                     prot |= PROT_WRITE;
@@ -1259,16 +1130,16 @@ do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
                             prot)
                    != 0)
                     warning_unexpected("%d", errno);
+#endif                    
             }
         }
     }
-#endif
 
     return retval;
 }
 
 ConnectionID
-ROMlib_new_connection(uint32_t n_sects)
+Executor::ROMlib_new_connection(uint32_t n_sects)
 {
     ConnectionID retval;
     Size n_bytes;
@@ -1276,25 +1147,26 @@ ROMlib_new_connection(uint32_t n_sects)
     n_bytes = sizeof *retval + n_sects * sizeof(section_info_t);
     retval = (ConnectionID)NewPtrSysClear(n_bytes);
     if(retval)
-        retval->n_sects = n_sects;
+        retval->n_sects = CL(n_sects);
     return retval;
 }
 
 OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
-                                 LoadFlags flags, ConnectionID *connp,
-                                 Ptr *mainAddrp, Str255 errname)
+                                 LoadFlags flags, GUEST<ConnectionID> *connp,
+                                 GUEST<Ptr> *mainAddrp, Str255 errname)
 {
     OSErr retval;
 
     syn68k_addr_t main_addr;
     PEFContainerHeader_t *headp;
+    ConnectionID conn;
 
     warning_unimplemented("ignoring flags = 0x%x\n", flags);
 
     main_addr = 0;
     *connp = 0;
 
-    headp = addr;
+    headp = (PEFContainerHeader_t*)addr;
 
     if(PEF_CONTAINER_TAG1_X(headp) != CLC(FOURCC('J', 'o', 'y', '!')))
         warning_unexpected("0x%x", PEF_CONTAINER_TAG1(headp));
@@ -1313,249 +1185,44 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
 
     // #warning ignoring (old_dev, old_imp, current) version
 
-    *connp = ROMlib_new_connection(PEF_CONTAINER_SECTION_COUNT(headp));
-    if(!*connp)
+   conn = ROMlib_new_connection(PEF_CONTAINER_SECTION_COUNT(headp));
+    if(!conn)
         retval = fragNoMem;
     else
-        retval = do_pef_sections(*connp, headp, &main_addr,
+        retval = do_pef_sections(conn, headp, &main_addr,
                                  PEF_CONTAINER_ARCHITECTURE(headp));
+    *connp = RM(conn);
 
     if(retval == noErr)
-        *mainAddrp = (Ptr)SYN68K_TO_US(main_addr);
+        *mainAddrp = guest_cast<Ptr>(CL(main_addr));
 
     return retval;
 }
 
-typedef struct
-{
-    void *addr; /* virtual address */
-    FSSpec fs; /* canonicalized file tht this came from */
-    LONGINT offset_req;
-    LONGINT length_req;
-    off_t offset_act;
-    size_t length_act;
-    bool mapped_to_eof_p;
-    int refcount;
-} context_t;
 
-static int n_context_slots = 0;
-static int n_active_contexts = 0;
-static context_t *contexts = 0;
-
-static bool
-fsmatch(FSSpecPtr fsp1, FSSpecPtr fsp2)
-{
-    bool retval;
-
-    retval = (fsp1->vRefNum == fsp2->vRefNum && fsp1->parID == fsp2->parID && EqualString(fsp1->name, fsp2->name, false, true));
-    return retval;
-}
-
-static bool
-match(FSSpecPtr fsp, LONGINT offset, LONGINT length, const context_t *cp)
-{
-    bool retval;
-
-    retval = (cp->refcount > 0 && fsmatch(fsp, (FSSpecPtr)&cp->fs) && offset >= cp->offset_act && ((length == kWholeFork && cp->mapped_to_eof_p) || (offset + length <= cp->offset_act + cp->length_act)));
-
-    return retval;
-}
-
-static OSErr
-get_context(int *contextidp, bool *exists_pp, FSSpecPtr fsp,
-            LONGINT offset, LONGINT length)
-{
-    static OSErr retval;
-    int i;
-    int free_slot;
-
-    retval = noErr;
-    free_slot = -1;
-    for(i = 0;
-        i < n_context_slots && !match(fsp, offset, length, &contexts[i]);
-        ++i)
-        if(contexts[i].refcount == 0)
-            free_slot = i;
-    if(i < n_context_slots)
-    {
-        ++contexts[i].refcount;
-        *contextidp = i;
-        *exists_pp = true;
-    }
-    else
-    {
-        if(free_slot == -1)
-        {
-            size_t new_size;
-            context_t *new_contexts;
-
-            if(n_context_slots != n_active_contexts)
-                warning_unexpected("%d %d", n_context_slots, n_active_contexts);
-            new_size = sizeof *new_contexts * (n_active_contexts + 1);
-            new_contexts = realloc(contexts, new_size);
-            if(new_contexts == NULL)
-                retval = memFullErr;
-            else
-            {
-                free_slot = n_active_contexts;
-                ++n_active_contexts;
-                ++n_context_slots;
-                contexts = new_contexts;
-            }
-        }
-        if(retval == noErr)
-        {
-            context_t *cp;
-
-            cp = &contexts[free_slot];
-            cp->fs = *fsp;
-            cp->offset_req = offset;
-            cp->length_req = length;
-            cp->refcount = 1;
-            *contextidp = free_slot;
-            *exists_pp = false;
-        }
-    }
-
-    return retval;
-}
-
-static OSErr
-release_context(int context)
-{
-    OSErr retval;
-
-    if(context >= n_context_slots || contexts[context].refcount <= 0)
-        retval = paramErr;
-    else
-    {
-        retval = noErr;
-        if(--contexts[context].refcount == 0)
-        {
-            --n_active_contexts;
-            munmap(contexts[context].addr, contexts[context].length_act);
-        }
-    }
-    return retval;
-}
-
-static context_t *
-contextp_from_id(int context)
-{
-    context_t *retval;
-
-    if(context >= n_context_slots || contexts[context].refcount <= 0)
-        retval = 0;
-    else
-        retval = &contexts[context];
-    return retval;
-}
-
-static OSErr
-try_to_mmap_file(FSSpecPtr fsp, LONGINT offset, LONGINT length,
-                 int *contextidp)
-{
-    OSErr retval;
-    INTEGER vref;
-
-    retval = noErr;
-    /* canonicalize fsp to make sure */
-    vref = CW(fsp->vRefNum);
-    if(ISWDNUM(vref) || pstr_index_after(fsp->name, ':', 0))
-    {
-        FSSpecPtr newfsp;
-
-        newfsp = alloca(sizeof *newfsp);
-        retval = FSMakeFSSpec(vref, CL(fsp->parID), fsp->name, newfsp);
-        if(retval == noErr)
-            fsp = newfsp;
-    }
-
-    if(retval == noErr)
-    {
-        bool exists_p;
-        int context;
-
-        retval = get_context(&context, &exists_p, fsp, offset, length);
-        if(retval == noErr)
-        {
-            if(exists_p)
-                *contextidp = context;
-            else
-            {
-                INTEGER rn;
-
-                retval = FSpOpenDF(fsp, fsRdPerm, &rn);
-                if(retval != noErr)
-                    release_context(context);
-                else
-                {
-                    const fcbrec *fp;
-                    context_t *cp;
-                    size_t pagesize;
-
-                    pagesize = getpagesize();
-                    fp = (const fcbrec *)(MR(LM(FCBSPtr)) + rn);
-                    /* NOTE: right now we let them place it anywhere they
-		     want -- eventually it probably makes sense to try to
-		     get it placed high */
-                    cp = contextp_from_id(context);
-                    cp->offset_act = rounddown(offset, pagesize);
-                    cp->mapped_to_eof_p = length == kWholeFork;
-                    if(!cp->mapped_to_eof_p)
-                        cp->length_act = length + (offset - cp->offset_act);
-                    else
-                    {
-                        LONGINT eof;
-                        OSErr err;
-
-                        err = GetEOF(rn, &eof);
-                        if(err == noErr)
-                            cp->length_act = eof - cp->offset_act;
-                        else
-                        {
-                            warning_unexpected("err = %d", err);
-                            cp->length_act = -1; /* force mmap to fail */
-                        }
-                    }
-                    cp->addr = mmap(0, cp->length_act, PROT_READ, MAP_PRIVATE,
-                                    fp->fcfd, cp->offset_act);
-                    if(cp->addr != MAP_FAILED)
-                        *contextidp = context;
-                    else
-                    {
-                        retval = ROMlib_maperrno();
-                        release_context(context);
-                    }
-                    FSClose(rn);
-                }
-            }
-        }
-    }
-
-    return retval;
-}
 
 OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
                                   LONGINT length, Str63 fragname,
-                                  LoadFlags flags, ConnectionID *connp,
-                                  Ptr *mainAddrp, Str255 errname)
+                                  LoadFlags flags, GUEST<ConnectionID> *connp,
+                                  GUEST<Ptr> *mainAddrp, Str255 errname)
 {
     OSErr retval;
-    int context;
 
     warning_unimplemented("ignoring flags = 0x%x\n", flags);
 
-    retval = try_to_mmap_file(fsp, offset, length, &context);
+    GUEST<INTEGER> rn;
+
+    retval = FSpOpenDF(fsp, fsRdPerm, &rn);
     if(retval == noErr)
     {
-        const context_t *cp;
-        void *addr;
+        GUEST<LONGINT> len;
+            
+        retval = GetEOF(CW(rn), &len);
 
-        cp = contextp_from_id(context);
+        Ptr p = NewPtr(CL(len));
+        FSRead(CW(rn), &len, p);
 
-        addr = (char *)cp->addr + offset - cp->offset_act;
-        retval = GetMemFragment(addr, length, fragname, flags, connp,
+        retval = GetMemFragment(p, CL(len), fragname, flags, connp,
                                 mainAddrp, errname);
     }
     return retval;

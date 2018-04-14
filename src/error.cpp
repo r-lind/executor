@@ -473,5 +473,3 @@ void _errno_warning(const char *file, int line, const char *fn,
     flush_stream();
 }
 
-#undef NULL_STRING
-const char NULL_STRING[] = ""; /* used to avoid bogus gcc warnings */

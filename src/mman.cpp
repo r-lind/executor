@@ -45,9 +45,9 @@ int ROMlib_stack_size = DEFAULT_STACK_SIZE;
 
 /* these two variables define, in ROMlib space, the beginning of mac-memory
    and the end of mac memory.  They're purpose is to try to prevent routines
-   like DisposHandle () from crashing when passed a bogus pointer.
+   like DisposeHandle () from crashing when passed a bogus pointer.
    Specifically, I know an application that picks up 4 bytes from low-memory
-   global 0x100 and then calls DisposHandle () on it.  That location contains
+   global 0x100 and then calls DisposeHandle () on it.  That location contains
    0xFFFF0048 both here and on a Mac.  On a Mac, this doesn't cause a crash.
    */
 
@@ -299,7 +299,7 @@ void HClrRBit(Handle h)
     SET_MEM_ERR(noErr);
 }
 
-/* Zone sizes will be zero modulo this number (which must be a power of 2). */
+/* Zone sizes will be zero modulo this number (which must be a pow of 2). */
 #define ZONE_ALIGN_SIZE 8192
 
 static void
@@ -698,7 +698,7 @@ _NewHandle_flags(Size size, bool sys_p, bool clear_p)
     size += HDRSIZE;
     if(ROMlib_relalloc(size, &block) != noErr)
     {
-        DisposHandle(newh);
+        DisposeHandle(newh);
         newh = NULL;
         SET_MEM_ERR(memFullErr);
         goto done;
@@ -724,7 +724,7 @@ done:
 
 #define TTS_HACK (ROMlib_options & ROMLIB_DISPOSHANDLE_HACK_BIT)
 
-void DisposHandle(Handle h)
+void DisposeHandle(Handle h)
 {
     MM_SLAM("entry");
 
@@ -1034,7 +1034,7 @@ _RecoverHandle_flags(Ptr p, bool sys_p)
     return h;
 }
 
-void ReallocHandle(Handle h, Size size)
+void ReallocateHandle(Handle h, Size size)
 {
     block_header_t *oldb, *newb;
     int32_t newsize;
@@ -1143,7 +1143,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
 
     ZONE_ALLOC_PTR_X(current_zone) = CLC_NULL;
 
-    ResrvMem(size);
+    ReserveMem(size);
     if(ROMlib_relalloc(size, &b))
     {
 #if 0
@@ -1177,7 +1177,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
     return p;
 }
 
-void DisposPtr(Ptr p)
+void DisposePtr(Ptr p)
 {
     MM_SLAM("entry");
 
@@ -1370,7 +1370,7 @@ int32_t _FreeMem_flags(bool sys_p)
     return freespace;
 }
 
-Size _MaxMem_flags(Size *growp, bool sys_p)
+Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
 {
     block_header_t *b;
     GUEST<THz> save_zone;
@@ -1471,7 +1471,7 @@ Size _MaxMem_flags(Size *growp, bool sys_p)
 
     LM(TheZone) = save_zone;
 
-    *growp = grow;
+    *growp = CL(grow);
     SET_MEM_ERR(noErr);
     MM_SLAM("exit");
     return biggestfree;
@@ -1589,7 +1589,6 @@ void _ResrvMem_flags(Size needed, bool sys_p)
     GUEST<THz> save_zone;
     THz current_zone;
     block_header_t *b;
-    Size free;
     long avail;
     bool already_maxed_p;
 
@@ -1624,7 +1623,9 @@ again:
         }
     }
 
-    avail = MaxMem(&free);
+    GUEST<Size> free_s;
+    avail = MaxMem(&free_s);
+    Size free = CL(free_s);
     if(avail >= needed && !already_maxed_p)
     {
         already_maxed_p = true;
@@ -1717,12 +1718,12 @@ BlockMove_and_possibly_flush_cache(Ptr src, Ptr dst, Size cnt,
     LM(MemErr) = CWC(noErr);
 }
 
-void BlockMove(Ptr src, Ptr dst, Size cnt)
+void C_BlockMove(Ptr src, Ptr dst, Size cnt)
 {
     BlockMove_and_possibly_flush_cache(src, dst, cnt, true);
 }
 
-void BlockMoveData(Ptr src, Ptr dst, Size cnt)
+void C_BlockMoveData(Ptr src, Ptr dst, Size cnt)
 {
     BlockMove_and_possibly_flush_cache(src, dst, cnt, false);
 }
@@ -1770,6 +1771,12 @@ void MoveHHi(Handle h)
     SET_MEM_ERR(noErr);
 }
 
+void C_HLockHi(Handle h)
+{
+    MoveHHi(h);
+    HLock(h);
+}
+
 int32_t _MaxBlock_flags(bool sys_p)
 {
     GUEST<THz> save_zone;
@@ -1810,7 +1817,7 @@ int32_t _MaxBlock_flags(bool sys_p)
     return MAX(total_free, max_free) - HDRSIZE;
 }
 
-void _PurgeSpace_flags(Size *total_out, Size *contig_out, bool sys_p)
+void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys_p)
 {
     GUEST<THz> save_zone;
     THz current_zone;
@@ -1855,8 +1862,8 @@ void _PurgeSpace_flags(Size *total_out, Size *contig_out, bool sys_p)
     LM(TheZone) = save_zone;
 
     SET_MEM_ERR(noErr);
-    *total_out = total_free - HDRSIZE;
-    *contig_out = MAX(this_contig, max_contig) - HDRSIZE;
+    *total_out = CL(total_free - HDRSIZE);
+    *contig_out = CL(MAX(this_contig, max_contig) - HDRSIZE);
     MM_SLAM("exit");
 }
 
@@ -1979,7 +1986,7 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         SetHandleSize(dh, size);
         if(LM(MemErr) == CWC(noErr))
             BlockMove(STARH(sh), STARH(dh), size);
-        DisposHandle(sh);
+        DisposeHandle(sh);
     }
     else
     {
@@ -1995,25 +2002,40 @@ void ROMlib_installhandle(Handle sh, Handle dh)
     MM_SLAM("exit");
 }
 
-OSErr MemError(void)
+OSErr C_MemError(void)
 {
     MM_SLAM("entry");
 
     return CW(LM(MemErr));
 }
 
-THz SystemZone(void)
+THz C_SystemZone(void)
 {
     MM_SLAM("entry");
 
     return MR(LM(SysZone));
 }
 
-THz ApplicZone(void)
+THz C_ApplicationZone(void)
 {
     MM_SLAM("entry");
 
     return MR(LM(ApplZone));
+}
+
+Ptr C_GetApplLimit()
+{
+    return MR(LM(ApplLimit));
+}
+
+Ptr C_TopMem()
+{
+    return MR(LM(MemTop));
+}
+
+Handle C_GZSaveHnd()
+{
+    return MR(LM(GZRootHnd));
 }
 
 /* Like NewHandle, but fills in the newly allocated memory by copying

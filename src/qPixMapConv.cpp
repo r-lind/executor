@@ -66,7 +66,7 @@ void Executor::gd_black_white(GDHandle gdh,
 
 void Executor::pixmap_free_copy(PixMap *pm)
 {
-    DisposPtr(MR(pm->baseAddr));
+    DisposePtr(MR(pm->baseAddr));
 }
 
 void Executor::pixmap_copy(const PixMap *src_pm, const Rect *src_rect,
@@ -461,7 +461,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                                                           CTAB_TABLE(mapping));
 
                     /* free up the mapping table */
-                    DisposHandle((Handle)mapping);
+                    DisposeHandle((Handle)mapping);
 
                     /* Remember the specs for the table we just created. */
                     cached_src_seed_x = src_seed_x;

@@ -59,7 +59,7 @@ void Executor::C_ClosePoly()
 
 void Executor::C_KillPoly(PolyHandle poly)
 {
-    DisposHandle((Handle)poly);
+    DisposeHandle((Handle)poly);
 }
 
 void Executor::C_OffsetPoly(PolyHandle poly, INTEGER dh,

@@ -78,6 +78,8 @@
 #include "rsys/text.h"
 #include "rsys/appearance.h"
 #include "rsys/hfs_plus.h"
+#include "rsys/cpu.h"
+#include <PowerCore.h>
 
 #include "rsys/check_structs.h"
 
@@ -347,9 +349,7 @@ capable of color.",
       opt_no_arg, "" },
 #endif
 
-#if defined(powerpc) || defined(__ppc__)
     { "ppc", "try to execute the PPC native code if possible (UNSUPPORTED)", opt_no_arg, "" },
-#endif
 
 #if defined(CYGWIN32)
     { "realmodecd", "try to use real-mode cd-rom driver", opt_no_arg, "" },
@@ -631,6 +631,8 @@ setup_trap_vectors(void)
     /* Set up the trap vector for the timer interrupt. */
     timer_callback = callback_install(catchalarm, NULL);
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = CL(timer_callback);
+
+    getPowerCore().handleInterrupt = &catchalarmPowerPC;
 
     /* Fill in unhandled trap vectors so they cause graceful deaths.
    * Skip over those trap vectors which are known to have legitimate

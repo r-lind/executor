@@ -1018,7 +1018,7 @@ void Executor::C_DelSearch(ProcPtr searchProc)
                 GD_SEARCH_PROC_X(gdev) = HxX(s, nxtSrch);
             else
                 HxX(prev, nxtSrch) = HxX(s, nxtSrch);
-            DisposHandle((Handle)s);
+            DisposeHandle((Handle)s);
             /* Invalidate all color conversion tables. */
             ROMlib_invalidate_conversion_tables();
             break;
