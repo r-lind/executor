@@ -79,6 +79,7 @@
 #include "rsys/appearance.h"
 #include "rsys/hfs_plus.h"
 #include "rsys/cpu.h"
+#include "rsys/debugger.h"
 #include <PowerCore.h>
 
 #include "rsys/check_structs.h"
@@ -1654,7 +1655,8 @@ int main(int argc, char **argv)
 #if defined(CYGWIN32)
     complain_if_no_ghostscript();
 #endif
-
+    InitDebugger();
+    
     executor_main();
 
     ExitToShell();

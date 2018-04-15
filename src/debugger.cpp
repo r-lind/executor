@@ -1,3 +1,4 @@
+#include <rsys/debugger.h>
 #include <OSUtil.h>
 
 #include <mon.h>
@@ -5,6 +6,7 @@
 #include <PowerCore.h>
 #include <syn68k_public.h>
 #include <SegmentLdr.h>
+#include <signal.h>
 
 using namespace Executor;
 
@@ -12,12 +14,13 @@ namespace
 {
 bool mon_inited = false;
 bool singlestep = false;
+bool nmi = false;
 uint32_t singlestepFromAddr;
 
-void InitDebugger();
 void EnterDebugger();
+}
 
-void InitDebugger()
+void Executor::InitDebugger()
 {
     if(mon_inited)
         return;
@@ -81,7 +84,25 @@ void InitDebugger()
     }, "s                        single step\n");
 
     mon_inited = true;
+
+    struct sigaction act = {0};
+    act.sa_handler = [](int) {
+        nmi = true;
+    };
+    sigaction(SIGINT, &act, nullptr);
 }
+
+void Executor::CheckForDebuggerInterrupt()
+{
+    if(nmi)
+    {
+        nmi = false;
+        EnterDebugger();
+    }
+}
+
+namespace
+{
 
 void EnterDebugger()
 {

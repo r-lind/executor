@@ -18,6 +18,7 @@
 #include "rsys/refresh.h"
 #include "rsys/soundopts.h"
 #include "rsys/cpu.h"
+#include "rsys/debugger.h"
 #include <PowerCore.h>
 
 using namespace Executor;
@@ -199,6 +200,8 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
     cpu_state.ccc = saved_ccc;
     cpu_state.ccv = saved_ccv;
     cpu_state.ccx = saved_ccx;
+
+    CheckForDebuggerInterrupt();
 
     return MAGIC_RTE_ADDRESS;
 }
