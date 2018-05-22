@@ -579,6 +579,8 @@ extern OSErr FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
 NOTRAP_FUNCTION2(FSOpen);
 extern OSErr OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
 NOTRAP_FUNCTION2(OpenRF);
+extern OSErr OpenDF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
+NOTRAP_FUNCTION2(OpenDF);
 extern OSErr FSRead(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
 NOTRAP_FUNCTION2(FSRead);
 extern OSErr FSWrite(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);

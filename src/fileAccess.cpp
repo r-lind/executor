@@ -161,6 +161,23 @@ OSErr Executor::OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV
     return (temp);
 }
 
+OSErr Executor::OpenDF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioNamePtr = RM(filen);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    pbr.ioParam.ioVersNum = 0;
+    pbr.ioParam.ioPermssn = fsCurPerm;
+    pbr.ioParam.ioMisc = 0;
+    temp = PBOpenDF(&pbr, 0);
+    *rn = pbr.ioParam.ioRefNum;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+
 OSErr Executor::FSRead(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp) /* IMIV-109 */
 {
     ParamBlockRec pbr;

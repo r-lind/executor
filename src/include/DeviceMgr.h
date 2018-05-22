@@ -167,11 +167,19 @@ FILE_TRAP(PBStatus, ParmBlkPtr, 0xA005);
 FILE_TRAP(PBKillIO, ParmBlkPtr, 0xA006);
 
 extern OSErr OpenDriver(StringPtr name, GUEST<INTEGER> *rnp);
+NOTRAP_FUNCTION2(OpenDriver);
 extern OSErr CloseDriver(INTEGER rn);
+NOTRAP_FUNCTION2(CloseDriver);
 extern OSErr Control(INTEGER rn, INTEGER code,
                      Ptr param);
+NOTRAP_FUNCTION2(Control);
 extern OSErr Status(INTEGER rn, INTEGER code, Ptr param);
+NOTRAP_FUNCTION2(Status);
 extern OSErr KillIO(INTEGER rn);
+NOTRAP_FUNCTION2(KillIO);
+
 extern DCtlHandle GetDCtlEntry(INTEGER rn);
+NOTRAP_FUNCTION2(GetDCtlEntry);
+
 }
 #endif /* __DEVICEMGR__ */

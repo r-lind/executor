@@ -33,6 +33,7 @@ set(trap_instance_sources
 		trap_instances/ScrapMgr.cpp
 		trap_instances/ScriptMgr.cpp
 		trap_instances/SegmentLdr.cpp
+		trap_instances/Serial.cpp
 		trap_instances/ShutDown.cpp
 		trap_instances/SoundMgr.cpp
 		trap_instances/SpeechManager.cpp

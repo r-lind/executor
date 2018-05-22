@@ -136,9 +136,9 @@ OSErr Executor::SerSetBuf(INTEGER rn, Ptr p, INTEGER len) /* IMII-251 */
 
 #define SERHSHAKE 10 /* IMII-251 */
 
-OSErr Executor::SerHShake(INTEGER rn, SerShk flags) /* IMII-251 */
+OSErr Executor::SerHShake(INTEGER rn, const SerShk *flags) /* IMII-251 */
 {
-    return Control(rn, SERHSHAKE, (Ptr)&flags);
+    return Control(rn, SERHSHAKE, (Ptr)flags);
 }
 
 #define SERSETBRK 12 /* IMII-252 */
