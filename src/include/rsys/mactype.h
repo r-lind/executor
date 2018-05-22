@@ -645,13 +645,13 @@ public:
 };
 
 template<typename TT, typename CallConv>
-GUEST<UPP<TT>> RM(UPP<TT,CallConv> p)
+GUEST<UPP<TT,CallConv>> RM(UPP<TT,CallConv> p)
 {
     return GUEST<UPP<TT,CallConv>>::fromHost(p);
 }
 
 template<typename TT, typename CallConv>
-UPP<TT> MR(GuestWrapper<UPP<TT, CallConv>> p)
+UPP<TT,CallConv> MR(GuestWrapper<UPP<TT, CallConv>> p)
 {
     return p.get();
 }

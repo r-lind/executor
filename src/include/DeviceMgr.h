@@ -23,13 +23,21 @@
 
 namespace Executor
 {
+
+struct DCtlEntry;
+typedef DCtlEntry *DCtlPtr;
+typedef GUEST<DCtlPtr> *DCtlHandle;
+typedef GUEST<DCtlHandle> *DCtlHandlePtr;
+
+using DriverProcPtr = UPP<OSErr (ParmBlkPtr, DCtlPtr), Register<D0(A0, A1)>>;
+
 typedef struct
 {
-    GUEST<ProcPtr> udrvrOpen;
-    GUEST<ProcPtr> udrvrPrime; /* read and write */
-    GUEST<ProcPtr> udrvrCtl; /* control and killio */
-    GUEST<ProcPtr> udrvrStatus;
-    GUEST<ProcPtr> udrvrClose;
+    GUEST<DriverProcPtr> udrvrOpen;
+    GUEST<DriverProcPtr> udrvrPrime; /* read and write */
+    GUEST<DriverProcPtr> udrvrCtl; /* control and killio */
+    GUEST<DriverProcPtr> udrvrStatus;
+    GUEST<DriverProcPtr> udrvrClose;
     Str255 udrvrName;
 } umacdriver, *umacdriverptr;
 
@@ -58,7 +66,7 @@ typedef enum { Open,
                Stat,
                Close } DriverRoutineType;
 
-typedef struct DCtlEntry
+struct DCtlEntry
 {
     GUEST_STRUCT;
     GUEST<umacdriverptr> dCtlDriver; /* not just Ptr */
@@ -72,11 +80,8 @@ typedef struct DCtlEntry
     GUEST<INTEGER> dCtlDelay;
     GUEST<INTEGER> dCtlEMask;
     GUEST<INTEGER> dCtlMenu;
-} * DCtlPtr;
+};
 
-typedef GUEST<DCtlPtr> *DCtlHandle;
-
-typedef GUEST<DCtlHandle> *DCtlHandlePtr;
 
 enum
 {
@@ -122,11 +127,11 @@ enum
 
 typedef struct
 {
-    OSErr (*open)();
-    OSErr (*prime)();
-    OSErr (*ctl)();
-    OSErr (*status)();
-    OSErr (*close)();
+    DriverProcPtr open;
+    DriverProcPtr prime;
+    DriverProcPtr ctl;
+    DriverProcPtr status;
+    DriverProcPtr close;
     StringPtr name;
     INTEGER refnum;
 } driverinfo;

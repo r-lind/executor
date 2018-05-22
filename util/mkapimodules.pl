@@ -15,7 +15,7 @@ while($header = <include/*.h include/rsys/*.h>) {
         $i++;
         $lastincludeline = $i if($line =~ /^#include/);
         $hasmodulename = 1 if($line =~ /^#define MODULE_NAME/);
-        $hadtrap = 1 if($line =~ /^(PASCAL|REGISTER|RAW_68K|FILE)_TRAP/ || $line =~ /^(PASCAL|REGISTER)_SUBTRAP/ || $line =~ /^(NOTRAP_FUNCTION|PASCAL_FUNCTION)/);
+        $hadtrap = 1 if($line =~ /^(PASCAL|REGISTER|RAW_68K|FILE)_TRAP/ || $line =~ /^(PASCAL|REGISTER)_SUBTRAP/ || $line =~ /^(NOTRAP_FUNCTION|PASCAL_FUNCTION|REGISTER_FUNCTION)/);
     }
     close(HEADER);
 

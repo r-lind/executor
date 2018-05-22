@@ -55,6 +55,7 @@ set(trap_instance_sources
 		trap_instances/rsys_osutil.cpp
 		trap_instances/rsys_print.cpp
 		trap_instances/rsys_refresh.cpp
+		trap_instances/rsys_serial.cpp
 		trap_instances/rsys_soundopts.cpp
 		trap_instances/rsys_stdfile.cpp
 		trap_instances/rsys_tesave.cpp
