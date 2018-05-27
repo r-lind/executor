@@ -149,15 +149,6 @@ const LowMemGlobal<Ptr> JFetch { 0x8F4 }; // DeviceMgr IMII-194 (false);
 const LowMemGlobal<Ptr> JStash { 0x8F8 }; // DeviceMgr IMII-195 (false);
 const LowMemGlobal<Ptr> JIODone { 0x8FC }; // DeviceMgr IMII-195 (false);
 
-/*
- * __ROMlib_otherdrivers is initialized to null, but can be used to allow
- * extra drivers to be called.  Have __ROMlib_otherdrivers point to an array
- * driverinfo (terminated with a null open field) before you call PBOpen
- * if you have additional drivers to use.
- */
-
-extern driverinfo *__ROMlib_otherdrivers;
-
 extern OSErr PBControl(ParmBlkPtr pbp, BOOLEAN a);
 extern OSErr PBStatus(ParmBlkPtr pbp, BOOLEAN a);
 extern OSErr PBKillIO(ParmBlkPtr pbp, BOOLEAN a);
