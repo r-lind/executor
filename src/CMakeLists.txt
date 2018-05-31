@@ -172,8 +172,7 @@ set(sound_sources ${sound_sources} SpeechManager-MacBridge.mm)
 endif()
 source_group(Sound FILES ${sound_sources})
 
-set(num_sources bindec.cpp float4.cpp float5.cpp float7.cpp floatnext.cpp toolmath.cpp
-    mathlib.cpp)
+set(num_sources bindec.cpp float4.cpp float5.cpp float7.cpp floatnext.cpp toolmath.cpp)
 source_group(Numerics FILES ${num_sources})
 
 set(misc_sources
@@ -289,7 +288,6 @@ set(include_sources hintemplate.h
                   include/rsys/icon.h
                   include/rsys/image.h
                   include/rsys/ini.h
-                  include/rsys/interfacelib.h
                   include/rsys/itm.h
                   include/rsys/iv.h
                   include/rsys/keyboard.h
@@ -302,7 +300,6 @@ set(include_sources hintemplate.h
                   include/rsys/m68kint.h
                   include/rsys/macros.h
                   include/rsys/mactype.h
-                  include/rsys/mathlib.h
                   include/rsys/memsize.h
                   include/rsys/menu.h
                   include/rsys/mixed_mode.h

@@ -22,8 +22,6 @@
 #include "rsys/cfm.h"
 #include "rsys/pef.h"
 #include "rsys/file.h"
-#include "rsys/interfacelib.h"
-#include "rsys/mathlib.h"
 #include "rsys/launch.h"
 #include "rsys/hfs.h"
 #include "rsys/string.h"
