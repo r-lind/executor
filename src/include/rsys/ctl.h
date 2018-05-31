@@ -146,8 +146,6 @@ struct lsastr
     GUEST<INTEGER> axis;
 };
 
-extern BOOLEAN ROMlib_cdef0_is_rectangular;
-
 extern void image_arrow_up_active_init(void);
 extern void image_arrow_up_inactive_init(void);
 extern void image_arrow_down_active_init(void);

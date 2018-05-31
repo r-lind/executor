@@ -20,8 +20,6 @@
 
 using namespace Executor;
 
-BOOLEAN Executor::ROMlib_cdef0_is_rectangular = false;
-
 ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
                                      BOOLEAN vis, INTEGER value, INTEGER min,
                                      INTEGER max, INTEGER procid,
@@ -38,17 +36,6 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
     {
         DisposeHandle((Handle)retval);
         return 0;
-    }
-
-    if((procid >> 4) == 0)
-    {
-        GUEST<INTEGER> id;
-        GUEST<ResType> type;
-        Str255 name;
-
-        GetResInfo(MR(temph), &id, &type, name);
-        ROMlib_cdef0_is_rectangular = (EqualString(name,
-                                                   (StringPtr) "\023rectangular buttons", false, false));
     }
 
     if(!title)
