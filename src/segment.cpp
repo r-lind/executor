@@ -17,7 +17,7 @@
 #include "WindowMgr.h"
 
 #include "rsys/hfs.h"
-#include "rsys/file.h"
+#include "rsys/cpu.h"
 #include "rsys/notmac.h"
 #include "rsys/glue.h"
 #include "rsys/wind.h"

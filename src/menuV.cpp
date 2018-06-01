@@ -11,7 +11,7 @@
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"
 
-#include "rsys/file.h"
+#include "rsys/cpu.h"
 #include "rsys/cquick.h"
 #include "rsys/menu.h"
 #include "rsys/wind.h"

@@ -11,6 +11,7 @@
 #include "rsys/stdfile.h"
 #include "rsys/flags.h"
 #include "rsys/prefs.h"
+#include "rsys/cpu.h"
 
 using namespace Executor;
 

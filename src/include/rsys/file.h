@@ -375,8 +375,6 @@ extern DrvQExtra *ROMlib_addtodq(ULONGINT drvsize, const char *devicename,
                                  INTEGER partition, INTEGER drefnum,
                                  drive_flags_t flags, hfs_access_t *hfsp);
 
-extern unsigned long ROMlib_destroy_blocks(syn68k_addr_t start, uint32_t count,
-                                           BOOLEAN flush_only_faulty_checksums);
 extern void ROMlib_automount(const char *path);
 
 extern Byte open_attrib_bits(LONGINT file_id, VCB *vcbp, GUEST<INTEGER> *refnump);

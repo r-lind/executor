@@ -8,6 +8,7 @@
 #include "MemoryMgr.h"
 #include "rsys/file.h"
 #include "rsys/hfs.h"
+#include "rsys/cpu.h"
 
 using namespace Executor;
 

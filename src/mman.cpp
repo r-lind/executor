@@ -15,7 +15,7 @@
 #include "OSEvent.h"
 
 #include "rsys/mman_private.h"
-#include "rsys/file.h"
+#include "rsys/cpu.h"
 #include "rsys/hook.h"
 #include "rsys/memsize.h"
 #include "rsys/executor.h"
