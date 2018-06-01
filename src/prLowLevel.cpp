@@ -1129,13 +1129,7 @@ BOOLEAN Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
 
     printer_init();
     retval = false;
-#if 0 && defined(MACOSX_)
-/*
- * NOTE: we don't actually call this because Excel sets up some goofy pages
- *	 and then we get way confused.
- */
-    ROMlib_updatenextpagerect(&Hx(hPrint, rPaper));
-#endif /* defined(MACOSX_) */
+
     if((prrecptr = CALLPRINITPROC(hPrint, (prinitprocp) initfptr)))
     {
         if(!SUNPATH_HACK || (((pritemprocp)MR(prrecptr->pItemProc)
@@ -1186,11 +1180,6 @@ BOOLEAN Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
         CloseDialog((DialogPtr)prrecptr);
         DisposePtr((Ptr)prrecptr);
     }
-#if defined(MACOSX_)
-    ROMlib_updatemacpagerect(&HxX(hPrint, rPaper),
-                             &HxX(hPrint, prInfo.rPage),
-                             &HxX(hPrint, prInfoPT.rPage));
-#endif /* defined(MACOSX_) */
     return retval;
 }
 

@@ -696,9 +696,6 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     LM(TheZone) = LM(ApplZone);
     ROMlib_memnomove_p = true;
 
-#if defined(NEXTSTEP)
-    ROMlib_startapp();
-#endif
     /*
  * NOTE: this memcpy has to be done after all local variables have been used
  *	 because it will quite possibly smash stuff that's on our stack.
