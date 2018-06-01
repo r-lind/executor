@@ -54,13 +54,6 @@ int ROMlib_stack_size = DEFAULT_STACK_SIZE;
 uintptr_t ROMlib_syszone;
 uintptr_t ROMlib_memtop;
 
-#if defined(MM_MANY_APPLZONES)
-/* for debugging, we can have multiple applzones which are used
-   roundrobin */
-int mm_n_applzones = 1;
-static int mm_current_applzone;
-#endif
-
 /* for routines that simply set LM(MemErr) */
 #define SET_MEM_ERR(err)   \
     do                     \
@@ -384,11 +377,7 @@ void ROMlib_InitZones()
 
 #define STACK_SIZE ROMlib_stack_size
 
-#if defined(MM_MANY_APPLZONES)
-        applzone_memory_segment_size = (mm_n_applzones * INIT_APPLZONE_SIZE);
-#else /* !MM_MANY_APPLZONES */
         applzone_memory_segment_size = INIT_APPLZONE_SIZE;
-#endif /* !MM_MANY_APPLZONES */
 
         /* Determine total allocated memory.  Round up to next 8K
        * since that's the page size we pretend to have.
@@ -446,31 +435,7 @@ void ROMlib_InitZones()
         beenhere = true;
     }
 
-#if defined(MM_MANY_APPLZONES)
-    if(mm_n_applzones != 1)
-    {
-        if(munmap((char *)MR(LM(SysZone))
-                      + INIT_SYSZONE_SIZE,
-                  applzone_memory_segment_size)
-           == -1)
-            warning_errno("unable to `munmap ()' previous applzone");
-
-        LM(ApplZone) = RM((THz)((char *)MR(LM(SysZone))
-                            + INIT_SYSZONE_SIZE
-                            + (mm_current_applzone * INIT_APPLZONE_SIZE)));
-        mm_current_applzone = (mm_current_applzone + 1) % mm_n_applzones;
-
-        if(mmap((char *)MR(LM(ApplZone)), INIT_APPLZONE_SIZE,
-                PROT_READ | PROT_WRITE,
-                MAP_ANONYMOUS | MAP_FIXED | MAP_PRIVATE, -1, 0)
-           == (void *)-1)
-            errno_fatal("unable to `mmap ()' new applzone");
-    }
-    else
-        LM(ApplZone) = RM((THz)((Ptr)MR(LM(SysZone)) + INIT_SYSZONE_SIZE));
-#else /* !MM_MANY_APPLZONES */
     LM(ApplZone) = RM((THz)((Ptr)MR(LM(SysZone)) + INIT_SYSZONE_SIZE));
-#endif
 
     Executor::InitApplZone();
 

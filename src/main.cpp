@@ -269,11 +269,6 @@ const option_vec Executor::common_opts = {
                    "available to Executor's internal system software.",
         opt_sep, "",
     },
-#if defined(MM_MANY_APPLZONES)
-    { "napplzones",
-      "debugging flag, specifies the number of applzones to use",
-      opt_sep, "" },
-#endif /* MM_MANY_APPLZONES */
 #endif /* MALLOC_MAC_MEMORY */
     { "system",
       "specify the system version that executor reports to applications",
@@ -1244,11 +1239,6 @@ int main(int argc, char **argv)
         note_memory_syntax_change("stack", ROMlib_stack_size);
     else
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
-
-#if defined(MM_MANY_APPLZONES)
-    opt_int_val(common_db, "napplzones", &mm_n_applzones, &bad_arg_p);
-    check_arg("napplzones", &mm_n_applzones, 1, /* random */ 255);
-#endif /* !MM_MANY_APPLZONES */
 
     ROMlib_InitZones();
 

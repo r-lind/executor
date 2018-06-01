@@ -31,14 +31,6 @@ extern void print_mem_full_message(void);
 
 extern int ROMlib_applzone_size, ROMlib_syszone_size, ROMlib_stack_size;
 
-#if !defined(NDEBUG) && defined(HAVE_MMAP)
-#define MM_MANY_APPLZONES
-#endif /* !NDEBUG && HAVE_MMAP */
-
-#if defined(MM_MANY_APPLZONES)
-extern int mm_n_applzones;
-#endif
-
 extern Handle _NewHandle_copy_ptr_flags(Size size, const void *data_to_copy,
                                         bool sys_p);
 extern Handle _NewHandle_copy_handle_flags(Size size, Handle data_to_copy,
