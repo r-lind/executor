@@ -191,7 +191,8 @@ set(misc_sources
   paramline.c fauxdbm.cpp commtool.cpp cfm.cpp pef_hash.cpp
   mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
-  executor.cpp  crc.cpp)
+  executor.cpp  crc.cpp
+  prefpanel.cpp)
 
 set(include_sources hintemplate.h
                   include/ADB.h

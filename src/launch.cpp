@@ -43,7 +43,6 @@
 #include "rsys/sounddriver.h"
 #include "rsys/prefs.h"
 #include "rsys/flags.h"
-#include "rsys/aboutpanel.h"
 #include "rsys/segment.h"
 #include "rsys/tesave.h"
 #include "rsys/blockinterrupts.h"

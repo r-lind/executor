@@ -8,13 +8,15 @@
 
  */
 
+#include <stdint.h>
+
 namespace Executor
 {
 
 typedef struct
 {
-    LONGINT first;
-    LONGINT second;
+    int first;
+    int second;
 } pair_t;
 
 extern pair_t ROMlib_ScreenSize;

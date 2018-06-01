@@ -1,6 +1,10 @@
 #if !defined(__RSYS_PREFPANEL__)
 #define __RSYS_PREFPANEL__
 
+namespace Executor
+{
+void dopreferences();
+
 enum
 {
     PREFDIALID = -4063
@@ -49,5 +53,6 @@ enum
 
     PREF_APPNAME = 37,
 };
+}
 
 #endif /* !defined(__RSYS_PREFPANEL__) */

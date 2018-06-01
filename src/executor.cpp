@@ -31,7 +31,6 @@
 #include "rsys/file.h"
 #include "rsys/soundopts.h"
 #include "rsys/prefs.h"
-#include "rsys/aboutpanel.h"
 #include "rsys/segment.h"
 #include "rsys/host.h"
 #include "rsys/executor.h"
