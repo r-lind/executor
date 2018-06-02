@@ -54,8 +54,6 @@ typedef void (*draghookp)(void);
 
 #define var(w) (GetWVariant((w)))
 
-extern BOOLEAN ROMlib_dirtyvariant;
-
 using windprocp = UPP<LONGINT(INTEGER var, WindowPtr wind, INTEGER mess,
                                     LONGINT param)>;
 

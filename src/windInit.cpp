@@ -39,10 +39,6 @@
 
 using namespace Executor;
 
-BOOLEAN Executor::ROMlib_dirtyvariant = false;
-
-bool Executor::system_file_version_skew_p;
-
 static void
 exit_executor(void)
 {

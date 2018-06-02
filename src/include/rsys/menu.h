@@ -298,7 +298,6 @@ typedef GUEST<tablePtr> *tableHandle;
 void cleanup_icon_info(icon_info_t *info);
 int get_icon_info(mextp item_info, icon_info_t *info, int need_icon_p);
 
-extern int ROMlib_sticky_menus_p;
 
 void menu_bar_color(RGBColor *bar_color);
 void menu_title_color(int16_t id, RGBColor *title_color);

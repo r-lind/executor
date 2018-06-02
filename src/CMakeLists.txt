@@ -192,7 +192,7 @@ set(misc_sources
   mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
   executor.cpp  crc.cpp
-  prefpanel.cpp dispatcher.cpp)
+  prefpanel.cpp dispatcher.cpp options.cpp)
 
 set(include_sources hintemplate.h
                   include/ADB.h

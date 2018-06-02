@@ -20,6 +20,7 @@
 #include "rsys/notmac.h"
 #include "rsys/osevent.h"
 #include "rsys/text.h"
+#include "rsys/prefs.h"
 
 using namespace Executor;
 
@@ -279,8 +280,6 @@ void Executor::ROMlib_teinsertstyleinfo(TEHandle te,
     if(cleanup_scrap_p)
         DisposeHandle((Handle)scrap);
 }
-
-int Executor::ROMlib_forward_del_p = false;
 
 void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
                                 int16_t len, bool insert, StScrpHandle styleh)

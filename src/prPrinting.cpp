@@ -36,9 +36,6 @@ using namespace std;
 int pageno = 0; /* This isn't really the way to do it */
 namespace Executor
 {
-int ROMlib_passpostscript = true;
-int ROMlib_fontsubstitution = false;
-
 string ROMlib_document_paper_sizes;
 string ROMlib_paper_size;
 string ROMlib_paper_size_name;

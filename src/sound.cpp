@@ -49,8 +49,6 @@ void Executor::SetSoundVol(INTEGER vol)
 }
 #endif
 
-int Executor::ROMlib_PretendSound = soundpretend;
-
 static inline bool
 qfull_p(SndChannelPtr chanp)
 {

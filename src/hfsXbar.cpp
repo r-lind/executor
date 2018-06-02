@@ -157,8 +157,6 @@ try_to_reopen(DrvQExtra *dqp)
 #endif
 }
 
-int Executor::ROMlib_directdiskaccess = false;
-
 OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;

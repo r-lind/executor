@@ -20,15 +20,10 @@ static long yylex( void );
 static void freestring( char *string );
 static char validblock = 1;
 char *ROMlib_win32_token = 0;
-char *Executor::ROMlib_WindowName = 0;
 char *ROMlib_DongleFamily = 0;
-char *Executor::ROMlib_Comments = 0;
 char *ROMlib_new_printer_name = 0;
 char *ROMlib_new_label = 0;
 static char *ROMlib_mac_cdrom;
-pair_t Executor::ROMlib_ScreenSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };
-pair_t Executor::ROMlib_MacSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };
-pair_t Executor::ROMlib_ScreenLocation = { INITIALPAIRVALUE, INITIALPAIRVALUE };
 static unsigned short crcval;
 int ROMlib_AppleChar = 0;
 int ROMlib_right_button_modifier = 0;
@@ -38,7 +33,7 @@ void yyerror(const char *str);
 
 %start configuration
 
-%union	{ long number; char *cptr; char **cptrptr; pair_t *pptr; int *iptr;
+%union	{ long number; char *cptr; char **cptrptr; std::pair<int,int> *pptr; int *iptr;
 	  unsigned long rtype;};
 
 %token	STRINGCONSTANT	/* ptr points to null-terminated string */

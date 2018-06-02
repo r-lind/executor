@@ -37,6 +37,7 @@
 #include "rsys/notmac.h"
 #include "rsys/version.h"
 #include "rsys/functions.impl.h"
+#include "rsys/prefs.h"
 
 using namespace Executor;
 
@@ -46,11 +47,6 @@ typedef LONGINT (*mbarhookp)(Rect *rp);
 
 #define CALLMENUHOOK(fp) ROMlib_CALLMENUHOOK((menuhookp)(fp))
 #define CALLMBARHOOK(arg, fp) ROMlib_CALLMBARHOOK(arg, (mbarhookp)(fp))
-
-namespace Executor
-{
-int ROMlib_sticky_menus_p = 0;
-}
 
 static void dirtymenusize(MenuHandle);
 static BOOLEAN findroot(INTEGER menuid, INTEGER *root_unswp);

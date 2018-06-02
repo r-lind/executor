@@ -94,9 +94,6 @@ void Executor::ROMlib_set_ppc(bool val)
 #define CONFIGEXTENSION ".ecf"
 #define OLD_CONFIG_EXTENSION ".econf" /* must be longer than configextension */
 
-FILE *Executor::configfile;
-int32_t Executor::ROMlib_options;
-
 static int16_t name0stripappl(StringPtr name)
 {
     char *p;
@@ -119,14 +116,6 @@ static int16_t name0stripappl(StringPtr name)
  * the user has changed things by hand).
  */
 
-int Executor::ROMlib_nowarn32;
-
-std::string Executor::ROMlib_configfilename;
-
-int Executor::ROMlib_pretend_help = false;
-int Executor::ROMlib_pretend_alias = false;
-int Executor::ROMlib_pretend_edition = false;
-int Executor::ROMlib_pretend_script = false;
 
 void remalloc(char **strp)
 {
@@ -149,8 +138,6 @@ void reset_string(char **strp)
         free(*strp);
     *strp = 0;
 }
-
-int Executor::ROMlib_desired_bpp;
 
 static void ParseConfigFile(StringPtr exefname, OSType type)
 {
@@ -188,7 +175,7 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
 
 #if 0	
 	if (ROMlib_options & ROMLIB_NOCLOCK_BIT)
-	    ROMlib_noclock = 1;
+	    ROMlib_noclock = true;
 #endif
         if(ROMlib_options & ROMLIB_BLIT_OS_BIT)
             ROMlib_WriteWhen(WriteInOSEvent);
@@ -204,10 +191,6 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
 #endif
         if(ROMlib_options & ROMLIB_REFRESH_BIT)
             ROMlib_refresh = 10;
-        if(ROMlib_options & ROMLIB_DIRTY_VARIANT_BIT)
-            ROMlib_dirtyvariant = true;
-        else
-            ROMlib_dirtyvariant = false;
         if(ROMlib_options & ROMLIB_SOUNDOFF_BIT)
             ROMlib_PretendSound = soundoff;
         if(ROMlib_options & ROMLIB_PRETENDSOUND_BIT)
@@ -342,8 +325,6 @@ static void beginexecutingat(LONGINT startpc)
     C_ExitToShell();
 }
 
-LONGINT Executor::ROMlib_appbit;
-
 size_info_t Executor::size_info;
 
 #define VERSFMT "(0x%02x, 0x%02x, 0x%02x, 0x%02x, %d)"
@@ -351,7 +332,6 @@ size_info_t Executor::size_info;
 
 LONGINT Executor::ROMlib_creator;
 
-void *ROMlib_foolgcc; /* to force the alloca to be done */
 
 void Executor::SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
 {

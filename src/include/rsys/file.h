@@ -452,7 +452,6 @@ extern void HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
 extern OSErr FSReadAll(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
 extern OSErr FSWriteAll(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
 
-extern int ROMlib_no_dot_files;
 extern LONGINT ROMlib_magic_offset;
 
 extern void convert_slashs_to_backslashs(char *p);

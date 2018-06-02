@@ -71,6 +71,7 @@ int Executor::nodrivesearch_p = false;
 #include "rsys/system_error.h"
 
 #include "rsys/functions.impl.h"
+#include "rsys/prefs.h"
 
 using namespace Executor;
 
@@ -1768,15 +1769,6 @@ static void bumpsavedisk(DialogPtr dp, BOOLEAN always)
     OSErr err;
     BOOLEAN is_single_tree_fs, seenus;
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    /*    static BOOLEAN beenhere = false; */
-
-    if(ROMlib_drive_check /* || !beenhere */)
-    {
-        futzwithdosdisks();
-        /*      beenhere = true; */
-    }
-#endif
     pb.volumeParam.ioVRefNum = CW(-CW(LM(SFSaveDisk)));
     pb.volumeParam.ioNamePtr = 0;
     pb.volumeParam.ioVolIndex = 0;

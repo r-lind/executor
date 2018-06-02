@@ -21,8 +21,6 @@ PowerCore& Executor::getPowerCore()
  *	 addresses.
  */
 
-int Executor::ROMlib_flushoften = 0;
-
 unsigned long Executor::ROMlib_destroy_blocks(
     syn68k_addr_t start, uint32_t count, bool flush_only_faulty_checksums)
 {

@@ -359,7 +359,6 @@ void Executor::ROMlib_rewinddir()
     cacheindex = 0x7fffffff;
 }
 
-int Executor::ROMlib_no_dot_files = false;
 
 static bool
 dislike_name(char *namep)
@@ -1331,9 +1330,6 @@ pbsetfpos(ParmBlkPtr pb, bool can_go_past_eof)
     fs_err_hook(err);
     return err;
 }
-
-int Executor::ROMlib_newlinetocr = true;
-
 
 OSErr Executor::ufsPBRead(ParmBlkPtr pb, BOOLEAN a) /* INTERNAL */
 {

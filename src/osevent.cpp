@@ -405,8 +405,6 @@ void Executor::FlushEvents(INTEGER evmask, INTEGER stopmask) /* II-69 */
 
 BOOLEAN Executor::ROMlib_bewaremovement;
 
-int Executor::ROMlib_refresh = 0;
-
 static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
                              BOOLEAN dropit)
 {

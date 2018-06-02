@@ -15,12 +15,9 @@ struct finderinfo
     GUEST<AppFile[1]> files;
 };
 
-extern int ROMlib_print;
 extern void SFSaveDisk_Update(INTEGER vrefnum, Str255 filename);
 
 extern char *ROMlib_undotdot(char *origp);
-
-extern LONGINT ROMlib_appbit, ROMlib_whichapps;
 
 extern void ROMlib_seginit(LONGINT argc, char **argv);
 extern void empty_timer_queues(void);

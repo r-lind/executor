@@ -450,9 +450,9 @@ int saveprefvalues(const char *savefilename, LONGINT locationx, LONGINT location
 	if (ROMlib_clock != 2)
 	    fprintf(fp, ", NoClock");
 #endif
-        if(ROMlib_nowarn32 != 0)
+        if(ROMlib_nowarn32)
             fprintf(fp, ", NoWarn32");
-        if(ROMlib_flushoften != 0)
+        if(ROMlib_flushoften)
             fprintf(fp, ", FlushOften");
         if(ROMlib_options & ROMLIB_DEBUG_BIT)
             fprintf(fp, ", Debug");

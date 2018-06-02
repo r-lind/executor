@@ -112,13 +112,8 @@ static void setstartdir(char *);
 using namespace Executor;
 using namespace std;
 
-int Executor::ROMlib_noclock = 0;
-
 /* optional resolution other than 72dpix72dpi for printing */
 INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
-
-/* A string approximating the original command line. */
-const char *Executor::ROMlib_command_line;
 
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
@@ -128,27 +123,7 @@ static bool bad_arg_p = false;
 
 static bool graphics_p = true;
 
-/* for a description of flags declared here, see <rsys/flags.h> */
-
-/* Initial screen size.  This can be changed dynamically. */
-INTEGER Executor::flag_width = 0, Executor::flag_height = 0; /* 0 means "use default". */
-
-/* Initial bits per pixel.  The screen depth can be changed dynamically. */
-int Executor::flag_bpp = 0; /* 0 means "use default". */
-
-INTEGER Executor::ROMlib_shadow_screen_p = true;
-
-#if defined(MSDOS) || defined(CYGWIN32)
-int ROMlib_drive_check = 0;
-#endif
-
 static bool use_native_code_p = true;
-
-/* the system version that executor is currently reporting to
-   applications, set through the `-system' options.  contains the
-   version number in the form `0xABC' which corresponds to system
-   version A.B.C */
-uint32_t Executor::system_version = 0x700; /* keep this in sync with Browser's .ecf file */
 
 const option_vec Executor::common_opts = {
     { "sticky", "sticky menus", opt_no_arg, "" },
@@ -538,8 +513,6 @@ static void setstartdir(char *argv0)
     ROMlib_startdirlen = strlen(ROMlib_startdir);
 #endif /* defined(MSDOS) */
 }
-
-char *Executor::program_name;
 
 static syn68k_addr_t
 unhandled_trap(syn68k_addr_t callback_address, void *arg)
@@ -1317,16 +1290,16 @@ int main(int argc, char **argv)
     /* Save the trap vectors away. */
     memcpy(save_trap_vectors, SYN68K_TO_US(0), sizeof save_trap_vectors);
 
-    opt_int_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
+    opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
 
-    opt_int_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
+    opt_bool_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
 
-    opt_int_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
+    opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
 
-    opt_int_val(common_db, "print", &ROMlib_print, &bad_arg_p);
+    opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
 
 #if defined(MACOSX_) || defined(LINUX)
-    opt_int_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
+    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
 #endif
 
 #if 0

@@ -63,9 +63,6 @@ LONGINT Executor::eventstate = 0;
 
 static BOOLEAN ROMlib_alarmonmbar = false;
 
-int Executor::ROMlib_delay = 0; /* number of ticks to wait when we
-										 * haven't gotten anything interesting */
-
 #define ALARMSICN -16385
 
 BOOLEAN Executor::ROMlib_beepedonce = false;

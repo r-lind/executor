@@ -27,8 +27,6 @@
 
 using namespace Executor;
 
-WriteWhenType Executor::ROMlib_when = WriteInBltrgn;
-
 void Executor::ROMlib_WriteWhen(WriteWhenType when)
 {
     ROMlib_when = when;

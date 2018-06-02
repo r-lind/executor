@@ -70,8 +70,6 @@ PASCAL_FUNCTION(cdef1008);
 
 #define VAR(w) (GetControlVariant((w)))
 
-extern BOOLEAN ROMlib_dirtyvariant;
-
 extern void sb_ctl_init(void);
 
 using ctlfuncp = UPP<LONGINT (INTEGER var, ControlHandle ctl, INTEGER mess, LONGINT param)>;
