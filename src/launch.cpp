@@ -320,9 +320,6 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
 
 static void beginexecutingat(LONGINT startpc)
 {
-#define ALINETRAPNUMBER 0xA
-    trap_install_handler(ALINETRAPNUMBER, alinehandler, (void *)0);
-
     EM_D0 = 0;
     EM_D1 = 0xFFFC000;
     EM_D2 = 0;

@@ -192,7 +192,7 @@ set(misc_sources
   mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
   executor.cpp  crc.cpp
-  prefpanel.cpp)
+  prefpanel.cpp dispatcher.cpp)
 
 set(include_sources hintemplate.h
                   include/ADB.h
@@ -234,7 +234,6 @@ set(include_sources hintemplate.h
                   include/QuickTime.h
                   include/ResourceMgr.h
                   include/rsys/aboutbox.h
-                  include/rsys/aboutpanel.h
                   include/rsys/adb.h
                   include/rsys/alias.h
                   include/rsys/appearance.h
@@ -263,6 +262,7 @@ set(include_sources hintemplate.h
                   include/rsys/dial.h
                   include/rsys/dirtyrect.h
                   include/rsys/drive_flags.h
+                  include/rsys/dispatcher.h
                   include/rsys/dump.h
                   include/rsys/emustubs.h
                   include/rsys/error.h
