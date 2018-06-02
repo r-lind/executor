@@ -98,4 +98,10 @@ bool ROMlib_print = false;
 bool ROMlib_no_dot_files = false;
 
 bool nodrivesearch_p = false;
+bool do_autorefresh_p = false;
+
+uint32_t ROMlib_PrDrvrVers = 70;
+
+/* true iff we should try to log errors to RAM when possible. */
+bool log_err_to_ram_p = false;
 }

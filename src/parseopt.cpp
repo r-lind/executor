@@ -81,7 +81,7 @@ bool Executor::parse_system_version(string vers)
 
     retval = ROMlib_parse_version(vers, &system_version);
     if(retval)
-        ROMlib_set_system_version(system_version);
+        ;
     else
     {
         fprintf(stderr, "%s: bad option `-system': invalid version\n",

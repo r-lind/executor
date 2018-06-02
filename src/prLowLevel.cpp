@@ -28,6 +28,7 @@
 #include "rsys/string.h"
 #include "rsys/osevent.h"
 #include "rsys/functions.impl.h"
+#include "rsys/prefs.h"
 
 #ifdef MACOSX_
 //#include "contextswitch.h"
@@ -39,7 +40,6 @@
 
 using namespace Executor;
 
-uint32_t ROMlib_PrDrvrVers = 70;
 
 void Executor::C_PrDrvrOpen() /* TODO */
 {

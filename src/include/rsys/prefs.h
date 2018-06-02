@@ -47,7 +47,11 @@ extern bool ROMlib_no_dot_files;
 
 extern bool nodrivesearch_p;
 
+extern bool do_autorefresh_p;
+extern bool log_err_to_ram_p;
+
 extern bool ROMlib_print;
+extern uint32_t ROMlib_PrDrvrVers;
 
 extern uint32_t system_version;
 

@@ -184,9 +184,6 @@ static void err_printf(const char *fmt, ...);
 
 #if defined(SUPPORT_LOG_ERR_TO_RAM)
 
-/* true iff we should try to log errors to RAM when possible. */
-bool log_err_to_ram_p;
-
 /* Current number of characters in the err buf, not counting the "\0". */
 static uint32_t ram_err_buf_size;
 

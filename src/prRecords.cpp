@@ -11,6 +11,7 @@
 
 #include "rsys/nextprint.h"
 #include "rsys/print.h"
+#include "rsys/prefs.h"
 
 using namespace Executor;
 

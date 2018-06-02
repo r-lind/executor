@@ -156,8 +156,6 @@ const option_vec Executor::common_opts = {
       opt_no_arg, "" },
     { "nosound", "disable any sound hardware",
       opt_no_arg, "" },
-    { "info", "print information about your system",
-      opt_no_arg, "" },
 #if defined(SUPPORT_LOG_ERR_TO_RAM)
     { "ramlog",
       "log debugging information to RAM; alt-shift-7 dumps the "
@@ -315,10 +313,6 @@ capable of color.",
 #endif
 
     { "ppc", "try to execute the PPC native code if possible (UNSUPPORTED)", opt_no_arg, "" },
-
-#if defined(CYGWIN32)
-    { "realmodecd", "try to use real-mode cd-rom driver", opt_no_arg, "" },
-#endif
 
     { "appearance", "(mac or windows) specify the appearance of windows and "
                     "menus.  For example \"executor -appearance windows\" will make each "
@@ -664,26 +658,6 @@ illegal_mode(void)
     exit(-1);
 }
 
-static void
-print_info(void)
-{
-    printf("This is %s, compiled.\n",
-           ROMlib_executor_full_name);
-
-#define MB (1024 * 1024U)
-
-    /* Print out actual memory size chosen. */
-    printf("Choosing %u.%02u MB for applzone, %u.%02u MB for syszone, "
-           "%u.%02u MB for stack\n",
-           ROMlib_applzone_size / MB,
-           (ROMlib_applzone_size % MB) * 100 / MB,
-           ROMlib_syszone_size / MB,
-           (ROMlib_syszone_size % MB) * 100 / MB,
-           ROMlib_stack_size / MB,
-           (ROMlib_stack_size % MB) * 100 / MB);
-
-#undef MB
-}
 
 /* This is to tell people about the switch from "-applzone 4096" to
  * "-applzone 4M".
@@ -880,11 +854,6 @@ int main(int argc, char **argv)
     if(opt_val(common_db, "hfsplusro", NULL))
         ROMlib_hfs_plus_support = true;
 
-#if defined(CYGWIN32)
-    if(opt_val(common_db, "realmodecd", NULL))
-        ROMlib_set_realmodecd(true);
-#endif
-
     if(opt_val(common_db, "size", &arg))
         bad_arg_p |= !parse_size_opt("size", arg);
 
@@ -979,6 +948,105 @@ int main(int argc, char **argv)
     else
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
+
+    if(opt_val(common_db, "keyboards", NULL))
+        graphics_p = false;
+
+
+    opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
+    opt_bool_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
+    opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
+    opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
+#if defined(MACOSX_) || defined(LINUX)
+    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
+#endif
+#if 0
+  opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
+#endif
+    {
+        int no_auto = false;
+        opt_int_val(common_db, "noautorefresh", &no_auto, &bad_arg_p);
+        do_autorefresh_p = !no_auto;
+    }
+
+    opt_int_val(common_db, "refresh", &ROMlib_refresh, &bad_arg_p);
+    check_arg("refresh", &ROMlib_refresh, 0, 60);
+
+    opt_int_val(common_db, "grayscale", &grayscale_p, &bad_arg_p);
+
+#if defined(LINUX)
+    opt_bool_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
+#endif
+
+    {
+        string str;
+
+        if(opt_val(common_db, "prvers", &str))
+        {
+            uint32_t vers;
+
+            if(!ROMlib_parse_version(str, &vers))
+                bad_arg_p = true;
+            else
+                ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
+        }
+    }
+
+#if defined(SUPPORT_LOG_ERR_TO_RAM)
+    {
+        int log;
+        log = 0;
+        opt_int_val(common_db, "ramlog", &log, &bad_arg_p);
+        log_err_to_ram_p = (log != 0);
+    }
+#endif
+
+    {
+        string appearance_str;
+
+        if(opt_val(common_db, "appearance", &appearance_str))
+            bad_arg_p |= !ROMlib_parse_appearance(appearance_str.c_str());
+    }
+
+
+    /* parse the `-system' option */
+    {
+        string system_str;
+
+        if(opt_val(common_db, "system", &system_str))
+            bad_arg_p |= !parse_system_version(system_str);
+    }
+
+    /* If we failed to parse our arguments properly, exit now.
+   * I don't think we should call ExitToShell yet because the
+   * rest of the system isn't initialized.
+   */
+    if(argc >= 2)
+    {
+        int a;
+
+        /* Only complain if we see something with a leading dash; anything
+	 * else might be a file to launch.
+	 */
+        for(a = 1; a < argc; a++)
+        {
+            if(argv[a][0] == '-')
+            {
+                fprintf(stderr, "%s: unknown option `%s'\n",
+                        program_name, argv[a]);
+                bad_arg_p = true;
+            }
+        }
+    }
+
+    if(bad_arg_p)
+    {
+        fprintf(stderr,
+                "Type \"%s -help\" for a list of command-line options.\n",
+                program_name);
+        exit(-10);
+    }
+
     ROMlib_InitZones();
 
 #if SIZEOF_CHAR_P > 4
@@ -1041,9 +1109,6 @@ int main(int argc, char **argv)
         EM_A7 = save_a7;
     }
 
-    if(opt_val(common_db, "keyboards", NULL))
-        graphics_p = false;
-
     /* Block virtual interrupts, until the system is fully set up. */
     int_state = block_virtual_ints();
 
@@ -1056,87 +1121,6 @@ int main(int argc, char **argv)
     /* Save the trap vectors away. */
     memcpy(save_trap_vectors, SYN68K_TO_US(0), sizeof save_trap_vectors);
 
-    opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
-
-    opt_bool_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
-
-    opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
-
-    opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
-
-#if defined(MACOSX_) || defined(LINUX)
-    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
-#endif
-
-#if 0
-  opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
-#endif
-
-    {
-        int no_auto = false;
-        opt_int_val(common_db, "noautorefresh", &no_auto, &bad_arg_p);
-        do_autorefresh_p = !no_auto;
-    }
-
-    opt_int_val(common_db, "refresh", &ROMlib_refresh, &bad_arg_p);
-    check_arg("refresh", &ROMlib_refresh, 0, 60);
-
-    opt_int_val(common_db, "grayscale", &grayscale_p, &bad_arg_p);
-
-#if defined(LINUX)
-    opt_bool_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
-#endif
-
-    {
-        string str;
-
-        if(opt_val(common_db, "prvers", &str))
-        {
-            uint32_t vers;
-
-            if(!ROMlib_parse_version(str, &vers))
-                bad_arg_p = true;
-            else
-                ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
-        }
-    }
-
-#if defined(SUPPORT_LOG_ERR_TO_RAM)
-    {
-        int log;
-        log = 0;
-        opt_int_val(common_db, "ramlog", &log, &bad_arg_p);
-        log_err_to_ram_p = (log != 0);
-    }
-#endif
-
-    if(opt_val(common_db, "info", NULL))
-    {
-        print_info();
-        exit(0);
-    }
-
-    /* If we failed to parse our arguments properly, exit now.
-   * I don't think we should call ExitToShell yet because the
-   * rest of the system isn't initialized.
-   */
-    if(argc >= 2)
-    {
-        int a;
-
-        /* Only complain if we see something with a leading dash; anything
-	 * else might be a file to launch.
-	 */
-        for(a = 1; a < argc; a++)
-        {
-            if(argv[a][0] == '-')
-            {
-                fprintf(stderr, "%s: unknown option `%s'\n",
-                        program_name, argv[a]);
-                bad_arg_p = true;
-            }
-        }
-    }
 
     if(opt_val(common_db, "logtraps", NULL))
         Executor::traps::init(true);
@@ -1282,32 +1266,12 @@ int main(int argc, char **argv)
 #endif
 #endif
 
-    {
-        string appearance_str;
-
-        if(opt_val(common_db, "appearance", &appearance_str))
-            bad_arg_p |= !ROMlib_parse_appearance(appearance_str.c_str());
-    }
 
     InitResources();
 
-    /* parse the `-system' option */
-    {
-        string system_str;
 
-        if(opt_val(common_db, "system", &system_str))
-            bad_arg_p |= !parse_system_version(system_str);
-        else
-            ROMlib_set_system_version(system_version);
-    }
-
-    if(bad_arg_p)
-    {
-        fprintf(stderr,
-                "Type \"%s -help\" for a list of command-line options.\n",
-                program_name);
-        exit(-10);
-    }
+    
+    ROMlib_set_system_version(system_version);
 
     {
         bool keyboard_set_failed;
