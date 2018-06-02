@@ -187,7 +187,7 @@ set(misc_sources
   version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
   process.cpp alias.cpp string.cpp tempmem.cpp edition.cpp fontIMVI.cpp balloon.cpp
   error.cpp adb.cpp color_wheel_bits.cpp finder.cpp system_error.cpp ibm_keycodes.cpp
-  icon.cpp redrawscreen.cpp ini.cpp checkpoint.cpp qt.cpp
+  icon.cpp redrawscreen.cpp ini.cpp qt.cpp
   paramline.c fauxdbm.cpp commtool.cpp cfm.cpp pef_hash.cpp
   mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
@@ -247,7 +247,6 @@ set(include_sources hintemplate.h
                   include/rsys/byteswap.h
                   include/rsys/cfm.h
                   include/rsys/check_structs.h
-                  include/rsys/checkpoint.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/common.h
                   include/rsys/commonevt.h

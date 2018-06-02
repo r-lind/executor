@@ -57,8 +57,6 @@ enum
     STANDARD_WIDTH = 348
 };
 
-extern int nodrivesearch_p;
-
 OSErr C_unixmount(CInfoPBRec *cbp);
 PASCAL_FUNCTION(unixmount);
 }

@@ -58,14 +58,7 @@
 #include "rsys/executor.h"
 
 #include "rsys/osevent.h"
-
-int Executor::nodrivesearch_p = false;
-
-#if defined(MSDOS) || defined(CYGWIN32)
-#include "dosdisk.h"
-#include "aspi.h"
-#include "rsys/checkpoint.h"
-#endif
+#include "rsys/prefs.h"
 
 #include "rsys/print.h"
 #include "rsys/system_error.h"
@@ -1721,9 +1714,6 @@ void Executor::futzwithdosdisks(void)
         {
             if(/* DRIVE_LOADED(i) */ ROMLIB_MACDRIVES & (1 << i))
             {
-#if defined(MSDOS) || defined(CYGWIN32)
-                checkpoint_macdrive(checkpointp, begin, 1 << i);
-#endif
                 if(((fd = OPEN_ROUTINE(FD_OF(i), &blocksize, &flags EXTRA_PARAM)) >= 0)
                    || (flags & DRIVE_FLAGS_FLOPPY))
                 {
@@ -1752,9 +1742,6 @@ void Executor::futzwithdosdisks(void)
                             CLOSE_ROUTINE(fd EXTRA_CLOSE_PARAM);
                     }
                 }
-#if defined(MSDOS) || defined(CYGWIN32)
-                checkpoint_macdrive(checkpointp, end, 1 << i);
-#endif
             }
         }
     }

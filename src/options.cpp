@@ -97,4 +97,5 @@ bool ROMlib_print = false;
 
 bool ROMlib_no_dot_files = false;
 
+bool nodrivesearch_p = false;
 }

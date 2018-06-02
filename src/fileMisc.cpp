@@ -22,10 +22,6 @@
 #include "rsys/segment.h"
 #include "rsys/suffix_maps.h"
 
-#if defined(MSDOS) || defined(CYGWIN32)
-#include "rsys/checkpoint.h"
-#endif
-
 #if !defined(WIN32)
 #include <pwd.h>
 #else
@@ -778,10 +774,8 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
                             uint32_t bit;
 
                             bit = drive_char_to_bit(stat_test[0]);
-                            checkpoint_dosdrives(checkpointp, begin, bit);
                             ROMlib_automount(drive_to_mount);
                             check_for_executor_cd(drive_to_mount);
-                            checkpoint_dosdrives(checkpointp, end, bit);
                         }
                     }
                 }
@@ -801,7 +795,6 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
                 if(ROMlib_dosdrives & bit)
                 {
                     drive_to_mount[0] = 'a' + i;
-                    checkpoint_dosdrives(checkpointp, begin, bit);
 #if defined(CYGWIN32)
                     drive_to_mount[0] += 'A' - 'a';
                     if(win_access(drive_to_mount))
@@ -814,7 +807,6 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 #if defined(CYGWIN32)
                     }
 #endif
-                    checkpoint_dosdrives(checkpointp, end, bit);
                 }
             }
         }

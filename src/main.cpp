@@ -71,7 +71,6 @@
 
 #include "rsys/os.h"
 #include "rsys/arch.h"
-#include "rsys/checkpoint.h"
 #include "rsys/gestalt.h"
 #include "rsys/keyboards.h"
 #include "rsys/launch.h"
@@ -271,11 +270,6 @@ capable of color.",
     { "die", "allow Executor to die instead of catching trap", opt_no_arg,
       "" },
     { "noautoevents", "disable timer driven event checking", opt_no_arg,
-      "" },
-#endif
-
-#if defined(MSDOS) || defined(CYGWIN32)
-    { "nocheckpoint", "disable \"failure.txt\" checkpointing", opt_no_arg,
       "" },
 #endif
 
@@ -670,94 +664,6 @@ illegal_mode(void)
     exit(-1);
 }
 
-#if defined(MSDOS) || defined(CYGWIN32)
-uint32_t ROMlib_macdrives; /* default computed at runtime */
-uint32_t ROMlib_dosdrives = ~0;
-static uint32_t skipdrives = 0;
-
-static bool
-drive_number_from_letter(char c, int *nump)
-{
-    bool retval;
-
-    if(isupper(c) || ((c >= '[' && c <= '`')))
-    {
-        *nump = c - 'A';
-        retval = true;
-    }
-    else if(islower(c))
-    {
-        *nump = c - 'a';
-        retval = true;
-    }
-    else
-        retval = false;
-    return retval;
-}
-
-static void
-drive_error(const char *opt)
-{
-    fprintf(stderr, "Invalid drive specification.\nUse something like "
-                    "\"-%s A-EJ\" (for drives A, B, C, D, E and J).\n",
-            opt);
-    bad_arg_p = true;
-}
-
-static const char *
-munch_next_char(const char *p, uint32_t *destp, const char *opt)
-{
-    const char *retval;
-    int d;
-
-    if(drive_number_from_letter(p[0], &d))
-    {
-        if(p[1] == '-')
-        {
-            int d2;
-            if(drive_number_from_letter(p[2], &d2))
-            {
-                int lower, upper, i;
-
-                lower = MIN(d, d2);
-                upper = MAX(d, d2);
-                for(i = lower; i <= upper; ++i)
-                    *destp |= (1 << i);
-                retval = p + 3;
-            }
-            else
-            {
-                drive_error(opt);
-                retval = "";
-            }
-        }
-        else
-        {
-            *destp |= 1 << d;
-            retval = p + 1;
-        }
-    }
-    else
-    {
-        drive_error(opt);
-        retval = "";
-    }
-    return retval;
-}
-
-uint32_t
-parse_drive_opt(const char *opt_name, const char *opt_value)
-{
-    uint32_t retval;
-    const char *next_charp;
-
-    retval = 0;
-    for(next_charp = opt_value; *next_charp;)
-        next_charp = munch_next_char(next_charp, &retval, opt_name);
-    return retval;
-}
-#endif
-
 static void
 print_info(void)
 {
@@ -827,93 +733,6 @@ construct_command_line_string(int argc, char **argv)
     return s;
 }
 
-static int
-zap_comments(char *buf, int n_left)
-{
-    char *ip, *op;
-    bool last_was_cr;
-    int retval;
-
-    ip = buf;
-    op = buf;
-    retval = 0;
-    last_was_cr = true;
-    while(n_left > 0)
-    {
-        while(n_left > 0 && (*ip != '#' || !last_was_cr))
-        {
-            last_was_cr = *ip == '\n' || *ip == '\r';
-            *op++ = *ip++;
-            ++retval;
-            --n_left;
-        }
-        if(n_left > 0)
-        {
-            while(n_left > 0 && *ip != '\n' && *ip != '\r')
-            {
-                ++ip;
-                --n_left;
-            }
-        }
-    }
-    return retval;
-}
-
-FILE *
-Executor::executor_dir_fopen(const char *file, const char *perm)
-{
-    return fopen(expandPath(std::string("+/") + file).c_str(), perm);
-}
-
-int
-Executor::executor_dir_remove(const char *file)
-{
-    return remove(expandPath(std::string("+/") + file).c_str());
-}
-
-static void
-read_args_from_file(const char *filename, int *argcp, char ***argvpp)
-{
-    FILE *fp;
-
-    fp = executor_dir_fopen(filename, "r");
-    if(fp)
-    {
-        int nread, n_extra_params, i;
-        char buf[8192], *bufp;
-        char **saveargv;
-
-        nread = fread(buf, 1, sizeof buf, fp);
-        fclose(fp);
-        nread = zap_comments(buf, nread);
-        n_extra_params = count_params(buf, nread);
-        *argcp += n_extra_params;
-        saveargv = *argvpp;
-        *argvpp = (char **)malloc((*argcp + 1) * sizeof *argvpp);
-        bufp = buf;
-        memcpy(*argvpp, saveargv, (*argcp - n_extra_params) * sizeof **argvpp);
-        for(i = *argcp - n_extra_params; i < *argcp; ++i)
-            (*argvpp)[i] = get_param((const char **)&bufp, &nread);
-        (*argvpp)[i] = 0;
-    }
-}
-
-#if defined(CYGWIN32)
-static uint32_t
-win_drive_to_bit(const char *drive_namep)
-{
-    uint32_t retval;
-
-    if(drive_namep[1] == ':')
-        retval = 1 << (tolower(drive_namep[0]) - 'a');
-    else
-    {
-        warning_unexpected("drive name = '%s'", drive_namep);
-        retval = 0;
-    }
-    return retval;
-}
-#endif
 
 #if defined(LINUX) && defined(PERSONALITY_HACK)
 #include <sys/personality.h>
@@ -991,14 +810,6 @@ int main(int argc, char **argv)
 
     setstartdir(argv[0]);
     set_appname(argv[0]);
-
-#define COMMANDS "commands.txt"
-
-    read_args_from_file(COMMANDS, &argc, &argv);
-#if defined(MSDOS) || defined(CYGWIN32)
-    read_args_from_file(CHECKPOINT_FILE, &argc, &argv);
-    checkpointp = checkpoint_init();
-#endif
 
     opt_init();
     common_db = opt_alloc_db();
@@ -1084,46 +895,6 @@ int main(int argc, char **argv)
     if(opt_val(common_db, "debug", &arg))
         bad_arg_p |= !error_parse_option_string(arg);
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(opt_val(common_db, "macdrives", &arg))
-        ROMlib_macdrives = parse_drive_opt("macdrives", arg);
-    else
-    {
-#if !defined(CYGWIN32)
-        ROMlib_macdrives = 3; /* A: + B: */
-        {
-            int cdrom;
-
-            cdrom = dosdisk_find_cdrom();
-            if(cdrom != -1)
-                ROMlib_macdrives |= (1 << cdrom);
-        }
-#else
-        char buf[512];
-
-        if(win_GetLogicalDriveStrings(sizeof buf - 1, buf))
-        {
-            char *p;
-
-            for(p = buf; *p; p += strlen(p) + 1)
-                if(win_direct_accessible_disk(p))
-                    ROMlib_macdrives |= win_drive_to_bit(p);
-        }
-#endif
-    }
-
-    if(opt_val(common_db, "dosdrives", &arg))
-        ROMlib_dosdrives = parse_drive_opt("dosdrives", arg);
-
-    if(opt_val(common_db, "skipdrives", &arg))
-    {
-        skipdrives = parse_drive_opt("skipdrives", arg);
-        ROMlib_macdrives &= ~skipdrives;
-        ROMlib_dosdrives &= ~skipdrives;
-    }
-
-#endif
-
 #if defined(MACOSX)
     // sync() really takes a long time on Mac OS X.
     ROMlib_nosync = true;
@@ -1161,11 +932,6 @@ int main(int argc, char **argv)
         uninstall_exception_handler();
     if(opt_val(common_db, "noautoevents", NULL))
         set_timer_driven_events(false);
-#endif
-
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(opt_val(common_db, "nocheckpoint", NULL))
-        disable_checkpointing();
 #endif
 
     /* Parse the "-memory" option. */
@@ -1318,7 +1084,7 @@ int main(int argc, char **argv)
     opt_int_val(common_db, "grayscale", &grayscale_p, &bad_arg_p);
 
 #if defined(LINUX)
-    opt_int_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
+    opt_bool_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
 #endif
 
     {
