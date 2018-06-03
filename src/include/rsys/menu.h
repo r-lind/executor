@@ -309,6 +309,4 @@ void menu_item_colors(int16_t id, int16_t item,
 void menu_delete_entries(int16_t menu_id);
 }
 
-extern "C" int ROMlib_AppleChar;
-
 #endif /* !_MENU_H_ */

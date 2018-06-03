@@ -144,19 +144,16 @@ void setedittextnum(DialogPtr dp, INTEGER itemno, INTEGER value)
     setedittext(dp, itemno, str);
 }
 
-void setedittextcstr(DialogPtr dp, INTEGER itemno, char *strp)
+void setedittextcstr(DialogPtr dp, INTEGER itemno, const std::string& cstr)
 {
     int len;
     Str255 str;
 
-    if(strp)
-        len = strlen(strp);
-    else
-        len = 0;
+    len = cstr.size();
     if(len > 255)
         len = 255;
     str[0] = len;
-    memcpy(str + 1, strp, len);
+    memcpy(str + 1, cstr.data(), len);
     setedittext(dp, itemno, str);
 }
 
@@ -274,7 +271,7 @@ void setupprefvalues(DialogPtr dp)
     setedittextcstr(dp, PREF_SYSTEM, C_STRING_FROM_SYSTEM_VERSION());
 }
 
-void update_string_from_edit_text(char **strp, DialogPtr dp, INTEGER itemno)
+void update_string_from_edit_text(std::string& cstr, DialogPtr dp, INTEGER itemno)
 {
     Str255 str;
     GUEST<Handle> h_s;
@@ -285,20 +282,13 @@ void update_string_from_edit_text(char **strp, DialogPtr dp, INTEGER itemno)
     GetDialogItem(dp, itemno, &type, &h_s, &r);
     h = MR(h_s);
     GetDialogItemText(h, str);
-    if(*strp)
-        free(*strp);
-    *strp = (char *)malloc(str[0] + 1);
-    if(*strp)
-    {
-        memcpy(*strp, str + 1, str[0]);
-        (*strp)[str[0]] = 0;
-    }
+    cstr = std::string(&str[1], &str[str[0] + 1]);
 }
 
 void readprefvalues(DialogPtr dp)
 {
     set_refresh_rate(getedittext(dp, PREFREFRESHITEM));
-    update_string_from_edit_text(&ROMlib_Comments, dp, PREF_COMMENTS);
+    update_string_from_edit_text(ROMlib_Comments, dp, PREF_COMMENTS);
 
     if(getvalue(dp, PREFANIMATIONITEM))
         ROMlib_WriteWhen(WriteInBltrgn);
@@ -333,12 +323,10 @@ void readprefvalues(DialogPtr dp)
     ROMlib_pretend_script = getvalue(dp, PREF_PRETEND_SCRIPT);
     ROMlib_pretend_alias = getvalue(dp, PREF_PRETEND_ALIAS);
     {
-        char *system_string;
+        std::string system_string;
 
-        system_string = 0;
-        update_string_from_edit_text(&system_string, dp, PREF_SYSTEM);
-        parse_system_version(system_string);
-        free(system_string);
+        update_string_from_edit_text(system_string, dp, PREF_SYSTEM);
+        parse_system_version(system_string.c_str());
     }
 }
 
@@ -348,17 +336,11 @@ void readprefvalues(DialogPtr dp)
  */
 
 static void
-clean(char *strp)
+clean(std::string& str)
 {
-    char c;
-
-    while((c = *strp++))
-        switch(c)
-        {
-            case '"':
-                strp[-1] = '\'';
-                break;
-        }
+    for(char& c : str)
+        if(c == '"')
+            c = '\'';
 }
 
 int saveprefvalues(const char *savefilename, LONGINT locationx, LONGINT locationy)
@@ -377,15 +359,15 @@ int saveprefvalues(const char *savefilename, LONGINT locationx, LONGINT location
                         "Executor\n",
                     lastslash);
         }
-        if(ROMlib_Comments)
+        if(!ROMlib_Comments.empty())
         {
             clean(ROMlib_Comments);
-            fprintf(fp, "Comments = \"%s\";\n", ROMlib_Comments);
+            fprintf(fp, "Comments = \"%s\";\n", ROMlib_Comments.c_str());
         }
-        if(ROMlib_WindowName)
+        if(!ROMlib_WindowName.empty())
         {
             clean(ROMlib_WindowName);
-            fprintf(fp, "WindowName = \"%s\";\n", ROMlib_WindowName);
+            fprintf(fp, "WindowName = \"%s\";\n", ROMlib_WindowName.c_str());
         }
         else
         {

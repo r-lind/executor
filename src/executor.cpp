@@ -43,6 +43,19 @@
 using namespace Executor;
 
 
+void Executor::SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
+{
+    ParamBlockRec pbr;
+    Str255 save_name;
+
+    str255assign(save_name, filename);
+    pbr.volumeParam.ioNamePtr = RM((StringPtr)save_name);
+    pbr.volumeParam.ioVolIndex = CWC(-1);
+    pbr.volumeParam.ioVRefNum = CW(vrefnum);
+    PBGetVInfo(&pbr, false);
+    LM(SFSaveDisk) = CW(-CW(pbr.volumeParam.ioVRefNum));
+}
+
 void Executor::executor_main(void)
 {
     char quickbytes[grafSize];

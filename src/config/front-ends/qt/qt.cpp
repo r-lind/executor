@@ -504,7 +504,7 @@ void Executor::vdriver_pump_events()
 #endif
 }
 
-void Executor::ROMlib_SetTitle(char *title)
+void Executor::ROMlib_SetTitle(const char *title)
 {
 }
 

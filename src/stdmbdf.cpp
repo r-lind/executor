@@ -20,6 +20,7 @@
 #include "rsys/wind.h"
 #include "rsys/image.h"
 #include "rsys/executor.h"
+#include "rsys/options.h"
 
 /* apple image */
 namespace Executor

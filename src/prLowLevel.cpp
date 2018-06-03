@@ -1061,7 +1061,7 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
 
                 ParamText(appname, 0, 0, 0);
             }
-            if(ROMlib_new_printer_name || ROMlib_new_label)
+            if(!ROMlib_new_printer_name.empty() || !ROMlib_new_label.empty())
             {
                 Rect r;
                 GUEST<INTEGER> item_type;
@@ -1075,8 +1075,8 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
 #define NEW_PRINTER_NAME "Print Selection"
 #define NEW_TYPE_LABEL "Print to:"
 
-                str255_from_c_string(new_printer_name, ROMlib_new_printer_name ? ROMlib_new_printer_name : NEW_PRINTER_NAME);
-                str255_from_c_string(new_type_label, ROMlib_new_label ? ROMlib_new_label : NEW_TYPE_LABEL);
+                str255_from_c_string(new_printer_name, ROMlib_new_printer_name.empty() ? NEW_PRINTER_NAME : ROMlib_new_printer_name.c_str());
+                str255_from_c_string(new_type_label, ROMlib_new_label.empty() ? NEW_TYPE_LABEL : ROMlib_new_label.c_str());
 
                 GetDialogItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
                          &item_type, &hh, &r);

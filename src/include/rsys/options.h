@@ -10,14 +10,22 @@
 
 #include <stdint.h>
 #include <utility>
+#include <string>
+
 namespace Executor
 {
 extern std::pair<int,int> ROMlib_ScreenSize;
 extern std::pair<int,int> ROMlib_MacSize;
 extern std::pair<int,int> ROMlib_ScreenLocation;
 extern int32_t ROMlib_options;
-extern char *ROMlib_WindowName;
-extern char *ROMlib_Comments;
+extern std::string ROMlib_WindowName;
+extern std::string ROMlib_Comments;
+extern std::string ROMlib_win32_token;
+extern std::string ROMlib_new_printer_name;
+extern std::string ROMlib_new_label;
+
+extern int ROMlib_AppleChar;
+
 extern int ROMlib_desired_bpp;
 
 #define ROMLIB_NOCLOCK_BIT (1 << 0)

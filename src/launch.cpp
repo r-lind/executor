@@ -92,7 +92,6 @@ void Executor::ROMlib_set_ppc(bool val)
 }
 
 #define CONFIGEXTENSION ".ecf"
-#define OLD_CONFIG_EXTENSION ".econf" /* must be longer than configextension */
 
 static int16_t name0stripappl(StringPtr name)
 {
@@ -116,29 +115,6 @@ static int16_t name0stripappl(StringPtr name)
  * the user has changed things by hand).
  */
 
-
-void remalloc(char **strp)
-{
-    char *new_string;
-    long len;
-
-    if(*strp)
-    {
-        len = strlen(*strp) + 1;
-        new_string = (char *)malloc(len);
-        if(new_string)
-            memcpy(new_string, *strp, len);
-        *strp = new_string;
-    }
-}
-
-void reset_string(char **strp)
-{
-    if(*strp)
-        free(*strp);
-    *strp = 0;
-}
-
 static void ParseConfigFile(StringPtr exefname, OSType type)
 {
     int strwidth;
@@ -146,19 +122,14 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
     char *dot;
     INTEGER fname0;
 
-    reset_string(&ROMlib_WindowName);
-    reset_string(&ROMlib_Comments);
+    ROMlib_WindowName.clear();
+    ROMlib_Comments.clear();
     ROMlib_desired_bpp = 0;
     fname0 = name0stripappl(exefname);
     std::string appname(exefname + 1, exefname + 1 + fname0);
 
     ROMlib_configfilename = ROMlib_ConfigurationFolder + "/" + appname + CONFIGEXTENSION;
     configfile = Ufopen(ROMlib_configfilename.c_str(), "r");
-    if(!configfile)
-    {
-        ROMlib_configfilename = ROMlib_ConfigurationFolder + "/" + appname + OLD_CONFIG_EXTENSION;
-        configfile = Ufopen(ROMlib_configfilename.c_str(), "r");
-    }
     if(!configfile && type != 0)
     {
         char buf[16];
@@ -248,34 +219,8 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
         fclose(configfile);
     }
 
-#if !defined(VDRIVER_DISPLAYED_IN_WINDOW)
-
-#define SetTitle(x)            \
-    do                         \
-    {                          \
-        ROMlib_WindowName = x; \
-    } while(0)
-
-#else
-
-#define SetTitle(x)                   \
-    do                                \
-    {                                 \
-        char *_x;                     \
-        char *_title;                 \
-        int len;                      \
-                                      \
-        _x = (x);                     \
-        len = strlen(_x) + 1;         \
-        _title = (char *)alloca(len); \
-        memcpy(_title, _x, len);      \
-        ROMlib_SetTitle(_title);      \
-    } while(0)
-
-#endif
-
-    if(ROMlib_WindowName)
-        SetTitle(ROMlib_WindowName);
+    if(!ROMlib_WindowName.empty())
+        ROMlib_SetTitle(ROMlib_WindowName.c_str());
     else
     {
         strwidth = fname0;
@@ -286,7 +231,7 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
         if(dot && (strcmp(dot, ".appl") == 0 || strcmp(dot, ".APPL") == 0))
             *dot = 0;
         // TODO: convert from MacRoman to UTF-8 (at least for SDL2 frontend)
-        SetTitle(newtitle);
+        ROMlib_SetTitle(newtitle);
     }
 #if 0
     if (ROMlib_ScreenLocation.first != INITIALPAIRVALUE)
@@ -296,9 +241,6 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
 	ROMlib_ShowScreen();
     }
 #endif
-
-    remalloc(&ROMlib_WindowName);
-    remalloc(&ROMlib_Comments);
 }
 
 static void beginexecutingat(LONGINT startpc)
@@ -332,19 +274,6 @@ size_info_t Executor::size_info;
 
 LONGINT Executor::ROMlib_creator;
 
-
-void Executor::SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
-{
-    ParamBlockRec pbr;
-    Str255 save_name;
-
-    str255assign(save_name, filename);
-    pbr.volumeParam.ioNamePtr = RM((StringPtr)save_name);
-    pbr.volumeParam.ioVolIndex = CWC(-1);
-    pbr.volumeParam.ioVRefNum = CW(vrefnum);
-    PBGetVInfo(&pbr, false);
-    LM(SFSaveDisk) = CW(-CW(pbr.volumeParam.ioVRefNum));
-}
 
 uint32_t Executor::ROMlib_version_long;
 

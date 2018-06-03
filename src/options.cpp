@@ -86,8 +86,8 @@ std::pair<int,int> ROMlib_ScreenSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };  
 std::pair<int,int> ROMlib_MacSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };     // unused
 std::pair<int,int> ROMlib_ScreenLocation = { INITIALPAIRVALUE, INITIALPAIRVALUE };  // unused
 int32_t ROMlib_options = 0;
-char *ROMlib_WindowName = nullptr;
-char *ROMlib_Comments = nullptr;      // unused on purpose
+std::string ROMlib_WindowName;
+std::string ROMlib_Comments;      // unused on purpose
 int ROMlib_desired_bpp = 0;
 
 bool ROMlib_sticky_menus_p = false;

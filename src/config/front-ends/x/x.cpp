@@ -2433,7 +2433,7 @@ int Executor::GetScrapX(OSType type, Handle h)
     return retval;
 }
 
-void Executor::ROMlib_SetTitle(char *newtitle)
+void Executor::ROMlib_SetTitle(const char *newtitle)
 {
     XSizeHints xsh;
 
