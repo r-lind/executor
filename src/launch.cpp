@@ -792,9 +792,7 @@ static void reset_low_globals(void)
     GUEST<char> saveKeyMap[sizeof_KeyMap];
 
     GUEST<Byte> saveFinderName[sizeof(LM(FinderName))];
-    virtual_int_state_t bt;
 
-    bt = block_virtual_ints();
     saveSysZone = LM(SysZone);
     saveTicks = LM(Ticks);
     saveBootDrive = LM(BootDrive);
@@ -887,7 +885,6 @@ static void reset_low_globals(void)
 
     LM(MBDFHndl) = saveMBDFHndl;
     LM(WMgrCPort) = saveWMgrCPort;
-    LM(WindowList) = NULL;
     memcpy(LM(FinderName), saveFinderName, sizeof(LM(FinderName)));
 
     LM(DABeeper) = saveDABeeper;
@@ -958,9 +955,13 @@ static void reset_low_globals(void)
     LM(MainDevice) = saveMainDevice;
     LM(DeviceList) = saveDeviceList;
 
-    restore_virtual_ints(bt);
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x20) = save20;
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x28) = save28;
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x58) = save58;
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x5C) = save5C;
 
     LM(nilhandle) = 0; /* so nil dereferences "work" */
+    LM(WindowList) = NULL;
 
     LM(CrsrBusy) = 0;
     LM(TESysJust) = 0;
@@ -997,14 +998,6 @@ static void reset_low_globals(void)
     LM(SysVersion) = CW(system_version);
     LM(FSFCBLen) = CWC(94);
 
-    /*
- * TODO:  how does this relate to Launch?
- */
-    /* Set up default floating point environment. */
-    {
-        INTEGER env = 0;
-        ROMlib_Fsetenv(&env, 0);
-    }
 
     LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
 
@@ -1057,10 +1050,6 @@ static void reset_low_globals(void)
 
     LM(TheZone) = LM(ApplZone);
 
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x20) = save20;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x28) = save28;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x58) = save58;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x5C) = save5C;
 
     LM(HiliteMode) = CB(0xFF); /* I think this is correct */
     LM(ROM85) = CWC(0x3FFF); /* We be color now */
@@ -1085,6 +1074,16 @@ static void reset_low_globals(void)
     LM(SysEvtMask) = CWC(~(1L << keyUp)); /* EVERYTHING except keyUp */
     LM(SdVolume) = 7; /* for Beebop 2 */
     LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+
+        /*
+ * TODO:  how does this relate to Launch?
+ */
+    /* Set up default floating point environment. */
+    {
+        INTEGER env = 0;
+        ROMlib_Fsetenv(&env, 0);
+    }
+
 }
 
 static void reset_traps(void)

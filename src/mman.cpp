@@ -340,7 +340,6 @@ void InitApplZone(void)
     SET_MEM_ERR(noErr);
 }
 
-#define MANDELSLOP (32L * 1024)
 
 void print_mem_full_message(void)
 {
@@ -421,6 +420,7 @@ void ROMlib_InitZones()
 #endif
         {
             int low_global_room = (char *)&LM(lastlowglobal) - (char *)&LM(nilhandle);
+            memset(memory, ~0, low_global_room);
             memory += low_global_room;
             init_syszone_size -= low_global_room;
         }
@@ -442,6 +442,11 @@ void ROMlib_InitZones()
     LM(ApplLimit) = RM(((Ptr)MR(LM(ApplZone))
                     + INIT_APPLZONE_SIZE));
 
+
+    // Why do we waste 32KB on the stack?
+    // It probably seemed necessary for compatibility with *something*.
+    // "MANDELSLOP" is such a descriptive name..
+#define MANDELSLOP (32L * 1024)
     EM_A7 = US_TO_SYN68K(stack_end - 16 - MANDELSLOP);
 
     LM(MemErr) = CWC(noErr);

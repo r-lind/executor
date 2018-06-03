@@ -32,6 +32,8 @@
 #include "Gestalt.h"
 #include "AppleTalk.h"
 #include "AppleEvents.h"
+#include "SoundDvr.h"
+#include "StartMgr.h"
 
 #include "rsys/cquick.h"
 #include "rsys/tesave.h"
@@ -68,6 +70,8 @@
 #include "rsys/system_error.h"
 #include "rsys/filedouble.h"
 #include "rsys/option.h"
+#include "rsys/emustubs.h"
+#include "rsys/float.h"
 
 #include "rsys/os.h"
 #include "rsys/arch.h"
@@ -727,10 +731,7 @@ int main(int argc, char **argv)
         CWC((unsigned short)0x4EF9), CWC(0), CWC(0) /* Filled in below. */
     };
     uint32_t l;
-    ULONGINT save_trap_vectors[64];
     virtual_int_state_t int_state;
-    GUEST<THz> saveSysZone, saveApplZone;
-    GUEST<Ptr> saveApplLimit;
     static void (*reg_funcs[])(void) = {
         vdriver_opt_register,
         NULL,
@@ -1118,9 +1119,6 @@ int main(int argc, char **argv)
         exit(-12);
     }
 
-    /* Save the trap vectors away. */
-    memcpy(save_trap_vectors, SYN68K_TO_US(0), sizeof save_trap_vectors);
-
 
     if(opt_val(common_db, "logtraps", NULL))
         Executor::traps::init(true);
@@ -1133,12 +1131,6 @@ int main(int argc, char **argv)
     ((unsigned char *)jmpl_to_ResourceStub)[4] = l >> 8;
     ((unsigned char *)jmpl_to_ResourceStub)[5] = l;
     ostraptable[0xFC] = US_TO_SYN68K(jmpl_to_ResourceStub);
-    //osstuff[0xFC].orig = US_TO_SYN68K(jmpl_to_ResourceStub);
-
-    saveSysZone = LM(SysZone);
-    saveApplZone = LM(ApplZone);
-    saveApplLimit = LM(ApplLimit);
-    memset(&LM(nilhandle), ~0, (char *)&LM(lastlowglobal) - (char *)&LM(nilhandle));
 
     LM(Ticks) = 0;
     LM(nilhandle) = 0; /* so nil dereferences "work" */
@@ -1149,9 +1141,6 @@ int main(int argc, char **argv)
     memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
     memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
     LM(TESysJust) = 0;
-    LM(SysZone) = saveSysZone;
-    LM(ApplZone) = saveApplZone;
-    LM(ApplLimit) = saveApplLimit;
     LM(BootDrive) = 0;
     LM(DefVCBPtr) = 0;
     LM(CurMap) = 0;
@@ -1219,6 +1208,72 @@ int main(int argc, char **argv)
     LM(UnitNtryCnt) = CW(NDEVICES);
     LM(TheZone) = LM(ApplZone);
 
+    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
+
+    LM(SCSIFlags) = CWC(0xEC00); /* scsi+clock+xparam+mmu+adb
+				 (no fpu,aux or pwrmgr) */
+
+    LM(MCLKPCmiss1) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 72 (MacLinkPC starts
+			   adding the 72 byte offset to VCB pointers too
+			   soon, starting with 0x358, which is not the
+			   address of a VCB) */
+
+    LM(MCLKPCmiss2) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 78 (MacLinkPC misses) */
+    LM(AuxCtlHead) = 0;
+    LM(CurDeactive) = 0;
+    LM(CurActivate) = 0;
+    LM(macfpstate)[0] = 0;
+    LM(fondid) = 0;
+    LM(PrintErr) = 0;
+    LM(mouseoffset) = 0;
+    LM(heapcheck) = 0;
+    LM(DefltStack) = CLC(0x2000); /* nobody really cares about these two */
+    LM(MinStack) = CLC(0x400); /* values ... */
+    LM(IAZNotify) = 0;
+    LM(CurPitch) = 0;
+    LM(JSwapFont) = RM((ProcPtr)&FMSwapFont);
+    LM(JInitCrsr) = RM((ProcPtr)&InitCursor);
+
+    LM(Key1Trans) = RM((Ptr)&stub_Key1Trans);
+    LM(Key2Trans) = RM((Ptr)&stub_Key2Trans);
+    LM(JFLUSH) = RM(&FlushCodeCache);
+    LM(JResUnknown1) = LM(JFLUSH); /* I don't know what these are supposed to */
+    LM(JResUnknown2) = LM(JFLUSH); /* do, but they're not called enough for
+				   us to worry about the cache flushing
+				   overhead */
+
+    //LM(CPUFlag) = 2; /* mc68020 */
+    LM(CPUFlag) = 4; /* mc68040 */
+
+
+        // #### UnitNtryCnt should be 32, but gets overridden here
+        //      this does not seem to make any sense.
+    LM(UnitNtryCnt) = 0; /* how many units in the table */
+
+    LM(TheZone) = LM(SysZone);
+    LM(VIA) = RM(NewPtr(16 * 512)); /* IMIII-43 */
+    memset(MR(LM(VIA)), 0, (LONGINT)16 * 512);
+    *(char *)MR(LM(VIA)) = 0x80; /* Sound Off */
+
+#define SCC_SIZE 1024
+
+    LM(SCCRd) = RM(NewPtrSysClear(SCC_SIZE));
+    LM(SCCWr) = RM(NewPtrSysClear(SCC_SIZE));
+
+    LM(SoundBase) = RM(NewPtr(370 * sizeof(INTEGER)));
+#if 0
+    memset(CL(LM(SoundBase)), 0, (LONGINT) 370 * sizeof(INTEGER));
+#else /* !0 */
+    for(i = 0; i < 370; ++i)
+        ((GUEST<INTEGER> *)MR(LM(SoundBase)))[i] = CWC(0x8000); /* reference 0 sound */
+#endif /* !0 */
+    LM(TheZone) = LM(ApplZone);
+    LM(HiliteMode) = CB(0xFF);
+    /* Mac II has 0x3FFF here */
+    LM(ROM85) = CWC(0x3FFF);
+
+    LM(loadtrap) = 0;
+
     if(graphics_p)
     {
         /* Set up the current graphics mode appropriately. */
@@ -1254,22 +1309,7 @@ int main(int argc, char **argv)
 
     InitUtil();
 
-#if !defined(X) && !defined(SDL)
-/* #warning "Hack so we don't smash mouse/keyboard m68k interrupt vectors." */
-#if defined(M68K_EVENT_VECTOR)
-    save_trap_vectors[M68K_EVENT_VECTOR]
-        = *(syn68k_addr_t *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4);
-#endif
-#if defined(M68K_MOUSE_MOVED_VECTOR)
-    save_trap_vectors[M68K_MOUSE_MOVED_VECTOR]
-        = *(syn68k_addr_t *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4);
-#endif
-#endif
-
-
     InitResources();
-
-
     
     ROMlib_set_system_version(system_version);
 
@@ -1314,18 +1354,7 @@ int main(int argc, char **argv)
         ROMlib_Fsetenv(&env, 0);
     }
 
-    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
-
-    {
-        LONGINT save58;
-
-        save58 = *(LONGINT *)SYN68K_TO_US(0x58);
-        /* Replace the trap vectors which got smashed during initialization. */
-        memcpy(SYN68K_TO_US(0), save_trap_vectors, sizeof save_trap_vectors);
-        *(LONGINT *)SYN68K_TO_US(0x58) = save58;
-
-        setup_trap_vectors();
-    }
+    setup_trap_vectors();
 
     /* Set up timer interrupts.  We need to do this after everything else
    * has been initialized.

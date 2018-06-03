@@ -21,21 +21,17 @@
 #include "FileMgr.h"
 #include "ControlMgr.h"
 #include "DeviceMgr.h"
-#include "SoundDvr.h"
 #include "PrintMgr.h"
-#include "StartMgr.h"
 #include "CommTool.h"
 
 #include "rsys/trapglue.h"
 #include "rsys/cquick.h"
 #include "rsys/file.h"
-#include "rsys/soundopts.h"
 #include "rsys/prefs.h"
 #include "rsys/segment.h"
 #include "rsys/host.h"
 #include "rsys/executor.h"
 #include "rsys/hfs.h"
-#include "rsys/float.h"
 #include "rsys/vdriver.h"
 #include "rsys/trapname.h"
 
@@ -43,7 +39,6 @@
 #include "rsys/suffix_maps.h"
 #include "rsys/string.h"
 
-#include "rsys/emustubs.h"
 
 using namespace Executor;
 
@@ -63,64 +58,6 @@ void Executor::executor_main(void)
     Str255 name;
     StringPtr fName;
 
-    LM(SCSIFlags) = CWC(0xEC00); /* scsi+clock+xparam+mmu+adb
-				 (no fpu,aux or pwrmgr) */
-
-    LM(MCLKPCmiss1) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 72 (MacLinkPC starts
-			   adding the 72 byte offset to VCB pointers too
-			   soon, starting with 0x358, which is not the
-			   address of a VCB) */
-
-    LM(MCLKPCmiss2) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 78 (MacLinkPC misses) */
-    LM(AuxCtlHead) = 0;
-    LM(CurDeactive) = 0;
-    LM(CurActivate) = 0;
-    LM(macfpstate)[0] = 0;
-    LM(fondid) = 0;
-    LM(PrintErr) = 0;
-    LM(mouseoffset) = 0;
-    LM(heapcheck) = 0;
-    LM(DefltStack) = CLC(0x2000); /* nobody really cares about these two */
-    LM(MinStack) = CLC(0x400); /* values ... */
-    LM(IAZNotify) = 0;
-    LM(CurPitch) = 0;
-    LM(JSwapFont) = RM((ProcPtr)&FMSwapFont);
-    LM(JInitCrsr) = RM((ProcPtr)&InitCursor);
-
-    LM(Key1Trans) = RM((Ptr)&stub_Key1Trans);
-    LM(Key2Trans) = RM((Ptr)&stub_Key2Trans);
-    LM(JFLUSH) = RM(&FlushCodeCache);
-    LM(JResUnknown1) = LM(JFLUSH); /* I don't know what these are supposed to */
-    LM(JResUnknown2) = LM(JFLUSH); /* do, but they're not called enough for
-				   us to worry about the cache flushing
-				   overhead */
-
-    //LM(CPUFlag) = 2; /* mc68020 */
-    LM(CPUFlag) = 4; /* mc68040 */
-    LM(UnitNtryCnt) = 0; /* how many units in the table */
-
-    LM(TheZone) = LM(SysZone);
-    LM(VIA) = RM(NewPtr(16 * 512)); /* IMIII-43 */
-    memset(MR(LM(VIA)), 0, (LONGINT)16 * 512);
-    *(char *)MR(LM(VIA)) = 0x80; /* Sound Off */
-
-#define SCC_SIZE 1024
-
-    LM(SCCRd) = RM(NewPtrSysClear(SCC_SIZE));
-    LM(SCCWr) = RM(NewPtrSysClear(SCC_SIZE));
-
-    LM(SoundBase) = RM(NewPtr(370 * sizeof(INTEGER)));
-#if 0
-    memset(CL(LM(SoundBase)), 0, (LONGINT) 370 * sizeof(INTEGER));
-#else /* !0 */
-    for(i = 0; i < 370; ++i)
-        ((GUEST<INTEGER> *)MR(LM(SoundBase)))[i] = CWC(0x8000); /* reference 0 sound */
-#endif /* !0 */
-    LM(TheZone) = LM(ApplZone);
-    LM(HiliteMode) = CB(0xFF);
-    /* Mac II has 0x3FFF here */
-    LM(ROM85) = CWC(0x3FFF);
-
     EM_A5 = US_TO_SYN68K(&tmpA5);
     LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
     InitGraf((Ptr)quickbytes + sizeof(quickbytes) - 4);
@@ -131,8 +68,6 @@ void Executor::executor_main(void)
     TEInit();
     InitDialogs((ProcPtr)0);
     InitCursor();
-
-    LM(loadtrap) = 0;
 
     /* ROMlib_WriteWhen(WriteInOSEvent); */
 
