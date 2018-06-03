@@ -362,27 +362,6 @@ check_arg(string argname, int *arg, int min, int max)
     }
 }
 
-#if defined(NEED_WAIT4)
-
-/*
- * NOTE: This is a replacement for wait4 that will work for what we use wait4.
- *	 It has the side effect of acknowledging the death of other children.
- */
-
-LONGINT Executor::wait4(LONGINT pid, union wait *statusp, LONGINT options,
-                        struct rusage *rusage)
-{
-    LONGINT retval;
-
-    do
-    {
-        retval = wait3(statusp, options, rusage);
-    } while(retval > 0 && retval != pid);
-
-    return retval;
-}
-#endif /* NEED_WAIT4 */
-
 char Executor::ROMlib_startdir[MAXPATHLEN];
 INTEGER ROMlib_startdirlen;
 #if defined(WIN32)
@@ -450,7 +429,7 @@ static void setstartdir(char *argv0)
         {
             close(p[1]);
             nread = read(p[0], buf, sizeof(buf) - 1);
-            wait4(pid, 0, 0, (struct rusage *)0);
+            waitpid(pid, nullptr, 0);
             if(nread)
                 --nread; /* get rid of trailing \n */
             buf[nread] = 0;
@@ -667,7 +646,7 @@ illegal_mode(void)
  * "-applzone 4M".
  */
 static void
-note_memory_syntax_change(const char *arg, unsigned val)
+note_memory_syntax(const char *arg, unsigned val)
 {
     /* Make sane error messages when the supplied value is insane.
    * Otherwise, try to print an example that illustrates how to
@@ -676,8 +655,8 @@ note_memory_syntax_change(const char *arg, unsigned val)
     if(val < 100 || val > 1000000)
         val = 2048;
 
-    fprintf(stderr, "Specified %s is too small.  The syntax "
-                    "has changed; now, for a %u.%02u\nmegabyte %s you would "
+    fprintf(stderr, "Specified %s is too small. "
+                    "For a %u.%02u\nmegabyte %s you would "
                     "say \"-%s ",
             arg, val / 1024, (val % 1024) * 100 / 1024,
             arg, arg);
@@ -727,9 +706,6 @@ int main(int argc, char **argv)
     check_structs();
 
     INTEGER i;
-    static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
-        CWC((unsigned short)0x4EF9), CWC(0), CWC(0) /* Filled in below. */
-    };
     uint32_t l;
     virtual_int_state_t int_state;
     static void (*reg_funcs[])(void) = {
@@ -931,21 +907,21 @@ int main(int argc, char **argv)
    Loser, but it will prevent confusion.  */
     opt_int_val(common_db, "applzone", &ROMlib_applzone_size, &bad_arg_p);
     if(ROMlib_applzone_size < 65536)
-        note_memory_syntax_change("applzone", ROMlib_applzone_size);
+        note_memory_syntax("applzone", ROMlib_applzone_size);
     else
         check_arg("applzone", &ROMlib_applzone_size, MIN_APPLZONE_SIZE,
                   MAX_APPLZONE_SIZE);
 
     opt_int_val(common_db, "syszone", &ROMlib_syszone_size, &bad_arg_p);
     if(ROMlib_syszone_size < 65536)
-        note_memory_syntax_change("syszone", ROMlib_syszone_size);
+        note_memory_syntax("syszone", ROMlib_syszone_size);
     else
         check_arg("syszone", &ROMlib_syszone_size, MIN_SYSZONE_SIZE,
                   MAX_SYSZONE_SIZE);
 
     opt_int_val(common_db, "stack", &ROMlib_stack_size, &bad_arg_p);
     if(ROMlib_stack_size < 32768)
-        note_memory_syntax_change("stack", ROMlib_stack_size);
+        note_memory_syntax("stack", ROMlib_stack_size);
     else
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
@@ -1125,12 +1101,18 @@ int main(int argc, char **argv)
     else
         Executor::traps::init(false);
 
+    // Mystery Hack: Replace the trap entry for ResourceStub by a piece
+    // of code that jumps to the former trap entry of ResourceStub. 
     l = ostraptable[0x0FC];
+    static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
+        CWC((unsigned short)0x4EF9), CWC(0), CWC(0) /* Filled in below. */
+    };
     ((unsigned char *)jmpl_to_ResourceStub)[2] = l >> 24;
     ((unsigned char *)jmpl_to_ResourceStub)[3] = l >> 16;
     ((unsigned char *)jmpl_to_ResourceStub)[4] = l >> 8;
     ((unsigned char *)jmpl_to_ResourceStub)[5] = l;
     ostraptable[0xFC] = US_TO_SYN68K(jmpl_to_ResourceStub);
+    // End Mystery Hack
 
     LM(Ticks) = 0;
     LM(nilhandle) = 0; /* so nil dereferences "work" */

@@ -23,16 +23,6 @@
 
 using namespace Executor;
 
-#if defined(SYSV)
-LONGINT
-setitimer(which, value, ovalue) /* TODO */
-    LONGINT which;
-CONST struct itimerval *value;
-struct itimerval *ovalue;
-{
-    return 0L;
-}
-#endif /* SYSV */
 
 QHdr Executor::ROMlib_timehead;
 
