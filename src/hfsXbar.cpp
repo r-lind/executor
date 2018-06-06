@@ -8,7 +8,7 @@
 #include "FileMgr.h"
 #include "rsys/hfs.h"
 #include "rsys/file.h"
-#include "rsys/stdfile.h"
+#include "rsys/futzwithdosdisks.h"
 #include "rsys/flags.h"
 #include "rsys/prefs.h"
 #include "rsys/cpu.h"

@@ -25,7 +25,6 @@
 #include "rsys/host.h"
 #include "rsys/time.h"
 #include "rsys/toolevent.h"
-#include "rsys/stdfile.h"
 #include "rsys/syncint.h"
 #include "rsys/emustubs.h"
 #include "rsys/cpu.h"

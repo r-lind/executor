@@ -1,14 +1,9 @@
-pointless declarations of non-existant P_blah functions
-ROMlib_destroyblocks (cache fluching) is in file.cpp?
-
-there is a function called futzwithdosdisks, which seems to check for mountable hfs volumes and is in stdfile.cpp
-
 serial.c: setbaud
     INTEGER rates[] = { ... 38400 ... };
         // this can't work
 
 =====
-rename "futzwithdosdisks" to something sensible and move it out of stdfile.cpp
+rename "futzwithdosdisks" (and its module) to something sensible
 
 
 region: mixed endianness, CWC_RAW

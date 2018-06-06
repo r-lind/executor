@@ -63,7 +63,6 @@
 #include "rsys/parseopt.h"
 #include "rsys/print.h"
 #include "rsys/memsize.h"
-#include "rsys/stdfile.h"
 #include "rsys/autorefresh.h"
 #include "rsys/sounddriver.h"
 #include "rsys/dcache.h"

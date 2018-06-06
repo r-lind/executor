@@ -23,7 +23,7 @@
 #include "rsys/hfs.h"
 #include "rsys/resource.h"
 #include "rsys/notmac.h"
-#include "rsys/stdfile.h"
+#include "rsys/futzwithdosdisks.h"
 #include "rsys/prefs.h"
 #include "rsys/options.h"
 #include "rsys/prefpanel.h"

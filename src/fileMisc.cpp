@@ -16,7 +16,7 @@
 #include "rsys/hfs.h"
 #include "rsys/file.h"
 #include "rsys/notmac.h"
-#include "rsys/stdfile.h"
+#include "rsys/futzwithdosdisks.h"
 #include "rsys/ini.h"
 #include "rsys/string.h"
 #include "rsys/segment.h"

@@ -124,7 +124,7 @@ set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileI
 source_group(Files FILES ${file_sources})
 
 set(hfs_sources hfsBtree.cpp hfsChanging.cpp hfsCreate.cpp hfsFile.cpp hfsHelper.cpp
-    hfsHier.cpp hfsMisc.cpp hfsVolume.cpp hfsWorkingdir.cpp hfsXbar.cpp)
+    hfsHier.cpp hfsMisc.cpp hfsVolume.cpp hfsWorkingdir.cpp hfsXbar.cpp futzwithdosdisks.cpp)
 source_group(HFS FILES ${hfs_sources})
 
 set(list_sources listAccess.cpp listAddDel.cpp listCreate.cpp listDisplay.cpp
@@ -278,6 +278,7 @@ set(include_sources hintemplate.h
                   include/rsys/font.h
                   include/rsys/functions.h
                   include/rsys/functions.impl.h
+                  include/rsys/futzwithdosdisks.h
                   include/rsys/gestalt.h
                   include/rsys/glue.h
                   include/rsys/gworld.h
