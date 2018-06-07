@@ -129,149 +129,6 @@ OSErr Executor::C_FSMakeFSSpec(int16_t vRefNum, int32_t dir_id,
     return retval;
 }
 
-#if 0
-
-typedef struct save_fcb_info_str
-{
-  filecontrolblock fcb;
-  HVCB *vptr;
-  struct save_fcb_info_str *next;
-  INTEGER refnum; /* zero if this is just info gathered for switching
-		     purposes */
-}
-save_fcb_info_t;
-
-static LONGINT
-get_file_num (FSSpecPtr fsp)
-{
-  return 0; /* TODO */
-}
-
-/*
- * get_fcb_info squirrels away all the FCB entries that match a particular
- * file.  It then alters them so that we can open files that are already
- * open without trouble.
- */
-
-static save_fcb_info_t *
-get_fcb_info (FSSpecPtr fsp)
-{
-  filecontrolblock *fcbp, *efcbp;
-  INTEGER total_length, fcb_size;
-  save_fcb_info_t *retval;
-  char *fcbsptr;
-  INTEGER swapped_vrefnum;
-  LONGINT swapped_fnum;
-
-
-  retval = 0;
-
-  swapped_vrefnum = fsp->vRefNum;
-  swapped_fnum = CL (get_file_num (fsp));
-
-  fcbsptr = (char *) CL (LM(FCBSPtr));
-  total_length = CW(*(short *)fcbsptr);
-  fcbp = (filecontrolblock *) ((short *)CL(LM(FCBSPtr))+1);
-  efcbp = (filecontrolblock *) ((char *)CL(LM(FCBSPtr)) + total_length);
-  fcb_size = CW (LM(FSFCBLen));
-  for (;fcbp < efcbp; fcbp = (filecontrolblock *) ((char *)fcbp + fcb_size))
-    {
-      HVCB *vptr;
-
-      vptr = CL (fcbp->fcbVPtr);
-      if (vptr && vptr->vcbVRefNum == swapped_vrefnum
-	  && fcbp->fcbFlNum == swapped_fnum)
-	{
-	  save_fcb_info_t *newp;
-
-	  newp = malloc (sizeof *newp);
-	  newp->refnum = (char *) fcbp - fcbsptr;
-	  newp->fcb = *fcbp;
-	  newp->next = retval;
-	  newp->vptr = fcbp->fcbVPtr;
-	  fcbp->fcbVPtr = 0; /* hide this open file */
-	  retval = newp;
-	}
-    }
-  return retval;
-}
-
-static OSErr
-exchange_forks (FSSpecPtr src, FSSpecPtr dst, forktype type)
-{
-  /* TODO */
-  return paramErr;
-}
-
-static void
-exchange_fcb (const save_fcb_info_t *dstp, const save_fcb_info_t *srcp)
-{
-  /* TODO */
-}
-
-/*
- * make_fcb_info looks up the info that we need in order to swap fcb info
- * when we only have information about one side
- */
-
-static save_fcb_info_t *
-make_fcb_info (FSSpecPtr fsp)
-{
-  save_fcb_info_t *retval;
-
-  retval = malloc (sizeof *retval);
-  retval->next = 0;
-  retval->vptr = 0; /* not needed */
-  retval->refnum = 0; /* means we're not associated with a real FCB */
-  return retval;
-}
-
-static void
-exchange_fcbs (FSSpecPtr fs1, const save_fcb_info_t *savefcbp1,
-	       FSSpecPtr fs2, const save_fcb_info_t *savefcbp2)
-{
-  if (savefcbp1 || savefcbp2)
-    {
-      if (!savefcbp1)
-	savefcbp1 = make_fcb_info (fs1);
-      else if (!savefcbp2)
-	savefcbp2 = make_fcb_info (fs2);
-    }
-  exchange_fcb (savefcbp1, savefcbp2);
-  exchange_fcb (savefcbp2, savefcbp1);
-}
-
-static void
-restore_fcb (const save_fcb_info_t *infop)
-{
-  char *fcbsptr;
-
-  fcbsptr = (char *) CL (LM(FCBSPtr));
-  if (infop)
-    {
-      if (infop->refnum)
-	{
-	  filecontrolblock *fcbp;
-
-	  fcbp = (filecontrolblock *) (fcbsptr + infop->refnum);
-	  fcbp->fcbVPtr = infop->vptr;
-	}
-      restore_fcb (infop->next);
-    }
-}
-
-static void
-release_fcb_info (save_fcb_info_t *infop)
-{
-  if (infop)
-    {
-      release_fcb_info (infop->next);
-      free (infop);
-    }
-}
-
-#endif
-
 /*
  * Part of ugly PAUP-specific hack below
  */
@@ -299,35 +156,6 @@ create_temp_name(Str63 name, int i)
 
 OSErr Executor::C_FSpExchangeFiles(FSSpecPtr src, FSSpecPtr dst)
 {
-#if 0
-  save_fcb_info_t *src_fcb_info, *dst_fcb_info;
-  OSErr retval;
-
-  src_fcb_info = get_fcb_info (src);
-  dst_fcb_info = get_fcb_info (dst);
-
-  retval = exchange_forks (src, dst, datafork);
-  if (retval == noErr)
-    {
-      retval = exchange_forks (src, dst, resourcefork);
-      if (retval != noErr)
-	exchange_forks (src, dst, datafork); /* try to put things back
-						together */
-    }
-
-  if (retval == noErr)
-    exchange_fcbs (src, src_fcb_info, dst, dst_fcb_info);
-  else
-    {
-      restore_fcb (src_fcb_info);
-      restore_fcb (dst_fcb_info);
-    }
-
-  release_fcb_info (src_fcb_info);
-  release_fcb_info (dst_fcb_info);
-
-  return retval;
-#else
     OSErr retval;
 
     warning_unimplemented("poorly implemented");
@@ -365,7 +193,6 @@ OSErr Executor::C_FSpExchangeFiles(FSSpecPtr src, FSSpecPtr dst)
         }
     }
     return retval;
-#endif
 }
 
 typedef OSErr (*open_procp)(HParmBlkPtr pb, BOOLEAN sync);
