@@ -37,7 +37,6 @@ namespace Executor
 #define FAKECURDIR 102
 #define FAKEOPENDIR 103
 
-extern int ROMlib_strcmp(const Byte *s1, const Byte *s2);
 extern void C_ROMlib_stdftrack(ControlHandle, INTEGER);
 PASCAL_FUNCTION(ROMlib_stdftrack);
 extern Boolean C_ROMlib_stdffilt(DialogPtr, EventRecord *, GUEST<INTEGER> *);

@@ -46,7 +46,7 @@
 #include "rsys/menu.h"
 
 #include "rsys/executor.h"
-
+#include "rsys/osutil.h"
 #include "rsys/osevent.h"
 #include "rsys/prefs.h"
 

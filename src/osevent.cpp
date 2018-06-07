@@ -34,6 +34,7 @@
 #include "rsys/segment.h"
 #include "rsys/toolevent.h"
 #include "rsys/osevent.h"
+#include "rsys/osutil.h"
 #include "rsys/dirtyrect.h"
 #include "rsys/stdfile.h"
 #include "rsys/system_error.h"
