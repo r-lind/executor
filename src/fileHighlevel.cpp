@@ -386,7 +386,6 @@ open_helper(FSSpecPtr spec, SignedByte perms, GUEST<int16_t> *refoutp,
         perms = fsRdWrPerm;
     }
     hpb.ioParam.ioPermssn = perms;
-    warning_unimplemented("poorly implemented ... will try to open drivers");
     retval = procp(&hpb, false);
     if(retval == noErr)
         *refoutp = hpb.ioParam.ioRefNum;
@@ -396,7 +395,7 @@ open_helper(FSSpecPtr spec, SignedByte perms, GUEST<int16_t> *refoutp,
 OSErr Executor::C_FSpOpenDF(FSSpecPtr spec, SignedByte perms,
                             GUEST<int16_t> *refoutp)
 {
-    return open_helper(spec, perms, refoutp, PBHOpen);
+    return open_helper(spec, perms, refoutp, PBHOpenDF);
 }
 
 OSErr Executor::C_FSpOpenRF(FSSpecPtr spec, SignedByte perms,
