@@ -120,7 +120,7 @@ set(dial_sources dialAlert.cpp dialCreate.cpp dialHandle.cpp dialInit.cpp dialMa
 source_group(Dialogs FILES ${dial_sources})
 
 set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileInfo.cpp
-    fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp)
+    fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp fileUnimplemented.cpp)
 source_group(Files FILES ${file_sources})
 
 set(hfs_sources hfsBtree.cpp hfsChanging.cpp hfsCreate.cpp hfsFile.cpp hfsHelper.cpp

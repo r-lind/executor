@@ -18,50 +18,6 @@
 
 using namespace Executor;
 
-OSErr Executor::Create(StringPtr filen, INTEGER vrn, OSType creator,
-                       OSType filtyp) /* IMIV-112 */
-{
-    ParamBlockRec pbr;
-    OSErr temp;
-    GUEST<ULONGINT> t;
-
-    pbr.fileParam.ioNamePtr = RM(filen);
-    pbr.fileParam.ioVRefNum = CW(vrn);
-    pbr.fileParam.ioFVersNum = 0;
-
-    temp = PBCreate(&pbr, 0);
-    if(temp != noErr)
-        return (temp);
-
-    pbr.fileParam.ioFlFndrInfo.fdType = CL(filtyp);
-    pbr.fileParam.ioFlFndrInfo.fdCreator = CL(creator);
-    pbr.fileParam.ioFlFndrInfo.fdFlags = 0;
-    ZEROPOINT(pbr.fileParam.ioFlFndrInfo.fdLocation);
-    pbr.fileParam.ioFlFndrInfo.fdFldr = 0;
-
-    GetDateTime(&t);
-    pbr.fileParam.ioFlCrDat = t;
-    pbr.fileParam.ioFlMdDat = t;
-
-    temp = PBSetFInfo(&pbr, 0);
-    /*
- * The dodge below of not returning fnfErr is necessary because people might
- * want to create a file in a directory without a .Rsrc.  This has some
- * unpleasant side effects (notably no file type and no logical eof), but we
- * allow it anyway (for now).
- */
-    return temp == fnfErr ? noErr : temp;
-}
-
-OSErr Executor::FSDelete(StringPtr filen, INTEGER vrn) /* IMIV-113 */
-{
-    ParamBlockRec pbr;
-
-    pbr.fileParam.ioNamePtr = RM(filen);
-    pbr.fileParam.ioVRefNum = CW(vrn);
-    pbr.fileParam.ioFVersNum = 0;
-    return (PBDelete(&pbr, 0));
-}
 
 static OSErr PBCreateForD(ParmBlkPtr, BOOLEAN, FOrDType, LONGINT);
 static OSErr PBDeleteForD(ParmBlkPtr, BOOLEAN, FOrDType, LONGINT);

@@ -750,21 +750,6 @@ DONE:
 }
 #undef RETURN
 
-OSErr Executor::GetVInfo(INTEGER drv, StringPtr voln, GUEST<INTEGER> *vrn,
-                         GUEST<LONGINT> *freeb) /* IMIV-107 */
-{
-    ParamBlockRec pbr;
-    OSErr temp;
-
-    pbr.volumeParam.ioVolIndex = 0;
-    pbr.volumeParam.ioVRefNum = CW(drv);
-    pbr.volumeParam.ioNamePtr = RM(voln);
-    temp = PBGetVInfo(&pbr, 0);
-    *vrn = pbr.volumeParam.ioVRefNum;
-    *freeb = CL(Cx(pbr.volumeParam.ioVFrBlk) * Cx(pbr.volumeParam.ioVAlBlkSiz));
-    return (temp);
-}
-
 OSErr Executor::GetVRefNum(INTEGER prn, GUEST<INTEGER> *vrn) /* IMIV-107 */
 {
     OSErr err;
@@ -775,53 +760,6 @@ OSErr Executor::GetVRefNum(INTEGER prn, GUEST<INTEGER> *vrn) /* IMIV-107 */
     if(err == noErr)
         *vrn = MR(fp->fcvptr)->vcbVRefNum;
     return (err);
-}
-
-OSErr Executor::GetVol(StringPtr voln, GUEST<INTEGER> *vrn) /* IMIV-107 */
-{
-    ParamBlockRec pbr;
-    OSErr temp;
-
-    pbr.volumeParam.ioNamePtr = RM(voln);
-    temp = PBGetVol(&pbr, 0);
-    *vrn = pbr.volumeParam.ioVRefNum;
-    return (temp);
-}
-
-OSErr Executor::SetVol(StringPtr voln, INTEGER vrn) /* IMIV-107 */
-{
-    ParamBlockRec pbr;
-
-    pbr.volumeParam.ioNamePtr = RM(voln);
-    pbr.volumeParam.ioVRefNum = CW(vrn);
-    return (PBSetVol(&pbr, 0));
-}
-
-OSErr Executor::FlushVol(StringPtr voln, INTEGER vrn) /* IMIV-108 */
-{
-    ParamBlockRec pbr;
-
-    pbr.ioParam.ioNamePtr = RM(voln);
-    pbr.ioParam.ioVRefNum = CW(vrn);
-    return (PBFlushVol(&pbr, 0));
-}
-
-OSErr Executor::UnmountVol(StringPtr voln, INTEGER vrn) /* IMIV-108 */
-{
-    ParamBlockRec pbr;
-
-    pbr.ioParam.ioNamePtr = RM(voln);
-    pbr.ioParam.ioVRefNum = CW(vrn);
-    return (PBUnmountVol(&pbr));
-}
-
-OSErr Executor::Eject(StringPtr voln, INTEGER vrn) /* IMIV-108 */
-{
-    ParamBlockRec pbr;
-
-    pbr.ioParam.ioNamePtr = RM(voln);
-    pbr.ioParam.ioVRefNum = CW(vrn);
-    return (PBEject(&pbr));
 }
 
 static VCB *findvcb(StringPtr, INTEGER, BOOLEAN *, GUEST<INTEGER> *);
