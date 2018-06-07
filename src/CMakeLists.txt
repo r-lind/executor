@@ -366,6 +366,7 @@ set(include_sources hintemplate.h
                   include/rsys/vbl.h
                   include/rsys/vdriver.h
                   include/rsys/version.h
+                  include/rsys/volume.h
                   include/rsys/wind.h
                   include/rsys/xdata.h
                   include/rsys/xdblt.h

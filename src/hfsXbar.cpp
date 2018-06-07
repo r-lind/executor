@@ -12,6 +12,7 @@
 #include "rsys/flags.h"
 #include "rsys/prefs.h"
 #include "rsys/cpu.h"
+#include "rsys/volume.h"
 
 using namespace Executor;
 
@@ -34,6 +35,52 @@ void cachecheck(HVCB *vcbp)
             warning_unexpected("busy");
 }
 #endif /* defined(CACHECHECK) */
+
+Volume *getVolume(void *vpb)
+{
+    IOParam *pb = (IOParam*)vpb;
+    LONGINT dir;
+    HVCB *vcbp = ROMlib_findvcb(Cx(pb->ioVRefNum), MR(pb->ioNamePtr), &dir, true);
+    if(!vcbp)
+        vcbp = ROMlib_findvcb(Cx(pb->ioVRefNum), (StringPtr)0, &dir, true);
+
+    if(vcbp)
+        return ((VCBExtra*)vcbp)->volume;
+    else
+        return nullptr;
+}
+
+
+Volume *getIVolume(void *vpb)
+{
+    VolumeParam *pb = (VolumeParam*)vpb;
+    if(Cx(pb->ioVolIndex) > 0)
+    {
+        HVCB *vcbp = (HVCB *)ROMlib_indexqueue(&LM(VCBQHdr), Cx(pb->ioVolIndex));
+        if(vcbp)
+            return ((VCBExtra*)vcbp)->volume;
+        else
+            return nullptr;
+    }
+    else
+        return getVolume(pb);
+}
+
+Volume *getFileVolume(void *vpb)
+{
+    IOParam *pb = (IOParam*)vpb;
+   
+    HVCB *vcbp;
+
+    filecontrolblock *fcbp = ROMlib_refnumtofcbp(Cx(pb->ioRefNum));
+    if(fcbp)
+    {
+        vcbp = MR(fcbp->fcbVPtr);
+        return ((VCBExtra*)vcbp)->volume;
+    }
+    else
+        return nullptr;
+}
 
 static BOOLEAN hfsvol(IOParam *pb)
 {
@@ -103,7 +150,9 @@ OSErr Executor::PBHRename(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHRename(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHRename(pb, async);
     else
         retval = ufsPBHRename(pb, async);
@@ -114,7 +163,9 @@ OSErr Executor::PBHCreate(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHCreate(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHCreate(pb, async);
     else
         retval = ufsPBHCreate(pb, async);
@@ -125,7 +176,9 @@ OSErr Executor::PBDirCreate(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBDirCreate(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBDirCreate(pb, async);
     else
         retval = ufsPBDirCreate(pb, async);
@@ -136,7 +189,9 @@ OSErr Executor::PBHDelete(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHDelete(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHDelete(pb, async);
     else
         retval = ufsPBHDelete(pb, async);
@@ -267,7 +322,9 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
             }
             else
             {
-                if(hfsfil((IOParam *)pb))
+                if(Volume *v = getFileVolume(pb))
+                    retval = v->PBRead(pb, async);
+                else if(hfsfil((IOParam *)pb))
                     retval = hfsPBRead(pb, async);
                 else
                     retval = ufsPBRead(pb, async);
@@ -328,7 +385,9 @@ OSErr Executor::PBWrite(ParmBlkPtr pb, BOOLEAN async)
 	break;
 #endif
         default:
-            if(hfsfil((IOParam *)pb))
+            if(Volume *v = getFileVolume(pb))
+                retval = v->PBWrite(pb, async);
+            else if(hfsfil((IOParam *)pb))
                 retval = hfsPBWrite(pb, async);
             else
                 retval = ufsPBWrite(pb, async);
@@ -341,7 +400,9 @@ OSErr Executor::PBClose(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBClose(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBClose(pb, async);
     else
         retval = ufsPBClose(pb, async);
@@ -366,6 +427,8 @@ OSErr Executor::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
     if(pb->ioParam.ioBuffer == 0 && pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
        && MR(pb->ioParam.ioNamePtr)[1] == '.')  // FIXME: PBHOpen should work with dotfiles if no driver is found
         retval = ROMlib_driveropen((ParmBlkPtr)pb, async);
+    else if(Volume *v = getVolume(pb))
+        retval = v->PBHOpen(pb, async);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBHOpen(pb, async);
     else
@@ -377,7 +440,9 @@ OSErr Executor::PBHOpenDF(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHOpenDF(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHOpen(pb, async);
     else
         retval = ufsPBHOpen(pb, async);
@@ -388,7 +453,9 @@ OSErr Executor::PBHOpenRF(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHOpenRF(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHOpenRF(pb, async);
     else
         retval = ufsPBHOpenRF(pb, async);
@@ -430,10 +497,13 @@ OSErr Executor::PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
         savep = pb->dirInfo.ioNamePtr;
         if(pb->dirInfo.ioFDirIndex != CWC(0)) /* IMIV-155, 156 */
             pb->dirInfo.ioNamePtr = 0;
+        Volume *v = getVolume(pb);
         ishfs = hfsvol((IOParam *)pb);
         pb->dirInfo.ioNamePtr = savep;
 
-        if(ishfs)
+        if(v)
+            retval = v->PBGetCatInfo(pb, async);
+        else if(ishfs)
             retval = hfsPBGetCatInfo(pb, async);
         else
             retval = ufsPBGetCatInfo(pb, async);
@@ -445,7 +515,9 @@ OSErr Executor::PBSetCatInfo(CInfoPBPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBSetCatInfo(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBSetCatInfo(pb, async);
     else
         retval = ufsPBSetCatInfo(pb, async);
@@ -456,7 +528,9 @@ OSErr Executor::PBCatMove(CMovePBPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBCatMove(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBCatMove(pb, async);
     else
         retval = ufsPBCatMove(pb, async);
@@ -467,7 +541,9 @@ OSErr Executor::PBGetVInfo(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsIvol((VolumeParam *)pb))
+    if(Volume *v = getIVolume(pb))
+        retval = v->PBGetVInfo(pb, async);
+    else if(hfsIvol((VolumeParam *)pb))
         retval = hfsPBGetVInfo(pb, async);
     else
         retval = ufsPBGetVInfo(pb, async);
@@ -478,7 +554,9 @@ OSErr Executor::PBUnmountVol(ParmBlkPtr pb)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBUnmountVol(pb);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBUnmountVol(pb);
     else
         retval = ufsPBUnmountVol(pb);
@@ -489,7 +567,9 @@ OSErr Executor::PBEject(ParmBlkPtr pb)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBEject(pb);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBEject(pb);
     else
         retval = ufsPBEject(pb);
@@ -500,7 +580,9 @@ OSErr Executor::PBAllocate(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBAllocate(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBAllocate(pb, async);
     else
         retval = ufsPBAllocate(pb, async);
@@ -511,7 +593,9 @@ OSErr Executor::PBAllocContig(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBAllocContig(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBAllocContig(pb, async);
     else
         retval = ufsPBAllocContig(pb, async);
@@ -527,10 +611,13 @@ OSErr Executor::PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async)
     savep = pb->ioParam.ioNamePtr;
     if(CW(pb->fileParam.ioFDirIndex) > 0) /* IMIV-155, 156 */
         pb->ioParam.ioNamePtr = 0;
+    Volume *v = getVolume(pb);
     ishfs = hfsvol((IOParam *)pb);
     pb->ioParam.ioNamePtr = savep;
 
-    if(ishfs)
+    if(v)
+        retval = v->PBHGetFInfo(pb, async);
+    else if(ishfs)
         retval = hfsPBHGetFInfo(pb, async);
     else
         retval = ufsPBHGetFInfo(pb, async);
@@ -541,7 +628,9 @@ OSErr Executor::PBSetEOF(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBSetEOF(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBSetEOF(pb, async);
     else
         retval = ufsPBSetEOF(pb, async);
@@ -555,6 +644,8 @@ OSErr Executor::PBOpen(ParmBlkPtr pb, BOOLEAN async)
     if(pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
        && MR(pb->ioParam.ioNamePtr)[1] == '.') // FIXME: PBOpen should work with dotfiles if no driver is found
         retval = ROMlib_driveropen(pb, async);
+    else if(Volume *v = getVolume(pb))
+        retval = v->PBOpen(pb, async);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBOpen(pb, async);
     else
@@ -566,7 +657,9 @@ OSErr Executor::PBOpenDF(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBOpen(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBOpen(pb, async);
     else
         retval = ufsPBOpen(pb, async);
@@ -597,7 +690,9 @@ OSErr Executor::PBOpenRF(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBOpenRF(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBOpenRF(pb, async);
     else
         retval = ufsPBOpenRF(pb, async);
@@ -608,7 +703,9 @@ OSErr Executor::PBLockRange(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBLockRange(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBLockRange(pb, async);
     else
         retval = ufsPBLockRange(pb, async);
@@ -619,7 +716,9 @@ OSErr Executor::PBUnlockRange(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBUnlockRange(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBUnlockRange(pb, async);
     else
         retval = ufsPBUnlockRange(pb, async);
@@ -630,7 +729,9 @@ OSErr Executor::PBGetFPos(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBGetFPos(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBGetFPos(pb, async);
     else
         retval = ufsPBGetFPos(pb, async);
@@ -641,7 +742,9 @@ OSErr Executor::PBSetFPos(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBSetFPos(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBSetFPos(pb, async);
     else
         retval = ufsPBSetFPos(pb, async);
@@ -652,7 +755,9 @@ OSErr Executor::PBGetEOF(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBGetEOF(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBGetEOF(pb, async);
     else
         retval = ufsPBGetEOF(pb, async);
@@ -663,7 +768,9 @@ OSErr Executor::PBFlushFile(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsfil((IOParam *)pb))
+    if(Volume *v = getFileVolume(pb))
+        retval = v->PBFlushFile(pb, async);
+    else if(hfsfil((IOParam *)pb))
         retval = hfsPBFlushFile(pb, async);
     else
         retval = ufsPBFlushFile(pb, async);
@@ -674,7 +781,9 @@ OSErr Executor::PBCreate(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBCreate(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBCreate(pb, async);
     else
         retval = ufsPBCreate(pb, async);
@@ -685,7 +794,9 @@ OSErr Executor::PBDelete(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBDelete(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBDelete(pb, async);
     else
         retval = ufsPBDelete(pb, async);
@@ -696,7 +807,9 @@ OSErr Executor::PBOpenWD(WDPBPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBOpenWD(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBOpenWD(pb, async);
     else
         retval = ufsPBOpenWD(pb, async);
@@ -728,10 +841,13 @@ OSErr Executor::PBGetFInfo(ParmBlkPtr pb, BOOLEAN async)
     savep = pb->ioParam.ioNamePtr;
     if(CW(pb->fileParam.ioFDirIndex) > 0) /* IMIV-155, 156 */
         pb->ioParam.ioNamePtr = 0;
+    Volume *v = getVolume(pb);
     ishfs = hfsvol((IOParam *)pb);
     pb->ioParam.ioNamePtr = savep;
 
-    if(ishfs)
+    if(v)
+        retval = v->PBGetFInfo(pb, async);
+    else if(ishfs)
         retval = hfsPBGetFInfo(pb, async);
     else
         retval = ufsPBGetFInfo(pb, async);
@@ -742,7 +858,9 @@ OSErr Executor::PBSetFInfo(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBSetFInfo(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBSetFInfo(pb, async);
     else
         retval = ufsPBSetFInfo(pb, async);
@@ -753,7 +871,9 @@ OSErr Executor::PBHSetFInfo(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHSetFInfo(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHSetFInfo(pb, async);
     else
         retval = ufsPBHSetFInfo(pb, async);
@@ -764,7 +884,9 @@ OSErr Executor::PBSetFLock(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBSetFLock(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBSetFLock(pb, async);
     else
         retval = ufsPBSetFLock(pb, async);
@@ -775,7 +897,9 @@ OSErr Executor::PBHSetFLock(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHSetFLock(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHSetFLock(pb, async);
     else
         retval = ufsPBHSetFLock(pb, async);
@@ -786,7 +910,9 @@ OSErr Executor::PBRstFLock(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBRstFLock(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBRstFLock(pb, async);
     else
         retval = ufsPBRstFLock(pb, async);
@@ -797,7 +923,9 @@ OSErr Executor::PBHRstFLock(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBHRstFLock(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBHRstFLock(pb, async);
     else
         retval = ufsPBHRstFLock(pb, async);
@@ -808,7 +936,9 @@ OSErr Executor::PBSetFVers(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBSetFVers(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBSetFVers(pb, async);
     else
         retval = ufsPBSetFVers(pb, async);
@@ -819,7 +949,9 @@ OSErr Executor::PBRename(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBRename(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBRename(pb, async);
     else
         retval = ufsPBRename(pb, async);
@@ -871,7 +1003,9 @@ OSErr Executor::PBHGetVInfo(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsIvol((VolumeParam *)pb))
+    if(Volume *v = getIVolume(pb))
+        retval = v->PBHGetVInfo(pb, async);
+    else if(hfsIvol((VolumeParam *)pb))
         retval = hfsPBHGetVInfo(pb, async);
     else
         retval = ufsPBHGetVInfo(pb, async);
@@ -952,7 +1086,9 @@ OSErr Executor::PBSetVInfo(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBSetVInfo(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBSetVInfo(pb, async);
     else
         retval = ufsPBSetVInfo(pb, async);
@@ -995,7 +1131,9 @@ OSErr Executor::PBFlushVol(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBFlushVol(pb, async);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBFlushVol(pb, async);
     else
         retval = ufsPBFlushVol(pb, async);
@@ -1006,54 +1144,11 @@ OSErr Executor::PBOffLine(ParmBlkPtr pb)
 {
     OSErr retval;
 
-    if(hfsvol((IOParam *)pb))
+    if(Volume *v = getVolume(pb))
+        retval = v->PBOffLine(pb);
+    else if(hfsvol((IOParam *)pb))
         retval = hfsPBOffLine(pb);
     else
         retval = ufsPBOffLine(pb);
     PBRETURN(pb, retval);
-}
-
-OSErr Executor::PBExchangeFiles(ParmBlkPtr pb, BOOLEAN async)
-{
-    OSErr retval;
-
-    warning_unimplemented(NULL_STRING);
-    retval = paramErr;
-    FAKEASYNC(pb, async, retval);
-}
-
-OSErr Executor::PBCatSearch(ParmBlkPtr pb, BOOLEAN async)
-{
-    OSErr retval;
-
-    warning_unimplemented(NULL_STRING);
-    retval = paramErr;
-    FAKEASYNC(pb, async, retval);
-}
-
-OSErr Executor::PBCreateFileIDRef(ParmBlkPtr pb, BOOLEAN async)
-{
-    OSErr retval;
-
-    warning_unimplemented(NULL_STRING);
-    retval = paramErr;
-    FAKEASYNC(pb, async, retval);
-}
-
-OSErr Executor::PBDeleteFileIDRef(ParmBlkPtr pb, BOOLEAN async)
-{
-    OSErr retval;
-
-    warning_unimplemented(NULL_STRING);
-    retval = paramErr;
-    FAKEASYNC(pb, async, retval);
-}
-
-OSErr Executor::PBResolveFileIDRef(ParmBlkPtr pb, BOOLEAN async)
-{
-    OSErr retval;
-
-    warning_unimplemented(NULL_STRING);
-    retval = paramErr;
-    FAKEASYNC(pb, async, retval);
 }

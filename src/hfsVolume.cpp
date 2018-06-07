@@ -502,6 +502,7 @@ Executor::hfsPBMountVol(ParmBlkPtr pb, LONGINT floppyfd, LONGINT offset, LONGINT
     else
     {
         vcbp = (HVCB *)NewPtr((Size)sizeof(VCBExtra));
+        memset(vcbp, 0, sizeof(VCBExtra));
         ((VCBExtra *)vcbp)->u.hfs.fd = floppyfd;
         ((VCBExtra *)vcbp)->u.hfs.offset = offset;
         ((VCBExtra *)vcbp)->u.hfs.bsize = bsize;

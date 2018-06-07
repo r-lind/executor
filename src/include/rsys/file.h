@@ -237,6 +237,8 @@ extern fcbrec *PRNTOFPERR(INTEGER prn, OSErr *errp);
 
 #define INODEMAP "inodemap"
 
+class Volume;
+
 typedef struct
 {
     VCB vcb;
@@ -256,6 +258,7 @@ typedef struct
         } ufs;
         hfs_access_t hfs;
     } u;
+    Volume *volume;
 } VCBExtra;
 
 enum
