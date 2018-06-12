@@ -316,7 +316,7 @@ HVCB *Executor::ROMlib_vcbbybiggestunixname(const char *name)
     for(vcbp = (HVCB *)MR(LM(VCBQHdr).qHead); vcbp;
         vcbp = (HVCB *)MR(vcbp->qLink))
     {
-        if(!vcbp->vcbCTRef)
+        if(((VCBExtra *)vcbp)->unixname)
         {
             namesize = strlen(((VCBExtra *)vcbp)->unixname);
             if(namesize > bestsize && VCB_CMPN_FUNC(((VCBExtra *)vcbp)->unixname, name, namesize) == 0)
@@ -334,7 +334,7 @@ Executor::ROMlib_vcbbyunixname(const char *name)
 {
     HVCB *vcbp;
 
-    for(vcbp = (HVCB *)MR(LM(VCBQHdr).qHead); vcbp && (vcbp->vcbCTRef || VCB_CMP_FUNC(((VCBExtra *)vcbp)->unixname, name) != 0);
+    for(vcbp = (HVCB *)MR(LM(VCBQHdr).qHead); vcbp && (!((VCBExtra *)vcbp)->unixname || VCB_CMP_FUNC(((VCBExtra *)vcbp)->unixname, name) != 0);
         vcbp = (HVCB *)MR(vcbp->qLink))
         ;
     return (VCBExtra *)vcbp;

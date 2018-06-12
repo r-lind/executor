@@ -679,13 +679,14 @@ OSErr Executor::ufsPBMountVol(ParmBlkPtr pb) /* INTERNAL */
     savezone = LM(TheZone);
     LM(TheZone) = LM(SysZone);
     if(Ustat(ROMlib_volumename.c_str(), &sbuf) < 0)
-        /*-->*/ RETURN(badMDBErr) if(ROMlib_vcbbydrive(Cx(pb->volumeParam.ioVRefNum)) || ROMlib_vcbbyunixname(ROMlib_volumename.c_str()))
+        /*-->*/ RETURN(badMDBErr)
+    if(ROMlib_vcbbydrive(Cx(pb->volumeParam.ioVRefNum)) || ROMlib_vcbbyunixname(ROMlib_volumename.c_str()))
             RETURN(volOnLinErr);
-    vp = (VCBExtra *)NewPtr((Size)sizeof(VCBExtra));
+    vp = (VCBExtra *)NewPtr(sizeof(VCBExtra));
 
     macvolumenamelen = ROMlib_volumename.size();
     if(vp)
-        memset(vp, 0, (LONGINT)sizeof(VCBExtra));
+        memset(vp, 0, sizeof(VCBExtra));
     if(!vp || !(vp->unixname = (char *)NewPtr(macvolumenamelen + 1)))
         /*-->*/ RETURN(memFullErr)
             strcpy(vp->unixname, ROMlib_volumename.c_str());

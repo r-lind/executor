@@ -828,6 +828,8 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
             cd_mounted_by_trickery_p = true;
     }
 #endif
+
+    initLocalVol();
 }
 
 fcbrec *

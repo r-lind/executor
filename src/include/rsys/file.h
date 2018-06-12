@@ -238,6 +238,7 @@ extern fcbrec *PRNTOFPERR(INTEGER prn, OSErr *errp);
 #define INODEMAP "inodemap"
 
 class Volume;
+void initLocalVol();
 
 typedef struct
 {

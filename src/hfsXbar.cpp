@@ -441,7 +441,7 @@ OSErr Executor::PBHOpenDF(HParmBlkPtr pb, BOOLEAN async)
     OSErr retval;
 
     if(Volume *v = getVolume(pb))
-        retval = v->PBHOpenDF(pb, async);
+        retval = v->PBHOpen(pb, async);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBHOpen(pb, async);
     else

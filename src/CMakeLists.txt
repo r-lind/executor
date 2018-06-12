@@ -11,6 +11,8 @@ find_path(DB_INCLUDE_PATH db.h ndbm.h)
 include_directories(${DB_INCLUDE_PATH})
 endif()
 
+find_package(Boost COMPONENTS filesystem system)
+
 find_program(BISON_COMMAND bison)
 find_package(Threads REQUIRED)
 
@@ -120,7 +122,8 @@ set(dial_sources dialAlert.cpp dialCreate.cpp dialHandle.cpp dialInit.cpp dialMa
 source_group(Dialogs FILES ${dial_sources})
 
 set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileInfo.cpp
-    fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp fileUnimplemented.cpp)
+    fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp fileUnimplemented.cpp
+    localvolume.cpp volume.cpp)
 source_group(Files FILES ${file_sources})
 
 set(hfs_sources hfsBtree.cpp hfsChanging.cpp hfsCreate.cpp hfsFile.cpp hfsHelper.cpp
@@ -415,5 +418,5 @@ else()
     target_link_libraries(executor ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k PowerCore mon)
+target_link_libraries(executor Threads::Threads syn68k PowerCore mon Boost::filesystem)
 

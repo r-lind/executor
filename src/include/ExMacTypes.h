@@ -27,6 +27,7 @@ typedef Byte Str32[33];
 typedef Byte Str63[64];
 typedef Byte Str255[256];
 typedef Byte *StringPtr;
+typedef const unsigned char *ConstStringPtr;
 
 typedef GUEST<StringPtr> *StringHandle;
 

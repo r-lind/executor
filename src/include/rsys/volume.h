@@ -7,21 +7,24 @@ namespace Executor
 {
     class Volume
     {
+    protected:
+        VCB& vcb;
     public:
+        Volume(VCB& vcb) : vcb(vcb) {}
         virtual ~Volume();
 
+        virtual OSErr PBGetVInfo(ParmBlkPtr pb, BOOLEAN async);
+        virtual OSErr PBHGetVInfo(HParmBlkPtr pb, BOOLEAN async);
 
         virtual OSErr PBHRename(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBHCreate(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBDirCreate(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBHDelete(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBHOpen(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHOpenDF(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBHOpenRF(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBSetCatInfo(CInfoPBPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBCatMove(CMovePBPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBGetVInfo(ParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBOpen(ParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBOpenRF(ParmBlkPtr pb, BOOLEAN async) = 0;
@@ -37,7 +40,6 @@ namespace Executor
         virtual OSErr PBHRstFLock(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBSetFVers(ParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBRename(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHGetVInfo(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBSetVInfo(HParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBFlushVol(ParmBlkPtr pb, BOOLEAN async) = 0;
         virtual OSErr PBUnmountVol(ParmBlkPtr pb) = 0;

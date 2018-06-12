@@ -892,7 +892,7 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
 
     vcbp = ROMlib_vcbbyvrn(CW(*vrefp));
     retval = false;
-    if(!vcbp->vcbCTRef)
+    if(((VCBExtra *)vcbp)->unixname)
     {
         namelen = strlen(((VCBExtra *)vcbp)->unixname);
         if(namelen != 1 + SLASH_CHAR_OFFSET)
@@ -1538,7 +1538,7 @@ static bool single_tree_fs_p(HParmBlkPtr pb)
 #else
     HVCB *vcbp = ROMlib_vcbbyvrn(CW(pb->volumeParam.ioVRefNum));
 
-    return vcbp && !vcbp->vcbCTRef;
+    return vcbp && ((VCBExtra *)vcbp)->unixname;
 #endif
 }
 
@@ -1709,6 +1709,8 @@ void adjustdrivebutton(DialogPtr dp)
         vcbp = (HVCB *)MR(vcbp->qLink))
         if(vcbp->vcbCTRef && vcbp->vcbDrvNum)
             ++count;
+        else if(((VCBExtra*)vcbp)->volume)
+            ++count;
         else if(!seenunix)
         {
             ++count;
@@ -1771,7 +1773,7 @@ unixcore(StringPtr namep, INTEGER *vrefnump, LONGINT *diridp)
     vcbp = ROMlib_breakoutioname(&pbr, &templ, &tempcp, (BOOLEAN *)0, true);
     free(tempcp);
 #endif
-    if(vcbp && !vcbp->vcbCTRef)
+    if(vcbp && ((VCBExtra *)vcbp)->unixname)
     {
         pb.ioParam.ioNamePtr = nullptr;
         pb.ioParam.ioVRefNum = pbr.ioParam.ioVRefNum;

@@ -106,16 +106,16 @@ OSErr Executor::PBGetFCBInfo(FCBPBPtr pb, BOOLEAN async)
     pb->ioFCBFlags = CW((fcbp->fcbMdRByt << 8) | (unsigned char)fcbp->fcbTypByt);
     pb->ioFCBStBlk = fcbp->fcbSBlk;
     pb->ioFCBEOF = fcbp->fcbEOF;
-    if(MR(fcbp->fcbVPtr)->vcbCTRef)
-    {
-        pb->ioFCBCrPs = fcbp->fcbCrPs; /* HFS */
-        pb->ioFCBPLen = fcbp->fcbPLen;
-    }
-    else
+    if(((VCBExtra*)fcbp)->unixname)
     {
         pb->ioFCBCrPs = CL((ULONGINT)(lseek(((fcbrec *)fcbp)->fcfd, 0, SEEK_CUR) - /* UFS */
                                       FORKOFFSET((fcbrec *)fcbp)));
         pb->ioFCBPLen = fcbp->fcbEOF;
+    }
+    else
+    {
+        pb->ioFCBCrPs = fcbp->fcbCrPs; 
+        pb->ioFCBPLen = fcbp->fcbPLen;
     }
     pb->ioFCBVRefNum = MR(fcbp->fcbVPtr)->vcbVRefNum;
     if(CW(pb->ioFCBIndx) <= 0 || pb->ioVRefNum == CWC(0))
