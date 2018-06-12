@@ -20,6 +20,13 @@ public:
     OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
 };
 
+using mac_string_view = std::basic_string_view<unsigned char>;
+mac_string_view PascalStringView(ConstStringPtr s)
+{
+    return mac_string_view(s+1, (size_t)s[0]);
+}
+
+using mac_string = std::basic_string<unsigned char>;
 
 class LocalVolume : public Volume
 {
@@ -39,53 +46,62 @@ class LocalVolume : public Volume
 public:
     LocalVolume(VCB& vcb, fs::path root);
 
-    virtual OSErr PBHRename(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHCreate(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBDirCreate(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHDelete(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHOpen(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHOpenRF(HParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetCatInfo(CInfoPBPtr pb, BOOLEAN async) override;
-    virtual OSErr PBCatMove(CMovePBPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBOpen(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBOpenRF(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBCreate(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBDelete(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBOpenWD(WDPBPtr pb, BOOLEAN async) override;
     virtual OSErr PBGetFInfo(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async) override;
+
+    virtual OSErr PBSetCatInfo(CInfoPBPtr pb, BOOLEAN async) override;
     virtual OSErr PBSetFInfo(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBHSetFInfo(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBSetVInfo(HParmBlkPtr pb, BOOLEAN async) override;
+
+    virtual OSErr PBDirCreate(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBCreate(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBHCreate(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBDelete(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBHDelete(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBRename(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBHRename(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBCatMove(CMovePBPtr pb, BOOLEAN async) override;
+
+    virtual OSErr PBOpenWD(WDPBPtr pb, BOOLEAN async) override;
+    virtual OSErr PBOpen(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBOpenRF(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBHOpen(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBHOpenRF(HParmBlkPtr pb, BOOLEAN async) override;
+
     virtual OSErr PBSetFLock(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBHSetFLock(HParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBRstFLock(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBHRstFLock(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetFVers(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBRename(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetVInfo(HParmBlkPtr pb, BOOLEAN async) override;
+
+    virtual OSErr PBClose(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBRead(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBWrite(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBGetFPos(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBSetFPos(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBGetEOF(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual OSErr PBFlushFile(ParmBlkPtr pb, BOOLEAN async) override;
+
     virtual OSErr PBFlushVol(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBUnmountVol(ParmBlkPtr pb) override;
     virtual OSErr PBEject(ParmBlkPtr pb) override;
     virtual OSErr PBOffLine(ParmBlkPtr pb) override;
-    virtual OSErr PBRead(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBWrite(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBClose(ParmBlkPtr pb, BOOLEAN async) override;
+
     virtual OSErr PBAllocate(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBAllocContig(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBSetEOF(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBLockRange(ParmBlkPtr pb, BOOLEAN async) override;
     virtual OSErr PBUnlockRange(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBGetFPos(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetFPos(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBGetEOF(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBFlushFile(ParmBlkPtr pb, BOOLEAN async) override;
+
+    virtual OSErr PBSetFVers(ParmBlkPtr pb, BOOLEAN async) override;
 };
 
 class LocalVolume::Item
 {
     LocalVolume& volume_;
     fs::path path_;
+    mac_string name_;
     bool isDir_;
     long dirID_;
     long parID_;
@@ -99,11 +115,18 @@ public:
     long dirID() const { return dirID_; }
     long parID() const { return parID_; }
     bool isDirectory() const { return isDir_; }
+    const mac_string& name() const { return name_; }
 };
 
 LocalVolume::Item::Item(LocalVolume& vol, fs::path p)
     : volume_(vol), path_(std::move(p))
 {
+    const std::string& str = path_.filename().string();
+    if(str.size() > 31)
+        name_ = mac_string(str.begin(), str.begin() + 31);
+    else
+        name_ = mac_string(str.begin(), str.end());
+
     if(fs::is_directory(path_))
     {
         isDir_ = true;
@@ -120,11 +143,6 @@ LocalVolume::Item::Item(LocalVolume& vol, fs::path p)
     }
 }
 
-using mac_string_view = std::basic_string_view<unsigned char>;
-mac_string_view PascalStringView(ConstStringPtr s)
-{
-    return mac_string_view(s+1, (size_t)s[0]);
-}
 
 LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     : Volume(vcb), root(root)
@@ -237,18 +255,22 @@ OSErr LocalVolume::PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
         std::cout << item.path() << std::endl;
         if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
         {
-            const std::string& str = item.path().filename().string();
-            uint8_t n = str.size() > 255 ? 255 : str.size();
-            memcpy(outputName+1, str.data(), n);
+            const mac_string name = item.name();
+            size_t n = std::min(name.size(), (size_t)255);
+            memcpy(outputName+1, name.data(), n);
             outputName[0] = n;
         }
-        pb->hFileInfo.ioFlAttrib = item.isDirectory() ? ATTRIB_ISADIR : 0;
-
+        
         if(item.isDirectory())
         {
+            pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
             pb->dirInfo.ioDrDirID = CL(item.dirID());
             pb->dirInfo.ioDrParID = CL(item.parID());
 
+        }
+        else
+        {
+             pb->hFileInfo.ioFlAttrib = 0;
         }
 
         return noErr;
