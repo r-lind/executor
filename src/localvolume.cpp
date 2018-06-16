@@ -8,6 +8,7 @@
 #include <boost/filesystem.hpp>
 #include <map>
 #include <iostream>
+#include <boost/filesystem/fstream.hpp>
 
 using namespace Executor;
 namespace fs = boost::filesystem;
@@ -23,10 +24,19 @@ public:
 using mac_string_view = std::basic_string_view<unsigned char>;
 mac_string_view PascalStringView(ConstStringPtr s)
 {
-    return mac_string_view(s+1, (size_t)s[0]);
+    if(s)
+        return mac_string_view(s+1, (size_t)s[0]);
+    else
+        return mac_string_view();
 }
 
 using mac_string = std::basic_string<unsigned char>;
+
+class OpenFile;
+class Item;
+class MetaDataHandler;
+
+using ItemPtr = std::unique_ptr<Item>;
 
 class LocalVolume : public Volume
 {
@@ -35,15 +45,16 @@ class LocalVolume : public Volume
     std::map<long, fs::path> idToPath;
     std::map<fs::path, long> pathToId;
 
-    class Item;
+    std::vector<std::unique_ptr<MetaDataHandler>> handlers;
 
+    ItemPtr resolve(short vRef, long dirID);
+    ItemPtr resolve(mac_string_view name, short vRef, long dirID);
+    ItemPtr resolve(short vRef, long dirID, short index);
+    ItemPtr resolve(mac_string_view name, short vRef, long dirID, short index);
+public:
     long lookupDirID(const fs::path& path);
 
-    Item resolve(short vRef, long dirID);
-    Item resolve(const unsigned char* name, short vRef, long dirID);
-    Item resolve(short vRef, long dirID, short index);
-    Item resolve(const unsigned char* name, short vRef, long dirID, short index);
-public:
+
     LocalVolume(VCB& vcb, fs::path root);
 
     virtual OSErr PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async) override;
@@ -97,7 +108,7 @@ public:
     virtual OSErr PBSetFVers(ParmBlkPtr pb, BOOLEAN async) override;
 };
 
-class LocalVolume::Item
+class Item
 {
     LocalVolume& volume_;
     fs::path path_;
@@ -118,7 +129,73 @@ public:
     const mac_string& name() const { return name_; }
 };
 
-LocalVolume::Item::Item(LocalVolume& vol, fs::path p)
+class MetaDataHandler
+{
+public:
+    virtual ~MetaDataHandler() = default;
+
+    virtual bool isHidden(const fs::directory_entry& e) { return false; }
+    virtual ItemPtr handleDirEntry(const fs::directory_entry& e) = 0;
+    virtual ItemPtr resolve(const fs::path& parent, mac_string_view mac_name) = 0;
+    virtual bool needsScan() { return false; }
+    virtual ItemPtr resolveWithDirEntry(const fs::directory_entry& e, mac_string_view mac_name) { return nullptr; }
+};
+
+class DirectoryHandler : public MetaDataHandler
+{
+    LocalVolume& volume;
+public:
+    DirectoryHandler(LocalVolume& vol) : volume(vol) {}
+    virtual ItemPtr handleDirEntry(const fs::directory_entry& e);
+    virtual ItemPtr resolve(const fs::path& parent, mac_string_view mac_name);
+};
+
+ItemPtr DirectoryHandler::handleDirEntry(const fs::directory_entry& e)
+{
+    if(fs::is_directory(e.path()))
+    {
+        return std::make_unique<Item>(volume, e.path());
+    }
+    return nullptr;
+}
+ItemPtr DirectoryHandler::resolve(const fs::path& parent, mac_string_view mac_name)
+{
+    std::string cname(mac_name.begin(), mac_name.end());
+    fs::path path = parent / cname;
+
+    if(fs::is_directory(path))
+    {
+        return std::make_unique<Item>(volume, path);
+    }
+    return nullptr;
+}
+
+
+class OpenFile
+{
+public:
+    virtual ~OpenFile();
+
+    virtual size_t getEOF() = 0;
+    virtual void setEOF(size_t sz) = 0;
+    virtual size_t read(size_t offset, void *p, size_t n) = 0;
+    virtual size_t write(size_t offset, void *p, size_t n) = 0;
+};
+
+class PlainDataFork : public OpenFile
+{
+    fs::fstream f;
+public:
+    PlainDataFork(fs::path path);
+    ~PlainDataFork();
+
+    virtual size_t getEOF() override;
+    virtual void setEOF(size_t sz) override;
+    virtual size_t read(size_t offset, void *p, size_t n) override;
+    virtual size_t write(size_t offset, void *p, size_t n) override;
+};
+
+Item::Item(LocalVolume& vol, fs::path p)
     : volume_(vol), path_(std::move(p))
 {
     const std::string& str = path_.filename().string();
@@ -149,6 +226,8 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
 {
     idToPath[2] = root;
     pathToId[root] = 2;
+
+    handlers.push_back(std::make_unique<DirectoryHandler>(*this));
 }
 
 long LocalVolume::lookupDirID(const fs::path& path)
@@ -163,14 +242,14 @@ long LocalVolume::lookupDirID(const fs::path& path)
         return it->second;
 }
 
-LocalVolume::Item LocalVolume::resolve(short vRef, long dirID)
+ItemPtr LocalVolume::resolve(short vRef, long dirID)
 {
     if(dirID)
     {
         auto it = idToPath.find(dirID);
         if(it == idToPath.end())
             throw OSErrorException(fnfErr);
-        return Item(*this, it->second); // TODO: don't throw away dirID
+        return std::make_unique<Item>(*this, it->second); // TODO: don't throw away dirID
     }
     else if(vRef == 0)
     {
@@ -187,31 +266,40 @@ LocalVolume::Item LocalVolume::resolve(short vRef, long dirID)
         return resolve(CW(vcb.vcbVRefNum), 2);
     }
 }
-LocalVolume::Item LocalVolume::resolve(const unsigned char* name, short vRef, long dirID)
+ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
 {
-    if(!name)
+    if(name.empty())
         return resolve(vRef, dirID);
     // TODO: handle pathnames (should probably be done outside of LocalVolume)
     //       handle encoding
     //       handle case insensitivity?
-    
+   /* 
     std::string cname(name + 1, name + 1 + name[0]);
-    return Item(*this, resolve(nullptr, vRef, dirID, 0).path() / cname);
-}
-LocalVolume::Item LocalVolume::resolve(short vRef, long dirID, short index)
-{
-    for(const auto& e : fs::directory_iterator(resolve(vRef, dirID)))
+    return Item(*this, resolve(nullptr, vRef, dirID, 0).path() / cname);*/
+
+    fs::path parent = resolve(vRef, dirID)->path();
+
+    for(auto& handler : handlers)
     {
-        if(!--index)
-            return Item(*this, e);
+        if(ItemPtr item = handler->resolve(parent, name))
+            return item;
     }
     throw OSErrorException(fnfErr);
 }
-LocalVolume::Item LocalVolume::resolve(const unsigned char* name, short vRef, long dirID, short index)
+ItemPtr LocalVolume::resolve(short vRef, long dirID, short index)
+{
+    for(const auto& e : fs::directory_iterator(resolve(vRef, dirID)->path()))
+    {
+        if(!--index)
+            return std::make_unique<Item>(*this, e);
+    }
+    throw OSErrorException(fnfErr);
+}
+ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID, short index)
 {
     if(index > 0)
         return resolve(vRef, dirID, index);
-    else if(index == 0 && name)
+    else if(index == 0 && !name.empty())
         return resolve(name, vRef, dirID);
     else
         return resolve(vRef, dirID);
@@ -249,23 +337,23 @@ OSErr LocalVolume::PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
         StringPtr inputName = MR(pb->hFileInfo.ioNamePtr);
         if(CW(pb->hFileInfo.ioFDirIndex) > 0)
             inputName = nullptr;
-        Item item = resolve(inputName, 
+        ItemPtr item = resolve(PascalStringView(inputName),
             CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID), CW(pb->hFileInfo.ioFDirIndex));
 
-        std::cout << item.path() << std::endl;
+        std::cout << item->path() << std::endl;
         if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
         {
-            const mac_string name = item.name();
+            const mac_string name = item->name();
             size_t n = std::min(name.size(), (size_t)255);
             memcpy(outputName+1, name.data(), n);
             outputName[0] = n;
         }
         
-        if(item.isDirectory())
+        if(item->isDirectory())
         {
             pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
-            pb->dirInfo.ioDrDirID = CL(item.dirID());
-            pb->dirInfo.ioDrParID = CL(item.parID());
+            pb->dirInfo.ioDrDirID = CL(item->dirID());
+            pb->dirInfo.ioDrParID = CL(item->parID());
 
         }
         else
@@ -311,9 +399,9 @@ OSErr LocalVolume::PBDelete(ParmBlkPtr pb, BOOLEAN async)
 }
 OSErr LocalVolume::PBOpenWD(WDPBPtr pb, BOOLEAN async)
 {
-    Item item = resolve(MR(pb->ioNamePtr), CW(pb->ioVRefNum), CL(pb->ioWDDirID));
-    std::cout << "PBOpenWD: " << item.path() << std::endl;
-    return ROMlib_mkwd(pb, &vcb, item.dirID(), Cx(pb->ioWDProcID));
+    ItemPtr item = resolve(MR(pb->ioNamePtr), CW(pb->ioVRefNum), CL(pb->ioWDDirID));
+    std::cout << "PBOpenWD: " << item->path() << std::endl;
+    return ROMlib_mkwd(pb, &vcb, item->dirID(), Cx(pb->ioWDProcID));
 }
 OSErr LocalVolume::PBGetFInfo(ParmBlkPtr pb, BOOLEAN async)
 {
