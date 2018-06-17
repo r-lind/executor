@@ -174,7 +174,7 @@ REGISTER_TRAP2(HandAndHand, 0xA9E4, D0(A0,A1), MoveA1ToA0, SaveA1D1D2, CCFromD0)
 extern OSErr PtrAndHand(Ptr p, Handle h, LONGINT s1);
 REGISTER_TRAP2(PtrAndHand, 0xA9EF, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD0);
 
-extern LONGINT ROMlib_RelString(unsigned char *s1, unsigned char *s2,
+extern LONGINT ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
                                 BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0);
 extern INTEGER RelString(StringPtr s1, StringPtr s2,
                                  BOOLEAN casesig, BOOLEAN diacsig);

@@ -5,13 +5,16 @@
 #include <MemoryMgr.h>
 #include <rsys/file.h>
 #include <rsys/hfs.h>
-#include <boost/filesystem.hpp>
 #include <map>
 #include <iostream>
-#include <boost/filesystem/fstream.hpp>
+
+#include "macstrings.h"
+#include "item.h"
 
 using namespace Executor;
-namespace fs = boost::filesystem;
+
+namespace Executor
+{
 
 class OSErrorException : public std::runtime_error
 {
@@ -21,22 +24,9 @@ public:
     OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
 };
 
-using mac_string_view = std::basic_string_view<unsigned char>;
-mac_string_view PascalStringView(ConstStringPtr s)
-{
-    if(s)
-        return mac_string_view(s+1, (size_t)s[0]);
-    else
-        return mac_string_view();
-}
-
-using mac_string = std::basic_string<unsigned char>;
-
 class OpenFile;
-class Item;
 class MetaDataHandler;
 
-using ItemPtr = std::unique_ptr<Item>;
 
 class LocalVolume : public Volume
 {
@@ -108,27 +98,6 @@ public:
     virtual OSErr PBSetFVers(ParmBlkPtr pb, BOOLEAN async) override;
 };
 
-class Item
-{
-    LocalVolume& volume_;
-    fs::path path_;
-    mac_string name_;
-    bool isDir_;
-    long dirID_;
-    long parID_;
-public:
-    Item(LocalVolume& vol, fs::path p);
-
-    operator const fs::path& () const { return path_; }
-
-    const fs::path& path() const { return path_; }
-
-    long dirID() const { return dirID_; }
-    long parID() const { return parID_; }
-    bool isDirectory() const { return isDir_; }
-    const mac_string& name() const { return name_; }
-};
-
 class MetaDataHandler
 {
 public:
@@ -148,27 +117,9 @@ public:
     DirectoryHandler(LocalVolume& vol) : volume(vol) {}
     virtual ItemPtr handleDirEntry(const fs::directory_entry& e);
     virtual ItemPtr resolve(const fs::path& parent, mac_string_view mac_name);
+    virtual ItemPtr resolveWithDirEntry(const fs::directory_entry& e, mac_string_view mac_name);
 };
 
-ItemPtr DirectoryHandler::handleDirEntry(const fs::directory_entry& e)
-{
-    if(fs::is_directory(e.path()))
-    {
-        return std::make_unique<Item>(volume, e.path());
-    }
-    return nullptr;
-}
-ItemPtr DirectoryHandler::resolve(const fs::path& parent, mac_string_view mac_name)
-{
-    std::string cname(mac_name.begin(), mac_name.end());
-    fs::path path = parent / cname;
-
-    if(fs::is_directory(path))
-    {
-        return std::make_unique<Item>(volume, path);
-    }
-    return nullptr;
-}
 
 
 class OpenFile
@@ -195,14 +146,42 @@ public:
     virtual size_t write(size_t offset, void *p, size_t n) override;
 };
 
+} /* namespace Executor */
+
+ItemPtr DirectoryHandler::handleDirEntry(const fs::directory_entry& e)
+{
+    if(fs::is_directory(e.path()))
+    {
+        return std::make_unique<Item>(volume, e.path());
+    }
+    return nullptr;
+}
+ItemPtr DirectoryHandler::resolve(const fs::path& parent, mac_string_view mac_name)
+{
+    fs::path path = parent / toUnicodeFilename(mac_name);
+
+    if(fs::is_directory(path))
+    {
+        return std::make_unique<Item>(volume, path);
+    }
+    return nullptr;
+}
+ItemPtr DirectoryHandler::resolveWithDirEntry(const fs::directory_entry& e, mac_string_view mac_name)
+{
+    const fs::path& path = e.path();
+
+    if(fs::is_directory(path) && matchesMacRomanFilename(path.filename(), mac_name))
+    {
+        return std::make_unique<Item>(volume, path);
+    }
+    return nullptr;
+}
+
+
 Item::Item(LocalVolume& vol, fs::path p)
     : volume_(vol), path_(std::move(p))
 {
-    const std::string& str = path_.filename().string();
-    if(str.size() > 31)
-        name_ = mac_string(str.begin(), str.begin() + 31);
-    else
-        name_ = mac_string(str.begin(), str.end());
+    name_ = toMacRomanFilename(path_.filename());
 
     if(fs::is_directory(path_))
     {
@@ -284,6 +263,16 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
         if(ItemPtr item = handler->resolve(parent, name))
             return item;
     }
+
+    for(const auto& e : fs::directory_iterator(parent))
+    {
+        for(auto& handler : handlers)
+        {
+            if(ItemPtr item = handler->resolveWithDirEntry(e, name))
+                return item;
+        }
+    }
+
     throw OSErrorException(fnfErr);
 }
 ItemPtr LocalVolume::resolve(short vRef, long dirID, short index)

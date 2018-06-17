@@ -206,11 +206,11 @@ static unsigned char order[256] = {
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
 };
 
-LONGINT Executor::ROMlib_RelString(unsigned char *s1, unsigned char *s2,
+LONGINT Executor::ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
                                    BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0)
 {
     INTEGER n1, n2;
-    unsigned char *s, *t;
+    const unsigned char *s, *t;
     unsigned char c1, c2;
 
     s = s1;

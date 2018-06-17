@@ -123,7 +123,11 @@ source_group(Dialogs FILES ${dial_sources})
 
 set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileInfo.cpp
     fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp fileUnimplemented.cpp
-    localvolume.cpp volume.cpp)
+    volume.cpp
+    
+    localvolume/localvolume.cpp 
+    localvolume/macstrings.cpp
+    )
 source_group(Files FILES ${file_sources})
 
 set(hfs_sources hfsBtree.cpp hfsChanging.cpp hfsCreate.cpp hfsFile.cpp hfsHelper.cpp
