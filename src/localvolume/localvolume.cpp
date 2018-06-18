@@ -16,7 +16,6 @@ ItemPtr DirectoryHandler::handleDirEntry(const DirectoryItem& parent, const fs::
 {
     if(fs::is_directory(e.path()))
     {
-        //return std::make_shared<DirectoryItem>(volume, e.path());
         return volume.lookupDirectory(parent, e.path());
     }
     return nullptr;
@@ -141,11 +140,6 @@ std::shared_ptr<DirectoryItem> LocalVolume::resolve(short vRef, long dirID)
 {
     if(dirID)
     {
-        /*auto it = idToPath.find(dirID);
-        if(it == idToPath.end())
-            throw OSErrorException(fnfErr);
-        return std::make_shared<DirectoryItem>(*this, it->second); // TODO: don't throw away dirID*/
-
         auto it = directories_.find(dirID);
         if(it == directories_.end())
             throw OSErrorException(fnfErr);
@@ -176,48 +170,14 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
 
     std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
     return dir->resolve(name);
-#if 0
-    // TODO: handle pathnames (should probably be done outside of LocalVolume)
-    //       handle encoding
-    //       handle case insensitivity?
-   /* 
-    std::string cname(name + 1, name + 1 + name[0]);
-    return Item(*this, resolve(nullptr, vRef, dirID, 0).path() / cname);*/
-
-    fs::path parent = resolve(vRef, dirID)->path();
-
-    for(auto& handler : handlers)
-    {
-        if(ItemPtr item = handler->resolve(parent, name))
-            return item;
-    }
-
-    for(const auto& e : fs::directory_iterator(parent))
-    {
-        for(auto& handler : handlers)
-        {
-            if(ItemPtr item = handler->resolveWithDirEntry(e, name))
-                return item;
-        }
-    }
-
-    throw OSErrorException(fnfErr);
-#endif
 }
+
 ItemPtr LocalVolume::resolve(short vRef, long dirID, short index)
 {
     std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
     return dir->resolve(index);
-
-#if 0
-    for(const auto& e : fs::directory_iterator(resolve(vRef, dirID)->path()))
-    {
-        if(!--index)
-            return std::make_unique<Item>(*this, e);
-    }
-    throw OSErrorException(fnfErr);
-#endif
 }
+
 ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID, short index)
 {
     if(index > 0)
