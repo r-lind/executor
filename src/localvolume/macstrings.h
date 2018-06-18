@@ -26,4 +26,5 @@ mac_string toMacRomanFilename(const fs::path& s);
 
 bool matchesMacRomanFilename(const fs::path& s, mac_string_view sv);
 
+bool equalCaseInsensitive(mac_string_view s1, mac_string_view s2);
 }
