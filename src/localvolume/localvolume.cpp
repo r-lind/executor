@@ -21,6 +21,15 @@ ItemPtr DirectoryHandler::handleDirEntry(const DirectoryItem& parent, const fs::
     return nullptr;
 }
 
+ItemPtr ExtensionHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+{
+    if(fs::is_regular_file(e.path()))
+    {
+        return std::make_shared<FileItem>(parent, e.path());
+    }
+    return nullptr;
+}
+
 Item::Item(LocalVolume& vol, fs::path p)
     : volume_(vol), path_(std::move(p))
 {
@@ -35,6 +44,35 @@ Item::Item(const DirectoryItem& parent, fs::path p)
     name_ = toMacRomanFilename(path_.filename());
 
     parID_ = parent.dirID();
+}
+
+std::unique_ptr<OpenFile> FileItem::open()
+{
+    return std::make_unique<PlainDataFork>(path_);
+}
+
+PlainDataFork::PlainDataFork(fs::path path)
+{
+}
+PlainDataFork::~PlainDataFork()
+{
+}
+
+size_t PlainDataFork::getEOF() override
+{
+    
+}
+void PlainDataFork::setEOF(size_t sz) override
+{
+    
+}
+size_t PlainDataFork::read(size_t offset, void *p, size_t n) override
+{
+    
+}
+size_t PlainDataFork::write(size_t offset, void *p, size_t n) override
+{
+    
 }
 
 
@@ -120,6 +158,7 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     directories_[2] = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
+    handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
 std::shared_ptr<DirectoryItem> LocalVolume::lookupDirectory(const DirectoryItem& parent, const fs::path& path)
@@ -239,9 +278,10 @@ OSErr LocalVolume::PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
             pb->dirInfo.ioDrParID = CL(dirItem->parID());
 
         }
-        else
+        else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
         {
              pb->hFileInfo.ioFlAttrib = 0;
+             pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
         }
 
         return noErr;

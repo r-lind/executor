@@ -6,6 +6,8 @@
 #include <chrono>
 #include <map>
 
+#include <rsys/macros.h>
+
 namespace Executor
 {
 class LocalVolume;
@@ -35,11 +37,6 @@ public:
 
 using ItemPtr = std::shared_ptr<Item>;
 
-class DirectoryCache
-{
-
-};
-
 class DirectoryItem : public Item
 {
     std::vector<ItemPtr>    contents_;
@@ -62,5 +59,21 @@ public:
     long dirID() const { return dirID_; }
 };
 
+class FileItem : public Item
+{
+public:
+    using Item::Item;
+
+    virtual FInfo getFInfo()
+    {
+        return FInfo {
+            TICKX("TEXT"),
+            TICKX("ttxt"),
+            CWC(0),  // fdFlags
+            { CWC(0), CWC(0) },   // fdLocation
+            CWC(0)   // fdFldr
+        };
+    }
+};
 
 }

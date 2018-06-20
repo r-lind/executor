@@ -118,6 +118,13 @@ public:
     virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
 };
 
+class ExtensionHandler : public MetaDataHandler
+{
+    LocalVolume& volume;
+public:
+    ExtensionHandler(LocalVolume& vol) : volume(vol) {}
+    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
+};
 
 
 class OpenFile
