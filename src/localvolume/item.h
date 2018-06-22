@@ -11,7 +11,7 @@
 namespace Executor
 {
 class LocalVolume;
-
+class OpenFile;
 
 class DirectoryItem;
 class Item
@@ -74,6 +74,8 @@ public:
             CWC(0)   // fdFldr
         };
     }
+
+    virtual std::unique_ptr<OpenFile> open();
 };
 
 }

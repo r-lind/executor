@@ -450,10 +450,6 @@ extern OSErr ROMlib_btpbindex(IOParam *pb, LONGINT dirid, HVCB **vcbpp,
 extern OSErr ROMlib_cleancache(HVCB *vcbp);
 extern OSErr ROMlib_flushcachevcbp(HVCB *vcbp);
 
-/* public entries in changing.c */
-
-extern INTEGER ROMlib_flnumtorefnum(ULONGINT flnum, VCB *vcbp);
-
 /* public entries in file.c */
 
 extern filecontrolblock *ROMlib_getfreefcbp(void);

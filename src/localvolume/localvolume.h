@@ -41,6 +41,12 @@ class LocalVolume : public Volume
     ItemPtr resolve(mac_string_view name, short vRef, long dirID);
     ItemPtr resolve(short vRef, long dirID, short index);
     ItemPtr resolve(mac_string_view name, short vRef, long dirID, short index);
+
+    struct FCBExtension;
+    std::vector<FCBExtension> fcbExtensions;
+
+    FCBExtension& getFCBX(short refNum);
+    FCBExtension& openFCBX();
 public:
     std::shared_ptr<DirectoryItem> lookupDirectory(const DirectoryItem& parent, const fs::path& path);
 
@@ -130,7 +136,7 @@ public:
 class OpenFile
 {
 public:
-    virtual ~OpenFile();
+    virtual ~OpenFile() = default;
 
     virtual size_t getEOF() = 0;
     virtual void setEOF(size_t sz) = 0;
@@ -140,7 +146,7 @@ public:
 
 class PlainDataFork : public OpenFile
 {
-    fs::fstream f;
+    fs::fstream stream;
 public:
     PlainDataFork(fs::path path);
     ~PlainDataFork();

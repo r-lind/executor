@@ -94,7 +94,8 @@ extern bool cd_mounted_by_trickery_p;
  * This struct is confusing.
  * Some of it is big-endian guest data,
  * some of it is native host data.
- * Not entirely sure yet which is which.
+ * And it is an almost-duplicate of filecontrolblock in hfs.h.
+ * This version describes the version of the struct used by the "ufs" code.
  */
 typedef struct
 {

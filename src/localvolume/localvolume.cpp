@@ -52,27 +52,32 @@ std::unique_ptr<OpenFile> FileItem::open()
 }
 
 PlainDataFork::PlainDataFork(fs::path path)
+    : stream(path)
 {
 }
 PlainDataFork::~PlainDataFork()
 {
 }
 
-size_t PlainDataFork::getEOF() override
+size_t PlainDataFork::getEOF()
+{
+    stream.seekg(0, std::ios::end);
+    return stream.tellg();
+}
+void PlainDataFork::setEOF(size_t sz)
 {
     
 }
-void PlainDataFork::setEOF(size_t sz) override
+size_t PlainDataFork::read(size_t offset, void *p, size_t n)
 {
-    
+    stream.seekg(offset);
+    stream.read((char*)p, n);
+    stream.clear(); // ?
+    return stream.gcount();
 }
-size_t PlainDataFork::read(size_t offset, void *p, size_t n) override
+size_t PlainDataFork::write(size_t offset, void *p, size_t n)
 {
-    
-}
-size_t PlainDataFork::write(size_t offset, void *p, size_t n) override
-{
-    
+    return 0;
 }
 
 
@@ -244,14 +249,146 @@ OSErr LocalVolume::PBHDelete(HParmBlkPtr pb, BOOLEAN async)
 {
     return paramErr;
 }
+
+struct LocalVolume::FCBExtension
+{
+    filecontrolblock *fcb;
+    short refNum;
+    std::unique_ptr<OpenFile> access;
+
+    FCBExtension() = default;
+    FCBExtension(filecontrolblock *fcb, short refNum)
+        : fcb(fcb), refNum(refNum)
+    {}
+};
+
+LocalVolume::FCBExtension& LocalVolume::getFCBX(short refNum)
+{
+    if(refNum < 0 || refNum >= fcbExtensions.size())
+        throw OSErrorException(paramErr);
+    return fcbExtensions[refNum];
+}
+
+LocalVolume::FCBExtension& LocalVolume::openFCBX()
+{
+    filecontrolblock* fcb = ROMlib_getfreefcbp();
+    short refNum = (char *)fcb - (char *)MR(LM(FCBSPtr));
+
+    memset(fcb, 0, sizeof(*fcb));
+    fcb->fcbVPtr = RM(&vcb);
+
+    if(fcbExtensions.size() < refNum + 1)
+        fcbExtensions.resize(refNum+1);
+    fcbExtensions[refNum] = FCBExtension(fcb, refNum);
+
+    return fcbExtensions[refNum];
+}
+
+
 OSErr LocalVolume::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
 {
-    return paramErr;
+    try
+    {  
+        ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID));
+        if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+        {
+            FCBExtension& fcbx = openFCBX();
+            fcbx.access = fileItem->open();
+            fcbx.fcb->fcbFlNum = CL(42);
+            pb->ioParam.ioRefNum = CW(fcbx.refNum);
+            return noErr;
+        }
+        else
+            return paramErr;    // TODO: what's the correct error?
+    }
+    catch(const OSErrorException& err)
+    {
+        return err.code;
+    }
 }
 OSErr LocalVolume::PBHOpenRF(HParmBlkPtr pb, BOOLEAN async)
 {
     return paramErr;
 }
+OSErr LocalVolume::PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async)
+{
+    try
+    {
+        StringPtr inputName = MR(pb->fileParam.ioNamePtr);
+        if(CW(pb->fileParam.ioFDirIndex) > 0)
+            inputName = nullptr;
+        
+            // negative index means what?
+        ItemPtr item = resolve(PascalStringView(inputName),
+            CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID), CW(pb->fileParam.ioFDirIndex));
+
+        std::cout << item->path() << std::endl;
+        if(StringPtr outputName = MR(pb->fileParam.ioNamePtr))
+        {
+            const mac_string name = item->name();
+            size_t n = std::min(name.size(), (size_t)255);
+            memcpy(outputName+1, name.data(), n);
+            outputName[0] = n;
+        }
+        
+        if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+        {
+             pb->fileParam.ioFlAttrib = 0;
+             pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
+            return noErr;
+        }
+        else
+            return paramErr;
+    }
+    catch(const OSErrorException& err)
+    {
+        return err.code;
+    }
+}
+OSErr LocalVolume::PBGetFInfo(ParmBlkPtr pb, BOOLEAN async)
+{
+try
+    {
+        StringPtr inputName = MR(pb->fileParam.ioNamePtr);
+        if(CW(pb->fileParam.ioFDirIndex) > 0)
+            inputName = nullptr;
+        
+            // negative index means what?
+        ItemPtr item = resolve(PascalStringView(inputName),
+            CW(pb->fileParam.ioVRefNum), 0, CW(pb->fileParam.ioFDirIndex));
+
+        std::cout << item->path() << std::endl;
+        if(StringPtr outputName = MR(pb->fileParam.ioNamePtr))
+        {
+            const mac_string name = item->name();
+            size_t n = std::min(name.size(), (size_t)255);
+            memcpy(outputName+1, name.data(), n);
+            outputName[0] = n;
+        }
+        
+        if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+        {
+             pb->fileParam.ioFlAttrib = 0;
+             pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
+            return noErr;
+        }
+        else
+            return paramErr;
+    }
+    catch(const OSErrorException& err)
+    {
+        return err.code;
+    }    return paramErr;
+}
+OSErr LocalVolume::PBSetFInfo(ParmBlkPtr pb, BOOLEAN async)
+{
+    return paramErr;
+}
+OSErr LocalVolume::PBHSetFInfo(HParmBlkPtr pb, BOOLEAN async)
+{
+    return paramErr;
+}
+
 OSErr LocalVolume::PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
 {
     try
@@ -299,14 +436,27 @@ OSErr LocalVolume::PBCatMove(CMovePBPtr pb, BOOLEAN async)
 {
     return paramErr;
 }
-OSErr LocalVolume::PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async)
-{
-    std::cout << "hgetFInfo\n" << std::endl;
-    return paramErr;
-}
+
 OSErr LocalVolume::PBOpen(ParmBlkPtr pb, BOOLEAN async)
 {
-    return paramErr;
+    try
+    {  
+        ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
+        if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+        {
+            FCBExtension& fcbx = openFCBX();
+            fcbx.access = fileItem->open();
+            fcbx.fcb->fcbFlNum = CL(42);
+            pb->ioParam.ioRefNum = CW(fcbx.refNum);
+            return noErr;
+        }
+        else
+            return paramErr;    // TODO: what's the correct error?
+    }
+    catch(const OSErrorException& err)
+    {
+        return err.code;
+    }
 }
 OSErr LocalVolume::PBOpenRF(ParmBlkPtr pb, BOOLEAN async)
 {
@@ -332,19 +482,6 @@ OSErr LocalVolume::PBOpenWD(WDPBPtr pb, BOOLEAN async)
         dirID = item->parID();
 
     return ROMlib_mkwd(pb, &vcb, dirID, Cx(pb->ioWDProcID));
-}
-OSErr LocalVolume::PBGetFInfo(ParmBlkPtr pb, BOOLEAN async)
-{
-        std::cout << "PBGetFInfo: " << std::endl;
-    return paramErr;
-}
-OSErr LocalVolume::PBSetFInfo(ParmBlkPtr pb, BOOLEAN async)
-{
-    return paramErr;
-}
-OSErr LocalVolume::PBHSetFInfo(HParmBlkPtr pb, BOOLEAN async)
-{
-    return paramErr;
 }
 OSErr LocalVolume::PBSetFLock(ParmBlkPtr pb, BOOLEAN async)
 {
@@ -392,7 +529,11 @@ OSErr LocalVolume::PBOffLine(ParmBlkPtr pb)
 }
 OSErr LocalVolume::PBRead(ParmBlkPtr pb, BOOLEAN async)
 {
-    return paramErr;
+    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    size_t n = fcbx.access->read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+    pb->ioParam.ioActCount = CL(n);
+    fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + n );
+    return noErr;
 }
 OSErr LocalVolume::PBWrite(ParmBlkPtr pb, BOOLEAN async)
 {
@@ -432,7 +573,11 @@ OSErr LocalVolume::PBSetFPos(ParmBlkPtr pb, BOOLEAN async)
 }
 OSErr LocalVolume::PBGetEOF(ParmBlkPtr pb, BOOLEAN async)
 {
-    return paramErr;
+    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    size_t n = fcbx.access->getEOF();
+    //read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+    pb->ioParam.ioMisc = CL(n);
+    return noErr;
 }
 OSErr LocalVolume::PBFlushFile(ParmBlkPtr pb, BOOLEAN async)
 {

@@ -7,7 +7,23 @@
 namespace Executor
 {
 
-using mac_string_view = std::basic_string_view<unsigned char>;
+//using mac_string_view = std::basic_string_view<unsigned char>;
+
+struct mac_string_view : std::basic_string_view<unsigned char>
+{
+    mac_string_view() = default;
+    mac_string_view(const unsigned char* pascalString)
+    {
+        if(pascalString)
+            *this = mac_string_view(pascalString + 1, pascalString[0]);
+    }
+
+    mac_string_view(const unsigned char* p, size_t n)
+        : basic_string_view(p,n)
+    {
+    }
+};
+
 inline mac_string_view PascalStringView(const unsigned char *s)
 {
     if(s)
