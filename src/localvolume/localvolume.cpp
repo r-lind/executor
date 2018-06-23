@@ -25,10 +25,34 @@ ItemPtr ExtensionHandler::handleDirEntry(const DirectoryItem& parent, const fs::
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<FileItem>(parent, e.path());
+        return std::make_shared<PlainFileItem>(parent, e.path());
     }
     return nullptr;
 }
+
+bool BasiliskHandler::isHidden(const fs::directory_entry& e)
+{
+    if(e.path().filename().string() == ".rsrc")
+        return true;
+    else if(e.path().filename().string() == ".finf")
+        return true;
+    return false;
+}
+
+
+ItemPtr BasiliskHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+{
+    if(fs::is_regular_file(e.path()))
+    {
+        fs::path rsrc = e.path().parent_path() / ".rsrc" / e.path().filename();
+        fs::path finf = e.path().parent_path() / ".finf" / e.path().filename();
+        
+        if(fs::is_regular_file(rsrc) || fs::is_regular_file(finf))
+            return std::make_shared<BasiliskFileItem>(parent, e.path());
+    }
+    return nullptr;
+}
+
 
 Item::Item(LocalVolume& vol, fs::path p)
     : volume_(vol), path_(std::move(p))
@@ -46,9 +70,13 @@ Item::Item(const DirectoryItem& parent, fs::path p)
     parID_ = parent.dirID();
 }
 
-std::unique_ptr<OpenFile> FileItem::open()
+std::unique_ptr<OpenFile> PlainFileItem::open()
 {
     return std::make_unique<PlainDataFork>(path_);
+}
+std::unique_ptr<OpenFile> PlainFileItem::openRF()
+{
+    return std::make_unique<EmptyFork>();
 }
 
 PlainDataFork::PlainDataFork(fs::path path)
@@ -78,6 +106,26 @@ size_t PlainDataFork::read(size_t offset, void *p, size_t n)
 size_t PlainDataFork::write(size_t offset, void *p, size_t n)
 {
     return 0;
+}
+
+FInfo BasiliskFileItem::getFInfo()
+{
+    fs::path finf = path().parent_path() / ".finf" / path().filename();
+
+    fs::ifstream in(finf);
+    FInfo info = {0};
+    in.read((char*)&info, sizeof(info));
+
+    return info;
+}
+std::unique_ptr<OpenFile> BasiliskFileItem::open()
+{
+    return std::make_unique<PlainDataFork>(path_);
+}
+std::unique_ptr<OpenFile> BasiliskFileItem::openRF()
+{
+    fs::path rsrc = path().parent_path() / ".rsrc" / path().filename();
+    return std::make_unique<PlainDataFork>(rsrc);
 }
 
 
@@ -114,6 +162,18 @@ void DirectoryItem::updateCache()
     
     for(const auto& e : fs::directory_iterator(path_))
     {
+        bool hidden = false;
+        for(auto& handler : volume_.handlers)
+        {
+            if(handler->isHidden(e))
+            {
+                hidden = true;
+                break;
+            }
+        }
+        if(hidden)
+            continue;
+
         for(auto& handler : volume_.handlers)
         {
             if(ItemPtr item = handler->handleDirEntry(*this, e))
@@ -163,6 +223,7 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     directories_[2] = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
+    handlers.push_back(std::make_unique<BasiliskHandler>(*this));
     handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
@@ -300,8 +361,46 @@ void LocalVolume::PBHOpen(HParmBlkPtr pb)
 }
 void LocalVolume::PBHOpenRF(HParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID));
+    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+    {
+        FCBExtension& fcbx = openFCBX();
+        fcbx.access = fileItem->openRF();
+        fcbx.fcb->fcbFlNum = CL(42);
+        pb->ioParam.ioRefNum = CW(fcbx.refNum);
+    }
+    else
+        throw OSErrorException(paramErr);    // TODO: what's the correct error?
 }
+
+void LocalVolume::PBOpenDF(ParmBlkPtr pb)
+{
+    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
+    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+    {
+        FCBExtension& fcbx = openFCBX();
+        fcbx.access = fileItem->open();
+        fcbx.fcb->fcbFlNum = CL(42);
+        pb->ioParam.ioRefNum = CW(fcbx.refNum);
+    }
+    else
+        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+}
+void LocalVolume::PBOpenRF(ParmBlkPtr pb)
+{
+    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
+    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+    {
+        FCBExtension& fcbx = openFCBX();
+        fcbx.access = fileItem->openRF();
+        fcbx.fcb->fcbFlNum = CL(42);
+        pb->ioParam.ioRefNum = CW(fcbx.refNum);
+    }
+    else
+        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+}
+
+
 void LocalVolume::PBHGetFInfo(HParmBlkPtr pb)
 {
     StringPtr inputName = MR(pb->fileParam.ioNamePtr);
@@ -404,23 +503,6 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
     throw OSErrorException(paramErr);
 }
 
-void LocalVolume::PBOpenDF(ParmBlkPtr pb)
-{
-    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        FCBExtension& fcbx = openFCBX();
-        fcbx.access = fileItem->open();
-        fcbx.fcb->fcbFlNum = CL(42);
-        pb->ioParam.ioRefNum = CW(fcbx.refNum);
-    }
-    else
-        throw OSErrorException(paramErr);    // TODO: what's the correct error?
-}
-void LocalVolume::PBOpenRF(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 void LocalVolume::PBCreate(ParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);

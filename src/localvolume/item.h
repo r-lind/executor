@@ -59,10 +59,21 @@ public:
     long dirID() const { return dirID_; }
 };
 
+
 class FileItem : public Item
 {
 public:
     using Item::Item;
+
+    virtual FInfo getFInfo() = 0;
+    virtual std::unique_ptr<OpenFile> open() = 0;
+    virtual std::unique_ptr<OpenFile> openRF() = 0;
+};
+
+class PlainFileItem : public FileItem
+{
+public:
+    using FileItem::FileItem;
 
     virtual FInfo getFInfo()
     {
@@ -76,6 +87,18 @@ public:
     }
 
     virtual std::unique_ptr<OpenFile> open();
+    virtual std::unique_ptr<OpenFile> openRF();
 };
+
+class BasiliskFileItem : public FileItem
+{
+public:
+    using FileItem::FileItem;
+
+    virtual FInfo getFInfo();
+    virtual std::unique_ptr<OpenFile> open();
+    virtual std::unique_ptr<OpenFile> openRF();
+};
+
 
 }

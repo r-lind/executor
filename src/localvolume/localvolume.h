@@ -125,6 +125,15 @@ public:
     virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
 };
 
+class BasiliskHandler : public MetaDataHandler
+{
+    LocalVolume& volume;
+public:
+    BasiliskHandler(LocalVolume& vol) : volume(vol) {}
+    virtual bool isHidden(const fs::directory_entry& e);
+    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
+};
+
 
 class OpenFile
 {
@@ -153,9 +162,6 @@ public:
 class EmptyFork : public OpenFile
 {
 public:
-    EmptyFork();
-    ~EmptyFork();
-
     virtual size_t getEOF() override { return 0; }
     virtual size_t read(size_t offset, void *p, size_t n) override { return 0; }
 };
