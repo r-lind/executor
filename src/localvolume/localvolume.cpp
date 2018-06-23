@@ -532,27 +532,46 @@ void LocalVolume::PBGetFPos(ParmBlkPtr pb)
     pb->ioParam.ioPosMode = CW(0);
     pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs;
 }
+
 void LocalVolume::PBSetFPos(ParmBlkPtr pb)
 {
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    size_t eof = fcbx.access->getEOF();
+    size_t newPos = CL(fcbx.fcb->fcbCrPs);
+    
     switch(CW(pb->ioParam.ioPosMode))
     {
         case fsAtMark:
             break;
         case fsFromStart:
-            fcbx.fcb->fcbCrPs = pb->ioParam.ioPosOffset;
+            newPos = CL(pb->ioParam.ioPosOffset);
             break;
         case fsFromLEOF:
-            fcbx.fcb->fcbCrPs = CL(fcbx.access->getEOF() + CL(pb->ioParam.ioPosOffset));
+            newPos = eof + CL(pb->ioParam.ioPosOffset);
             break;
         case fsFromMark:
-            fcbx.fcb->fcbCrPs = CL(CL(fcbx.fcb->fcbCrPs) + CL(pb->ioParam.ioPosOffset));
+            newPos = CL(fcbx.fcb->fcbCrPs) + CL(pb->ioParam.ioPosOffset);
             break;
     }
-    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs;
 
-    // TODO: clamp position to range, report eofErr, posErr
-    // TODO: is ioPosOffset filled on error?
+    OSErr err = noErr;
+    if(newPos > eof)
+    {
+        newPos = eor;
+        err = eofErr;
+    }
+    
+    if(newPos < 0)
+    {
+        newPos = CL(fcbx.fcb->fcbCrPs);     // MacOS 9 behavior.
+                                            // System 6 actually sets fcbCrPs to a negative value.
+        err = posErr;
+    }
+
+    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = CL(newPos);
+
+    if(err)
+        throw OSErrorException(err);
 }
 void LocalVolume::PBGetEOF(ParmBlkPtr pb)
 {
