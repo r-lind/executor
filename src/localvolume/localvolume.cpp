@@ -529,6 +529,7 @@ OSErr LocalVolume::PBOffLine(ParmBlkPtr pb)
 }
 OSErr LocalVolume::PBRead(ParmBlkPtr pb, BOOLEAN async)
 {
+    PBSetFPos(pb, false);
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
     size_t n = fcbx.access->read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
     pb->ioParam.ioActCount = CL(n);
@@ -565,17 +566,40 @@ OSErr LocalVolume::PBUnlockRange(ParmBlkPtr pb, BOOLEAN async)
 }
 OSErr LocalVolume::PBGetFPos(ParmBlkPtr pb, BOOLEAN async)
 {
-    return paramErr;
+    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    pb->ioReqCount = CL(0);
+    pb->ioActCount = CL(0);
+    pb->ioPosMode = CW(0);
+    pb->ioPosOffset = fcbx.fcb->fcbCrPs;
+    return noErr;
 }
 OSErr LocalVolume::PBSetFPos(ParmBlkPtr pb, BOOLEAN async)
 {
-    return paramErr;
+    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    switch(CW(pb->ioPosMode))
+    {
+        case fsAtMark:
+            break;
+        case fsFromStart:
+            fcbx.fcb->fcbCrPs = pb->ioPosOffset;
+            break;
+        case fsFromLEOF:
+            fcbx.fcb->fcbCrPs = CL(fcbx.access->getEOF() + CL(pb->ioPosOffset));
+            break;
+        case fsFromMark:
+            fcbx.fcb->fcbCrPs = CL(CL(fcbx.fcb->fcbCrPs) + CL(pb->ioPosOffset));
+            break;
+    }
+    pb->ioPosOffset = fcbx.fcb->fcbCrPs;
+
+    // TODO: clamp position to range, report eofErr, posErr
+    // TODO: is ioPosOffset filled on error?
+    return noErr;
 }
 OSErr LocalVolume::PBGetEOF(ParmBlkPtr pb, BOOLEAN async)
 {
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
     size_t n = fcbx.access->getEOF();
-    //read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
     pb->ioParam.ioMisc = CL(n);
     return noErr;
 }
