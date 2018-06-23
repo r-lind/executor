@@ -5,6 +5,14 @@
 
 namespace Executor
 {
+    class OSErrorException : public std::runtime_error
+    {
+    public:
+        OSErr code;
+
+        OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
+    };
+
     class Volume
     {
     protected:
@@ -13,51 +21,51 @@ namespace Executor
         Volume(VCB& vcb) : vcb(vcb) {}
         virtual ~Volume();
 
-        virtual OSErr PBGetVInfo(ParmBlkPtr pb, BOOLEAN async);
-        virtual OSErr PBHGetVInfo(HParmBlkPtr pb, BOOLEAN async);
+        virtual void PBGetVInfo(ParmBlkPtr pb);
+        virtual void PBHGetVInfo(HParmBlkPtr pb);
 
-        virtual OSErr PBHRename(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHCreate(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBDirCreate(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHDelete(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHOpen(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHOpenRF(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBSetCatInfo(CInfoPBPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBCatMove(CMovePBPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBOpen(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBOpenRF(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBCreate(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBDelete(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBOpenWD(WDPBPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBGetFInfo(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBSetFInfo(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHSetFInfo(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBSetFLock(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHSetFLock(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBRstFLock(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBHRstFLock(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBSetFVers(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBRename(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBSetVInfo(HParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBFlushVol(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBUnmountVol(ParmBlkPtr pb) = 0;
-        virtual OSErr PBEject(ParmBlkPtr pb) = 0;
-        virtual OSErr PBOffLine(ParmBlkPtr pb) = 0;
+        virtual void PBHRename(HParmBlkPtr pb) = 0;
+        virtual void PBHCreate(HParmBlkPtr pb) = 0;
+        virtual void PBDirCreate(HParmBlkPtr pb) = 0;
+        virtual void PBHDelete(HParmBlkPtr pb) = 0;
+        virtual void PBHOpen(HParmBlkPtr pb) = 0;
+        virtual void PBHOpenRF(HParmBlkPtr pb) = 0;
+        virtual void PBGetCatInfo(CInfoPBPtr pb) = 0;
+        virtual void PBSetCatInfo(CInfoPBPtr pb) = 0;
+        virtual void PBCatMove(CMovePBPtr pb) = 0;
+        virtual void PBHGetFInfo(HParmBlkPtr pb) = 0;
+        virtual void PBOpen(ParmBlkPtr pb) = 0;
+        virtual void PBOpenRF(ParmBlkPtr pb) = 0;
+        virtual void PBCreate(ParmBlkPtr pb) = 0;
+        virtual void PBDelete(ParmBlkPtr pb) = 0;
+        virtual void PBOpenWD(WDPBPtr pb) = 0;
+        virtual void PBGetFInfo(ParmBlkPtr pb) = 0;
+        virtual void PBSetFInfo(ParmBlkPtr pb) = 0;
+        virtual void PBHSetFInfo(HParmBlkPtr pb) = 0;
+        virtual void PBSetFLock(ParmBlkPtr pb) = 0;
+        virtual void PBHSetFLock(HParmBlkPtr pb) = 0;
+        virtual void PBRstFLock(ParmBlkPtr pb) = 0;
+        virtual void PBHRstFLock(HParmBlkPtr pb) = 0;
+        virtual void PBSetFVers(ParmBlkPtr pb) = 0;
+        virtual void PBRename(ParmBlkPtr pb) = 0;
+        virtual void PBSetVInfo(HParmBlkPtr pb) = 0;
+        virtual void PBFlushVol(ParmBlkPtr pb) = 0;
+        virtual void PBUnmountVol(ParmBlkPtr pb) = 0;
+        virtual void PBEject(ParmBlkPtr pb) = 0;
+        virtual void PBOffLine(ParmBlkPtr pb) = 0;
 
-        virtual OSErr PBRead(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBWrite(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBClose(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBAllocate(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBAllocContig(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBSetEOF(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBLockRange(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBUnlockRange(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBGetFPos(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBSetFPos(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBGetEOF(ParmBlkPtr pb, BOOLEAN async) = 0;
-        virtual OSErr PBFlushFile(ParmBlkPtr pb, BOOLEAN async) = 0;
+        virtual void PBRead(ParmBlkPtr pb) = 0;
+        virtual void PBWrite(ParmBlkPtr pb) = 0;
+        virtual void PBClose(ParmBlkPtr pb) = 0;
+        virtual void PBAllocate(ParmBlkPtr pb) = 0;
+        virtual void PBAllocContig(ParmBlkPtr pb) = 0;
+        virtual void PBSetEOF(ParmBlkPtr pb) = 0;
+        virtual void PBLockRange(ParmBlkPtr pb) = 0;
+        virtual void PBUnlockRange(ParmBlkPtr pb) = 0;
+        virtual void PBGetFPos(ParmBlkPtr pb) = 0;
+        virtual void PBSetFPos(ParmBlkPtr pb) = 0;
+        virtual void PBGetEOF(ParmBlkPtr pb) = 0;
+        virtual void PBFlushFile(ParmBlkPtr pb) = 0;
 
     };
 }

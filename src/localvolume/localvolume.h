@@ -16,13 +16,6 @@
 namespace Executor
 {
 
-class OSErrorException : public std::runtime_error
-{
-public:
-    OSErr code;
-
-    OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
-};
 
 class OpenFile;
 class MetaDataHandler;
@@ -56,55 +49,55 @@ public:
 
     LocalVolume(VCB& vcb, fs::path root);
 
-    virtual OSErr PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async) override;
-    virtual OSErr PBGetFInfo(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual void PBGetCatInfo(CInfoPBPtr pb) override;
+    virtual void PBGetFInfo(ParmBlkPtr pb) override;
+    virtual void PBHGetFInfo(HParmBlkPtr pb) override;
 
-    virtual OSErr PBSetCatInfo(CInfoPBPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetFInfo(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHSetFInfo(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetVInfo(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual void PBSetCatInfo(CInfoPBPtr pb) override;
+    virtual void PBSetFInfo(ParmBlkPtr pb) override;
+    virtual void PBHSetFInfo(HParmBlkPtr pb) override;
+    virtual void PBSetVInfo(HParmBlkPtr pb) override;
 
-    virtual OSErr PBDirCreate(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBCreate(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHCreate(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBDelete(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHDelete(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBRename(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHRename(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBCatMove(CMovePBPtr pb, BOOLEAN async) override;
+    virtual void PBDirCreate(HParmBlkPtr pb) override;
+    virtual void PBCreate(ParmBlkPtr pb) override;
+    virtual void PBHCreate(HParmBlkPtr pb) override;
+    virtual void PBDelete(ParmBlkPtr pb) override;
+    virtual void PBHDelete(HParmBlkPtr pb) override;
+    virtual void PBRename(ParmBlkPtr pb) override;
+    virtual void PBHRename(HParmBlkPtr pb) override;
+    virtual void PBCatMove(CMovePBPtr pb) override;
 
-    virtual OSErr PBOpenWD(WDPBPtr pb, BOOLEAN async) override;
-    virtual OSErr PBOpen(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBOpenRF(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHOpen(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHOpenRF(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual void PBOpenWD(WDPBPtr pb) override;
+    virtual void PBOpen(ParmBlkPtr pb) override;
+    virtual void PBOpenRF(ParmBlkPtr pb) override;
+    virtual void PBHOpen(HParmBlkPtr pb) override;
+    virtual void PBHOpenRF(HParmBlkPtr pb) override;
 
-    virtual OSErr PBSetFLock(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHSetFLock(HParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBRstFLock(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBHRstFLock(HParmBlkPtr pb, BOOLEAN async) override;
+    virtual void PBSetFLock(ParmBlkPtr pb) override;
+    virtual void PBHSetFLock(HParmBlkPtr pb) override;
+    virtual void PBRstFLock(ParmBlkPtr pb) override;
+    virtual void PBHRstFLock(HParmBlkPtr pb) override;
 
-    virtual OSErr PBClose(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBRead(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBWrite(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBGetFPos(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetFPos(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBGetEOF(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBFlushFile(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual void PBClose(ParmBlkPtr pb) override;
+    virtual void PBRead(ParmBlkPtr pb) override;
+    virtual void PBWrite(ParmBlkPtr pb) override;
+    virtual void PBGetFPos(ParmBlkPtr pb) override;
+    virtual void PBSetFPos(ParmBlkPtr pb) override;
+    virtual void PBGetEOF(ParmBlkPtr pb) override;
+    virtual void PBFlushFile(ParmBlkPtr pb) override;
 
-    virtual OSErr PBFlushVol(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBUnmountVol(ParmBlkPtr pb) override;
-    virtual OSErr PBEject(ParmBlkPtr pb) override;
-    virtual OSErr PBOffLine(ParmBlkPtr pb) override;
+    virtual void PBFlushVol(ParmBlkPtr pb) override;
+    virtual void PBUnmountVol(ParmBlkPtr pb) override;
+    virtual void PBEject(ParmBlkPtr pb) override;
+    virtual void PBOffLine(ParmBlkPtr pb) override;
 
-    virtual OSErr PBAllocate(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBAllocContig(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBSetEOF(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBLockRange(ParmBlkPtr pb, BOOLEAN async) override;
-    virtual OSErr PBUnlockRange(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual void PBAllocate(ParmBlkPtr pb) override;
+    virtual void PBAllocContig(ParmBlkPtr pb) override;
+    virtual void PBSetEOF(ParmBlkPtr pb) override;
+    virtual void PBLockRange(ParmBlkPtr pb) override;
+    virtual void PBUnlockRange(ParmBlkPtr pb) override;
 
-    virtual OSErr PBSetFVers(ParmBlkPtr pb, BOOLEAN async) override;
+    virtual void PBSetFVers(ParmBlkPtr pb) override;
 };
 
 class MetaDataHandler

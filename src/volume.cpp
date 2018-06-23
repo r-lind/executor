@@ -9,7 +9,7 @@ Volume::~Volume()
     
 }
 
-OSErr Volume::PBGetVInfo(ParmBlkPtr pb, BOOLEAN async)
+void Volume::PBGetVInfo(ParmBlkPtr pb)
 {
     if(pb->volumeParam.ioNamePtr)
         str255assign(MR(pb->volumeParam.ioNamePtr), vcb.vcbVN);
@@ -23,12 +23,10 @@ OSErr Volume::PBGetVInfo(ParmBlkPtr pb, BOOLEAN async)
     pb->volumeParam.ioAlBlSt = vcb.vcbAlBlSt;
     pb->volumeParam.ioVNxtFNum = vcb.vcbNxtCNID;
     pb->volumeParam.ioVFrBlk = vcb.vcbFreeBks;
-
-    return noErr;
 }
-OSErr Volume::PBHGetVInfo(HParmBlkPtr pb, BOOLEAN async)
+void Volume::PBHGetVInfo(HParmBlkPtr pb)
 {
-    PBGetVInfo(reinterpret_cast<ParmBlkPtr>(pb), false);
+    PBGetVInfo(reinterpret_cast<ParmBlkPtr>(pb));
 
     pb->volumeParam.ioVRefNum = vcb.vcbVRefNum;
     pb->volumeParam.ioVSigWord = vcb.vcbSigWord;
@@ -51,6 +49,4 @@ OSErr Volume::PBHGetVInfo(HParmBlkPtr pb, BOOLEAN async)
             pb->volumeParam.ioVFndrInfo[1] = wdp->dirid;
     }
 #endif
-
-    return noErr;
 }
