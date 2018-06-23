@@ -389,7 +389,7 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
             }
         }
         else
-            err = dInstErr;
+            err = fnfErr;
     }
 
     fs_err_hook(err);

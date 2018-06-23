@@ -34,7 +34,7 @@ namespace Executor
         virtual void PBSetCatInfo(CInfoPBPtr pb) = 0;
         virtual void PBCatMove(CMovePBPtr pb) = 0;
         virtual void PBHGetFInfo(HParmBlkPtr pb) = 0;
-        virtual void PBOpen(ParmBlkPtr pb) = 0;
+        virtual void PBOpenDF(ParmBlkPtr pb) = 0;
         virtual void PBOpenRF(ParmBlkPtr pb) = 0;
         virtual void PBCreate(ParmBlkPtr pb) = 0;
         virtual void PBDelete(ParmBlkPtr pb) = 0;

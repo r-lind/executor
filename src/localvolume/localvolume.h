@@ -68,7 +68,7 @@ public:
     virtual void PBCatMove(CMovePBPtr pb) override;
 
     virtual void PBOpenWD(WDPBPtr pb) override;
-    virtual void PBOpen(ParmBlkPtr pb) override;
+    virtual void PBOpenDF(ParmBlkPtr pb) override;
     virtual void PBOpenRF(ParmBlkPtr pb) override;
     virtual void PBHOpen(HParmBlkPtr pb) override;
     virtual void PBHOpenRF(HParmBlkPtr pb) override;
@@ -132,9 +132,9 @@ public:
     virtual ~OpenFile() = default;
 
     virtual size_t getEOF() = 0;
-    virtual void setEOF(size_t sz) = 0;
+    virtual void setEOF(size_t sz) { throw OSErrorException(wrPermErr); }
     virtual size_t read(size_t offset, void *p, size_t n) = 0;
-    virtual size_t write(size_t offset, void *p, size_t n) = 0;
+    virtual size_t write(size_t offset, void *p, size_t n) { throw OSErrorException(wrPermErr); }
 };
 
 class PlainDataFork : public OpenFile
@@ -149,5 +149,16 @@ public:
     virtual size_t read(size_t offset, void *p, size_t n) override;
     virtual size_t write(size_t offset, void *p, size_t n) override;
 };
+
+class EmptyFork : public OpenFile
+{
+public:
+    EmptyFork();
+    ~EmptyFork();
+
+    virtual size_t getEOF() override { return 0; }
+    virtual size_t read(size_t offset, void *p, size_t n) override { return 0; }
+};
+
 
 } /* namespace Executor */

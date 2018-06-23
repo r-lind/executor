@@ -436,11 +436,14 @@ OSErr Executor::PBClose(ParmBlkPtr pb, BOOLEAN async)
 
 OSErr Executor::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
 {
-    OSErr retval;
+    OSErr retval = fnfErr; // no driver found
 
     if(pb->ioParam.ioBuffer == 0 && pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
-       && MR(pb->ioParam.ioNamePtr)[1] == '.')  // FIXME: PBHOpen should work with dotfiles if no driver is found
+       && MR(pb->ioParam.ioNamePtr)[1] == '.')
         retval = ROMlib_driveropen((ParmBlkPtr)pb, async);
+    
+    if(retval != fnfErr)
+        ;
     else if(Volume *v = getVolume(pb))
         retval = handleExceptions(*v, &Volume::PBHOpen, pb);
     else if(hfsvol((IOParam *)pb))
@@ -653,13 +656,16 @@ OSErr Executor::PBSetEOF(ParmBlkPtr pb, BOOLEAN async)
 
 OSErr Executor::PBOpen(ParmBlkPtr pb, BOOLEAN async)
 {
-    OSErr retval;
+    OSErr retval = fnfErr; // no driver found
 
-    if(pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
-       && MR(pb->ioParam.ioNamePtr)[1] == '.') // FIXME: PBOpen should work with dotfiles if no driver is found
+    if(pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]    // fixme: PBHOpen also checks ioBuffer
+       && MR(pb->ioParam.ioNamePtr)[1] == '.')
         retval = ROMlib_driveropen(pb, async);
+
+    if(retval != fnfErr)
+        ;
     else if(Volume *v = getVolume(pb))
-        retval = handleExceptions(*v, &Volume::PBOpen, pb);
+        retval = handleExceptions(*v, &Volume::PBOpenDF, pb);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBOpen(pb, async);
     else
@@ -672,7 +678,7 @@ OSErr Executor::PBOpenDF(ParmBlkPtr pb, BOOLEAN async)
     OSErr retval;
 
     if(Volume *v = getVolume(pb))
-        retval = handleExceptions(*v, &Volume::PBOpen, pb);
+        retval = handleExceptions(*v, &Volume::PBOpenDF, pb);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBOpen(pb, async);
     else

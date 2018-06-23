@@ -323,8 +323,8 @@ void LocalVolume::PBHGetFInfo(HParmBlkPtr pb)
     
     if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
     {
-            pb->fileParam.ioFlAttrib = 0;
-            pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
+        pb->fileParam.ioFlAttrib = 0;
+        pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
     }
     else
         throw OSErrorException(paramErr);
@@ -391,8 +391,8 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
     }
     else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
     {
-            pb->hFileInfo.ioFlAttrib = 0;
-            pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
+        pb->hFileInfo.ioFlAttrib = 0;
+        pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
     }
 }
 void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
@@ -404,7 +404,7 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
     throw OSErrorException(paramErr);
 }
 
-void LocalVolume::PBOpen(ParmBlkPtr pb)
+void LocalVolume::PBOpenDF(ParmBlkPtr pb)
 {
     ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
     if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
@@ -557,7 +557,7 @@ void LocalVolume::PBSetFPos(ParmBlkPtr pb)
     OSErr err = noErr;
     if(newPos > eof)
     {
-        newPos = eor;
+        newPos = eof;
         err = eofErr;
     }
     
