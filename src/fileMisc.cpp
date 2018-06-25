@@ -486,8 +486,8 @@ StringPtr Executor::ROMlib_exefname;
 char *Executor::ROMlib_exeuname;
 
 std::string Executor::ROMlib_ConfigurationFolder;
-std::string Executor::ROMlib_SystemFolder;
-std::string Executor::ROMlib_DefaultFolder;
+static std::string ROMlib_SystemFolder;
+static std::string ROMlib_DefaultFolder;
 std::string Executor::ROMlib_PublicDirectoryMap;
 std::string Executor::ROMlib_PrivateDirectoryMap;
 static std::string ROMlib_MacVolumes;
