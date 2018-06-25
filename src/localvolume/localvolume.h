@@ -40,6 +40,9 @@ class LocalVolume : public Volume
 
     FCBExtension& getFCBX(short refNum);
     FCBExtension& openFCBX();
+
+    void createCommon(DirectoryItem& parent, mac_string_view name);
+    void setFInfoCommon(Item& item, ParmBlkPtr pb);
 public:
     std::shared_ptr<DirectoryItem> lookupDirectory(const DirectoryItem& parent, const fs::path& path);
 

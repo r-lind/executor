@@ -30,36 +30,13 @@ ItemPtr ExtensionHandler::handleDirEntry(const DirectoryItem& parent, const fs::
     return nullptr;
 }
 
-bool BasiliskHandler::isHidden(const fs::directory_entry& e)
-{
-    if(e.path().filename().string() == ".rsrc")
-        return true;
-    else if(e.path().filename().string() == ".finf")
-        return true;
-    return false;
-}
-
-
-ItemPtr BasiliskHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
-{
-    if(fs::is_regular_file(e.path()))
-    {
-        fs::path rsrc = e.path().parent_path() / ".rsrc" / e.path().filename();
-        fs::path finf = e.path().parent_path() / ".finf" / e.path().filename();
-        
-        if(fs::is_regular_file(rsrc) || fs::is_regular_file(finf))
-            return std::make_shared<BasiliskFileItem>(parent, e.path());
-    }
-    return nullptr;
-}
-
 
 Item::Item(LocalVolume& vol, fs::path p)
     : volume_(vol), path_(std::move(p))
 {
     name_ = toMacRomanFilename(path_.filename());
 
-    parID_ = 2;
+    parID_ = 1;
 }
 
 Item::Item(const DirectoryItem& parent, fs::path p)
@@ -78,54 +55,9 @@ std::unique_ptr<OpenFile> PlainFileItem::openRF()
 {
     return std::make_unique<EmptyFork>();
 }
-
-PlainDataFork::PlainDataFork(fs::path path)
-    : stream(path)
+void PlainFileItem::deleteFile()
 {
-}
-PlainDataFork::~PlainDataFork()
-{
-}
-
-size_t PlainDataFork::getEOF()
-{
-    stream.seekg(0, std::ios::end);
-    return stream.tellg();
-}
-void PlainDataFork::setEOF(size_t sz)
-{
-    
-}
-size_t PlainDataFork::read(size_t offset, void *p, size_t n)
-{
-    stream.seekg(offset);
-    stream.read((char*)p, n);
-    stream.clear(); // ?
-    return stream.gcount();
-}
-size_t PlainDataFork::write(size_t offset, void *p, size_t n)
-{
-    return 0;
-}
-
-FInfo BasiliskFileItem::getFInfo()
-{
-    fs::path finf = path().parent_path() / ".finf" / path().filename();
-
-    fs::ifstream in(finf);
-    FInfo info = {0};
-    in.read((char*)&info, sizeof(info));
-
-    return info;
-}
-std::unique_ptr<OpenFile> BasiliskFileItem::open()
-{
-    return std::make_unique<PlainDataFork>(path_);
-}
-std::unique_ptr<OpenFile> BasiliskFileItem::openRF()
-{
-    fs::path rsrc = path().parent_path() / ".rsrc" / path().filename();
-    return std::make_unique<PlainDataFork>(rsrc);
+    fs::remove(path());
 }
 
 
@@ -189,6 +121,7 @@ void DirectoryItem::updateCache()
                 {
                     std::cout << "duplicate name mapping: " << e.path() << std::endl; 
                 }
+                break;
             }
         }
     }
@@ -298,15 +231,7 @@ void LocalVolume::PBHRename(HParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);
 }
-void LocalVolume::PBHCreate(HParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 void LocalVolume::PBDirCreate(HParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBHDelete(HParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);
 }
@@ -411,7 +336,7 @@ void LocalVolume::PBHGetFInfo(HParmBlkPtr pb)
     ItemPtr item = resolve(PascalStringView(inputName),
         CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID), CW(pb->fileParam.ioFDirIndex));
 
-    std::cout << item->path() << std::endl;
+    std::cout << "HGetFInfo: " << item->path() << std::endl;
     if(StringPtr outputName = MR(pb->fileParam.ioNamePtr))
     {
         const mac_string name = item->name();
@@ -435,10 +360,10 @@ void LocalVolume::PBGetFInfo(ParmBlkPtr pb)
         inputName = nullptr;
     
         // negative index means what?
-    ItemPtr item = resolve(PascalStringView(inputName),
+    ItemPtr item = resolve(inputName,
         CW(pb->fileParam.ioVRefNum), 0, CW(pb->fileParam.ioFDirIndex));
 
-    std::cout << item->path() << std::endl;
+    std::cout << "GetFInfo: " << item->path() << std::endl;
     if(StringPtr outputName = MR(pb->fileParam.ioNamePtr))
     {
         const mac_string name = item->name();
@@ -449,19 +374,35 @@ void LocalVolume::PBGetFInfo(ParmBlkPtr pb)
     
     if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
     {
-            pb->fileParam.ioFlAttrib = 0;
-            pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
+        pb->fileParam.ioFlAttrib = 0;   // TODO
+        pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
+        pb->fileParam.ioFlCrDat = 0;    // TODO
+        pb->fileParam.ioFlMdDat = 0;    // TODO
     }
     else
         throw OSErrorException(paramErr);
 }
+
+void LocalVolume::setFInfoCommon(Item& item, ParmBlkPtr pb)
+{
+    if(FileItem *fitem = dynamic_cast<FileItem*>(&item))
+    {
+        fitem->setFInfo(pb->fileParam.ioFlFndrInfo);
+    }
+    else
+        throw OSErrorException(paramErr);   // TODO: item is a directory
+    
+    // pb->fileParam.ioFlCrDat      TODO
+    // pb->fileParam.ioFlMdDat      TODO
+}
 void LocalVolume::PBSetFInfo(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    setFInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0), pb);
 }
 void LocalVolume::PBHSetFInfo(HParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    setFInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)),
+        reinterpret_cast<ParmBlkPtr>(pb));
 }
 
 void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
@@ -472,7 +413,7 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
     ItemPtr item = resolve(PascalStringView(inputName),
         CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID), CW(pb->hFileInfo.ioFDirIndex));
 
-    std::cout << item->path() << std::endl;
+    std::cout << "GetCatInfo: " << item->path() << std::endl;
     if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
     {
         const mac_string name = item->name();
@@ -503,14 +444,67 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
     throw OSErrorException(paramErr);
 }
 
+void LocalVolume::createCommon(DirectoryItem& parent, mac_string_view name)
+{
+    try
+    {
+        parent.resolve(name);
+    }
+    catch(OSErrorException& e)
+    {
+        if(e.code == fnfErr)
+            ;
+        else if(e.code == noErr)
+            throw OSErrorException(dupFNErr);
+        else
+            throw;
+    }
+
+    // TODO: this is the responsible of the BasiliskHandler class
+    fs::create_directory(parent.path() / ".rsrc");
+    fs::create_directory(parent.path() / ".finf");
+    fs::path fn = toUnicodeFilename(name);
+
+    fs::ofstream(parent.path() / fn);
+    fs::ofstream(parent.path() / ".rsrc" / fn);
+    FInfo info = {0};
+    fs::ofstream(parent.path() / ".finf" / fn).write((char*)&info, sizeof(info));
+    parent.flushCache();
+}
 void LocalVolume::PBCreate(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    createCommon(*resolve(CW(pb->fileParam.ioVRefNum), 0), MR(pb->ioParam.ioNamePtr));
 }
+void LocalVolume::PBHCreate(HParmBlkPtr pb)
+{
+    createCommon(*resolve(CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)), MR(pb->ioParam.ioNamePtr));
+}
+
+
 void LocalVolume::PBDelete(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
+    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+    {
+        fileItem->deleteFile();
+        resolve(CW(pb->ioParam.ioVRefNum), 0)->flushCache();    // TODO: fileItem should know about parent
+    }
+    else
+        throw OSErrorException(paramErr);    // TODO: what's the correct error?
 }
+void LocalVolume::PBHDelete(HParmBlkPtr pb)
+{
+    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID));
+    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+    {
+        fileItem->deleteFile();
+        resolve(CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID))->flushCache();   // TODO: fileItem should know about parent
+    }
+    else
+        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+}
+
+
 void LocalVolume::PBOpenWD(WDPBPtr pb)
 {
     ItemPtr item = resolve(MR(pb->ioNamePtr), CW(pb->ioVRefNum), CL(pb->ioWDDirID));
@@ -580,21 +574,24 @@ void LocalVolume::PBRead(ParmBlkPtr pb)
 }
 void LocalVolume::PBWrite(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    PBSetFPos(pb);
+    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    size_t n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+    pb->ioParam.ioActCount = CL(n);
+    fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + n );
 }
 void LocalVolume::PBClose(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    fcbx.fcb->fcbFlNum = 0;
+    fcbx = FCBExtension();
 }
+
 void LocalVolume::PBAllocate(ParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);
 }
 void LocalVolume::PBAllocContig(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBSetEOF(ParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);
 }
@@ -618,8 +615,8 @@ void LocalVolume::PBGetFPos(ParmBlkPtr pb)
 void LocalVolume::PBSetFPos(ParmBlkPtr pb)
 {
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
-    size_t eof = fcbx.access->getEOF();
-    size_t newPos = CL(fcbx.fcb->fcbCrPs);
+    ssize_t eof = (ssize_t) fcbx.access->getEOF();
+    ssize_t newPos = CL(fcbx.fcb->fcbCrPs);
     
     switch(CW(pb->ioParam.ioPosMode))
     {
@@ -661,6 +658,13 @@ void LocalVolume::PBGetEOF(ParmBlkPtr pb)
     size_t n = fcbx.access->getEOF();
     pb->ioParam.ioMisc = CL(n);
 }
+
+void LocalVolume::PBSetEOF(ParmBlkPtr pb)
+{
+    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
+}
+
 void LocalVolume::PBFlushFile(ParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);
