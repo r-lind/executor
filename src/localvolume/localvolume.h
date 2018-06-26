@@ -34,6 +34,7 @@ class LocalVolume : public Volume
     ItemPtr resolve(mac_string_view name, short vRef, long dirID);
     ItemPtr resolve(short vRef, long dirID, short index);
     ItemPtr resolve(mac_string_view name, short vRef, long dirID, short index);
+    ItemPtr resolveRelative(const std::shared_ptr<DirectoryItem>& base, mac_string_view name);
 
     struct FCBExtension;
     std::vector<FCBExtension> fcbExtensions;
@@ -49,6 +50,7 @@ public:
     long lookupDirID(const fs::path& path);
     std::vector<std::unique_ptr<MetaDataHandler>> handlers;
 
+    mac_string getVolumeName() const;
 
     LocalVolume(VCB& vcb, fs::path root);
 

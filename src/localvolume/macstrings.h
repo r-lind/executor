@@ -22,6 +22,13 @@ struct mac_string_view : std::basic_string_view<unsigned char>
         : basic_string_view(p,n)
     {
     }
+
+    template<class It>
+    mac_string_view(It p, It q)
+        : basic_string_view(&*p,q-p)
+    {
+    }
+
 };
 
 inline mac_string_view PascalStringView(const unsigned char *s)

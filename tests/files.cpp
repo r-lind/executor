@@ -271,6 +271,125 @@ TEST_F(FileTest, WriteRead)
     EXPECT_EQ(0, memcmp(buf1, buf2, 13));
 }
 
+TEST_F(FileTest, CaseInsensitive)
+{
+    CInfoPBRec ipb;
+
+    Str255 name = "\pTEMP-test";
+
+    // Files are found with case-insensitive match on file names
+    // but GetCatInfo does not write to ioNamePtr
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    Str255 buf;
+    ipb.hFileInfo.ioNamePtr = name;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+
+    EXPECT_EQ("TEMP-test", std::string(name + 1, name + 1 + name[0]));
+}
+
+TEST_F(FileTest, Pathname)
+{
+    CInfoPBRec ipb;
+    long curDirID = dirID;
+    short realVRefNum;
+    std::string path(file1 + 1, file1 + 1 + file1[0]);
+
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.dirInfo.ioCompletion = nullptr;
+    ipb.dirInfo.ioVRefNum = vRefNum;
+    Str255 buf;
+    ipb.dirInfo.ioNamePtr = nullptr;
+    ipb.dirInfo.ioFDirIndex = -1;
+    ipb.dirInfo.ioDrDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+
+    realVRefNum = ipb.dirInfo.ioVRefNum;
+    curDirID = ipb.dirInfo.ioDrDirID;
+
+    for(int i = 0; i < 100 && curDirID != 1; i++)
+    {
+        memset(&ipb, 42, sizeof(ipb));
+        ipb.dirInfo.ioCompletion = nullptr;
+        ipb.dirInfo.ioVRefNum = realVRefNum;
+        Str255 buf;
+        ipb.dirInfo.ioNamePtr = buf;
+        ipb.dirInfo.ioFDirIndex = -1;
+        ipb.dirInfo.ioDrDirID = curDirID;
+
+        PBGetCatInfoSync(&ipb);
+
+        ASSERT_EQ(noErr, ipb.dirInfo.ioResult);
+
+        if(curDirID == 2)
+        {
+            EXPECT_EQ(1, ipb.dirInfo.ioDrParID);
+        }
+        curDirID = ipb.dirInfo.ioDrParID;
+        
+        EXPECT_EQ(realVRefNum, ipb.dirInfo.ioVRefNum);
+        path = std::string(buf + 1, buf + 1 + buf[0]) + ":" + path;
+    };
+
+    ASSERT_EQ(curDirID, 1);
+
+    EXPECT_NE("", path);
+    EXPECT_NE(std::string::npos, path.find(':'));
+    EXPECT_NE(0, path.find(':'));
+
+    printf("%s\n", path.c_str());
+
+    hello();
+
+    Str255 pathP;
+    pathP[0] = std::min(size_t(255), path.size());
+    memcpy(pathP+1, path.data(), pathP[0]);
+
+    HParamBlockRec hpb;
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = 0;
+    hpb.fileParam.ioDirID = 0;
+    hpb.ioParam.ioNamePtr = pathP;
+    hpb.ioParam.ioPermssn = fsRdPerm;
+    PBHOpenSync(&hpb);
+
+    EXPECT_EQ(noErr, hpb.fileParam.ioResult);
+    EXPECT_GE(hpb.ioParam.ioRefNum, 2);
+
+    if(hpb.fileParam.ioResult == noErr)
+    {
+        refNum = hpb.ioParam.ioRefNum;
+
+        char buf1[] = "Hello, world.";
+        char buf2[100];
+
+        ParamBlockRec pb;
+
+        memset(&pb, 42, sizeof(pb));
+        pb.ioParam.ioCompletion = nullptr;
+        pb.ioParam.ioRefNum = refNum;
+        pb.ioParam.ioPosMode = fsFromStart;
+        pb.ioParam.ioPosOffset = 0;
+        pb.ioParam.ioBuffer = buf2;
+        pb.ioParam.ioReqCount = 13;
+        PBReadSync(&pb);
+
+        EXPECT_EQ(noErr, pb.ioParam.ioResult);
+        EXPECT_EQ(13, pb.ioParam.ioActCount);
+
+        EXPECT_EQ(0, memcmp(buf1, buf2, 13));
+    }
+}
 
 TEST_F(FileTest, Seek)
 {

@@ -183,7 +183,10 @@ static void lastcomponent(StringPtr dest, StringPtr src)
         n = src[0] - (lastcolon - (src + 1));
     }
     else
+    {
+        lastcolon = src + 1;
         n = src[0];
+    }
     dest[0] = n;
     memmove(dest + 1, lastcolon, n);
 }

@@ -64,6 +64,7 @@ void PlainFileItem::deleteFile()
 DirectoryItem::DirectoryItem(LocalVolume& vol, fs::path p)
     : Item(vol, std::move(p)), dirID_(2)
 {
+    name_ = vol.getVolumeName();
 }
 
 DirectoryItem::DirectoryItem(const DirectoryItem& parent, fs::path p, long dirID)
@@ -204,10 +205,54 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
     if(name.empty())
         return resolve(vRef, dirID);
 
-    // TODO: handle pathnames
+    size_t colon = name.find(':');
 
-    std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
-    return dir->resolve(name);
+    if(colon != mac_string_view::npos)
+    {
+        if(colon == 0)
+        {
+            std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
+            return resolveRelative(dir, name);
+        }
+        else
+        {
+            return resolveRelative(directories_[2], mac_string_view(name.begin() + colon, name.end()));
+        }
+    }
+    else
+    {
+        std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
+        return dir->resolve(name);
+    }
+}
+
+ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base, mac_string_view name)
+{
+    auto p = name.begin();
+    //for(++p; p != name.end() && *p == ':'; ++p)
+    //    base = 
+    // TODO: relative paths
+
+    if(p == name.end())
+        return base;
+
+    ++p;
+
+    if(p == name.end())
+        return base;
+
+    auto colon = std::find(p, name.end(), ':');
+
+    ItemPtr item = base->resolve(mac_string_view(p, colon));
+
+    if(colon == name.end())
+        return item;
+    else if(auto dir = std::dynamic_pointer_cast<DirectoryItem>(item))
+    {
+        return resolveRelative(dir, mac_string_view(colon, name.end()));
+    }
+    else
+        throw OSErrorException(fnfErr);
 }
 
 ItemPtr LocalVolume::resolve(short vRef, long dirID, short index)
@@ -224,6 +269,11 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID, short
         return resolve(name, vRef, dirID);
     else
         return resolve(vRef, dirID);
+}
+
+mac_string LocalVolume::getVolumeName() const
+{
+    return mac_string(mac_string_view(vcb.vcbVN));
 }
 
 
@@ -416,16 +466,21 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
     std::cout << "GetCatInfo: " << item->path() << std::endl;
     if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
     {
-        const mac_string name = item->name();
-        size_t n = std::min(name.size(), (size_t)255);
-        memcpy(outputName+1, name.data(), n);
-        outputName[0] = n;
+        if(!inputName)
+        {
+            const mac_string name = item->name();
+            size_t n = std::min(name.size(), (size_t)255);
+            memcpy(outputName+1, name.data(), n);
+            outputName[0] = n;
+        }
     }
     
     if(DirectoryItem *dirItem = dynamic_cast<DirectoryItem*>(item.get()))
     {
         pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
         pb->dirInfo.ioDrDirID = CL(dirItem->dirID());
+
+        pb->dirInfo.ioVRefNum = vcb.vcbVRefNum;
         pb->dirInfo.ioDrParID = CL(dirItem->parID());
 
     }
@@ -433,6 +488,9 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
     {
         pb->hFileInfo.ioFlAttrib = 0;
         pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
+
+        pb->hFileInfo.ioVRefNum = vcb.vcbVRefNum;
+        pb->hFileInfo.ioFlParID = CL(fileItem->parID());
     }
 }
 void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)

@@ -642,6 +642,8 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 #endif /* defined(LITTLEENDIAN) */
 
     ROMlib_hfsinit();
+    initLocalVol();
+
     ROMlib_automount(ROMlib_SystemFolder.c_str());
 
 #if 0
@@ -828,8 +830,6 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
             cd_mounted_by_trickery_p = true;
     }
 #endif
-
-    initLocalVol();
 }
 
 fcbrec *

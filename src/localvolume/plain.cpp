@@ -1,10 +1,12 @@
 #include "localvolume.h"
+#include <iostream>
 
 using namespace Executor;
 
 PlainDataFork::PlainDataFork(fs::path path)
     : stream(path)
 {
+    std::cout << "ACCESSING FILE: " << path << std::endl;
 }
 PlainDataFork::~PlainDataFork()
 {
