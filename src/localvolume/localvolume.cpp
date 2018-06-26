@@ -158,6 +158,7 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
     handlers.push_back(std::make_unique<BasiliskHandler>(*this));
+    handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
     handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
@@ -458,7 +459,7 @@ void LocalVolume::PBHSetFInfo(HParmBlkPtr pb)
 void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
 {
     StringPtr inputName = MR(pb->hFileInfo.ioNamePtr);
-    if(CW(pb->hFileInfo.ioFDirIndex) > 0)
+    if(CW(pb->hFileInfo.ioFDirIndex) != 0)
         inputName = nullptr;
     ItemPtr item = resolve(PascalStringView(inputName),
         CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID), CW(pb->hFileInfo.ioFDirIndex));

@@ -128,6 +128,7 @@ set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileI
     localvolume/localvolume.cpp 
     localvolume/macstrings.cpp
     localvolume/basilisk.cpp
+    localvolume/appledouble.cpp
     localvolume/plain.cpp
     )
 source_group(Files FILES ${file_sources})

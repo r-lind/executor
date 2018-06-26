@@ -112,5 +112,18 @@ public:
     virtual void deleteFile();
 };
 
+class AppleDoubleFileItem : public FileItem
+{
+public:
+    using FileItem::FileItem;
+
+    virtual FInfo getFInfo();
+    virtual void setFInfo(FInfo finfo);
+    virtual std::unique_ptr<OpenFile> open();
+    virtual std::unique_ptr<OpenFile> openRF();
+
+    virtual void deleteFile();
+};
+
 
 }

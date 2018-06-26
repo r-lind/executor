@@ -346,7 +346,7 @@ TEST_F(FileTest, Pathname)
     EXPECT_NE(std::string::npos, path.find(':'));
     EXPECT_NE(0, path.find(':'));
 
-    printf("%s\n", path.c_str());
+    //printf("%s\n", path.c_str());
 
     hello();
 
