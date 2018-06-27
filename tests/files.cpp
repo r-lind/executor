@@ -354,6 +354,20 @@ TEST_F(FileTest, Pathname)
     pathP[0] = std::min(size_t(255), path.size());
     memcpy(pathP+1, path.data(), pathP[0]);
 
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = 0;
+    ipb.hFileInfo.ioNamePtr = pathP;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = 0;
+
+    PBGetCatInfoSync(&ipb);
+
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+    EXPECT_NE(0, ipb.hFileInfo.ioFlParID);
+
+
     HParamBlockRec hpb;
     memset(&hpb, 42, sizeof(hpb));
     hpb.ioParam.ioCompletion = nullptr;

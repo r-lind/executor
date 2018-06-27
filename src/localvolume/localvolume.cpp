@@ -157,8 +157,8 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     directories_[2] = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
-    handlers.push_back(std::make_unique<BasiliskHandler>(*this));
     handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
+    handlers.push_back(std::make_unique<BasiliskHandler>(*this));
     handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
@@ -481,9 +481,16 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
         pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
         pb->dirInfo.ioDrDirID = CL(dirItem->dirID());
 
-        pb->dirInfo.ioVRefNum = vcb.vcbVRefNum;
         pb->dirInfo.ioDrParID = CL(dirItem->parID());
 
+        pb->dirInfo.ioDrNmFls = CW(dirItem->countItems());
+
+        // ioACUser
+        // ioDrUserWds
+        // ioDrCrDat
+        // ioDrMdDat
+        // ioDrBkDat
+        // ioDrFndrInfo
     }
     else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
     {
@@ -492,6 +499,18 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
 
         pb->hFileInfo.ioVRefNum = vcb.vcbVRefNum;
         pb->hFileInfo.ioFlParID = CL(fileItem->parID());
+
+        // ioFlStBlk
+        // ioFlLgLen
+        // ioFlPyLen
+        // ioFlRStBlk
+        // ioFlRPyLen
+
+        // ioFlCrDat
+        // ioFlMdDat
+        // ioFlBkDat
+        // ioFlXFndrInfo
+        // ioFlClpSiz
     }
 }
 void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)

@@ -57,6 +57,8 @@ public:
     ItemPtr resolve(int index);
 
     long dirID() const { return dirID_; }
+
+    int countItems() { return contents_.size(); }
 };
 
 

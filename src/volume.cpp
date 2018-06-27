@@ -11,12 +11,17 @@ Volume::~Volume()
 
 void Volume::PBGetVInfo(ParmBlkPtr pb)
 {
+    // TODO: derived class should keep fields up to date
+    
     if(pb->volumeParam.ioNamePtr)
         str255assign(MR(pb->volumeParam.ioNamePtr), vcb.vcbVN);
+    pb->volumeParam.ioVRefNum = vcb.vcbVRefNum;
     pb->volumeParam.ioVCrDate = vcb.vcbCrDate;
     pb->volumeParam.ioVLsBkUp = vcb.vcbVolBkUp;
     pb->volumeParam.ioVAtrb = vcb.vcbAtrb;
-    pb->volumeParam.ioVNmFls = vcb.vcbNmFls;
+    pb->volumeParam.ioVNmFls = vcb.vcbNmFls;    // FIXME: should refer to WD if vrefnum is a WD
+    // ioVDirSt     // FIXME
+    // ioVBlLen     // FIXME
     pb->volumeParam.ioVNmAlBlks = vcb.vcbNmAlBlks;
     pb->volumeParam.ioVAlBlkSiz = vcb.vcbAlBlkSiz;
     pb->volumeParam.ioVClpSiz = vcb.vcbClpSiz;
@@ -28,7 +33,6 @@ void Volume::PBHGetVInfo(HParmBlkPtr pb)
 {
     PBGetVInfo(reinterpret_cast<ParmBlkPtr>(pb));
 
-    pb->volumeParam.ioVRefNum = vcb.vcbVRefNum;
     pb->volumeParam.ioVSigWord = vcb.vcbSigWord;
     pb->volumeParam.ioVDrvInfo = vcb.vcbDrvNum;
     pb->volumeParam.ioVDRefNum = vcb.vcbDRefNum;
