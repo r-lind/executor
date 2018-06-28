@@ -704,15 +704,18 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
             p = 0;
     }
 #endif
-
+#if 0
     ROMlib_automount(ROMlib_startdir);
     ROMlib_automount(ROMlib_DefaultFolder.c_str());
+#endif
     if(is_unix_path(ROMlib_DefaultFolder.c_str())
        && Ustat(ROMlib_DefaultFolder.c_str(), &sbuf) == 0)
     {
         LM(CurDirStore) = CL((LONGINT)ST_INO(sbuf));
+#if 0
         vcbp = ROMlib_vcbbybiggestunixname(ROMlib_DefaultFolder.c_str());
         LM(SFSaveDisk) = CW(-CW(vcbp->vcbVRefNum));
+#endif
     }
     if(is_unix_path(ROMlib_SystemFolder.c_str()))
     {

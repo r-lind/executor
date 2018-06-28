@@ -646,9 +646,13 @@ void LocalVolume::PBRead(ParmBlkPtr pb)
 {
     PBSetFPos(pb);
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
-    size_t n = fcbx.access->read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
-    pb->ioParam.ioActCount = CL(n);
-    fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + n );
+    size_t req = CL(pb->ioParam.ioReqCount);
+    size_t act = fcbx.access->read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), req);
+    pb->ioParam.ioActCount = CL(act);
+    fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + act );
+
+    if(act < req)
+        throw OSErrorException(eofErr);
 }
 void LocalVolume::PBWrite(ParmBlkPtr pb)
 {

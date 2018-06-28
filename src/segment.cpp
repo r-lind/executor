@@ -353,7 +353,9 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
                 warning_unexpected("getwd failed: expect trouble reading "
                                    "resources");
         }
+#if 0
         ROMlib_automount(uname);
+#endif
         vcbp = (VCBExtra *)ROMlib_vcbbybiggestunixname(uname);
         if(vcbp)
         {
@@ -391,7 +393,7 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
             }
         }
         else
-            path = 0; /* TODO:  Some sort of problem here */
+            path = (unsigned char*)""; /* TODO:  Some sort of problem here */
     }
     else
     {
