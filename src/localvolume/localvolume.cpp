@@ -246,8 +246,16 @@ ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base,
 
     auto colon = std::find(p, name.end(), ':');
 
-    // TODO: double colon = parent directory
-    ItemPtr item = base->resolve(mac_string_view(p, colon));
+    ItemPtr item;
+    
+    if(colon == p)
+    {
+        if(base->parID() == 1)
+            throw OSErrorException(dirNFErr);
+        item = items.at(base->parID());
+    }
+    else
+        item = base->resolve(mac_string_view(p, colon));
 
     if(colon == name.end())
         return item;
@@ -553,10 +561,11 @@ void LocalVolume::PBDirCreate(HParmBlkPtr pb)
             throw;
     }
     fs::path fn = toUnicodeFilename(name);
-    std::cout << "create dir: " << parent->path() / fn << std::endl;
     fs::create_directory(parent->path() / fn);
 
     parent->flushCache();
+
+    pb->fileParam.ioDirID = CL(parent->resolve(name)->cnid());
 }
 
 

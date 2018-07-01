@@ -72,6 +72,23 @@ protected:
 
     FileTest()
     {
+        if(dirID == 0 || vRefNum == 0)
+        {
+            CInfoPBRec ipb;
+            memset(&ipb, 42, sizeof(ipb));
+            ipb.dirInfo.ioCompletion = nullptr;
+            ipb.dirInfo.ioVRefNum = vRefNum;
+            Str255 buf;
+            ipb.dirInfo.ioNamePtr = nullptr;
+            ipb.dirInfo.ioFDirIndex = -1;
+            ipb.dirInfo.ioDrDirID = dirID;
+
+            PBGetCatInfoSync(&ipb);
+
+            vRefNum = ipb.dirInfo.ioVRefNum;
+            dirID = ipb.dirInfo.ioDrDirID;
+        }
+
         HParamBlockRec pb;
         memset(&pb, 42, sizeof(pb));
         pb.fileParam.ioCompletion = nullptr;
@@ -334,28 +351,15 @@ TEST_F(FileTest, Pathname)
 {
     CInfoPBRec ipb;
     long curDirID = dirID;
-    short realVRefNum;
     std::string path(file1 + 1, file1 + 1 + file1[0]);
 
 
-    memset(&ipb, 42, sizeof(ipb));
-    ipb.dirInfo.ioCompletion = nullptr;
-    ipb.dirInfo.ioVRefNum = vRefNum;
-    Str255 buf;
-    ipb.dirInfo.ioNamePtr = nullptr;
-    ipb.dirInfo.ioFDirIndex = -1;
-    ipb.dirInfo.ioDrDirID = dirID;
-
-    PBGetCatInfoSync(&ipb);
-
-    realVRefNum = ipb.dirInfo.ioVRefNum;
-    curDirID = ipb.dirInfo.ioDrDirID;
 
     for(int i = 0; i < 100 && curDirID != 1; i++)
     {
         memset(&ipb, 42, sizeof(ipb));
         ipb.dirInfo.ioCompletion = nullptr;
-        ipb.dirInfo.ioVRefNum = realVRefNum;
+        ipb.dirInfo.ioVRefNum = vRefNum;
         Str255 buf;
         ipb.dirInfo.ioNamePtr = buf;
         ipb.dirInfo.ioFDirIndex = -1;
@@ -371,7 +375,7 @@ TEST_F(FileTest, Pathname)
         }
         curDirID = ipb.dirInfo.ioDrParID;
         
-        EXPECT_EQ(realVRefNum, ipb.dirInfo.ioVRefNum);
+        EXPECT_EQ(vRefNum, ipb.dirInfo.ioVRefNum);
         path = std::string(buf + 1, buf + 1 + buf[0]) + ":" + path;
     };
 
@@ -505,4 +509,42 @@ TEST_F(FileTest, Seek)
                 || off == 13-42;    // System 6
         }, pb.ioParam.ioPosOffset);
 
+}
+
+
+TEST_F(FileTest, UpDirRelative)
+{
+    HParamBlockRec hpb;
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBDirCreateSync(&hpb);
+
+    ASSERT_EQ(noErr, hpb.ioParam.ioResult);
+
+    long tempDirID = hpb.fileParam.ioDirID;
+
+    Str255 relPath = "\p::temp-test";
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = tempDirID;
+    hpb.ioParam.ioNamePtr = relPath;
+    hpb.ioParam.ioPermssn = fsRdPerm;
+    PBHOpenSync(&hpb);
+
+    EXPECT_EQ(noErr, hpb.fileParam.ioResult);
+    EXPECT_GE(hpb.ioParam.ioRefNum, 2);
+    refNum = hpb.ioParam.ioRefNum;
+
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBHDeleteSync(&hpb);
+
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
 }
