@@ -143,7 +143,15 @@ void DirectoryItem::deleteItem()
     fs::remove(path() / ".rsrc", ec);
     fs::remove(path() / ".finf", ec);       // TODO: individual handlers should provide this info
 
-    fs::remove(path());
+    fs::remove(path(), ec);
+
+    if(ec)
+    {
+        if(ec == boost::system::errc::directory_not_empty)
+            throw OSErrorException(fBsyErr);
+        else
+            throw OSErrorException(paramErr);
+    }
 }
 
 LocalVolume::LocalVolume(VCB& vcb, fs::path root)
@@ -507,46 +515,21 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
     throw OSErrorException(paramErr);
 }
 
-void LocalVolume::createCommon(DirectoryItem& parent, mac_string_view name)
+LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name, short vRefNum, CNID dirID)
 {
-    try
+    std::shared_ptr<DirectoryItem> parent;
+    auto colon = name.rfind(':');
+
+    if(colon == mac_string_view::npos)
+        parent = resolve(vRefNum, dirID);
+    else
     {
-        parent.resolve(name);
-    }
-    catch(OSErrorException& e)
-    {
-        if(e.code == fnfErr)
-            ;
-        else if(e.code == noErr)
-            throw OSErrorException(dupFNErr);
-        else
-            throw;
+        parent = std::dynamic_pointer_cast<DirectoryItem>(resolve(mac_string_view(name.begin(), colon), vRefNum, dirID));
+        if(!parent)
+            throw OSErrorException(dirNFErr);
+        name = mac_string_view(name.begin() + colon+1, name.end());
     }
 
-    // TODO: this is the responsibility of the BasiliskHandler class
-    fs::create_directory(parent.path() / ".rsrc");
-    fs::create_directory(parent.path() / ".finf");
-    fs::path fn = toUnicodeFilename(name);
-
-    fs::ofstream(parent.path() / fn);
-    fs::ofstream(parent.path() / ".rsrc" / fn);
-    FInfo info = {0};
-    fs::ofstream(parent.path() / ".finf" / fn).write((char*)&info, sizeof(info));
-    parent.flushCache();
-}
-void LocalVolume::PBCreate(ParmBlkPtr pb)
-{
-    createCommon(*resolve(CW(pb->fileParam.ioVRefNum), 0), MR(pb->ioParam.ioNamePtr));
-}
-void LocalVolume::PBHCreate(HParmBlkPtr pb)
-{
-    createCommon(*resolve(CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)), MR(pb->ioParam.ioNamePtr));
-}
-
-void LocalVolume::PBDirCreate(HParmBlkPtr pb)
-{
-    auto parent = resolve(CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID));
-    mac_string_view name = MR(pb->ioParam.ioNamePtr);
     try
     {
         parent->resolve(name);
@@ -560,6 +543,37 @@ void LocalVolume::PBDirCreate(HParmBlkPtr pb)
         else
             throw;
     }
+
+    return NonexistentFile { parent, name };
+}
+
+void LocalVolume::createCommon(NonexistentFile file)
+{
+    fs::path parentPath = file.parent->path();
+    fs::path fn = toUnicodeFilename(file.name);
+
+    // TODO: this is the responsibility of the BasiliskHandler class
+    fs::create_directory(parentPath / ".rsrc");
+    fs::create_directory(parentPath / ".finf");
+
+    fs::ofstream(parentPath / fn);
+    fs::ofstream(parentPath / ".rsrc" / fn);
+    FInfo info = {0};
+    fs::ofstream(parentPath / ".finf" / fn).write((char*)&info, sizeof(info));
+    file.parent->flushCache();
+}
+void LocalVolume::PBCreate(ParmBlkPtr pb)
+{
+    createCommon(resolveForCreate(MR(pb->ioParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0));
+}
+void LocalVolume::PBHCreate(HParmBlkPtr pb)
+{
+    createCommon(resolveForCreate(MR(pb->ioParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)));
+}
+
+void LocalVolume::PBDirCreate(HParmBlkPtr pb)
+{
+    auto [parent, name] = resolveForCreate(MR(pb->ioParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID));
     fs::path fn = toUnicodeFilename(name);
     fs::create_directory(parent->path() / fn);
 

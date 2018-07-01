@@ -511,40 +511,52 @@ TEST_F(FileTest, Seek)
 
 }
 
-
-TEST_F(FileTest, UpDirRelative)
+TEST(Files, DeleteFullDirectory)
 {
-    HParamBlockRec hpb;
-    memset(&hpb, 42, sizeof(hpb));
-    hpb.ioParam.ioCompletion = nullptr;
-    hpb.ioParam.ioVRefNum = vRefNum;
-    hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
-    PBDirCreateSync(&hpb);
+    HParamBlockRec pb;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBDirCreateSync(&pb);
 
-    ASSERT_EQ(noErr, hpb.ioParam.ioResult);
+    ASSERT_EQ(noErr, pb.ioParam.ioResult);
 
-    long tempDirID = hpb.fileParam.ioDirID;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\p:temp-test-dir:file in dir";
+    PBHCreateSync(&pb);
 
-    Str255 relPath = "\p::temp-test";
-    memset(&hpb, 42, sizeof(hpb));
-    hpb.ioParam.ioCompletion = nullptr;
-    hpb.ioParam.ioVRefNum = vRefNum;
-    hpb.fileParam.ioDirID = tempDirID;
-    hpb.ioParam.ioNamePtr = relPath;
-    hpb.ioParam.ioPermssn = fsRdPerm;
-    PBHOpenSync(&hpb);
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
 
-    EXPECT_EQ(noErr, hpb.fileParam.ioResult);
-    EXPECT_GE(hpb.ioParam.ioRefNum, 2);
-    refNum = hpb.ioParam.ioRefNum;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBHDeleteSync(&pb);
 
-    memset(&hpb, 42, sizeof(hpb));
-    hpb.ioParam.ioCompletion = nullptr;
-    hpb.ioParam.ioVRefNum = vRefNum;
-    hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
-    PBHDeleteSync(&hpb);
+    EXPECT_EQ(fBsyErr, pb.ioParam.ioResult);
 
-    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\p:temp-test-dir:file in dir";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
 }

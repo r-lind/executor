@@ -46,7 +46,15 @@ class LocalVolume : public Volume
     FCBExtension& getFCBX(short refNum);
     FCBExtension& openFCBX();
 
-    void createCommon(DirectoryItem& parent, mac_string_view name);
+    struct NonexistentFile
+    {
+        std::shared_ptr<DirectoryItem> parent;
+        mac_string_view name;
+    };
+
+    NonexistentFile resolveForCreate(mac_string_view name, short vRefNum, CNID dirID);
+
+    void createCommon(NonexistentFile file);
     void setFInfoCommon(Item& item, ParmBlkPtr pb);
     void openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork);
     void deleteCommon(ItemPtr item);
