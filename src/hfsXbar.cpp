@@ -445,7 +445,7 @@ OSErr Executor::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
     if(retval != fnfErr)
         ;
     else if(Volume *v = getVolume(pb))
-        retval = handleExceptions(*v, &Volume::PBHOpen, pb);
+        retval = handleExceptions(*v, &Volume::PBHOpenDF, pb);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBHOpen(pb, async);
     else
@@ -458,7 +458,7 @@ OSErr Executor::PBHOpenDF(HParmBlkPtr pb, BOOLEAN async)
     OSErr retval;
 
     if(Volume *v = getVolume(pb))
-        retval = handleExceptions(*v, &Volume::PBHOpen, pb);
+        retval = handleExceptions(*v, &Volume::PBHOpenDF, pb);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBHOpen(pb, async);
     else

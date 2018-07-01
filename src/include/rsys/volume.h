@@ -28,7 +28,7 @@ namespace Executor
         virtual void PBHCreate(HParmBlkPtr pb) = 0;
         virtual void PBDirCreate(HParmBlkPtr pb) = 0;
         virtual void PBHDelete(HParmBlkPtr pb) = 0;
-        virtual void PBHOpen(HParmBlkPtr pb) = 0;
+        virtual void PBHOpenDF(HParmBlkPtr pb) = 0;
         virtual void PBHOpenRF(HParmBlkPtr pb) = 0;
         virtual void PBGetCatInfo(CInfoPBPtr pb) = 0;
         virtual void PBSetCatInfo(CInfoPBPtr pb) = 0;

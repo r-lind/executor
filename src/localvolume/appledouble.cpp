@@ -53,11 +53,12 @@ void AppleDoubleFileItem::setFInfo(FInfo info)
     AppleSingleDoubleFork(std::make_unique<PlainDataFork>(adpath), 9).write(0, &info, sizeof(info));
 }
 
-void AppleDoubleFileItem::deleteFile()
+void AppleDoubleFileItem::deleteItem()
 {
     fs::remove(path());
     fs::path adpath = path().parent_path() / ("%" + path().filename().string());
-    fs::remove(adpath);
+    boost::system::error_code ec;
+    fs::remove(adpath, ec);
 }
 
 AppleSingleDoubleFork::AppleSingleDoubleFork(std::unique_ptr<OpenFile> aFile, int entry)

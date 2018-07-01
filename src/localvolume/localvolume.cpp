@@ -49,6 +49,11 @@ Item::Item(const DirectoryItem& parent, fs::path p)
     cnid_ = volume_.newCNID();
 }
 
+void Item::deleteItem()
+{
+    fs::remove(path());
+}
+
 std::unique_ptr<OpenFile> PlainFileItem::open()
 {
     return std::make_unique<PlainDataFork>(path_);
@@ -56,10 +61,6 @@ std::unique_ptr<OpenFile> PlainFileItem::open()
 std::unique_ptr<OpenFile> PlainFileItem::openRF()
 {
     return std::make_unique<EmptyFork>();
-}
-void PlainFileItem::deleteFile()
-{
-    fs::remove(path());
 }
 
 
@@ -134,6 +135,15 @@ ItemPtr DirectoryItem::resolve(int index)
     if(index >= 1 && index <= contents_.size())
         return contents_[index-1];
     throw OSErrorException(fnfErr);
+}
+
+void DirectoryItem::deleteItem()
+{
+    boost::system::error_code ec;
+    fs::remove(path() / ".rsrc", ec);
+    fs::remove(path() / ".finf", ec);       // TODO: individual handlers should provide this info
+
+    fs::remove(path());
 }
 
 LocalVolume::LocalVolume(VCB& vcb, fs::path root)
@@ -225,9 +235,6 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
 ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base, mac_string_view name)
 {
     auto p = name.begin();
-    //for(++p; p != name.end() && *p == ':'; ++p)
-    //    base = 
-    // TODO: relative paths
 
     if(p == name.end())
         return base;
@@ -239,6 +246,7 @@ ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base,
 
     auto colon = std::find(p, name.end(), ':');
 
+    // TODO: double colon = parent directory
     ItemPtr item = base->resolve(mac_string_view(p, colon));
 
     if(colon == name.end())
@@ -277,10 +285,6 @@ void LocalVolume::PBHRename(HParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);
 }
-void LocalVolume::PBDirCreate(HParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 
 struct LocalVolume::FCBExtension
 {
@@ -316,59 +320,36 @@ LocalVolume::FCBExtension& LocalVolume::openFCBX()
     return fcbExtensions[refNum];
 }
 
-
-void LocalVolume::PBHOpen(HParmBlkPtr pb)
+void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork)
 {
-    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID));
     if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
     {
+        auto access = fork == Fork::resource ? fileItem->openRF() : fileItem->open();
         FCBExtension& fcbx = openFCBX();
-        fcbx.access = fileItem->open();
+        fcbx.access = std::move(access);
         fcbx.fcb->fcbFlNum = CL(fileItem->cnid());
-        pb->ioParam.ioRefNum = CW(fcbx.refNum);
+        refNum = CW(fcbx.refNum);
     }
     else
         throw OSErrorException(paramErr);    // TODO: what's the correct error?
 }
+
+void LocalVolume::PBHOpenDF(HParmBlkPtr pb)
+{
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::data);
+}
 void LocalVolume::PBHOpenRF(HParmBlkPtr pb)
 {
-    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID));
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        FCBExtension& fcbx = openFCBX();
-        fcbx.access = fileItem->openRF();
-        fcbx.fcb->fcbFlNum = CL(42);
-        pb->ioParam.ioRefNum = CW(fcbx.refNum);
-    }
-    else
-        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::resource);
 }
 
 void LocalVolume::PBOpenDF(ParmBlkPtr pb)
 {
-    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        FCBExtension& fcbx = openFCBX();
-        fcbx.access = fileItem->open();
-        fcbx.fcb->fcbFlNum = CL(42);
-        pb->ioParam.ioRefNum = CW(fcbx.refNum);
-    }
-    else
-        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::data);
 }
 void LocalVolume::PBOpenRF(ParmBlkPtr pb)
 {
-    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        FCBExtension& fcbx = openFCBX();
-        fcbx.access = fileItem->openRF();
-        fcbx.fcb->fcbFlNum = CL(42);
-        pb->ioParam.ioRefNum = CW(fcbx.refNum);
-    }
-    else
-        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::resource);
 }
 
 
@@ -554,30 +535,48 @@ void LocalVolume::PBHCreate(HParmBlkPtr pb)
     createCommon(*resolve(CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)), MR(pb->ioParam.ioNamePtr));
 }
 
+void LocalVolume::PBDirCreate(HParmBlkPtr pb)
+{
+    auto parent = resolve(CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID));
+    mac_string_view name = MR(pb->ioParam.ioNamePtr);
+    try
+    {
+        parent->resolve(name);
+    }
+    catch(OSErrorException& e)
+    {
+        if(e.code == fnfErr)
+            ;
+        else if(e.code == noErr)
+            throw OSErrorException(dupFNErr);
+        else
+            throw;
+    }
+    fs::path fn = toUnicodeFilename(name);
+    std::cout << "create dir: " << parent->path() / fn << std::endl;
+    fs::create_directory(parent->path() / fn);
+
+    parent->flushCache();
+}
+
+
+void LocalVolume::deleteCommon(ItemPtr item)
+{
+    item->deleteItem();
+    
+    items.erase(item->cnid());
+    pathToId.erase(item->path());
+    dynamic_cast<DirectoryItem&>(*items.at(item->parID())).flushCache();
+}
 
 void LocalVolume::PBDelete(ParmBlkPtr pb)
 {
-    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0);
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        fileItem->deleteFile();
-        resolve(CW(pb->ioParam.ioVRefNum), 0)->flushCache();    // TODO: fileItem should know about parent
-    }
-    else
-        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+    deleteCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0));
 }
 void LocalVolume::PBHDelete(HParmBlkPtr pb)
 {
-    ItemPtr item = resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID));
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        fileItem->deleteFile();
-        resolve(CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID))->flushCache();   // TODO: fileItem should know about parent
-    }
-    else
-        throw OSErrorException(paramErr);    // TODO: what's the correct error?
+    deleteCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)));
 }
-
 
 void LocalVolume::PBOpenWD(WDPBPtr pb)
 {

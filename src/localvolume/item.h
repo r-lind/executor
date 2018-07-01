@@ -38,6 +38,8 @@ public:
     CNID cnid() const { return cnid_; }
 
     const mac_string& name() const { return name_; }
+
+    virtual void deleteItem();
 };
 
 using ItemPtr = std::shared_ptr<Item>;
@@ -62,6 +64,8 @@ public:
     long dirID() const { return cnid(); }
 
     int countItems() { return contents_.size(); }
+
+    virtual void deleteItem();
 };
 
 
@@ -74,7 +78,6 @@ public:
     virtual void setFInfo(FInfo finfo) = 0;
     virtual std::unique_ptr<OpenFile> open() = 0;
     virtual std::unique_ptr<OpenFile> openRF() = 0;
-    virtual void deleteFile() = 0;
 };
 
 class PlainFileItem : public FileItem
@@ -100,8 +103,6 @@ public:
 
     virtual std::unique_ptr<OpenFile> open();
     virtual std::unique_ptr<OpenFile> openRF();
-    
-    virtual void deleteFile();
 };
 
 class BasiliskFileItem : public FileItem
@@ -114,7 +115,7 @@ public:
     virtual std::unique_ptr<OpenFile> open();
     virtual std::unique_ptr<OpenFile> openRF();
 
-    virtual void deleteFile();
+    virtual void deleteItem();
 };
 
 class AppleDoubleFileItem : public FileItem
@@ -127,7 +128,7 @@ public:
     virtual std::unique_ptr<OpenFile> open();
     virtual std::unique_ptr<OpenFile> openRF();
 
-    virtual void deleteFile();
+    virtual void deleteItem();
 };
 
 

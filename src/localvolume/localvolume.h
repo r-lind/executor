@@ -20,6 +20,12 @@ namespace Executor
 class OpenFile;
 class MetaDataHandler;
 
+enum class Fork
+{
+    data,
+    resource
+};
+
 class LocalVolume : public Volume
 {
     fs::path root;
@@ -42,6 +48,8 @@ class LocalVolume : public Volume
 
     void createCommon(DirectoryItem& parent, mac_string_view name);
     void setFInfoCommon(Item& item, ParmBlkPtr pb);
+    void openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork);
+    void deleteCommon(ItemPtr item);
 public:
     ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
     CNID newCNID();
@@ -72,7 +80,7 @@ public:
     virtual void PBOpenWD(WDPBPtr pb) override;
     virtual void PBOpenDF(ParmBlkPtr pb) override;
     virtual void PBOpenRF(ParmBlkPtr pb) override;
-    virtual void PBHOpen(HParmBlkPtr pb) override;
+    virtual void PBHOpenDF(HParmBlkPtr pb) override;
     virtual void PBHOpenRF(HParmBlkPtr pb) override;
 
     virtual void PBSetFLock(ParmBlkPtr pb) override;

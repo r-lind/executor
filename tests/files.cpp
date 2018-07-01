@@ -31,6 +31,37 @@ TEST(Files, CreateDelete)
     EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
 }
 
+TEST(Files, CreateDeleteDir)
+{
+    HParamBlockRec pb;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    PBDirCreateSync(&pb);
+
+    ASSERT_EQ(noErr, pb.ioParam.ioResult);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = 0;
+    pb.fileParam.ioDirID = 0;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
+}
+
 class FileTest : public testing::Test
 {
 protected:
@@ -115,7 +146,11 @@ protected:
     }
     short openDF(SInt8 perm = fsCurPerm)
     {
-        return open([](auto pbp){PBHOpenDFSync(pbp);}, perm);
+        return open([](auto pbp){
+            PBHOpenDFSync(pbp);
+            if(pbp->ioParam.ioResult == paramErr)
+                PBHOpenSync(pbp);
+        }, perm);
     }
     short openRF(SInt8 perm = fsCurPerm)
     {

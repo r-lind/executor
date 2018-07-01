@@ -53,11 +53,12 @@ void BasiliskFileItem::setFInfo(FInfo info)
     fs::ofstream(finf).write((char*)&info, sizeof(info));
 }
 
-void BasiliskFileItem::deleteFile()
+void BasiliskFileItem::deleteItem()
 {
     fs::remove(path());
     fs::path rsrc = path().parent_path() / ".rsrc" / path().filename();
     fs::path finf = path().parent_path() / ".finf" / path().filename();
-    fs::remove(rsrc);
-    fs::remove(finf);
+    boost::system::error_code ec;
+    fs::remove(rsrc, ec);
+    fs::remove(finf, ec);
 }
