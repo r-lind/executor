@@ -71,8 +71,13 @@ public:
 
 class FileItem : public Item
 {
+    friend class Executor::LocalVolume;
+    short dataWriteAccessRefNum = -1;
+    short resWriteAccessRefNum = -1;
+
 public:
     using Item::Item;
+
 
     virtual FInfo getFInfo() = 0;
     virtual void setFInfo(FInfo finfo) = 0;

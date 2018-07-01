@@ -307,6 +307,7 @@ struct LocalVolume::FCBExtension
     filecontrolblock *fcb;
     short refNum;
     std::unique_ptr<OpenFile> access;
+    std::shared_ptr<FileItem> file;
 
     FCBExtension() = default;
     FCBExtension(filecontrolblock *fcb, short refNum)
@@ -336,15 +337,33 @@ LocalVolume::FCBExtension& LocalVolume::openFCBX()
     return fcbExtensions[refNum];
 }
 
-void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork)
+void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8_t permission)
 {
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+    if(auto fileItem = std::dynamic_pointer_cast<FileItem>(item))
     {
+        short& writeAccessRef = fork == Fork::resource ? fileItem->resWriteAccessRefNum : fileItem->dataWriteAccessRefNum;
+
+        if(permission != fsRdPerm)
+        {
+            if(writeAccessRef > 0)
+            {
+                refNum = CW(writeAccessRef);
+                throw OSErrorException(opWrErr);
+            }
+        }
+
         auto access = fork == Fork::resource ? fileItem->openRF() : fileItem->open();
         FCBExtension& fcbx = openFCBX();
         fcbx.access = std::move(access);
         fcbx.fcb->fcbFlNum = CL(fileItem->cnid());
+        fcbx.file = fileItem;
         refNum = CW(fcbx.refNum);
+
+        if(permission != fsRdPerm)
+        {
+            writeAccessRef = fcbx.refNum;
+        }
+
     }
     else
         throw OSErrorException(paramErr);    // TODO: what's the correct error?
@@ -352,20 +371,20 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork)
 
 void LocalVolume::PBHOpenDF(HParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::data);
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::data, pb->ioParam.ioPermssn);
 }
 void LocalVolume::PBHOpenRF(HParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::resource);
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::resource, pb->ioParam.ioPermssn);
 }
 
 void LocalVolume::PBOpenDF(ParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::data);
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::data, pb->ioParam.ioPermssn);
 }
 void LocalVolume::PBOpenRF(ParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::resource);
+    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::resource, pb->ioParam.ioPermssn);
 }
 
 
@@ -682,8 +701,15 @@ void LocalVolume::PBWrite(ParmBlkPtr pb)
 }
 void LocalVolume::PBClose(ParmBlkPtr pb)
 {
-    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    short refNum = CW(pb->ioParam.ioRefNum);
+    auto& fcbx = getFCBX(refNum);
     fcbx.fcb->fcbFlNum = 0;
+
+    if(fcbx.file->resWriteAccessRefNum == refNum)
+        fcbx.file->resWriteAccessRefNum = -1;
+    if(fcbx.file->dataWriteAccessRefNum == refNum)
+        fcbx.file->dataWriteAccessRefNum = -1;
+
     fcbx = FCBExtension();
 }
 

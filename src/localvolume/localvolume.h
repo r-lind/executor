@@ -56,7 +56,7 @@ class LocalVolume : public Volume
 
     void createCommon(NonexistentFile file);
     void setFInfoCommon(Item& item, ParmBlkPtr pb);
-    void openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork);
+    void openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8_t permission);
     void deleteCommon(ItemPtr item);
 public:
     ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
