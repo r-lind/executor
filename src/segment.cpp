@@ -393,7 +393,10 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
             }
         }
         else
+        {
             path = (unsigned char*)""; /* TODO:  Some sort of problem here */
+            cinfo.hFileInfo.ioVRefNum = 0;
+        }
     }
     else
     {
@@ -402,8 +405,9 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
         path = (unsigned char *)alloca(len + 1);
         colon_colon_copy(path, uname);
         cinfo.hFileInfo.ioVRefNum = 0;
-        wpb.ioNamePtr = RM(path);
     }
+    wpb.ioNamePtr = RM(path);
+
     cinfo.hFileInfo.ioNamePtr = RM(path);
     cinfo.hFileInfo.ioFDirIndex = CWC(0);
     cinfo.hFileInfo.ioDirID = 0;
