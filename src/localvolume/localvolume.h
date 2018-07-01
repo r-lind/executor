@@ -20,15 +20,13 @@ namespace Executor
 class OpenFile;
 class MetaDataHandler;
 
-using DirID = long;
-
 class LocalVolume : public Volume
 {
     fs::path root;
-    long nextDirectory = 3;
-    std::map<fs::path, DirID> pathToId;
-
-    std::unordered_map<DirID, std::shared_ptr<DirectoryItem>> directories_; 
+    long nextCNID = 3;
+    std::map<fs::path, CNID> pathToId;
+    std::unordered_map<CNID, ItemPtr> items; 
+    std::vector<std::unique_ptr<MetaDataHandler>> handlers;
 
     std::shared_ptr<DirectoryItem> resolve(short vRef, long dirID);
     ItemPtr resolve(mac_string_view name, short vRef, long dirID);
@@ -45,10 +43,9 @@ class LocalVolume : public Volume
     void createCommon(DirectoryItem& parent, mac_string_view name);
     void setFInfoCommon(Item& item, ParmBlkPtr pb);
 public:
-    std::shared_ptr<DirectoryItem> lookupDirectory(const DirectoryItem& parent, const fs::path& path);
+    ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
+    CNID newCNID();
 
-    long lookupDirID(const fs::path& path);
-    std::vector<std::unique_ptr<MetaDataHandler>> handlers;
 
     mac_string getVolumeName() const;
 

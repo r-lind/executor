@@ -16,7 +16,7 @@ ItemPtr DirectoryHandler::handleDirEntry(const DirectoryItem& parent, const fs::
 {
     if(fs::is_directory(e.path()))
     {
-        return volume.lookupDirectory(parent, e.path());
+        return std::make_shared<DirectoryItem>(parent, e.path());
     }
     return nullptr;
 }
@@ -37,6 +37,7 @@ Item::Item(LocalVolume& vol, fs::path p)
     name_ = toMacRomanFilename(path_.filename());
 
     parID_ = 1;
+    cnid_ = 2;
 }
 
 Item::Item(const DirectoryItem& parent, fs::path p)
@@ -45,6 +46,7 @@ Item::Item(const DirectoryItem& parent, fs::path p)
     name_ = toMacRomanFilename(path_.filename());
 
     parID_ = parent.dirID();
+    cnid_ = volume_.newCNID();
 }
 
 std::unique_ptr<OpenFile> PlainFileItem::open()
@@ -62,13 +64,13 @@ void PlainFileItem::deleteFile()
 
 
 DirectoryItem::DirectoryItem(LocalVolume& vol, fs::path p)
-    : Item(vol, std::move(p)), dirID_(2)
+    : Item(vol, std::move(p))
 {
     name_ = vol.getVolumeName();
 }
 
-DirectoryItem::DirectoryItem(const DirectoryItem& parent, fs::path p, long dirID)
-    : Item(parent, std::move(p)), dirID_(dirID)
+DirectoryItem::DirectoryItem(const DirectoryItem& parent, fs::path p)
+    : Item(parent, std::move(p))
 {
 }
 
@@ -95,34 +97,18 @@ void DirectoryItem::updateCache()
     
     for(const auto& e : fs::directory_iterator(path_))
     {
-        bool hidden = false;
-        for(auto& handler : volume_.handlers)
+        if(ItemPtr item = volume_.getItemForDirEntry(*this, e))
         {
-            if(handler->isHidden(e))
+            mac_string nameUpr = item->name();
+            ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
+            auto [it, inserted] = contents_by_name_.emplace(nameUpr, item);
+            if(inserted)
             {
-                hidden = true;
-                break;
+                contents_.push_back(item);
             }
-        }
-        if(hidden)
-            continue;
-
-        for(auto& handler : volume_.handlers)
-        {
-            if(ItemPtr item = handler->handleDirEntry(*this, e))
+            else
             {
-                mac_string nameUpr = item->name();
-                ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-                auto [it, inserted] = contents_by_name_.emplace(nameUpr, item);
-                if(inserted)
-                {
-                    contents_.push_back(item);
-                }
-                else
-                {
-                    std::cout << "duplicate name mapping: " << e.path() << std::endl; 
-                }
-                break;
+                std::cout << "duplicate name mapping: " << e.path() << std::endl; 
             }
         }
     }
@@ -154,7 +140,7 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     : Volume(vcb), root(root)
 {
     pathToId[root] = 2;
-    directories_[2] = std::make_shared<DirectoryItem>(*this, root);
+    items[2] = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
     handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
@@ -162,29 +148,45 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
-std::shared_ptr<DirectoryItem> LocalVolume::lookupDirectory(const DirectoryItem& parent, const fs::path& path)
+ItemPtr LocalVolume::getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& entry)
 {
-    auto [it, inserted] = pathToId.emplace(path, nextDirectory);
-    if(inserted)
+    for(auto& handler : handlers)
+        if(handler->isHidden(entry))
+            return ItemPtr();
+
+    auto it = pathToId.find(entry.path());
+    if(it != pathToId.end())
+        return items.at(it->second);
+
+    for(auto& handler : handlers)
     {
-        DirID id = nextDirectory++;
-        auto dir = std::make_shared<DirectoryItem>(parent, path, id);
-        directories_.emplace(id, dir);
-        return dir;
+        if(ItemPtr item = handler->handleDirEntry(parent, entry))
+        {
+            pathToId.emplace(entry.path(), item->cnid());
+            items.emplace(item->cnid(), item);
+            return item;
+        }
     }
-    else
-        return directories_.at(it->second);
+
+    return ItemPtr();
+}
+
+CNID LocalVolume::newCNID()
+{
+    return nextCNID++;
 }
 
 std::shared_ptr<DirectoryItem> LocalVolume::resolve(short vRef, long dirID)
 {
     if(dirID)
     {
-        auto it = directories_.find(dirID);
-        if(it == directories_.end())
+        auto it = items.find(dirID);
+        if(it == items.end())
             throw OSErrorException(fnfErr);
+        else if(auto dirItem = std::dynamic_pointer_cast<DirectoryItem>(it->second))
+            return dirItem;
         else
-            return it->second;
+            throw OSErrorException(fnfErr); // not a directory
     }
     else if(vRef == 0)
     {
@@ -210,15 +212,8 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
 
     if(colon != mac_string_view::npos)
     {
-        if(colon == 0)
-        {
-            std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
-            return resolveRelative(dir, name);
-        }
-        else
-        {
-            return resolveRelative(directories_[2], mac_string_view(name.begin() + colon, name.end()));
-        }
+        std::shared_ptr<DirectoryItem> dir = resolve(vRef, colon == 0 ? dirID : 2);
+        return resolveRelative(dir, mac_string_view(name.begin() + colon, name.end()));
     }
     else
     {
@@ -329,7 +324,7 @@ void LocalVolume::PBHOpen(HParmBlkPtr pb)
     {
         FCBExtension& fcbx = openFCBX();
         fcbx.access = fileItem->open();
-        fcbx.fcb->fcbFlNum = CL(42);
+        fcbx.fcb->fcbFlNum = CL(fileItem->cnid());
         pb->ioParam.ioRefNum = CW(fcbx.refNum);
     }
     else
@@ -464,6 +459,7 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
     ItemPtr item = resolve(PascalStringView(inputName),
         CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID), CW(pb->hFileInfo.ioFDirIndex));
 
+    std::cout.clear();
     std::cout << "GetCatInfo: " << item->path() << std::endl;
     if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
     {
@@ -499,7 +495,7 @@ void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
 
         pb->hFileInfo.ioVRefNum = vcb.vcbVRefNum;
         pb->hFileInfo.ioFlParID = CL(fileItem->parID());
-
+        pb->hFileInfo.ioDirID = CL(fileItem->cnid());
         // ioFlStBlk
         // ioFlLgLen
         // ioFlPyLen
@@ -538,7 +534,7 @@ void LocalVolume::createCommon(DirectoryItem& parent, mac_string_view name)
             throw;
     }
 
-    // TODO: this is the responsible of the BasiliskHandler class
+    // TODO: this is the responsibility of the BasiliskHandler class
     fs::create_directory(parent.path() / ".rsrc");
     fs::create_directory(parent.path() / ".finf");
     fs::path fn = toUnicodeFilename(name);

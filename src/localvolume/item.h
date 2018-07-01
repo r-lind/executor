@@ -13,6 +13,8 @@ namespace Executor
 class LocalVolume;
 class OpenFile;
 
+using CNID = long;
+
 class DirectoryItem;
 class Item
 {
@@ -20,7 +22,8 @@ protected:
     LocalVolume& volume_;
     fs::path path_;
     mac_string name_;
-    long parID_;
+    CNID cnid_;
+    CNID parID_;
     Item(LocalVolume& vol, fs::path p);
 
 public:
@@ -31,7 +34,9 @@ public:
 
     const fs::path& path() const { return path_; }
 
-    long parID() const { return parID_; }
+    CNID parID() const { return parID_; }
+    CNID cnid() const { return cnid_; }
+
     const mac_string& name() const { return name_; }
 };
 
@@ -44,10 +49,8 @@ class DirectoryItem : public Item
     std::chrono::steady_clock::time_point   cache_timestamp_;
     bool    cache_valid_ = false;
 
-    long dirID_;
-
 public:
-    DirectoryItem(const DirectoryItem& parent, fs::path p, long dirID);
+    DirectoryItem(const DirectoryItem& parent, fs::path p);
     DirectoryItem(LocalVolume& vol, fs::path p);
 
     void flushCache();
@@ -56,7 +59,7 @@ public:
     ItemPtr resolve(mac_string_view name);
     ItemPtr resolve(int index);
 
-    long dirID() const { return dirID_; }
+    long dirID() const { return cnid(); }
 
     int countItems() { return contents_.size(); }
 };
