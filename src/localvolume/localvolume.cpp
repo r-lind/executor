@@ -665,7 +665,6 @@ void LocalVolume::PBSetVInfo(HParmBlkPtr pb)
 }
 void LocalVolume::PBFlushVol(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
 }
 void LocalVolume::PBUnmountVol(ParmBlkPtr pb)
 {
@@ -686,7 +685,7 @@ void LocalVolume::PBRead(ParmBlkPtr pb)
     size_t req = CL(pb->ioParam.ioReqCount);
     size_t act = fcbx.access->read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), req);
     pb->ioParam.ioActCount = CL(act);
-    fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + act );
+    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + act );
 
     if(act < req)
         throw OSErrorException(eofErr);
@@ -697,7 +696,7 @@ void LocalVolume::PBWrite(ParmBlkPtr pb)
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
     size_t n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
     pb->ioParam.ioActCount = CL(n);
-    fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + n );
+    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + n );
 }
 void LocalVolume::PBClose(ParmBlkPtr pb)
 {

@@ -323,6 +323,33 @@ TEST_F(FileTest, WriteRead)
     EXPECT_EQ(0, memcmp(buf1, buf2, 13));
 }
 
+
+TEST_F(FileTest, ReadEOF)
+{
+    hello();
+    open();
+
+    char buf1[] = "Hello, world.";
+    char buf2[100];
+
+    ParamBlockRec pb;
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioRefNum = refNum;
+    pb.ioParam.ioPosMode = fsFromStart;
+    pb.ioParam.ioPosOffset = 0;
+    pb.ioParam.ioBuffer = buf2;
+    pb.ioParam.ioReqCount = 26;
+    PBReadSync(&pb);
+
+    EXPECT_EQ(eofErr, pb.ioParam.ioResult);
+    EXPECT_EQ(13, pb.ioParam.ioActCount);
+    EXPECT_EQ(13, pb.ioParam.ioPosOffset);
+
+    EXPECT_EQ(0, memcmp(buf1, buf2, 13));
+}
+
 TEST_F(FileTest, CaseInsensitive)
 {
     CInfoPBRec ipb;
