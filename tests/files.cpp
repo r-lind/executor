@@ -625,3 +625,93 @@ TEST_F(FileTest, UpDirRelative)
 
     EXPECT_EQ(noErr, hpb.ioParam.ioResult);
 }
+
+
+TEST_F(FileTest, Rename)
+{
+    HParamBlockRec hpb;
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBDirCreateSync(&hpb);
+
+    ASSERT_EQ(noErr, hpb.ioParam.ioResult);
+
+    long tempDirID = hpb.fileParam.ioDirID;
+
+    CInfoPBRec ipb;
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    ipb.hFileInfo.ioNamePtr = file1;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+
+    long cnid = ipb.hFileInfo.ioDirID;
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+    EXPECT_GT(cnid, 0);
+     
+
+    Str255 fileName2 = "\ptemp-test Renamed";
+    Str255 badName = "\p:temp-test-dir:blah";
+
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    hpb.ioParam.ioMisc = (Ptr)badName;
+    
+    PBHRenameSync(&hpb);
+    EXPECT_EQ(bdNamErr, hpb.ioParam.ioResult);
+
+
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    hpb.ioParam.ioMisc = (Ptr)fileName2;
+    
+    PBHRenameSync(&hpb);
+    OSErr renameErr = hpb.ioParam.ioResult;
+    EXPECT_EQ(noErr, renameErr);
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    ipb.hFileInfo.ioNamePtr = fileName2;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+    EXPECT_EQ(cnid, ipb.hFileInfo.ioDirID);
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    ipb.hFileInfo.ioNamePtr = file1;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+
+    EXPECT_EQ(fnfErr, ipb.hFileInfo.ioResult);
+
+
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBHDeleteSync(&hpb);
+
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+
+    if(renameErr == noErr)
+        memcpy(file1, fileName2, fileName2[0]+1);
+}

@@ -54,6 +54,14 @@ void Item::deleteItem()
     fs::remove(path());
 }
 
+void Item::renameItem(mac_string_view newName)
+{
+    fs::path newPath = path().parent_path() / toUnicodeFilename(newName);
+    fs::rename(path(), newPath);
+    path_ = std::move(newPath);
+    name_ = newName;
+}
+
 std::unique_ptr<OpenFile> PlainFileItem::open()
 {
     return std::make_unique<PlainDataFork>(path_);
@@ -296,11 +304,6 @@ mac_string LocalVolume::getVolumeName() const
     return mac_string(mac_string_view(vcb.vcbVN));
 }
 
-
-void LocalVolume::PBHRename(HParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 
 struct LocalVolume::FCBExtension
 {
@@ -620,6 +623,47 @@ void LocalVolume::PBHDelete(HParmBlkPtr pb)
     deleteCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)));
 }
 
+void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
+{
+    if(newName.find(':') != mac_string_view::npos)
+        throw OSErrorException(bdNamErr);
+
+    auto& parent = dynamic_cast<DirectoryItem&>(*items.at(item->parID()));
+    try
+    {
+        parent.resolve(newName);
+    }
+    catch(OSErrorException& e)
+    {
+        if(e.code == fnfErr)
+            ;
+        else if(e.code == noErr)
+            throw OSErrorException(dupFNErr);
+        else
+            throw;
+    }
+
+    fs::path oldPath = item->path();
+    item->renameItem(newName);
+
+    pathToId.erase(item->path());
+    pathToId.emplace(item->path(), item->cnid());
+    parent.flushCache();
+}
+
+
+void LocalVolume::PBRename(ParmBlkPtr pb)
+{
+    renameCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), 
+                MR(guest_cast<StringPtr>(pb->ioParam.ioMisc)));
+}
+
+void LocalVolume::PBHRename(HParmBlkPtr pb)
+{
+    renameCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), 
+                MR(guest_cast<StringPtr>(pb->ioParam.ioMisc)));
+}
+
 void LocalVolume::PBOpenWD(WDPBPtr pb)
 {
     ItemPtr item = resolve(MR(pb->ioNamePtr), CW(pb->ioVRefNum), CL(pb->ioWDDirID));
@@ -655,10 +699,7 @@ void LocalVolume::PBSetFVers(ParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);
 }
-void LocalVolume::PBRename(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
+
 void LocalVolume::PBSetVInfo(HParmBlkPtr pb)
 {
     throw OSErrorException(paramErr);

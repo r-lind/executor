@@ -62,3 +62,23 @@ void BasiliskFileItem::deleteItem()
     fs::remove(rsrc, ec);
     fs::remove(finf, ec);
 }
+
+void BasiliskFileItem::renameItem(mac_string_view newName)
+{
+    fs::path newFN = toUnicodeFilename(newName);
+    fs::path newPath = path().parent_path() / newFN;
+
+    fs::path rsrcOld = path().parent_path() / ".rsrc" / path().filename();
+    fs::path finfOld = path().parent_path() / ".finf" / path().filename();
+    fs::path rsrcNew = path().parent_path() / ".rsrc" / newFN;
+    fs::path finfNew = path().parent_path() / ".finf" / newFN;
+
+    fs::rename(path(), newPath);
+
+    boost::system::error_code ec;
+    fs::rename(rsrcOld, rsrcNew, ec);
+    fs::rename(finfOld, finfNew, ec);
+
+    path_ = std::move(newPath);
+    name_ = newName;
+}

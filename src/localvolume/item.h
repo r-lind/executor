@@ -40,6 +40,7 @@ public:
     const mac_string& name() const { return name_; }
 
     virtual void deleteItem();
+    virtual void renameItem(mac_string_view newName);
 };
 
 using ItemPtr = std::shared_ptr<Item>;
@@ -121,6 +122,7 @@ public:
     virtual std::unique_ptr<OpenFile> openRF();
 
     virtual void deleteItem();
+    virtual void renameItem(mac_string_view newName);
 };
 
 class AppleDoubleFileItem : public FileItem
@@ -134,6 +136,7 @@ public:
     virtual std::unique_ptr<OpenFile> openRF();
 
     virtual void deleteItem();
+    virtual void renameItem(mac_string_view newName);
 };
 
 

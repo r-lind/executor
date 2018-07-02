@@ -58,6 +58,7 @@ class LocalVolume : public Volume
     void setFInfoCommon(Item& item, ParmBlkPtr pb);
     void openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8_t permission);
     void deleteCommon(ItemPtr item);
+    void renameCommon(ItemPtr item, mac_string_view newName);
 public:
     ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
     CNID newCNID();
