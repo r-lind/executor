@@ -169,8 +169,12 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     items[2] = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
+#ifdef MACOSX
+    handlers.push_back(std::make_unique<MacHandler>());
+#else
     handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
     handlers.push_back(std::make_unique<BasiliskHandler>(*this));
+#endif
     handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
@@ -646,7 +650,7 @@ void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
     fs::path oldPath = item->path();
     item->renameItem(newName);
 
-    pathToId.erase(item->path());
+    pathToId.erase(oldPath);
     pathToId.emplace(item->path(), item->cnid());
     parent.flushCache();
 }
@@ -833,7 +837,6 @@ void LocalVolume::PBSetEOF(ParmBlkPtr pb)
 
 void LocalVolume::PBFlushFile(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
 }
 
 void Executor::initLocalVol()

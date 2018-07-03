@@ -139,5 +139,16 @@ public:
     virtual void renameItem(mac_string_view newName);
 };
 
+class MacFileItem : public FileItem
+{
+public:
+    using FileItem::FileItem;
+
+    virtual FInfo getFInfo();
+    virtual void setFInfo(FInfo finfo);
+    virtual std::unique_ptr<OpenFile> open();
+    virtual std::unique_ptr<OpenFile> openRF();
+};
+
 
 }

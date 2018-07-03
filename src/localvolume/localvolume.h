@@ -162,6 +162,10 @@ public:
     virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
 };
 
+class MacHandler : public MetaDataHandler
+{
+    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
+};
 
 class OpenFile
 {
