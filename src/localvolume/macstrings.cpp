@@ -216,9 +216,9 @@ mac_string Executor::toMacRomanFilename(const fs::path& p)
         // incorrectly-encoded filename on a unix system
 
         const std::string& s = p.string();
-        for(char c : ws)
+        for(char c : s)
         {
-            if(dst.size() == 30 && ws.size() > 31)
+            if(dst.size() == 30 && s.size() > 31)
             {
                 dst.push_back(0xC9); // ellipsis
                 break;
