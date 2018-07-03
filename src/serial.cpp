@@ -136,9 +136,9 @@ OSErr Executor::SerSetBuf(INTEGER rn, Ptr p, INTEGER len) /* IMII-251 */
 
 #define SERHSHAKE 10 /* IMII-251 */
 
-OSErr Executor::SerHShake(INTEGER rn, SerShk flags) /* IMII-251 */
+OSErr Executor::SerHShake(INTEGER rn, const SerShk *flags) /* IMII-251 */
 {
-    return Control(rn, SERHSHAKE, (Ptr)&flags);
+    return Control(rn, SERHSHAKE, (Ptr)flags);
 }
 
 #define SERSETBRK 12 /* IMII-252 */
@@ -267,7 +267,7 @@ static const char *specialname(ParmBlkPtr pbp, const char **lockfilep,
             *lockfilep = "/usr/spool/uucp/LCK/LCK..cufa";
             *tempfilep = "/usr/spool/uucp/LCK/etempcufa";
 #elif defined(LINUX)
-            retval = "/dev/cua0";
+            retval = "/dev/ttyUSB1";
             *lockfilep = 0; /* for now */
             *tempfilep = 0; /* for now */
 #endif
@@ -314,7 +314,7 @@ void callcomp(ParmBlkPtr pbp, ProcPtr comp, OSErr err)
 static const char *lockname;
 #endif
 
-OSErr Executor::ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     DCtlPtr otherp; /* auto due to old compiler bug */
@@ -407,7 +407,7 @@ OSErr Executor::ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     DOCOMPLETION(pbp, err);
 }
 
-OSErr Executor::ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+OSErr Executor::C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;
@@ -856,7 +856,7 @@ static OSErr flow(LONGINT fd, LONGINT flag)
 
 #define SERKILLIO 1
 
-OSErr Executor::ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;
@@ -957,7 +957,7 @@ OSErr Executor::ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
  * NOTE:  SERSTATUS lies about everything except rdPend.
  */
 
-OSErr Executor::ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;
@@ -1031,10 +1031,10 @@ static void restorecloseanddispose(hiddenh h)
     close(HxX(h, fd));
     Uunlink(lockname);
 #endif
-    DisposHandle((Handle)h);
+    DisposeHandle((Handle)h);
 }
 
-OSErr Executor::ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+OSErr Executor::C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;

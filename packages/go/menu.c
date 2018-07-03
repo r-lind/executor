@@ -104,7 +104,7 @@ domenu (long choice)
       else
 	{
 	  mh = GetMHandle (FIRSTMENU);
-	  GetItem (mh, menu_id, apname);
+	  GetMenuItemText (mh, menu_id, apname);
 	  OpenDeskAcc (apname);
 	}
     }

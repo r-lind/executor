@@ -14,7 +14,7 @@
 
 using namespace Executor;
 
-void Executor::C_LFind(GUEST<INTEGER> *offsetp, GUEST<INTEGER> *lenp,
+void Executor::C_LGetCellDataLocation(GUEST<INTEGER> *offsetp, GUEST<INTEGER> *lenp,
                        Cell cell, ListHandle list) /* IMIV-274 */
 {
     GUEST<INTEGER> *ip;
@@ -135,7 +135,7 @@ BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
     swappedcell = *cellp;
     /* TODO: SPEEDUP:  the following is a stupid way to do the loop, instead ip
 		 and ep should be used! */
-    while((C_LFind(&offS, &lenS, cell, list), len = CW(lenS), off = CW(offS),
+    while((C_LGetCellDataLocation(&offS, &lenS, cell, list), len = CW(lenS), off = CW(offS),
            len != -1)
           && CALLCMP(dp, (Ptr)STARH(HxP(list, cells)) + off, dl, len, fp) != 0)
         if(!C_LNextCell(true, true, &swappedcell, list))

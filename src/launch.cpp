@@ -43,7 +43,6 @@
 #include "rsys/sounddriver.h"
 #include "rsys/prefs.h"
 #include "rsys/flags.h"
-#include "rsys/aboutpanel.h"
 #include "rsys/segment.h"
 #include "rsys/tesave.h"
 #include "rsys/blockinterrupts.h"
@@ -79,6 +78,10 @@
 
 #include "rsys/logging.h"
 
+#include <rsys/builtinlibs.h>
+#include <rsys/cpu.h>
+#include <PowerCore.h>
+
 using namespace Executor;
 
 static bool ppc_launch_p = false;
@@ -89,10 +92,6 @@ void Executor::ROMlib_set_ppc(bool val)
 }
 
 #define CONFIGEXTENSION ".ecf"
-#define OLD_CONFIG_EXTENSION ".econf" /* must be longer than configextension */
-
-FILE *Executor::configfile;
-int32_t Executor::ROMlib_options;
 
 static int16_t name0stripappl(StringPtr name)
 {
@@ -116,39 +115,6 @@ static int16_t name0stripappl(StringPtr name)
  * the user has changed things by hand).
  */
 
-int Executor::ROMlib_nowarn32;
-
-std::string Executor::ROMlib_configfilename;
-
-int Executor::ROMlib_pretend_help = false;
-int Executor::ROMlib_pretend_alias = false;
-int Executor::ROMlib_pretend_edition = false;
-int Executor::ROMlib_pretend_script = false;
-
-void remalloc(char **strp)
-{
-    char *new_string;
-    long len;
-
-    if(*strp)
-    {
-        len = strlen(*strp) + 1;
-        new_string = (char *)malloc(len);
-        if(new_string)
-            memcpy(new_string, *strp, len);
-        *strp = new_string;
-    }
-}
-
-void reset_string(char **strp)
-{
-    if(*strp)
-        free(*strp);
-    *strp = 0;
-}
-
-int Executor::ROMlib_desired_bpp;
-
 static void ParseConfigFile(StringPtr exefname, OSType type)
 {
     int strwidth;
@@ -156,19 +122,14 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
     char *dot;
     INTEGER fname0;
 
-    reset_string(&ROMlib_WindowName);
-    reset_string(&ROMlib_Comments);
+    ROMlib_WindowName.clear();
+    ROMlib_Comments.clear();
     ROMlib_desired_bpp = 0;
     fname0 = name0stripappl(exefname);
     std::string appname(exefname + 1, exefname + 1 + fname0);
 
     ROMlib_configfilename = ROMlib_ConfigurationFolder + "/" + appname + CONFIGEXTENSION;
     configfile = Ufopen(ROMlib_configfilename.c_str(), "r");
-    if(!configfile)
-    {
-        ROMlib_configfilename = ROMlib_ConfigurationFolder + "/" + appname + OLD_CONFIG_EXTENSION;
-        configfile = Ufopen(ROMlib_configfilename.c_str(), "r");
-    }
     if(!configfile && type != 0)
     {
         char buf[16];
@@ -185,7 +146,7 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
 
 #if 0	
 	if (ROMlib_options & ROMLIB_NOCLOCK_BIT)
-	    ROMlib_noclock = 1;
+	    ROMlib_noclock = true;
 #endif
         if(ROMlib_options & ROMLIB_BLIT_OS_BIT)
             ROMlib_WriteWhen(WriteInOSEvent);
@@ -201,10 +162,6 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
 #endif
         if(ROMlib_options & ROMLIB_REFRESH_BIT)
             ROMlib_refresh = 10;
-        if(ROMlib_options & ROMLIB_DIRTY_VARIANT_BIT)
-            ROMlib_dirtyvariant = true;
-        else
-            ROMlib_dirtyvariant = false;
         if(ROMlib_options & ROMLIB_SOUNDOFF_BIT)
             ROMlib_PretendSound = soundoff;
         if(ROMlib_options & ROMLIB_PRETENDSOUND_BIT)
@@ -262,34 +219,8 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
         fclose(configfile);
     }
 
-#if !defined(VDRIVER_DISPLAYED_IN_WINDOW)
-
-#define SetTitle(x)            \
-    do                         \
-    {                          \
-        ROMlib_WindowName = x; \
-    } while(0)
-
-#else
-
-#define SetTitle(x)                   \
-    do                                \
-    {                                 \
-        char *_x;                     \
-        char *_title;                 \
-        int len;                      \
-                                      \
-        _x = (x);                     \
-        len = strlen(_x) + 1;         \
-        _title = (char *)alloca(len); \
-        memcpy(_title, _x, len);      \
-        ROMlib_SetTitle(_title);      \
-    } while(0)
-
-#endif
-
-    if(ROMlib_WindowName)
-        SetTitle(ROMlib_WindowName);
+    if(!ROMlib_WindowName.empty())
+        ROMlib_SetTitle(ROMlib_WindowName.c_str());
     else
     {
         strwidth = fname0;
@@ -300,7 +231,7 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
         if(dot && (strcmp(dot, ".appl") == 0 || strcmp(dot, ".APPL") == 0))
             *dot = 0;
         // TODO: convert from MacRoman to UTF-8 (at least for SDL2 frontend)
-        SetTitle(newtitle);
+        ROMlib_SetTitle(newtitle);
     }
 #if 0
     if (ROMlib_ScreenLocation.first != INITIALPAIRVALUE)
@@ -310,16 +241,10 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
 	ROMlib_ShowScreen();
     }
 #endif
-
-    remalloc(&ROMlib_WindowName);
-    remalloc(&ROMlib_Comments);
 }
 
 static void beginexecutingat(LONGINT startpc)
 {
-#define ALINETRAPNUMBER 0xA
-    trap_install_handler(ALINETRAPNUMBER, alinehandler, (void *)0);
-
     EM_D0 = 0;
     EM_D1 = 0xFFFC000;
     EM_D2 = 0;
@@ -342,8 +267,6 @@ static void beginexecutingat(LONGINT startpc)
     C_ExitToShell();
 }
 
-LONGINT Executor::ROMlib_appbit;
-
 size_info_t Executor::size_info;
 
 #define VERSFMT "(0x%02x, 0x%02x, 0x%02x, 0x%02x, %d)"
@@ -351,20 +274,6 @@ size_info_t Executor::size_info;
 
 LONGINT Executor::ROMlib_creator;
 
-void *ROMlib_foolgcc; /* to force the alloca to be done */
-
-void Executor::SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
-{
-    ParamBlockRec pbr;
-    Str255 save_name;
-
-    str255assign(save_name, filename);
-    pbr.volumeParam.ioNamePtr = RM((StringPtr)save_name);
-    pbr.volumeParam.ioVolIndex = CWC(-1);
-    pbr.volumeParam.ioVRefNum = CW(vrefnum);
-    PBGetVInfo(&pbr, false);
-    LM(SFSaveDisk) = CW(-CW(pbr.volumeParam.ioVRefNum));
-}
 
 uint32_t Executor::ROMlib_version_long;
 
@@ -409,24 +318,27 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
     cfirp = ROMlib_find_cfrg(cfrg0, desired_arch, kApplicationCFrag,
                              (StringPtr) "");
 
-#if(defined(powerpc) || defined(__ppc__)) && !defined(CFM_PROBLEMS)
     if(cfirp)
     {
-        Ptr mainAddr;
+        GUEST<Ptr> mainAddr;
         Str255 errName;
-        ConnectionID c_id;
+        GUEST<ConnectionID> c_id;
 
-        ROMlib_release_tracking_values();
+        unsigned char empty[] = { 0 };
+
+        //ROMlib_release_tracking_values();
 
         if(CFIR_LOCATION(cfirp) == kOnDiskFlat)
         {
             // #warning were ignoring a lot of the cfir attributes
-            GetDiskFragment(fsp, CFIR_OFFSET_TO_FRAGMENT(cfirp),
-                            CFIR_FRAGMENT_LENGTH(cfirp), "",
+           OSErr err = GetDiskFragment(fsp, CFIR_OFFSET_TO_FRAGMENT(cfirp),
+                            CFIR_FRAGMENT_LENGTH(cfirp), empty,
                             kLoadLib,
                             &c_id,
                             &mainAddr,
                             errName);
+            fprintf(stderr, "GetDiskFragment -> err == %d\n", err);
+
         }
         else if(CFIR_LOCATION(cfirp) == kOnDiskSegmented)
         {
@@ -438,21 +350,35 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             id = CFIR_FRAGMENT_LENGTH(cfirp);
             h = GetResource(typ, id);
             HLock(h);
-            GetMemFragment(STARH(h), GetHandleSize(h), "", kLoadLib,
+            GetMemFragment(STARH(h), GetHandleSize(h), empty, kLoadLib,
                            &c_id, &mainAddr, errName);
 
             fprintf(stderr, "Memory leak from segmented fragment\n");
         }
         {
-            uint32_t new_toc;
-            void *new_pc;
+            void *mainAddr1 = (void*) MR(mainAddr);
+            uint32_t new_toc = CL( ((GUEST<uint32_t>*)mainAddr1)[1] );
+            uint32_t new_pc = CL( ((GUEST<uint32_t>*)mainAddr1)[0] );
 
-            new_toc = ((uint32_t *)mainAddr)[1];
-            new_pc = ((void **)mainAddr)[0];
-            ppc_call(new_toc, new_pc, 0);
+            printf("ppc start: r2 = %08x, %08x\n", new_toc, new_pc);
+
+            PowerCore& cpu = getPowerCore();
+            cpu.r[2] = new_toc;
+            cpu.r[1] = EM_A7-1024;
+            cpu.lr = 0xFFFFFFFC;
+            cpu.CIA = new_pc;
+
+            cpu.syscall = &builtinlibs::handleSC;
+
+            cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
+            cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
+            cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
+            cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
+
+            //C_Debugger();
+            cpu.execute();
         }
     }
-#endif
 
     C_ExitToShell();
 }
@@ -675,9 +601,6 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     LM(TheZone) = LM(ApplZone);
     ROMlib_memnomove_p = true;
 
-#if defined(NEXTSTEP)
-    ROMlib_startapp();
-#endif
     /*
  * NOTE: this memcpy has to be done after all local variables have been used
  *	 because it will quite possibly smash stuff that's on our stack.
@@ -798,9 +721,7 @@ static void reset_low_globals(void)
     GUEST<char> saveKeyMap[sizeof_KeyMap];
 
     GUEST<Byte> saveFinderName[sizeof(LM(FinderName))];
-    virtual_int_state_t bt;
 
-    bt = block_virtual_ints();
     saveSysZone = LM(SysZone);
     saveTicks = LM(Ticks);
     saveBootDrive = LM(BootDrive);
@@ -893,7 +814,6 @@ static void reset_low_globals(void)
 
     LM(MBDFHndl) = saveMBDFHndl;
     LM(WMgrCPort) = saveWMgrCPort;
-    LM(WindowList) = NULL;
     memcpy(LM(FinderName), saveFinderName, sizeof(LM(FinderName)));
 
     LM(DABeeper) = saveDABeeper;
@@ -964,9 +884,13 @@ static void reset_low_globals(void)
     LM(MainDevice) = saveMainDevice;
     LM(DeviceList) = saveDeviceList;
 
-    restore_virtual_ints(bt);
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x20) = save20;
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x28) = save28;
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x58) = save58;
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x5C) = save5C;
 
     LM(nilhandle) = 0; /* so nil dereferences "work" */
+    LM(WindowList) = NULL;
 
     LM(CrsrBusy) = 0;
     LM(TESysJust) = 0;
@@ -1003,14 +927,6 @@ static void reset_low_globals(void)
     LM(SysVersion) = CW(system_version);
     LM(FSFCBLen) = CWC(94);
 
-    /*
- * TODO:  how does this relate to Launch?
- */
-    /* Set up default floating point environment. */
-    {
-        INTEGER env = 0;
-        ROMlib_Fsetenv(&env, 0);
-    }
 
     LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
 
@@ -1063,10 +979,6 @@ static void reset_low_globals(void)
 
     LM(TheZone) = LM(ApplZone);
 
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x20) = save20;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x28) = save28;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x58) = save58;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x5C) = save5C;
 
     LM(HiliteMode) = CB(0xFF); /* I think this is correct */
     LM(ROM85) = CWC(0x3FFF); /* We be color now */
@@ -1091,6 +1003,16 @@ static void reset_low_globals(void)
     LM(SysEvtMask) = CWC(~(1L << keyUp)); /* EVERYTHING except keyUp */
     LM(SdVolume) = 7; /* for Beebop 2 */
     LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+
+        /*
+ * TODO:  how does this relate to Launch?
+ */
+    /* Set up default floating point environment. */
+    {
+        INTEGER env = 0;
+        ROMlib_Fsetenv(&env, 0);
+    }
+
 }
 
 static void reset_traps(void)

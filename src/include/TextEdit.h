@@ -544,15 +544,15 @@ PASCAL_TRAP(TESetText, 0xA9CF);
 extern CharsHandle C_TEGetText(TEHandle teh);
 PASCAL_TRAP(TEGetText, 0xA9CB);
 
-extern void C_TESetJust(INTEGER j, TEHandle teh);
-PASCAL_TRAP(TESetJust, 0xA9DF);
+extern void C_TESetAlignment(INTEGER j, TEHandle teh);
+PASCAL_TRAP(TESetAlignment, 0xA9DF);
 
 extern void C_TEUpdate(Rect *r, TEHandle teh);
 PASCAL_TRAP(TEUpdate, 0xA9D3);
 
-extern void C_TextBox(Ptr p, LONGINT ln, Rect *r,
+extern void C_TETextBox(Ptr p, LONGINT ln, Rect *r,
                                   INTEGER j);
-PASCAL_TRAP(TextBox, 0xA9CE);
+PASCAL_TRAP(TETextBox, 0xA9CE);
 extern void C_TEScroll(INTEGER dh, INTEGER dv, TEHandle teh);
 PASCAL_TRAP(TEScroll, 0xA9DD);
 
@@ -584,21 +584,21 @@ PASCAL_TRAP(TESelView, 0xA811);
 extern void C_TEAutoView(BOOLEAN autoflag,
                                      TEHandle teh);
 PASCAL_TRAP(TEAutoView, 0xA813);
-extern TEHandle C_TEStylNew(Rect *dst, Rect *view);
-PASCAL_TRAP(TEStylNew, 0xA83E);
+extern TEHandle C_TEStyleNew(Rect *dst, Rect *view);
+PASCAL_TRAP(TEStyleNew, 0xA83E);
 
-extern void C_SetStylHandle(TEStyleHandle theHandle,
+extern void C_TESetStyleHandle(TEStyleHandle theHandle,
                                         TEHandle teh);
-PASCAL_SUBTRAP(SetStylHandle, 0xA83D, 0x0005, TEDispatch);
-extern TEStyleHandle C_GetStylHandle(TEHandle teh);
-PASCAL_SUBTRAP(GetStylHandle, 0xA83D, 0x0004, TEDispatch);
+PASCAL_SUBTRAP(TESetStyleHandle, 0xA83D, 0x0005, TEDispatch);
+extern TEStyleHandle C_TEGetStyleHandle(TEHandle teh);
+PASCAL_SUBTRAP(TEGetStyleHandle, 0xA83D, 0x0004, TEDispatch);
 
-extern StScrpHandle C_GetStylScrap(TEHandle teh);
-PASCAL_SUBTRAP(GetStylScrap, 0xA83D, 0x0006, TEDispatch);
+extern StScrpHandle C_TEGetStyleScrapHandle(TEHandle teh);
+PASCAL_SUBTRAP(TEGetStyleScrapHandle, 0xA83D, 0x0006, TEDispatch);
 
-extern void C_TEStylInsert(Ptr text, LONGINT length,
+extern void C_TEStyleInsert(Ptr text, LONGINT length,
                                        StScrpHandle hST, TEHandle teh);
-PASCAL_SUBTRAP(TEStylInsert, 0xA83D, 0x0007, TEDispatch);
+PASCAL_SUBTRAP(TEStyleInsert, 0xA83D, 0x0007, TEDispatch);
 extern INTEGER C_TEGetOffset(Point pt, TEHandle teh);
 PASCAL_TRAP(TEGetOffset, 0xA83C);
 
@@ -611,8 +611,8 @@ extern void C_TEGetStyle(INTEGER offset,
                                      TextStyle *theStyle, GUEST<INTEGER> *lineHeight, GUEST<INTEGER> *fontAscent,
                                      TEHandle teh);
 PASCAL_SUBTRAP(TEGetStyle, 0xA83D, 0x0003, TEDispatch);
-extern void C_TEStylPaste(TEHandle teh);
-PASCAL_SUBTRAP(TEStylPaste, 0xA83D, 0x0000, TEDispatch);
+extern void C_TEStylePaste(TEHandle teh);
+PASCAL_SUBTRAP(TEStylePaste, 0xA83D, 0x0000, TEDispatch);
 
 extern void C_TESetStyle(INTEGER mode, TextStyle *newStyle,
                                      BOOLEAN redraw, TEHandle teh);
@@ -623,9 +623,9 @@ PASCAL_SUBTRAP(TEReplaceStyle, 0xA83D, 0x0002, TEDispatch);
 extern BOOLEAN C_TEContinuousStyle(GUEST<INTEGER> *modep,
                                                TextStyle *thestyle, TEHandle teh);
 PASCAL_SUBTRAP(TEContinuousStyle, 0xA83D, 0x000A, TEDispatch);
-extern void C_SetStylScrap(LONGINT start, LONGINT stop,
+extern void C_TEUseStyleScrap(LONGINT start, LONGINT stop,
                                        StScrpHandle newstyles, BOOLEAN redraw, TEHandle teh);
-PASCAL_SUBTRAP(SetStylScrap, 0xA83D, 0x000B, TEDispatch);
+PASCAL_SUBTRAP(TEUseStyleScrap, 0xA83D, 0x000B, TEDispatch);
 extern void C_TECustomHook(INTEGER sel, GUEST<ProcPtr> *addr,
                                        TEHandle teh);
 PASCAL_SUBTRAP(TECustomHook, 0xA83D, 0x000C, TEDispatch);
@@ -656,16 +656,16 @@ PASCAL_TRAP(TEActivate, 0xA9D8);
 extern void C_TEDeactivate(TEHandle teh);
 PASCAL_TRAP(TEDeactivate, 0xA9D9);
 
-extern void SetWordBreak(ProcPtr wb, TEHandle teh);
-extern void SetClikLoop(ProcPtr cp, TEHandle teh);
+extern void TESetWordBreak(ProcPtr wb, TEHandle teh);
+extern void TESetClickLoop(ProcPtr cp, TEHandle teh);
 extern void C_TECalText(TEHandle teh);
 PASCAL_TRAP(TECalText, 0xA9D0);
 
 extern OSErr TEFromScrap(void);
 extern OSErr TEToScrap(void);
 extern Handle TEScrapHandle(void);
-extern LONGINT TEGetScrapLen(void);
-extern void TESetScrapLen(LONGINT ln);
+extern LONGINT TEGetScrapLength(void);
+extern void TESetScrapLength(LONGINT ln);
 extern int16_t C_TEFeatureFlag(int16_t feature, int16_t action,
                                            TEHandle te);
 PASCAL_SUBTRAP(TEFeatureFlag, 0xA83D, 0x000E, TEDispatch);

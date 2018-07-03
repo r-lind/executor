@@ -14,7 +14,7 @@ int Executor::host_cursor_depth = 1;
 
 /* Window manager interface functions */
 
-void Executor::ROMlib_SetTitle(char *title)
+void Executor::ROMlib_SetTitle(const char *title)
 {
     SDL_WM_SetCaption(title, "executor");
 }

@@ -8,32 +8,35 @@
 
  */
 
+#include <stdint.h>
+#include <utility>
+#include <string>
+
 namespace Executor
 {
-
-typedef struct
-{
-    LONGINT first;
-    LONGINT second;
-} pair_t;
-
-extern pair_t ROMlib_ScreenSize;
-extern pair_t ROMlib_MacSize;
-extern pair_t ROMlib_ScreenLocation;
+extern std::pair<int,int> ROMlib_ScreenSize;
+extern std::pair<int,int> ROMlib_MacSize;
+extern std::pair<int,int> ROMlib_ScreenLocation;
 extern int32_t ROMlib_options;
-extern char *ROMlib_WindowName;
-extern char *ROMlib_Comments;
+extern std::string ROMlib_WindowName;
+extern std::string ROMlib_Comments;
+extern std::string ROMlib_win32_token;
+extern std::string ROMlib_new_printer_name;
+extern std::string ROMlib_new_label;
+
+extern int ROMlib_AppleChar;
+
 extern int ROMlib_desired_bpp;
 
 #define ROMLIB_NOCLOCK_BIT (1 << 0)
 #define ROMLIB_DEBUG_BIT (1 << 1)
 #define ROMLIB_REFRESH_BIT (1 << 2)
-#define ROMLIB_DIRTY_VARIANT_BIT (1 << 3)
+#define ROMLIB_DIRTY_VARIANT_BIT (1 << 3)   /* unused */
 /*
  * NOTE: Don't change ROMLIB_STRIPADDRESSHACK_BIT.  It is assumed to be 1 << 4
  * in __StripAddress in stubs.s
  */
-#define ROMLIB_STRIPADDRESSHACK_BIT (1 << 4)
+#define ROMLIB_STRIPADDRESSHACK_BIT (1 << 4)     /* unused */
 #define ROMLIB_BLIT_OFTEN_BIT (1 << 5)
 #define ROMLIB_BLIT_OS_BIT (1 << 6)
 #define ROMLIB_BLIT_TRAP_BIT (1 << 7)

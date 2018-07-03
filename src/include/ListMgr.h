@@ -92,9 +92,9 @@ enum
 
 DISPATCHER_TRAP(Pack0, 0xA9E7, StackW);
 
-extern void C_LFind(GUEST<INTEGER> *offsetp,
+extern void C_LGetCellDataLocation(GUEST<INTEGER> *offsetp,
                                 GUEST<INTEGER> *lenp, Cell cell, ListHandle list);
-PASCAL_SUBTRAP(LFind, 0xA9E7, 0x0034, Pack0);
+PASCAL_SUBTRAP(LGetCellDataLocation, 0xA9E7, 0x0034, Pack0);
 extern BOOLEAN C_LNextCell(BOOLEAN hnext,
                                        BOOLEAN vnext, GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LNextCell, 0xA9E7, 0x0048, Pack0);
@@ -128,9 +128,9 @@ PASCAL_SUBTRAP(LDispose, 0xA9E7, 0x0028, Pack0);
 extern void C_LDraw(Cell cell,
                                 ListHandle list);
 PASCAL_SUBTRAP(LDraw, 0xA9E7, 0x0030, Pack0);
-extern void C_LDoDraw(BOOLEAN draw,
+extern void C_LSetDrawingMode(BOOLEAN draw,
                                   ListHandle list);
-PASCAL_SUBTRAP(LDoDraw, 0xA9E7, 0x002C, Pack0);
+PASCAL_SUBTRAP(LSetDrawingMode, 0xA9E7, 0x002C, Pack0);
 extern void C_LScroll(INTEGER ncol,
                                   INTEGER nrow, ListHandle list);
 PASCAL_SUBTRAP(LScroll, 0xA9E7, 0x0050, Pack0);

@@ -188,7 +188,7 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
         if(Hx(list, listFlags) & DODRAW)
             EraseRect(&HxX(list, rView));
         if((control = HxP(list, hScroll)))
-            SetCtlMax(control, Hx(control, contrlMin));
+            SetControlMaximum(control, Hx(control, contrlMin));
         /*-->*/ return; /* quick delete of everything */
     }
 
@@ -326,7 +326,7 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
         if(Hx(list, listFlags) & DODRAW)
             EraseRect(&HxX(list, rView));
         if((control = HxP(list, vScroll)))
-            SetCtlMax(control, Hx(control, contrlMin));
+            SetControlMaximum(control, Hx(control, contrlMin));
         /*-->*/ return; /* quick delete of all */
     }
 

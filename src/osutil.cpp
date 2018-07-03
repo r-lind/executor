@@ -27,6 +27,9 @@
 #include "rsys/toolevent.h"
 #include "rsys/stdfile.h"
 #include "rsys/syncint.h"
+#include "rsys/emustubs.h"
+#include "rsys/cpu.h"
+#include <PowerCore.h>
 
 using namespace Executor;
 
@@ -35,7 +38,7 @@ using namespace Executor;
  *	 Hence, the handle that hp points to is not swapped.
  */
 
-OSErr Executor::HandToHand(Handle *hp)
+OSErr Executor::HandToHand(GUEST<Handle> *hp)
 {
     Handle nh;
     Size s;
@@ -47,7 +50,7 @@ OSErr Executor::HandToHand(Handle *hp)
         /*-->*/ return nilHandleErr;
     }
 
-    s = GetHandleSize(*hp);
+    s = GetHandleSize(MR(*hp));
     if((err = MemError()))
         /*-->*/ return (err);
 
@@ -55,8 +58,8 @@ OSErr Executor::HandToHand(Handle *hp)
     if((err = MemError()))
         /*-->*/ return (err);
 
-    BlockMove(STARH(*hp), STARH(nh), s);
-    *hp = nh;
+    BlockMove(STARH(MR(*hp)), STARH(nh), s);
+    *hp = RM(nh);
     return noErr;
 }
 
@@ -65,7 +68,7 @@ OSErr Executor::HandToHand(Handle *hp)
  *	 h points to isn't swapped.
  */
 
-OSErr Executor::PtrToHand(Ptr p, Handle *h, LONGINT s)
+OSErr Executor::PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s)
 {
     Handle nh;
     OSErr err;
@@ -76,7 +79,7 @@ OSErr Executor::PtrToHand(Ptr p, Handle *h, LONGINT s)
     BlockMove(p, STARH(nh), s);
     if((err = MemError()))
         return (err);
-    *h = nh;
+    *h = RM(nh);
     return (noErr);
 }
 
@@ -85,7 +88,7 @@ OSErr Executor::PtrToXHand(Ptr p, Handle h, LONGINT s)
     OSErr err;
 
     /*
- * DO *NOT* use ReallocHandle here.  It will fail if the handle is locked.
+ * DO *NOT* use ReallocateHandle here.  It will fail if the handle is locked.
  */
     SetHandleSize(h, s);
     if((err = MemError()))
@@ -324,7 +327,7 @@ void Executor::ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len)
         *p = base[U(*p)];
 }
 
-void Executor::UprString(StringPtr s, BOOLEAN diac)
+void Executor::UpperString(StringPtr s, BOOLEAN diac)
 {
     ROMlib_UprString(s + 1, diac, (INTEGER)(unsigned char)s[0]);
 }
@@ -437,7 +440,7 @@ daysinyears(ULONGINT year)
 
 static BOOLEAN isleap(ULONGINT);
 static void setdefaults();
-static OSErr openparam(INTEGER *);
+static OSErr openparam(GUEST<INTEGER> *);
 static void deriveglobals();
 
 static BOOLEAN isleap(ULONGINT year)
@@ -600,16 +603,16 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
  * NOTE: not callable from the outside world directly
  */
 
-void Executor::Date2Secs(DateTimeRec *d, ULONGINT *s)
+void Executor::DateToSeconds(DateTimeRec *d, GUEST<ULONGINT> *s)
 {
     long long l;
 
     l = ROMlib_long_long_secs(CW(d->year), CW(d->month), CW(d->day),
                               CW(d->hour), CW(d->minute), CW(d->second));
-    *s = (ULONGINT)l;
+    *s = CL((ULONGINT)l);
 }
 
-void Executor::Secs2Date(ULONGINT mactime, DateTimeRec *d)
+void Executor::SecondsToDate(ULONGINT mactime, DateTimeRec *d)
 {
     date_to_swapped_fields((unsigned long)mactime, &d->year, &d->month,
                            &d->day, &d->hour, &d->minute, &d->second,
@@ -621,15 +624,15 @@ void Executor::GetTime(DateTimeRec *d)
     GUEST<ULONGINT> secs;
 
     GetDateTime(&secs);
-    Secs2Date(CL(secs), d);
+    SecondsToDate(CL(secs), d);
 }
 
 void Executor::SetTime(DateTimeRec *d)
 {
-    ULONGINT secs;
+    GUEST<ULONGINT> secs;
 
-    Date2Secs(d, &secs);
-    SetDateTime(secs);
+    DateToSeconds(d, &secs);
+    SetDateTime(CL(secs));
 }
 
 typedef enum { Read,
@@ -651,7 +654,7 @@ static void setdefaults()
     LM(SPMisc2) = 0x4C;
 }
 
-static OSErr openparam(INTEGER *rnp)
+static OSErr openparam(GUEST<INTEGER> *rnp)
 {
     static char paramname[] = PARAMRAMMACNAME;
     OSErr err;
@@ -703,9 +706,9 @@ static void deriveglobals()
 
 OSErr Executor::InitUtil() /* IMII-380 */
 {
-    INTEGER rn;
+    GUEST<INTEGER> rn;
     SysParmType sp;
-    LONGINT count;
+    GUEST<LONGINT> count;
     OSErr err;
     BOOLEAN badread;
 
@@ -714,8 +717,8 @@ OSErr Executor::InitUtil() /* IMII-380 */
 #endif
     if((err = openparam(&rn)) == noErr)
     {
-        count = sizeof(sp);
-        if(FSRead(rn, &count, (Ptr)&sp) == noErr && sp.valid == VALID && count == sizeof(sp))
+        count = CLC(sizeof(sp));
+        if(FSRead(CW(rn), &count, (Ptr)&sp) == noErr && sp.valid == VALID && count == CLC(sizeof(sp)))
         {
             LM(SPValid) = sp.valid;
             LM(SPATalkA) = sp.aTalkA;
@@ -741,7 +744,7 @@ OSErr Executor::InitUtil() /* IMII-380 */
     if(err)
         err = prInitErr;
     else
-        err = FSClose(rn);
+        err = FSClose(CW(rn));
     return err;
 }
 
@@ -758,7 +761,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
     OSErr err, err2;
 
     err = prWrErr;
-    if(openparam(&rn) == noErr)
+    if(openparam(guestref(rn)) == noErr)
     {
         sp.valid = LM(SPValid);
         sp.aTalkA = LM(SPATalkA);
@@ -772,7 +775,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
         sp.volClik = CW((short)(LM(SPVolCtl) << 8) | (LM(SPClikCaret) & 0xff));
         sp.misc = CW(LM(SPMisc2));
         count = sizeof(sp);
-        if(FSWrite(rn, &count, (Ptr)&sp) == noErr && count == sizeof(sp))
+        if(FSWrite(rn, guestref(count), (Ptr)&sp) == noErr && count == sizeof(sp))
             err = noErr;
         deriveglobals();
         ROMlib_beepedonce = false;
@@ -826,16 +829,6 @@ OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
     return retval;
 }
 
-LONGINT Executor::NGetTrapAddress(INTEGER n, INTEGER ttype) /* IMII-384 */
-{
-    LONGINT retval;
-
-    retval = (LONGINT)((ttype == OSTrap) ? ostraptable[n & (NOSENTRIES - 1)]
-                                         : tooltraptable[n & (NTOOLENTRIES - 1)]);
-    warning_trace_info("n = 0x%x, ttype = %d, retval = %8x", (uint16_t)n, ttype,
-                       (unsigned)retval);
-    return retval;
-}
 
 
 static BOOLEAN shouldbeawake;
@@ -847,7 +840,7 @@ void Executor::C_ROMlib_wakeup()
 
 /* argument n is in 1/60ths of a second */
 
-void Executor::Delay(LONGINT n, LONGINT *ftp) /* IMII-384 */
+void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
 {
     if(n > 0)
     {
@@ -868,9 +861,8 @@ void Executor::Delay(LONGINT n, LONGINT *ftp) /* IMII-384 */
         RmvTime((QElemPtr)&tm);
     }
 
-    /* Note:  we're really called from a stub, so no CL() is needed here. */
     if(ftp)
-        *ftp = TickCount();
+        *ftp = CL(TickCount());
 }
 
 void Executor::C_SysBeep(INTEGER i) /* SYSTEM DEPENDENT */
@@ -944,12 +936,84 @@ LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
     return l;
 }
 
-void Executor::C_DebugStr(StringPtr p)
-{
-    int i;
 
-    fprintf(stderr, "debugstr: ");
-    for(i = *p++; i-- > 0; fprintf(stderr, "%c", (LONGINT)*p++))
-        ;
-    fprintf(stderr, "\n");
+void Executor::C_MakeDataExecutable(void *ptr, uint32_t sz)
+{
+    getPowerCore().flushCache(US_TO_SYN68K(ptr), sz);    
+}
+
+
+
+LONGINT Executor::C_NGetTrapAddress(INTEGER n, TrapType ttype) /* IMII-384 */
+{
+    return ttype == kOSTrapType ? GetOSTrapAddress(n) : GetToolTrapAddress(n);
+}
+
+void Executor::C_NSetTrapAddress(LONGINT addr, INTEGER trapnum, TrapType typ)
+{
+    switch(typ)
+    {
+        case kOSTrapType:
+            trapnum &= 0xff;
+            ostraptable[trapnum] = (addr);
+            break;
+        case kToolboxTrapType:
+            trapnum &= 0x3ff;
+            tooltraptable[trapnum] = (addr);
+            break;
+        default:
+            warning_unexpected("%d", typ);
+            break;
+    }
+    warning_trace_info(NULL_STRING);
+}
+
+void Executor::C_SetOSTrapAddress(LONGINT addr, INTEGER trapnum)
+{
+    warning_trace_info(NULL_STRING);
+    NSetTrapAddress(addr, trapnum, kOSTrapType);
+}
+void Executor::C_SetToolTrapAddress(LONGINT addr, INTEGER trapnum)
+{
+    warning_trace_info(NULL_STRING);
+    NSetTrapAddress(addr, trapnum, kToolboxTrapType);
+}
+
+
+LONGINT Executor::C_GetToolTrapAddress(INTEGER trap_no)
+{
+    LONGINT retval;
+    uint32_t d0, a0;
+
+    d0 = trap_no;
+    ROMlib_GetTrapAddress_helper(&d0, 0xA746, &a0);
+    retval = (LONGINT)a0;
+    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    return retval;
+}
+
+LONGINT Executor::C_GetOSTrapAddress(INTEGER trap_no)
+{
+    LONGINT retval;
+    uint32_t d0, a0;
+
+    d0 = trap_no;
+    ROMlib_GetTrapAddress_helper(&d0, 0xA346, &a0);
+    retval = (LONGINT)a0;
+    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    return retval;
+}
+
+LONGINT Executor::SetCurrentA5()
+{
+    long oldA5 = EM_A5;
+    EM_A5 = LM(CurrentA5).raw_host_order();
+    return oldA5;
+}
+
+LONGINT Executor::SetA5(LONGINT newA5)
+{
+    long oldA5 = EM_A5;
+    EM_A5 = newA5;
+    return oldA5;
 }

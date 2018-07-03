@@ -155,12 +155,12 @@ struct AuxCtlRec
 
 const LowMemGlobal<AuxCtlHandle> AuxCtlHead { 0xCD4 }; // ControlMgr IMV-216 (true);
 
-extern void C_SetCTitle(ControlHandle c,
+extern void C_SetControlTitle(ControlHandle c,
                                     StringPtr t);
-PASCAL_TRAP(SetCTitle, 0xA95F);
-extern void C_GetCTitle(ControlHandle c,
+PASCAL_TRAP(SetControlTitle, 0xA95F);
+extern void C_GetControlTitle(ControlHandle c,
                                     StringPtr t);
-PASCAL_TRAP(GetCTitle, 0xA95E);
+PASCAL_TRAP(GetControlTitle, 0xA95E);
 extern void C_HideControl(ControlHandle c);
 PASCAL_TRAP(HideControl, 0xA958);
 
@@ -176,9 +176,9 @@ PASCAL_TRAP(DrawControls, 0xA969);
 extern void C_Draw1Control(ControlHandle c);
 PASCAL_TRAP(Draw1Control, 0xA96D);
 
-extern void C_UpdtControl(WindowPtr wp,
+extern void C_UpdateControls(WindowPtr wp,
                                       RgnHandle rh);
-PASCAL_TRAP(UpdtControl, 0xA953);
+PASCAL_TRAP(UpdateControls, 0xA953);
 extern ControlHandle C_NewControl(WindowPtr wst, Rect *r,
                                               StringPtr title, BOOLEAN vis, INTEGER value, INTEGER min,
                                               INTEGER max, INTEGER procid, LONGINT rc);
@@ -192,24 +192,24 @@ PASCAL_TRAP(DisposeControl, 0xA955);
 extern void C_KillControls(WindowPtr w);
 PASCAL_TRAP(KillControls, 0xA956);
 
-extern void C_SetCRefCon(ControlHandle c,
+extern void C_SetControlReference(ControlHandle c,
                                      LONGINT data);
-PASCAL_TRAP(SetCRefCon, 0xA95B);
-extern LONGINT C_GetCRefCon(ControlHandle c);
-PASCAL_TRAP(GetCRefCon, 0xA95A);
+PASCAL_TRAP(SetControlReference, 0xA95B);
+extern LONGINT C_GetControlReference(ControlHandle c);
+PASCAL_TRAP(GetControlReference, 0xA95A);
 
-extern void C_SetCtlAction(ControlHandle c,
+extern void C_SetControlAction(ControlHandle c,
                                        ControlActionUPP a);
-PASCAL_TRAP(SetCtlAction, 0xA96B);
-extern ControlActionUPP C_GetCtlAction(ControlHandle c);
-PASCAL_TRAP(GetCtlAction, 0xA96A);
+PASCAL_TRAP(SetControlAction, 0xA96B);
+extern ControlActionUPP C_GetControlAction(ControlHandle c);
+PASCAL_TRAP(GetControlAction, 0xA96A);
 
-extern INTEGER C_GetCVariant(ControlHandle c);
-PASCAL_TRAP(GetCVariant, 0xA809);
+extern INTEGER C_GetControlVariant(ControlHandle c);
+PASCAL_TRAP(GetControlVariant, 0xA809);
 
-extern BOOLEAN C_GetAuxCtl(ControlHandle c,
+extern BOOLEAN C_GetAuxiliaryControlRecord(ControlHandle c,
                                        GUEST<AuxCtlHandle> *acHndl);
-PASCAL_TRAP(GetAuxCtl, 0xAA44);
+PASCAL_TRAP(GetAuxiliaryControlRecord, 0xAA44);
 extern INTEGER C_FindControl(Point p,
                                          WindowPtr w, GUEST<ControlHandle> *cp);
 PASCAL_TRAP(FindControl, 0xA96C);
@@ -219,23 +219,23 @@ PASCAL_TRAP(TrackControl, 0xA968);
 extern INTEGER C_TestControl(
     ControlHandle c, Point p);
 PASCAL_TRAP(TestControl, 0xA966);
-extern void C_SetCtlValue(ControlHandle c,
+extern void C_SetControlValue(ControlHandle c,
                                       INTEGER v);
-PASCAL_TRAP(SetCtlValue, 0xA963);
-extern INTEGER C_GetCtlValue(
+PASCAL_TRAP(SetControlValue, 0xA963);
+extern INTEGER C_GetControlValue(
     ControlHandle c);
-PASCAL_TRAP(GetCtlValue, 0xA960);
-extern void C_SetCtlMin(ControlHandle c,
+PASCAL_TRAP(GetControlValue, 0xA960);
+extern void C_SetControlMinimum(ControlHandle c,
                                     INTEGER v);
-PASCAL_TRAP(SetCtlMin, 0xA964);
-extern INTEGER C_GetCtlMin(ControlHandle c);
-PASCAL_TRAP(GetCtlMin, 0xA961);
+PASCAL_TRAP(SetControlMinimum, 0xA964);
+extern INTEGER C_GetControlMinimum(ControlHandle c);
+PASCAL_TRAP(GetControlMinimum, 0xA961);
 
-extern void C_SetCtlMax(ControlHandle c,
+extern void C_SetControlMaximum(ControlHandle c,
                                     INTEGER v);
-PASCAL_TRAP(SetCtlMax, 0xA965);
-extern INTEGER C_GetCtlMax(ControlHandle c);
-PASCAL_TRAP(GetCtlMax, 0xA962);
+PASCAL_TRAP(SetControlMaximum, 0xA965);
+extern INTEGER C_GetControlMaximum(ControlHandle c);
+PASCAL_TRAP(GetControlMaximum, 0xA962);
 
 extern void C_MoveControl(ControlHandle c,
                                       INTEGER h, INTEGER v);
@@ -246,7 +246,7 @@ PASCAL_TRAP(DragControl, 0xA967);
 extern void C_SizeControl(ControlHandle c,
                                       INTEGER width, INTEGER height);
 PASCAL_TRAP(SizeControl, 0xA95C);
-extern void C_SetCtlColor(ControlHandle ctl, CCTabHandle ctab);
-PASCAL_TRAP(SetCtlColor, 0xAA43);
+extern void C_SetControlColor(ControlHandle ctl, CCTabHandle ctab);
+PASCAL_TRAP(SetControlColor, 0xAA43);
 }
 #endif /* __CONTROL__ */

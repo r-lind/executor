@@ -23,7 +23,7 @@ void Executor::C_Draw1Control(ControlHandle c) /* IMIV-53 */
     }
 }
 
-void Executor::C_UpdtControl(WindowPtr wp, RgnHandle rh) /* IMIV-53 */
+void Executor::C_UpdateControls(WindowPtr wp, RgnHandle rh) /* IMIV-53 */
 {
     ControlHandle c;
 

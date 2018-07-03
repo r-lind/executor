@@ -17,7 +17,7 @@
 #include "WindowMgr.h"
 
 #include "rsys/hfs.h"
-#include "rsys/file.h"
+#include "rsys/cpu.h"
 #include "rsys/notmac.h"
 #include "rsys/glue.h"
 #include "rsys/wind.h"
@@ -61,8 +61,6 @@ typedef GUEST<finderinfoptr> *finderinfohand;
 }
 
 using namespace Executor;
-
-int Executor::ROMlib_cacheheuristic = false;
 
 void Executor::C_FlushCodeCache()
 {
@@ -430,7 +428,6 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
     return retval;
 }
 
-int Executor::ROMlib_print;
 
 #if !defined(MSDOS) && !defined(CYGWIN32)
 #define PATH_SEPARATER ':'
@@ -474,7 +471,7 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
                 firstcolon = 0; /* this will break us out of the loop */
             else
             {
-                DisposPtr((Ptr)fullpathname);
+                DisposePtr((Ptr)fullpathname);
                 fullpathname = 0;
             }
         }
@@ -508,7 +505,7 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
     HxX(fh, count) = 0;
     HxX(fh, message) = ROMlib_print ? CWC(appPrint) : CWC(appOpen);
     if(fullpathname && fullpathname != argv[0])
-        DisposPtr((Ptr)fullpathname);
+        DisposePtr((Ptr)fullpathname);
     while(--argc > 0)
     {
         ++argv;
@@ -562,8 +559,6 @@ void Executor::C_GetAppParms(StringPtr namep, GUEST<INTEGER> *rnp,
 
 char *ROMlib_errorstring;
 char ROMlib_exit = 0;
-
-int Executor::ROMlib_nobrowser = 0;
 
 static BOOLEAN valid_browser(void)
 {
@@ -718,10 +713,6 @@ void Executor::C_LoadSeg(INTEGER volatile segno)
     unsigned short offbytes;
     INTEGER taboff, nentries, savenentries;
     GUEST<int16_t> *ptr, *saveptr;
-#if defined(MACOSX_)
-    if(ROMlib_appbit && !(ROMlib_appbit & ROMlib_whichapps))
-        ExitToShell();
-#endif
 
     LM(ResLoad) = -1; /* CricketDraw III's behaviour suggested this */
     newcode = GetResource(TICK("CODE"), segno);

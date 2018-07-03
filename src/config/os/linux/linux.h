@@ -70,5 +70,6 @@ extern int ROMlib_launch_native_app(int n_filenames, char **filenames);
 
 #define DB_DBM_HSEARCH 1
 #include <db.h>
+#undef store    /* sanitize macros */
 
 #endif /* !_OS_LINUX_H_ */

@@ -1009,7 +1009,7 @@ void Executor::C_DisposePalette(PaletteHandle palette)
         pm_deallocate_entry(entry, false);
     }
 
-    DisposHandle((Handle)palette);
+    DisposeHandle((Handle)palette);
 }
 
 void Executor::C_ResizePalette(PaletteHandle palette, INTEGER new_size)

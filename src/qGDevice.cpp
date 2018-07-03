@@ -221,7 +221,7 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
                 gui_fatal("unable to get color table `%d'",
                           color_p ? bpp : (bpp + 32));
             ROMlib_copy_ctab(temp_color_table, gd_color_table);
-            DisposCTable(temp_color_table);
+            DisposeCTable(temp_color_table);
         }
 
         CTAB_FLAGS_X(gd_color_table) = CTAB_GDEVICE_BIT_X;
@@ -261,11 +261,11 @@ void Executor::C_SetGDevice(GDHandle gdh)
 
 void Executor::C_DisposeGDevice(GDHandle gdh)
 {
-    DisposHandle((Handle)GD_ITABLE(gdh));
-    DisposPixMap(GD_PMAP(gdh));
+    DisposeHandle((Handle)GD_ITABLE(gdh));
+    DisposePixMap(GD_PMAP(gdh));
 
     /* FIXME: do other cleanup */
-    DisposHandle((Handle)gdh);
+    DisposeHandle((Handle)gdh);
 }
 
 GDHandle Executor::C_GetGDevice()

@@ -77,7 +77,9 @@ PASCAL_TRAP(SetString, 0xA907);
 extern StringHandle C_GetString(INTEGER i);
 PASCAL_TRAP(GetString, 0xA9BA);
 
-extern void GetIndString(StringPtr s, INTEGER sid, INTEGER index);
+extern void C_GetIndString(StringPtr s, INTEGER sid, INTEGER index);
+NOTRAP_FUNCTION(GetIndString);
+
 extern LONGINT C_Munger(Handle h, LONGINT off, Ptr p1,
                                     LONGINT len1, Ptr p2, LONGINT len2);
 PASCAL_TRAP(Munger, 0xA9E0);

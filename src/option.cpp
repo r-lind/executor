@@ -393,7 +393,7 @@ void Executor::opt_put_int_val(opt_database_t &db, const string &opt, int valint
 
 #define option_value(opt_val) ((opt_val)->t_val != "" ? (opt_val)->t_val : (opt_val)->val)
 
-int Executor::opt_val(opt_database_t &db, string opt, string *retval)
+bool Executor::opt_val(opt_database_t &db, string opt, string *retval)
 {
     opt_val_t *opt_val;
     string val = "";
@@ -418,7 +418,7 @@ int Executor::opt_val(opt_database_t &db, string opt, string *retval)
  * error message in case of a parse error, else leaves it untouched.
  * Returns true if a value was found.
  */
-int Executor::opt_int_val(opt_database_t &db, string opt, int *retval,
+bool Executor::opt_int_val(opt_database_t &db, string opt, int *retval,
                           bool *parse_error_p)
 {
     opt_val_t *opt_val;
@@ -445,10 +445,24 @@ int Executor::opt_int_val(opt_database_t &db, string opt, int *retval,
     return opt_val && val != "";
 }
 
-int Executor::opt_parse(opt_database_t &db, option_vec opts,
+bool Executor::opt_bool_val(opt_database_t &db, string opt, bool *retval,
+                          bool *parse_error_p)
+{
+    int tmp;
+    if(opt_int_val(db, opt, &tmp, parse_error_p))
+    {
+        if(retval)
+            *retval = tmp != 0;
+        return true;
+    }
+    else
+        return false;
+}
+
+bool Executor::opt_parse(opt_database_t &db, option_vec opts,
                         int *argc, char *argv[])
 {
-    int parse_error_p = false;
+    bool parse_error_p = false;
     int i;
     int argc_left;
 

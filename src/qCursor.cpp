@@ -439,9 +439,9 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
     }
 }
 
-void Executor::C_DisposCCursor(CCrsrHandle ccrsr)
+void Executor::C_DisposeCCursor(CCrsrHandle ccrsr)
 {
-    /* #warning "implement DisposCCursor" */
+    /* #warning "implement DisposeCCursor" */
     warning_unimplemented(NULL_STRING);
 }
 

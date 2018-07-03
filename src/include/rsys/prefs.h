@@ -2,6 +2,7 @@
 #define __RSYS_PREFS__
 
 #include <string>
+#include <stdint.h>
 
 namespace Executor
 {
@@ -14,24 +15,43 @@ typedef enum {
     WriteNever
 } WriteWhenType; /* This is an extension */
 
+typedef enum {
+    soundoff,
+    soundpretend,
+    soundon
+} sound_t;
+
+
 extern WriteWhenType ROMlib_when;
-extern int ROMlib_PretendSound;
-extern int ROMlib_cacheheuristic;
+extern sound_t ROMlib_PretendSound;
+extern bool ROMlib_cacheheuristic;
 extern int ROMlib_clock;
-extern int ROMlib_directdiskaccess;
-extern int ROMlib_flushoften;
-extern int ROMlib_fontsubstitution;
-extern int ROMlib_newlinetocr;
-extern int ROMlib_nowarn32;
-extern int ROMlib_passpostscript;
+extern bool ROMlib_directdiskaccess;
+extern bool ROMlib_flushoften;
+extern bool ROMlib_fontsubstitution;
+extern bool ROMlib_newlinetocr;
+extern bool ROMlib_nowarn32;
+extern bool ROMlib_passpostscript;
 extern int ROMlib_refresh;
 extern int ROMlib_delay;
-extern int ROMlib_noclock;
+extern bool ROMlib_noclock;
 
-extern int ROMlib_pretend_help;
-extern int ROMlib_pretend_alias;
-extern int ROMlib_pretend_script;
-extern int ROMlib_pretend_edition;
+extern bool ROMlib_pretend_help;
+extern bool ROMlib_pretend_alias;
+extern bool ROMlib_pretend_script;
+extern bool ROMlib_pretend_edition;
+
+extern bool ROMlib_sticky_menus_p;
+extern bool ROMlib_forward_del_p;
+extern bool ROMlib_no_dot_files;
+
+extern bool nodrivesearch_p;
+
+extern bool do_autorefresh_p;
+extern bool log_err_to_ram_p;
+
+extern bool ROMlib_print;
+extern uint32_t ROMlib_PrDrvrVers;
 
 extern uint32_t system_version;
 

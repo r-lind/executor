@@ -12,12 +12,15 @@ extern struct timeval ROMlib_start_time;
 
 extern unsigned long msecs_elapsed(void);
 
+class PowerCore;
+
 namespace Executor
 {
 #if !defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
 extern QHdr ROMlib_timehead;
 
 extern syn68k_addr_t catchalarm(syn68k_addr_t pc, void *unused);
+extern void catchalarmPowerPC(PowerCore&);
 #endif
 }
 

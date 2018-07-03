@@ -890,7 +890,7 @@ void calc_doc(GrafPtr w)
     SetRectRgn(WINDOW_CONT_REGION(w), left, top, right, bottom);
 
     rh = WINDOW_STRUCT_REGION(w);
-    ReallocHandle((Handle)rh, (Size)44);
+    ReallocateHandle((Handle)rh, (Size)44);
     HxX(rh, rgnBBox.left) = CW(left - 1);
     HxX(rh, rgnBBox.top) = CW(top - 19);
     HxX(rh, rgnBBox.right) = CW(right + 2);
@@ -936,7 +936,7 @@ void calc_alt_dialog_box(GrafPtr w)
 
     rh = WINDOW_STRUCT_REGION(w);
 
-    ReallocHandle((Handle)rh, (Size)44);
+    ReallocateHandle((Handle)rh, (Size)44);
     HxX(rh, rgnBBox.left) = CW(left - 1);
     HxX(rh, rgnBBox.top) = CW(top - 1);
     HxX(rh, rgnBBox.right) = CW(right + 3);
@@ -1113,7 +1113,7 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
             break;
         case wDispose:
             if(WINDOW_SPARE_FLAG_X(w))
-                DisposHandle(WINDOW_DATA(w));
+                DisposeHandle(WINDOW_DATA(w));
             break;
         case wGrow:
 

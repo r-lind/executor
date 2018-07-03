@@ -192,7 +192,7 @@ void Executor::C_CopyRgn(RgnHandle s, RgnHandle d)
     if(s == d)
         return;
     size = RGN_SIZE(s);
-    ReallocHandle((Handle)d, size);
+    ReallocateHandle((Handle)d, size);
     memcpy((Ptr)STARH(d), (Ptr)STARH(s), size);
 }
 
@@ -212,7 +212,7 @@ void Executor::C_CloseRgn(RgnHandle rh)
 
 void Executor::C_DisposeRgn(RgnHandle rh)
 {
-    DisposHandle((Handle)rh);
+    DisposeHandle((Handle)rh);
 }
 
 void Executor::C_SetEmptyRgn(RgnHandle rh)
@@ -835,7 +835,7 @@ static void sectbinop(RgnHandle srcrgn1, RgnHandle srcrgn2, RgnHandle dstrgn)
                             + sizeof(INTEGER) * (tptr - temppoints));
         RGN_SET_SIZE_AND_SPECIAL(dstrgn, dst_rgn_size, false);
         /* TODO fix rgnBBox here */
-        ReallocHandle((Handle)dstrgn, dst_rgn_size);
+        ReallocateHandle((Handle)dstrgn, dst_rgn_size);
     }
 
     memmove(RGN_DATA(dstrgn), temppoints,
@@ -948,7 +948,7 @@ static void binop(optype op, RgnHandle srcrgn1, RgnHandle srcrgn2,
     gui_assert(sizeof(INTEGER) * (tptr - temppoints) <= 2 * (Hx(srcrgn1, rgnSize) + Hx(srcrgn2, rgnSize) + 18 * sizeof(INTEGER)));
     HxX(dstrgn, rgnSize) = CW(RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints));
     /* TODO fix rgnBBox here */
-    ReallocHandle((Handle)dstrgn,
+    ReallocateHandle((Handle)dstrgn,
                   RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints));
     {
         INTEGER *ip, *op;
@@ -1222,12 +1222,12 @@ void Executor::C_InsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv)
         qsort(p, npairs, sizeof(INTEGER) * 2, comparex);
         hinset(p, dv);
         qsort(p, npairs, sizeof(INTEGER) * 2, comparey);
-        ReallocHandle((Handle)rh, newsize);
+        ReallocateHandle((Handle)rh, newsize);
         ptorh(p, rh);
         ROMlib_sizergn(rh, false);
         gui_assert(Hx(rh, rgnSize) <= newsize);
         HUnlock(h);
-        DisposHandle(h);
+        DisposeHandle(h);
     }
 }
 
@@ -1321,7 +1321,7 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     else
     {
         finalrestingplace = 0;
-        ReallocHandle((Handle)dest, Hx(s1, rgnSize) + Hx(s2, rgnSize) + 36);
+        ReallocateHandle((Handle)dest, Hx(s1, rgnSize) + Hx(s2, rgnSize) + 36);
     }
 
     if(RGN_SMALL_P(s1))

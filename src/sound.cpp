@@ -49,8 +49,6 @@ void Executor::SetSoundVol(INTEGER vol)
 }
 #endif
 
-int Executor::ROMlib_PretendSound = soundpretend;
-
 static inline bool
 qfull_p(SndChannelPtr chanp)
 {
@@ -1041,7 +1039,7 @@ OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, BOOLEAN quitnow)
 		h = RecoverHandle((Ptr) CL(mp->code));
 		HSetState(h, mp->hState);
 	    }
-	    DisposPtr((Ptr) mp);
+	    DisposePtr((Ptr) mp);
 	}
 #endif
 
@@ -1052,9 +1050,9 @@ OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, BOOLEAN quitnow)
             if(*pp)
             {
                 *pp = chanp->nextChan;
-                DisposPtr((Ptr)MR(chanp->firstMod));
+                DisposePtr((Ptr)MR(chanp->firstMod));
                 if(chanp->flags & CWC(CHAN_ALLOC_FLAG))
-                    DisposPtr((Ptr)chanp);
+                    DisposePtr((Ptr)chanp);
             }
             else
             {

@@ -6,6 +6,7 @@
 #include <rsys/byteswap.h>
 #include <rsys/functions.impl.h>
 #include <rsys/logging.h>
+#include <rsys/dispatcher.h>
 
 #include <assert.h>
 
@@ -54,4 +55,6 @@ void traps::init(bool log)
         if(ostraptable[i] == 0)
             ostraptable[i] = US_TO_SYN68K((void*)&stub_Unimplemented);
     }
+
+    trap_install_handler(0xA, &alinehandler, (void *)0);
 }

@@ -134,8 +134,8 @@ extern INTEGER C_GetResAttrs(Handle res);
 PASCAL_TRAP(GetResAttrs, 0xA9A6);
 
 extern LONGINT ROMlib_SizeResource(Handle res, BOOLEAN usehandle);
-extern LONGINT C_SizeResource(Handle res);
-PASCAL_TRAP(SizeResource, 0xA9A5);
+extern LONGINT C_GetResourceSizeOnDisk(Handle res);
+PASCAL_TRAP(GetResourceSizeOnDisk, 0xA9A5);
 
 extern INTEGER C_CountTypes(void);
 PASCAL_TRAP(CountTypes, 0xA99E);
@@ -149,8 +149,8 @@ PASCAL_TRAP(GetIndType, 0xA99F);
 extern void C_Get1IndType(GUEST<ResType> *typ,
                                       INTEGER indx);
 PASCAL_TRAP(Get1IndType, 0xA80F);
-extern LONGINT C_MaxSizeRsrc(Handle h);
-PASCAL_TRAP(MaxSizeRsrc, 0xA821);
+extern LONGINT C_GetMaxResourceSize(Handle h);
+PASCAL_TRAP(GetMaxResourceSize, 0xA821);
 
 extern LONGINT C_RsrcMapEntry(Handle h);
 PASCAL_TRAP(RsrcMapEntry, 0xA9C5);
@@ -185,8 +185,8 @@ PASCAL_TRAP(ChangedResource, 0xA9AA);
 extern void C_AddResource(Handle data, ResType typ,
                                       INTEGER id, StringPtr name);
 PASCAL_TRAP(AddResource, 0xA9AB);
-extern void C_RmveResource(Handle res);
-PASCAL_TRAP(RmveResource, 0xA9AD);
+extern void C_RemoveResource(Handle res);
+PASCAL_TRAP(RemoveResource, 0xA9AD);
 
 extern void C_UpdateResFile(INTEGER rn);
 PASCAL_TRAP(UpdateResFile, 0xA999);

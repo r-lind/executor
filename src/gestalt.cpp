@@ -496,7 +496,7 @@ Executor::ROMlib_add_to_gestalt_list(OSType selector, OSErr retval, uint32_t new
     }
 }
 
-OSErr Executor::Gestalt(OSType selector, GUEST<LONGINT> *responsep)
+OSErr Executor::C_Gestalt(OSType selector, GUEST<LONGINT> *responsep)
 {
     static bool been_here = false;
 
@@ -610,7 +610,7 @@ new_link(OSType selector, SelectorFunctionUPP selFunc)
     return retval;
 }
 
-OSErr Executor::NewGestalt(OSType selector, SelectorFunctionUPP selFunc)
+OSErr Executor::C_NewGestalt(OSType selector, SelectorFunctionUPP selFunc)
 {
     OSErr retval;
 
@@ -622,8 +622,8 @@ OSErr Executor::NewGestalt(OSType selector, SelectorFunctionUPP selFunc)
     return retval;
 }
 
-OSErr Executor::ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
-                                  SelectorFunctionUPP *oldSelFuncp)
+OSErr Executor::C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
+                                  GUEST<SelectorFunctionUPP> *oldSelFuncp)
 {
     OSErr retval;
     gestalt_link_t *gp;
@@ -633,7 +633,7 @@ OSErr Executor::ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
     {
         if(syszone_p((ProcPtr)selFunc))
         {
-            *oldSelFuncp = gp->selectorFunction;
+            *oldSelFuncp = RM(gp->selectorFunction);
             gp->selectorFunction = selFunc;
             retval = noErr;
         }
@@ -649,7 +649,7 @@ OSErr Executor::ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
             retval = gestaltUndefSelectorErr;
         else
         {
-            *oldSelFuncp = &GestaltTablesOnly;
+            *oldSelFuncp = RM(&GestaltTablesOnly);
             retval = new_link(selector, selFunc);
         }
     }

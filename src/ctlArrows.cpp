@@ -679,7 +679,7 @@ static void
 restore(const save_t *sp)
 {
     SetPort(sp->port);
-    DisposHandle((Handle)PPR(sp->cp.portPixMap));
+    DisposeHandle((Handle)PPR(sp->cp.portPixMap));
 }
 
 LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
@@ -777,7 +777,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
             RectRgn((RgnHandle)HxP(c, contrlData), &tempr);
             break;
         case dispCntl:
-            DisposHandle((Handle)HxP(c, contrlData));
+            DisposeHandle((Handle)HxP(c, contrlData));
             break;
         case posCntl:
             validate_colors_for_control(c);

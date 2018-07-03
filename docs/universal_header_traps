@@ -534,9 +534,9 @@
 0xA943	GetItmMark
 0xA944	SetItmMark
 0xA945	CheckItem
-0xA946	GetItem
 0xA946	GetMenuItemText
-0xA947	SetItem
+0xA946	GetMenuItemText
+0xA947	SetMenuItemText
 0xA947	SetMenuItemText
 0xA948	CalcMenuSize
 0xA949	GetMHandle

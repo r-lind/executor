@@ -420,7 +420,7 @@ void Executor::C_ClosePicture()
         ph = HxP(pch, pichandle);
         SetHandleSize((Handle)ph, Hx(pch, pichowfar));
         DisposeRgn(HxP(pch, picclip));
-        DisposHandle((Handle)pch);
+        DisposeHandle((Handle)pch);
         PORT_PIC_SAVE_X(thePort) = nullptr;
         ShowPen();
     }
@@ -442,12 +442,12 @@ void Executor::C_KillPicture(PicHandle pic)
 {
     /*
  * It's not clear what the Mac does in the case below.  We really should
- * test exactly how the Mac deals with DisposHandle being called on resource
+ * test exactly how the Mac deals with DisposeHandle being called on resource
  * handles.
  */
     SignedByte state;
 
     state = HGetState((Handle)pic);
     if(!(state & RSRCBIT))
-        DisposHandle((Handle)pic);
+        DisposeHandle((Handle)pic);
 }

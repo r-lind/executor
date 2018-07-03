@@ -1,6 +1,6 @@
 project(Executor)
 cmake_minimum_required(VERSION 3.9)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
 find_program(PERL_COMMAND perl)
 
@@ -34,7 +34,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     #                    anonymous enums in the headers.
     #                    Code like (blah ? noErr : paramErr) triggers the enum-compare warning.
 
-    add_definitions(
+    add_compile_options(
         -Wall
         -Wno-unused-but-set-variable
         -Wno-sign-compare
@@ -172,12 +172,12 @@ set(sound_sources ${sound_sources} SpeechManager-MacBridge.mm)
 endif()
 source_group(Sound FILES ${sound_sources})
 
-set(num_sources bindec.cpp float4.cpp float5.cpp float7.cpp floatnext.cpp toolmath.cpp
-    mathlib.cpp)
+set(num_sources bindec.cpp float4.cpp float5.cpp float7.cpp floatnext.cpp toolmath.cpp)
 source_group(Numerics FILES ${num_sources})
 
 set(misc_sources
-  traps.cpp logging.cpp
+  traps.cpp logging.cpp builtinlibs.cpp
+  debugger.cpp cpu.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp trapname.cpp font.cpp
   gestalt.cpp globals.cpp iu.cpp launch.cpp main.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
   osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
@@ -187,11 +187,12 @@ set(misc_sources
   version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
   process.cpp alias.cpp string.cpp tempmem.cpp edition.cpp fontIMVI.cpp balloon.cpp
   error.cpp adb.cpp color_wheel_bits.cpp finder.cpp system_error.cpp ibm_keycodes.cpp
-  icon.cpp redrawscreen.cpp ini.cpp checkpoint.cpp qt.cpp
+  icon.cpp redrawscreen.cpp ini.cpp qt.cpp
   paramline.c fauxdbm.cpp commtool.cpp cfm.cpp pef_hash.cpp
-  interfacelib.cpp mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
-  emutrap.cpp emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
-  executor.cpp  crc.cpp)
+  mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
+  emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
+  executor.cpp  crc.cpp
+  prefpanel.cpp dispatcher.cpp options.cpp)
 
 set(include_sources hintemplate.h
                   include/ADB.h
@@ -233,7 +234,6 @@ set(include_sources hintemplate.h
                   include/QuickTime.h
                   include/ResourceMgr.h
                   include/rsys/aboutbox.h
-                  include/rsys/aboutpanel.h
                   include/rsys/adb.h
                   include/rsys/alias.h
                   include/rsys/appearance.h
@@ -243,13 +243,14 @@ set(include_sources hintemplate.h
                   include/rsys/autorefresh.h
                   include/rsys/blockdev.h
                   include/rsys/blockinterrupts.h
+                  include/rsys/builtinlibs.h
                   include/rsys/byteswap.h
                   include/rsys/cfm.h
                   include/rsys/check_structs.h
-                  include/rsys/checkpoint.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/common.h
                   include/rsys/commonevt.h
+                  include/rsys/cpu.h
                   include/rsys/cquick.h
                   include/rsys/crc.h
                   include/rsys/ctl.h
@@ -260,6 +261,7 @@ set(include_sources hintemplate.h
                   include/rsys/dial.h
                   include/rsys/dirtyrect.h
                   include/rsys/drive_flags.h
+                  include/rsys/dispatcher.h
                   include/rsys/dump.h
                   include/rsys/emustubs.h
                   include/rsys/error.h
@@ -286,7 +288,6 @@ set(include_sources hintemplate.h
                   include/rsys/icon.h
                   include/rsys/image.h
                   include/rsys/ini.h
-                  include/rsys/interfacelib.h
                   include/rsys/itm.h
                   include/rsys/iv.h
                   include/rsys/keyboard.h
@@ -299,7 +300,6 @@ set(include_sources hintemplate.h
                   include/rsys/m68kint.h
                   include/rsys/macros.h
                   include/rsys/mactype.h
-                  include/rsys/mathlib.h
                   include/rsys/memsize.h
                   include/rsys/menu.h
                   include/rsys/mixed_mode.h
@@ -413,5 +413,5 @@ else()
     target_link_libraries(executor ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k)
+target_link_libraries(executor Threads::Threads syn68k PowerCore mon)
 

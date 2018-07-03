@@ -32,8 +32,8 @@ struct D0HighWord;
 struct D0LowWord;
 
 template <int mask> struct TrapBit;
-template<typename loc, typename T> struct Out;
-template<typename loc, typename T> struct InOut;
+template<typename T, typename loc> struct Out;
+template<typename T, typename loc, typename outloc = loc> struct InOut;
 
 template<typename Loc> struct ReturnMemErr;
 struct CCFromD0;

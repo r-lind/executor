@@ -120,7 +120,7 @@ void Executor::menu_delete_entries(int16_t menu_id)
     }
 }
 
-void Executor::C_DelMCEntries(INTEGER menu_id, INTEGER menu_item)
+void Executor::C_DeleteMCEntries(INTEGER menu_id, INTEGER menu_item)
 {
     MCTableHandle menu_c_info;
     MCEntryPtr entries;
@@ -163,7 +163,7 @@ MCTableHandle Executor::C_GetMCInfo()
 
 void Executor::C_SetMCInfo(MCTableHandle menu_ctab)
 {
-    DispMCInfo(MR(LM(MenuCInfo)));
+    DisposeMCInfo(MR(LM(MenuCInfo)));
 
     TheZoneGuard guard(LM(SysZone));
     Handle t;
@@ -175,9 +175,9 @@ void Executor::C_SetMCInfo(MCTableHandle menu_ctab)
     LM(MenuCInfo) = RM((MCTableHandle)t);
 }
 
-void Executor::C_DispMCInfo(MCTableHandle menu_ctab)
+void Executor::C_DisposeMCInfo(MCTableHandle menu_ctab)
 {
-    DisposHandle((Handle)menu_ctab);
+    DisposeHandle((Handle)menu_ctab);
 }
 
 MCEntryPtr Executor::C_GetMCEntry(INTEGER menu_id, INTEGER menu_item)

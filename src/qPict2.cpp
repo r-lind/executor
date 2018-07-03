@@ -333,21 +333,21 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
             if(verb & returnColorTable)
                 pict_info->theColorTable = RM(color_table);
             else
-                DisposHandle((Handle)color_table);
+                DisposeHandle((Handle)color_table);
         }
 
     cleanup_and_return:
     {
         struct link *t, *next;
 
-        DisposPtr((Ptr)bank);
+        DisposePtr((Ptr)bank);
 
         for(t = head, next = t->next;
             t;
             t = next, next = t ? t->next : NULL)
         {
             if(t)
-                DisposPtr((Ptr)t);
+                DisposePtr((Ptr)t);
         }
         return retval;
     }

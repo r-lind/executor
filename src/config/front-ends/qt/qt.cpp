@@ -245,7 +245,6 @@ public:
     void keyEvent(QKeyEvent *ev, bool down_p)
     {
         unsigned char mkvkey;
-        uint16_t mod;
         LONGINT keywhat;
         int32_t when;
         Point where;
@@ -505,7 +504,7 @@ void Executor::vdriver_pump_events()
 #endif
 }
 
-void Executor::ROMlib_SetTitle(char *title)
+void Executor::ROMlib_SetTitle(const char *title)
 {
 }
 

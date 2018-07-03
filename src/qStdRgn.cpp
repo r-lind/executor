@@ -27,8 +27,6 @@
 
 using namespace Executor;
 
-WriteWhenType Executor::ROMlib_when = WriteInBltrgn;
-
 void Executor::ROMlib_WriteWhen(WriteWhenType when)
 {
     ROMlib_when = when;
@@ -422,7 +420,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
                     Ptr raw = HxX(xh, raw_pat_bits_mem);
                     if(raw)
                     {
-                        DisposPtr(raw);
+                        DisposePtr(raw);
                         HxX(xh, raw_pat_bits_mem) = NULL;
                     }
                 }

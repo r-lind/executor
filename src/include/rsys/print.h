@@ -12,6 +12,7 @@
 #include "PrintMgr.h"
 #include "rsys/nextprint.h"
 #include "rsys/ini.h"
+#include "rsys/prefs.h"
 
 #if defined(CYGWIN32)
 #include "win_print.h"
@@ -246,7 +247,7 @@ extern char *cstring_from_str255(Str255 text);
 extern void disable_stdtext(void);
 extern void enable_stdtext(void);
 
-#define WIN32_TOKEN (ROMlib_win32_token ? ROMlib_win32_token : "Win32")
+#define WIN32_TOKEN (ROMlib_win32_token.empty() ? "Win32" : ROMlib_win32_token.c_str())
 
 extern void ROMlib_rotatebegin(LONGINT flippage, LONGINT angle);
 extern void ROMlib_rotatecenter(double yoffset, double xoffset);
@@ -258,12 +259,6 @@ extern void ROMlib_acknowledge_job_dialog(THPrint thprint);
 }
 
 extern "C" {
-extern char *ROMlib_win32_token;
-extern uint32_t ROMlib_PrDrvrVers;
-
-extern char *ROMlib_new_printer_name;
-extern char *ROMlib_new_label;
-
 extern FILE *ROMlib_printfile;
 }
 #endif /* !defined(__RSYS_PRINT__) */

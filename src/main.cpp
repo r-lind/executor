@@ -32,6 +32,8 @@
 #include "Gestalt.h"
 #include "AppleTalk.h"
 #include "AppleEvents.h"
+#include "SoundDvr.h"
+#include "StartMgr.h"
 
 #include "rsys/cquick.h"
 #include "rsys/tesave.h"
@@ -68,16 +70,20 @@
 #include "rsys/system_error.h"
 #include "rsys/filedouble.h"
 #include "rsys/option.h"
+#include "rsys/emustubs.h"
+#include "rsys/float.h"
 
 #include "rsys/os.h"
 #include "rsys/arch.h"
-#include "rsys/checkpoint.h"
 #include "rsys/gestalt.h"
 #include "rsys/keyboards.h"
 #include "rsys/launch.h"
 #include "rsys/text.h"
 #include "rsys/appearance.h"
 #include "rsys/hfs_plus.h"
+#include "rsys/cpu.h"
+#include "rsys/debugger.h"
+#include <PowerCore.h>
 
 #include "rsys/check_structs.h"
 
@@ -109,13 +115,8 @@ static void setstartdir(char *);
 using namespace Executor;
 using namespace std;
 
-int Executor::ROMlib_noclock = 0;
-
 /* optional resolution other than 72dpix72dpi for printing */
 INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
-
-/* A string approximating the original command line. */
-const char *Executor::ROMlib_command_line;
 
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
@@ -125,27 +126,7 @@ static bool bad_arg_p = false;
 
 static bool graphics_p = true;
 
-/* for a description of flags declared here, see <rsys/flags.h> */
-
-/* Initial screen size.  This can be changed dynamically. */
-INTEGER Executor::flag_width = 0, Executor::flag_height = 0; /* 0 means "use default". */
-
-/* Initial bits per pixel.  The screen depth can be changed dynamically. */
-int Executor::flag_bpp = 0; /* 0 means "use default". */
-
-INTEGER Executor::ROMlib_shadow_screen_p = true;
-
-#if defined(MSDOS) || defined(CYGWIN32)
-int ROMlib_drive_check = 0;
-#endif
-
 static bool use_native_code_p = true;
-
-/* the system version that executor is currently reporting to
-   applications, set through the `-system' options.  contains the
-   version number in the form `0xABC' which corresponds to system
-   version A.B.C */
-uint32_t Executor::system_version = 0x700; /* keep this in sync with Browser's .ecf file */
 
 const option_vec Executor::common_opts = {
     { "sticky", "sticky menus", opt_no_arg, "" },
@@ -178,8 +159,6 @@ const option_vec Executor::common_opts = {
     { "nodiskcache", "disable internal disk cache.",
       opt_no_arg, "" },
     { "nosound", "disable any sound hardware",
-      opt_no_arg, "" },
-    { "info", "print information about your system",
       opt_no_arg, "" },
 #if defined(SUPPORT_LOG_ERR_TO_RAM)
     { "ramlog",
@@ -266,11 +245,6 @@ const option_vec Executor::common_opts = {
                    "available to Executor's internal system software.",
         opt_sep, "",
     },
-#if defined(MM_MANY_APPLZONES)
-    { "napplzones",
-      "debugging flag, specifies the number of applzones to use",
-      opt_sep, "" },
-#endif /* MM_MANY_APPLZONES */
 #endif /* MALLOC_MAC_MEMORY */
     { "system",
       "specify the system version that executor reports to applications",
@@ -298,11 +272,6 @@ capable of color.",
     { "die", "allow Executor to die instead of catching trap", opt_no_arg,
       "" },
     { "noautoevents", "disable timer driven event checking", opt_no_arg,
-      "" },
-#endif
-
-#if defined(MSDOS) || defined(CYGWIN32)
-    { "nocheckpoint", "disable \"failure.txt\" checkpointing", opt_no_arg,
       "" },
 #endif
 
@@ -347,13 +316,7 @@ capable of color.",
       opt_no_arg, "" },
 #endif
 
-#if defined(powerpc) || defined(__ppc__)
     { "ppc", "try to execute the PPC native code if possible (UNSUPPORTED)", opt_no_arg, "" },
-#endif
-
-#if defined(CYGWIN32)
-    { "realmodecd", "try to use real-mode cd-rom driver", opt_no_arg, "" },
-#endif
 
     { "appearance", "(mac or windows) specify the appearance of windows and "
                     "menus.  For example \"executor -appearance windows\" will make each "
@@ -398,27 +361,6 @@ check_arg(string argname, int *arg, int min, int max)
         bad_arg_p = true;
     }
 }
-
-#if defined(NEED_WAIT4)
-
-/*
- * NOTE: This is a replacement for wait4 that will work for what we use wait4.
- *	 It has the side effect of acknowledging the death of other children.
- */
-
-LONGINT Executor::wait4(LONGINT pid, union wait *statusp, LONGINT options,
-                        struct rusage *rusage)
-{
-    LONGINT retval;
-
-    do
-    {
-        retval = wait3(statusp, options, rusage);
-    } while(retval > 0 && retval != pid);
-
-    return retval;
-}
-#endif /* NEED_WAIT4 */
 
 char Executor::ROMlib_startdir[MAXPATHLEN];
 INTEGER ROMlib_startdirlen;
@@ -487,7 +429,7 @@ static void setstartdir(char *argv0)
         {
             close(p[1]);
             nread = read(p[0], buf, sizeof(buf) - 1);
-            wait4(pid, 0, 0, (struct rusage *)0);
+            waitpid(pid, nullptr, 0);
             if(nread)
                 --nread; /* get rid of trailing \n */
             buf[nread] = 0;
@@ -542,8 +484,6 @@ static void setstartdir(char *argv0)
     ROMlib_startdirlen = strlen(ROMlib_startdir);
 #endif /* defined(MSDOS) */
 }
-
-char *Executor::program_name;
 
 static syn68k_addr_t
 unhandled_trap(syn68k_addr_t callback_address, void *arg)
@@ -632,6 +572,8 @@ setup_trap_vectors(void)
     timer_callback = callback_install(catchalarm, NULL);
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = CL(timer_callback);
 
+    getPowerCore().handleInterrupt = &catchalarmPowerPC;
+
     /* Fill in unhandled trap vectors so they cause graceful deaths.
    * Skip over those trap vectors which are known to have legitimate
    * values.
@@ -699,120 +641,12 @@ illegal_mode(void)
     exit(-1);
 }
 
-#if defined(MSDOS) || defined(CYGWIN32)
-uint32_t ROMlib_macdrives; /* default computed at runtime */
-uint32_t ROMlib_dosdrives = ~0;
-static uint32_t skipdrives = 0;
-
-static bool
-drive_number_from_letter(char c, int *nump)
-{
-    bool retval;
-
-    if(isupper(c) || ((c >= '[' && c <= '`')))
-    {
-        *nump = c - 'A';
-        retval = true;
-    }
-    else if(islower(c))
-    {
-        *nump = c - 'a';
-        retval = true;
-    }
-    else
-        retval = false;
-    return retval;
-}
-
-static void
-drive_error(const char *opt)
-{
-    fprintf(stderr, "Invalid drive specification.\nUse something like "
-                    "\"-%s A-EJ\" (for drives A, B, C, D, E and J).\n",
-            opt);
-    bad_arg_p = true;
-}
-
-static const char *
-munch_next_char(const char *p, uint32_t *destp, const char *opt)
-{
-    const char *retval;
-    int d;
-
-    if(drive_number_from_letter(p[0], &d))
-    {
-        if(p[1] == '-')
-        {
-            int d2;
-            if(drive_number_from_letter(p[2], &d2))
-            {
-                int lower, upper, i;
-
-                lower = MIN(d, d2);
-                upper = MAX(d, d2);
-                for(i = lower; i <= upper; ++i)
-                    *destp |= (1 << i);
-                retval = p + 3;
-            }
-            else
-            {
-                drive_error(opt);
-                retval = "";
-            }
-        }
-        else
-        {
-            *destp |= 1 << d;
-            retval = p + 1;
-        }
-    }
-    else
-    {
-        drive_error(opt);
-        retval = "";
-    }
-    return retval;
-}
-
-uint32_t
-parse_drive_opt(const char *opt_name, const char *opt_value)
-{
-    uint32_t retval;
-    const char *next_charp;
-
-    retval = 0;
-    for(next_charp = opt_value; *next_charp;)
-        next_charp = munch_next_char(next_charp, &retval, opt_name);
-    return retval;
-}
-#endif
-
-static void
-print_info(void)
-{
-    printf("This is %s, compiled.\n",
-           ROMlib_executor_full_name);
-
-#define MB (1024 * 1024U)
-
-    /* Print out actual memory size chosen. */
-    printf("Choosing %u.%02u MB for applzone, %u.%02u MB for syszone, "
-           "%u.%02u MB for stack\n",
-           ROMlib_applzone_size / MB,
-           (ROMlib_applzone_size % MB) * 100 / MB,
-           ROMlib_syszone_size / MB,
-           (ROMlib_syszone_size % MB) * 100 / MB,
-           ROMlib_stack_size / MB,
-           (ROMlib_stack_size % MB) * 100 / MB);
-
-#undef MB
-}
 
 /* This is to tell people about the switch from "-applzone 4096" to
  * "-applzone 4M".
  */
 static void
-note_memory_syntax_change(const char *arg, unsigned val)
+note_memory_syntax(const char *arg, unsigned val)
 {
     /* Make sane error messages when the supplied value is insane.
    * Otherwise, try to print an example that illustrates how to
@@ -821,8 +655,8 @@ note_memory_syntax_change(const char *arg, unsigned val)
     if(val < 100 || val > 1000000)
         val = 2048;
 
-    fprintf(stderr, "Specified %s is too small.  The syntax "
-                    "has changed; now, for a %u.%02u\nmegabyte %s you would "
+    fprintf(stderr, "Specified %s is too small. "
+                    "For a %u.%02u\nmegabyte %s you would "
                     "say \"-%s ",
             arg, val / 1024, (val % 1024) * 100 / 1024,
             arg, arg);
@@ -856,93 +690,6 @@ construct_command_line_string(int argc, char **argv)
     return s;
 }
 
-static int
-zap_comments(char *buf, int n_left)
-{
-    char *ip, *op;
-    bool last_was_cr;
-    int retval;
-
-    ip = buf;
-    op = buf;
-    retval = 0;
-    last_was_cr = true;
-    while(n_left > 0)
-    {
-        while(n_left > 0 && (*ip != '#' || !last_was_cr))
-        {
-            last_was_cr = *ip == '\n' || *ip == '\r';
-            *op++ = *ip++;
-            ++retval;
-            --n_left;
-        }
-        if(n_left > 0)
-        {
-            while(n_left > 0 && *ip != '\n' && *ip != '\r')
-            {
-                ++ip;
-                --n_left;
-            }
-        }
-    }
-    return retval;
-}
-
-FILE *
-Executor::executor_dir_fopen(const char *file, const char *perm)
-{
-    return fopen(expandPath(std::string("+/") + file).c_str(), perm);
-}
-
-int
-Executor::executor_dir_remove(const char *file)
-{
-    return remove(expandPath(std::string("+/") + file).c_str());
-}
-
-static void
-read_args_from_file(const char *filename, int *argcp, char ***argvpp)
-{
-    FILE *fp;
-
-    fp = executor_dir_fopen(filename, "r");
-    if(fp)
-    {
-        int nread, n_extra_params, i;
-        char buf[8192], *bufp;
-        char **saveargv;
-
-        nread = fread(buf, 1, sizeof buf, fp);
-        fclose(fp);
-        nread = zap_comments(buf, nread);
-        n_extra_params = count_params(buf, nread);
-        *argcp += n_extra_params;
-        saveargv = *argvpp;
-        *argvpp = (char **)malloc((*argcp + 1) * sizeof *argvpp);
-        bufp = buf;
-        memcpy(*argvpp, saveargv, (*argcp - n_extra_params) * sizeof **argvpp);
-        for(i = *argcp - n_extra_params; i < *argcp; ++i)
-            (*argvpp)[i] = get_param((const char **)&bufp, &nread);
-        (*argvpp)[i] = 0;
-    }
-}
-
-#if defined(CYGWIN32)
-static uint32_t
-win_drive_to_bit(const char *drive_namep)
-{
-    uint32_t retval;
-
-    if(drive_namep[1] == ':')
-        retval = 1 << (tolower(drive_namep[0]) - 'a');
-    else
-    {
-        warning_unexpected("drive name = '%s'", drive_namep);
-        retval = 0;
-    }
-    return retval;
-}
-#endif
 
 #if defined(LINUX) && defined(PERSONALITY_HACK)
 #include <sys/personality.h>
@@ -959,14 +706,8 @@ int main(int argc, char **argv)
     check_structs();
 
     INTEGER i;
-    static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
-        CWC((unsigned short)0x4EF9), CWC(0), CWC(0) /* Filled in below. */
-    };
     uint32_t l;
-    ULONGINT save_trap_vectors[64];
     virtual_int_state_t int_state;
-    GUEST<THz> saveSysZone, saveApplZone;
-    GUEST<Ptr> saveApplLimit;
     static void (*reg_funcs[])(void) = {
         vdriver_opt_register,
         NULL,
@@ -1020,14 +761,6 @@ int main(int argc, char **argv)
 
     setstartdir(argv[0]);
     set_appname(argv[0]);
-
-#define COMMANDS "commands.txt"
-
-    read_args_from_file(COMMANDS, &argc, &argv);
-#if defined(MSDOS) || defined(CYGWIN32)
-    read_args_from_file(CHECKPOINT_FILE, &argc, &argv);
-    checkpointp = checkpoint_init();
-#endif
 
     opt_init();
     common_db = opt_alloc_db();
@@ -1098,11 +831,6 @@ int main(int argc, char **argv)
     if(opt_val(common_db, "hfsplusro", NULL))
         ROMlib_hfs_plus_support = true;
 
-#if defined(CYGWIN32)
-    if(opt_val(common_db, "realmodecd", NULL))
-        ROMlib_set_realmodecd(true);
-#endif
-
     if(opt_val(common_db, "size", &arg))
         bad_arg_p |= !parse_size_opt("size", arg);
 
@@ -1112,46 +840,6 @@ int main(int argc, char **argv)
 
     if(opt_val(common_db, "debug", &arg))
         bad_arg_p |= !error_parse_option_string(arg);
-
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(opt_val(common_db, "macdrives", &arg))
-        ROMlib_macdrives = parse_drive_opt("macdrives", arg);
-    else
-    {
-#if !defined(CYGWIN32)
-        ROMlib_macdrives = 3; /* A: + B: */
-        {
-            int cdrom;
-
-            cdrom = dosdisk_find_cdrom();
-            if(cdrom != -1)
-                ROMlib_macdrives |= (1 << cdrom);
-        }
-#else
-        char buf[512];
-
-        if(win_GetLogicalDriveStrings(sizeof buf - 1, buf))
-        {
-            char *p;
-
-            for(p = buf; *p; p += strlen(p) + 1)
-                if(win_direct_accessible_disk(p))
-                    ROMlib_macdrives |= win_drive_to_bit(p);
-        }
-#endif
-    }
-
-    if(opt_val(common_db, "dosdrives", &arg))
-        ROMlib_dosdrives = parse_drive_opt("dosdrives", arg);
-
-    if(opt_val(common_db, "skipdrives", &arg))
-    {
-        skipdrives = parse_drive_opt("skipdrives", arg);
-        ROMlib_macdrives &= ~skipdrives;
-        ROMlib_dosdrives &= ~skipdrives;
-    }
-
-#endif
 
 #if defined(MACOSX)
     // sync() really takes a long time on Mac OS X.
@@ -1192,11 +880,6 @@ int main(int argc, char **argv)
         set_timer_driven_events(false);
 #endif
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(opt_val(common_db, "nocheckpoint", NULL))
-        disable_checkpointing();
-#endif
-
     /* Parse the "-memory" option. */
     {
         int total_memory;
@@ -1224,28 +907,122 @@ int main(int argc, char **argv)
    Loser, but it will prevent confusion.  */
     opt_int_val(common_db, "applzone", &ROMlib_applzone_size, &bad_arg_p);
     if(ROMlib_applzone_size < 65536)
-        note_memory_syntax_change("applzone", ROMlib_applzone_size);
+        note_memory_syntax("applzone", ROMlib_applzone_size);
     else
         check_arg("applzone", &ROMlib_applzone_size, MIN_APPLZONE_SIZE,
                   MAX_APPLZONE_SIZE);
 
     opt_int_val(common_db, "syszone", &ROMlib_syszone_size, &bad_arg_p);
     if(ROMlib_syszone_size < 65536)
-        note_memory_syntax_change("syszone", ROMlib_syszone_size);
+        note_memory_syntax("syszone", ROMlib_syszone_size);
     else
         check_arg("syszone", &ROMlib_syszone_size, MIN_SYSZONE_SIZE,
                   MAX_SYSZONE_SIZE);
 
     opt_int_val(common_db, "stack", &ROMlib_stack_size, &bad_arg_p);
     if(ROMlib_stack_size < 32768)
-        note_memory_syntax_change("stack", ROMlib_stack_size);
+        note_memory_syntax("stack", ROMlib_stack_size);
     else
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
-#if defined(MM_MANY_APPLZONES)
-    opt_int_val(common_db, "napplzones", &mm_n_applzones, &bad_arg_p);
-    check_arg("napplzones", &mm_n_applzones, 1, /* random */ 255);
-#endif /* !MM_MANY_APPLZONES */
+
+    if(opt_val(common_db, "keyboards", NULL))
+        graphics_p = false;
+
+
+    opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
+    opt_bool_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
+    opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
+    opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
+#if defined(MACOSX_) || defined(LINUX)
+    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
+#endif
+#if 0
+  opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
+#endif
+    {
+        int no_auto = false;
+        opt_int_val(common_db, "noautorefresh", &no_auto, &bad_arg_p);
+        do_autorefresh_p = !no_auto;
+    }
+
+    opt_int_val(common_db, "refresh", &ROMlib_refresh, &bad_arg_p);
+    check_arg("refresh", &ROMlib_refresh, 0, 60);
+
+    opt_int_val(common_db, "grayscale", &grayscale_p, &bad_arg_p);
+
+#if defined(LINUX)
+    opt_bool_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
+#endif
+
+    {
+        string str;
+
+        if(opt_val(common_db, "prvers", &str))
+        {
+            uint32_t vers;
+
+            if(!ROMlib_parse_version(str, &vers))
+                bad_arg_p = true;
+            else
+                ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
+        }
+    }
+
+#if defined(SUPPORT_LOG_ERR_TO_RAM)
+    {
+        int log;
+        log = 0;
+        opt_int_val(common_db, "ramlog", &log, &bad_arg_p);
+        log_err_to_ram_p = (log != 0);
+    }
+#endif
+
+    {
+        string appearance_str;
+
+        if(opt_val(common_db, "appearance", &appearance_str))
+            bad_arg_p |= !ROMlib_parse_appearance(appearance_str.c_str());
+    }
+
+
+    /* parse the `-system' option */
+    {
+        string system_str;
+
+        if(opt_val(common_db, "system", &system_str))
+            bad_arg_p |= !parse_system_version(system_str);
+    }
+
+    /* If we failed to parse our arguments properly, exit now.
+   * I don't think we should call ExitToShell yet because the
+   * rest of the system isn't initialized.
+   */
+    if(argc >= 2)
+    {
+        int a;
+
+        /* Only complain if we see something with a leading dash; anything
+	 * else might be a file to launch.
+	 */
+        for(a = 1; a < argc; a++)
+        {
+            if(argv[a][0] == '-')
+            {
+                fprintf(stderr, "%s: unknown option `%s'\n",
+                        program_name, argv[a]);
+                bad_arg_p = true;
+            }
+        }
+    }
+
+    if(bad_arg_p)
+    {
+        fprintf(stderr,
+                "Type \"%s -help\" for a list of command-line options.\n",
+                program_name);
+        exit(-10);
+    }
 
     ROMlib_InitZones();
 
@@ -1309,9 +1086,6 @@ int main(int argc, char **argv)
         EM_A7 = save_a7;
     }
 
-    if(opt_val(common_db, "keyboards", NULL))
-        graphics_p = false;
-
     /* Block virtual interrupts, until the system is fully set up. */
     int_state = block_virtual_ints();
 
@@ -1321,108 +1095,24 @@ int main(int argc, char **argv)
         exit(-12);
     }
 
-    /* Save the trap vectors away. */
-    memcpy(save_trap_vectors, SYN68K_TO_US(0), sizeof save_trap_vectors);
-
-    opt_int_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
-
-    opt_int_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
-
-    opt_int_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
-
-    opt_int_val(common_db, "print", &ROMlib_print, &bad_arg_p);
-
-#if defined(MACOSX_) || defined(LINUX)
-    opt_int_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
-#endif
-
-#if 0
-  opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
-#endif
-
-    {
-        int no_auto = false;
-        opt_int_val(common_db, "noautorefresh", &no_auto, &bad_arg_p);
-        do_autorefresh_p = !no_auto;
-    }
-
-    opt_int_val(common_db, "refresh", &ROMlib_refresh, &bad_arg_p);
-    check_arg("refresh", &ROMlib_refresh, 0, 60);
-
-    opt_int_val(common_db, "grayscale", &grayscale_p, &bad_arg_p);
-
-#if defined(LINUX)
-    opt_int_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
-#endif
-
-    {
-        string str;
-
-        if(opt_val(common_db, "prvers", &str))
-        {
-            uint32_t vers;
-
-            if(!ROMlib_parse_version(str, &vers))
-                bad_arg_p = true;
-            else
-                ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
-        }
-    }
-
-#if defined(SUPPORT_LOG_ERR_TO_RAM)
-    {
-        int log;
-        log = 0;
-        opt_int_val(common_db, "ramlog", &log, &bad_arg_p);
-        log_err_to_ram_p = (log != 0);
-    }
-#endif
-
-    if(opt_val(common_db, "info", NULL))
-    {
-        print_info();
-        exit(0);
-    }
-
-    /* If we failed to parse our arguments properly, exit now.
-   * I don't think we should call ExitToShell yet because the
-   * rest of the system isn't initialized.
-   */
-    if(argc >= 2)
-    {
-        int a;
-
-        /* Only complain if we see something with a leading dash; anything
-	 * else might be a file to launch.
-	 */
-        for(a = 1; a < argc; a++)
-        {
-            if(argv[a][0] == '-')
-            {
-                fprintf(stderr, "%s: unknown option `%s'\n",
-                        program_name, argv[a]);
-                bad_arg_p = true;
-            }
-        }
-    }
 
     if(opt_val(common_db, "logtraps", NULL))
         Executor::traps::init(true);
     else
         Executor::traps::init(false);
 
+    // Mystery Hack: Replace the trap entry for ResourceStub by a piece
+    // of code that jumps to the former trap entry of ResourceStub. 
     l = ostraptable[0x0FC];
+    static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
+        CWC((unsigned short)0x4EF9), CWC(0), CWC(0) /* Filled in below. */
+    };
     ((unsigned char *)jmpl_to_ResourceStub)[2] = l >> 24;
     ((unsigned char *)jmpl_to_ResourceStub)[3] = l >> 16;
     ((unsigned char *)jmpl_to_ResourceStub)[4] = l >> 8;
     ((unsigned char *)jmpl_to_ResourceStub)[5] = l;
     ostraptable[0xFC] = US_TO_SYN68K(jmpl_to_ResourceStub);
-    //osstuff[0xFC].orig = US_TO_SYN68K(jmpl_to_ResourceStub);
-
-    saveSysZone = LM(SysZone);
-    saveApplZone = LM(ApplZone);
-    saveApplLimit = LM(ApplLimit);
-    memset(&LM(nilhandle), ~0, (char *)&LM(lastlowglobal) - (char *)&LM(nilhandle));
+    // End Mystery Hack
 
     LM(Ticks) = 0;
     LM(nilhandle) = 0; /* so nil dereferences "work" */
@@ -1433,9 +1123,6 @@ int main(int argc, char **argv)
     memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
     memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
     LM(TESysJust) = 0;
-    LM(SysZone) = saveSysZone;
-    LM(ApplZone) = saveApplZone;
-    LM(ApplLimit) = saveApplLimit;
     LM(BootDrive) = 0;
     LM(DefVCBPtr) = 0;
     LM(CurMap) = 0;
@@ -1503,6 +1190,72 @@ int main(int argc, char **argv)
     LM(UnitNtryCnt) = CW(NDEVICES);
     LM(TheZone) = LM(ApplZone);
 
+    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
+
+    LM(SCSIFlags) = CWC(0xEC00); /* scsi+clock+xparam+mmu+adb
+				 (no fpu,aux or pwrmgr) */
+
+    LM(MCLKPCmiss1) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 72 (MacLinkPC starts
+			   adding the 72 byte offset to VCB pointers too
+			   soon, starting with 0x358, which is not the
+			   address of a VCB) */
+
+    LM(MCLKPCmiss2) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 78 (MacLinkPC misses) */
+    LM(AuxCtlHead) = 0;
+    LM(CurDeactive) = 0;
+    LM(CurActivate) = 0;
+    LM(macfpstate)[0] = 0;
+    LM(fondid) = 0;
+    LM(PrintErr) = 0;
+    LM(mouseoffset) = 0;
+    LM(heapcheck) = 0;
+    LM(DefltStack) = CLC(0x2000); /* nobody really cares about these two */
+    LM(MinStack) = CLC(0x400); /* values ... */
+    LM(IAZNotify) = 0;
+    LM(CurPitch) = 0;
+    LM(JSwapFont) = RM((ProcPtr)&FMSwapFont);
+    LM(JInitCrsr) = RM((ProcPtr)&InitCursor);
+
+    LM(Key1Trans) = RM((Ptr)&stub_Key1Trans);
+    LM(Key2Trans) = RM((Ptr)&stub_Key2Trans);
+    LM(JFLUSH) = RM(&FlushCodeCache);
+    LM(JResUnknown1) = LM(JFLUSH); /* I don't know what these are supposed to */
+    LM(JResUnknown2) = LM(JFLUSH); /* do, but they're not called enough for
+				   us to worry about the cache flushing
+				   overhead */
+
+    //LM(CPUFlag) = 2; /* mc68020 */
+    LM(CPUFlag) = 4; /* mc68040 */
+
+
+        // #### UnitNtryCnt should be 32, but gets overridden here
+        //      this does not seem to make any sense.
+    LM(UnitNtryCnt) = 0; /* how many units in the table */
+
+    LM(TheZone) = LM(SysZone);
+    LM(VIA) = RM(NewPtr(16 * 512)); /* IMIII-43 */
+    memset(MR(LM(VIA)), 0, (LONGINT)16 * 512);
+    *(char *)MR(LM(VIA)) = 0x80; /* Sound Off */
+
+#define SCC_SIZE 1024
+
+    LM(SCCRd) = RM(NewPtrSysClear(SCC_SIZE));
+    LM(SCCWr) = RM(NewPtrSysClear(SCC_SIZE));
+
+    LM(SoundBase) = RM(NewPtr(370 * sizeof(INTEGER)));
+#if 0
+    memset(CL(LM(SoundBase)), 0, (LONGINT) 370 * sizeof(INTEGER));
+#else /* !0 */
+    for(i = 0; i < 370; ++i)
+        ((GUEST<INTEGER> *)MR(LM(SoundBase)))[i] = CWC(0x8000); /* reference 0 sound */
+#endif /* !0 */
+    LM(TheZone) = LM(ApplZone);
+    LM(HiliteMode) = CB(0xFF);
+    /* Mac II has 0x3FFF here */
+    LM(ROM85) = CWC(0x3FFF);
+
+    LM(loadtrap) = 0;
+
     if(graphics_p)
     {
         /* Set up the current graphics mode appropriately. */
@@ -1538,44 +1291,9 @@ int main(int argc, char **argv)
 
     InitUtil();
 
-#if !defined(X) && !defined(SDL)
-/* #warning "Hack so we don't smash mouse/keyboard m68k interrupt vectors." */
-#if defined(M68K_EVENT_VECTOR)
-    save_trap_vectors[M68K_EVENT_VECTOR]
-        = *(syn68k_addr_t *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4);
-#endif
-#if defined(M68K_MOUSE_MOVED_VECTOR)
-    save_trap_vectors[M68K_MOUSE_MOVED_VECTOR]
-        = *(syn68k_addr_t *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4);
-#endif
-#endif
-
-    {
-        string appearance_str;
-
-        if(opt_val(common_db, "appearance", &appearance_str))
-            bad_arg_p |= !ROMlib_parse_appearance(appearance_str.c_str());
-    }
-
     InitResources();
-
-    /* parse the `-system' option */
-    {
-        string system_str;
-
-        if(opt_val(common_db, "system", &system_str))
-            bad_arg_p |= !parse_system_version(system_str);
-        else
-            ROMlib_set_system_version(system_version);
-    }
-
-    if(bad_arg_p)
-    {
-        fprintf(stderr,
-                "Type \"%s -help\" for a list of command-line options.\n",
-                program_name);
-        exit(-10);
-    }
+    
+    ROMlib_set_system_version(system_version);
 
     {
         bool keyboard_set_failed;
@@ -1618,18 +1336,7 @@ int main(int argc, char **argv)
         ROMlib_Fsetenv(&env, 0);
     }
 
-    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
-
-    {
-        LONGINT save58;
-
-        save58 = *(LONGINT *)SYN68K_TO_US(0x58);
-        /* Replace the trap vectors which got smashed during initialization. */
-        memcpy(SYN68K_TO_US(0), save_trap_vectors, sizeof save_trap_vectors);
-        *(LONGINT *)SYN68K_TO_US(0x58) = save58;
-
-        setup_trap_vectors();
-    }
+    setup_trap_vectors();
 
     /* Set up timer interrupts.  We need to do this after everything else
    * has been initialized.
@@ -1652,7 +1359,8 @@ int main(int argc, char **argv)
 #if defined(CYGWIN32)
     complain_if_no_ghostscript();
 #endif
-
+    InitDebugger();
+    
     executor_main();
 
     ExitToShell();

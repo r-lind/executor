@@ -58,19 +58,13 @@
 #include "rsys/executor.h"
 
 #include "rsys/osevent.h"
-
-int Executor::nodrivesearch_p = false;
-
-#if defined(MSDOS) || defined(CYGWIN32)
-#include "dosdisk.h"
-#include "aspi.h"
-#include "rsys/checkpoint.h"
-#endif
+#include "rsys/prefs.h"
 
 #include "rsys/print.h"
 #include "rsys/system_error.h"
 
 #include "rsys/functions.impl.h"
+#include "rsys/prefs.h"
 
 using namespace Executor;
 
@@ -251,7 +245,7 @@ static void drawinboxwithicon(StringPtr str, Rect *rp, INTEGER icon)
 static void safeflflip(fltype *f, INTEGER sel)
 {
     Rect r;
-    INTEGER fltop = GetCtlValue(f->flsh);
+    INTEGER fltop = GetControlValue(f->flsh);
 
     if(sel >= fltop && sel < fltop + f->flnmlin)
     {
@@ -277,7 +271,7 @@ static void flupdate(fltype *f, INTEGER st, INTEGER n)
     INTEGER fltop;
     Rect r;
 
-    fltop = GetCtlValue(f->flsh);
+    fltop = GetControlValue(f->flsh);
     r.top = CW(CW(f->flrect.top) + (st - fltop) * f->fllinht);
     r.bottom = CW(f->flascent);
     r.left = f->flrect.left;
@@ -376,24 +370,24 @@ void Executor::C_ROMlib_stdftrack(ControlHandle sh, INTEGER part)
     else
         last_scroll_msecs = current_msecs;
 
-    from = GetCtlValue(sh);
+    from = GetControlValue(sh);
     pg = CTLFL(sh)->flnmlin - 1;
     switch(part)
     {
         case inUpButton:
-            SetCtlValue(sh, from - 1);
+            SetControlValue(sh, from - 1);
             break;
         case inDownButton:
-            SetCtlValue(sh, from + 1);
+            SetControlValue(sh, from + 1);
             break;
         case inPageUp:
-            SetCtlValue(sh, from - pg);
+            SetControlValue(sh, from - pg);
             break;
         case inPageDown:
-            SetCtlValue(sh, from + pg);
+            SetControlValue(sh, from + pg);
             break;
     }
-    flscroll(CTLFL(sh), from, GetCtlValue(sh));
+    flscroll(CTLFL(sh), from, GetControlValue(sh));
 }
 
 static GUEST<INTEGER> cachedvrn = CWC(32767);
@@ -558,13 +552,13 @@ static INTEGER flwhich(fltype *f, Point p)
             bump = 1;
         if(bump)
         {
-            from = GetCtlValue(f->flsh);
-            SetCtlValue(f->flsh, from + bump);
-            flscroll(f, from, GetCtlValue(f->flsh));
+            from = GetControlValue(f->flsh);
+            SetControlValue(f->flsh, from + bump);
+            flscroll(f, from, GetControlValue(f->flsh));
         }
         /*-->*/ return (-1);
     }
-    retval = (p.v - CW(f->flrect.top)) / f->fllinht + GetCtlValue(f->flsh);
+    retval = (p.v - CW(f->flrect.top)) / f->fllinht + GetControlValue(f->flsh);
     if(retval >= f->flnmfil || MR(*f->flinfo)[retval].flicns & GRAYBIT)
         /*-->*/ retval = -1;
     return (retval);
@@ -645,8 +639,8 @@ static void getcurname(fltype *f)
 static void flfinit(fltype *fp)
 {
     DisposeControl(fp->flsh);
-    DisposHandle((Handle)fp->flinfo);
-    DisposHandle((Handle)fp->flstrs);
+    DisposeHandle((Handle)fp->flinfo);
+    DisposeHandle((Handle)fp->flstrs);
 }
 
 static void flinsert(fltype *f, StringPtr p, INTEGER micon)
@@ -766,11 +760,11 @@ static void flfill(fltype *f)
     }
     if(f->flnmfil > f->flnmlin)
     {
-        SetCtlMax(f->flsh, f->flnmfil - f->flnmlin);
-        SetCtlValue(f->flsh, 0);
+        SetControlMaximum(f->flsh, f->flnmfil - f->flnmlin);
+        SetControlValue(f->flsh, 0);
     }
     else
-        SetCtlMax(f->flsh, 0);
+        SetControlMaximum(f->flsh, 0);
 
     if(f->flnmfil > 0)
     {
@@ -811,7 +805,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
     PenNormal();
 
     h = NULL;
-    GetDItem((DialogPtr)dp, which, &i, &h, &r);
+    GetDialogItem((DialogPtr)dp, which, &i, &h, &r);
     /*    h = CL(h); we don't really use h */
     switch(which)
     {
@@ -819,7 +813,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
         case putNmList:
             if(h)
                 FrameRect(&r);
-            flupdate(WINDFL(dp), GetCtlValue(WINDFL(dp)->flsh),
+            flupdate(WINDFL(dp), GetControlValue(WINDFL(dp)->flsh),
                      WINDFL(dp)->flnmlin);
             break;
         case getDotted:
@@ -830,7 +824,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
             EraseRect(&r);
             width = CW(r.right) - CW(r.left);
             diskname = getdiskname(&ejectable, NULL);
-            GetDItem((DialogPtr)dp, putEject, &i, &tmpH, &r2);
+            GetDialogItem((DialogPtr)dp, putEject, &i, &tmpH, &r2);
             ejhand = MR(tmpH);
             if(ejectable)
                 HiliteControl((ControlHandle)ejhand, 0);
@@ -988,14 +982,14 @@ BOOLEAN keyarrow(fltype *fl, INTEGER incr) /* -1: up, 1: down */
  * Figure out what should be visible and scroll there if necessary
  */
 
-    newval = oldval = GetCtlValue(fl->flsh);
+    newval = oldval = GetControlValue(fl->flsh);
     if(nsel < oldval)
         newval = nsel;
     else if(nsel >= oldval + fl->flnmlin)
         newval = nsel - fl->flnmlin + 1;
     if(newval != oldval)
     {
-        SetCtlValue(fl->flsh, newval);
+        SetControlValue(fl->flsh, newval);
         flscroll(fl, oldval, newval);
     }
 
@@ -1102,7 +1096,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
             {
                 case NUMPAD_ENTER:
                 case '\r':
-                    GetDItem((DialogPtr)dp, CW(dp->aDefItem), &i, &tmpH, &r);
+                    GetDialogItem((DialogPtr)dp, CW(dp->aDefItem), &i, &tmpH, &r);
                     h = (ControlHandle)MR(tmpH);
                     if(Hx(h, contrlVis) && U(Hx(h, contrlHilite)) != 255)
                     {
@@ -1112,7 +1106,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
                         retval = -1;
                         //#if !defined(MACOSX_)
                         HiliteControl(h, inButton);
-                        Delay((LONGINT)5, (LONGINT *)0);
+                        Delay((LONGINT)5, nullptr);
                         HiliteControl(h, 0);
                         //#endif
                     }
@@ -1171,11 +1165,11 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
                         if(nsel != fl->flsel)
                         {
                             safeflflip(fl, fl->flsel);
-                            fltop = GetCtlValue(fl->flsh);
+                            fltop = GetControlValue(fl->flsh);
                             if(nsel < fltop || nsel >= fltop + fl->flnmlin)
                             {
-                                SetCtlValue(fl->flsh, nsel - fl->flnmlin / 2);
-                                flscroll(fl, fltop, GetCtlValue(fl->flsh));
+                                SetControlValue(fl->flsh, nsel - fl->flnmlin / 2);
+                                flscroll(fl, fltop, GetControlValue(fl->flsh));
                             }
                             safeflflip(fl, fl->flsel = nsel);
                             settype(fl, nsel);
@@ -1192,7 +1186,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
             if(PtInRect(p, &fl->flrect))
             {
                 GUEST<Handle> h_s;
-                GetDItem((DialogPtr)dp, getOpen, &i, &h_s, &r);
+                GetDialogItem((DialogPtr)dp, getOpen, &i, &h_s, &r);
                 h = (ControlHandle)MR(h_s);
                 flmouse(fl, evt->where.get(), h);
                 ticks = TickCount();
@@ -1211,9 +1205,9 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
             {
                 if(t == inThumb)
                 {
-                    from = GetCtlValue(fl->flsh);
+                    from = GetControlValue(fl->flsh);
                     TrackControl(fl->flsh, p, nullptr);
-                    flscroll(fl, from, GetCtlValue(fl->flsh));
+                    flscroll(fl, from, GetControlValue(fl->flsh));
                 }
                 else
                     TrackControl(fl->flsh, p, &ROMlib_stdftrack);
@@ -1226,7 +1220,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
             else
             {
                 GUEST<Handle> h_s;
-                GetDItem((DialogPtr)dp, getOpen, &i, &h_s, &r);
+                GetDialogItem((DialogPtr)dp, getOpen, &i, &h_s, &r);
                 h = (ControlHandle)MR(h_s);
                 if((part = TestControl(h, p)) && TrackControl(h, p, nullptr))
                 {
@@ -1486,7 +1480,7 @@ static BOOLEAN trackdirs(DialogPeek dp)
         /* restore the rect and clean up after ourselves */
         CopyBits(wrapper, PORT_BITS_FOR_COPY(thePort),
                  &PIXMAP_BOUNDS(save_bits), &therect, srcCopy, NULL);
-        DisposPixMap(save_bits);
+        DisposePixMap(save_bits);
     }
     if(sel != -1)
     {
@@ -1720,9 +1714,6 @@ void Executor::futzwithdosdisks(void)
         {
             if(/* DRIVE_LOADED(i) */ ROMLIB_MACDRIVES & (1 << i))
             {
-#if defined(MSDOS) || defined(CYGWIN32)
-                checkpoint_macdrive(checkpointp, begin, 1 << i);
-#endif
                 if(((fd = OPEN_ROUTINE(FD_OF(i), &blocksize, &flags EXTRA_PARAM)) >= 0)
                    || (flags & DRIVE_FLAGS_FLOPPY))
                 {
@@ -1751,9 +1742,6 @@ void Executor::futzwithdosdisks(void)
                             CLOSE_ROUTINE(fd EXTRA_CLOSE_PARAM);
                     }
                 }
-#if defined(MSDOS) || defined(CYGWIN32)
-                checkpoint_macdrive(checkpointp, end, 1 << i);
-#endif
             }
         }
     }
@@ -1768,15 +1756,6 @@ static void bumpsavedisk(DialogPtr dp, BOOLEAN always)
     OSErr err;
     BOOLEAN is_single_tree_fs, seenus;
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    /*    static BOOLEAN beenhere = false; */
-
-    if(ROMlib_drive_check /* || !beenhere */)
-    {
-        futzwithdosdisks();
-        /*      beenhere = true; */
-    }
-#endif
     pb.volumeParam.ioVRefNum = CW(-CW(LM(SFSaveDisk)));
     pb.volumeParam.ioNamePtr = 0;
     pb.volumeParam.ioVolIndex = 0;
@@ -1828,9 +1807,9 @@ static void bumpsavedisk(DialogPtr dp, BOOLEAN always)
  * I have just verified that the fix is incorrect.  It works because we
  * bypass some startup code that Photoshop 3.0 uses to set up its type list.
  * This means that the type list won't work properly.  However if we don't
- * swap in 'stdf' then we wind up making calls to InsMenuItem that add
+ * swap in 'stdf' then we wind up making calls to InsertMenuItem that add
  * entries to the "Format" menu which somehow results in a crash eventually.
- * If we have ROMlib_CALLDHOOK temporarily disable InsMenuItem then PS3.0
+ * If we have ROMlib_CALLDHOOK temporarily disable InsertMenuItem then PS3.0
  * will work even w/ 'stdf' in the refcon.  It will also work if we rig
  * CountMItems to always return 0 inside ROMlib_CALLDHOOK.  So something
  * appears to go wrong if we call the startup code and actually add (and
@@ -1894,7 +1873,7 @@ static void transformsfpdialog(DialogPtr dp, Point *offset, Rect *scrollrect,
     numitems = CW(*(GUEST<INTEGER> *)STARH((MR(((DialogPeek)dp)->items)))) + 1;
     for(j = 1; j <= numitems; j++)
     {
-        GetDItem(dp, j, &swapped_itype, &tmpH, &r);
+        GetDialogItem(dp, j, &swapped_itype, &tmpH, &r);
         i = CW(swapped_itype);
         h = MR(tmpH);
         if(!getting || CW(r.bottom) > CW(scrollrect->top))
@@ -1903,7 +1882,7 @@ static void transformsfpdialog(DialogPtr dp, Point *offset, Rect *scrollrect,
             r.bottom = CW(CW(r.bottom) + (extrasizeneeded));
             if(i <= 7 && i >= 4) /* It's a control */
                 MoveControl((ControlHandle)h, CW(r.left), CW(r.top));
-            SetDItem(dp, j, i, h, &r);
+            SetDialogItem(dp, j, i, h, &r);
         }
     }
     windheight = CW(dp->portRect.bottom) - CW(dp->portRect.top) + extrasizeneeded;
@@ -1943,7 +1922,7 @@ void adjustdrivebutton(DialogPtr dp)
 #else /* defined(MSDOS) */
     count = 2; /* always allow the user to hit the drive button */
 #endif /* defined(MSDOS) */
-    GetDItem(dp, putDrive, &i, &tmpH, &r); /* putDrive == getDrive */
+    GetDialogItem(dp, putDrive, &i, &tmpH, &r); /* putDrive == getDrive */
     drhand = MR(tmpH);
     HiliteControl((ControlHandle)drhand, count > 1 ? 0 : 255);
 }
@@ -2106,10 +2085,10 @@ create_new_folder_button(DialogPtr dp)
         GUEST<Handle> h;
         Rect r;
 
-        GetDItem(dp, sfItemNewFolderUser, &i, &h, &r);
+        GetDialogItem(dp, sfItemNewFolderUser, &i, &h, &r);
         retval = NewControl((WindowPtr)dp, &r, (StringPtr) "\012New Folder",
                             true, 0, 0, 0, 0, 0L);
-        SetDItem(dp, sfItemNewFolderUser, ctrlItem | btnCtrl,
+        SetDialogItem(dp, sfItemNewFolderUser, ctrlItem | btnCtrl,
                  (Handle)retval, &r);
     }
     return retval;
@@ -2154,12 +2133,12 @@ getditext(DialogPtr dp, INTEGER item, StringPtr text)
     Rect r;
 
     h = 0;
-    GetDItem(dp, item, &i, &h, &r);
+    GetDialogItem(dp, item, &i, &h, &r);
     if(!h)
         text[0] = 0;
     else
     {
-        GetIText(MR(h), text);
+        GetDialogItemText(MR(h), text);
     }
 }
 
@@ -2237,7 +2216,7 @@ do_new_folder(fltype *f)
         bool done;
         GUEST<INTEGER> ihit;
 
-        SelIText(dp, 3, 0, 32767);
+        SelectDialogItemText(dp, 3, 0, 32767);
         ShowWindow(dp);
         SelectWindow(dp);
         done = false;
@@ -2402,7 +2381,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
         dp = GetNewDialog(dig, (Ptr)0, (WindowPtr)-1);
         bumpsavedisk(dp, false);
         SetPort(dp);
-        GetDItem(dp, openorsave, &i, &tmpH, &r);
+        GetDialogItem(dp, openorsave, &i, &tmpH, &r);
         sahand = MR(tmpH);
         if(getorput == put && SF_NAME(&f)[0])
         {
@@ -2416,21 +2395,21 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
             sav = false;
             HiliteControl((ControlHandle)sahand, 255);
         }
-        GetDItem(dp, ejectitem, &i, &tmpH, &r);
+        GetDialogItem(dp, ejectitem, &i, &tmpH, &r);
         ejhand = MR(tmpH);
         HiliteControl((ControlHandle)ejhand, 255);
-        GetDItem(dp, driveitem, &i, &tmpH, &r);
+        GetDialogItem(dp, driveitem, &i, &tmpH, &r);
         drhand = MR(tmpH);
         adjustdrivebutton(dp);
 
         if(getorput == put)
         {
-            GetDItem(dp, promptitem, &i, &tmpH, &r);
+            GetDialogItem(dp, promptitem, &i, &tmpH, &r);
             h = MR(tmpH);
-            SetIText(h, prompt ? prompt : (StringPtr) "");
+            SetDialogItemText(h, prompt ? prompt : (StringPtr) "");
         }
 
-        GetDItem(dp, nmlistitem, &i, &tmpH, &scrollrect);
+        GetDialogItem(dp, nmlistitem, &i, &tmpH, &scrollrect);
         h = MR(tmpH);
 
         if(getorput == put)
@@ -2449,21 +2428,21 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
                 new_folder_button = create_new_folder_button(dp);
             }
 
-            GetDItem(dp, putname, &i, &tmpH, &r);
+            GetDialogItem(dp, putname, &i, &tmpH, &r);
             pnhand = MR(tmpH);
-            SetIText(pnhand, SF_NAME(&f));
-            SelIText((DialogPtr)dp, putname, 0, 32767);
+            SetDialogItemText(pnhand, SF_NAME(&f));
+            SelectDialogItemText((DialogPtr)dp, putname, 0, 32767);
         }
         else
         {
             if(f.flavor == original_sf)
             {
-                GetDItem(dp, getScroll, &i, &tmpH, &r);
+                GetDialogItem(dp, getScroll, &i, &tmpH, &r);
                 h = MR(tmpH);
                 transform = CW(r.right) - CW(r.left) == 16;
-                GetDItem(dp, getDotted, &i, &tmpH, &r);
+                GetDialogItem(dp, getDotted, &i, &tmpH, &r);
                 h = MR(tmpH);
-                SetDItem(dp, getDotted, userItem, (Handle)(void*)&ROMlib_filebox, &r);
+                SetDialogItem(dp, getDotted, userItem, (Handle)(void*)&ROMlib_filebox, &r);
             }
             else
                 transform = false;
@@ -2472,11 +2451,11 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
         if(transform)
             transformsfpdialog(dp, &p, &scrollrect, getorput == get);
 
-        SetDItem(dp, nmlistitem, userItem, (Handle)(void*)&ROMlib_filebox, &scrollrect);
+        SetDialogItem(dp, nmlistitem, userItem, (Handle)(void*)&ROMlib_filebox, &scrollrect);
 
-        GetDItem(dp, diskname, &i, &tmpH, &r);
+        GetDialogItem(dp, diskname, &i, &tmpH, &r);
         h = MR(tmpH);
-        SetDItem(dp, diskname, userItem, (Handle)(void*)&ROMlib_filebox, &r);
+        SetDialogItem(dp, diskname, userItem, (Handle)(void*)&ROMlib_filebox, &r);
 
         r.left = CW(CW(scrollrect.left) + 1);
         r.right = CW(CW(scrollrect.right) - 16);
@@ -2526,7 +2505,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
             ModalDialog(&ROMlib_stdffilt, &ihit_s);
             ihit = CW(ihit_s);
             if(getorput == put)
-                GetIText(pnhand, SF_NAME(&f));
+                GetDialogItemText(pnhand, SF_NAME(&f));
             if(dh.odh)
                 ihit = ROMlib_CALLDHOOK(&f, ihit, dp, dh);
             if(ihit == openorsave)
@@ -2544,7 +2523,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
                 }
                 else
                 {
-                    GetIText(pnhand, SF_NAME(&f));
+                    GetDialogItemText(pnhand, SF_NAME(&f));
                     hpb.dirInfo.ioCompletion = 0;
                     hpb.dirInfo.ioNamePtr = RM((StringPtr)SF_NAME(&f));
                     hpb.dirInfo.ioVRefNum = SF_VREFNUM_X(&f);
@@ -2621,7 +2600,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
                 Str255 file_name;
                 bool writable;
 
-                GetIText(pnhand, file_name);
+                GetDialogItemText(pnhand, file_name);
                 str31assign(SF_NAME(&f), file_name);
                 getdiskname(NULL, &writable);
                 if((SF_NAME(&f))[0] && writable && !sav)

@@ -143,7 +143,7 @@ void Executor::ROMlib_sledgehammer_te(TEHandle te)
 }
 #endif
 
-void Executor::SetWordBreak(ProcPtr wb, TEHandle teh)
+void Executor::TESetWordBreak(ProcPtr wb, TEHandle teh)
 {
     TE_SLAM(teh);
     HxX(teh, wordBreak) = RM(wb);
@@ -155,13 +155,13 @@ void Executor::SetWordBreak(ProcPtr wb, TEHandle teh)
  */
 
 /*
- * NOTE: on the 68k, SetClikLoop is provided by glue, and the glue doesn't
- *       correspond to the implementation of SetClikLoop below, because it
+ * NOTE: on the 68k, TESetClickLoop is provided by glue, and the glue doesn't
+ *       correspond to the implementation of TESetClickLoop below, because it
  *       has to address the goofy calling conventions that are used there.
  *       So this routine is only useful on the PPC.
  */
 
-void Executor::SetClikLoop(ProcPtr cp, TEHandle teh)
+void Executor::TESetClickLoop(ProcPtr cp, TEHandle teh)
 {
     TE_SLAM(teh);
     HxX(teh, clikLoop) = RM(cp);

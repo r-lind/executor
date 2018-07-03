@@ -49,7 +49,7 @@ void Executor::C_NumToString(LONGINT l, StringPtr s)
     s[0] = p - (s + 1);
 }
 
-void Executor::C_StringToNum(StringPtr s, LONGINT *lp)
+void Executor::C_StringToNum(StringPtr s, GUEST<LONGINT> *lp)
 {
     char *p = (char *)s + 1;
     char *ep = p + s[0];
@@ -68,5 +68,5 @@ void Executor::C_StringToNum(StringPtr s, LONGINT *lp)
     }
     while(p != ep)
         l = l * 10 + (*p++ & 0xF);
-    *lp = sign * l;
+    lp->set(sign * l);
 }

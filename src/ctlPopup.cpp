@@ -46,14 +46,14 @@ init(ControlHandle ctl)
     mh = GetMenu(mid);
     InsertMenu(mh, -1);
     {
-        Handle hh;
+        GUEST<Handle> hh;
 
-        hh = (Handle)mh;
+        hh = RM((Handle)mh);
         HandToHand(&hh);
         flags = CTL_VALUE(ctl);
 
         POPUP_MENU_ID_X(data) = CW(mid);
-        POPUP_MENU_X(data) = RM((MenuHandle)hh);
+        POPUP_MENU_X(data) = guest_cast<MenuHandle>(hh);
     }
     /* private fields */
     POPUP_TITLE_WIDTH(data) = CTL_MAX(ctl);
@@ -475,8 +475,8 @@ int32_t Executor::C_cdef1008(int16_t var, ControlHandle ctl, int16_t message,
             data = (popup_data_handle)CTL_DATA(ctl);
 
             DeleteMenu(POPUP_MENU_ID(data));
-            DisposHandle((Handle)POPUP_MENU(data));
-            DisposHandle((Handle)data);
+            DisposeHandle((Handle)POPUP_MENU(data));
+            DisposeHandle((Handle)data);
             break;
         }
 

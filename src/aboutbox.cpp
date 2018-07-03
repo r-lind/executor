@@ -149,29 +149,29 @@ help_scroll(ControlHandle c, INTEGER part)
         int page_size, old_value, new_value, delta;
         int line_height;
 
-        old_value = GetCtlValue(c);
+        old_value = GetControlValue(c);
         line_height = TE_LINE_HEIGHT(about_te);
         page_size = RECT_HEIGHT(&CTL_RECT(c)) / line_height;
 
         switch(part)
         {
             case inUpButton:
-                SetCtlValue(c, old_value - 1);
+                SetControlValue(c, old_value - 1);
                 break;
             case inDownButton:
-                SetCtlValue(c, old_value + 1);
+                SetControlValue(c, old_value + 1);
                 break;
             case inPageUp:
-                SetCtlValue(c, old_value - page_size);
+                SetControlValue(c, old_value - page_size);
                 break;
             case inPageDown:
-                SetCtlValue(c, old_value + page_size);
+                SetControlValue(c, old_value + page_size);
                 break;
             default:
                 break;
         }
 
-        new_value = GetCtlValue(about_scrollbar);
+        new_value = GetControlValue(about_scrollbar);
         delta = new_value - old_value;
         if(delta != 0)
             TEScroll(0, -delta * line_height, about_te);
@@ -370,7 +370,7 @@ dispose_license_text(void)
     b = find_license_button();
     if(about_box_buttons[b].text != NULL)
     {
-        DisposPtr((Ptr)about_box_buttons[b].text);
+        DisposePtr((Ptr)about_box_buttons[b].text);
         about_box_buttons[b].text = NULL;
     }
 }
@@ -445,7 +445,7 @@ create_about_box()
     about_scrollbar = NewControl(about_box, &scroll_bar_bounds, NULL, true,
                                  0, 0, 100, scrollBarProc, -1);
     about_te = TENew(&te_bounds, &te_bounds);
-    TESetJust(teFlushLeft, about_te);
+    TESetAlignment(teFlushLeft, about_te);
 }
 
 /* Closes about box and frees up memory taken by it. */
@@ -464,10 +464,10 @@ static void
 set_text(const char *text)
 {
     TESetText((Ptr)text, strlen(text), about_te);
-    SetCtlMax(about_scrollbar,
+    SetControlMaximum(about_scrollbar,
               MAX(0, (TE_N_LINES(about_te)
                       - ((TE_HEIGHT - 2) / TE_LINE_HEIGHT(about_te)))));
-    SetCtlValue(about_scrollbar, 0);
+    SetControlValue(about_scrollbar, 0);
     TE_DEST_RECT(about_te) = TE_VIEW_RECT(about_te);
     InvalRect(&TE_VIEW_RECT(about_te));
 }
@@ -566,7 +566,7 @@ event_loop(bool executor_p)
     which_text = 0;
     InvalRect(&about_box->portRect);
 
-    old_scroll_bar_value = GetCtlValue(about_scrollbar);
+    old_scroll_bar_value = GetControlValue(about_scrollbar);
 
     for(done_p = false; !done_p;)
     {
@@ -653,7 +653,7 @@ event_loop(bool executor_p)
                                              : scroll_bar_callback))
                            == inThumb)
                         {
-                            new_val = GetCtlValue(about_scrollbar);
+                            new_val = GetControlValue(about_scrollbar);
                             delta = new_val - old_scroll_bar_value;
                             if(delta != 0)
                             {
@@ -662,7 +662,7 @@ event_loop(bool executor_p)
                             }
                         }
 
-                        old_scroll_bar_value = GetCtlValue(about_scrollbar);
+                        old_scroll_bar_value = GetControlValue(about_scrollbar);
                     }
                     else if(TrackControl(c, local_pt, (ControlActionUPP)-1)
                             == inButton)
