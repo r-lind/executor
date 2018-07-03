@@ -1,6 +1,8 @@
+#include "host-os-config.h"
 #include "localvolume.h"
 #include "item.h"
 
+#ifdef MACOSX
 using namespace Executor;
 
 #include <sys/xattr.h>
@@ -55,3 +57,4 @@ void MacFileItem::setFInfo(FInfo info)
     
     // TODO: errors
 }
+#endif
