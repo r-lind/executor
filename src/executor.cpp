@@ -65,7 +65,6 @@ void Executor::executor_main(void)
     INTEGER exevrefnum, toskip;
     AppFile thefile;
     Byte *p;
-    int i;
     WDPBRec wdpb;
     CInfoPBRec hpb;
     Str255 name;

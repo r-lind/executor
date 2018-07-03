@@ -85,7 +85,7 @@ void Executor::InitDebugger()
 
     mon_inited = true;
 
-    struct sigaction act = {0};
+    struct sigaction act = {};
     act.sa_handler = [](int) {
         nmi = true;
     };

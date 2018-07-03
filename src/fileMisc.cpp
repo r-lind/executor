@@ -563,13 +563,17 @@ is_unix_path(const char *pathname)
     return retval;
 }
 
+//#define WITH_OLD_UFS
+
 void Executor::ROMlib_fileinit() /* INTERNAL */
 {
     INTEGER i;
     CInfoPBRec cpb;
     WDPBRec wpb;
     INTEGER wdlen;
+#ifdef WITH_OLD_UFS
     HVCB *vcbp;
+#endif
     GUEST<LONGINT> m;
     GUEST<THz> savezone;
     struct stat sbuf;
@@ -704,7 +708,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
             p = 0;
     }
 #endif
-#if 0
+#ifdef WITH_OLD_UFS
     ROMlib_automount(ROMlib_startdir);
     ROMlib_automount(ROMlib_DefaultFolder.c_str());
 #endif
@@ -712,7 +716,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
        && Ustat(ROMlib_DefaultFolder.c_str(), &sbuf) == 0)
     {
         LM(CurDirStore) = CL((LONGINT)ST_INO(sbuf));
-#if 0
+#ifdef WITH_OLD_UFS
         vcbp = ROMlib_vcbbybiggestunixname(ROMlib_DefaultFolder.c_str());
         LM(SFSaveDisk) = CW(-CW(vcbp->vcbVRefNum));
 #endif

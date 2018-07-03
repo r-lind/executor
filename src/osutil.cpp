@@ -987,7 +987,7 @@ LONGINT Executor::C_GetToolTrapAddress(INTEGER trap_no)
     d0 = trap_no;
     ROMlib_GetTrapAddress_helper(&d0, 0xA746, &a0);
     retval = (LONGINT)a0;
-    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    warning_trace_info("trap = 0x%x, retval = 0x%08x", trap_no, retval);
     return retval;
 }
 
@@ -999,7 +999,7 @@ LONGINT Executor::C_GetOSTrapAddress(INTEGER trap_no)
     d0 = trap_no;
     ROMlib_GetTrapAddress_helper(&d0, 0xA346, &a0);
     retval = (LONGINT)a0;
-    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    warning_trace_info("trap = 0x%x, retval = 0x%08x", trap_no, retval);
     return retval;
 }
 
