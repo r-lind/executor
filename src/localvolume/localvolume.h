@@ -59,6 +59,7 @@ class LocalVolume : public Volume
     void openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8_t permission);
     void deleteCommon(ItemPtr item);
     void renameCommon(ItemPtr item, mac_string_view newName);
+    void setFPosCommon(ParmBlkPtr pb, bool checkEOF);
 public:
     ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
     CNID newCNID();
@@ -180,7 +181,8 @@ public:
 
 class PlainDataFork : public OpenFile
 {
-    fs::fstream stream;
+    //fs::fstream stream;
+    int fd;
 public:
     PlainDataFork(fs::path path);
     ~PlainDataFork();

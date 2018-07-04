@@ -689,6 +689,7 @@ void LocalVolume::PBOpenWD(WDPBPtr pb)
 
 void LocalVolume::PBRead(ParmBlkPtr pb)
 {
+    pb->ioParam.ioActCount = 0;
     PBSetFPos(pb);
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
     size_t req = CL(pb->ioParam.ioReqCount);
@@ -701,7 +702,8 @@ void LocalVolume::PBRead(ParmBlkPtr pb)
 }
 void LocalVolume::PBWrite(ParmBlkPtr pb)
 {
-    PBSetFPos(pb);
+    pb->ioParam.ioActCount = 0;
+    setFPosCommon(pb, false);
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
     size_t n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
     pb->ioParam.ioActCount = CL(n);
@@ -730,7 +732,7 @@ void LocalVolume::PBGetFPos(ParmBlkPtr pb)
     pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs;
 }
 
-void LocalVolume::PBSetFPos(ParmBlkPtr pb)
+void LocalVolume::setFPosCommon(ParmBlkPtr pb, bool checkEOF)
 {
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
     ssize_t eof = (ssize_t) fcbx.access->getEOF();
@@ -752,7 +754,7 @@ void LocalVolume::PBSetFPos(ParmBlkPtr pb)
     }
 
     OSErr err = noErr;
-    if(newPos > eof)
+    if(newPos > eof && checkEOF)
     {
         newPos = eof;
         err = eofErr;
@@ -769,6 +771,10 @@ void LocalVolume::PBSetFPos(ParmBlkPtr pb)
 
     if(err)
         throw OSErrorException(err);
+}
+void LocalVolume::PBSetFPos(ParmBlkPtr pb)
+{
+    setFPosCommon(pb, true);
 }
 void LocalVolume::PBGetEOF(ParmBlkPtr pb)
 {
