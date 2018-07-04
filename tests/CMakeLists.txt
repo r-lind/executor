@@ -6,7 +6,7 @@ if(CMAKE_SYSTEM_NAME MATCHES Retro.*)
     include_directories("googletest/googletest/")
     add_definitions( -DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -DPATH_MAX=256)
 
-    add_application(tests main.cpp files.cpp googletest/googletest/src/gtest-all.cc CONSOLE)
+    add_application(tests main.cpp files.cpp googletest/googletest/src/gtest-all.cc size.r CONSOLE)
     set_target_properties(tests PROPERTIES LINK_FLAGS "-Wl,-gc-sections")
 
 else()

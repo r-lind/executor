@@ -715,3 +715,206 @@ TEST_F(FileTest, Rename)
     if(renameErr == noErr)
         memcpy(file1, fileName2, fileName2[0]+1);
 }
+
+
+void doWrite(short refNum, long offset, const char* p, long n)
+{
+    ParamBlockRec pb;
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioRefNum = refNum;
+    pb.ioParam.ioPosMode = fsFromStart;
+    pb.ioParam.ioPosOffset = offset;
+    pb.ioParam.ioBuffer = (Ptr)p;
+    pb.ioParam.ioReqCount = n;
+    PBWriteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+    EXPECT_EQ(n, pb.ioParam.ioActCount);
+    EXPECT_EQ(offset + n, pb.ioParam.ioPosOffset);
+}
+
+bool verifyContents(short refNum, const char *p, long n)
+{
+    char *buf = new char[n + 32];
+
+    ParamBlockRec pb;
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioRefNum = refNum;
+    PBGetEOFSync(&pb);
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+    EXPECT_EQ(n, (UInt32)pb.ioParam.ioMisc);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioRefNum = refNum;
+    pb.ioParam.ioPosMode = fsFromStart;
+    pb.ioParam.ioPosOffset = 0;
+    pb.ioParam.ioBuffer = buf;
+    pb.ioParam.ioReqCount = n + 32;
+    PBReadSync(&pb);
+
+    bool sizeMatches = (n == pb.ioParam.ioActCount);
+    EXPECT_EQ(eofErr, pb.ioParam.ioResult);
+    EXPECT_EQ(n, pb.ioParam.ioActCount);
+    EXPECT_EQ(n, pb.ioParam.ioPosOffset);
+
+    if(sizeMatches)
+        EXPECT_EQ(0, memcmp(buf, p, n)) << "comparing " << n << " bytes - got '" << buf << "' expecting '" << p << "'";
+    bool memMatches = memcmp(buf, p, n) == 0;
+    
+    delete[] buf;
+
+    return sizeMatches && memMatches;
+}
+void setEOF(short refNum, long n)
+{
+    ParamBlockRec pb;
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioRefNum = refNum;
+    pb.ioParam.ioMisc = (Ptr) n;
+    PBSetEOFSync(&pb);
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+}
+
+void eofCommon(short refNum)
+{
+        // earlier system versions deliver undefined data when a file is grown using SetEOF
+        // in Mac OS X 10.4 + classic + MacOS 9, the test also passes without the following line:
+    doWrite(refNum, 0, "\0\0\0\0\0\0\0\0", 8);
+
+    setEOF(refNum, 4);
+    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0", 4));
+
+    setEOF(refNum, 8);
+    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0\0\0\0\0", 8));
+
+    setEOF(refNum, 4);
+    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0", 4));
+
+    doWrite(refNum, 6, "a", 1);
+    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0\0\0a", 7));
+
+    doWrite(refNum, 0, "Hello, world.", 13);
+    EXPECT_TRUE(verifyContents(refNum, "Hello, world.", 13));
+
+    setEOF(refNum, 5);
+    EXPECT_TRUE(verifyContents(refNum, "Hello", 5));
+}
+
+TEST_F(FileTest, SetEOF)
+{
+    open();
+    eofCommon(refNum);
+    close();
+}
+
+TEST_F(FileTest, SetEOF_RF)
+{
+    openRF();
+    eofCommon(refNum);
+    close();
+}
+
+TEST_F(FileTest, SetEOF_BothForks)
+{
+    open();
+    eofCommon(refNum);
+    close();
+
+    openRF();
+    eofCommon(refNum);
+    close();
+
+    open();
+    EXPECT_TRUE(verifyContents(refNum, "Hello", 5));
+    doWrite(refNum, 0, "\0\0\0\0", 4);
+    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0o", 5));
+
+    eofCommon(refNum);
+    close();
+}
+
+
+TEST(Files, CatMove)
+{
+    CInfoPBRec ipb;
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.dirInfo.ioCompletion = nullptr;
+    ipb.dirInfo.ioVRefNum = 0;
+    Str255 buf;
+    ipb.dirInfo.ioNamePtr = nullptr;
+    ipb.dirInfo.ioFDirIndex = -1;
+    ipb.dirInfo.ioDrDirID = 0;
+
+    PBGetCatInfoSync(&ipb);
+    ASSERT_EQ(noErr, ipb.dirInfo.ioResult);
+
+    short vRefNum = ipb.dirInfo.ioVRefNum;
+    long dirID = ipb.dirInfo.ioDrDirID;
+
+    HParamBlockRec pb;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBDirCreateSync(&pb);
+
+    ASSERT_EQ(noErr, pb.ioParam.ioResult);
+    long newDirID = pb.fileParam.ioDirID;
+    
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    PBHCreateSync(&pb);
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
+    CMovePBRec mpb;
+    
+    memset(&mpb, 42, sizeof(mpb));
+    mpb.ioCompletion = nullptr;
+    mpb.ioVRefNum = vRefNum;
+    mpb.ioDirID = dirID;
+    mpb.ioNamePtr = (StringPtr)"\ptemp-test";
+    mpb.ioNewName = nullptr;
+    mpb.ioNewDirID = newDirID;
+    PBCatMoveSync(&mpb);
+
+    EXPECT_EQ(noErr, mpb.ioResult);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = newDirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+}
