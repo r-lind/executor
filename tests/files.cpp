@@ -3,6 +3,26 @@
 #include <Files.h>
 #include <Devices.h>
 
+TEST(Files, GetWDInfo)
+{
+    WDPBRec wdpb;
+    memset(&wdpb, 42, sizeof(wdpb));
+    wdpb.ioCompletion = nullptr;
+    wdpb.ioVRefNum = 0;
+    Str255 buf;
+    wdpb.ioNamePtr = nullptr;
+    wdpb.ioWDIndex = 0;
+
+    PBGetWDInfoSync(&wdpb);
+    ASSERT_EQ(noErr, wdpb.ioResult);
+
+    short vRefNum = wdpb.ioWDVRefNum;
+    long dirID = wdpb.ioWDDirID;
+
+    EXPECT_LT(vRefNum, 0);
+    EXPECT_GT(dirID, 0);
+}
+
 TEST(Files, CreateDelete)
 {
     ParamBlockRec pb;
@@ -74,19 +94,19 @@ protected:
     {
         if(dirID == 0 || vRefNum == 0)
         {
-            CInfoPBRec ipb;
-            memset(&ipb, 42, sizeof(ipb));
-            ipb.dirInfo.ioCompletion = nullptr;
-            ipb.dirInfo.ioVRefNum = vRefNum;
+            WDPBRec wdpb;
+            memset(&wdpb, 42, sizeof(wdpb));
+            wdpb.ioCompletion = nullptr;
+            wdpb.ioVRefNum = vRefNum;
             Str255 buf;
-            ipb.dirInfo.ioNamePtr = nullptr;
-            ipb.dirInfo.ioFDirIndex = -1;
-            ipb.dirInfo.ioDrDirID = dirID;
+            wdpb.ioNamePtr = nullptr;
+            wdpb.ioWDIndex = 0;
 
-            PBGetCatInfoSync(&ipb);
+            PBGetWDInfoSync(&wdpb);
+            EXPECT_EQ(noErr, wdpb.ioResult);
 
-            vRefNum = ipb.dirInfo.ioVRefNum;
-            dirID = ipb.dirInfo.ioDrDirID;
+            vRefNum = wdpb.ioWDVRefNum;
+            dirID = wdpb.ioWDDirID;
         }
 
         HParamBlockRec pb;
@@ -843,20 +863,20 @@ TEST_F(FileTest, SetEOF_BothForks)
 
 TEST(Files, CatMove)
 {
-    CInfoPBRec ipb;
-    memset(&ipb, 42, sizeof(ipb));
-    ipb.dirInfo.ioCompletion = nullptr;
-    ipb.dirInfo.ioVRefNum = 0;
+    WDPBRec wdpb;
+    memset(&wdpb, 42, sizeof(wdpb));
+    wdpb.ioCompletion = nullptr;
+    wdpb.ioVRefNum = 0;
     Str255 buf;
-    ipb.dirInfo.ioNamePtr = nullptr;
-    ipb.dirInfo.ioFDirIndex = -1;
-    ipb.dirInfo.ioDrDirID = 0;
+    wdpb.ioNamePtr = nullptr;
+    wdpb.ioWDIndex = 0;
 
-    PBGetCatInfoSync(&ipb);
-    ASSERT_EQ(noErr, ipb.dirInfo.ioResult);
+    PBGetWDInfoSync(&wdpb);
+    EXPECT_EQ(noErr, wdpb.ioResult);
 
-    short vRefNum = ipb.dirInfo.ioVRefNum;
-    long dirID = ipb.dirInfo.ioDrDirID;
+    short vRefNum = wdpb.ioWDVRefNum;
+    long dirID = wdpb.ioWDDirID;
+
 
     HParamBlockRec pb;
     memset(&pb, 42, sizeof(pb));
@@ -917,4 +937,76 @@ TEST(Files, CatMove)
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
+}
+
+TEST_F(FileTest, GetFInfo)
+{
+    HParamBlockRec pb;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBDirCreateSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+    long newDirID = pb.fileParam.ioDirID;
+    
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.fileParam.ioFDirIndex = 0;
+    PBHGetFInfoSync(&pb);
+    EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = file1;
+    pb.fileParam.ioFDirIndex = 0;
+    PBHGetFInfoSync(&pb);
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
+
+    CInfoPBRec ipb;
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    ipb.hFileInfo.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+
+    EXPECT_GE(ipb.dirInfo.ioDrCrDat, pb.fileParam.ioFlCrDat);
+    EXPECT_GE(ipb.dirInfo.ioDrMdDat, pb.fileParam.ioFlMdDat);
+    EXPECT_GE(pb.fileParam.ioFlCrDat, 10);
+    EXPECT_GE(pb.fileParam.ioFlMdDat, 10);
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    ipb.hFileInfo.ioNamePtr = file1;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+
+    int comparison = memcmp((void*)&pb.fileParam.ioResult, (void*)&ipb.hFileInfo.ioResult, (char*)&ipb.hFileInfo.ioFlBkDat - (char*)&ipb.hFileInfo.ioResult);
+    EXPECT_EQ(0, comparison);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
 }
