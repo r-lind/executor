@@ -82,3 +82,25 @@ void BasiliskFileItem::renameItem(mac_string_view newName)
     path_ = std::move(newPath);
     name_ = newName;
 }
+
+void BasiliskFileItem::moveItem(const fs::path& newParent)
+{
+    fs::path newPath = newParent / path().filename();
+
+    fs::path rsrcOld = path().parent_path() / ".rsrc" / path().filename();
+    fs::path finfOld = path().parent_path() / ".finf" / path().filename();
+    fs::path rsrcNew = newParent / ".rsrc" / path().filename();
+    fs::path finfNew = newParent / ".finf" / path().filename();
+
+    fs::create_directory(newParent / ".rsrc");
+    fs::create_directory(newParent / ".finf");
+
+    fs::rename(path(), newPath);
+
+    boost::system::error_code ec;
+    fs::rename(rsrcOld, rsrcNew, ec);
+    fs::rename(finfOld, finfNew, ec);
+
+    path_ = std::move(newPath);
+
+}

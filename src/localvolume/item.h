@@ -41,6 +41,7 @@ public:
 
     virtual void deleteItem();
     virtual void renameItem(mac_string_view newName);
+    virtual void moveItem(const fs::path& newParent);
 };
 
 using ItemPtr = std::shared_ptr<Item>;
@@ -123,6 +124,7 @@ public:
 
     virtual void deleteItem();
     virtual void renameItem(mac_string_view newName);
+    virtual void moveItem(const fs::path& newParent);
 };
 
 class AppleDoubleFileItem : public FileItem
@@ -137,6 +139,7 @@ public:
 
     virtual void deleteItem();
     virtual void renameItem(mac_string_view newName);
+    virtual void moveItem(const fs::path& newParent);
 };
 
 class MacFileItem : public FileItem

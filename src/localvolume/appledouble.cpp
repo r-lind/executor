@@ -78,6 +78,20 @@ void AppleDoubleFileItem::renameItem(mac_string_view newName)
     name_ = newName;
 }
 
+void AppleDoubleFileItem::moveItem(const fs::path& newParent)
+{
+    fs::path newPath = newParent / path().filename();
+
+    fs::path adpathOld = path().parent_path() / ("%" + path().filename().string());
+    fs::path adpathNew = newParent / ("%" + path().filename().string());
+
+    fs::rename(path(), newPath);
+
+    boost::system::error_code ec;
+    fs::rename(adpathOld, adpathNew, ec);
+
+    path_ = std::move(newPath);
+}
 
 AppleSingleDoubleFork::AppleSingleDoubleFork(std::unique_ptr<OpenFile> aFile, int entry)
     : file(std::move(aFile))

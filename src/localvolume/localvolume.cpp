@@ -62,6 +62,13 @@ void Item::renameItem(mac_string_view newName)
     name_ = newName;
 }
 
+void Item::moveItem(const fs::path& newParent)
+{
+    fs::path newPath = newParent / path().filename();
+    fs::rename(path(), newPath);
+    path_ = std::move(newPath);
+}
+
 std::unique_ptr<OpenFile> PlainFileItem::open()
 {
     return std::make_unique<PlainDataFork>(path_);
@@ -536,10 +543,6 @@ void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
 {
     throw OSErrorException(paramErr);
 }
-void LocalVolume::PBCatMove(CMovePBPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 
 LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name, short vRefNum, CNID dirID)
 {
@@ -683,46 +686,7 @@ void LocalVolume::PBOpenWD(WDPBPtr pb)
     if(err)
         throw OSErrorException(err);
 }
-void LocalVolume::PBSetFLock(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBHSetFLock(HParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBRstFLock(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBHRstFLock(HParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBSetFVers(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 
-void LocalVolume::PBSetVInfo(HParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBFlushVol(ParmBlkPtr pb)
-{
-}
-void LocalVolume::PBUnmountVol(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBEject(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBOffLine(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 void LocalVolume::PBRead(ParmBlkPtr pb)
 {
     PBSetFPos(pb);
@@ -757,22 +721,6 @@ void LocalVolume::PBClose(ParmBlkPtr pb)
     fcbx = FCBExtension();
 }
 
-void LocalVolume::PBAllocate(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBAllocContig(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBLockRange(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
-void LocalVolume::PBUnlockRange(ParmBlkPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 void LocalVolume::PBGetFPos(ParmBlkPtr pb)
 {
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
@@ -835,8 +783,99 @@ void LocalVolume::PBSetEOF(ParmBlkPtr pb)
     fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
 }
 
+void LocalVolume::PBCatMove(CMovePBPtr pb)
+{
+    ItemPtr item = resolve(MR(pb->ioNamePtr), CW(pb->ioVRefNum), CL(pb->ioDirID));
+    auto newParent = std::dynamic_pointer_cast<DirectoryItem>(resolve(MR(pb->ioNewName), CW(pb->ioVRefNum), CL(pb->ioNewDirID)));
+
+    if(!newParent)
+        throw OSErrorException(dirNFErr);   // check this?
+
+    auto name = item->name();
+
+    auto &parent = dynamic_cast<DirectoryItem &>(*items.at(item->parID()));
+    try
+    {
+        newParent->resolve(mac_string_view(name.data(), name.size()));
+    }
+    catch(OSErrorException &e)
+    {
+        if(e.code == fnfErr)
+            ;
+        else if(e.code == noErr)
+            throw OSErrorException(dupFNErr);
+        else
+            throw;
+    }
+
+    fs::path oldPath = item->path();
+    item->moveItem(newParent->path());
+
+    pathToId.erase(oldPath);
+    pathToId.emplace(item->path(), item->cnid());
+    parent.flushCache();
+    newParent->flushCache();
+}
+
 void LocalVolume::PBFlushFile(ParmBlkPtr pb)
 {
+}
+void LocalVolume::PBFlushVol(ParmBlkPtr pb)
+{
+}
+
+void LocalVolume::PBAllocate(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBAllocContig(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBLockRange(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBUnlockRange(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBSetFLock(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBHSetFLock(HParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBRstFLock(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBHRstFLock(HParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBSetFVers(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+
+void LocalVolume::PBSetVInfo(HParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBUnmountVol(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBEject(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
+void LocalVolume::PBOffLine(ParmBlkPtr pb)
+{
+    throw OSErrorException(paramErr);
 }
 
 void Executor::initLocalVol()
