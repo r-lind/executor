@@ -1010,3 +1010,78 @@ TEST_F(FileTest, GetFInfo)
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
 
 }
+
+
+TEST_F(FileTest, GetFInfoIndexed)
+{
+    HParamBlockRec pb;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBDirCreateSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+    long newDirID = pb.fileParam.ioDirID;
+    
+
+    std::set<std::string> filesCat;
+    std::set<std::string> filesInfo;
+
+    for(int i = 1; ; i++)
+    {
+        Str255 buffer;
+        CInfoPBRec ipb;
+
+        buffer[0] = 0;
+        memset(&ipb, 42, sizeof(ipb));
+        ipb.hFileInfo.ioCompletion = nullptr;
+        ipb.hFileInfo.ioVRefNum = vRefNum;
+        ipb.hFileInfo.ioNamePtr = buffer;
+        ipb.hFileInfo.ioFDirIndex = i;
+        ipb.hFileInfo.ioDirID = dirID;
+
+        PBGetCatInfoSync(&ipb);
+        if(ipb.hFileInfo.ioResult == fnfErr)
+            break;
+
+        EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+        EXPECT_NE(0, buffer[0]);
+
+        if(ipb.hFileInfo.ioFlAttrib & kioFlAttribDirMask)
+            ;
+        else
+            filesCat.emplace(buffer+1, buffer+1+buffer[0]);
+    }
+    for(int i = 1; ; i++)
+    {
+        Str255 buffer;
+        buffer[0] = 0;
+        memset(&pb, 42, sizeof(pb));
+        pb.ioParam.ioCompletion = nullptr;
+        pb.ioParam.ioVRefNum = vRefNum;
+        pb.fileParam.ioDirID = dirID;
+        pb.ioParam.ioNamePtr = buffer;
+        pb.fileParam.ioFDirIndex = i;
+        PBHGetFInfoSync(&pb);
+        if(pb.ioParam.ioResult == fnfErr)
+            break;
+
+        EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
+        filesInfo.emplace(buffer+1, buffer+1+buffer[0]);
+    }
+
+    EXPECT_EQ(filesCat, filesInfo);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioVRefNum = vRefNum;
+    pb.fileParam.ioDirID = dirID;
+    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    PBHDeleteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+
+}
