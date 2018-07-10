@@ -1085,3 +1085,88 @@ TEST_F(FileTest, GetFInfoIndexed)
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
 
 }
+
+
+TEST(Files, DirID1)
+{
+    std::set<std::string> filesCat;
+    CInfoPBRec ipb;
+    Str255 rootName;
+    Str255 firstItem;
+    Str255 relPath;
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.dirInfo.ioCompletion = nullptr;
+    ipb.dirInfo.ioVRefNum = 0;
+    ipb.dirInfo.ioNamePtr = rootName;
+    ipb.dirInfo.ioFDirIndex = -1;
+    ipb.dirInfo.ioDrDirID = 2;
+    
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.dirInfo.ioCompletion = nullptr;
+    ipb.dirInfo.ioVRefNum = 0;
+    ipb.dirInfo.ioNamePtr = firstItem;
+    ipb.dirInfo.ioFDirIndex = 1;
+    ipb.dirInfo.ioDrDirID = 2;
+    
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+
+    relPath[0] = rootName[0] + firstItem[0] + 2;
+    relPath[1] = ':';
+    memcpy(relPath + 2, rootName + 1, rootName[0]);
+    relPath[2 + rootName[0]] = ':';
+    memcpy(relPath + 2 + rootName[0] + 1, firstItem + 1, firstItem[0]);
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = 0;
+    ipb.hFileInfo.ioNamePtr = rootName;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = 1;
+
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+    EXPECT_EQ(2, ipb.hFileInfo.ioDirID);
+    EXPECT_EQ(1, ipb.hFileInfo.ioFlParID);
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = 0;
+    ipb.hFileInfo.ioNamePtr = relPath;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = 1;
+
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+    EXPECT_EQ(2, ipb.hFileInfo.ioFlParID);
+
+
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = 0;
+    ipb.hFileInfo.ioNamePtr = rootName;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = 2;
+
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(fnfErr, ipb.hFileInfo.ioResult);
+    
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = 0;
+    ipb.hFileInfo.ioNamePtr = relPath;
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = 2;
+
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(dirNFErr, ipb.hFileInfo.ioResult);
+}
+
+
+
+// Question:
+// does the "poor man's search path" look for the *file name* or the *relative pathname*?
