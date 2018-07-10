@@ -511,7 +511,8 @@ void LocalVolume::setFInfoCommon(Item& item, ParmBlkPtr pb)
 
 void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
 {
-    throw OSErrorException(paramErr);
+    setFInfoCommon(*resolve(MR(pb->hFileInfo.ioNamePtr), CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID)),
+        reinterpret_cast<ParmBlkPtr>(pb));
 }
 void LocalVolume::PBSetFInfo(ParmBlkPtr pb)
 {
