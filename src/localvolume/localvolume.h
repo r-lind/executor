@@ -183,6 +183,7 @@ class PlainDataFork : public OpenFile
 {
     //fs::fstream stream;
     int fd;
+    fs::path path_;
 public:
     PlainDataFork(fs::path path);
     ~PlainDataFork();

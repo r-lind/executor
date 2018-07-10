@@ -133,7 +133,7 @@ void DirectoryItem::updateCache()
     cache_valid_ = true;
 }
 
-ItemPtr DirectoryItem::resolve(mac_string_view name)
+ItemPtr DirectoryItem::tryResolve(mac_string_view name)
 {
     updateCache();
     mac_string nameUpr { name };
@@ -141,7 +141,8 @@ ItemPtr DirectoryItem::resolve(mac_string_view name)
     auto it = contents_by_name_.find(nameUpr);
     if(it != contents_by_name_.end())
         return it->second;
-    throw OSErrorException(fnfErr);
+    std::cout << "NOT FOUND: " << std::string(name.begin(), name.end()) << " in " << path() << std::endl;
+    return {};
 }
 
 ItemPtr DirectoryItem::resolve(int index)
@@ -225,14 +226,14 @@ std::shared_ptr<DirectoryItem> LocalVolume::resolve(short vRef, long dirID)
         else
             throw OSErrorException(fnfErr); // not a directory
     }
-    else if(vRef == 0)
-    {
-        return resolve(CW(vcb.vcbVRefNum), CL(DefDirID));
-    }
     else if(ISWDNUM(vRef))
     {
         auto wdp = WDNUMTOWDP(vRef);
         return resolve(CW(vcb.vcbVRefNum), CL(wdp->dirid));
+    }
+    else if(vRef == 0)
+    {
+        return resolve(CW(vcb.vcbVRefNum), CL(DefDirID));
     }
     else
     {
@@ -255,7 +256,10 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
     else
     {
         std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
-        return dir->resolve(name);
+        if(auto file = dir->tryResolve(name))
+            return file;
+        else
+            throw OSErrorException(fnfErr);
     }
 }
 
@@ -282,7 +286,11 @@ ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base,
         item = items.at(base->parID());
     }
     else
-        item = base->resolve(mac_string_view(p, colon));
+    {
+        item = base->tryResolve(mac_string_view(p, colon));
+        if(!item)
+            throw OSErrorException(fnfErr);
+    }
 
     if(colon == name.end())
         return item;
@@ -559,20 +567,9 @@ LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name,
         name = mac_string_view(name.begin() + colon+1, name.end());
     }
 
-    try
-    {
-        parent->resolve(name);
-    }
-    catch(OSErrorException& e)
-    {
-        if(e.code == fnfErr)
-            ;
-        else if(e.code == noErr)
-            throw OSErrorException(dupFNErr);
-        else
-            throw;
-    }
-
+    if(parent->tryResolve(name))
+        throw OSErrorException(dupFNErr);
+    
     return NonexistentFile { parent, name };
 }
 
@@ -581,14 +578,16 @@ void LocalVolume::createCommon(NonexistentFile file)
     fs::path parentPath = file.parent->path();
     fs::path fn = toUnicodeFilename(file.name);
 
+    fs::ofstream(parentPath / fn);
+#ifndef MACOSX
     // TODO: this is the responsibility of the BasiliskHandler class
     fs::create_directory(parentPath / ".rsrc");
     fs::create_directory(parentPath / ".finf");
 
-    fs::ofstream(parentPath / fn);
     fs::ofstream(parentPath / ".rsrc" / fn);
     FInfo info = {0};
     fs::ofstream(parentPath / ".finf" / fn).write((char*)&info, sizeof(info));
+#endif
     file.parent->flushCache();
 }
 void LocalVolume::PBCreate(ParmBlkPtr pb)
@@ -608,7 +607,10 @@ void LocalVolume::PBDirCreate(HParmBlkPtr pb)
 
     parent->flushCache();
 
-    pb->fileParam.ioDirID = CL(parent->resolve(name)->cnid());
+    auto item = parent->tryResolve(name);
+    if(!item)
+        throw OSErrorException(ioErr);
+    pb->fileParam.ioDirID = CL(item->cnid());
 }
 
 
@@ -636,20 +638,9 @@ void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
         throw OSErrorException(bdNamErr);
 
     auto& parent = dynamic_cast<DirectoryItem&>(*items.at(item->parID()));
-    try
-    {
-        parent.resolve(newName);
-    }
-    catch(OSErrorException& e)
-    {
-        if(e.code == fnfErr)
-            ;
-        else if(e.code == noErr)
-            throw OSErrorException(dupFNErr);
-        else
-            throw;
-    }
-
+    if(parent.tryResolve(newName))
+        throw OSErrorException(dupFNErr);
+    
     fs::path oldPath = item->path();
     item->renameItem(newName);
 
@@ -800,19 +791,8 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
     auto name = item->name();
 
     auto &parent = dynamic_cast<DirectoryItem &>(*items.at(item->parID()));
-    try
-    {
-        newParent->resolve(mac_string_view(name.data(), name.size()));
-    }
-    catch(OSErrorException &e)
-    {
-        if(e.code == fnfErr)
-            ;
-        else if(e.code == noErr)
-            throw OSErrorException(dupFNErr);
-        else
-            throw;
-    }
+    if(newParent->tryResolve(mac_string_view(name.data(), name.size())))
+        throw OSErrorException(dupFNErr);
 
     fs::path oldPath = item->path();
     item->moveItem(newParent->path());

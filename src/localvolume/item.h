@@ -60,7 +60,7 @@ public:
     void flushCache();
     void updateCache();
 
-    ItemPtr resolve(mac_string_view name);
+    ItemPtr tryResolve(mac_string_view name);
     ItemPtr resolve(int index);
 
     long dirID() const { return cnid(); }
