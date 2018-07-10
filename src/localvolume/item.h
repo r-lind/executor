@@ -49,6 +49,7 @@ using ItemPtr = std::shared_ptr<Item>;
 class DirectoryItem : public Item
 {
     std::vector<ItemPtr>    contents_;
+    std::vector<ItemPtr>    files_;
     std::map<mac_string, ItemPtr> contents_by_name_;
     std::chrono::steady_clock::time_point   cache_timestamp_;
     bool    cache_valid_ = false;
@@ -61,7 +62,7 @@ public:
     void updateCache();
 
     ItemPtr tryResolve(mac_string_view name);
-    ItemPtr resolve(int index);
+    ItemPtr resolve(int index, bool includeDirectories);
 
     long dirID() const { return cnid(); }
 

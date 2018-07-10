@@ -36,8 +36,7 @@ class LocalVolume : public Volume
 
     std::shared_ptr<DirectoryItem> resolve(short vRef, long dirID);
     ItemPtr resolve(mac_string_view name, short vRef, long dirID);
-    ItemPtr resolve(short vRef, long dirID, short index);
-    ItemPtr resolve(mac_string_view name, short vRef, long dirID, short index);
+    ItemPtr resolveForInfo(mac_string_view name, short vRef, long dirID, short index, bool includeDirectories);
     ItemPtr resolveRelative(const std::shared_ptr<DirectoryItem>& base, mac_string_view name);
 
     struct FCBExtension;
@@ -60,6 +59,16 @@ class LocalVolume : public Volume
     void deleteCommon(ItemPtr item);
     void renameCommon(ItemPtr item, mac_string_view newName);
     void setFPosCommon(ParmBlkPtr pb, bool checkEOF);
+
+    enum class InfoKind
+    {
+        FInfo,
+        HFInfo,
+        CatInfo
+    };
+
+    void getInfoCommon(CInfoPBPtr pb, InfoKind infoKind);
+
 public:
     ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
     CNID newCNID();

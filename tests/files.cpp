@@ -984,8 +984,8 @@ TEST_F(FileTest, GetFInfo)
 
     EXPECT_GE(ipb.dirInfo.ioDrCrDat, pb.fileParam.ioFlCrDat);
     EXPECT_GE(ipb.dirInfo.ioDrMdDat, pb.fileParam.ioFlMdDat);
-    EXPECT_GE(pb.fileParam.ioFlCrDat, 10);
-    EXPECT_GE(pb.fileParam.ioFlMdDat, 10);
+    EXPECT_GE(pb.fileParam.ioFlCrDat, 0);
+    EXPECT_GE(pb.fileParam.ioFlMdDat, 0);
 
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;

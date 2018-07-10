@@ -95,6 +95,7 @@ void DirectoryItem::flushCache()
     cache_valid_ = false;
     contents_.clear();
     contents_by_name_.clear();
+    files_.clear();
 }
 void DirectoryItem::updateCache()
 {
@@ -121,6 +122,8 @@ void DirectoryItem::updateCache()
             if(inserted)
             {
                 contents_.push_back(item);
+                if(!dynamic_cast<DirectoryItem*>(item.get()))
+                    files_.push_back(item);
             }
             else
             {
@@ -145,13 +148,15 @@ ItemPtr DirectoryItem::tryResolve(mac_string_view name)
     return {};
 }
 
-ItemPtr DirectoryItem::resolve(int index)
+ItemPtr DirectoryItem::resolve(int index, bool includeDirectories)
 {
     updateCache();
-    if(index >= 1 && index <= contents_.size())
-        return contents_[index-1];
+    const auto& array = includeDirectories ? contents_ : files_;
+    if(index >= 1 && index <= array.size())
+        return array[index-1];
     throw OSErrorException(fnfErr);
 }
+
 
 void DirectoryItem::deleteItem()
 {
@@ -302,16 +307,13 @@ ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base,
         throw OSErrorException(fnfErr);
 }
 
-ItemPtr LocalVolume::resolve(short vRef, long dirID, short index)
-{
-    std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
-    return dir->resolve(index);
-}
-
-ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID, short index)
+ItemPtr LocalVolume::resolveForInfo(mac_string_view name, short vRef, long dirID, short index, bool includeDirectories)
 {
     if(index > 0)
-        return resolve(vRef, dirID, index);
+    {
+        auto dir = resolve(vRef, dirID);
+        return dir->resolve(index, includeDirectories);
+    }
     else if(index == 0 && !name.empty())
         return resolve(name, vRef, dirID);
     else
@@ -410,61 +412,88 @@ void LocalVolume::PBOpenRF(ParmBlkPtr pb)
 }
 
 
-void LocalVolume::PBHGetFInfo(HParmBlkPtr pb)
-{
-    StringPtr inputName = MR(pb->fileParam.ioNamePtr);
-    if(CW(pb->fileParam.ioFDirIndex) > 0)
-        inputName = nullptr;
-    
-        // negative index means what?
-    ItemPtr item = resolve(PascalStringView(inputName),
-        CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID), CW(pb->fileParam.ioFDirIndex));
 
-    std::cout << "HGetFInfo: " << item->path() << std::endl;
-    if(StringPtr outputName = MR(pb->fileParam.ioNamePtr))
+void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
+{
+    ItemPtr item = resolveForInfo(MR(pb->hFileInfo.ioNamePtr),
+        CW(pb->hFileInfo.ioVRefNum), infoKind == InfoKind::FInfo ? 0 : CL(pb->hFileInfo.ioDirID), CW(pb->hFileInfo.ioFDirIndex),
+        infoKind == InfoKind::CatInfo);
+
+    if(CW(pb->hFileInfo.ioFDirIndex) != 0)
     {
-        const mac_string name = item->name();
-        size_t n = std::min(name.size(), (size_t)255);
-        memcpy(outputName+1, name.data(), n);
-        outputName[0] = n;
+        if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
+        {
+            const mac_string name = item->name();
+            size_t n = std::min(name.size(), (size_t)255);
+            memcpy(outputName+1, name.data(), n);
+            outputName[0] = n;
+        }
     }
-    
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+
+    pb->hFileInfo.ioDirID = CL(item->cnid());   // a.k.a. pb->dirInfo.ioDrDirID
+
+    if(infoKind == InfoKind::CatInfo)
     {
-        pb->fileParam.ioFlAttrib = 0;
-        pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
+        pb->hFileInfo.ioFlParID = CL(item->parID());    // a.k.a. pb->dirInfo.ioDrParID
+    }
+
+    if(DirectoryItem *dirItem = dynamic_cast<DirectoryItem*>(item.get()))
+    {
+        if(infoKind != InfoKind::CatInfo)
+            throw OSErrorException(fnfErr);
+
+        pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
+        pb->dirInfo.ioDrNmFls = CW(dirItem->countItems());
+
+        // TODO:
+        // ioACUser
+        // ioDrUserWds
+        // ioDrCrDat
+        // ioDrMdDat
+        // ioDrBkDat
+        // ioDrFndrInfo
+
+        pb->dirInfo.ioACUser = 0;
+
+    }
+    else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
+    {
+        pb->hFileInfo.ioFlAttrib = 0;
+        pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
+
+        // TODO:
+        // ioFlStBlk
+        // ioFlLgLen
+        // ioFlPyLen
+        // ioFlRStBlk
+        // ioFlRPyLen
+
+        // ioFlCrDat
+        // ioFlMdDat
+
+        if(infoKind == InfoKind::CatInfo)
+        {
+            // ioFlBkDat
+            // ioFlXFndrInfo
+
+            // ioFlClpSiz
+        }
     }
     else
-        throw OSErrorException(paramErr);
+        std::abort();
+}
+
+void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
+{
+    getInfoCommon(pb, InfoKind::CatInfo);
+}
+void LocalVolume::PBHGetFInfo(HParmBlkPtr pb)
+{
+    getInfoCommon(reinterpret_cast<CInfoPBPtr>(pb), InfoKind::HFInfo);
 }
 void LocalVolume::PBGetFInfo(ParmBlkPtr pb)
 {
-    StringPtr inputName = MR(pb->fileParam.ioNamePtr);
-    if(CW(pb->fileParam.ioFDirIndex) > 0)
-        inputName = nullptr;
-    
-        // negative index means what?
-    ItemPtr item = resolve(inputName,
-        CW(pb->fileParam.ioVRefNum), 0, CW(pb->fileParam.ioFDirIndex));
-
-    std::cout << "GetFInfo: " << item->path() << std::endl;
-    if(StringPtr outputName = MR(pb->fileParam.ioNamePtr))
-    {
-        const mac_string name = item->name();
-        size_t n = std::min(name.size(), (size_t)255);
-        memcpy(outputName+1, name.data(), n);
-        outputName[0] = n;
-    }
-    
-    if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        pb->fileParam.ioFlAttrib = 0;   // TODO
-        pb->fileParam.ioFlFndrInfo = fileItem->getFInfo();
-        pb->fileParam.ioFlCrDat = 0;    // TODO
-        pb->fileParam.ioFlMdDat = 0;    // TODO
-    }
-    else
-        throw OSErrorException(paramErr);
+    getInfoCommon(reinterpret_cast<CInfoPBPtr>(pb), InfoKind::FInfo);
 }
 
 void LocalVolume::setFInfoCommon(Item& item, ParmBlkPtr pb)
@@ -479,6 +508,11 @@ void LocalVolume::setFInfoCommon(Item& item, ParmBlkPtr pb)
     // pb->fileParam.ioFlCrDat      TODO
     // pb->fileParam.ioFlMdDat      TODO
 }
+
+void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
+{
+    throw OSErrorException(paramErr);
+}
 void LocalVolume::PBSetFInfo(ParmBlkPtr pb)
 {
     setFInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0), pb);
@@ -489,68 +523,6 @@ void LocalVolume::PBHSetFInfo(HParmBlkPtr pb)
         reinterpret_cast<ParmBlkPtr>(pb));
 }
 
-void LocalVolume::PBGetCatInfo(CInfoPBPtr pb)
-{
-    StringPtr inputName = MR(pb->hFileInfo.ioNamePtr);
-    if(CW(pb->hFileInfo.ioFDirIndex) != 0)
-        inputName = nullptr;
-    ItemPtr item = resolve(PascalStringView(inputName),
-        CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID), CW(pb->hFileInfo.ioFDirIndex));
-
-    std::cout.clear();
-    std::cout << "GetCatInfo: " << item->path() << std::endl;
-    if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
-    {
-        if(!inputName)
-        {
-            const mac_string name = item->name();
-            size_t n = std::min(name.size(), (size_t)255);
-            memcpy(outputName+1, name.data(), n);
-            outputName[0] = n;
-        }
-    }
-    
-    if(DirectoryItem *dirItem = dynamic_cast<DirectoryItem*>(item.get()))
-    {
-        pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
-        pb->dirInfo.ioDrDirID = CL(dirItem->dirID());
-
-        pb->dirInfo.ioDrParID = CL(dirItem->parID());
-
-        pb->dirInfo.ioDrNmFls = CW(dirItem->countItems());
-
-        // ioACUser
-        // ioDrUserWds
-        // ioDrCrDat
-        // ioDrMdDat
-        // ioDrBkDat
-        // ioDrFndrInfo
-    }
-    else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
-    {
-        pb->hFileInfo.ioFlAttrib = 0;
-        pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
-
-        pb->hFileInfo.ioVRefNum = vcb.vcbVRefNum;
-        pb->hFileInfo.ioFlParID = CL(fileItem->parID());
-        pb->hFileInfo.ioDirID = CL(fileItem->cnid());
-        // ioFlStBlk
-        // ioFlLgLen
-        // ioFlPyLen
-        // ioFlRStBlk
-        // ioFlRPyLen
-
-        // ioFlCrDat
-        // ioFlMdDat
-        // ioFlBkDat
-        // ioFlXFndrInfo
-        // ioFlClpSiz
-    }
-}
-void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
-{
-    throw OSErrorException(paramErr);
-}
 
 LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name, short vRefNum, CNID dirID)
 {
