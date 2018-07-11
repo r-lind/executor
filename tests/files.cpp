@@ -1170,3 +1170,21 @@ TEST(Files, DirID1)
 
 // Question:
 // does the "poor man's search path" look for the *file name* or the *relative pathname*?
+
+    // just here to verify that ALlocate does what I think it does,
+    // not what Executor originally thought it did.
+TEST_F(FileTest, Allocate)
+{
+    open();
+    long allocSz = 1234, eof = 42;
+    OSErr err = Allocate(refNum, &allocSz);
+    EXPECT_EQ(noErr, err);
+    EXPECT_GE(allocSz, 1234);
+
+    err = GetEOF(refNum, &eof);
+    EXPECT_EQ(noErr, err);
+    EXPECT_EQ(0, eof);
+
+    close();
+
+}

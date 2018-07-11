@@ -785,11 +785,11 @@ void LocalVolume::PBFlushVol(ParmBlkPtr pb)
 
 void LocalVolume::PBAllocate(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    // no-op... emulated programs will have a hard time noticing that we're not actually pre-allocating blocks
 }
 void LocalVolume::PBAllocContig(ParmBlkPtr pb)
 {
-    throw OSErrorException(paramErr);
+    // no-op, like PBALlocate above
 }
 void LocalVolume::PBLockRange(ParmBlkPtr pb)
 {
