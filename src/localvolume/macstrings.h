@@ -23,6 +23,11 @@ struct mac_string_view : std::basic_string_view<unsigned char>
     {
     }
 
+    mac_string_view(std::basic_string_view<unsigned char> v)
+        : basic_string_view(std::move(v))
+    {
+    }
+
     template<class It>
     mac_string_view(It p, It q)
         : basic_string_view(&*p,q-p)

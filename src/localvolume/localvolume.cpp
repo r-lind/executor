@@ -253,10 +253,31 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
 
     size_t colon = name.find(':');
 
-    if(colon != mac_string_view::npos)
+        // special case: directory ID 1 is a funny thing...
+    if(dirID == 1 && (colon == 0 || colon == mac_string_view::npos))
+    {
+        std::shared_ptr<DirectoryItem> dir = resolve(vRef, 2);
+
+        size_t afterColon = colon == 0 ? 1 : 0;
+        size_t rest = colon == 0 ? name.find(':', 1) : mac_string_view::npos;
+
+        if(name.substr(afterColon, rest-afterColon) != getVolumeName())
+        {
+            if(rest != mac_string_view::npos)
+                throw OSErrorException(dirNFErr);
+            else
+                throw OSErrorException(fnfErr);
+        }
+
+        if(rest == mac_string_view::npos)
+            return dir;
+        else
+            return resolveRelative(dir, name.substr(rest));
+    }
+    else if(colon != mac_string_view::npos)
     {
         std::shared_ptr<DirectoryItem> dir = resolve(vRef, colon == 0 ? dirID : 2);
-        return resolveRelative(dir, mac_string_view(name.begin() + colon, name.end()));
+        return resolveRelative(dir, name.substr(colon));
     }
     else
     {
@@ -294,7 +315,12 @@ ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base,
     {
         item = base->tryResolve(mac_string_view(p, colon));
         if(!item)
-            throw OSErrorException(fnfErr);
+        {
+            if(colon == name.end())
+                throw OSErrorException(fnfErr);
+            else
+                throw OSErrorException(dirNFErr);
+        }
     }
 
     if(colon == name.end())

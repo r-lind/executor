@@ -1094,7 +1094,9 @@ TEST(Files, DirID1)
     Str255 rootName;
     Str255 firstItem;
     Str255 relPath;
+    Str255 dir1Name;
 
+    // get root directory name (== volume name)
     memset(&ipb, 42, sizeof(ipb));
     ipb.dirInfo.ioCompletion = nullptr;
     ipb.dirInfo.ioVRefNum = 0;
@@ -1105,6 +1107,7 @@ TEST(Files, DirID1)
     PBGetCatInfoSync(&ipb);
     EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
 
+    // get the name of the first item of the root directory (doesn't matter what it is)
     memset(&ipb, 42, sizeof(ipb));
     ipb.dirInfo.ioCompletion = nullptr;
     ipb.dirInfo.ioVRefNum = 0;
@@ -1115,12 +1118,20 @@ TEST(Files, DirID1)
     PBGetCatInfoSync(&ipb);
     EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
 
-    relPath[0] = rootName[0] + firstItem[0] + 2;
-    relPath[1] = ':';
-    memcpy(relPath + 2, rootName + 1, rootName[0]);
-    relPath[2 + rootName[0]] = ':';
-    memcpy(relPath + 2 + rootName[0] + 1, firstItem + 1, firstItem[0]);
+    /// --- 
 
+    // make sure dirID==1 is not a "real" directory
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.dirInfo.ioCompletion = nullptr;
+    ipb.dirInfo.ioVRefNum = 0;
+    ipb.dirInfo.ioNamePtr = dir1Name;
+    ipb.dirInfo.ioFDirIndex = -1;
+    ipb.dirInfo.ioDrDirID = 1;
+    
+    PBGetCatInfoSync(&ipb);
+    EXPECT_EQ(fnfErr, ipb.hFileInfo.ioResult);  // we aren't allowed to get info for dir 1
+
+    // access root directory by name
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;
     ipb.hFileInfo.ioVRefNum = 0;
@@ -1133,6 +1144,13 @@ TEST(Files, DirID1)
     EXPECT_EQ(2, ipb.hFileInfo.ioDirID);
     EXPECT_EQ(1, ipb.hFileInfo.ioFlParID);
 
+    // access file in root directory using relative path
+    relPath[0] = rootName[0] + firstItem[0] + 2;
+    relPath[1] = ':';
+    memcpy(relPath + 2, rootName + 1, rootName[0]);
+    relPath[2 + rootName[0]] = ':';
+    memcpy(relPath + 2 + rootName[0] + 1, firstItem + 1, firstItem[0]);
+
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;
     ipb.hFileInfo.ioVRefNum = 0;
@@ -1144,7 +1162,7 @@ TEST(Files, DirID1)
     EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
     EXPECT_EQ(2, ipb.hFileInfo.ioFlParID);
 
-
+    // test that root directory is not a subdir of itself
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;
     ipb.hFileInfo.ioVRefNum = 0;
@@ -1155,6 +1173,7 @@ TEST(Files, DirID1)
     PBGetCatInfoSync(&ipb);
     EXPECT_EQ(fnfErr, ipb.hFileInfo.ioResult);
     
+    // ... and that the relative path doesn't work either
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;
     ipb.hFileInfo.ioVRefNum = 0;
