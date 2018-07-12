@@ -223,6 +223,38 @@ protected:
         close();
     }
 
+
+    template<typename F, typename G>
+    void testSetFInfoCommon(F set, G check)
+    {
+        HParamBlockRec hpb;
+        memset(&hpb, 42, sizeof(hpb));
+        hpb.ioParam.ioCompletion = nullptr;
+        hpb.ioParam.ioVRefNum = vRefNum;
+        hpb.fileParam.ioDirID = dirID;
+        hpb.ioParam.ioNamePtr = file1;
+        hpb.fileParam.ioFDirIndex = 0;
+        
+        PBHGetFInfoSync(&hpb);
+        EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+
+        set(hpb);
+        hpb.fileParam.ioDirID = dirID;
+
+        PBHSetFInfoSync(&hpb);
+        EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+
+        memset(&hpb, 42, sizeof(hpb));
+        hpb.ioParam.ioCompletion = nullptr;
+        hpb.ioParam.ioVRefNum = vRefNum;
+        hpb.fileParam.ioDirID = dirID;
+        hpb.ioParam.ioNamePtr = file1;
+        hpb.fileParam.ioFDirIndex = 0;
+
+        PBHGetFInfoSync(&hpb);
+        EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+        check(hpb);
+    }
 };
 
 
@@ -1210,38 +1242,48 @@ TEST_F(FileTest, Allocate)
     close();
 }
 
+
 TEST_F(FileTest, SetFInfo)
 {
-    HParamBlockRec hpb;
-    memset(&hpb, 42, sizeof(hpb));
-    hpb.ioParam.ioCompletion = nullptr;
-    hpb.ioParam.ioVRefNum = vRefNum;
-    hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = file1;
-    hpb.fileParam.ioFDirIndex = 0;
-    
-    PBHGetFInfoSync(&hpb);
-    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
-
-    hpb.fileParam.ioFlFndrInfo.fdType = 'TEST';
-    hpb.fileParam.ioFlFndrInfo.fdCreator = 'Test';
-    hpb.fileParam.ioDirID = dirID;
-
-    PBHSetFInfoSync(&hpb);
-    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
-
-    memset(&hpb, 42, sizeof(hpb));
-    hpb.ioParam.ioCompletion = nullptr;
-    hpb.ioParam.ioVRefNum = vRefNum;
-    hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = file1;
-    hpb.fileParam.ioFDirIndex = 0;
-
-    PBHGetFInfoSync(&hpb);
-    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
-    EXPECT_EQ('TEST', hpb.fileParam.ioFlFndrInfo.fdType);
-    EXPECT_EQ('Test', hpb.fileParam.ioFlFndrInfo.fdCreator);
+    testSetFInfoCommon(
+        [](auto& hpb) {
+            hpb.fileParam.ioFlFndrInfo.fdType = 'TEST';
+            hpb.fileParam.ioFlFndrInfo.fdCreator = 'Test';
+        },
+        [](auto& hpb) {
+            EXPECT_EQ('TEST', hpb.fileParam.ioFlFndrInfo.fdType);
+            EXPECT_EQ('Test', hpb.fileParam.ioFlFndrInfo.fdCreator);
+        }
+    );
 }
+
+TEST_F(FileTest, SetFInfo_MdDat)
+{
+    constexpr unsigned long date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
+
+    testSetFInfoCommon(
+        [](auto& hpb) {
+            hpb.fileParam.ioFlMdDat = date;
+        },
+        [](auto& hpb) {
+            EXPECT_EQ(date, hpb.fileParam.ioFlMdDat);
+        }
+    );
+}
+TEST_F(FileTest, SetFInfo_CrDat)
+{
+    constexpr unsigned long date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
+
+    testSetFInfoCommon(
+        [](auto& hpb) {
+            hpb.fileParam.ioFlCrDat = date;
+        },
+        [](auto& hpb) {
+            EXPECT_EQ(date, hpb.fileParam.ioFlCrDat);
+        }
+    );
+}
+
 
 TEST_F(FileTest, SetFLock)
 {
@@ -1310,7 +1352,7 @@ TEST_F(FileTest, SetFLock)
     EXPECT_EQ(wrPermErr, writeSomething(0));
     close();
 
-    EXPECT_EQ(noErr, setInfo());
+    EXPECT_EQ(noErr, setInfo());    // SetFInfo works on locked files
 
     lock(false);
 
@@ -1324,6 +1366,20 @@ TEST_F(FileTest, SetFLock)
     lock(true);
 
     HParamBlockRec hpb;
+
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    hpb.fileParam.ioFDirIndex = 0;
+    
+    PBHGetFInfoSync(&hpb);
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+    EXPECT_EQ('TEST', hpb.fileParam.ioFlFndrInfo.fdType);
+    EXPECT_EQ('Test', hpb.fileParam.ioFlFndrInfo.fdCreator);
+    EXPECT_EQ(1, hpb.fileParam.ioFlAttrib & 1);
+
     memset(&hpb, 42, sizeof(hpb));
     hpb.ioParam.ioCompletion = nullptr;
     hpb.ioParam.ioVRefNum = vRefNum;
@@ -1331,7 +1387,49 @@ TEST_F(FileTest, SetFLock)
     hpb.ioParam.ioNamePtr = file1;
     PBHDeleteSync(&hpb);
 
-    EXPECT_EQ(fLckdErr, hpb.ioParam.ioResult);
+    EXPECT_EQ(fLckdErr, hpb.ioParam.ioResult);  // Delete does not work on locked files
 
     lock(false);
+}
+
+TEST_F(FileTest, GetInfoOpenFile)
+{
+    open(fsRdPerm);
+    HParamBlockRec hpb;
+
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    hpb.fileParam.ioFDirIndex = 0;
+    
+    PBHGetFInfoSync(&hpb);
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+    EXPECT_EQ(refNum, hpb.ioParam.ioRefNum);
+
+    const auto expectedBits = kioFlAttribFileOpenMask | kioFlAttribDataOpenMask;
+    const auto expectedMask = expectedBits | kioFlAttribLockedMask | kioFlAttribResOpenMask | kioFlAttribDirMask;
+    EXPECT_EQ(expectedBits, hpb.fileParam.ioFlAttrib & expectedMask);
+}
+
+TEST_F(FileTest, GetInfoOpenResFile)
+{
+    openRF(fsRdPerm);
+    HParamBlockRec hpb;
+
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    hpb.fileParam.ioFDirIndex = 0;
+    
+    PBHGetFInfoSync(&hpb);
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+    EXPECT_EQ(refNum, hpb.ioParam.ioRefNum);
+
+    const auto expectedBits = kioFlAttribFileOpenMask | kioFlAttribResOpenMask;
+    const auto expectedMask = expectedBits | kioFlAttribLockedMask | kioFlAttribDataOpenMask | kioFlAttribDirMask;
+    EXPECT_EQ(expectedBits, hpb.fileParam.ioFlAttrib & expectedMask);
 }
