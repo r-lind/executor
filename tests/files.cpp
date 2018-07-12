@@ -3,6 +3,12 @@
 #include <Files.h>
 #include <Devices.h>
 
+
+// Unanswered Questions:
+// - does the "poor man's search path" look for the *file name* or the *relative pathname*?
+// - do later system versions still do it? (docs say it "might be removed in future versions")
+
+
 TEST(Files, GetWDInfo)
 {
     WDPBRec wdpb;
@@ -1187,11 +1193,8 @@ TEST(Files, DirID1)
 
 
 
-// Question:
-// does the "poor man's search path" look for the *file name* or the *relative pathname*?
-
-    // just here to verify that ALlocate does what I think it does,
-    // not what Executor originally thought it did.
+    // just here to verify that ALlocate does what I think it does, (allocate physical blocks)
+    // not what Executor originally thought it did (change logical EOF)
 TEST_F(FileTest, Allocate)
 {
     open();
@@ -1205,5 +1208,130 @@ TEST_F(FileTest, Allocate)
     EXPECT_EQ(0, eof);
 
     close();
+}
 
+TEST_F(FileTest, SetFInfo)
+{
+    HParamBlockRec hpb;
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    hpb.fileParam.ioFDirIndex = 0;
+    
+    PBHGetFInfoSync(&hpb);
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+
+    hpb.fileParam.ioFlFndrInfo.fdType = 'TEST';
+    hpb.fileParam.ioFlFndrInfo.fdCreator = 'Test';
+    hpb.fileParam.ioDirID = dirID;
+
+    PBHSetFInfoSync(&hpb);
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    hpb.fileParam.ioFDirIndex = 0;
+
+    PBHGetFInfoSync(&hpb);
+    EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+    EXPECT_EQ('TEST', hpb.fileParam.ioFlFndrInfo.fdType);
+    EXPECT_EQ('Test', hpb.fileParam.ioFlFndrInfo.fdCreator);
+}
+
+TEST_F(FileTest, SetFLock)
+{
+    auto lock = [this](bool dolock) {
+        HParamBlockRec hpb;
+        memset(&hpb, 42, sizeof(hpb));
+        hpb.ioParam.ioCompletion = nullptr;
+        hpb.ioParam.ioVRefNum = vRefNum;
+        hpb.fileParam.ioDirID = dirID;
+        hpb.ioParam.ioNamePtr = file1;
+        if(dolock)
+            PBHSetFLockSync(&hpb);
+        else
+            PBHRstFLockSync(&hpb);
+        EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+    };
+
+    lock(true);
+
+    auto writeSomething = [this](long expectedOffset) {
+        char buf1[] = "Hello, world.";
+
+        ParamBlockRec pb;
+        memset(&pb, 42, sizeof(pb));
+        pb.ioParam.ioCompletion = nullptr;
+        pb.ioParam.ioRefNum = refNum;
+        pb.ioParam.ioPosMode = fsFromLEOF;
+        pb.ioParam.ioPosOffset = 0;
+        pb.ioParam.ioBuffer = buf1;
+        pb.ioParam.ioReqCount = 13;
+        PBWriteSync(&pb);
+
+        
+        EXPECT_EQ(expectedOffset, pb.ioParam.ioPosOffset);
+        return pb.ioParam.ioResult;
+    };
+
+    auto setInfo = [this]() {
+        HParamBlockRec hpb;
+        memset(&hpb, 42, sizeof(hpb));
+        hpb.ioParam.ioCompletion = nullptr;
+        hpb.ioParam.ioVRefNum = vRefNum;
+        hpb.fileParam.ioDirID = dirID;
+        hpb.ioParam.ioNamePtr = file1;
+        hpb.fileParam.ioFDirIndex = 0;
+        
+        PBHGetFInfoSync(&hpb);
+        EXPECT_EQ(noErr, hpb.ioParam.ioResult);
+
+        EXPECT_NE('TEST', hpb.fileParam.ioFlFndrInfo.fdType);
+        EXPECT_NE('Test', hpb.fileParam.ioFlFndrInfo.fdCreator);
+        
+
+        hpb.fileParam.ioFlFndrInfo.fdType = 'TEST';
+        hpb.fileParam.ioFlFndrInfo.fdCreator = 'Test';
+        hpb.fileParam.ioDirID = dirID;
+
+        PBHSetFInfoSync(&hpb);
+        return hpb.ioParam.ioResult;
+    };
+
+    open();
+    EXPECT_EQ(wrPermErr, writeSomething(0));
+    close();
+    openRF();
+    EXPECT_EQ(wrPermErr, writeSomething(0));
+    close();
+
+    EXPECT_EQ(noErr, setInfo());
+
+    lock(false);
+
+    open();
+    EXPECT_EQ(noErr, writeSomething(13));
+    close();
+    openRF();
+    EXPECT_EQ(noErr, writeSomething(13));
+    close();
+
+    lock(true);
+
+    HParamBlockRec hpb;
+    memset(&hpb, 42, sizeof(hpb));
+    hpb.ioParam.ioCompletion = nullptr;
+    hpb.ioParam.ioVRefNum = vRefNum;
+    hpb.fileParam.ioDirID = dirID;
+    hpb.ioParam.ioNamePtr = file1;
+    PBHDeleteSync(&hpb);
+
+    EXPECT_EQ(fLckdErr, hpb.ioParam.ioResult);
+
+    lock(false);
 }
