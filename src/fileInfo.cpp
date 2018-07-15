@@ -173,31 +173,6 @@ INTEGER Executor::ROMlib_UNIX7_to_Mac(char *cname, INTEGER length)
     return retval;
 }
 
-Byte
-Executor::open_attrib_bits(LONGINT file_id, VCB *vcbp, GUEST<INTEGER> *refnump)
-{
-    Byte retval;
-    int i;
-
-    retval = 0;
-    *refnump = 0;
-    for(i = 0; i < NFCB; i++)
-    {
-        if(CL(ROMlib_fcblocks[i].fdfnum) == file_id
-           && MR(ROMlib_fcblocks[i].fcvptr) == vcbp)
-        {
-            if(*refnump == CW(0))
-                *refnump = CW(i * 94 + 2);
-            if(ROMlib_fcblocks[i].fcflags & fcfisres)
-                retval |= ATTRIB_RESOPEN;
-            else
-                retval |= ATTRIB_DATAOPEN;
-        }
-    }
-    if(retval & (ATTRIB_RESOPEN | ATTRIB_DATAOPEN))
-        retval |= ATTRIB_ISOPEN;
-    return retval;
-}
 
 OSErr Executor::ROMlib_PBGetSetFInfoD(ParmBlkPtr pb, BOOLEAN a,
                                       GetOrSetType op, GUEST<LONGINT> *dir,

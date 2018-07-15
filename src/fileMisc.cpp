@@ -34,6 +34,119 @@
 
 using namespace Executor;
 
+namespace Executor
+{
+int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
+}
+
+
+#if !defined(NDEBUG)
+void Executor::fs_err_hook(OSErr err)
+{
+}
+#endif
+
+int ROMlib_lasterrnomapped;
+
+#define MAX_ERRNO 50
+
+#define install_errno(uerr, merr)         \
+    do                                    \
+    {                                     \
+        gui_assert(uerr < NELEM(xtable)); \
+        xtable[uerr] = merr;              \
+    } while(false);
+
+OSErr Executor::ROMlib_maperrno() /* INTERNAL */
+{
+    OSErr retval;
+    static OSErr xtable[MAX_ERRNO + 1];
+    static char been_here = false;
+    int errno_save;
+
+    if(!been_here)
+    {
+        int i;
+
+        for(i = 0; i < (int)NELEM(xtable); ++i)
+            xtable[i] = fsDSIntErr;
+
+        install_errno(0, noErr);
+        install_errno(EPERM, permErr);
+        install_errno(ENOENT, fnfErr);
+        install_errno(EIO, ioErr);
+        install_errno(ENXIO, paramErr);
+        install_errno(EBADF, fnOpnErr);
+        install_errno(EAGAIN, fLckdErr);
+        install_errno(ENOMEM, memFullErr);
+        install_errno(EACCES, permErr);
+        install_errno(EFAULT, paramErr);
+        install_errno(EBUSY, fBsyErr);
+        install_errno(EEXIST, dupFNErr);
+        install_errno(EXDEV, fsRnErr);
+        install_errno(ENODEV, nsvErr);
+        install_errno(ENOTDIR, dirNFErr);
+        install_errno(EINVAL, paramErr);
+        install_errno(ENFILE, tmfoErr);
+        install_errno(EMFILE, tmfoErr);
+        install_errno(EFBIG, dskFulErr);
+        install_errno(ENOSPC, dskFulErr);
+        install_errno(ESPIPE, posErr);
+        install_errno(EROFS, wPrErr);
+        install_errno(EMLINK, dirFulErr);
+#if !defined(WIN32)
+        install_errno(ETXTBSY, fBsyErr);
+        install_errno(EWOULDBLOCK, permErr);
+#endif
+
+        been_here = true;
+    }
+
+    errno_save = errno;
+    ROMlib_lasterrnomapped = errno_save;
+
+    if(errno_save < 0 || errno_save >= (int)NELEM(xtable))
+        retval = fsDSIntErr;
+    else
+        retval = xtable[errno_save];
+
+    if(retval == fsDSIntErr)
+        warning_unexpected("fsDSIntErr errno = %d", errno_save);
+
+    if(retval == dirNFErr)
+        warning_trace_info("dirNFErr errno = %d", errno_save);
+
+    fs_err_hook(retval);
+    return retval;
+}
+
+
+Byte
+Executor::open_attrib_bits(LONGINT file_id, VCB *vcbp, GUEST<INTEGER> *refnump)
+{
+    Byte retval;
+    int i;
+
+    retval = 0;
+    *refnump = 0;
+    for(i = 0; i < NFCB; i++)
+    {
+        if(CL(ROMlib_fcblocks[i].fdfnum) == file_id
+           && MR(ROMlib_fcblocks[i].fcvptr) == vcbp)
+        {
+            if(*refnump == CW(0))
+                *refnump = CW(i * 94 + 2);
+            if(ROMlib_fcblocks[i].fcflags & fcfisres)
+                retval |= ATTRIB_RESOPEN;
+            else
+                retval |= ATTRIB_DATAOPEN;
+        }
+    }
+    if(retval & (ATTRIB_RESOPEN | ATTRIB_DATAOPEN))
+        retval |= ATTRIB_ISOPEN;
+    return retval;
+}
+
 /* NOTE:  calling most of the routines here is a sign that the user may
 	  be depending on the internal layout of things a bit too much */
 
@@ -56,56 +169,61 @@ QHdrPtr Executor::GetDrvQHdr() /* IMIV-182 */
     return (&LM(DrvQHdr));
 }
 
-OSErr Executor::ufsPBGetFCBInfo(FCBPBPtr pb, BOOLEAN a) /* INTERNAL */
+/*
+ * NOTE:  This is *the* PCBGetFCBInfo that we use whether
+ *	  we're looking at hfs or ufs stuff.
+ */
+
+OSErr Executor::PBGetFCBInfo(FCBPBPtr pb, BOOLEAN async)
 {
-    int rn;
-    OSErr err;
-    fcbrec *fp;
-    int i, count;
+    filecontrolblock *fcbp, *efcbp;
+    INTEGER i;
 
-#if !defined(LETGCCWAIL)
-    rn = -1;
-    fp = 0;
-#endif /* LETGCCWAIL */
-
-    err = noErr;
-    if(pb->ioFCBIndx == CWC(0))
+    if((i = CW(pb->ioFCBIndx)) > 0)
     {
-        rn = Cx(pb->ioRefNum);
-        fp = PRNTOFPERR(rn, &err);
-    }
-    else if(Cx(pb->ioFCBIndx) > 0)
-    {
-        for(count = 0, i = 0; i < NFCB && count < Cx(pb->ioFCBIndx); i++)
-            if(ROMlib_fcblocks[i].fdfnum && (!pb->ioVRefNum || MR(ROMlib_fcblocks[i].fcvptr)->vcbVRefNum == pb->ioVRefNum))
-                count++;
-        if(count == Cx(pb->ioFCBIndx))
+        fcbp = (filecontrolblock *)(MR(LM(FCBSPtr)) + sizeof(INTEGER));
+        efcbp = (filecontrolblock *)(MR(LM(FCBSPtr)) + CW(*(GUEST<INTEGER> *)MR(LM(FCBSPtr))));
+        if(CW(pb->ioVRefNum) < 0)
         {
-            fp = ROMlib_fcblocks + i - 1;
-            rn = (Ptr)fp - MR(LM(FCBSPtr));
+            for(; fcbp != efcbp; fcbp++)
+                if(fcbp->fcbFlNum && MR(fcbp->fcbVPtr)->vcbVRefNum == pb->ioVRefNum && --i <= 0)
+                    break;
+    }
+        else if(pb->ioVRefNum == CWC(0))
+    {
+            for(; fcbp != efcbp && (fcbp->fcbFlNum == CLC(0) || --i > 0); fcbp++)
+                ;
         }
-        else
-            err = paramErr;
+        else /* if (CW(pb->ioVRefNum) > 0 */
+        {
+            for(; fcbp != efcbp; fcbp++)
+                if(fcbp->fcbFlNum && MR(fcbp->fcbVPtr)->vcbDrvNum == pb->ioVRefNum && --i <= 0)
+                    break;
+        }
+        if(fcbp == efcbp)
+            PBRETURN(pb, fnOpnErr);
+        pb->ioRefNum = CW((char *)fcbp - (char *)MR(LM(FCBSPtr)));
     }
     else
-        err = paramErr;
-    if(err == noErr)
     {
-        if(pb->ioNamePtr)
-            str255assign(MR(pb->ioNamePtr), fp->fcname);
-        pb->ioVRefNum = MR(fp->fcvptr)->vcbVRefNum;
-        pb->ioRefNum = CW(rn);
-        pb->ioFCBFlNm = fp->fdfnum;
-        pb->ioFCBFlags = CW((fp->fcflags << 8) | (unsigned char)fp->fcbTypByt);
-        pb->ioFCBStBlk = CW(0);
-        pb->ioFCBEOF = fp->fcleof;
-        pb->ioFCBPLen = fp->fcleof;
-        pb->ioFCBCrPs = CL(lseek(fp->fcfd, 0, SEEK_CUR) - FORKOFFSET(fp));
-        pb->ioFCBVRefNum = MR(fp->fcvptr)->vcbVRefNum; /* what's this? */
-        pb->ioFCBClpSiz = MR(fp->fcvptr)->vcbClpSiz;
-        pb->ioFCBParID = fp->fcparid;
+        fcbp = ROMlib_refnumtofcbp(CW(pb->ioRefNum));
+        if(!fcbp)
+            PBRETURN(pb, rfNumErr);
     }
-    return err;
+        if(pb->ioNamePtr)
+        str255assign(MR(pb->ioNamePtr), fcbp->fcbCName);
+    pb->ioFCBFlNm = fcbp->fcbFlNum;
+    pb->ioFCBFlags = CW((fcbp->fcbMdRByt << 8) | (unsigned char)fcbp->fcbTypByt);
+    pb->ioFCBStBlk = fcbp->fcbSBlk;
+    pb->ioFCBEOF = fcbp->fcbEOF;
+    pb->ioFCBCrPs = fcbp->fcbCrPs; 
+    pb->ioFCBPLen = fcbp->fcbPLen;
+    pb->ioFCBVRefNum = MR(fcbp->fcbVPtr)->vcbVRefNum;
+    if(CW(pb->ioFCBIndx) <= 0 || pb->ioVRefNum == CWC(0))
+        pb->ioVRefNum = pb->ioFCBVRefNum;
+    pb->ioFCBClpSiz = fcbp->fcbClmpSize;
+    pb->ioFCBParID = fcbp->fcbDirID;
+    PBRETURN(pb, noErr);
 }
 
 static bool
