@@ -164,8 +164,6 @@ void Executor::ROMlib_OurClose(void)
                 ROMlib_ejectfloppy(((VCBExtra *)vcbp)->u.hfs.fd);
 #endif
         }
-        else if(((VCBExtra*)vcbp)->unixname)
-            ROMlib_dbm_close((VCBExtra *)vcbp);
         else
             ;   // ### TODO
     }

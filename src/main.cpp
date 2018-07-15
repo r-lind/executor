@@ -67,7 +67,6 @@
 #include "rsys/sounddriver.h"
 #include "rsys/dcache.h"
 #include "rsys/system_error.h"
-#include "rsys/filedouble.h"
 #include "rsys/option.h"
 #include "rsys/emustubs.h"
 #include "rsys/float.h"
@@ -255,12 +254,6 @@ const option_vec Executor::common_opts = {
     { "grayscale", "\
 specify that executor should run in grayscale mode even if it is \
 capable of color.",
-      opt_no_arg, "" },
-    { "netatalk", "use netatalk naming conventions for AppleDouble files",
-      opt_no_arg, "" },
-    { "afpd", "use afpd conventions for AppleDouble files (implies -netatalk)",
-      opt_no_arg, "" },
-    { "rsrc", "use native resource forks on Mac OS X",
       opt_no_arg, "" },
 
     { "cities", "Don't use Helvetica for Geneva, Courier for Monaco and Times "
@@ -860,15 +853,6 @@ int main(int argc, char **argv)
     }
 
     use_native_code_p = !opt_val(common_db, "notnative", NULL);
-
-    if(opt_val(common_db, "netatalk", NULL))
-        setup_resfork_format(ResForkFormat::netatalk);
-    else if(opt_val(common_db, "afpd", NULL))
-        setup_resfork_format(ResForkFormat::afpd);
-    else if(opt_val(common_db, "rsrc", NULL))
-        setup_resfork_format(ResForkFormat::native);
-    else
-        setup_resfork_format(ResForkFormat::standard);
 
     substitute_fonts_p = !opt_val(common_db, "cities", NULL);
 

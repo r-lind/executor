@@ -219,32 +219,6 @@ get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
 #endif
     };
 
-    {
-        static bool been_here_p = false;
-
-        if(!been_here_p)
-        {
-            int j;
-
-#if defined(CYGWIN32)
-            guesses[0] = win_temp();
-#endif
-
-            for(j = 0; j < (int)NELEM(guesses); ++j)
-            {
-                char *p;
-
-                if(guesses[j])
-                {
-                    p = (char *)alloca(strlen(guesses[j]) + 1);
-                    strcpy(p, guesses[j]);
-                    ROMlib_automount(p);
-                }
-            }
-            been_here_p = true;
-        }
-    }
-
     retval = look_for_volume("tmp:", tmp_vrefp, tmp_diridp);
 
     for(i = 0; retval != noErr && i < (int)NELEM(guesses); ++i)

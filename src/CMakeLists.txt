@@ -121,12 +121,14 @@ set(dial_sources dialAlert.cpp dialCreate.cpp dialHandle.cpp dialInit.cpp dialMa
     dialDispatch.cpp dialItem.cpp)
 source_group(Dialogs FILES ${dial_sources})
 
-set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileInfo.cpp
-    fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp fileUnimplemented.cpp
+set(file_sources 
+    fileMisc.cpp
+    fileHighlevel.cpp  fileUnimplemented.cpp
+    dcache.cpp
     volume.cpp
+    macstrings.cpp
     
     localvolume/localvolume.cpp 
-    localvolume/macstrings.cpp
     localvolume/basilisk.cpp
     localvolume/appledouble.cpp
     localvolume/plain.cpp
@@ -200,7 +202,7 @@ set(misc_sources
   error.cpp adb.cpp color_wheel_bits.cpp finder.cpp system_error.cpp ibm_keycodes.cpp
   icon.cpp redrawscreen.cpp ini.cpp qt.cpp
   paramline.c fauxdbm.cpp commtool.cpp cfm.cpp pef_hash.cpp
-  mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
+  mixed_mode.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
   executor.cpp  crc.cpp
   prefpanel.cpp dispatcher.cpp options.cpp)
@@ -281,7 +283,6 @@ set(include_sources hintemplate.h
                   include/rsys/executor.h
                   include/rsys/fauxdbm.h
                   include/rsys/file.h
-                  include/rsys/filedouble.h
                   include/rsys/flags.h
                   include/rsys/float.h
                   include/rsys/float_fcw.h
@@ -359,7 +360,6 @@ set(include_sources hintemplate.h
                   include/rsys/stdfile.h
                   include/rsys/stdio_smashage.h
                   include/rsys/string.h
-                  include/rsys/suffix_maps.h
                   include/rsys/syncint.h
                   include/rsys/syserr.h
                   include/rsys/system_error.h

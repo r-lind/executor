@@ -12,7 +12,6 @@
 
 #include "rsys/resource.h"
 #include "rsys/file.h"
-#include "rsys/filedouble.h"
 #include "rsys/mman.h"
 #include "rsys/flags.h"
 #include "rsys/version.h"
@@ -95,8 +94,6 @@ INTEGER Executor::C_InitResources()
     {
         fprintf(stderr, "OpenRFPerm (\"%.*s\", 0x%x, fsCurPerm) failed\n",
                 SYSMACNAME[0], SYSMACNAME + 1, (uint16_t)Cx(LM(BootDrive)));
-
-        report_resfork_problem();
 
         exit(1);
     }

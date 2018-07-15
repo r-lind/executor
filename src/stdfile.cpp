@@ -890,8 +890,19 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
     char *namecpy, *slashp;
     INTEGER namelen;
 
-    vcbp = ROMlib_vcbbyvrn(CW(*vrefp));
     retval = false;
+#if 0
+    /*
+        This function is the counterpart to `unixcore`.
+        It finds the parent of a mount point,
+        whereas `getparent()` above finds the parent directory within a filesystem.
+
+        Yay for function names. ;-)
+
+        See also the comment in `unixcore`.
+     */
+
+    vcbp = ROMlib_vcbbyvrn(CW(*vrefp));
     if(((VCBExtra *)vcbp)->unixname)
     {
         namelen = strlen(((VCBExtra *)vcbp)->unixname);
@@ -916,6 +927,7 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
             }
         }
     }
+#endif
     return retval;
 }
 
@@ -1533,7 +1545,7 @@ static BOOLEAN ejected(HParmBlkPtr pb)
 
 static bool single_tree_fs_p(HParmBlkPtr pb)
 {
-#if defined(MSDOS) || defined(CYGWIN32)
+#if true || defined(MSDOS) || defined(CYGWIN32)
     return false;
 #else
     HVCB *vcbp = ROMlib_vcbbyvrn(CW(pb->volumeParam.ioVRefNum));
@@ -1751,60 +1763,18 @@ static GUEST<OSType> gettypeX(StringPtr name, INTEGER vref, LONGINT dirid)
 static OSErr
 unixcore(StringPtr namep, INTEGER *vrefnump, LONGINT *diridp)
 {
-    INTEGER vrefnum;
-    HVCB *vcbp;
-    char *newname;
-    INTEGER namelen;
-    OSErr err;
-    ParamBlockRec pb;
-    char *pathname, *filename, *endname;
-    VCBExtra *vcbp2;
-    struct stat sbuf;
-    LONGINT templ;
-    char *tempcp;
-    ParamBlockRec pbr;
+    // if (namep, *vrefnump, *diridp) refers to a mount point
+    // (a concept which doesn't exist on real Macs),
+    // set *vrefnump and *diridp and return noErr.
+    // Otherwise, return nsvErr.
 
-    vrefnum = *vrefnump;
-#if 0
-  vcbp = ROMlib_vcbbyvrn(vrefnum);
-#else
-    pbr.ioParam.ioNamePtr = nullptr;
-    pbr.ioParam.ioVRefNum = CW(vrefnum);
-    vcbp = ROMlib_breakoutioname(&pbr, &templ, &tempcp, (BOOLEAN *)0, true);
-    free(tempcp);
-#endif
-    if(vcbp && ((VCBExtra *)vcbp)->unixname)
-    {
-        pb.ioParam.ioNamePtr = nullptr;
-        pb.ioParam.ioVRefNum = pbr.ioParam.ioVRefNum;
-        err = ROMlib_nami(&pb, *diridp, NoIndex, &pathname, &filename,
-                          &endname, false, &vcbp2, &sbuf);
-        if(err == noErr)
-        {
-            VCBExtra *vcbextrap;
+    // Real MacOS Classic under Mac OS X simulates alias files
+    // for mount points.
 
-            namelen = endname - pathname - 1;
-            newname = (char *)alloca(namelen + 1 + namep[0] + 1);
-            strncpy(newname, pathname, namelen);
-            newname[namelen] = '/';
-            strncpy(newname + namelen + 1, (char *)namep + 1, namep[0]);
-            newname[namelen + 1 + namep[0]] = 0;
-            ROMlib_automount(newname);
-            vcbextrap = ROMlib_vcbbyunixname(newname);
-            if(vcbextrap)
-            {
-                *vrefnump = CW(vcbextrap->vcb.vcbVRefNum);
-                if(*diridp == vcbextrap->u.ufs.ino)
-                    *diridp = 2;
-            }
-            else
-                err = nsvErr;
-            free(pathname);
-        }
-    }
-    else
-        err = nsvErr;
-    return err;
+    // Executor used to handle mount points via this routine,
+    // and currently pretends everything on Unix is one volume.
+
+    return nsvErr;
 }
 
 OSErr Executor::C_unixmount(CInfoPBRec *cbp)

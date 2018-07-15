@@ -622,8 +622,6 @@ NOTRAP_FUNCTION2(RstFLock);
 extern OSErr Rename(StringPtr filen, INTEGER vrn,
                     StringPtr newf);
 NOTRAP_FUNCTION2(Rename);
-extern unsigned char ROMlib_fromhex(unsigned char c);
-extern INTEGER ROMlib_UNIX7_to_Mac(char *name, INTEGER length);
 extern void FInitQueue(void);
 extern QHdrPtr GetFSQHdr(void);
 extern QHdrPtr GetVCBQHdr(void);

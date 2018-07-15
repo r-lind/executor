@@ -260,56 +260,6 @@ colon_colon_copy(StringPtr dst, const char *src)
     save_dst[0] = dst - save_dst;
 }
 
-/*
- * This routine converts the UNIX path path to a pascal string that
- * starts with a colon whose individual components have been converted
- * from AppleDouble representation to Mac representation.  In theory we
- * could use this whether or not we were using the netatalk naming convention,
- * but since this is a recent addition to ROMlib and since we're about to
- * start building 2.1 candidates it makes sense to just use this in the
- * unsupported case and continue using the old code with non-netatalk naming.
- */
-
-#define MAC_LOCAL_FROM_UNIX_LOCAL(s)                                    \
-    ({                                                                  \
-        char *_s;                                                       \
-        unsigned char *retval;                                          \
-        int len;                                                        \
-        int count;                                                      \
-        char *next_slash;                                               \
-                                                                        \
-        _s = (s);                                                       \
-        len = strlen(_s);                                               \
-        retval = (unsigned char *)alloca(len + 2);                      \
-        retval[1] = ':';                                                \
-        count = 1;                                                      \
-                                                                        \
-        do                                                              \
-        {                                                               \
-            int component_len, shrinkage;                               \
-                                                                        \
-            next_slash = strchr(_s, '/');                               \
-            if(next_slash)                                              \
-                component_len = next_slash - _s;                        \
-            else                                                        \
-                component_len = strlen(_s);                             \
-            memcpy(retval + count + 1, _s, component_len);              \
-            shrinkage = ROMlib_UNIX7_to_Mac((char *)retval + count + 1, \
-                                            component_len);             \
-            count += component_len - shrinkage;                         \
-            if(next_slash)                                              \
-            {                                                           \
-                                                                        \
-                _s += component_len + 1; /* skip the '/', too */        \
-                retval[count + 1] = ':';                                \
-                ++count;                                                \
-            }                                                           \
-        } while(next_slash);                                            \
-                                                                        \
-        retval[0] = count;                                              \
-        retval;                                                         \
-    })
-
 static BOOLEAN argv_to_appfile(char *, AppFile *);
 void ROMlib_seginit(LONGINT, char **); /* INTERNAL */
 
@@ -330,73 +280,8 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
 
     if(uname && Ustat(uname, &sbuf) == 0)
     {
-        if(!full_pathname_p(uname))
-        {
-            namelen = strlen(uname);
-            path = (unsigned char *)ALLOCA(MAXPATHLEN + 1 + namelen + 1);
-            if(getcwd((char *)path, MAXPATHLEN))
-            {
-                pathlen = strlen((char *)path);
-                path[pathlen] = '/';
-                if(uname[0] == '.' && uname[1] == '/')
-                    BlockMoveData((Ptr)uname + 2, (Ptr)(path + pathlen + 1),
-                                  (Size)namelen + 1 - 2);
-                else
-                    BlockMoveData((Ptr)uname, (Ptr)(path + pathlen + 1),
-                                  (Size)namelen + 1);
-                uname = (char *)path;
-#if defined(MSDOS) || defined(CYGWIN32)
-                uname = canonicalize_potential_windows_path(uname);
-#endif
-            }
-            else
-                warning_unexpected("getwd failed: expect trouble reading "
-                                   "resources");
-        }
-#if 0
-        ROMlib_automount(uname);
-#endif
-        vcbp = (VCBExtra *)ROMlib_vcbbybiggestunixname(uname);
-        if(vcbp)
-        {
-            cinfo.hFileInfo.ioVRefNum = vcbp->vcb.vcbVRefNum;
-            wpb.ioNamePtr = 0;
-            sysnamelen = strlen(vcbp->unixname);
-            if(sysnamelen == 1 + SLASH_CHAR_OFFSET) /* don't remove leading
-						      '/' if that's
-						      all there is */
-            {
-                sysnamelen = 0;
-                uname += SLASH_CHAR_OFFSET;
-            }
-
-            /* NOTE: we can probably skip the following "if" and the else
-	     part and just use the "path = MAC_LOC..." line unconditionally,
-	     but I don't want to possibly introduce a subtle bug at the last
-	     minute before releasing 2.1 final. */
-
-            if(apple_double_quote_char == ':')
-                path = MAC_LOCAL_FROM_UNIX_LOCAL(uname + sysnamelen + 1);
-            else
-            {
-                totnamelen = strlen(uname);
-                pathlen = totnamelen - sysnamelen + 2; /* count & NUL */
-                path = (unsigned char *)alloca(pathlen);
-                strcpy((char *)path + 1, uname + sysnamelen); /* path has count and */
-                path[0] = pathlen - 2; /* is NUL terminated */
-                path[1] = ':';
-                for(p = path; *++p;)
-                    if(*p == '/')
-                        *p = ':';
-
-                path[0] -= ROMlib_UNIX7_to_Mac((char *)path + 1, path[0]);
-            }
-        }
-        else
-        {
-            path = (unsigned char*)""; /* TODO:  Some sort of problem here */
-            cinfo.hFileInfo.ioVRefNum = 0;
-        }
+        return false;
+        // TODO
     }
     else
     {

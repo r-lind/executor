@@ -4,10 +4,10 @@
 
 #include <FileMgr.h>
 #include <MemoryMgr.h>
-#include "macstrings.h"
+#include <rsys/macstrings.h>
 #include "item.h"
 
-#include "filesystem.h"
+#include <rsys/filesystem.h>
 
 #include <map>
 #include <unordered_map>

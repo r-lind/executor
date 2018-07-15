@@ -5,8 +5,6 @@
 
 #if !defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
 
-#include "rsys/filedouble.h"
-
 /* #warning ioCompletion code isn't being called */
 
 /*
@@ -306,8 +304,6 @@ typedef struct
 #define SOFTLOCKED (1 << 15)
 #define volumenotlocked(vp) (Cx(((VCB *)vp)->vcbAtrb) & SOFTLOCKED ? vLckdErr : (Cx(((VCB *)vp)->vcbAtrb) & HARDLOCKED ? wPrErr : noErr))
 
-#define FORKOFFSET ROMlib_FORKOFFSET
-
 #if !defined(L_INCR)
 #define L_INCR 1
 #endif /* L_INCR */
@@ -329,49 +325,12 @@ typedef struct
 #define UPDATE_IONAMEPTR_P(pb) \
     ((pb).ioNamePtr && ((pb).ioFDirIndex != CWC(0) || !MR((pb).ioNamePtr)[0]))
 
-/* After a pathname has been normalized, the offset of the first
-   slash.  It's 2 under DOS because a normalized path is, e.g., C:/etc */
-
-#if defined(WIN32)
-enum
-{
-    SLASH_CHAR_OFFSET = 2
-};
-#else
-enum
-{
-    SLASH_CHAR_OFFSET = 0
-};
-#endif
-
 extern StringPtr ROMlib_exefname;
-extern char *ROMlib_exeuname;
 
 #pragma pack(pop)
 
-extern LONGINT ROMlib_FORKOFFSET(fcbrec *fp);
-extern OSErr ROMlib_seteof(fcbrec *fp);
-extern OSErr ROMlib_geteofostype(fcbrec *fp);
-extern OSErr ROMlib_nami(ParmBlkPtr pb, LONGINT dir, IndexType indextype,
-                         char **pathname, char **filename, char **endname,
-                         BOOLEAN nodirs, VCBExtra **vcbpp, struct stat *sbufp);
 extern OSErr ROMlib_maperrno(void);
-extern VCB *ROMlib_breakoutioname(ParmBlkPtr pb, LONGINT *diridp,
-                                  char **therestp, BOOLEAN *fullpathp, BOOLEAN usedefault);
 
-extern void ROMlib_fillkeycontent(datum *keyp, datum *contentp,
-                                  char *path, VCBExtra *vcbp);
-extern datum ROMlib_dbm_fetch(VCBExtra *vcbp, LONGINT dir);
-extern BOOLEAN ROMlib_dbm_store(VCBExtra *vcbp, char *pathname,
-                                LONGINT *dirp, BOOLEAN verify_p);
-extern void ROMlib_dbm_delete_inode(VCBExtra *vcbp, LONGINT inode);
-extern void ROMlib_dbm_open(VCBExtra *vcbp);
-extern void ROMlib_dbm_close(VCBExtra *vcbp);
-
-extern OSErr ROMlib_PBMoveOrRename(ParmBlkPtr pb, BOOLEAN a, LONGINT dir,
-                                   LONGINT newdir, char *newname, MoveOrRenameType op);
-extern OSErr ROMlib_PBGetSetFInfoD(ParmBlkPtr pb, BOOLEAN a,
-                                   GetOrSetType op, GUEST<LONGINT> *dir, BOOLEAN dodirs);
 extern OSErr ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a);
 extern OSErr ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
                              DriverRoutineType routine, INTEGER trap);
@@ -380,63 +339,8 @@ extern DrvQExtra *ROMlib_addtodq(ULONGINT drvsize, const char *devicename,
                                  INTEGER partition, INTEGER drefnum,
                                  drive_flags_t flags, hfs_access_t *hfsp);
 
-extern void ROMlib_automount(const char *path);
-
 extern Byte open_attrib_bits(LONGINT file_id, VCB *vcbp, GUEST<INTEGER> *refnump);
 
-extern VCB *vlookupbyname(const char *namep, const char *endp);
-
-extern OSErr ufsPBOpen(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHOpen(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBOpenRF(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHOpenRF(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBLockRange(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBUnlockRange(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBRead(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBWrite(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBGetFPos(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetFPos(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBGetEOF(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetEOF(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBAllocate(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBAllocContig(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBFlushFile(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBClose(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBCreate(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHCreate(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBDirCreate(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBDelete(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHDelete(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBGetCatInfo(CInfoPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetCatInfo(CInfoPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBCatMove(CMovePBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBOpenWD(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBCloseWD(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBGetWDInfo(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBGetFInfo(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHGetFInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetFInfo(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHSetFInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetFLock(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHSetFLock(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBRstFLock(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHRstFLock(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetFVers(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBRename(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHRename(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBGetFCBInfo(FCBPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBMountVol(ParmBlkPtr ufsPB);
-extern OSErr ufsPBGetVInfo(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHGetVInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetVInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBGetVol(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHGetVol(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBSetVol(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBHSetVol(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBFlushVol(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr ufsPBUnmountVol(ParmBlkPtr ufsPB);
-extern OSErr ufsPBOffLine(ParmBlkPtr ufsPB);
-extern OSErr ufsPBEject(ParmBlkPtr ufsPB);
 
 extern void ROMlib_fileinit(void);
 
@@ -459,21 +363,13 @@ extern OSErr FSWriteAll(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
 
 extern LONGINT ROMlib_magic_offset;
 
-extern void convert_slashs_to_backslashs(char *p);
 
-extern OSErr ROMlib_hiddenbyname(GetOrSetType gors, char *pathname,
-                                 char *rpathname, Single_dates *datep,
-                                 FInfo *finfop, FXInfo *fxinfop,
-                                 GUEST<LONGINT> *lenp, GUEST<LONGINT> *rlenp);
-
-extern unsigned char ROMlib_fromhex(unsigned char c);
 #endif
 
 #if !defined(ST_INO)
 #define ST_INO(buf) ((uint32_t)((buf).st_ino))
 #endif
 
-extern std::string ROMlib_volumename;
 extern INTEGER ROMlib_nextvrn;
 
 std::string expandPath(std::string);
