@@ -17,6 +17,10 @@
 #include "DeviceMgr.h"
 #include "rsys/hook.h"
 #include "rsys/drive_flags.h"
+#include "rsys/filesystem.h"
+
+#include <optional>
+#include <string>
 
 /* relative paths of the system folder */
 
@@ -238,24 +242,14 @@ extern fcbrec *PRNTOFPERR(INTEGER prn, OSErr *errp);
 
 class Volume;
 void initLocalVol();
+std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
+std::optional<FSSpec> macPathToFSSpec(const std::string& p);
+
 
 typedef struct
 {
     VCB vcb;
-    char *unixname;
-#if !defined(__alpha)
-    char *filler;
-#endif
     union {
-        struct
-        {
-            LONGINT ino;
-            LONGINT nhashentries;
-            hashlink_t **hashtable;
-#if !defined(__alpha)
-            char *filler2;
-#endif
-        } ufs;
         hfs_access_t hfs;
     } u;
     Volume *volume;

@@ -93,6 +93,8 @@ get_sys_vref_and_dirid(INTEGER *sys_vrefp, LONGINT *sys_diridp)
 static OSErr
 try_to_find(INTEGER vref, const char *str, INTEGER *vrefp, LONGINT *diridp)
 {
+    return nsvErr;
+#if 0
     OSErr err;
     HVCB *vcbp;
 
@@ -132,6 +134,7 @@ try_to_find(INTEGER vref, const char *str, INTEGER *vrefp, LONGINT *diridp)
     }
     warning_trace_info("err = %d", err);
     return err;
+#endif
 }
 
 static OSErr

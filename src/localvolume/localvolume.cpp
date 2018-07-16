@@ -863,6 +863,49 @@ void LocalVolume::PBOffLine(ParmBlkPtr pb)
     throw OSErrorException(paramErr);
 }
 
+std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
+{
+    boost::system::error_code ec;
+
+    if(!fs::exists(inPath))
+        return std::nullopt;
+
+    auto relpath = fs::relative(inPath, root, ec);
+    if(ec)
+        return std::nullopt;
+
+    auto path = root;
+    ItemPtr item = items[2];
+    for(auto elem : relpath)
+    {
+        if(auto dir = dynamic_cast<DirectoryItem*>(item.get()))
+            dir->updateCache();
+        else
+            return std::nullopt;
+
+        path /= elem;
+
+        auto it = pathToId.find(path);
+        if(it == pathToId.end())
+            return std::nullopt;
+
+        item = items[it->second];
+    }
+
+    if(item)
+    {
+        FSSpec spec;
+        const auto& name = item->name();
+        spec.vRefNum = vcb.vcbVRefNum;
+        spec.parID = CL(item->parID());
+        memcpy(&spec.name[1], name.c_str(), name.size());
+        spec.name[0] = name.size();
+        return spec;
+    }
+    else
+        return std::nullopt;
+}
+
 void Executor::initLocalVol()
 {
     VCBExtra *vp;
@@ -905,4 +948,20 @@ void Executor::initLocalVol()
     Enqueue((QElemPtr)vp, &LM(VCBQHdr));
 
     vp->volume = new LocalVolume(vp->vcb, "/");
+}
+
+std::optional<FSSpec> Executor::nativePathToFSSpec(const fs::path& p)
+{
+    VCBExtra *vcbp;
+
+    for(vcbp = (VCBExtra *)MR(LM(VCBQHdr).qHead); vcbp; vcbp = (VCBExtra *)MR(vcbp->vcb.qLink))
+    {
+        if(auto volume = dynamic_cast<LocalVolume*>(vcbp->volume))
+        {
+            if(auto spec = volume->nativePathToFSSpec(p))
+                return spec;
+        }
+    }
+
+    return std::nullopt;
 }

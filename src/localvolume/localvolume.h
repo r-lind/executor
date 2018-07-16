@@ -70,6 +70,9 @@ class LocalVolume : public Volume
     void getInfoCommon(CInfoPBPtr pb, InfoKind infoKind);
 
 public:
+
+    std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
+
     ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
     CNID newCNID();
 

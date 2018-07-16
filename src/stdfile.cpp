@@ -884,14 +884,7 @@ static LONGINT getparent(LONGINT dirid)
 
 static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
 {
-    HVCB *vcbp;
-    BOOLEAN retval;
-    struct stat sbuf;
-    char *namecpy, *slashp;
-    INTEGER namelen;
-
-    retval = false;
-#if 0
+#if 1
     /*
         This function is the counterpart to `unixcore`.
         It finds the parent of a mount point,
@@ -902,6 +895,15 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
         See also the comment in `unixcore`.
      */
 
+    return false;
+#else
+    HVCB *vcbp;
+    BOOLEAN retval;
+    struct stat sbuf;
+    char *namecpy, *slashp;
+    INTEGER namelen;
+
+    retval = false;
     vcbp = ROMlib_vcbbyvrn(CW(*vrefp));
     if(((VCBExtra *)vcbp)->unixname)
     {
@@ -927,8 +929,8 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
             }
         }
     }
-#endif
     return retval;
+#endif
 }
 
 static BOOLEAN moveuponedir(DialogPtr dp)

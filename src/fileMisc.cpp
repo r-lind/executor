@@ -426,7 +426,6 @@ StringPtr Executor::ROMlib_exefname;
 
 std::string Executor::ROMlib_ConfigurationFolder;
 static std::string ROMlib_SystemFolder;
-static std::string ROMlib_DefaultFolder;
 std::string Executor::ROMlib_PublicDirectoryMap;
 std::string Executor::ROMlib_PrivateDirectoryMap;
 static std::string ROMlib_MacVolumes;
@@ -559,7 +558,6 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     ROMlib_SystemFolder = initpath("SystemFolder", "+/ExecutorVolume/System Folder");
     ROMlib_PublicDirectoryMap = initpath("PublicDirectoryMap", "+/DirectoryMap");
     ROMlib_PrivateDirectoryMap = initpath("PrivateDirectoryMap", "~/.ExecutorDirectoryMap");
-    ROMlib_DefaultFolder = initpath("DefaultFolder", "+/ExecutorVolume");
     ROMlib_MacVolumes = initpath("MacVolumes", "+/exsystem.hfv;+"); // this is wrong: only first + is replaced
     ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");
     ROMlib_OffsetFile = initpath("OffsetFile", "+/offset_file");
@@ -582,12 +580,6 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     ROMlib_hfsinit();
     initLocalVol();
 
-#if 0
-    m = 0;
-    if (Ustat(ROMlib_DefaultFolder, &sbuf) == 0)
-	if ((sbuf.st_mode & S_IFMT) == S_IFREG)
-	    ROMlib_openharddisk(ROMlib_DefaultFolder, &m);
-#else
     m = 0;
     p = (char *)alloca(ROMlib_MacVolumes.size() + 1);
     strcpy(p, ROMlib_MacVolumes.c_str());
@@ -639,23 +631,20 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
         else
             p = 0;
     }
-#endif
 
-    if(is_unix_path(ROMlib_DefaultFolder.c_str())
-       && Ustat(ROMlib_DefaultFolder.c_str(), &sbuf) == 0)
-    {
-        LM(CurDirStore) = CL((LONGINT)ST_INO(sbuf));
-    }
     if(is_unix_path(ROMlib_SystemFolder.c_str()))
     {
-        if(Ustat(ROMlib_SystemFolder.c_str(), &sbuf) < 0)
+        if(auto sysSpec = nativePathToFSSpec(fs::path(ROMlib_SystemFolder) / "System")) // FIXME: SYSMACNAME
+        {
+            cpb.hFileInfo.ioNamePtr = RM((StringPtr)SYSMACNAME);
+            cpb.hFileInfo.ioVRefNum = sysSpec->vRefNum;
+            cpb.hFileInfo.ioDirID = sysSpec->parID;
+        }
+        else
         {
             fprintf(stderr, "Couldn't find '%s'\n", ROMlib_SystemFolder.c_str());
             exit(1);
         }
-        cpb.hFileInfo.ioNamePtr = RM((StringPtr)SYSMACNAME);
-        cpb.hFileInfo.ioVRefNum = CWC(-1);
-        cpb.hFileInfo.ioDirID = CL((LONGINT)ST_INO(sbuf));
     }
     else
     {

@@ -274,14 +274,14 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
     WDPBRec wpb;
     struct stat sbuf;
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    uname = canonicalize_potential_windows_path(uname);
-#endif
+    FSSpec spec;
 
-    if(uname && Ustat(uname, &sbuf) == 0)
+    if(auto unixSpec = nativePathToFSSpec(uname))
     {
-        return false;
-        // TODO
+        spec = unixSpec.value();
+        cinfo.hFileInfo.ioVRefNum = spec.vRefNum;
+        cinfo.hFileInfo.ioDirID = spec.parID;
+        path = spec.name;
     }
     else
     {
@@ -290,16 +290,16 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
         path = (unsigned char *)alloca(len + 1);
         colon_colon_copy(path, uname);
         cinfo.hFileInfo.ioVRefNum = 0;
+        cinfo.hFileInfo.ioDirID = 0;
     }
-    wpb.ioNamePtr = RM(path);
-
-    cinfo.hFileInfo.ioNamePtr = RM(path);
+    
     cinfo.hFileInfo.ioFDirIndex = CWC(0);
-    cinfo.hFileInfo.ioDirID = 0;
+    cinfo.hFileInfo.ioNamePtr = RM(path);
     if((retval = (PBGetCatInfo(&cinfo, false) == noErr)))
     {
         ap->fType = cinfo.hFileInfo.ioFlFndrInfo.fdType;
         ap->versNum = 0;
+        wpb.ioNamePtr = RM(path);
         wpb.ioVRefNum = cinfo.hFileInfo.ioVRefNum;
         wpb.ioWDProcID = TICKX("unix");
         wpb.ioWDDirID = cinfo.hFileInfo.ioFlParID;
