@@ -812,10 +812,13 @@ void LocalVolume::PBFlushVol(ParmBlkPtr pb)
 void LocalVolume::PBAllocate(ParmBlkPtr pb)
 {
     // no-op... emulated programs will have a hard time noticing that we're not actually pre-allocating blocks
+    // just pretend that everything worked.
+    pb->ioParam.ioActCount = CL((CL(pb->ioParam.ioReqCount) + 511) & ~511);
 }
 void LocalVolume::PBAllocContig(ParmBlkPtr pb)
 {
     // no-op, like PBALlocate above
+    pb->ioParam.ioActCount = CL((CL(pb->ioParam.ioReqCount) + 511) & ~511);
 }
 void LocalVolume::PBLockRange(ParmBlkPtr pb)
 {

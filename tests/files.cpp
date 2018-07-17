@@ -1241,6 +1241,20 @@ TEST_F(FileTest, Allocate)
 
     close();
 }
+TEST_F(FileTest, AllocContig)
+{
+    open();
+    long allocSz = 1234, eof = 42;
+    OSErr err = AllocContig(refNum, &allocSz);
+    EXPECT_EQ(noErr, err);
+    EXPECT_GE(allocSz, 1234);
+
+    err = GetEOF(refNum, &eof);
+    EXPECT_EQ(noErr, err);
+    EXPECT_EQ(0, eof);
+
+    close();
+}
 
 
 TEST_F(FileTest, SetFInfo)
