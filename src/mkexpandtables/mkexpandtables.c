@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+//#include "rsys/common.h"
 #include <stdio.h>
 
 #define EIGHTHPOWEROF(x) ((x) * (x) * (x) * (x) * (x) * (x) * (x) * (x))

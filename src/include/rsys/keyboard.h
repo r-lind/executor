@@ -38,8 +38,8 @@ struct dead_key_rec_t
     GUEST<modifier_table_number_t> table_number;
     GUEST<virt_key_t> virt_key;
     GUEST<completer_t> completer; /* VARIABLE LENGTH */
-    GUEST<unsigned char> filler;
-    GUEST<unsigned char> no_match;
+    //GUEST<unsigned char> filler;
+    //GUEST<unsigned char> no_match;
 };
 
 #define DEAD_KEY_TABLE_NUMBER_X(p) ((p)->table_number)
@@ -63,8 +63,8 @@ typedef struct kchr_str
     GUEST<modifier_table_number_t[256]> modifier_table;
     GUEST<INTEGER> n_tables;
     GUEST<unsigned char> table[0][128]; /* VARIABLE LENGTH */
-    GUEST<INTEGER> n_dead_key_recs;
-    GUEST<dead_key_rec_t> dead_key_recs[0]; /* VARIABLE LENGTH */
+    //GUEST<INTEGER> n_dead_key_recs;
+    //GUEST<dead_key_rec_t> dead_key_recs[0]; /* VARIABLE LENGTH */
 } * kchr_ptr_t;
 
 typedef GUEST<kchr_ptr_t> *kchr_hand;

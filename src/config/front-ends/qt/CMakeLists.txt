@@ -1,6 +1,8 @@
+cmake_policy(SET CMP0020 NEW) # Automatically link Qt executables to qtmain target on Windows.
 find_package(Qt5Gui)
 
 if(TARGET Qt5::Gui)
+
     add_library(front-end-qt
             host_vdriver.h
             qt.h

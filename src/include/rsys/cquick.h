@@ -2,6 +2,8 @@
 #define _CQUICK_H_
 
 #include "CQuickDraw.h"
+#include "IconUtil.h"
+#include "MemoryMgr.h"
 
 #include "rsys/rgbutil.h"
 namespace Executor
@@ -464,24 +466,22 @@ typedef BitMap blt_bitmap_t;
 #define CICON_DATA_X(cicon) (HxX(cicon, iconData))
 #define CICON_DATA(cicon) (PPR(CICON_DATA_X(cicon)))
 
-#define CICON_P(icon)                                                             \
-    ({                                                                            \
-        Handle _icon;                                                             \
-        CIconHandle _cicon;                                                       \
-        uint32_t icon_size;                                                       \
-                                                                                  \
-        _icon = (Handle)(icon);                                                   \
-        icon_size = GetHandleSize(_icon);                                         \
-        _cicon = (CIconHandle)_icon;                                              \
-                                                                                  \
-        ((icon_size < sizeof(CIcon))                                              \
-             ? false                                                              \
-             : (icon_size == (sizeof(CIcon)                                       \
-                              - sizeof(int16_t)                                   \
-                              + (RECT_HEIGHT(&BITMAP_BOUNDS(&CICON_PMAP(_cicon))) \
-                                 * (BITMAP_ROWBYTES(&CICON_BMAP(_cicon))          \
-                                    + BITMAP_ROWBYTES(&CICON_MASK(_cicon)))))));  \
-    })
+inline bool CICON_P(Handle _icon)
+{
+    CIconHandle _cicon;                                                      
+    uint32_t icon_size;                                                      
+                                                                                 
+    icon_size = GetHandleSize(_icon);                                        
+    _cicon = (CIconHandle)_icon;                                             
+                                                                                 
+    return ((icon_size < sizeof(CIcon))                                             
+            ? false                                                             
+            : (icon_size == (sizeof(CIcon)                                      
+                            - sizeof(int16_t)                                  
+                            + (RECT_HEIGHT(&BITMAP_BOUNDS(&CICON_PMAP(_cicon)))
+                                * (BITMAP_ROWBYTES(&CICON_BMAP(_cicon))         
+                                + BITMAP_ROWBYTES(&CICON_MASK(_cicon))))))); 
+}
 
 /* palette accessors */
 /* number of bytes of storage needed for a palette which

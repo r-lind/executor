@@ -6,23 +6,22 @@
  * All rights reserved.
  */
 
-#if 0
+#if 1
 struct dirent
 {
   char d_name[FILENAME_MAX];
 };
 
-typedef struct
+struct DIR
 {
   int valid_dir_magic; /* put magic number at top where it's most likely
 			  to get smashed */
   struct dirent *showme;
   struct dirent *stored;
   HANDLE private_data;
-}
-DIR;
+};
 
-enum { WINFS_SIG = 0x3301; }; /* arbitrary number */
+enum { WINFS_SIG = 0x3301 }; /* arbitrary number */
 #endif
 
 struct statfs
@@ -38,7 +37,7 @@ struct statfs
 typedef short dev_t;
 #endif
 
-#if 0
+#if 1
 extern int closedir (DIR *dirp);
 extern DIR *Uopendir (const char *path);
 extern DIR *opendir (const char *path);

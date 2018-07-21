@@ -6,6 +6,7 @@ extern "C" {
 #endif
 
 #if defined(WIN32)
+struct DIR;
 
 extern int Uaccess(const char *path, int mode);
 extern int Uchdir(const char *path);

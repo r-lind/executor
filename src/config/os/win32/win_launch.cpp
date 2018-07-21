@@ -9,6 +9,7 @@
 
 #include <windows.h>
 #include <stdio.h>
+#include <malloc.h>
 
 #include "sdl2_hwnd.h"
 

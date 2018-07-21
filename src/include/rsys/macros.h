@@ -33,7 +33,11 @@
 #endif
 
 #if !defined(PACKED)
+#ifdef _MSC_VER
+#define PACKED /* FIXME: check where this is used, we might need somethig */
+#else
 #define PACKED __attribute__((packed))
+#endif
 #endif
 
 #if !defined(U)
@@ -42,7 +46,7 @@
 
 #if !defined(ALLOCABEGIN)
 #define ALLOCABEGIN /* nothing */
-#define ALLOCA(n) __builtin_alloca(n)
+#define ALLOCA(n) alloca(n)
 #define ALLOCAEND /* nothing */
 #endif
 

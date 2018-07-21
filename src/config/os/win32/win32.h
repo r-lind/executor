@@ -4,19 +4,17 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
-#include <unistd.h>
 #include <time.h>
-#include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifndef _MSC_VER
+#include <unistd.h>
+#include <sys/time.h>
 #include <dirent.h>
 //#include <sys/vfs.h>
 #include <sys/param.h>
 //#include <sys/errno.h>
-
-#if !defined(static)
-
 #endif
 
 #define CONFIG_OFFSET_P 1 /* Use offset memory, at least for the first port */
@@ -34,4 +32,6 @@ typedef struct
     unsigned dsize;
 } datum;
 
-inline int geteuid() { return 1; }
+//inline int geteuid() { return 1; }
+
+#include <malloc.h>
