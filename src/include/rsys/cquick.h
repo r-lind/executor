@@ -2,7 +2,7 @@
 #define _CQUICK_H_
 
 #include "CQuickDraw.h"
-#include "IconUtil.h"
+#include "Iconutil.h"
 #include "MemoryMgr.h"
 
 #include "rsys/rgbutil.h"
