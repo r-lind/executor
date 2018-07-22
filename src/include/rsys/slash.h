@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 #if defined(WIN32)
-struct DIR;
 
 extern int Uaccess(const char *path, int mode);
 extern int Uchdir(const char *path);
@@ -18,10 +17,6 @@ extern int Umkdir(const char *path, int mode);
 extern int Uopen(const char *path, int flags, int mode);
 extern int Uclose(int fd);
 extern DIR *Uopendir(const char *path);
-
-#if !defined(CYGWIN32) /* statfs is in winfs.h for now */
-extern int Ustatfs(const char *path, struct statfs *buf);
-#endif
 
 extern int Urename(const char *path, const char *newp);
 extern int Urmdir(const char *path);
@@ -43,7 +38,6 @@ extern int Uutimes(const char *path, struct timeval tvp[2]);
 #define Urename rename
 #define Urmdir rmdir
 #define Ustat stat
-#define Ustatfs statfs
 #define Uunlink unlink
 #define Uutimes utimes
 
