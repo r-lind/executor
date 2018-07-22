@@ -11,9 +11,9 @@
 #include <stdio.h>
 #include <malloc.h>
 
-#include "sdl2_hwnd.h"
+//#include "sdl2_hwnd.h"
 
-using namespace Executor;
+//using namespace Executor;
 /*
  * returns number of characters written (or needed if bufp is NULL).
  */
@@ -77,6 +77,7 @@ enum
 
 int ROMlib_launch_native_app(int n_filenames, char **filenames)
 {
+#if 0
     HINSTANCE hi;
     int buf_len;
     char *command_buf;
@@ -97,4 +98,6 @@ int ROMlib_launch_native_app(int n_filenames, char **filenames)
                       SW_SHOWNORMAL);
 
     return ((intptr_t)hi > 32 ? noErr : paramErr);
+#endif
+    return paramErr;
 }
