@@ -13,10 +13,10 @@
 #include "rsys/cquick.h"
 #include "rsys/rgbutil.h"
 #include <syn68k_public.h>
-#include "rsys/blockinterrupts.h"
 #include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/dirtyrect.h"
+#include "rsys/syncint.h"
 
 using namespace Executor;
 
@@ -794,7 +794,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
                 }
             }
 
-            check_virtual_interrupt();
+            syncint_check_interrupt();
         } while(tail != head);
     }
 

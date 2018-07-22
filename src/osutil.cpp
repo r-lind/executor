@@ -19,7 +19,6 @@
 #include "rsys/glue.h"
 #include "rsys/notmac.h"
 #include "rsys/mman.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/trapglue.h"
 #include "rsys/osutil.h"
 #include "rsys/host.h"
@@ -788,9 +787,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
 void Executor::Enqueue(QElemPtr e, QHdrPtr h)
 {
     GUEST<QElemPtr> *qpp;
-    virtual_int_state_t block;
 
-    block = block_virtual_ints();
     for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && MR(*qpp) != e;
         qpp = (GUEST<QElemPtr> *)MR(*qpp))
         ;
@@ -803,17 +800,14 @@ void Executor::Enqueue(QElemPtr e, QHdrPtr h)
             h->qHead = RM(e);
         h->qTail = RM(e);
     }
-    restore_virtual_ints(block);
 }
 
 OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
 {
     GUEST<QElemPtr> *qpp;
     OSErr retval;
-    virtual_int_state_t block;
 
     retval = qErr;
-    block = block_virtual_ints();
     for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && MR(*qpp) != e;
         qpp = (GUEST<QElemPtr> *)MR(*qpp))
         ;
@@ -824,7 +818,6 @@ OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
             h->qTail = qpp == (GUEST<QElemPtr> *)&h->qHead ? nullptr : RM((QElemPtr)qpp);
         retval = noErr;
     }
-    restore_virtual_ints(block);
     return retval;
 }
 
@@ -854,8 +847,7 @@ void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
         PrimeTime((QElemPtr)&tm, n * 1000 / 60);
         while(!shouldbeawake)
         {
-            syncint_wait();
-            check_virtual_interrupt();
+            syncint_wait_interrupt();
         }
         RmvTime((QElemPtr)&tm);
     }

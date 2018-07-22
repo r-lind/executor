@@ -20,7 +20,6 @@
 #include "OSEvent.h"
 #include "FontMgr.h"
 #include "rsys/nextprint.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/next.h"
 #include "rsys/PSstrings.h"
 #include "rsys/tempalloc.h"
@@ -730,20 +729,12 @@ static void doimage(LONGINT verb, Rect *rp, GrafPtr thePortp)
 
 void Executor::ROMlib_gsave(void)
 {
-    virtual_int_state_t block;
-
-    block = block_virtual_ints();
     PSgsave();
-    restore_virtual_ints(block);
 }
 
 void Executor::ROMlib_grestore(void)
 {
-    virtual_int_state_t block;
-
-    block = block_virtual_ints();
     PSgrestore();
-    restore_virtual_ints(block);
 }
 
 char Executor::ROMlib_suppressclip = NO;
@@ -753,51 +744,37 @@ static double save_xoffset, save_yoffset;
 
 void Executor::ROMlib_rotatebegin(LONGINT flippage, LONGINT angle)
 {
-    virtual_int_state_t block;
-
-    block = block_virtual_ints();
     PSrotate(angle);
     PStranslate(-save_xoffset, -save_yoffset);
     ROMlib_suppressclip = YES;
     printport.pnLoc.h = CWC(-32768); /* force reload */
     printport.txFont = CWC(-32768); /* force reload */
-    restore_virtual_ints(block);
 }
 
 void Executor::ROMlib_rotatecenter(double yoffset, double xoffset)
 {
     DPSContext context;
-    virtual_int_state_t block;
 
     /*
  * TODO:  support flippage
  */
 
-    block = block_virtual_ints();
     context = DPSGetCurrentContext();
     PSgsave();
     PStranslate(xoffset, yoffset);
     save_xoffset = xoffset;
     save_yoffset = yoffset;
-    restore_virtual_ints(block);
 }
 
 void Executor::ROMlib_rotateend(void)
 {
-    virtual_int_state_t block;
-
-    block = block_virtual_ints();
     PSgrestore();
     ROMlib_suppressclip = NO;
     reloadclip = YES;
-    restore_virtual_ints(block);
 }
 
 static void NeXTClip(Rect *rp)
 {
-    virtual_int_state_t block;
-
-    block = block_virtual_ints();
     /* we used to do a `grestore' `gsave' sequence here, to get the clip
      path before the previous call to `NeXTClip ()', and then add the
      new `rectclip'.  but this causes serious problems, because the
@@ -811,7 +788,6 @@ static void NeXTClip(Rect *rp)
     if((rp->left != CWC(-32767) && rp->left != CWC(-32768)) || (rp->top != CWC(-32767) && rp->top != CWC(-32768)) || rp->right != CWC(32767) || rp->bottom != CWC(32767))
         PSrectclip(CW(rp->left), CW(rp->top),
                    CW(rp->right) - CW(rp->left), CW(rp->bottom) - CW(rp->top));
-    restore_virtual_ints(block);
 }
 
 static int myEqualRect(Rect *r1, Rect *r2)
@@ -1048,9 +1024,7 @@ void Executor::ROMlib_trytomatch(char *retval, LONGINT index)
         int n;
         NSArray *font_list;
         int i;
-        virtual_int_state_t block;
 
-        block = block_virtual_ints();
         font_list = [[NSFontManager sharedFontManager] availableFonts];
         bestn = 0;
 
@@ -1089,7 +1063,6 @@ void Executor::ROMlib_trytomatch(char *retval, LONGINT index)
                     break;
             }
         }
-        restore_virtual_ints(block);
     }
 }
 #endif
@@ -1190,11 +1163,9 @@ void NeXTSetText(StringPtr fname, LONGINT txFace, LONGINT txSize,
 {
     char *font;
     float matrix[6];
-    virtual_int_state_t block;
     float font_size;
     bool need_to_free;
 
-    block = block_virtual_ints();
     font = fnametofont(fname, txFace);
     if(txSize < 0)
         txSize = 1;
@@ -1215,7 +1186,6 @@ void NeXTSetText(StringPtr fname, LONGINT txFace, LONGINT txSize,
     matrix[5] = 0;
     PSsendfloatarray(matrix, 6);
     DPSPrintf(DPSGetCurrentContext(), "selectfont\n");
-    restore_virtual_ints(block);
     if(need_to_free)
         free(font);
 }
@@ -1276,9 +1246,7 @@ void Executor::NeXTPrArc(LONGINT verb, Rect *rp, LONGINT starta, LONGINT arca,
         short psh, psv;
         float xdiam, ydiam, midx, midy;
         LONGINT froma, toa;
-        virtual_int_state_t block;
 
-        block = block_virtual_ints();
         pnupdate(thePortp);
         PSgsave();
         if(arca > 0)
@@ -1321,7 +1289,6 @@ void Executor::NeXTPrArc(LONGINT verb, Rect *rp, LONGINT starta, LONGINT arca,
 
         doimage(verb, rp, thePortp);
         PSgrestore();
-        restore_virtual_ints(block);
     }
 }
 
@@ -1369,14 +1336,12 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
     int numbytesneeded;
     PixMap *srcpmp;
     short rowbytes, numbytes, pixelsize;
-    virtual_int_state_t block;
     bool direct_color_p;
     bool indexed_color_p;
     TEMP_ALLOC_DECL(temp_alloc_space);
 
     direct_color_p = false;
     indexed_color_p = false;
-    block = block_virtual_ints();
     commonupdate(thePortp);
     srcwidth = CW(srcrp->right) - CW(srcrp->left);
     srcheight = CW(srcrp->bottom) - CW(srcrp->top);
@@ -1541,7 +1506,6 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
     DONE:
         PSgrestore();
     }
-    restore_virtual_ints(block);
 
     TEMP_ALLOC_FREE(temp_alloc_space);
 }
@@ -1551,9 +1515,7 @@ void Executor::NeXTPrLine(Point to, GrafPtr thePortp)
     float temp, fromh, fromv, toh, tov;
     short psh, psv;
     Rect r;
-    virtual_int_state_t block;
 
-    block = block_virtual_ints();
     pnupdate(thePortp);
     if(CW(thePortp->pnSize.h) || CW(thePortp->pnSize.v))
     {
@@ -1604,7 +1566,6 @@ void Executor::NeXTPrLine(Point to, GrafPtr thePortp)
         doimage((LONGINT)paintVerb, &r, thePortp);
         PSgrestore();
     }
-    restore_virtual_ints(block);
 }
 
 void Executor::NeXTPrOval(LONGINT verb, Rect *rp, GrafPtr thePortp)
@@ -1627,10 +1588,8 @@ void Executor::NeXTPrPoly(LONGINT verb, PolyHandle ph, GrafPtr thePortp)
 {
     GUEST<Point> *pp, *ep;
     Point firstp;
-    virtual_int_state_t block;
     Point pt;
 
-    block = block_virtual_ints();
     pnupdate(thePortp);
     pp = MR(*ph)->polyPoints;
     ep = (GUEST<Point> *)((char *)MR(*ph) + CW((MR(*ph))->polySize));
@@ -1670,7 +1629,6 @@ void Executor::NeXTPrPoly(LONGINT verb, PolyHandle ph, GrafPtr thePortp)
             PSgrestore();
         }
     }
-    restore_virtual_ints(block);
 }
 
 void Executor::NeXTPrRRect(LONGINT verb, Rect *rp, LONGINT width, LONGINT height,
@@ -1678,13 +1636,11 @@ void Executor::NeXTPrRRect(LONGINT verb, Rect *rp, LONGINT width, LONGINT height
 {
     float sfactor, midy, rt, rb, rl, rr, sfactor2;
     short psh, psv;
-    virtual_int_state_t block;
 
     if(width <= 0 || height <= 0)
         NeXTPrRect(verb, rp, thePortp);
     else
     {
-        block = block_virtual_ints();
         pnupdate(thePortp);
         sfactor = (float)height / width;
         midy = ((float)CW(rp->top) + CW(rp->bottom)) / 2;
@@ -1726,16 +1682,13 @@ void Executor::NeXTPrRRect(LONGINT verb, Rect *rp, LONGINT width, LONGINT height
 
         doimage(verb, rp, thePortp);
         PSgrestore();
-        restore_virtual_ints(block);
     }
 }
 
 void Executor::NeXTPrRect(LONGINT verb, Rect *rp, GrafPtr thePortp)
 {
     short psh, psv;
-    virtual_int_state_t block;
 
-    block = block_virtual_ints();
     pnupdate(thePortp);
     PSgsave();
     PSnewpath();
@@ -1759,7 +1712,6 @@ void Executor::NeXTPrRect(LONGINT verb, Rect *rp, GrafPtr thePortp)
     doimage(verb, rp, thePortp);
 
     PSgrestore();
-    restore_virtual_ints(block);
 }
 
 void Executor::NeXTPrRgn(LONGINT verb, RgnHandle rgn, GrafPtr thePortp)
@@ -1771,15 +1723,12 @@ short Executor::NeXTPrTxMeas(LONGINT n, Ptr p, GUEST<Point> *nump, GUEST<Point> 
                              FontInfo *finfop, GrafPtr thePortp)
 {
     GUEST<Point> num, den;
-    virtual_int_state_t block;
     short retval;
 
     SETUPA5;
-    block = block_virtual_ints();
     num.h = num.v = den.h = den.v = CWC(0x100);
     retval = ROMlib_StdTxMeas(n,
                               (Ptr)p, &num, &den, NULL);
-    restore_virtual_ints(block);
     RESTOREA5;
     return (float)retval * CW(num.h) / CW(den.h);
 }
@@ -1909,11 +1858,7 @@ static void doashow(char *translated, LONGINT n, int i, short total)
 
 void Executor::NeXTsendps(LONGINT n, Ptr textbufp)
 {
-    virtual_int_state_t block;
-
-    block = block_virtual_ints();
     DPSWritePostScript(DPSGetCurrentContext(), textbufp, n);
-    restore_virtual_ints(block);
 }
 
 enum
@@ -2056,7 +2001,6 @@ find_run_of_symbol_chars(LONGINT n, Ptr textbufp, int *run_startp,
 void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
                           GrafPtr thePortp)
 {
-    virtual_int_state_t block;
     /* right now blow off num and den */
     char *translated;
     short total;
@@ -2101,7 +2045,6 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
     {
         if(n != 0)
         {
-            block = block_virtual_ints();
             txupdate(thePortp);
             if(rotation.rotated_p)
             {
@@ -2154,7 +2097,6 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
             }
             if(rotation.rotated_p)
                 PSgrestore();
-            restore_virtual_ints(block);
         }
     }
 }

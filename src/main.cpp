@@ -50,7 +50,6 @@
 #include "rsys/segment.h"
 #include "rsys/version.h"
 #include "rsys/m68kint.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/rgbutil.h"
 #include "rsys/refresh.h"
 #include "rsys/executor.h"
@@ -699,7 +698,6 @@ int main(int argc, char **argv)
 
     INTEGER i;
     uint32_t l;
-    virtual_int_state_t int_state;
     static void (*reg_funcs[])(void) = {
         vdriver_opt_register,
         NULL,
@@ -1069,9 +1067,6 @@ int main(int argc, char **argv)
         EM_A7 = save_a7;
     }
 
-    /* Block virtual interrupts, until the system is fully set up. */
-    int_state = block_virtual_ints();
-
     if(graphics_p && !vdriver_init(0, 0, 0, false, &argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");
@@ -1334,8 +1329,6 @@ int main(int argc, char **argv)
     sound_init();
 
     set_refresh_rate(ROMlib_refresh);
-
-    restore_virtual_ints(int_state);
 
     LM(WWExist) = LM(QDExist) = EXIST_NO;
 

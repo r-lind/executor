@@ -20,10 +20,7 @@ MTimer_Intr(uint32_t uID, uint32_t uMsg, uint32_t dwUser, uint32_t dw1, uint32_t
    */
 
     /* Virtual interrupt */
-    if(!_virtual_interrupts_blocked)
-    {
-        interrupt_generate(M68K_TIMER_PRIORITY);
-    }
+    interrupt_generate(M68K_TIMER_PRIORITY);
 }
 
 static uint32_t Timer32;

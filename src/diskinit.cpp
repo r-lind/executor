@@ -13,7 +13,7 @@
 #include "rsys/glue.h"
 #include "mkvol/mkvol.h"
 #include "rsys/hfs.h"
-#include "rsys/blockinterrupts.h"
+#include "rsys/syncint.h"
 
 using namespace Executor;
 
@@ -71,7 +71,7 @@ raw_read_write(func_t func, our_file_info_t *op, LONGINT *lengthp,
     OSErr retval;
     ParamBlockRec pbr;
 
-    check_virtual_interrupt();
+    syncint_check_interrupt();
     pbr.ioParam.ioVRefNum = CW(op->vref);
     pbr.ioParam.ioRefNum = CW(op->dref);
     pbr.ioParam.ioBuffer = RM((Ptr)buf);

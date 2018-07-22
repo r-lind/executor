@@ -5,9 +5,22 @@
 #include "rsys/common.h"
 
 #include "rsys/syncint.h"
-#include "rsys/blockinterrupts.h"
 
 using namespace Executor;
+
+void Executor::syncint_check_interrupt()
+{
+    if(INTERRUPT_PENDING())
+    {
+        syn68k_addr_t pc;
+
+        pc = interrupt_process_any_pending(MAGIC_EXIT_EMULATOR_ADDRESS);
+        if(pc != MAGIC_EXIT_EMULATOR_ADDRESS)
+        {
+            interpret_code(hash_lookup_code_and_create_if_needed(pc));
+        }
+    }
+}
 
 #if defined(WIN32)
 
@@ -58,10 +71,11 @@ int Executor::syncint_init(void)
     return true;
 }
 
-void Executor::syncint_wait()
+void Executor::syncint_wait_interrupt()
 {
     std::unique_lock<std::mutex> lock(mutex);
     wake_cond.wait_for(lock, 1s, []() { return INTERRUPT_PENDING(); });
+    syncint_check_interrupt();
 }
 
 void Executor::syncint_post(std::chrono::microseconds usecs, bool fromLast)
@@ -115,11 +129,12 @@ void Executor::syncint_post(std::chrono::microseconds usecs, bool fromLast)
     setitimer(ITIMER_REAL, &t, NULL);
 }
 
-void Executor::syncint_wait()
+void Executor::syncint_wait_interrupt()
 {
     sigset_t zero_mask;
     sigemptyset(&zero_mask);
     sigsuspend(&zero_mask);
+    syncint_check_interrupt();
 }
 
 #endif

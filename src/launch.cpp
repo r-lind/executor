@@ -45,7 +45,6 @@
 #include "rsys/flags.h"
 #include "rsys/segment.h"
 #include "rsys/tesave.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/resource.h"
 #include "rsys/hfs.h"
 #include "rsys/osutil.h"
@@ -70,6 +69,7 @@
 #include "rsys/print.h"
 #include "rsys/gestalt.h"
 #include "rsys/osevent.h"
+#include "rsys/time.h"
 
 #include "rsys/cfm.h"
 #include "rsys/launch.h"
@@ -1020,9 +1020,6 @@ void Executor::empty_timer_queues(void)
 {
     TMTask *tp, *nexttp;
     VBLTaskPtr vp, nextvp;
-    virtual_int_state_t bt;
-
-    bt = block_virtual_ints();
 
     dequeue_refresh_task();
     clear_pending_sounds();
@@ -1036,8 +1033,6 @@ void Executor::empty_timer_queues(void)
         nexttp = (TMTask *)MR(tp->qLink);
         RmvTime((QElemPtr)tp);
     }
-
-    restore_virtual_ints(bt);
 }
 
 static void reinitialize_things(void)

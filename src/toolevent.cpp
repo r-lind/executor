@@ -34,7 +34,6 @@
 #include "rsys/vbl.h"
 #include "rsys/osutil.h"
 #include "rsys/osevent.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/keyboard.h"
 #include "rsys/parse.h"
 #include "rsys/refresh.h"
@@ -45,6 +44,7 @@
 #include "rsys/toolevent.h"
 #include "rsys/nextprint.h"
 #include "rsys/scrap.h"
+#include "rsys/time.h"
 
 #if !defined(WIN32)
 #include <sys/socket.h>
@@ -248,7 +248,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
 
     /* We tend to call this routine from various ROMlib modal loops, so this
      * is a good place to check for timer interrupts. */
-    check_virtual_interrupt();
+    syncint_check_interrupt();
 
     hle_reset();
 

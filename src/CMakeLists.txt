@@ -195,7 +195,7 @@ set(misc_sources
   gestalt.cpp globals.cpp iu.cpp launch.cpp main.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
   osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
   slash.cpp stdfile.cpp romlib_stubs.cpp syserr.cpp toolevent.cpp toolutil.cpp time.cpp
-  vbl.cpp syncint.cpp virtualint.cpp refresh.cpp autorefresh.cpp aboutbox.cpp
+  vbl.cpp syncint.cpp refresh.cpp autorefresh.cpp aboutbox.cpp
   option.cpp parseopt.cpp parsenum.cpp
   version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
   process.cpp alias.cpp string.cpp tempmem.cpp edition.cpp fontIMVI.cpp balloon.cpp
@@ -255,7 +255,6 @@ set(include_sources hintemplate.h
                   include/rsys/arrowkeys.h
                   include/rsys/autorefresh.h
                   include/rsys/blockdev.h
-                  include/rsys/blockinterrupts.h
                   include/rsys/builtinlibs.h
                   include/rsys/byteswap.h
                   include/rsys/cfm.h

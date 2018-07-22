@@ -8,7 +8,6 @@
 #include "MemoryMgr.h"
 #include "OSUtil.h"
 
-#include "rsys/blockinterrupts.h"
 #include "rsys/string.h"
 #include "rsys/mman.h"
 
@@ -37,9 +36,6 @@ Executor::CRMGetHeader(void)
 void
 Executor::CRMInstall(QElemPtr qp)
 {
-    virtual_int_state_t block;
-
-    block = block_virtual_ints();
     if(!commtool_head.qTail)
         ((CRMRecPtr)qp)->crmDeviceID = CLC(1);
     else
@@ -51,7 +47,6 @@ Executor::CRMInstall(QElemPtr qp)
     }
 
     Enqueue(qp, &commtool_head);
-    restore_virtual_ints(block);
 }
 
 OSErr
@@ -67,18 +62,15 @@ QElemPtr
 Executor::CRMSearch(QElemPtr qp)
 {
     QElemPtr retval;
-    virtual_int_state_t block;
     CRMRecPtr p;
     LONGINT min;
 
     min = CL(((CRMRecPtr)qp)->crmDeviceID) + 1;
-    block = block_virtual_ints();
 
     for(p = (CRMRecPtr)MR(commtool_head.qHead);
         p && CL(p->crmDeviceID) < min;
         p = (CRMRecPtr)MR(p->qLink))
         ;
-    restore_virtual_ints(block);
     retval = (QElemPtr)p;
     return retval;
 }

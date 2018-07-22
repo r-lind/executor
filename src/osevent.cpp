@@ -26,7 +26,6 @@
 #include "rsys/mman.h"
 #include "rsys/arrowkeys.h"
 #include "rsys/notmac.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/time.h"
 #include "rsys/prefs.h"
 #include "rsys/vdriver.h"
@@ -38,6 +37,7 @@
 #include "rsys/dirtyrect.h"
 #include "rsys/stdfile.h"
 #include "rsys/system_error.h"
+#include "rsys/syncint.h"
 
 #include "rsys/string.h"
 #include "rsys/keyboard.h"
@@ -390,9 +390,7 @@ void Executor::FlushEvents(INTEGER evmask, INTEGER stopmask) /* II-69 */
 {
     EvQEl *qp, *next;
     int x;
-    virtual_int_state_t block;
 
-    block = block_virtual_ints();
     for(qp = (EvQEl *)MR(LM(EventQueue).qHead);
         qp && !((x = 1 << Cx(qp->evtQWhat)) & stopmask); qp = next)
     {
@@ -400,7 +398,6 @@ void Executor::FlushEvents(INTEGER evmask, INTEGER stopmask) /* II-69 */
         if(x & evmask)
             dropevent(qp);
     }
-    restore_virtual_ints(block);
     /* NOTE:  According to IMII-69 we should be leaving stuff in d0 */
 }
 
@@ -410,14 +407,13 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
                              BOOLEAN dropit)
 {
     EvQEl *qp;
-    virtual_int_state_t block;
     BOOLEAN retval;
     static Point oldpoint = { -1, -1 };
     LONGINT ticks;
 
     /* We tend to call this routine from various ROMlib modal loops, so this
      * is a good place to check for timer interrupts, etc. */
-    check_virtual_interrupt();
+    syncint_check_interrupt();
 
     if(send_application_open_aevt_p
        && application_accepts_open_app_aevt_p)
@@ -526,7 +522,6 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
     vdriver_pump_events();
 #endif
 
-    block = block_virtual_ints();
     for(qp = (EvQEl *)MR(LM(EventQueue).qHead); qp && !((1 << Cx(qp->evtQWhat)) & evmask);
         qp = (EvQEl *)MR(qp->qLink))
         ;
@@ -573,7 +568,6 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
             retval = false;
         }
     }
-    restore_virtual_ints(block);
     if(eventp->where.h.get() != oldpoint.h || eventp->where.v.get() != oldpoint.v)
     {
         oldpoint = eventp->where.get();

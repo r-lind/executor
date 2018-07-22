@@ -4,7 +4,6 @@
 
 #include "rsys/common.h"
 #include "rsys/refresh.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/vdriver.h"
 #include "rsys/prefs.h"
 #include "rsys/dirtyrect.h"
@@ -13,6 +12,7 @@
 #include "rsys/autorefresh.h"
 #include "TimeMgr.h"
 #include "OSEvent.h"
+#include "rsys/syncint.h"
 
 using namespace Executor;
 
@@ -164,7 +164,7 @@ Executor::find_changed_rect_and_update_shadow(const uint32_t *screen, uint32_t *
     if(longs_left == 0)
         return false;
 
-    check_virtual_interrupt();
+    syncint_check_interrupt();
 
     /* Record the top row. */
     top = (screen_longs - longs_left) / row_longs;
@@ -199,7 +199,7 @@ Executor::find_changed_rect_and_update_shadow(const uint32_t *screen, uint32_t *
     if(longs_left == 0)
         return false;
 
-    check_virtual_interrupt();
+    syncint_check_interrupt();
 
     /* Record one row past the last row that changed. */
     bottom = (longs_left + row_longs - 1) / row_longs;
@@ -228,7 +228,7 @@ found_left:
         return false;
     left = x;
 
-    check_virtual_interrupt();
+    syncint_check_interrupt();
 
     /* Now creep in from the right and find the rightmost changed long. */
     s1 = &shadow[top * row_longs + row_longs - 1];
