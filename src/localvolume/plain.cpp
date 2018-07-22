@@ -15,9 +15,8 @@ using namespace Executor;
 PlainDataFork::PlainDataFork(fs::path path)
     : path_(path)
 {
-    fd = open(path.string().c_str(), O_RDWR | O_CREAT, 0644);
-    std::cout << "ACCESSING FILE: " <<
-    fd << " = " << path << std::endl;
+    fd = open(path.string().c_str(), O_RDWR | O_CREAT | O_BINARY, 0644);
+    std::cout << "ACCESSING FILE: " << fd << " = " << path << std::endl;
 }
 PlainDataFork::~PlainDataFork()
 {
@@ -88,7 +87,7 @@ size_t PlainDataFork::write(size_t offset, void *p, size_t n)
 }
 #else
 PlainDataFork::PlainDataFork(fs::path path)
-    : stream(path)
+    : stream(path, std::ios::binary)
 {
     std::cout << "ACCESSING FILE: " << path << std::endl;
 }
