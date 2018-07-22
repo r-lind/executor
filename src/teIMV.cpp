@@ -18,6 +18,7 @@
 #include "rsys/mman.h"
 #include "rsys/tesave.h"
 #include "rsys/hook.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -550,7 +551,7 @@ StScrpHandle Executor::C_TEGetStyleScrapHandle(TEHandle te)
     start_run_index = make_style_run_at(te_style, start);
     end_run_index = make_style_run_at(te_style, end);
 
-    scrap_n_styles = MAX(end_run_index - start_run_index, 1);
+    scrap_n_styles = std::max(end_run_index - start_run_index, 1);
     scrap = (StScrpHandle)NewHandle(SCRAP_SIZE_FOR_N_STYLES(scrap_n_styles));
     SCRAP_N_STYLES_X(scrap) = CW(scrap_n_styles);
 
@@ -627,7 +628,7 @@ int32_t Executor::C_TEGetHeight(LONGINT endLine, LONGINT startLine,
     else
         startLine = 0;
 
-    endLine = MIN(TE_N_LINES(teh), endLine);
+    endLine = std::min<LONGINT>(TE_N_LINES(teh), endLine);
     if(endLine < 0)
         endLine = 0;
     else if(endLine > 0)
@@ -972,7 +973,7 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
                 StyleRun *run;
 
                 run = TE_STYLE_RUN(te_style, run_i);
-                if(STYLE_RUN_START_CHAR(run) <= MAX(insertion_point - 1, 0))
+                if(STYLE_RUN_START_CHAR(run) <= std::max(insertion_point - 1, 0))
                 {
                     style_index = STYLE_RUN_STYLE_INDEX(run);
                     break;

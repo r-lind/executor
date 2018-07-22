@@ -17,6 +17,7 @@
 #include "rsys/text.h"
 
 #include "rsys/safe_alloca.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -450,7 +451,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         {
             int height;
 
-            height = MAX(CB(fmop->ascent) + descent, Cx(fp->fRectHeight));
+            height = std::max<int>(CB(fmop->ascent) + descent, Cx(fp->fRectHeight));
             stylemap.bounds.bottom = CW(CW(PORT_PEN_LOC(thePort).v)
                                         - CB(fmop->ascent) + height);
         }

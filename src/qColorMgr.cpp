@@ -108,7 +108,7 @@ rgb_diff(RGBColor *rgb1p, RGBColor *rgb2p)
    * 0x8100, so counting on it going to a particular value seems risky.
    */
 
-    retval = (ABS((CW(rgb1p->red) & 0xff00) - (CW(rgb2p->red) & 0xff00)) + ABS((CW(rgb1p->green) & 0xff00) - (CW(rgb2p->green) & 0xff00)) + ABS((CW(rgb1p->blue) & 0xff00) - (CW(rgb2p->blue) & 0xff00)));
+    retval = (std::abs((CW(rgb1p->red) & 0xff00) - (CW(rgb2p->red) & 0xff00)) + std::abs((CW(rgb1p->green) & 0xff00) - (CW(rgb2p->green) & 0xff00)) + std::abs((CW(rgb1p->blue) & 0xff00) - (CW(rgb2p->blue) & 0xff00)));
 
     return retval;
 }
@@ -491,13 +491,13 @@ static unsigned current_red, current_green, current_blue;
         const unsigned mid_bit = (0x8000 >> (RES));                            \
                                                                                \
         bc = ((components & mask) << (16 - (RES))) | mid_bit;                  \
-        error = ABS((long)(bc - current_blue));                                \
+        error = std::abs((long)(bc - current_blue));                                \
                                                                                \
         gc = ((components & (mask << (RES))) << (16 - (RES)*2)) | mid_bit;     \
-        error += ABS((long)(gc - current_green));                              \
+        error += std::abs((long)(gc - current_green));                              \
                                                                                \
         rc = ((components & (mask << ((RES)*2))) << (16 - (RES)*3)) | mid_bit; \
-        error += ABS((long)(rc - current_red));                                \
+        error += std::abs((long)(rc - current_red));                                \
                                                                                \
         return error;                                                          \
     }

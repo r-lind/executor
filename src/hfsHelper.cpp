@@ -15,6 +15,7 @@
 #include "rsys/hfs.h"
 #include "rsys/file.h"
 #include "rsys/partition.h"
+#include <algorithm>
 
 #if defined(MSDOS) || defined(CYGWIN32)
 #include "dosdisk.h"
@@ -541,7 +542,7 @@ OSErr Executor::ROMlib_readwrite(LONGINT fd, char *buffer, LONGINT count,
     if((remainder = offset % blocksize))
     { /* |xxxDATA| */
         remainder = blocksize - remainder;
-        totransfer = MIN(count, remainder);
+        totransfer = std::min(count, remainder);
         newbuffer = (char *)(((uintptr_t)alloca(blocksize + 3) + 3) & ~3);
         offset = offset / blocksize * blocksize;
         JUMPTODONEIF(seekfp(fd, offset, SEEK_SET) < 0)
@@ -572,7 +573,7 @@ OSErr Executor::ROMlib_readwrite(LONGINT fd, char *buffer, LONGINT count,
         }
         while(count)
         {
-            totransfer = MIN(maxtransfer, count);
+            totransfer = std::min(maxtransfer, count);
             if(rw == reading)
             {
                 JUMPTODONEIF(readfp(fd, buffer, totransfer) != totransfer)

@@ -47,30 +47,6 @@ typedef struct win_print_str
 #define NELEM(x) (sizeof(x) / sizeof(x)[0])
 #endif
 
-#if !defined(MIN)
-#define MIN(x, y)          \
-    ({                     \
-        decltype(x) _x;    \
-        decltype(y) _y;    \
-                           \
-        _x = (x);          \
-        _y = (y);          \
-        _x < _y ? _x : _y; \
-    })
-#endif
-
-#if !defined(MAX)
-#define MAX(x, y)          \
-    ({                     \
-        decltype(x) _x;    \
-        decltype(y) _y;    \
-                           \
-        _x = (x);          \
-        _y = (y);          \
-        _x > _y ? _x : _y; \
-    })
-#endif
-
 enum
 {
     NO_BIT_BLT = 32700,

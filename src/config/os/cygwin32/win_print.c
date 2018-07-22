@@ -745,8 +745,8 @@ get_info(win_printp_t *wpp, int physx, int physy,
                     {
                         int lesser, greater;
 
-                        lesser = MIN(infop->physx, infop->physy);
-                        greater = MAX(infop->physx, infop->physy);
+                        lesser = std::min(infop->physx, infop->physy);
+                        greater = std::max(infop->physx, infop->physy);
 
                         if(infop->orientation == DMORIENT_PORTRAIT)
                         {

@@ -14,6 +14,7 @@
 #include "mkvol/mkvol.h"
 #include "rsys/hfs.h"
 #include "rsys/syncint.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -195,7 +196,7 @@ writefunc(int magic, const void *buf, size_t buf_len)
         uint32_t n_bytes_left, n_to_copy;
 
         n_bytes_left = N_TRACK_BYTES - length;
-        n_to_copy = MIN(n_bytes_left, buf_len_remaining);
+        n_to_copy = std::min(n_bytes_left, buf_len_remaining);
         memcpy(track_bufp + length, bufp, n_to_copy);
         length += n_to_copy;
         if(length == N_TRACK_BYTES)

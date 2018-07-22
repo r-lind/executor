@@ -12,6 +12,7 @@
 #include "rsys/tesave.h"
 #include "rsys/cquick.h"
 #include "rsys/mman.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -72,7 +73,7 @@ void Executor::C_TEPinScroll(int16_t dh, int16_t dv, TEHandle te) /* IMIV-57 */
         {
             maxshift = CW(view_rect->left) - CW(dest_rect->left);
             if(maxshift > 0)
-                dh = MIN(maxshift, dh);
+                dh = std::min(maxshift, dh);
             else
                 dh = 0;
         }
@@ -80,7 +81,7 @@ void Executor::C_TEPinScroll(int16_t dh, int16_t dv, TEHandle te) /* IMIV-57 */
         {
             maxshift = CW(view_rect->left) - CW(dest_rect->left);
             if(maxshift < 0)
-                dh = MAX(maxshift, dh);
+                dh = std::max(maxshift, dh);
             else
                 dh = 0;
         }

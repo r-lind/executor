@@ -22,6 +22,7 @@
 #include "rsys/options.h"
 #include "rsys/toolutil.h"
 #include "rsys/gestalt.h"
+#include <algorithm>
 
 #if defined(LINUX) || defined(MACOSX)
 #include <sys/mman.h>
@@ -1784,7 +1785,7 @@ int32_t _MaxBlock_flags(bool sys_p)
     LM(TheZone) = save_zone;
     SET_MEM_ERR(noErr);
     MM_SLAM("exit");
-    return MAX(total_free, max_free) - HDRSIZE;
+    return std::max(total_free, max_free) - HDRSIZE;
 }
 
 void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys_p)
@@ -1833,7 +1834,7 @@ void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys
 
     SET_MEM_ERR(noErr);
     *total_out = CL(total_free - HDRSIZE);
-    *contig_out = CL(MAX(this_contig, max_contig) - HDRSIZE);
+    *contig_out = CL(std::max(this_contig, max_contig) - HDRSIZE);
     MM_SLAM("exit");
 }
 

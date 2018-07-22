@@ -11,6 +11,7 @@
 #include "rsys/flags.h"
 #include "rsys/autorefresh.h"
 #include "OSEvent.h"
+#include <algorithm>
 
 #if !defined(MAX_DIRTY_RECTS)
 #define MAX_DIRTY_RECTS 5
@@ -43,10 +44,10 @@ area_added(int top, int left, int bottom, int right, int r1_area,
 {
     int t, l, b, r, new_area, r2_area;
 
-    t = MIN(top, r2->top);
-    l = MIN(left, r2->left);
-    b = MAX(bottom, r2->bottom);
-    r = MAX(right, r2->right);
+    t = std::min(top, r2->top);
+    l = std::min(left, r2->left);
+    b = std::max(bottom, r2->bottom);
+    r = std::max(right, r2->right);
 
     /* This works because we know the rects don't overlap. */
     new_area = (r - l) * (b - t);

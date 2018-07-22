@@ -26,6 +26,7 @@
 #include "rsys/hfs.h"
 #include "rsys/string.h"
 #include <rsys/builtinlibs.h>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -615,7 +616,7 @@ symbol_lookup(uint32_t *indexp, GUEST<Ptr> *valp, uint8_t imports[][4],
                 Str255 sym255;
                 OSErr err;
 
-                sym255[0] = MIN(strlen(symbol_name), 255);
+                sym255[0] = std::min<int>(strlen(symbol_name), 255);
                 memcpy(sym255 + 1, symbol_name, sym255[0]);
                 if(LIB_CID(l))
                     err = FindSymbol(LIB_CID(l), sym255, valp, 0);
@@ -895,7 +896,7 @@ begin_closure(uint32_t n_libs, PEFImportedLibrary_t *libs,
 
         offset = PEFIL_NAME_OFFSET(&libs[i]);
         cname = symbol_names + offset;
-        libName[0] = MIN(strlen(cname), 63);
+        libName[0] = std::min<int>(strlen(cname), 63);
         memcpy(libName + 1, cname, libName[0]);
         err = GetSharedLibrary(libName, arch, kReferenceCFrag,
                                &LIB_CID_X(&retval->libs[i]),

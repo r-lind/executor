@@ -83,6 +83,7 @@
 #include <PowerCore.h>
 
 #include <rsys/macstrings.h>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -382,7 +383,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     for(p = fName + fName[0] + 1; p > fName && *--p != ':';)
         ;
     toskip = p - fName;
-    LM(CurApName)[0] = MIN(fName[0] - toskip, 31);
+    LM(CurApName)[0] = std::min(fName[0] - toskip, 31);
     BlockMoveData((Ptr)fName + 1 + toskip, (Ptr)LM(CurApName) + 1,
                   (Size)LM(CurApName)[0]);
     std::string appNameUTF8 = toUnicodeFilename(LM(CurApName)).string();

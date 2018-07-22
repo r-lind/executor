@@ -130,7 +130,7 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
             width = VDRIVER_DEFAULT_SCREEN_WIDTH;
 #if 0
             if(ROMlib_fullscreen_p)
-                width = MAX(width, os_current_screen_width());
+                width = std::max(width, os_current_screen_width());
 #endif
         }
     }
@@ -143,7 +143,7 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
             height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
 #if 0
             if(ROMlib_fullscreen_p)
-                height = MAX(height, os_current_screen_height());
+                height = std::max(height, os_current_screen_height());
 #endif
         }
     }

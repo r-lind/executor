@@ -38,6 +38,7 @@
 #include "rsys/options.h"
 #include "rsys/string.h"
 
+#include <algorithm>
 
 using namespace Executor;
 
@@ -82,7 +83,7 @@ void Executor::executor_main(void)
 
     /* ROMlib_WriteWhen(WriteInOSEvent); */
 
-    LM(FinderName)[0] = MIN(strlen(BROWSER_NAME), sizeof(LM(FinderName)) - 1);
+    LM(FinderName)[0] = std::min(strlen(BROWSER_NAME), sizeof(LM(FinderName)) - 1);
     memcpy(LM(FinderName) + 1, BROWSER_NAME, LM(FinderName)[0]);
 
     CountAppFiles(&mess, &count_s);
@@ -113,7 +114,7 @@ void Executor::executor_main(void)
         p > fName && *--p != ':';)
         ;
     toskip = p - fName;
-    LM(CurApName)[0] = MIN(fName[0] - toskip, 31);
+    LM(CurApName)[0] = std::min(fName[0] - toskip, 31);
     BlockMoveData((Ptr)fName + 1 + toskip, (Ptr)LM(CurApName) + 1,
                   (Size)LM(CurApName)[0]);
 

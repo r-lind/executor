@@ -219,7 +219,7 @@ compare_zone_infos(uint16_t trapn, zone_info_t current[3], zone_info_t new[3])
 
     for(i = 0; i < 2; ++i)
     {
-        if((ABS(current[i].n_rel - new[i].n_rel) > 2) || (ABS(current[i].n_nrel - new[i].n_nrel) > 2) || (ABS(current[i].total_free - new[i].total_free) > 12 * 1024))
+        if((std::abs(current[i].n_rel - new[i].n_rel) > 2) || (std::abs(current[i].n_nrel - new[i].n_nrel) > 2) || (std::abs(current[i].total_free - new[i].total_free) > 12 * 1024))
             dump_difference(trapn, i, &current[i], &new[i]);
     }
 }

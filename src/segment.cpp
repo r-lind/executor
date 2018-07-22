@@ -34,6 +34,7 @@
 #include "rsys/launch.h"
 
 #include <ctype.h>
+#include <algorithm>
 
 #if defined(CYGWIN32)
 
@@ -381,7 +382,7 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
 #if 0
 	LM(CurApRefNum) = CW(OpenRFPerm(app.fName, CW(app.vRefNum), fsCurPerm));
 #endif
-        LM(CurApName)[0] = MIN(app.fName[0], sizeof(LM(CurApName)) - 1);
+        LM(CurApName)[0] = std::min<uint8_t>(app.fName[0], sizeof(LM(CurApName)) - 1);
         BlockMoveData((Ptr)app.fName + 1, (Ptr)LM(CurApName) + 1, (Size)LM(CurApName)[0]);
     }
     else
@@ -471,7 +472,7 @@ static void launch_browser(void)
    */
     SetDepth(MR(LM(MainDevice)),
              (flag_bpp
-                  ? MIN(flag_bpp, vdriver_max_bpp)
+                  ? std::min(flag_bpp, vdriver_max_bpp)
                   : vdriver_max_bpp),
              0, 0);
     Launch(LM(FinderName), CW(LM(BootDrive)));
@@ -567,7 +568,7 @@ void Executor::C_ExitToShell()
                 ROMlib_exit = 1;
             else
             {
-                LM(CurApName)[0] = MIN(reply.fName[0], 31);
+                LM(CurApName)[0] = std::min<uint8_t>(reply.fName[0], 31);
                 BlockMoveData((Ptr)reply.fName + 1, (Ptr)LM(CurApName) + 1,
                               (Size)LM(CurApName)[0]);
                 Launch(LM(CurApName), CW(reply.vRefNum));

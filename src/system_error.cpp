@@ -19,6 +19,7 @@
 #include "rsys/cquick.h"
 #include "rsys/osevent.h"
 #include "rsys/options.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -246,12 +247,12 @@ int Executor::system_error(const char *_message, int _default_button,
         line_count
             /* must be at least one line of text, otherwise we'll get hit
             with a div by zero below */
-            = MAX(int_sqrt(total_message_width / (4 * text_height)), 1);
+            = std::max(int_sqrt(total_message_width / (4 * text_height)), 1);
 
         max_button_width = -1;
         for(i = 0; i < N_BUTTONS; i++)
             if(buttons[i].text != NULL)
-                max_button_width = MAX(max_button_width,
+                max_button_width = std::max<int>(max_button_width,
                                        /* ### `TextWidth ()' should be const */
                                        TextWidth((Ptr)buttons[i].text, 0,
                                                  strlen(buttons[i].text)));

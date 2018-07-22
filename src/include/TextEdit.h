@@ -245,24 +245,15 @@ typedef Byte Chars[1], *CharsPtr, **CharsHandle;
 #define TE_SEL_RECT(te) (HxX((te), selRect))
 #define TE_SEL_POINT(te) (HxX((te), selPoint))
 #define TE_LINE_STARTS(te) (HxX((te), lineStarts))
-#define TE_GET_STYLE(te)                                             \
-    ({                                                               \
-        TEStyleHandle retval;                                        \
-                                                                     \
-        if(!TE_STYLIZED_P(te))                                       \
-            retval = NULL;                                           \
-        else                                                         \
-            retval = MR(*(GUEST<TEStyleHandle> *)&TE_TX_FONT_X(te)); \
-        retval;                                                      \
-    })
 
 extern void ROMlib_sledgehammer_te(TEHandle te);
 #if ERROR_SUPPORTED_P(ERROR_TEXT_EDIT_SLAM)
 #define TE_SLAM(te)                               \
-    ({                                            \
+    do                                            \
+    {                                             \
         if(ERROR_ENABLED_P(ERROR_TEXT_EDIT_SLAM)) \
             ROMlib_sledgehammer_te(te);           \
-    })
+    } while(false)
 #else /* No ERROR_TEXT_EDIT_SLAM */
 #define TE_SLAM(te)
 #endif /* No ERROR_TEXT_EDIT_SLAM */
@@ -309,43 +300,33 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TE_FLAGS_X(te) (HxX(TEHIDDENH(te), flags))
 #define TE_FLAGS(te) (CL(TE_FLAGS_X(te)))
 
-#if !defined(NDEBUG)
-#define TEP_DO_TEXT(tep, start, end, what)           \
-    ({                                               \
-        Handle te;                                   \
-                                                     \
-        te = RecoverHandle((Ptr)tep);                \
-        gui_assert(te && (HGetState(te) & LOCKBIT)); \
-        ROMlib_call_TEDoText(tep, start, end, what); \
-    })
-#else
+
 #define TEP_DO_TEXT(tep, start, end, what) \
-    ({ ROMlib_call_TEDoText(tep, start, end, what); })
-#endif
+    ROMlib_call_TEDoText(tep, start, end, what)
 
 #if !defined(NDEBUG)
 #define TEP_CHAR_TO_POINT(tep, sel, pt)              \
-    ({                                               \
+    do {                                               \
         Handle te;                                   \
                                                      \
         te = RecoverHandle((Ptr)tep);                \
         gui_assert(te && (HGetState(te) & LOCKBIT)); \
         te_char_to_point(tep, sel, pt);              \
-    })
+    } while(false)
 #else
 #define TEP_CHAR_TO_POINT(tep, sel, pt) \
-    ({ te_char_to_point(tep, sel, pt); })
+    te_char_to_point(tep, sel, pt)
 #endif
 #define TEP_CHAR_TO_LINENO(tep, sel) \
     te_char_to_lineno(tep, sel)
 
 #define TEP_SLAM(tep)                   \
-    ({                                  \
+    do {                                  \
         Handle te;                      \
                                         \
         te = RecoverHandle(tep)         \
             ROMlib_sledgehammer_te(te); \
-    })
+    } while(false)
 
 #define TEP_SEL_RECT(te) ((tep)->selRect)
 #define TEP_DEST_RECT(tep) ((tep)->destRect)
@@ -353,16 +334,6 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TEP_LINE_STARTS(tep) ((tep)->lineStarts)
 #define TEP_SEL_POINT(tep) ((tep)->selPoint)
 #define TEP_TX_FACE(tep) ((tep)->txFace)
-#define TEP_GET_STYLE(tep)                                             \
-    ({                                                                 \
-        TEStyleHandle retval;                                          \
-                                                                       \
-        if(!TEP_STYLIZED_P(tep))                                       \
-            retval = NULL;                                             \
-        else                                                           \
-            retval = MR(*(GUEST<TEStyleHandle> *)&TEP_TX_FONT_X(tep)); \
-        retval;                                                        \
-    })
 
 #define TEP_STYLIZED_P(tep) ((tep)->txSize == CWC(-1))
 #define TEP_LINE_HEIGHT_X(tep) ((tep)->lineHeight)
@@ -396,6 +367,20 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TEP_TX_FONT(tep) (CW(TEP_TX_FONT_X(tep)))
 #define TEP_TX_SIZE(tep) (CW(TEP_TX_SIZE_X(tep)))
 #define TEP_IN_PORT(tep) (MR(TEP_IN_PORT_X(tep)))
+
+inline TEStyleHandle TE_GET_STYLE(TEHandle te)
+{
+    if(!TE_STYLIZED_P(te))
+        return nullptr;
+    return MR(*(GUEST<TEStyleHandle> *)&TE_TX_FONT_X(te));
+}
+inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
+{
+    if(!TEP_STYLIZED_P(tep))
+        return nullptr;
+    return MR(*(GUEST<TEStyleHandle> *)&TEP_TX_FONT_X(tep));
+}
+
 
 #define TEP_HEIGHT_FOR_LINE(tep, lineno)                           \
     (TEP_STYLIZED_P(tep) && TEP_LINE_HEIGHT_X(tep) == CWC(-1)      \
@@ -531,10 +516,10 @@ extern void release_style_index(TEStyleHandle te_style, int16_t style_index);
 extern void stabilize_style_info(TEStyleHandle te_style);
 extern void te_style_combine_runs(TEStyleHandle te_style);
 
-const LowMemGlobal<ProcPtr> TEDoText { 0xA70 }; // TextEdit IMI-391 (true);
-const LowMemGlobal<ProcPtr> TERecal { 0xA74 }; // TextEdit IMI-391 (false);
-const LowMemGlobal<INTEGER> TEScrpLength { 0xAB0 }; // TextEdit IMI-389 (true);
-const LowMemGlobal<Handle> TEScrpHandle { 0xAB4 }; // TextEdit IMI-389 (true);
+const LowMemGlobal<ProcPtr> TEDoText{ 0xA70 }; // TextEdit IMI-391 (true);
+const LowMemGlobal<ProcPtr> TERecal{ 0xA74 }; // TextEdit IMI-391 (false);
+const LowMemGlobal<INTEGER> TEScrpLength{ 0xAB0 }; // TextEdit IMI-389 (true);
+const LowMemGlobal<Handle> TEScrpHandle{ 0xAB4 }; // TextEdit IMI-389 (true);
 
 DISPATCHER_TRAP(TEDispatch, 0xA83D, StackW);
 
@@ -551,7 +536,7 @@ extern void C_TEUpdate(Rect *r, TEHandle teh);
 PASCAL_TRAP(TEUpdate, 0xA9D3);
 
 extern void C_TETextBox(Ptr p, LONGINT ln, Rect *r,
-                                  INTEGER j);
+                        INTEGER j);
 PASCAL_TRAP(TETextBox, 0xA9CE);
 extern void C_TEScroll(INTEGER dh, INTEGER dv, TEHandle teh);
 PASCAL_TRAP(TEScroll, 0xA9DD);
@@ -575,20 +560,20 @@ extern void C_TEInsert(Ptr p, LONGINT ln, TEHandle teh);
 PASCAL_TRAP(TEInsert, 0xA9DE);
 
 extern void C_TEPinScroll(INTEGER dh,
-                                      INTEGER dv, TEHandle teh);
+                          INTEGER dv, TEHandle teh);
 PASCAL_TRAP(TEPinScroll, 0xA812);
 extern void ROMlib_teautoloop(TEHandle teh);
 extern void C_TESelView(TEHandle teh);
 PASCAL_TRAP(TESelView, 0xA811);
 
 extern void C_TEAutoView(BOOLEAN autoflag,
-                                     TEHandle teh);
+                         TEHandle teh);
 PASCAL_TRAP(TEAutoView, 0xA813);
 extern TEHandle C_TEStyleNew(Rect *dst, Rect *view);
 PASCAL_TRAP(TEStyleNew, 0xA83E);
 
 extern void C_TESetStyleHandle(TEStyleHandle theHandle,
-                                        TEHandle teh);
+                               TEHandle teh);
 PASCAL_SUBTRAP(TESetStyleHandle, 0xA83D, 0x0005, TEDispatch);
 extern TEStyleHandle C_TEGetStyleHandle(TEHandle teh);
 PASCAL_SUBTRAP(TEGetStyleHandle, 0xA83D, 0x0004, TEDispatch);
@@ -597,7 +582,7 @@ extern StScrpHandle C_TEGetStyleScrapHandle(TEHandle teh);
 PASCAL_SUBTRAP(TEGetStyleScrapHandle, 0xA83D, 0x0006, TEDispatch);
 
 extern void C_TEStyleInsert(Ptr text, LONGINT length,
-                                       StScrpHandle hST, TEHandle teh);
+                            StScrpHandle hST, TEHandle teh);
 PASCAL_SUBTRAP(TEStyleInsert, 0xA83D, 0x0007, TEDispatch);
 extern INTEGER C_TEGetOffset(Point pt, TEHandle teh);
 PASCAL_TRAP(TEGetOffset, 0xA83C);
@@ -608,29 +593,29 @@ PASCAL_SUBTRAP(TEGetPoint, 0xA83D, 0x0008, TEDispatch);
 extern int32_t C_TEGetHeight(LONGINT endLine, LONGINT startLine, TEHandle teh);
 PASCAL_SUBTRAP(TEGetHeight, 0xA83D, 0x0009, TEDispatch);
 extern void C_TEGetStyle(INTEGER offset,
-                                     TextStyle *theStyle, GUEST<INTEGER> *lineHeight, GUEST<INTEGER> *fontAscent,
-                                     TEHandle teh);
+                         TextStyle *theStyle, GUEST<INTEGER> *lineHeight, GUEST<INTEGER> *fontAscent,
+                         TEHandle teh);
 PASCAL_SUBTRAP(TEGetStyle, 0xA83D, 0x0003, TEDispatch);
 extern void C_TEStylePaste(TEHandle teh);
 PASCAL_SUBTRAP(TEStylePaste, 0xA83D, 0x0000, TEDispatch);
 
 extern void C_TESetStyle(INTEGER mode, TextStyle *newStyle,
-                                     BOOLEAN redraw, TEHandle teh);
+                         BOOLEAN redraw, TEHandle teh);
 PASCAL_SUBTRAP(TESetStyle, 0xA83D, 0x0001, TEDispatch);
 extern void C_TEReplaceStyle(INTEGER mode,
-                                         TextStyle *oldStyle, TextStyle *newStyle, BOOLEAN redraw, TEHandle teh);
+                             TextStyle *oldStyle, TextStyle *newStyle, BOOLEAN redraw, TEHandle teh);
 PASCAL_SUBTRAP(TEReplaceStyle, 0xA83D, 0x0002, TEDispatch);
 extern BOOLEAN C_TEContinuousStyle(GUEST<INTEGER> *modep,
-                                               TextStyle *thestyle, TEHandle teh);
+                                   TextStyle *thestyle, TEHandle teh);
 PASCAL_SUBTRAP(TEContinuousStyle, 0xA83D, 0x000A, TEDispatch);
 extern void C_TEUseStyleScrap(LONGINT start, LONGINT stop,
-                                       StScrpHandle newstyles, BOOLEAN redraw, TEHandle teh);
+                              StScrpHandle newstyles, BOOLEAN redraw, TEHandle teh);
 PASCAL_SUBTRAP(TEUseStyleScrap, 0xA83D, 0x000B, TEDispatch);
 extern void C_TECustomHook(INTEGER sel, GUEST<ProcPtr> *addr,
-                                       TEHandle teh);
+                           TEHandle teh);
 PASCAL_SUBTRAP(TECustomHook, 0xA83D, 0x000C, TEDispatch);
 extern LONGINT C_TENumStyles(LONGINT start, LONGINT stop,
-                                         TEHandle teh);
+                             TEHandle teh);
 PASCAL_SUBTRAP(TENumStyles, 0xA83D, 0x000D, TEDispatch);
 extern void C_TEInit(void);
 PASCAL_TRAP(TEInit, 0xA9CC);
@@ -648,7 +633,7 @@ extern void C_TEClick(Point p, BOOLEAN ext, TEHandle teh);
 PASCAL_TRAP(TEClick, 0xA9D4);
 
 extern void C_TESetSelect(LONGINT start, LONGINT stop,
-                                      TEHandle teh);
+                          TEHandle teh);
 PASCAL_TRAP(TESetSelect, 0xA9D1);
 extern void C_TEActivate(TEHandle teh);
 PASCAL_TRAP(TEActivate, 0xA9D8);
@@ -667,7 +652,7 @@ extern Handle TEScrapHandle(void);
 extern LONGINT TEGetScrapLength(void);
 extern void TESetScrapLength(LONGINT ln);
 extern int16_t C_TEFeatureFlag(int16_t feature, int16_t action,
-                                           TEHandle te);
+                               TEHandle te);
 PASCAL_SUBTRAP(TEFeatureFlag, 0xA83D, 0x000E, TEDispatch);
 }
 #endif /* _TEXTEDIT_H_ */

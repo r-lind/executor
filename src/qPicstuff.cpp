@@ -23,6 +23,7 @@
 #include "rsys/print.h"
 #include "rsys/executor.h"
 #include <rsys/functions.impl.h>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -173,7 +174,7 @@ static void reduce(LONGINT *nump, LONGINT *denp)
     num = *nump;
     den = *denp;
 
-    max = MIN(num / 2, den / 2);
+    max = std::min(num / 2, den / 2);
 
     for(i = max; i >= 2; --i)
     {

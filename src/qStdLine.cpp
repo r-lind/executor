@@ -12,6 +12,7 @@
 #include "rsys/quick.h"
 #include "rsys/cquick.h"
 #include "rsys/picture.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -444,7 +445,7 @@ void Executor::C_StdLine(Point p)
     }
 
     dy = y2 - y1;
-    dx = ABS(x2 - x1);
+    dx = std::abs(x2 - x1);
 
     if(PORT_REGION_SAVE_X(thePort))
     {
@@ -452,9 +453,9 @@ void Executor::C_StdLine(Point p)
         RgnPtr tmpRP;
         tmpRP = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + (dy + 1) * sizeof(INTEGER) * 6 + sizeof(INTEGER));
         tmpRP->rgnBBox.top = CW(y1);
-        tmpRP->rgnBBox.left = CW(MIN(x1, x2));
+        tmpRP->rgnBBox.left = CW(std::min(x1, x2));
         tmpRP->rgnBBox.bottom = CW(y2);
-        tmpRP->rgnBBox.right = CW(MAX(x1, x2));
+        tmpRP->rgnBBox.right = CW(std::max(x1, x2));
 
         if(dy >= dx)
             if(x2 > x1)
@@ -483,9 +484,9 @@ void Executor::C_StdLine(Point p)
     tmpRP = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + (dy + py + 1) * sizeof(LONGINT) * 4 + 3 * 2 * sizeof(LONGINT));
     /* Cx(rp->rgnSize) gets filled in later */
     tmpRP->rgnBBox.top = CW(y1);
-    tmpRP->rgnBBox.left = CW(MIN(x1, x2));
+    tmpRP->rgnBBox.left = CW(std::min(x1, x2));
     tmpRP->rgnBBox.bottom = CW(y2 + py);
-    tmpRP->rgnBBox.right = CW(MAX(x1, x2) + px);
+    tmpRP->rgnBBox.right = CW(std::max(x1, x2) + px);
     op = destpoints = (INTEGER *)ALLOCA(MAXNPOINTS(dy) * sizeof(INTEGER));
     op2 = destpoints2 = (INTEGER *)ALLOCA(MAXNPOINTS(dy) * sizeof(INTEGER));
 

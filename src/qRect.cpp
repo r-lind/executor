@@ -7,6 +7,7 @@
 #include "rsys/common.h"
 #include "QuickDraw.h"
 #include "ToolboxUtil.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -47,10 +48,10 @@ BOOLEAN Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
        && CW(s1->left) < CW(s2->right)
        && CW(s2->left) < CW(s1->right))
     {
-        dest->top = CW(MAX(CW(s1->top), CW(s2->top)));
-        dest->left = CW(MAX(CW(s1->left), CW(s2->left)));
-        dest->bottom = CW(MIN(CW(s1->bottom), CW(s2->bottom)));
-        dest->right = CW(MIN(CW(s1->right), CW(s2->right)));
+        dest->top = CW(std::max(CW(s1->top), CW(s2->top)));
+        dest->left = CW(std::max(CW(s1->left), CW(s2->left)));
+        dest->bottom = CW(std::min(CW(s1->bottom), CW(s2->bottom)));
+        dest->right = CW(std::min(CW(s1->right), CW(s2->right)));
         return !EmptyRect(dest);
     }
     else
@@ -73,10 +74,10 @@ void Executor::C_UnionRect(Rect *s1, Rect *s2, Rect *dest)
         *dest = *s1;
     else
     {
-        dest->top = CW(MIN(CW(s1->top), CW(s2->top)));
-        dest->left = CW(MIN(CW(s1->left), CW(s2->left)));
-        dest->bottom = CW(MAX(CW(s1->bottom), CW(s2->bottom)));
-        dest->right = CW(MAX(CW(s1->right), CW(s2->right)));
+        dest->top = CW(std::min(CW(s1->top), CW(s2->top)));
+        dest->left = CW(std::min(CW(s1->left), CW(s2->left)));
+        dest->bottom = CW(std::max(CW(s1->bottom), CW(s2->bottom)));
+        dest->right = CW(std::max(CW(s1->right), CW(s2->right)));
     }
 }
 
@@ -93,10 +94,10 @@ BOOLEAN Executor::C_PtInRect(Point p, Rect *r)
 
 void Executor::C_Pt2Rect(Point p1, Point p2, Rect *dest)
 {
-    dest->top = CW(MIN(p1.v, p2.v));
-    dest->left = CW(MIN(p1.h, p2.h));
-    dest->bottom = CW(MAX(p1.v, p2.v));
-    dest->right = CW(MAX(p1.h, p2.h));
+    dest->top = CW(std::min(p1.v, p2.v));
+    dest->left = CW(std::min(p1.h, p2.h));
+    dest->bottom = CW(std::max(p1.v, p2.v));
+    dest->right = CW(std::max(p1.h, p2.h));
 }
 
 void Executor::C_PtToAngle(Rect *rp, Point p, GUEST<INTEGER> *angle)

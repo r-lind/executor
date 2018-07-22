@@ -13,6 +13,7 @@
 #include <rsys/cpu.h>
 #include <PowerCore.h>
 #include <cassert>
+#include <algorithm>
 
 using namespace Executor;
 

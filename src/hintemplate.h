@@ -73,7 +73,7 @@ DECL
         else
         {
             /* - (+ -) (+ -) ... (+ -) + */
-            /* remember that dh is negative, so +dh is -ABS(dh) */
+            /* remember that dh is negative, so +dh is -std::abs(dh) */
             if((x2 = oldunset[0]) != 32767)
             {
                 *oldinset++ = x2 + dh;

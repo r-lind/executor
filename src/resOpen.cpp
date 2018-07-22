@@ -16,6 +16,7 @@
 #include "rsys/osevent.h"
 #include "rsys/prefs.h"
 #include "rsys/functions.impl.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -186,7 +187,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
 
 #define DONT_TRUST_FRACTIONAL_RATIO
 #if defined(DONT_TRUST_FRACTIONAL_RATIO)
-            working_size = MAX(final_size, working_size);
+            working_size = std::max(final_size, working_size);
 #endif
 
             *workspacep = NewPtr(working_size);

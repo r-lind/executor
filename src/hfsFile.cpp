@@ -10,6 +10,8 @@
 #include "rsys/hfs.h"
 #include "rsys/cpu.h"
 
+#include <algorithm>
+
 using namespace Executor;
 
 filecontrolblock *Executor::ROMlib_getfreefcbp(void)
@@ -346,7 +348,7 @@ static ULONGINT countbits(HVCB *vcbp, ULONGINT bno, unsigned char lookfor)
             for(; !(c & mask); mask >>= 1)
                 retval++;
     }
-    return MIN(max, retval);
+    return std::min(max, retval);
 }
 
 static BOOLEAN fillextent(xtntdesc *xp, ULONGINT *nallocneededp, HVCB *vcbp,
@@ -369,7 +371,7 @@ static BOOLEAN fillextent(xtntdesc *xp, ULONGINT *nallocneededp, HVCB *vcbp,
         toextend = countbits(vcbp, Cx(xp->blockstart) + Cx(xp->blockcount), 0);
         if(toextend)
         {
-            toextend = MIN(toextend, needed);
+            toextend = std::min(toextend, needed);
             needed -= toextend;
             setbits(vcbp, Cx(xp->blockstart) + Cx(xp->blockcount), toextend, 1);
             xp->blockcount = CW(CW(xp->blockcount) + (toextend));
@@ -433,7 +435,7 @@ static BOOLEAN fillextent(xtntdesc *xp, ULONGINT *nallocneededp, HVCB *vcbp,
         while(needed > 0 && --nempty >= 0 && tmpxp->blockcount)
         {
             xp->blockstart = tmpxp->blockstart;
-            xp->blockcount = CW(MIN(CW(tmpxp->blockcount), needed));
+            xp->blockcount = CW(std::min<ULONGINT>(CW(tmpxp->blockcount), needed));
 #if 1
             if(xp->blockcount == CWC(0))
                 warning_unexpected("blockcount = 0");
@@ -574,7 +576,7 @@ OSErr Executor::ROMlib_allochelper(IOParam *pb, BOOLEAN async, alloctype alloc,
         }
         if(Cx(fcbp->fcbPLen) > totallength)
         {
-            newabn = MAX(neweof, totallength) / Cx(vcbp->vcbAlBlkSiz);
+            newabn = std::max(neweof, totallength) / Cx(vcbp->vcbAlBlkSiz);
             if(!(xtkeyp = fcbpbnotoxkeyp(fcbp, newabn)))
             {
                 neweof = Cx(fcbp->fcbPLen);
@@ -839,7 +841,7 @@ static OSErr PBReadWrite(IOParam *pb, BOOLEAN async, accesstype rw)
             fs_err_hook(newerr);
             RETURN(newerr);
         }
-        ntocopy = MIN(totransfer, PHYSBSIZE - ntoskip);
+        ntocopy = std::min(totransfer, PHYSBSIZE - ntoskip);
         if(rw == reading)
             BlockMove((Ptr)tempbuf + ntoskip, (Ptr)bufp, (Size)ntocopy);
         else
@@ -880,7 +882,7 @@ static OSErr PBReadWrite(IOParam *pb, BOOLEAN async, accesstype rw)
                     RETURN(err);
                 }
             }
-            thisrun = MIN(nphyscontig, nblockstogo);
+            thisrun = std::min(nphyscontig, nblockstogo);
 #if 0
 	    if (((LONGINT)bufp & 3) == 0) {
 		newerr = ROMlib_transphysblk (&vcbp->hfs, physblock, thisrun,

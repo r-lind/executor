@@ -45,6 +45,7 @@
 #include "rsys/nextprint.h"
 #include "rsys/scrap.h"
 #include "rsys/time.h"
+#include <algorithm>
 
 #if !defined(WIN32)
 #include <sys/socket.h>
@@ -515,7 +516,7 @@ BOOLEAN Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
             }
             else if(sleep > 0)
             {
-                Delay(MIN(sleep, 4), nullptr);
+                Delay(std::min(sleep, 4), nullptr);
                 sleep -= 4;
             }
             saved_h = p.h;

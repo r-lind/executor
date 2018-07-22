@@ -20,6 +20,8 @@
 
 #include "rsys/alias.h"
 
+#include <algorithm>
+
 #define paramErr (-50)
 
 using namespace Executor;
@@ -469,7 +471,7 @@ parse2 (AliasHandle ah, const void *addrs[], int count)
 		
       headp = (alias_head_t *) STARH (ah);
       partp = (INTEGER *) (&headp[1]);
-      ep = (INTEGER *) ((char *) headp + MIN (size, CW (headp->length)));
+      ep = (INTEGER *) ((char *) headp + std::min(size, CW (headp->length)));
       memset (addrs, 0, count * sizeof addrs[0]);
       for (; partp < ep && *partp != CWC (-1);
 	   partp = (INTEGER *) ((char *) partp + EVENUP (4 + CW (partp[1]))))

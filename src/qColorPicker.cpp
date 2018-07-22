@@ -24,6 +24,7 @@
 
 #include <ctype.h>
 #include <math.h>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -352,8 +353,8 @@ text_box_init(void)
 
         title = titles[i];
         label = labels[i];
-        offset = MAX(offset, StringWidth(title));
-        label_width = MAX(label_width, StringWidth(label));
+        offset = std::max<int>(offset, StringWidth(title));
+        label_width = std::max<int>(label_width, StringWidth(label));
     }
 
     for(i = 0; i < N_TEXT_BOXES; i++)

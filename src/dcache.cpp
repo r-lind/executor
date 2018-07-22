@@ -4,6 +4,7 @@
 
 #include "rsys/common.h"
 #include "rsys/dcache.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -359,7 +360,7 @@ Executor::dcache_read(uint32_t fd, void *buf, uint32_t offset, uint32_t count,
             {
                 uint32_t n_to_copy;
 
-                n_to_copy = MIN((uint32_t)DCACHE_BLOCK_SIZE, count - n);
+                n_to_copy = std::min((uint32_t)DCACHE_BLOCK_SIZE, count - n);
                 memcpy((uint8_t *)buf + n, d->data, n_to_copy);
                 retval += n_to_copy;
             }
