@@ -9,7 +9,6 @@
 
 #include "rsys/common.h"
 
-#include <sys/mman.h>
 #include <assert.h>
 
 #include "FileMgr.h"
