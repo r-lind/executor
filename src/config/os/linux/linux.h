@@ -18,16 +18,8 @@
 
 #include <signal.h>
 
-#if !defined(__GLIBC__) || __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 1)
-
-#undef GLIBC_DB1_INCLUDES_NDBM
-
-#else
-
-#define GLIBC_DB1_INCLUDES_NDBM
 #include <stdint.h>
 
-#endif
 
 #if !defined(LINUX)
 #define LINUX
@@ -60,16 +52,5 @@
 #define CONFIG_OFFSET_P 1 /* don't normally use offset memory */
 
 extern int ROMlib_launch_native_app(int n_filenames, char **filenames);
-
-/* #if !defined (GLIBC_DB1_INCLUDES_NDBM) */
-/* #include <ndbm.h> */
-/* #else */
-/* #include <db1/ndbm.h> */
-/* #endif */
-/* to be fixed, 12/08/03 */
-
-#define DB_DBM_HSEARCH 1
-#include <db.h>
-#undef store    /* sanitize macros */
 
 #endif /* !_OS_LINUX_H_ */

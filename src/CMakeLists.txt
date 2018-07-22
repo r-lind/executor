@@ -4,13 +4,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 find_program(PERL_COMMAND perl)
 
-if(WIN32)
-else()
-find_library(DB_LIBRARY db)
-find_path(DB_INCLUDE_PATH db.h ndbm.h)
-include_directories(${DB_INCLUDE_PATH})
-endif()
-
 find_package(Boost COMPONENTS filesystem system)
 
 find_program(BISON_COMMAND bison)
@@ -201,7 +194,7 @@ set(misc_sources
   process.cpp alias.cpp string.cpp tempmem.cpp edition.cpp fontIMVI.cpp balloon.cpp
   error.cpp adb.cpp color_wheel_bits.cpp finder.cpp system_error.cpp ibm_keycodes.cpp
   icon.cpp redrawscreen.cpp ini.cpp qt.cpp
-  paramline.c fauxdbm.cpp commtool.cpp cfm.cpp pef_hash.cpp
+  paramline.c commtool.cpp cfm.cpp pef_hash.cpp
   mixed_mode.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
   executor.cpp  crc.cpp
@@ -280,7 +273,6 @@ set(include_sources hintemplate.h
                   include/rsys/everything.h
                   include/rsys/evil.h
                   include/rsys/executor.h
-                  include/rsys/fauxdbm.h
                   include/rsys/file.h
                   include/rsys/flags.h
                   include/rsys/float.h
