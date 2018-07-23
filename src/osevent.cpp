@@ -454,12 +454,6 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
 
                     GetAppFiles(i, &file);
 
-#if 0
-		  fprintf (stderr, "%d:`%s'\n",
-			   i,
-			   TEMP_C_STRING_FROM_STR255 (file.fName));
-#endif
-
                     FSMakeFSSpec(CW(file.vRefNum), 0, file.fName, &spec);
 
                     AEPutPtr(list, i, typeFSS, (Ptr)&spec, sizeof spec);
