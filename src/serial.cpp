@@ -250,8 +250,7 @@ static DCtlPtr otherdctl(ParmBlkPtr pbp)
  *	  delay the opening until we know just what type of flow
  *	  control the user wants to do.
  */
-static const char *specialname(ParmBlkPtr pbp, const char **lockfilep,
-                          const char **tempfilep)
+static const char *specialname(ParmBlkPtr pbp)
 {
     const char *retval;
     *lockfilep = 0;
@@ -262,27 +261,11 @@ static const char *specialname(ParmBlkPtr pbp, const char **lockfilep,
     {
         case AINREFNUM:
         case AOUTREFNUM:
-#if defined(NEXTSTEP)
-            retval = "/dev/cufa";
-            *lockfilep = "/usr/spool/uucp/LCK/LCK..cufa";
-            *tempfilep = "/usr/spool/uucp/LCK/etempcufa";
-#elif defined(LINUX)
             retval = "/dev/ttyUSB1";
-            *lockfilep = 0; /* for now */
-            *tempfilep = 0; /* for now */
-#endif
             break;
         case BINREFNUM:
         case BOUTREFNUM:
-#if defined(NEXTSTEP)
-            retval = "/dev/cufb";
-            *lockfilep = "/usr/spool/uucp/LCK/LCK..cufb";
-            *tempfilep = "/usr/spool/uucp/LCK/etempcufa";
-#elif defined(LINUX)
-            retval = "/dev/cua1";
-            *lockfilep = 0;
-            *tempfilep = 0;
-#endif
+            retval = "/dev/ttyUSB2";
             break;
     }
     return retval;
@@ -310,18 +293,14 @@ void callcomp(ParmBlkPtr pbp, ProcPtr comp, OSErr err)
 
 #define SERIALDEBUG
 
-#if defined(LINUX) || defined(MACOSX)
-static const char *lockname;
-#endif
-
 OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     DCtlPtr otherp; /* auto due to old compiler bug */
     hiddenh h;
 #if defined(LINUX) || defined(MACOSX)
-    const char *devname, *tempname;
-    LONGINT fd, ourpid, theirpid, newfd, oumask;
+    const char *devname;
+    LONGINT fd, ourpid, theirpid, newfd;
 #endif
 
     err = noErr;
@@ -339,40 +318,9 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
         {
 #if defined(LINUX) || defined(MACOSX)
             err = permErr;
-            if((devname = specialname(pbp, &lockname, &tempname)))
+            if((devname = specialname(pbp)))
             {
-                oumask = umask(0);
-                if(!tempname)
-                    err = noErr;
-                else if((fd = Uopen(tempname, O_BINARY | O_CREAT | O_WRONLY, 0666L))
-                        >= 0)
-                {
-                    ourpid = getpid();
-                    if(write(fd, &ourpid, sizeof(ourpid)) == sizeof(ourpid))
-                    {
-                        if(Ulink(tempname, lockname) == 0)
-                            err = noErr;
-                        else
-                        {
-                            if((newfd = Uopen(lockname, O_BINARY | O_RDWR, 0))
-                               >= 0)
-                            {
-                                if(read(newfd, &theirpid, sizeof(theirpid))
-                                   == sizeof(theirpid))
-                                    if((kill(theirpid, 0) != 0) && errno == ESRCH)
-                                    {
-                                        err = noErr;
-                                        Uunlink(lockname);
-                                        Ulink(tempname, lockname);
-                                    }
-                                close(newfd);
-                            }
-                        }
-                        Uunlink(tempname);
-                    }
-                    close(fd);
-                }
-                umask(oumask);
+                err = noErr;
             }
 #endif
             if(err == noErr)
@@ -1029,7 +977,6 @@ static void restorecloseanddispose(hiddenh h)
     ioctl(HxX(h, fd), TIOCLSET, &HxX(h, lclmode));
 #endif
     close(HxX(h, fd));
-    Uunlink(lockname);
 #endif
     DisposeHandle((Handle)h);
 }

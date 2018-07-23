@@ -431,39 +431,23 @@ static void setstartdir(char *argv0)
     if(suffix)
         *suffix = 0;
     getcwd(savedir, sizeof savedir);
-    Uchdir(lookhere);
+    chdir(lookhere);
     if(suffix)
         *suffix = '/';
     getcwd(ROMlib_startdir, sizeof ROMlib_startdir);
-    Uchdir(savedir);
+    chdir(savedir);
     ROMlib_startdirlen = strlen(ROMlib_startdir) + 1;
 #else /* defined(MSDOS) || defined(CYGWIN32) */
 
     if(argv0[1] == ':')
     {
         char *lastslash;
-#if 1
-        static char cd_to[] = "C:/";
 
         ROMlib_start_drive = argv0[0];
-        cd_to[0] = argv0[0];
-        Uchdir(cd_to);
-#if 0
-	strcpy(ROMlib_startdir, argv0 + 2);
-#else
-        /* We now include the drive letter in with ROMlib_startdir. */
-
         strcpy(ROMlib_startdir, argv0);
-#endif
-
-#else
-        strcpy(ROMlib_startdir, argv0);
-#endif
         lastslash = strrchr(ROMlib_startdir, '/');
-#if defined(WIN32)
         if(!lastslash)
             lastslash = strrchr(ROMlib_startdir, '\\');
-#endif
         if(lastslash)
             *lastslash = 0;
     }
