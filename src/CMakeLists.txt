@@ -417,5 +417,7 @@ else()
     target_link_libraries(executor ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k PowerCore mon Boost::filesystem)
+target_link_libraries(executor Threads::Threads syn68k PowerCore mon)
 
+#target_link_libraries(executor Boost::filesystem)  # mxe doesn't like this
+target_link_libraries(executor ${Boost_LIBRARIES})
