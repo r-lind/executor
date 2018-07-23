@@ -5,6 +5,8 @@
 #include "rsys/common.h"
 
 #include "rsys/syncint.h"
+#include "rsys/cpu.h"
+#include <PowerCore.h>
 
 using namespace Executor;
 
@@ -24,7 +26,6 @@ void Executor::syncint_check_interrupt()
 
 #if defined(WIN32)
 
-#undef store    /* namespace pollution from db.h */
 #include <thread>
 #include <mutex>
 #include <condition_variable>
@@ -97,8 +98,6 @@ void Executor::syncint_post(std::chrono::microseconds usecs, bool fromLast)
 #include <iostream>
 #include <unistd.h>
 #include <sys/time.h>
-#include "rsys/cpu.h"
-#include <PowerCore.h>
 
 static void
 handle_itimer_tick(int n)
