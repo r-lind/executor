@@ -48,12 +48,6 @@ int Uaccess(const char *path, int mode)
     return access(path, mode);
 }
 
-int Uchdir(const char *path)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return chdir(path);
-}
-
 FILE *Ufopen(const char *path, const char *type)
 {
     path = DOUBLE_SLASH_REMOVE(path);
