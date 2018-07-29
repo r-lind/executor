@@ -253,8 +253,6 @@ static DCtlPtr otherdctl(ParmBlkPtr pbp)
 static const char *specialname(ParmBlkPtr pbp)
 {
     const char *retval;
-    *lockfilep = 0;
-    *tempfilep = 0;
     retval = 0;
 
     switch(CW(pbp->cntrlParam.ioCRefNum))
