@@ -1,8 +1,65 @@
 #include "gtest/gtest.h"
 
+#ifdef EXECUTOR
+#define AUTOMATIC_CONVERSIONS
+#include <FileMgr.h>
+#include <DeviceMgr.h>
+#include <MemoryMgr.h>
+using namespace Executor;
+
+StringPtr PSTR(const char* s)
+{
+    size_t n = strlen(s);
+    StringPtr p = (StringPtr)NewPtr(n + 1);   // just leaking it
+    p[0] = n;
+    memcpy(p+1, s, n);
+    return p;
+}
+
+typedef signed char SInt8;
+typedef int32_t SInt32;
+
+enum
+{
+    kioFlAttribLockedBit          = 0,
+    kioFlAttribLockedMask         = 0x01,
+    kioFlAttribResOpenBit         = 2,
+    kioFlAttribResOpenMask        = 0x04,
+    kioFlAttribDataOpenBit        = 3,
+    kioFlAttribDataOpenMask       = 0x08,
+    kioFlAttribDirBit             = 4,
+    kioFlAttribDirMask            = 0x10,
+    ioDirFlg                      = 4,
+    ioDirMask                     = 0x10,
+    kioFlAttribCopyProtBit        = 6,
+    kioFlAttribCopyProtMask       = 0x40,
+    kioFlAttribFileOpenBit        = 7,
+    kioFlAttribFileOpenMask       = 0x80,
+    kioFlAttribInSharedBit        = 2,
+    kioFlAttribInSharedMask       = 0x04,
+    kioFlAttribMountedBit         = 3,
+    kioFlAttribMountedMask        = 0x08,
+    kioFlAttribSharePointBit      = 5,
+    kioFlAttribSharePointMask     = 0x20
+};
+
+GUEST<LONGINT> toIoMisc(long x) { return CL((LONGINT)x); }
+GUEST<LONGINT> toIoMisc(void* x) { return guest_cast<LONGINT>(RM(x)); }
+
+#define PTR(x) (&guestref(x))
+
+
+#else
 #include <Files.h>
 #include <Devices.h>
 
+#define PSTR(s) StringPtr("\p" s)
+
+Ptr toIoMisc(long x) { return (Ptr)x; }
+Ptr toIoMisc(void* x) { return (Ptr)x; }
+
+#define PTR(x) (&x)
+#endif
 
 // Unanswered Questions:
 // - does the "poor man's search path" look for the *file name* or the *relative pathname*?
@@ -35,7 +92,7 @@ TEST(Files, CreateDelete)
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBCreateSync(&pb);
 
     ASSERT_EQ(noErr, pb.ioParam.ioResult);
@@ -43,7 +100,7 @@ TEST(Files, CreateDelete)
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -51,7 +108,7 @@ TEST(Files, CreateDelete)
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBDeleteSync(&pb);
 
     EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
@@ -64,7 +121,7 @@ TEST(Files, CreateDeleteDir)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBDirCreateSync(&pb);
 
     ASSERT_EQ(noErr, pb.ioParam.ioResult);
@@ -73,7 +130,7 @@ TEST(Files, CreateDeleteDir)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -82,16 +139,17 @@ TEST(Files, CreateDeleteDir)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
 }
 
+
 class FileTest : public testing::Test
 {
 protected:
-    Str255 file1 = "\ptemp-test";
+    StringPtr file1 = PSTR("temp-test");
     short vRefNum = 0;
     long dirID = 0;
     short refNum = -1;
@@ -213,7 +271,7 @@ protected:
         pb.ioParam.ioRefNum = refNum;
         pb.ioParam.ioPosMode = fsFromStart;
         pb.ioParam.ioPosOffset = 0;
-        pb.ioParam.ioBuffer = buf1;
+        pb.ioParam.ioBuffer = (Ptr)buf1;
         pb.ioParam.ioReqCount = 13;
         PBWriteSync(&pb);
 
@@ -256,8 +314,6 @@ protected:
         check(hpb);
     }
 };
-
-
 
 TEST_F(FileTest, Open)
 {
@@ -338,7 +394,7 @@ TEST_F(FileTest, WriteRead)
     pb.ioParam.ioRefNum = refNum;
     pb.ioParam.ioPosMode = fsFromStart;
     pb.ioParam.ioPosOffset = 0;
-    pb.ioParam.ioBuffer = buf1;
+    pb.ioParam.ioBuffer = (Ptr)buf1;
     pb.ioParam.ioReqCount = 13;
     PBWriteSync(&pb);
 
@@ -350,7 +406,7 @@ TEST_F(FileTest, WriteRead)
     pb.ioParam.ioRefNum = refNum;
     pb.ioParam.ioPosMode = fsFromStart;
     pb.ioParam.ioPosOffset = 0;
-    pb.ioParam.ioBuffer = buf2;
+    pb.ioParam.ioBuffer = (Ptr)buf2;
     pb.ioParam.ioReqCount = 13;
     PBReadSync(&pb);
 
@@ -371,7 +427,7 @@ TEST_F(FileTest, WriteRead)
     pb.ioParam.ioRefNum = refNum;
     pb.ioParam.ioPosMode = fsFromStart;
     pb.ioParam.ioPosOffset = 0;
-    pb.ioParam.ioBuffer = buf2;
+    pb.ioParam.ioBuffer = (Ptr)buf2;
     pb.ioParam.ioReqCount = 13;
     PBReadSync(&pb);
 
@@ -397,7 +453,7 @@ TEST_F(FileTest, ReadEOF)
     pb.ioParam.ioRefNum = refNum;
     pb.ioParam.ioPosMode = fsFromStart;
     pb.ioParam.ioPosOffset = 0;
-    pb.ioParam.ioBuffer = buf2;
+    pb.ioParam.ioBuffer = (Ptr)buf2;
     pb.ioParam.ioReqCount = 26;
     PBReadSync(&pb);
 
@@ -412,7 +468,7 @@ TEST_F(FileTest, CaseInsensitive)
 {
     CInfoPBRec ipb;
 
-    Str255 name = "\pTEMP-test";
+    StringPtr name = PSTR("TEMP-test");
 
     // Files are found with case-insensitive match on file names
     // but GetCatInfo does not write to ioNamePtr
@@ -518,7 +574,7 @@ TEST_F(FileTest, Pathname)
         pb.ioParam.ioRefNum = refNum;
         pb.ioParam.ioPosMode = fsFromStart;
         pb.ioParam.ioPosOffset = 0;
-        pb.ioParam.ioBuffer = buf2;
+        pb.ioParam.ioBuffer = (Ptr)buf2;
         pb.ioParam.ioReqCount = 13;
         PBReadSync(&pb);
 
@@ -589,10 +645,10 @@ TEST_F(FileTest, Seek)
 
     EXPECT_EQ(posErr, pb.ioParam.ioResult);
     EXPECT_PRED1(
-        [](long off) { 
+        [](SInt32 off) { 
             return off == 13        // Mac OS 9
                 || off == 13-42;    // System 6
-        }, pb.ioParam.ioPosOffset);
+        }, (SInt32)pb.ioParam.ioPosOffset);
 
 }
 
@@ -603,7 +659,7 @@ TEST(Files, DeleteFullDirectory)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBDirCreateSync(&pb);
 
     ASSERT_EQ(noErr, pb.ioParam.ioResult);
@@ -612,7 +668,7 @@ TEST(Files, DeleteFullDirectory)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\p:temp-test-dir:file in dir";
+    pb.ioParam.ioNamePtr = PSTR(":temp-test-dir:file in dir");
     PBHCreateSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -621,7 +677,7 @@ TEST(Files, DeleteFullDirectory)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(fBsyErr, pb.ioParam.ioResult);
@@ -631,7 +687,7 @@ TEST(Files, DeleteFullDirectory)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\p:temp-test-dir:file in dir";
+    pb.ioParam.ioNamePtr = PSTR(":temp-test-dir:file in dir");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -640,7 +696,7 @@ TEST(Files, DeleteFullDirectory)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = 0;
     pb.fileParam.ioDirID = 0;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -654,14 +710,14 @@ TEST_F(FileTest, UpDirRelative)
     hpb.ioParam.ioCompletion = nullptr;
     hpb.ioParam.ioVRefNum = vRefNum;
     hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    hpb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBDirCreateSync(&hpb);
 
     ASSERT_EQ(noErr, hpb.ioParam.ioResult);
 
     long tempDirID = hpb.fileParam.ioDirID;
 
-    Str255 relPath = "\p::temp-test";
+    StringPtr relPath = PSTR("::temp-test");
     memset(&hpb, 42, sizeof(hpb));
     hpb.ioParam.ioCompletion = nullptr;
     hpb.ioParam.ioVRefNum = vRefNum;
@@ -678,7 +734,7 @@ TEST_F(FileTest, UpDirRelative)
     hpb.ioParam.ioCompletion = nullptr;
     hpb.ioParam.ioVRefNum = vRefNum;
     hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    hpb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBHDeleteSync(&hpb);
 
     EXPECT_EQ(noErr, hpb.ioParam.ioResult);
@@ -692,7 +748,7 @@ TEST_F(FileTest, Rename)
     hpb.ioParam.ioCompletion = nullptr;
     hpb.ioParam.ioVRefNum = vRefNum;
     hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    hpb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBDirCreateSync(&hpb);
 
     ASSERT_EQ(noErr, hpb.ioParam.ioResult);
@@ -714,14 +770,14 @@ TEST_F(FileTest, Rename)
     EXPECT_GT(cnid, 0);
      
 
-    Str255 fileName2 = "\ptemp-test Renamed";
-    Str255 badName = "\p:temp-test-dir:blah";
+    StringPtr fileName2 = PSTR("temp-test Renamed");
+    StringPtr badName = PSTR(":temp-test-dir:blah");
 
     hpb.ioParam.ioCompletion = nullptr;
     hpb.ioParam.ioVRefNum = vRefNum;
     hpb.fileParam.ioDirID = dirID;
     hpb.ioParam.ioNamePtr = file1;
-    hpb.ioParam.ioMisc = (Ptr)badName;
+    hpb.ioParam.ioMisc = toIoMisc(badName);
     
     PBHRenameSync(&hpb);
     EXPECT_EQ(bdNamErr, hpb.ioParam.ioResult);
@@ -731,7 +787,7 @@ TEST_F(FileTest, Rename)
     hpb.ioParam.ioVRefNum = vRefNum;
     hpb.fileParam.ioDirID = dirID;
     hpb.ioParam.ioNamePtr = file1;
-    hpb.ioParam.ioMisc = (Ptr)fileName2;
+    hpb.ioParam.ioMisc = toIoMisc(fileName2);
     
     PBHRenameSync(&hpb);
     OSErr renameErr = hpb.ioParam.ioResult;
@@ -765,13 +821,13 @@ TEST_F(FileTest, Rename)
     hpb.ioParam.ioCompletion = nullptr;
     hpb.ioParam.ioVRefNum = vRefNum;
     hpb.fileParam.ioDirID = dirID;
-    hpb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    hpb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBHDeleteSync(&hpb);
 
     EXPECT_EQ(noErr, hpb.ioParam.ioResult);
 
     if(renameErr == noErr)
-        memcpy(file1, fileName2, fileName2[0]+1);
+        file1 = fileName2;
 }
 
 
@@ -795,7 +851,7 @@ void doWrite(short refNum, long offset, const char* p, long n)
 
 bool verifyContents(short refNum, const char *p, long n)
 {
-    char *buf = new char[n + 32];
+    Ptr buf = NewPtr(n + 32);
 
     ParamBlockRec pb;
 
@@ -804,7 +860,7 @@ bool verifyContents(short refNum, const char *p, long n)
     pb.ioParam.ioRefNum = refNum;
     PBGetEOFSync(&pb);
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
-    EXPECT_EQ(n, (UInt32)pb.ioParam.ioMisc);
+    EXPECT_EQ(n, (long)pb.ioParam.ioMisc);
 
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
@@ -824,7 +880,7 @@ bool verifyContents(short refNum, const char *p, long n)
         EXPECT_EQ(0, memcmp(buf, p, n)) << "comparing " << n << " bytes - got '" << buf << "' expecting '" << p << "'";
     bool memMatches = memcmp(buf, p, n) == 0;
     
-    delete[] buf;
+    DisposePtr(buf);
 
     return sizeMatches && memMatches;
 }
@@ -835,7 +891,7 @@ void setEOF(short refNum, long n)
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioRefNum = refNum;
-    pb.ioParam.ioMisc = (Ptr) n;
+    pb.ioParam.ioMisc = toIoMisc(n);
     PBSetEOFSync(&pb);
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
 }
@@ -921,7 +977,7 @@ TEST(Files, CatMove)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBDirCreateSync(&pb);
 
     ASSERT_EQ(noErr, pb.ioParam.ioResult);
@@ -931,7 +987,7 @@ TEST(Files, CatMove)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBHCreateSync(&pb);
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
 
@@ -941,7 +997,7 @@ TEST(Files, CatMove)
     mpb.ioCompletion = nullptr;
     mpb.ioVRefNum = vRefNum;
     mpb.ioDirID = dirID;
-    mpb.ioNamePtr = (StringPtr)"\ptemp-test";
+    mpb.ioNamePtr = PSTR("temp-test");
     mpb.ioNewName = nullptr;
     mpb.ioNewDirID = newDirID;
     PBCatMoveSync(&mpb);
@@ -952,7 +1008,7 @@ TEST(Files, CatMove)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
@@ -961,7 +1017,7 @@ TEST(Files, CatMove)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = newDirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test";
+    pb.ioParam.ioNamePtr = PSTR("temp-test");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -971,7 +1027,7 @@ TEST(Files, CatMove)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -984,7 +1040,7 @@ TEST_F(FileTest, GetFInfo)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBDirCreateSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -994,7 +1050,7 @@ TEST_F(FileTest, GetFInfo)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     pb.fileParam.ioFDirIndex = 0;
     PBHGetFInfoSync(&pb);
     EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
@@ -1013,7 +1069,7 @@ TEST_F(FileTest, GetFInfo)
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;
     ipb.hFileInfo.ioVRefNum = vRefNum;
-    ipb.hFileInfo.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    ipb.hFileInfo.ioNamePtr = PSTR("temp-test-dir");
     ipb.hFileInfo.ioFDirIndex = 0;
     ipb.hFileInfo.ioDirID = dirID;
 
@@ -1042,7 +1098,7 @@ TEST_F(FileTest, GetFInfo)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -1057,7 +1113,7 @@ TEST_F(FileTest, GetFInfoIndexed)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBDirCreateSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -1117,7 +1173,7 @@ TEST_F(FileTest, GetFInfoIndexed)
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
     pb.fileParam.ioDirID = dirID;
-    pb.ioParam.ioNamePtr = (StringPtr)"\ptemp-test-dir";
+    pb.ioParam.ioNamePtr = PSTR("temp-test-dir");
     PBHDeleteSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
@@ -1230,12 +1286,12 @@ TEST(Files, DirID1)
 TEST_F(FileTest, Allocate)
 {
     open();
-    long allocSz = 1234, eof = 42;
-    OSErr err = Allocate(refNum, &allocSz);
+    SInt32 allocSz = 1234, eof = 42;
+    OSErr err = Allocate(refNum, PTR(allocSz));
     EXPECT_EQ(noErr, err);
     EXPECT_GE(allocSz, 1234);
 
-    err = GetEOF(refNum, &eof);
+    err = GetEOF(refNum, PTR(eof));
     EXPECT_EQ(noErr, err);
     EXPECT_EQ(0, eof);
 
@@ -1244,12 +1300,12 @@ TEST_F(FileTest, Allocate)
 TEST_F(FileTest, AllocContig)
 {
     open();
-    long allocSz = 1234, eof = 42;
-    OSErr err = AllocContig(refNum, &allocSz);
+    SInt32 allocSz = 1234, eof = 42;
+    OSErr err = AllocContig(refNum, PTR(allocSz));
     EXPECT_EQ(noErr, err);
     EXPECT_GE(allocSz, 1234);
 
-    err = GetEOF(refNum, &eof);
+    err = GetEOF(refNum, PTR(eof));
     EXPECT_EQ(noErr, err);
     EXPECT_EQ(0, eof);
 
@@ -1326,7 +1382,7 @@ TEST_F(FileTest, SetFLock)
         pb.ioParam.ioRefNum = refNum;
         pb.ioParam.ioPosMode = fsFromLEOF;
         pb.ioParam.ioPosOffset = 0;
-        pb.ioParam.ioBuffer = buf1;
+        pb.ioParam.ioBuffer = (Ptr)buf1;
         pb.ioParam.ioReqCount = 13;
         PBWriteSync(&pb);
 
