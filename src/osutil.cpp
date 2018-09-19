@@ -804,7 +804,7 @@ void Executor::Enqueue(QElemPtr e, QHdrPtr h)
 
 OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
 {
-    GUEST<QElemPtr> *qpp;
+    GUEST<QElemPtr> *qpp;       // ### HORRIBLE REINTERPRET-CASTING CODE OBFUSCATION....
     OSErr retval;
 
     retval = qErr;
@@ -815,7 +815,7 @@ OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
     {
         *qpp = e->evQElem.qLink;
         if(MR(h->qTail) == e)
-            h->qTail = qpp == (GUEST<QElemPtr> *)&h->qHead ? nullptr : RM((QElemPtr)qpp);
+            h->qTail = RM( (qpp == (GUEST<QElemPtr> *)&h->qHead) ? nullptr : (QElemPtr)qpp );
         retval = noErr;
     }
     return retval;

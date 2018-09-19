@@ -51,9 +51,9 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
         HLock((Handle)h);
         p->ioParam.ioTrap = CW(trapn);
         if(async)
-            p->ioParam.ioTrap.raw_or(CWC(asyncTrpBit));
+            p->ioParam.ioTrap |= CWC(asyncTrpBit);
         else
-            p->ioParam.ioTrap.raw_or(CWC(noQueueBit));
+            p->ioParam.ioTrap |= CWC(noQueueBit);
         if(!(HxX(h, dCtlFlags) & CWC(RAMBASEDBIT)))
         {
             switch(routine)
