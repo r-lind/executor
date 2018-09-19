@@ -661,9 +661,6 @@ construct_command_line_string(int argc, char **argv)
 #define READ_IMPLIES_EXEC 0x0400000
 #endif
 
-#if defined(LINUX)
-extern char _etext, _end; /* boundaries of data+bss sections, supplied by the linker */
-#endif
 
 int main(int argc, char **argv)
 {
@@ -979,54 +976,7 @@ int main(int argc, char **argv)
         exit(-10);
     }
 
-    ROMlib_InitZones();
-
-#if SIZEOF_CHAR_P > 4
-    /*
-    On 64-bit platforms, there is no single ROMlib_offset, but rather
-    a four-element array. The high two bits of the 69K address are mapped
-    to an index in this array.
-    This way, we can access:
-        0 - the regular emulated memory
-        1 - video memory.
-        2 - local variables of executor's main thread
-        3 - executor's global variables (which includes syn68K callback addresses)
-
-    Block 0 is set up in ROMlib_InitZones.
-    Block 1 is set up later, when video memory is allocated.
-    Global variables are in block 3 so that we don't need to figure out
-    the exact boundaries for that address range.
-   */
-
-    // mark the slot as occupied until we explicitly set it later
-    ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 30);
-    ROMlib_sizes[1] = 0;
-
-    // assume an arbitrary maximum stack size of 16MB.
-    ROMlib_offsets[2] = (uintptr_t)&thingOnStack - 16 * 1024 * 1024;
-    ROMlib_offsets[2] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[2] -= (2UL << 30);
-    ROMlib_sizes[2] = 16 * 1024 * 1024;
-
-#if defined(LINUX)
-    ROMlib_offsets[3] = (uintptr_t)&_etext;
-    ROMlib_offsets[3] -= ROMlib_offsets[3] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = &_end - &_etext;
-#else
-    /* Mac OS X doesn't have _etext and _end, and the functions in
-       mach/getsect.h don't give the correct results when ASLR is active.
-       Win32 might also have a way to get the addresses, or it might not.
-
-       So we just use the address of a static variable and 512MB in each direction.
-     */
-    static char staticThing[32];
-    ROMlib_offsets[3] = (uintptr_t)&staticThing - 0x20000000;
-    ROMlib_offsets[3] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = 0x3FFFFFFF;
-#endif
-#endif
+    InitMemory(&thingOnStack);
 
     {
         uint32_t save_a7;
