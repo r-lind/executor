@@ -12,16 +12,8 @@
 #include "rsys/commonevt.h"
 namespace Executor
 {
-extern char ROMlib_startdir[];
 
-extern std::string ROMlib_ConfigurationFolder;
-extern std::string ROMlib_PublicDirectoryMap;
-extern std::string ROMlib_PrivateDirectoryMap;
-extern std::string ROMlib_ScreenDumpFile;
 extern std::string ROMlib_appname;
-#if defined(WIN32)
-extern char ROMlib_start_drive;
-#endif
 
 extern BOOLEAN ROMlib_shouldalarm(void);
 

@@ -112,8 +112,6 @@ static void setstartdir(char *);
 using namespace Executor;
 using namespace std;
 
-/* optional resolution other than 72dpix72dpi for printing */
-INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
 
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
@@ -353,12 +351,6 @@ check_arg(string argname, int *arg, int min, int max)
     }
 }
 
-char Executor::ROMlib_startdir[MAXPATHLEN];
-INTEGER ROMlib_startdirlen;
-#if defined(WIN32)
-char Executor::ROMlib_start_drive;
-#endif
-std::string Executor::ROMlib_appname;
 
 #if !defined(LINUX)
 #define SHELL "/bin/sh"
@@ -436,7 +428,6 @@ static void setstartdir(char *argv0)
         *suffix = '/';
     getcwd(ROMlib_startdir, sizeof ROMlib_startdir);
     chdir(savedir);
-    ROMlib_startdirlen = strlen(ROMlib_startdir) + 1;
 #else /* defined(MSDOS) || defined(CYGWIN32) */
 
     if(argv0[1] == ':')
@@ -456,7 +447,6 @@ static void setstartdir(char *argv0)
         ROMlib_start_drive = 0;
         strcpy(ROMlib_startdir, ".");
     }
-    ROMlib_startdirlen = strlen(ROMlib_startdir);
 #endif /* defined(MSDOS) */
 }
 

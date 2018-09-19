@@ -36,6 +36,11 @@ using namespace Executor;
 namespace Executor
 {
 int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
+char ROMlib_startdir[MAXPATHLEN];
+#if defined(WIN32)
+char ROMlib_start_drive;
+#endif
+std::string ROMlib_appname;
 }
 
 
@@ -384,7 +389,6 @@ Executor::expandPath(std::string name)
 }
 
 #if defined(MSDOS) || defined(CYGWIN32)
-bool cd_mounted_by_trickery_p = false;
 
 #define MACCDROM \
     (ROMlib_mac_cdromp ? (char *)ROMlib_mac_cdromp->chars : "DOS/EXTRA/LIBRARY/MACCDROM.HFV")

@@ -67,7 +67,6 @@ void Executor::executor_main(void)
     Byte *p;
     WDPBRec wdpb;
     CInfoPBRec hpb;
-    Str255 name;
     StringPtr fName;
 
     EM_A5 = US_TO_SYN68K(&tmpA5);

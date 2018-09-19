@@ -41,6 +41,8 @@
 
 using namespace Executor;
 
+/* optional resolution other than 72dpix72dpi for printing */
+INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
 
 void Executor::C_PrDrvrOpen() /* TODO */
 {

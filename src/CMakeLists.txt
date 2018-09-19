@@ -185,7 +185,7 @@ set(misc_sources
   traps.cpp logging.cpp builtinlibs.cpp
   debugger.cpp cpu.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp trapname.cpp font.cpp
-  gestalt.cpp globals.cpp iu.cpp launch.cpp main.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
+  gestalt.cpp globals.cpp iu.cpp launch.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
   osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
   slash.cpp stdfile.cpp romlib_stubs.cpp syserr.cpp toolevent.cpp toolutil.cpp time.cpp
   vbl.cpp syncint.cpp refresh.cpp autorefresh.cpp aboutbox.cpp
@@ -405,19 +405,24 @@ set(sources ${ctl_sources} ${dial_sources}
     ${trap_instance_sources}
     ${include_sources})
 
-add_executable(executor ${sources}
+add_library(romlib ${sources}
         ${GENERATED_FILES}
     )
 
-target_link_libraries(executor front-end-${FRONT_END} arch-${HOST_ARCH})
+target_include_directories(romlib PUBLIC include/ ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(romlib front-end-${FRONT_END} arch-${HOST_ARCH})
 
 if(HOST_OS STREQUAL win32 OR HOST_OS STREQUAL macosx)
-    target_link_libraries(executor os-${HOST_OS})
+    target_link_libraries(romlib os-${HOST_OS})
 else()
-    target_link_libraries(executor ${DB_LIBRARY})
+    target_link_libraries(romlib ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k PowerCore mon)
+target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 
-#target_link_libraries(executor Boost::filesystem)  # mxe doesn't like this
-target_link_libraries(executor ${Boost_LIBRARIES})
+#target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
+target_link_libraries(romlib ${Boost_LIBRARIES})
+
+add_executable(executor main.cpp)
+target_link_libraries(executor romlib)

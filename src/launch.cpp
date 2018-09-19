@@ -105,10 +105,6 @@ void Executor::ROMlib_set_ppc(bool val)
 
 static void ParseConfigFile(std::string appname, OSType type)
 {
-    int strwidth;
-    char *newtitle;
-    char *dot;
-
     ROMlib_WindowName.clear();
     ROMlib_Comments.clear();
     ROMlib_desired_bpp = 0;
