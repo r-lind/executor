@@ -31,10 +31,6 @@ int main(int argc, char **argv)
     LM(DefVCBPtr) = 0;
     LM(FSFCBLen) = CWC(94);
 
-    initialize_68k_emulator(nullptr,
-                            false,
-                            (uint32_t *)SYN68K_TO_US(0),
-                            0);
     Executor::traps::init(false);
     Executor::ROMlib_fileinit();
 
