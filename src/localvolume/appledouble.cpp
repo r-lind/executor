@@ -120,7 +120,11 @@ size_t AppleSingleDoubleFork::getEOF()
 }
 void AppleSingleDoubleFork::setEOF(size_t sz)
 {
-    
+    if(CL(desc.offset) + CL(desc.length) != file->getEOF())
+        throw std::logic_error("fork not at end of AppleDouble file");
+    desc.length = CL(sz);
+    file->setEOF(CL(desc.offset) + CL(desc.length));
+    file->write(descOffset, &desc, sizeof(desc));
 }
 size_t AppleSingleDoubleFork::read(size_t offset, void *p, size_t n)
 {
@@ -131,5 +135,8 @@ size_t AppleSingleDoubleFork::read(size_t offset, void *p, size_t n)
 }
 size_t AppleSingleDoubleFork::write(size_t offset, void *p, size_t n)
 {
-    return 0;
+    if(offset + n > CL(desc.length))
+        setEOF(offset + n);
+
+    return file->write(offset + CL(desc.offset), p, n);
 }
