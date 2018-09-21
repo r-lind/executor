@@ -62,4 +62,5 @@ set(trap_instance_sources
 		trap_instances/rsys_tesave.cpp
 		trap_instances/rsys_vbl.cpp
 		trap_instances/rsys_wind.cpp
+		trap_instances/ReferenceAllTraps.cpp
 	)
