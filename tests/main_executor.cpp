@@ -31,7 +31,6 @@ int main(int argc, char **argv)
     LM(DefVCBPtr) = 0;
     LM(FSFCBLen) = CWC(94);
 
-    Executor::traps::init(false);
     Executor::ROMlib_fileinit();
 
     if(auto fsspec = nativePathToFSSpec(fs::current_path()))
