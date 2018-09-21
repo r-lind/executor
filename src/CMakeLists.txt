@@ -124,7 +124,15 @@ set(file_sources
     localvolume/appledouble.cpp
     localvolume/plain.cpp
     localvolume/mac.cpp
+
+    localvolume/localvolume.h 
+    localvolume/item.h 
+    localvolume/basilisk.h
+    localvolume/appledouble.h
+    localvolume/plain.h
+    localvolume/mac.h
     )
+
 source_group(Files FILES ${file_sources})
 
 set(hfs_sources hfsBtree.cpp hfsChanging.cpp hfsCreate.cpp hfsFile.cpp hfsHelper.cpp

@@ -9,6 +9,11 @@
 #include <iostream>
 #include "item.h"
 
+#include "plain.h"
+#include "basilisk.h"
+#include "mac.h"
+#include "appledouble.h"
+
 using namespace Executor;
 
 

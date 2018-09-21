@@ -1,5 +1,5 @@
-#include "localvolume.h"
-#include "item.h"
+#include "appledouble.h"
+#include "plain.h"
 
 using namespace Executor;
 
@@ -120,8 +120,8 @@ size_t AppleSingleDoubleFork::getEOF()
 }
 void AppleSingleDoubleFork::setEOF(size_t sz)
 {
-    if(CL(desc.offset) + CL(desc.length) != file->getEOF())
-        throw std::logic_error("fork not at end of AppleDouble file");
+    //if(CL(desc.offset) + CL(desc.length) != file->getEOF())
+     //###   throw std::logic_error("fork not at end of AppleDouble file");
     desc.length = CL(sz);
     file->setEOF(CL(desc.offset) + CL(desc.length));
     file->write(descOffset, &desc, sizeof(desc));
