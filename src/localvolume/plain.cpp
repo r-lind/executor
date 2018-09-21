@@ -61,11 +61,7 @@ size_t PlainDataFork::read(size_t offset, void *p, size_t n)
     lseek(fd, offset, SEEK_SET);
     ssize_t done;
     
-    //do
-    //{
-    //    errno = 0;
-        done = ::read(fd, p, n);
-    //} while(errno == EINTR);
+    done = ::read(fd, p, n);
     
     return done;
 }
@@ -74,10 +70,7 @@ size_t PlainDataFork::write(size_t offset, void *p, size_t n)
     lseek(fd, offset, SEEK_SET);
     ssize_t done;
     
-    do
-    {
-        done = ::write(fd, p, n);
-    } while(errno == EINTR);
+    done = ::write(fd, p, n);
     
     if(done != n)
     {
