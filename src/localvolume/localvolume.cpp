@@ -123,7 +123,7 @@ void DirectoryItem::updateCache()
         {
             mac_string nameUpr = item->name();
             ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-            auto [it, inserted] = contents_by_name_.emplace(nameUpr, item);
+            auto inserted = contents_by_name_.emplace(nameUpr, item).second;
             if(inserted)
             {
                 contents_.push_back(item);
@@ -187,6 +187,8 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     items[2] = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
+    handlers.push_back(std::make_unique<AppleSingleHandler>(*this));
+    //defaultCreateHandler = handlers.back().get();
 #ifdef MACOSX
     handlers.push_back(std::make_unique<MacHandler>());
     defaultCreateHandler = handlers.back().get();

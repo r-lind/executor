@@ -113,6 +113,62 @@ void AppleDoubleFileItem::moveItem(const fs::path& newParent)
 }
 
 
+ItemPtr AppleSingleHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+{
+    uint64_t magic = 0;
+    fs::ifstream(e.path(), std::ios::binary).read((char*)&guestref(magic), 8);
+
+    if(magic == 0x0005160000020000)
+        return std::make_shared<AppleSingleFileItem>(parent, e.path());
+    else
+        return nullptr;
+}
+
+void AppleSingleHandler::createFile(const fs::path& parentPath, mac_string_view name)
+{
+    fs::path fn = toUnicodeFilename(name);
+    fs::path path = parentPath / fn;
+
+    AppleSingleDoubleFile rsrc(std::make_unique<PlainDataFork>(path, PlainDataFork::create),
+                                AppleSingleDoubleFile::create_single);
+}
+
+
+std::shared_ptr<AppleSingleDoubleFile> AppleSingleFileItem::access()
+{
+    std::shared_ptr<AppleSingleDoubleFile> p;
+    if(p = openedFile.lock())
+        return p;
+    else
+    {
+        p = std::make_shared<AppleSingleDoubleFile>(std::make_unique<PlainDataFork>(path()));
+        openedFile = p;
+        return p;
+    }
+}
+std::unique_ptr<OpenFile> AppleSingleFileItem::open()
+{
+    return std::make_unique<AppleSingleDoubleFork>(access(), 1);
+}
+std::unique_ptr<OpenFile> AppleSingleFileItem::openRF()
+{
+    return std::make_unique<AppleSingleDoubleFork>(access(), 2);
+}
+
+FInfo AppleSingleFileItem::getFInfo()
+{
+    FInfo info = {0};
+
+    access()->read(9, 0, &info, sizeof(info));
+
+    return info;
+}
+
+void AppleSingleFileItem::setFInfo(FInfo info)
+{
+    access()->write(9, 0, &info, sizeof(info));
+}
+
 AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile)
     : file(std::move(aFile))
 {

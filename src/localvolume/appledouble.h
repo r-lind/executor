@@ -39,6 +39,33 @@ public:
     virtual void moveItem(const fs::path &newParent);
 };
 
+class AppleSingleHandler : public MetaDataHandler
+{
+    LocalVolume &volume;
+
+public:
+    AppleSingleHandler(LocalVolume &vol)
+        : volume(vol)
+    {
+    }
+    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry &e);
+    virtual void createFile(const fs::path& parentPath, mac_string_view name);
+};
+
+class AppleSingleFileItem : public FileItem
+{
+    std::weak_ptr<AppleSingleDoubleFile> openedFile;
+
+    std::shared_ptr<AppleSingleDoubleFile> access();
+public:
+    using FileItem::FileItem;
+
+    virtual FInfo getFInfo();
+    virtual void setFInfo(FInfo finfo);
+    virtual std::unique_ptr<OpenFile> open();
+    virtual std::unique_ptr<OpenFile> openRF();
+};
+
 class AppleSingleDoubleFile
 {
     struct EntryDescriptor
