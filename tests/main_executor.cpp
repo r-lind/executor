@@ -6,6 +6,38 @@
 
 using namespace Executor;
 
+class ExecutorTestEnvironment : public testing::Environment
+{
+    char *thingOnStack;
+public:
+    ExecutorTestEnvironment(char* thingOnStack) : thingOnStack(thingOnStack) {}
+
+    virtual void SetUp() override
+    {
+        Executor::InitMemory(thingOnStack);
+
+        memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
+        memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
+        memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
+        LM(DefVCBPtr) = 0;
+        LM(FSFCBLen) = CWC(94);
+
+        Executor::ROMlib_fileinit();
+
+        if(auto fsspec = nativePathToFSSpec(fs::current_path()))
+        {
+            WDPBRec wdpb;
+
+            wdpb.ioVRefNum = fsspec->vRefNum;
+            wdpb.ioWDDirID = fsspec->parID;
+            wdpb.ioWDProcID = CLC(FOURCC('X', 'c', 't', 'r'));
+            wdpb.ioNamePtr = fsspec->name;
+            PBOpenWD(&wdpb, false);
+            SetVol(nullptr, wdpb.ioVRefNum);
+        }
+    }
+};
+
 TEST(MemoryMgr, NewClearGetSizeDispose)
 {
     Ptr p = NewPtrClear(42);
@@ -23,27 +55,7 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
 
     char thingOnStack;
-    Executor::InitMemory(&thingOnStack);
-
-    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
-    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
-    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
-    LM(DefVCBPtr) = 0;
-    LM(FSFCBLen) = CWC(94);
-
-    Executor::ROMlib_fileinit();
-
-    if(auto fsspec = nativePathToFSSpec(fs::current_path()))
-    {
-        WDPBRec wdpb;
-
-        wdpb.ioVRefNum = fsspec->vRefNum;
-        wdpb.ioWDDirID = fsspec->parID;
-        wdpb.ioWDProcID = CLC(FOURCC('X', 'c', 't', 'r'));
-        wdpb.ioNamePtr = fsspec->name;
-        PBOpenWD(&wdpb, false);
-        SetVol(nullptr, wdpb.ioVRefNum);
-    }
+    testing::AddGlobalTestEnvironment(new ExecutorTestEnvironment(&thingOnStack));
 
     int result = RUN_ALL_TESTS();
     return result;
