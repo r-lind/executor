@@ -1,5 +1,6 @@
 #include "mac.h"
 #include "host-os-config.h"
+#include "plain.h"
 
 #ifdef MACOSX
 using namespace Executor;
@@ -13,6 +14,14 @@ ItemPtr MacHandler::handleDirEntry(const DirectoryItem& parent, const fs::direct
         return std::make_shared<MacFileItem>(parent, e.path());
     }
     return nullptr;
+}
+
+void MacHandler::createFile(const fs::path& parentPath, mac_string_view name)
+{
+    fs::path fn = toUnicodeFilename(name);
+    fs::path path = parentPath / fn;
+
+    PlainDataFork data(path, PlainDataFork::create);
 }
 
 std::unique_ptr<OpenFile> MacFileItem::open()

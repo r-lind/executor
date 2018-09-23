@@ -20,5 +20,6 @@ public:
 class MacHandler : public MetaDataHandler
 {
     virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
+    virtual void createFile(const fs::path& parentPath, mac_string_view name);
 };
 }
