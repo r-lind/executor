@@ -189,9 +189,11 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
 #ifdef MACOSX
     handlers.push_back(std::make_unique<MacHandler>());
+    defaultCreateHandler = handlers.back().get();
 #else
     handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
     handlers.push_back(std::make_unique<BasiliskHandler>(*this));
+    defaultCreateHandler = handlers.back().get();
 #endif
     handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
@@ -580,18 +582,7 @@ LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name,
 void LocalVolume::createCommon(NonexistentFile file)
 {
     fs::path parentPath = file.parent->path();
-    fs::path fn = toUnicodeFilename(file.name);
-
-    fs::ofstream(parentPath / fn);
-#ifndef MACOSX
-    // TODO: this is the responsibility of the BasiliskHandler class
-    fs::create_directory(parentPath / ".rsrc");
-    fs::create_directory(parentPath / ".finf");
-
-    fs::ofstream(parentPath / ".rsrc" / fn);
-    FInfo info = {0};
-    fs::ofstream(parentPath / ".finf" / fn).write((char*)&info, sizeof(info));
-#endif
+    defaultCreateHandler->createFile(parentPath, file.name);
     file.parent->flushCache();
 }
 void LocalVolume::PBCreate(ParmBlkPtr pb)

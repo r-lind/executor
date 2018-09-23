@@ -31,12 +31,15 @@ public:
 
 class PlainDataFork : public OpenFile
 {
-    //fs::fstream stream;
     int fd;
     fs::path path_;
 
 public:
+    struct create_t {};
+    static constexpr create_t create = {};
+
     PlainDataFork(fs::path path);
+    PlainDataFork(fs::path path, create_t);
     ~PlainDataFork();
 
     virtual size_t getEOF() override;

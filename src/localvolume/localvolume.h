@@ -33,6 +33,7 @@ class LocalVolume : public Volume
     std::map<fs::path, CNID> pathToId;
     std::unordered_map<CNID, ItemPtr> items; 
     std::vector<std::unique_ptr<MetaDataHandler>> handlers;
+    MetaDataHandler *defaultCreateHandler;
 
     std::shared_ptr<DirectoryItem> resolve(short vRef, long dirID);
     ItemPtr resolve(mac_string_view name, short vRef, long dirID);
@@ -139,6 +140,8 @@ public:
 
     virtual bool isHidden(const fs::directory_entry& e) { return false; }
     virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e) = 0;
+    virtual void createFile(const fs::path& parentPath, mac_string_view name)
+        { throw std::logic_error("createFile unimplemented"); }
 };
 
 class DirectoryHandler : public MetaDataHandler

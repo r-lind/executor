@@ -15,9 +15,17 @@ using namespace Executor;
 PlainDataFork::PlainDataFork(fs::path path)
     : path_(path)
 {
-    fd = open(path.string().c_str(), O_RDWR | O_CREAT | O_BINARY, 0644);
+    fd = open(path.string().c_str(), O_RDWR | O_BINARY, 0644);
     std::cout << "ACCESSING FILE: " << fd << " = " << path << std::endl;
 }
+
+PlainDataFork::PlainDataFork(fs::path path, create_t)
+    : path_(path)
+{
+    fd = open(path.string().c_str(), O_RDWR | O_CREAT | O_BINARY, 0644);
+    std::cout << "CREATING FILE: " << fd << " = " << path << std::endl;
+}
+
 PlainDataFork::~PlainDataFork()
 {
     close(fd);

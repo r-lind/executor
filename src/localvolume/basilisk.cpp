@@ -26,6 +26,20 @@ ItemPtr BasiliskHandler::handleDirEntry(const DirectoryItem& parent, const fs::d
     return nullptr;
 }
 
+void BasiliskHandler::createFile(const fs::path& parentPath, mac_string_view name)
+{
+    fs::path fn = toUnicodeFilename(name);
+
+    fs::ofstream(parentPath / fn);
+
+    fs::create_directory(parentPath / ".rsrc");
+    fs::create_directory(parentPath / ".finf");
+
+    fs::ofstream(parentPath / ".rsrc" / fn, std::ios::binary);
+    FInfo info = {0};
+    fs::ofstream(parentPath / ".finf" / fn, std::ios::binary).write((char*)&info, sizeof(info));
+}
+
 std::unique_ptr<OpenFile> BasiliskFileItem::open()
 {
     return std::make_unique<PlainDataFork>(path_);
@@ -41,7 +55,7 @@ FInfo BasiliskFileItem::getFInfo()
     fs::path finf = path().parent_path() / ".finf" / path().filename();
 
     FInfo info = {0};
-    fs::ifstream(finf).read((char*)&info, sizeof(info));
+    fs::ifstream(finf, std::ios::binary).read((char*)&info, sizeof(info));
 
     return info;
 }
@@ -50,7 +64,7 @@ void BasiliskFileItem::setFInfo(FInfo info)
 {
     fs::path finf = path().parent_path() / ".finf" / path().filename();
 
-    fs::ofstream(finf).write((char*)&info, sizeof(info));
+    fs::ofstream(finf, std::ios::binary).write((char*)&info, sizeof(info));
 }
 
 void BasiliskFileItem::deleteItem()
