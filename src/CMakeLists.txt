@@ -120,6 +120,7 @@ set(file_sources
     macstrings.cpp
     
     localvolume/localvolume.cpp 
+    localvolume/item.cpp
     localvolume/basilisk.cpp
     localvolume/appledouble.cpp
     localvolume/plain.cpp

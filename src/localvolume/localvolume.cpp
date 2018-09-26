@@ -18,7 +18,6 @@
 
 using namespace Executor;
 
-
 ItemPtr DirectoryHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_directory(e.path()))
@@ -37,102 +36,24 @@ ItemPtr ExtensionHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid
     return nullptr;
 }
 
-
-Item::Item(LocalVolume& vol, fs::path p)
-    : volume_(vol), path_(std::move(p))
+LocalVolume::LocalVolume(VCB& vcb, fs::path root)
+    : Volume(vcb), root(root)
 {
-    name_ = toMacRomanFilename(path_.filename());
+    cnidMapper = std::make_unique<SimpleCNIDMapper>(root);
+    items[2] = rootDirItem = std::make_shared<DirectoryItem>(*this, root);
 
-    parID_ = 1;
-    cnid_ = 2;
-}
-
-Item::Item(LocalVolume& vol, CNID parID, CNID cnid, fs::path p)
-    : volume_(vol), parID_(parID), cnid_(cnid), path_(std::move(p))
-{
-    name_ = toMacRomanFilename(path_.filename());
-}
-
-Item::~Item()
-{
-    volume_.noteItemFreed(cnid_);
-}
-
-void Item::deleteItem()
-{
-    fs::remove(path());
-}
-
-void Item::renameItem(mac_string_view newName)
-{
-    fs::path newPath = path().parent_path() / toUnicodeFilename(newName);
-    fs::rename(path(), newPath);
-    path_ = std::move(newPath);
-    name_ = newName;
-}
-
-void Item::moveItem(const fs::path& newParent)
-{
-    fs::path newPath = newParent / path().filename();
-    fs::rename(path(), newPath);
-    path_ = std::move(newPath);
-}
-
-std::unique_ptr<OpenFile> PlainFileItem::open()
-{
-    return std::make_unique<PlainDataFork>(path_);
-}
-std::unique_ptr<OpenFile> PlainFileItem::openRF()
-{
-    return std::make_unique<EmptyFork>();
-}
-
-
-DirectoryItem::DirectoryItem(LocalVolume& vol, fs::path p)
-    : Item(vol, std::move(p))
-{
-    name_ = vol.getVolumeName();
-}
-
-DirectoryItem::DirectoryItem(LocalVolume& vol, CNID parID, CNID cnid, fs::path p)
-    : Item(vol, parID, cnid, std::move(p))
-{
-}
-
-void DirectoryItem::clearCache()
-{
-    cache_valid_ = false;
-    contents_.clear();
-    contents_by_name_.clear();
-    files_.clear();
-}
-
-void DirectoryItem::populateCache()
-{
-    if(cache_valid_)
-        return;
-    
-    for(const auto& e : fs::directory_iterator(path_))
-    {
-        if(ItemPtr item = volume_.getItemForDirEntry(cnid(), e))
-        {
-            mac_string nameUpr = item->name();
-            ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-            auto inserted = contents_by_name_.emplace(nameUpr, item).second;
-            if(inserted)
-            {
-                contents_.push_back(item);
-                if(!dynamic_cast<DirectoryItem*>(item.get()))
-                    files_.push_back(item);
-            }
-            else
-            {
-                std::cout << "duplicate name mapping: " << e.path() << std::endl; 
-            }
-        }
-    }
-
-    cache_valid_ = true;
+    handlers.push_back(std::make_unique<DirectoryHandler>(*this));
+    handlers.push_back(std::make_unique<AppleSingleHandler>(*this));
+    //defaultCreateHandler = handlers.back().get();
+#ifdef MACOSX
+    handlers.push_back(std::make_unique<MacHandler>());
+    defaultCreateHandler = handlers.back().get();
+#else
+    handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
+    handlers.push_back(std::make_unique<BasiliskHandler>(*this));
+    defaultCreateHandler = handlers.back().get();
+#endif
+    handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
 void LocalVolume::cleanDirectoryCache()
@@ -181,66 +102,6 @@ void LocalVolume::flushDirectoryCache(long dirID)
                 flushDirectoryCache(dir);
         }
     }
-}
-
-
-ItemPtr DirectoryItem::tryResolve(mac_string_view name)
-{
-    assert(cache_valid_);
-    mac_string nameUpr { name };
-    ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-    auto it = contents_by_name_.find(nameUpr);
-    if(it != contents_by_name_.end())
-        return it->second;
-    std::cout << "NOT FOUND: " << std::string(name.begin(), name.end()) << " in " << path() << std::endl;
-    return {};
-}
-
-ItemPtr DirectoryItem::resolve(int index, bool includeDirectories)
-{
-    assert(cache_valid_);
-    const auto& array = includeDirectories ? contents_ : files_;
-    if(index >= 1 && index <= array.size())
-        return array[index-1];
-    throw OSErrorException(fnfErr);
-}
-
-
-void DirectoryItem::deleteItem()
-{
-    boost::system::error_code ec;
-    fs::remove(path() / ".rsrc", ec);
-    fs::remove(path() / ".finf", ec);       // TODO: individual handlers should provide this info
-
-    fs::remove(path(), ec);
-
-    if(ec)
-    {
-        if(ec == boost::system::errc::directory_not_empty)
-            throw OSErrorException(fBsyErr);
-        else
-            throw OSErrorException(paramErr);
-    }
-}
-
-LocalVolume::LocalVolume(VCB& vcb, fs::path root)
-    : Volume(vcb), root(root)
-{
-    cnidMapper = std::make_unique<SimpleCNIDMapper>(root);
-    items[2] = rootDirItem = std::make_shared<DirectoryItem>(*this, root);
-
-    handlers.push_back(std::make_unique<DirectoryHandler>(*this));
-    handlers.push_back(std::make_unique<AppleSingleHandler>(*this));
-    //defaultCreateHandler = handlers.back().get();
-#ifdef MACOSX
-    handlers.push_back(std::make_unique<MacHandler>());
-    defaultCreateHandler = handlers.back().get();
-#else
-    handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
-    handlers.push_back(std::make_unique<BasiliskHandler>(*this));
-    defaultCreateHandler = handlers.back().get();
-#endif
-    handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
 ItemPtr LocalVolume::getItemForDirEntry(CNID parID, const fs::directory_entry& entry)
@@ -340,6 +201,7 @@ std::shared_ptr<DirectoryItem> LocalVolume::resolveDir(short vRef, long dirID)
         return resolveDir(2);
     }
 }
+
 ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
 {
     if(name.empty())

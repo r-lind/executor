@@ -22,11 +22,6 @@ namespace Executor
 class OpenFile;
 class MetaDataHandler;
 
-enum class Fork
-{
-    data,
-    resource
-};
 
 
 class LocalVolume : public Volume
@@ -72,6 +67,12 @@ class LocalVolume : public Volume
 
     void createCommon(NonexistentFile file);
     void setFInfoCommon(Item& item, ParmBlkPtr pb);
+
+    enum class Fork
+    {
+        data,
+        resource
+    };
     void openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8_t permission);
     void deleteCommon(ItemPtr item);
     void renameCommon(ItemPtr item, mac_string_view newName);
