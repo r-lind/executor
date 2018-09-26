@@ -13,6 +13,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "cnidmapper.h"
+
 namespace Executor
 {
 
@@ -26,15 +28,15 @@ enum class Fork
     resource
 };
 
+
 class LocalVolume : public Volume
 {
     fs::path root;
-    long nextCNID = 3;
-    std::map<fs::path, CNID> pathToId;
-    std::unordered_map<CNID, fs::path> idToPath; 
     std::unordered_map<CNID, std::weak_ptr<Item>> items; 
     
     DirectoryItemPtr rootDirItem;
+
+    std::unique_ptr<CNIDMapper> cnidMapper;
 
     struct CachedDirectory
     {
@@ -96,9 +98,6 @@ public:
 
     ItemPtr getItemForDirEntry(CNID parID, const fs::directory_entry& path);
     ItemPtr getItemForDirEntry(CNID parID, CNID cnid, const fs::directory_entry& path);
-
-    CNID newCNID();
-
 
     mac_string getVolumeName() const;
 

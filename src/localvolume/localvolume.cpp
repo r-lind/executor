@@ -14,6 +14,8 @@
 #include "mac.h"
 #include "appledouble.h"
 
+#include "simplecnidmapper.h"
+
 using namespace Executor;
 
 
@@ -224,8 +226,7 @@ void DirectoryItem::deleteItem()
 LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     : Volume(vcb), root(root)
 {
-    pathToId[root] = 2;
-    idToPath[2] = root;
+    cnidMapper = std::make_unique<SimpleCNIDMapper>(root);
     items[2] = rootDirItem = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
@@ -248,12 +249,7 @@ ItemPtr LocalVolume::getItemForDirEntry(CNID parID, const fs::directory_entry& e
         if(handler->isHidden(entry))
             return ItemPtr();
 
-    CNID cnid;
-    auto idIt = pathToId.find(entry.path());
-    if(idIt != pathToId.end())
-        cnid = idIt->second;
-    else
-        cnid = newCNID();
+    CNID cnid = cnidMapper->cnidForPath(entry.path());
 
     auto itemIt = items.find(cnid);
     if(itemIt != items.end())
@@ -271,19 +267,12 @@ ItemPtr LocalVolume::getItemForDirEntry(CNID parID, CNID cnid, const fs::directo
     {
         if(ItemPtr item = handler->handleDirEntry(*this, parID, cnid, entry))
         {
-            pathToId.emplace(entry.path(), item->cnid());
-            idToPath.emplace(item->cnid(), entry.path());
             items.emplace(item->cnid(), item);
             return item;
         }
     }
 
     return ItemPtr();
-}
-
-CNID LocalVolume::newCNID()
-{
-    return nextCNID++;
 }
 
 void LocalVolume::noteItemFreed(long cnid)
@@ -301,15 +290,12 @@ ItemPtr LocalVolume::resolve(long cnid)
     }
 
     fs::path path;
-    {
-        auto it = idToPath.find(cnid);
-        if(it == idToPath.end())
-            throw OSErrorException(fnfErr);
-        else
-            path = it->second;
-    }
+    if(auto optionalPath = cnidMapper->pathForCNID(cnid))
+        path = *optionalPath;
+    else
+        throw OSErrorException(fnfErr);
 
-    CNID parID = pathToId.at(path.parent_path());
+    CNID parID = cnidMapper->cnidForPath(path.parent_path());
 
     if(ItemPtr item = getItemForDirEntry(parID, cnid, fs::directory_entry(path)))
         return item;
@@ -718,8 +704,7 @@ void LocalVolume::deleteCommon(ItemPtr item)
     item->deleteItem();
     
     items.erase(item->cnid());
-    pathToId.erase(item->path());
-    idToPath.erase(item->cnid());
+    cnidMapper->deleteCNID(item->cnid());
     flushDirectoryCache(item->parID());
 }
 
@@ -742,12 +727,9 @@ void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
     if(parent->tryResolve(newName))
         throw OSErrorException(dupFNErr);
     
-    fs::path oldPath = item->path();
     item->renameItem(newName);
 
-    pathToId.erase(oldPath);
-    pathToId.emplace(item->path(), item->cnid());
-    idToPath[item->cnid()] = item->path();
+    cnidMapper->moveCNID(item->cnid(), item->path());
     flushDirectoryCache(parent);
 }
 
@@ -897,12 +879,9 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
     if(newParent->tryResolve(mac_string_view(name.data(), name.size())))
         throw OSErrorException(dupFNErr);
 
-    fs::path oldPath = item->path();
     item->moveItem(newParent->path());
+    cnidMapper->moveCNID(item->cnid(), item->path());
 
-    pathToId.erase(oldPath);
-    pathToId.emplace(item->path(), item->cnid());
-    idToPath[item->cnid()] = item->path();
     flushDirectoryCache(parent);
     flushDirectoryCache(newParent);
 }
@@ -978,27 +957,10 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
     if(!fs::exists(inPath))
         return std::nullopt;
 
-    auto relpath = fs::relative(inPath, root, ec);
+    auto path = fs::canonical(inPath, ec);
     if(ec)
-        return std::nullopt;
-
-    auto path = root;
-    ItemPtr item = resolveDir(2);
-    for(auto elem : relpath)
-    {
-        if(auto dir = std::dynamic_pointer_cast<DirectoryItem>(item))
-            cacheDirectory(dir);
-        else
-            return std::nullopt;
-
-        path /= elem;
-
-        auto it = pathToId.find(path);
-        if(it == pathToId.end())
-            return std::nullopt;
-
-        item = resolve(it->second);
-    }
+        return {};
+    ItemPtr item = resolve(cnidMapper->cnidForPath(path));
 
     if(item)
     {

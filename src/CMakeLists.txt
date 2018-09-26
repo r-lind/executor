@@ -131,6 +131,10 @@ set(file_sources
     localvolume/appledouble.h
     localvolume/plain.h
     localvolume/mac.h
+
+    localvolume/cnidmapper.h
+    localvolume/simplecnidmapper.h
+    localvolume/simplecnidmapper.cpp
     )
 
 source_group(Files FILES ${file_sources})
