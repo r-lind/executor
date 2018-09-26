@@ -5,7 +5,6 @@
 #include <memory>
 #include <chrono>
 #include <map>
-#include <iostream>
 
 #include <rsys/macros.h>
 
@@ -15,32 +14,6 @@ class LocalVolume;
 class OpenFile;
 
 using CNID = long;
-
-template<class T>
-class InstanceCounter
-{
-public:
-    static int count;
-
-    void report()
-    {
-        std::cerr << "Number of " << typeid(T).name() << " instances: " << count << std::endl << std::flush;
-    }
-
-    InstanceCounter()
-    {
-        ++count;
-        report();
-    }
-
-    ~InstanceCounter()
-    {
-        --count;
-        report();
-    }
-};
-template<class T> 
-int InstanceCounter<T>::count = 0; 
 
 class DirectoryItem;
 class Item
@@ -52,7 +25,6 @@ protected:
     fs::path path_;
     mac_string name_;
 
-    InstanceCounter<Item> counter_;
     Item(LocalVolume& vol, fs::path p);
 
 public:
@@ -84,8 +56,6 @@ class DirectoryItem : public Item
     std::vector<ItemPtr>    files_;
     std::map<mac_string, ItemPtr> contents_by_name_;
     bool    cache_valid_ = false;
-
-    InstanceCounter<DirectoryItem> counter_;
 
     friend class LocalVolume;
     void clearCache();
