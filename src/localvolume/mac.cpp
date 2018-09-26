@@ -7,11 +7,11 @@ using namespace Executor;
 
 #include <sys/xattr.h>
 
-ItemPtr MacHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+ItemPtr MacHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<MacFileItem>(parent, e.path());
+        return std::make_shared<MacFileItem>(vol, parID, cnid, e.path());
     }
     return nullptr;
 }

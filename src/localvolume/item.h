@@ -5,6 +5,7 @@
 #include <memory>
 #include <chrono>
 #include <map>
+#include <iostream>
 
 #include <rsys/macros.h>
 
@@ -15,20 +16,48 @@ class OpenFile;
 
 using CNID = long;
 
+template<class T>
+class InstanceCounter
+{
+public:
+    static int count;
+
+    void report()
+    {
+        std::cerr << "Number of " << typeid(T).name() << " instances: " << count << std::endl << std::flush;
+    }
+
+    InstanceCounter()
+    {
+        ++count;
+        report();
+    }
+
+    ~InstanceCounter()
+    {
+        --count;
+        report();
+    }
+};
+template<class T> 
+int InstanceCounter<T>::count = 0; 
+
 class DirectoryItem;
 class Item
 {
 protected:
     LocalVolume& volume_;
+    CNID parID_;
+    CNID cnid_;
     fs::path path_;
     mac_string name_;
-    CNID cnid_;
-    CNID parID_;
+
+    InstanceCounter<Item> counter_;
     Item(LocalVolume& vol, fs::path p);
 
 public:
-    Item(const DirectoryItem& parent, fs::path p);
-    virtual ~Item() = default;
+    Item(LocalVolume& vol, CNID parID, CNID cnid, fs::path p);
+    virtual ~Item();
 
     operator const fs::path& () const { return path_; }
 
@@ -44,22 +73,27 @@ public:
     virtual void moveItem(const fs::path& newParent);
 };
 
+class DirectoryItem;
+
 using ItemPtr = std::shared_ptr<Item>;
+using DirectoryItemPtr = std::shared_ptr<DirectoryItem>;
 
 class DirectoryItem : public Item
 {
     std::vector<ItemPtr>    contents_;
     std::vector<ItemPtr>    files_;
     std::map<mac_string, ItemPtr> contents_by_name_;
-    std::chrono::steady_clock::time_point   cache_timestamp_;
     bool    cache_valid_ = false;
 
-public:
-    DirectoryItem(const DirectoryItem& parent, fs::path p);
-    DirectoryItem(LocalVolume& vol, fs::path p);
+    InstanceCounter<DirectoryItem> counter_;
 
-    void flushCache();
-    void updateCache();
+    friend class LocalVolume;
+    void clearCache();
+    void populateCache();
+    bool isCached() const { return cache_valid_; }
+public:
+    DirectoryItem(LocalVolume& vol, CNID parID, CNID cnid, fs::path p);
+    DirectoryItem(LocalVolume& vol, fs::path p);
 
     ItemPtr tryResolve(mac_string_view name);
     ItemPtr resolve(int index, bool includeDirectories);

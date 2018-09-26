@@ -12,15 +12,14 @@ bool AppleDoubleHandler::isHidden(const fs::directory_entry& e)
     return false;
 }
 
-
-ItemPtr AppleDoubleHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+ItemPtr AppleDoubleHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
         fs::path adpath = e.path().parent_path() / ("%" + e.path().filename().string());
         
         if(fs::is_regular_file(adpath))
-            return std::make_shared<AppleDoubleFileItem>(parent, e.path());
+            return std::make_shared<AppleDoubleFileItem>(vol, parID, cnid, e.path());
     }
     return nullptr;
 }
@@ -113,13 +112,13 @@ void AppleDoubleFileItem::moveItem(const fs::path& newParent)
 }
 
 
-ItemPtr AppleSingleHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+ItemPtr AppleSingleHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     uint64_t magic = 0;
     fs::ifstream(e.path(), std::ios::binary).read((char*)&guestref(magic), 8);
 
     if(magic == 0x0005160000020000)
-        return std::make_shared<AppleSingleFileItem>(parent, e.path());
+        return std::make_shared<AppleSingleFileItem>(vol, parID, cnid, e.path());
     else
         return nullptr;
 }

@@ -13,7 +13,7 @@ bool BasiliskHandler::isHidden(const fs::directory_entry& e)
 }
 
 
-ItemPtr BasiliskHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+ItemPtr BasiliskHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
@@ -21,7 +21,7 @@ ItemPtr BasiliskHandler::handleDirEntry(const DirectoryItem& parent, const fs::d
         fs::path finf = e.path().parent_path() / ".finf" / e.path().filename();
         
         if(fs::is_regular_file(rsrc) || fs::is_regular_file(finf))
-            return std::make_shared<BasiliskFileItem>(parent, e.path());
+            return std::make_shared<BasiliskFileItem>(vol, parID, cnid, e.path());
     }
     return nullptr;
 }

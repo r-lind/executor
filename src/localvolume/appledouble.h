@@ -14,9 +14,9 @@ public:
         : volume(vol)
     {
     }
-    virtual bool isHidden(const fs::directory_entry &e);
-    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry &e);
-    virtual void createFile(const fs::path& parentPath, mac_string_view name);
+    virtual bool isHidden(const fs::directory_entry &e) override;
+    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual void createFile(const fs::path& parentPath, mac_string_view name) override;
 };
 
 class AppleSingleDoubleFile;
@@ -29,14 +29,14 @@ class AppleDoubleFileItem : public FileItem
 public:
     using FileItem::FileItem;
 
-    virtual FInfo getFInfo();
-    virtual void setFInfo(FInfo finfo);
-    virtual std::unique_ptr<OpenFile> open();
-    virtual std::unique_ptr<OpenFile> openRF();
+    virtual FInfo getFInfo() override;
+    virtual void setFInfo(FInfo finfo) override;
+    virtual std::unique_ptr<OpenFile> open() override;
+    virtual std::unique_ptr<OpenFile> openRF() override;
 
-    virtual void deleteItem();
-    virtual void renameItem(mac_string_view newName);
-    virtual void moveItem(const fs::path &newParent);
+    virtual void deleteItem() override;
+    virtual void renameItem(mac_string_view newName) override;
+    virtual void moveItem(const fs::path &newParent) override;
 };
 
 class AppleSingleHandler : public MetaDataHandler
@@ -48,8 +48,8 @@ public:
         : volume(vol)
     {
     }
-    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry &e);
-    virtual void createFile(const fs::path& parentPath, mac_string_view name);
+    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual void createFile(const fs::path& parentPath, mac_string_view name) override;
 };
 
 class AppleSingleFileItem : public FileItem

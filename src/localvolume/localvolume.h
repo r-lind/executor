@@ -31,11 +31,25 @@ class LocalVolume : public Volume
     fs::path root;
     long nextCNID = 3;
     std::map<fs::path, CNID> pathToId;
-    std::unordered_map<CNID, ItemPtr> items; 
+    std::unordered_map<CNID, fs::path> idToPath; 
+    std::unordered_map<CNID, std::weak_ptr<Item>> items; 
+    
+    DirectoryItemPtr rootDirItem;
+
+    struct CachedDirectory
+    {
+        DirectoryItemPtr directory;
+        std::chrono::steady_clock::time_point timestamp;
+    };
+    std::list<CachedDirectory> cachedDirectories;
+
     std::vector<std::unique_ptr<MetaDataHandler>> handlers;
     MetaDataHandler *defaultCreateHandler;
 
-    std::shared_ptr<DirectoryItem> resolve(short vRef, long dirID);
+
+    ItemPtr resolve(long cnid);
+    std::shared_ptr<DirectoryItem> resolveDir(long dirID);
+    std::shared_ptr<DirectoryItem> resolveDir(short vRef, long dirID);
     ItemPtr resolve(mac_string_view name, short vRef, long dirID);
     ItemPtr resolveForInfo(mac_string_view name, short vRef, long dirID, short index, bool includeDirectories);
     ItemPtr resolveRelative(const std::shared_ptr<DirectoryItem>& base, mac_string_view name);
@@ -70,11 +84,19 @@ class LocalVolume : public Volume
 
     void getInfoCommon(CInfoPBPtr pb, InfoKind infoKind);
 
+    void cleanDirectoryCache();
 public:
+    void noteItemFreed(long cnid);
+    void cacheDirectory(DirectoryItemPtr item);
+    void flushDirectoryCache(DirectoryItemPtr item);
+    void flushDirectoryCache(long dirID);
+    
 
     std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
 
-    ItemPtr getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& path);
+    ItemPtr getItemForDirEntry(CNID parID, const fs::directory_entry& path);
+    ItemPtr getItemForDirEntry(CNID parID, CNID cnid, const fs::directory_entry& path);
+
     CNID newCNID();
 
 
@@ -139,7 +161,7 @@ public:
     virtual ~MetaDataHandler() = default;
 
     virtual bool isHidden(const fs::directory_entry& e) { return false; }
-    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e) = 0;
+    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) = 0;
     virtual void createFile(const fs::path& parentPath, mac_string_view name)
         { throw std::logic_error("createFile unimplemented"); }
 };
@@ -149,7 +171,7 @@ class DirectoryHandler : public MetaDataHandler
     LocalVolume& volume;
 public:
     DirectoryHandler(LocalVolume& vol) : volume(vol) {}
-    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
+    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
 };
 
 class ExtensionHandler : public MetaDataHandler
@@ -157,7 +179,7 @@ class ExtensionHandler : public MetaDataHandler
     LocalVolume& volume;
 public:
     ExtensionHandler(LocalVolume& vol) : volume(vol) {}
-    virtual ItemPtr handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e);
+    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
 };
 
 

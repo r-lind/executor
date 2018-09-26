@@ -17,20 +17,20 @@
 using namespace Executor;
 
 
-ItemPtr DirectoryHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+ItemPtr DirectoryHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_directory(e.path()))
     {
-        return std::make_shared<DirectoryItem>(parent, e.path());
+        return std::make_shared<DirectoryItem>(vol, parID, cnid, e.path());
     }
     return nullptr;
 }
 
-ItemPtr ExtensionHandler::handleDirEntry(const DirectoryItem& parent, const fs::directory_entry& e)
+ItemPtr ExtensionHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<PlainFileItem>(parent, e.path());
+        return std::make_shared<PlainFileItem>(vol, parID, cnid, e.path());
     }
     return nullptr;
 }
@@ -45,13 +45,15 @@ Item::Item(LocalVolume& vol, fs::path p)
     cnid_ = 2;
 }
 
-Item::Item(const DirectoryItem& parent, fs::path p)
-    : volume_(parent.volume_), path_(std::move(p))
+Item::Item(LocalVolume& vol, CNID parID, CNID cnid, fs::path p)
+    : volume_(vol), parID_(parID), cnid_(cnid), path_(std::move(p))
 {
     name_ = toMacRomanFilename(path_.filename());
+}
 
-    parID_ = parent.dirID();
-    cnid_ = volume_.newCNID();
+Item::~Item()
+{
+    volume_.noteItemFreed(cnid_);
 }
 
 void Item::deleteItem()
@@ -90,36 +92,27 @@ DirectoryItem::DirectoryItem(LocalVolume& vol, fs::path p)
     name_ = vol.getVolumeName();
 }
 
-DirectoryItem::DirectoryItem(const DirectoryItem& parent, fs::path p)
-    : Item(parent, std::move(p))
+DirectoryItem::DirectoryItem(LocalVolume& vol, CNID parID, CNID cnid, fs::path p)
+    : Item(vol, parID, cnid, std::move(p))
 {
 }
 
-void DirectoryItem::flushCache()
+void DirectoryItem::clearCache()
 {
     cache_valid_ = false;
     contents_.clear();
     contents_by_name_.clear();
     files_.clear();
 }
-void DirectoryItem::updateCache()
+
+void DirectoryItem::populateCache()
 {
-    auto now = std::chrono::steady_clock::now();
-    if(cache_valid_)
-    {
-        using namespace std::chrono_literals;
-        if(now > cache_timestamp_ + 1s)
-        {
-            std::cout << "flushed.\n";
-            flushCache();
-        }
-    }
     if(cache_valid_)
         return;
     
     for(const auto& e : fs::directory_iterator(path_))
     {
-        if(ItemPtr item = volume_.getItemForDirEntry(*this, e))
+        if(ItemPtr item = volume_.getItemForDirEntry(cnid(), e))
         {
             mac_string nameUpr = item->name();
             ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
@@ -137,13 +130,61 @@ void DirectoryItem::updateCache()
         }
     }
 
-    cache_timestamp_ = now;
     cache_valid_ = true;
 }
 
+void LocalVolume::cleanDirectoryCache()
+{
+    using namespace std::chrono_literals;
+    const auto cacheExpiryTime = 1s;
+    const size_t maxCachedDirectories = 20;
+    const auto now = std::chrono::steady_clock::now();
+    
+    while(!cachedDirectories.empty()
+        && (cachedDirectories.front().timestamp + cacheExpiryTime < now
+            || cachedDirectories.size() > maxCachedDirectories))
+    {
+        cachedDirectories.front().directory->clearCache();
+        cachedDirectories.pop_front();
+    }
+}
+
+void LocalVolume::cacheDirectory(DirectoryItemPtr item)
+{
+    cleanDirectoryCache();
+    if(!item->isCached())
+    {
+        item->populateCache();
+        cachedDirectories.push_back({item, std::chrono::steady_clock::now()});
+    }
+}
+
+void LocalVolume::flushDirectoryCache(DirectoryItemPtr item)
+{
+    if(item->isCached())
+    {
+        item->clearCache();
+        cachedDirectories.remove_if([&](const auto& p) { return p.directory == item; });
+    }
+}
+
+void LocalVolume::flushDirectoryCache(long dirID)
+{
+    auto it = items.find(dirID);
+    if(it != items.end())
+    {
+        if(auto item = it->second.lock())
+        {
+            if(auto dir = std::dynamic_pointer_cast<DirectoryItem>(item))
+                flushDirectoryCache(dir);
+        }
+    }
+}
+
+
 ItemPtr DirectoryItem::tryResolve(mac_string_view name)
 {
-    updateCache();
+    assert(cache_valid_);
     mac_string nameUpr { name };
     ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
     auto it = contents_by_name_.find(nameUpr);
@@ -155,7 +196,7 @@ ItemPtr DirectoryItem::tryResolve(mac_string_view name)
 
 ItemPtr DirectoryItem::resolve(int index, bool includeDirectories)
 {
-    updateCache();
+    assert(cache_valid_);
     const auto& array = includeDirectories ? contents_ : files_;
     if(index >= 1 && index <= array.size())
         return array[index-1];
@@ -184,7 +225,8 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     : Volume(vcb), root(root)
 {
     pathToId[root] = 2;
-    items[2] = std::make_shared<DirectoryItem>(*this, root);
+    idToPath[2] = root;
+    items[2] = rootDirItem = std::make_shared<DirectoryItem>(*this, root);
 
     handlers.push_back(std::make_unique<DirectoryHandler>(*this));
     handlers.push_back(std::make_unique<AppleSingleHandler>(*this));
@@ -200,21 +242,37 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     handlers.push_back(std::make_unique<ExtensionHandler>(*this));
 }
 
-ItemPtr LocalVolume::getItemForDirEntry(const DirectoryItem& parent, const fs::directory_entry& entry)
+ItemPtr LocalVolume::getItemForDirEntry(CNID parID, const fs::directory_entry& entry)
 {
     for(auto& handler : handlers)
         if(handler->isHidden(entry))
             return ItemPtr();
 
-    auto it = pathToId.find(entry.path());
-    if(it != pathToId.end())
-        return items.at(it->second);
+    CNID cnid;
+    auto idIt = pathToId.find(entry.path());
+    if(idIt != pathToId.end())
+        cnid = idIt->second;
+    else
+        cnid = newCNID();
 
+    auto itemIt = items.find(cnid);
+    if(itemIt != items.end())
+    {
+        if(auto itemPtr = itemIt->second.lock())
+            return itemPtr;
+    }
+
+    return getItemForDirEntry(parID, cnid, entry);
+}
+
+ItemPtr LocalVolume::getItemForDirEntry(CNID parID, CNID cnid, const fs::directory_entry& entry)
+{
     for(auto& handler : handlers)
     {
-        if(ItemPtr item = handler->handleDirEntry(parent, entry))
+        if(ItemPtr item = handler->handleDirEntry(*this, parID, cnid, entry))
         {
             pathToId.emplace(entry.path(), item->cnid());
+            idToPath.emplace(item->cnid(), entry.path());
             items.emplace(item->cnid(), item);
             return item;
         }
@@ -228,44 +286,85 @@ CNID LocalVolume::newCNID()
     return nextCNID++;
 }
 
-std::shared_ptr<DirectoryItem> LocalVolume::resolve(short vRef, long dirID)
+void LocalVolume::noteItemFreed(long cnid)
 {
-    if(dirID)
+    items.erase(cnid);
+}
+
+ItemPtr LocalVolume::resolve(long cnid)
+{
     {
-        auto it = items.find(dirID);
-        if(it == items.end())
+        auto it = items.find(cnid);
+        if(it != items.end())
+            if(ItemPtr item = it->second.lock())
+                return item;
+    }
+
+    fs::path path;
+    {
+        auto it = idToPath.find(cnid);
+        if(it == idToPath.end())
             throw OSErrorException(fnfErr);
-        else if(auto dirItem = std::dynamic_pointer_cast<DirectoryItem>(it->second))
+        else
+            path = it->second;
+    }
+
+    CNID parID = pathToId.at(path.parent_path());
+
+    if(ItemPtr item = getItemForDirEntry(parID, cnid, fs::directory_entry(path)))
+        return item;
+    else
+        throw OSErrorException(fnfErr);
+}
+
+std::shared_ptr<DirectoryItem> LocalVolume::resolveDir(long dirID)
+{
+    try
+    {
+        if(auto dirItem = std::dynamic_pointer_cast<DirectoryItem>(resolve(dirID)))
             return dirItem;
         else
-            throw OSErrorException(fnfErr); // not a directory
+            throw OSErrorException(dirNFErr); // not a directory
     }
+    catch(OSErrorException& e)
+    {
+        if(e.code == fnfErr)
+            throw OSErrorException(dirNFErr);
+        else
+            throw;
+    }
+}
+
+std::shared_ptr<DirectoryItem> LocalVolume::resolveDir(short vRef, long dirID)
+{
+    if(dirID)
+        return resolveDir(dirID);
     else if(ISWDNUM(vRef))
     {
         auto wdp = WDNUMTOWDP(vRef);
-        return resolve(CW(vcb.vcbVRefNum), CL(wdp->dirid));
+        return resolveDir(CL(wdp->dirid));
     }
     else if(vRef == 0)
     {
-        return resolve(CW(vcb.vcbVRefNum), CL(DefDirID));
+        return resolveDir(CL(DefDirID));
     }
     else
     {
         // "poor man's search path": not implemented
-        return resolve(CW(vcb.vcbVRefNum), 2);
+        return resolveDir(2);
     }
 }
 ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
 {
     if(name.empty())
-        return resolve(vRef, dirID);
+        return resolveDir(vRef, dirID);
 
     size_t colon = name.find(':');
 
         // special case: directory ID 1 is a funny thing...
     if(dirID == 1 && (colon == 0 || colon == mac_string_view::npos))
     {
-        std::shared_ptr<DirectoryItem> dir = resolve(vRef, 2);
+        std::shared_ptr<DirectoryItem> dir = resolveDir(vRef, 2);
 
         size_t afterColon = colon == 0 ? 1 : 0;
         size_t rest = colon == 0 ? name.find(':', 1) : mac_string_view::npos;
@@ -285,12 +384,13 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
     }
     else if(colon != mac_string_view::npos)
     {
-        std::shared_ptr<DirectoryItem> dir = resolve(vRef, colon == 0 ? dirID : 2);
+        std::shared_ptr<DirectoryItem> dir = resolveDir(vRef, colon == 0 ? dirID : 2);
         return resolveRelative(dir, name.substr(colon));
     }
     else
     {
-        std::shared_ptr<DirectoryItem> dir = resolve(vRef, dirID);
+        std::shared_ptr<DirectoryItem> dir = resolveDir(vRef, dirID);
+        cacheDirectory(dir);
         if(auto file = dir->tryResolve(name))
             return file;
         else
@@ -316,12 +416,11 @@ ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base,
     
     if(colon == p)
     {
-        if(base->parID() == 1)
-            throw OSErrorException(dirNFErr);
-        item = items.at(base->parID());
+        item = resolveDir(base->parID());
     }
     else
     {
+        cacheDirectory(base);
         item = base->tryResolve(mac_string_view(p, colon));
         if(!item)
         {
@@ -346,13 +445,14 @@ ItemPtr LocalVolume::resolveForInfo(mac_string_view name, short vRef, long dirID
 {
     if(index > 0)
     {
-        auto dir = resolve(vRef, dirID);
+        auto dir = resolveDir(vRef, dirID);
+        cacheDirectory(dir);
         return dir->resolve(index, includeDirectories);
     }
     else if(index == 0 && !name.empty())
         return resolve(name, vRef, dirID);
     else
-        return resolve(vRef, dirID);
+        return resolveDir(vRef, dirID);
 }
 
 mac_string LocalVolume::getVolumeName() const
@@ -566,7 +666,7 @@ LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name,
     auto colon = name.rfind(':');
 
     if(colon == mac_string_view::npos)
-        parent = resolve(vRefNum, dirID);
+        parent = resolveDir(vRefNum, dirID);
     else
     {
         parent = std::dynamic_pointer_cast<DirectoryItem>(resolve(mac_string_view(name.begin(), colon), vRefNum, dirID));
@@ -575,6 +675,7 @@ LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name,
         name = mac_string_view(name.begin() + colon+1, name.end());
     }
 
+    cacheDirectory(parent);
     if(parent->tryResolve(name))
         throw OSErrorException(dupFNErr);
     
@@ -585,7 +686,7 @@ void LocalVolume::createCommon(NonexistentFile file)
 {
     fs::path parentPath = file.parent->path();
     defaultCreateHandler->createFile(parentPath, file.name);
-    file.parent->flushCache();
+    flushDirectoryCache(file.parent);
 }
 void LocalVolume::PBCreate(ParmBlkPtr pb)
 {
@@ -602,8 +703,9 @@ void LocalVolume::PBDirCreate(HParmBlkPtr pb)
     fs::path fn = toUnicodeFilename(name);
     fs::create_directory(parent->path() / fn);
 
-    parent->flushCache();
+    flushDirectoryCache(parent);
 
+    cacheDirectory(parent);
     auto item = parent->tryResolve(name);
     if(!item)
         throw OSErrorException(ioErr);
@@ -617,7 +719,8 @@ void LocalVolume::deleteCommon(ItemPtr item)
     
     items.erase(item->cnid());
     pathToId.erase(item->path());
-    dynamic_cast<DirectoryItem&>(*items.at(item->parID())).flushCache();
+    idToPath.erase(item->cnid());
+    flushDirectoryCache(item->parID());
 }
 
 void LocalVolume::PBDelete(ParmBlkPtr pb)
@@ -634,8 +737,9 @@ void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
     if(newName.find(':') != mac_string_view::npos)
         throw OSErrorException(bdNamErr);
 
-    auto& parent = dynamic_cast<DirectoryItem&>(*items.at(item->parID()));
-    if(parent.tryResolve(newName))
+    auto parent = resolveDir(item->parID());
+    cacheDirectory(parent);
+    if(parent->tryResolve(newName))
         throw OSErrorException(dupFNErr);
     
     fs::path oldPath = item->path();
@@ -643,7 +747,8 @@ void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
 
     pathToId.erase(oldPath);
     pathToId.emplace(item->path(), item->cnid());
-    parent.flushCache();
+    idToPath[item->cnid()] = item->path();
+    flushDirectoryCache(parent);
 }
 
 
@@ -787,7 +892,8 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
 
     auto name = item->name();
 
-    auto &parent = dynamic_cast<DirectoryItem &>(*items.at(item->parID()));
+    auto parent = resolveDir(item->parID());
+    cacheDirectory(newParent);
     if(newParent->tryResolve(mac_string_view(name.data(), name.size())))
         throw OSErrorException(dupFNErr);
 
@@ -796,8 +902,9 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
 
     pathToId.erase(oldPath);
     pathToId.emplace(item->path(), item->cnid());
-    parent.flushCache();
-    newParent->flushCache();
+    idToPath[item->cnid()] = item->path();
+    flushDirectoryCache(parent);
+    flushDirectoryCache(newParent);
 }
 
 void LocalVolume::PBFlushFile(ParmBlkPtr pb)
@@ -876,11 +983,11 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
         return std::nullopt;
 
     auto path = root;
-    ItemPtr item = items[2];
+    ItemPtr item = resolveDir(2);
     for(auto elem : relpath)
     {
-        if(auto dir = dynamic_cast<DirectoryItem*>(item.get()))
-            dir->updateCache();
+        if(auto dir = std::dynamic_pointer_cast<DirectoryItem>(item))
+            cacheDirectory(dir);
         else
             return std::nullopt;
 
@@ -890,7 +997,7 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
         if(it == pathToId.end())
             return std::nullopt;
 
-        item = items[it->second];
+        item = resolve(it->second);
     }
 
     if(item)
