@@ -3,7 +3,7 @@
 
 using namespace Executor;
 
-bool AppleDoubleHandler::isHidden(const fs::directory_entry& e)
+bool AppleDoubleItemFactory::isHidden(const fs::directory_entry& e)
 {
     if(e.path().filename().string().substr(0,1) == "%")
         return true;
@@ -12,7 +12,7 @@ bool AppleDoubleHandler::isHidden(const fs::directory_entry& e)
     return false;
 }
 
-ItemPtr AppleDoubleHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr AppleDoubleItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
@@ -24,7 +24,7 @@ ItemPtr AppleDoubleHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cn
     return nullptr;
 }
 
-void AppleDoubleHandler::createFile(const fs::path& parentPath, mac_string_view name)
+void AppleDoubleItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
 {
     fs::path fn = toUnicodeFilename(name);
     fs::path path = parentPath / fn;
@@ -112,7 +112,7 @@ void AppleDoubleFileItem::moveItem(const fs::path& newParent)
 }
 
 
-ItemPtr AppleSingleHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr AppleSingleItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     uint64_t magic = 0;
     fs::ifstream(e.path(), std::ios::binary).read((char*)&guestref(magic), 8);
@@ -123,7 +123,7 @@ ItemPtr AppleSingleHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cn
         return nullptr;
 }
 
-void AppleSingleHandler::createFile(const fs::path& parentPath, mac_string_view name)
+void AppleSingleItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
 {
     fs::path fn = toUnicodeFilename(name);
     fs::path path = parentPath / fn;

@@ -1,4 +1,8 @@
 #include "item.h"
+#include "localvolume.h"
+
+#include <OSUtil.h>
+#include <iostream>
 
 using namespace Executor;
 
@@ -81,7 +85,7 @@ void DirectoryItem::populateCache()
             }
             else
             {
-                std::cout << "duplicate name mapping: " << e.path() << std::endl; 
+                std::cerr << "duplicate name mapping: " << e.path() << std::endl; 
             }
         }
     }
@@ -97,7 +101,6 @@ ItemPtr DirectoryItem::tryResolve(mac_string_view name)
     auto it = contents_by_name_.find(nameUpr);
     if(it != contents_by_name_.end())
         return it->second;
-    std::cout << "NOT FOUND: " << std::string(name.begin(), name.end()) << " in " << path() << std::endl;
     return {};
 }
 
@@ -115,7 +118,7 @@ void DirectoryItem::deleteItem()
 {
     boost::system::error_code ec;
     fs::remove(path() / ".rsrc", ec);
-    fs::remove(path() / ".finf", ec);       // TODO: individual handlers should provide this info
+    fs::remove(path() / ".finf", ec);       // TODO: individual ItemFactories should provide this info
 
     fs::remove(path(), ec);
 
@@ -126,13 +129,4 @@ void DirectoryItem::deleteItem()
         else
             throw OSErrorException(paramErr);
     }
-}
-
-std::unique_ptr<OpenFile> PlainFileItem::open()
-{
-    return std::make_unique<PlainDataFork>(path_);
-}
-std::unique_ptr<OpenFile> PlainFileItem::openRF()
-{
-    return std::make_unique<EmptyFork>();
 }

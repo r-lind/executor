@@ -18,7 +18,7 @@
 
 using namespace Executor;
 
-ItemPtr DirectoryHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr DirectoryItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_directory(e.path()))
     {
@@ -27,7 +27,7 @@ ItemPtr DirectoryHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid
     return nullptr;
 }
 
-ItemPtr ExtensionHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr ExtensionItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
@@ -42,18 +42,18 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     cnidMapper = std::make_unique<SimpleCNIDMapper>(root);
     items[2] = rootDirItem = std::make_shared<DirectoryItem>(*this, root);
 
-    handlers.push_back(std::make_unique<DirectoryHandler>(*this));
-    handlers.push_back(std::make_unique<AppleSingleHandler>(*this));
-    //defaultCreateHandler = handlers.back().get();
+    itemFactories.push_back(std::make_unique<DirectoryItemFactory>(*this));
+    itemFactories.push_back(std::make_unique<AppleSingleItemFactory>(*this));
+    //defaultItemFactory = itemFactories.back().get();
 #ifdef MACOSX
-    handlers.push_back(std::make_unique<MacHandler>());
-    defaultCreateHandler = handlers.back().get();
+    itemFactories.push_back(std::make_unique<MacItemFactory>());
+    defaultItemFactory = itemFactories.back().get();
 #else
-    handlers.push_back(std::make_unique<AppleDoubleHandler>(*this));
-    handlers.push_back(std::make_unique<BasiliskHandler>(*this));
-    defaultCreateHandler = handlers.back().get();
+    itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>(*this));
+    itemFactories.push_back(std::make_unique<BasiliskItemFactory>(*this));
+    defaultItemFactory = itemFactories.back().get();
 #endif
-    handlers.push_back(std::make_unique<ExtensionHandler>(*this));
+    itemFactories.push_back(std::make_unique<ExtensionItemFactory>(*this));
 }
 
 void LocalVolume::cleanDirectoryCache()
@@ -106,8 +106,8 @@ void LocalVolume::flushDirectoryCache(long dirID)
 
 ItemPtr LocalVolume::getItemForDirEntry(CNID parID, const fs::directory_entry& entry)
 {
-    for(auto& handler : handlers)
-        if(handler->isHidden(entry))
+    for(auto& itemFactory : itemFactories)
+        if(itemFactory->isHidden(entry))
             return ItemPtr();
 
     CNID cnid = cnidMapper->cnidForPath(entry.path());
@@ -124,9 +124,9 @@ ItemPtr LocalVolume::getItemForDirEntry(CNID parID, const fs::directory_entry& e
 
 ItemPtr LocalVolume::getItemForDirEntry(CNID parID, CNID cnid, const fs::directory_entry& entry)
 {
-    for(auto& handler : handlers)
+    for(auto& itemFactory : itemFactories)
     {
-        if(ItemPtr item = handler->handleDirEntry(*this, parID, cnid, entry))
+        if(ItemPtr item = itemFactory->createItemForDirEntry(*this, parID, cnid, entry))
         {
             items.emplace(item->cnid(), item);
             return item;
@@ -533,7 +533,7 @@ LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name,
 void LocalVolume::createCommon(NonexistentFile file)
 {
     fs::path parentPath = file.parent->path();
-    defaultCreateHandler->createFile(parentPath, file.name);
+    defaultItemFactory->createFile(parentPath, file.name);
     flushDirectoryCache(file.parent);
 }
 void LocalVolume::PBCreate(ParmBlkPtr pb)

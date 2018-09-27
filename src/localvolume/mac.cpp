@@ -7,7 +7,7 @@ using namespace Executor;
 
 #include <sys/xattr.h>
 
-ItemPtr MacHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr MacItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
@@ -16,7 +16,7 @@ ItemPtr MacHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, cons
     return nullptr;
 }
 
-void MacHandler::createFile(const fs::path& parentPath, mac_string_view name)
+void MacItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
 {
     fs::path fn = toUnicodeFilename(name);
     fs::path path = parentPath / fn;

@@ -20,7 +20,7 @@ namespace Executor
 
 
 class OpenFile;
-class MetaDataHandler;
+class ItemFactory;
 
 
 
@@ -40,8 +40,8 @@ class LocalVolume : public Volume
     };
     std::list<CachedDirectory> cachedDirectories;
 
-    std::vector<std::unique_ptr<MetaDataHandler>> handlers;
-    MetaDataHandler *defaultCreateHandler;
+    std::vector<std::unique_ptr<ItemFactory>> itemFactories;
+    ItemFactory *defaultItemFactory;
 
 
     ItemPtr resolve(long cnid);
@@ -155,31 +155,31 @@ public:
     virtual void PBSetFVers(ParmBlkPtr pb) override;
 };
 
-class MetaDataHandler
+class ItemFactory
 {
 public:
-    virtual ~MetaDataHandler() = default;
+    virtual ~ItemFactory() = default;
 
     virtual bool isHidden(const fs::directory_entry& e) { return false; }
-    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) = 0;
+    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) = 0;
     virtual void createFile(const fs::path& parentPath, mac_string_view name)
         { throw std::logic_error("createFile unimplemented"); }
 };
 
-class DirectoryHandler : public MetaDataHandler
+class DirectoryItemFactory : public ItemFactory
 {
     LocalVolume& volume;
 public:
-    DirectoryHandler(LocalVolume& vol) : volume(vol) {}
-    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    DirectoryItemFactory(LocalVolume& vol) : volume(vol) {}
+    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
 };
 
-class ExtensionHandler : public MetaDataHandler
+class ExtensionItemFactory : public ItemFactory
 {
     LocalVolume& volume;
 public:
-    ExtensionHandler(LocalVolume& vol) : volume(vol) {}
-    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    ExtensionItemFactory(LocalVolume& vol) : volume(vol) {}
+    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
 };
 
 

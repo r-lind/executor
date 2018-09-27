@@ -3,7 +3,7 @@
 
 using namespace Executor;
 
-bool BasiliskHandler::isHidden(const fs::directory_entry& e)
+bool BasiliskItemFactory::isHidden(const fs::directory_entry& e)
 {
     if(e.path().filename().string() == ".rsrc")
         return true;
@@ -13,7 +13,7 @@ bool BasiliskHandler::isHidden(const fs::directory_entry& e)
 }
 
 
-ItemPtr BasiliskHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr BasiliskItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
@@ -26,7 +26,7 @@ ItemPtr BasiliskHandler::handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid,
     return nullptr;
 }
 
-void BasiliskHandler::createFile(const fs::path& parentPath, mac_string_view name)
+void BasiliskItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
 {
     fs::path fn = toUnicodeFilename(name);
 

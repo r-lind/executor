@@ -17,9 +17,9 @@ public:
 };
 
 
-class MacHandler : public MetaDataHandler
+class MacItemFactory : public ItemFactory
 {
-    virtual ItemPtr handleDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
     virtual void createFile(const fs::path& parentPath, mac_string_view name) override;
 };
 }

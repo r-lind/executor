@@ -2,6 +2,7 @@
 
 #include "localvolume.h"
 #include "item.h"
+#include <rsys/macros.h>
 
 namespace Executor
 {
@@ -10,16 +11,7 @@ class PlainFileItem : public FileItem
 public:
     using FileItem::FileItem;
 
-    virtual FInfo getFInfo()
-    {
-        return FInfo{
-            TICKX("TEXT"),
-            TICKX("ttxt"),
-            CWC(0), // fdFlags
-            { CWC(0), CWC(0) }, // fdLocation
-            CWC(0) // fdFldr
-        };
-    }
+    virtual FInfo getFInfo();
 
     virtual void setFInfo(FInfo finfo)
     {
