@@ -7,11 +7,11 @@ using namespace Executor;
 
 #include <sys/xattr.h>
 
-ItemPtr MacItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr MacItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<MacFileItem>(vol, parID, cnid, e.path());
+        return std::make_shared<MacFileItem>(itemcache, parID, cnid, e.path());
     }
     return nullptr;
 }

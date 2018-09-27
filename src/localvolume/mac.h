@@ -19,7 +19,7 @@ public:
 
 class MacItemFactory : public ItemFactory
 {
-    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) override;
     virtual void createFile(const fs::path& parentPath, mac_string_view name) override;
 };
 }

@@ -119,19 +119,25 @@ set(file_sources
     volume.cpp
     macstrings.cpp
     
-    localvolume/localvolume.cpp 
-    localvolume/item.cpp
-    localvolume/basilisk.cpp
-    localvolume/appledouble.cpp
-    localvolume/plain.cpp
-    localvolume/mac.cpp
-
     localvolume/localvolume.h 
+    localvolume/localvolume.cpp 
+
+    localvolume/openfile.h
+
     localvolume/item.h 
+    localvolume/item.cpp
+
+    localvolume/itemcache.h
+    localvolume/itemcache.cpp
+
     localvolume/basilisk.h
+    localvolume/basilisk.cpp
     localvolume/appledouble.h
+    localvolume/appledouble.cpp
     localvolume/plain.h
+    localvolume/plain.cpp
     localvolume/mac.h
+    localvolume/mac.cpp
 
     localvolume/cnidmapper.h
     localvolume/simplecnidmapper.h

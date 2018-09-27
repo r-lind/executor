@@ -1,29 +1,23 @@
 #include "item.h"
-#include "localvolume.h"
+#include "itemcache.h"
 
 #include <OSUtil.h>
 #include <iostream>
 
 using namespace Executor;
 
-Item::Item(LocalVolume& vol, fs::path p)
-    : volume_(vol), path_(std::move(p))
+Item::Item(ItemCache& itemcache, CNID parID, CNID cnid, fs::path p, mac_string_view name)
+    : itemcache_(itemcache), parID_(parID), cnid_(cnid), path_(std::move(p))
 {
-    name_ = toMacRomanFilename(path_.filename());
-
-    parID_ = 1;
-    cnid_ = 2;
-}
-
-Item::Item(LocalVolume& vol, CNID parID, CNID cnid, fs::path p)
-    : volume_(vol), parID_(parID), cnid_(cnid), path_(std::move(p))
-{
-    name_ = toMacRomanFilename(path_.filename());
+    if(name.empty())
+        name_ = toMacRomanFilename(path_.filename());
+    else
+        name_ = name;
 }
 
 Item::~Item()
 {
-    volume_.noteItemFreed(cnid_);
+    itemcache_.noteItemFreed(cnid_);
 }
 
 void Item::deleteItem()
@@ -46,15 +40,13 @@ void Item::moveItem(const fs::path& newParent)
     path_ = std::move(newPath);
 }
 
-DirectoryItem::DirectoryItem(LocalVolume& vol, fs::path p)
-    : Item(vol, std::move(p))
+ItemPtr DirectoryItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
-    name_ = vol.getVolumeName();
-}
-
-DirectoryItem::DirectoryItem(LocalVolume& vol, CNID parID, CNID cnid, fs::path p)
-    : Item(vol, parID, cnid, std::move(p))
-{
+    if(fs::is_directory(e.path()))
+    {
+        return std::make_shared<DirectoryItem>(itemcache, parID, cnid, e.path());
+    }
+    return nullptr;
 }
 
 void DirectoryItem::clearCache()
@@ -72,7 +64,7 @@ void DirectoryItem::populateCache()
     
     for(const auto& e : fs::directory_iterator(path_))
     {
-        if(ItemPtr item = volume_.getItemForDirEntry(cnid(), e))
+        if(ItemPtr item = itemcache_.getItemForDirEntry(cnid(), e))
         {
             mac_string nameUpr = item->name();
             ROMlib_UprString(nameUpr.data(), false, nameUpr.size());

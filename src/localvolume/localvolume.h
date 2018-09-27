@@ -13,7 +13,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "cnidmapper.h"
 
 namespace Executor
 {
@@ -24,27 +23,16 @@ class ItemFactory;
 
 
 
-class LocalVolume : public Volume
+class LocalVolume : public Volume, private ItemFactory
 {
     fs::path root;
-    std::unordered_map<CNID, std::weak_ptr<Item>> items; 
-    
-    DirectoryItemPtr rootDirItem;
 
-    std::unique_ptr<CNIDMapper> cnidMapper;
-
-    struct CachedDirectory
-    {
-        DirectoryItemPtr directory;
-        std::chrono::steady_clock::time_point timestamp;
-    };
-    std::list<CachedDirectory> cachedDirectories;
-
+    std::unique_ptr<ItemCache> itemCache;
     std::vector<std::unique_ptr<ItemFactory>> itemFactories;
     ItemFactory *defaultItemFactory;
 
 
-    ItemPtr resolve(long cnid);
+    //ItemPtr resolve(long cnid);
     std::shared_ptr<DirectoryItem> resolveDir(long dirID);
     std::shared_ptr<DirectoryItem> resolveDir(short vRef, long dirID);
     ItemPtr resolve(mac_string_view name, short vRef, long dirID);
@@ -87,18 +75,11 @@ class LocalVolume : public Volume
 
     void getInfoCommon(CInfoPBPtr pb, InfoKind infoKind);
 
-    void cleanDirectoryCache();
+    virtual bool isHidden(const fs::directory_entry& e) override;
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+
 public:
-    void noteItemFreed(long cnid);
-    void cacheDirectory(DirectoryItemPtr item);
-    void flushDirectoryCache(DirectoryItemPtr item);
-    void flushDirectoryCache(long dirID);
-    
-
     std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
-
-    ItemPtr getItemForDirEntry(CNID parID, const fs::directory_entry& path);
-    ItemPtr getItemForDirEntry(CNID parID, CNID cnid, const fs::directory_entry& path);
 
     mac_string getVolumeName() const;
 
@@ -155,52 +136,14 @@ public:
     virtual void PBSetFVers(ParmBlkPtr pb) override;
 };
 
-class ItemFactory
-{
-public:
-    virtual ~ItemFactory() = default;
-
-    virtual bool isHidden(const fs::directory_entry& e) { return false; }
-    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) = 0;
-    virtual void createFile(const fs::path& parentPath, mac_string_view name)
-        { throw std::logic_error("createFile unimplemented"); }
-};
-
-class DirectoryItemFactory : public ItemFactory
-{
-    LocalVolume& volume;
-public:
-    DirectoryItemFactory(LocalVolume& vol) : volume(vol) {}
-    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
-};
 
 class ExtensionItemFactory : public ItemFactory
 {
-    LocalVolume& volume;
 public:
-    ExtensionItemFactory(LocalVolume& vol) : volume(vol) {}
-    virtual ItemPtr createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) override;
 };
 
 
-class OpenFile
-{
-public:
-    virtual ~OpenFile() = default;
-
-    virtual size_t getEOF() = 0;
-    virtual void setEOF(size_t sz) { throw OSErrorException(wrPermErr); }
-    virtual size_t read(size_t offset, void *p, size_t n) = 0;
-    virtual size_t write(size_t offset, void *p, size_t n) { throw OSErrorException(wrPermErr); }
-};
-
-
-class EmptyFork : public OpenFile
-{
-public:
-    virtual size_t getEOF() override { return 0; }
-    virtual size_t read(size_t offset, void *p, size_t n) override { return 0; }
-};
 
 
 } /* namespace Executor */

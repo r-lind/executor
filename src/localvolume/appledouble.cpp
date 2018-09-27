@@ -12,14 +12,14 @@ bool AppleDoubleItemFactory::isHidden(const fs::directory_entry& e)
     return false;
 }
 
-ItemPtr AppleDoubleItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr AppleDoubleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
         fs::path adpath = e.path().parent_path() / ("%" + e.path().filename().string());
         
         if(fs::is_regular_file(adpath))
-            return std::make_shared<AppleDoubleFileItem>(vol, parID, cnid, e.path());
+            return std::make_shared<AppleDoubleFileItem>(itemcache, parID, cnid, e.path());
     }
     return nullptr;
 }
@@ -112,13 +112,13 @@ void AppleDoubleFileItem::moveItem(const fs::path& newParent)
 }
 
 
-ItemPtr AppleSingleItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr AppleSingleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     uint64_t magic = 0;
     fs::ifstream(e.path(), std::ios::binary).read((char*)&guestref(magic), 8);
 
     if(magic == 0x0005160000020000)
-        return std::make_shared<AppleSingleFileItem>(vol, parID, cnid, e.path());
+        return std::make_shared<AppleSingleFileItem>(itemcache, parID, cnid, e.path());
     else
         return nullptr;
 }

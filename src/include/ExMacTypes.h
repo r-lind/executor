@@ -50,6 +50,14 @@ typedef INTEGER OSErr;
 typedef LONGINT OSType;
 typedef LONGINT ResType;
 
+class OSErrorException : public std::runtime_error
+{
+public:
+    OSErr code;
+
+    OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
+};
+
 struct QHdr
 {
     GUEST_STRUCT;

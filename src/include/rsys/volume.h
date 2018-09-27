@@ -5,14 +5,6 @@
 
 namespace Executor
 {
-    class OSErrorException : public std::runtime_error
-    {
-    public:
-        OSErr code;
-
-        OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
-    };
-
     class Volume
     {
     protected:

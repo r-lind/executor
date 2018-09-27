@@ -5,30 +5,33 @@
 #include <FileMgr.h>
 
 #include <memory>
-#include <chrono>
 #include <map>
 
 namespace Executor
 {
+class ItemCache;
 class LocalVolume;
 class OpenFile;
 
 using CNID = long;
 
+class Item;
 class DirectoryItem;
+
+using ItemPtr = std::shared_ptr<Item>;
+using DirectoryItemPtr = std::shared_ptr<DirectoryItem>;
+
 class Item
 {
 protected:
-    LocalVolume& volume_;
+    ItemCache& itemcache_;
     CNID parID_;
     CNID cnid_;
     fs::path path_;
     mac_string name_;
 
-    Item(LocalVolume& vol, fs::path p);
-
 public:
-    Item(LocalVolume& vol, CNID parID, CNID cnid, fs::path p);
+    Item(ItemCache& itemcache, CNID parID, CNID cnid, fs::path p, mac_string_view name = {});
     virtual ~Item();
 
     operator const fs::path& () const { return path_; }
@@ -45,10 +48,24 @@ public:
     virtual void moveItem(const fs::path& newParent);
 };
 
-class DirectoryItem;
 
-using ItemPtr = std::shared_ptr<Item>;
-using DirectoryItemPtr = std::shared_ptr<DirectoryItem>;
+class ItemFactory
+{
+public:
+    virtual ~ItemFactory() = default;
+
+    virtual bool isHidden(const fs::directory_entry& e) { return false; }
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) = 0;
+    virtual void createFile(const fs::path& parentPath, mac_string_view name)
+        { throw std::logic_error("createFile unimplemented"); }
+};
+
+
+class DirectoryItemFactory : public ItemFactory
+{
+public:
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+};
 
 class DirectoryItem : public Item
 {
@@ -57,13 +74,12 @@ class DirectoryItem : public Item
     std::map<mac_string, ItemPtr> contents_by_name_;
     bool    cache_valid_ = false;
 
-    friend class LocalVolume;
+    friend class ItemCache;
     void clearCache();
     void populateCache();
     bool isCached() const { return cache_valid_; }
 public:
-    DirectoryItem(LocalVolume& vol, CNID parID, CNID cnid, fs::path p);
-    DirectoryItem(LocalVolume& vol, fs::path p);
+    using Item::Item;
 
     ItemPtr tryResolve(mac_string_view name);
     ItemPtr resolve(int index, bool includeDirectories);
@@ -74,7 +90,6 @@ public:
 
     virtual void deleteItem();
 };
-
 
 class FileItem : public Item
 {

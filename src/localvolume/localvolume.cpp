@@ -15,23 +15,16 @@
 #include "appledouble.h"
 
 #include "simplecnidmapper.h"
+#include "itemcache.h"
 
 using namespace Executor;
 
-ItemPtr DirectoryItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
-{
-    if(fs::is_directory(e.path()))
-    {
-        return std::make_shared<DirectoryItem>(vol, parID, cnid, e.path());
-    }
-    return nullptr;
-}
 
-ItemPtr ExtensionItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr ExtensionItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<PlainFileItem>(vol, parID, cnid, e.path());
+        return std::make_shared<PlainFileItem>(itemcache, parID, cnid, e.path());
     }
     return nullptr;
 }
@@ -39,147 +32,53 @@ ItemPtr ExtensionItemFactory::createItemForDirEntry(LocalVolume& vol, CNID parID
 LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     : Volume(vcb), root(root)
 {
-    cnidMapper = std::make_unique<SimpleCNIDMapper>(root);
-    items[2] = rootDirItem = std::make_shared<DirectoryItem>(*this, root);
+    itemCache = std::make_unique<ItemCache>(
+            root,
+            getVolumeName(),
+            std::make_unique<SimpleCNIDMapper>(root),
+            static_cast<ItemFactory*>(this)
+        );
 
-    itemFactories.push_back(std::make_unique<DirectoryItemFactory>(*this));
-    itemFactories.push_back(std::make_unique<AppleSingleItemFactory>(*this));
+    itemFactories.push_back(std::make_unique<DirectoryItemFactory>());
+    itemFactories.push_back(std::make_unique<AppleSingleItemFactory>());
     //defaultItemFactory = itemFactories.back().get();
 #ifdef MACOSX
     itemFactories.push_back(std::make_unique<MacItemFactory>());
     defaultItemFactory = itemFactories.back().get();
 #else
-    itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>(*this));
-    itemFactories.push_back(std::make_unique<BasiliskItemFactory>(*this));
+    itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>());
+    itemFactories.push_back(std::make_unique<BasiliskItemFactory>());
     defaultItemFactory = itemFactories.back().get();
 #endif
-    itemFactories.push_back(std::make_unique<ExtensionItemFactory>(*this));
+    itemFactories.push_back(std::make_unique<ExtensionItemFactory>());
 }
 
-void LocalVolume::cleanDirectoryCache()
-{
-    using namespace std::chrono_literals;
-    const auto cacheExpiryTime = 1s;
-    const size_t maxCachedDirectories = 20;
-    const auto now = std::chrono::steady_clock::now();
-    
-    while(!cachedDirectories.empty()
-        && (cachedDirectories.front().timestamp + cacheExpiryTime < now
-            || cachedDirectories.size() > maxCachedDirectories))
-    {
-        cachedDirectories.front().directory->clearCache();
-        cachedDirectories.pop_front();
-    }
-}
-
-void LocalVolume::cacheDirectory(DirectoryItemPtr item)
-{
-    cleanDirectoryCache();
-    if(!item->isCached())
-    {
-        item->populateCache();
-        cachedDirectories.push_back({item, std::chrono::steady_clock::now()});
-    }
-}
-
-void LocalVolume::flushDirectoryCache(DirectoryItemPtr item)
-{
-    if(item->isCached())
-    {
-        item->clearCache();
-        cachedDirectories.remove_if([&](const auto& p) { return p.directory == item; });
-    }
-}
-
-void LocalVolume::flushDirectoryCache(long dirID)
-{
-    auto it = items.find(dirID);
-    if(it != items.end())
-    {
-        if(auto item = it->second.lock())
-        {
-            if(auto dir = std::dynamic_pointer_cast<DirectoryItem>(item))
-                flushDirectoryCache(dir);
-        }
-    }
-}
-
-ItemPtr LocalVolume::getItemForDirEntry(CNID parID, const fs::directory_entry& entry)
-{
-    for(auto& itemFactory : itemFactories)
-        if(itemFactory->isHidden(entry))
-            return ItemPtr();
-
-    CNID cnid = cnidMapper->cnidForPath(entry.path());
-
-    auto itemIt = items.find(cnid);
-    if(itemIt != items.end())
-    {
-        if(auto itemPtr = itemIt->second.lock())
-            return itemPtr;
-    }
-
-    return getItemForDirEntry(parID, cnid, entry);
-}
-
-ItemPtr LocalVolume::getItemForDirEntry(CNID parID, CNID cnid, const fs::directory_entry& entry)
+bool LocalVolume::isHidden(const fs::directory_entry& e)
 {
     for(auto& itemFactory : itemFactories)
     {
-        if(ItemPtr item = itemFactory->createItemForDirEntry(*this, parID, cnid, entry))
-        {
-            items.emplace(item->cnid(), item);
+        if(itemFactory->isHidden(e))
+            return true;
+    }
+    return false;
+}
+
+ItemPtr LocalVolume::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
+{
+    for(auto& itemFactory : itemFactories)
+    {
+        if(ItemPtr item = itemFactory->createItemForDirEntry(itemcache, parID, cnid, e))
             return item;
-        }
     }
-
-    return ItemPtr();
-}
-
-void LocalVolume::noteItemFreed(long cnid)
-{
-    items.erase(cnid);
-}
-
-ItemPtr LocalVolume::resolve(long cnid)
-{
-    {
-        auto it = items.find(cnid);
-        if(it != items.end())
-            if(ItemPtr item = it->second.lock())
-                return item;
-    }
-
-    fs::path path;
-    if(auto optionalPath = cnidMapper->pathForCNID(cnid))
-        path = *optionalPath;
-    else
-        throw OSErrorException(fnfErr);
-
-    CNID parID = cnidMapper->cnidForPath(path.parent_path());
-
-    if(ItemPtr item = getItemForDirEntry(parID, cnid, fs::directory_entry(path)))
-        return item;
-    else
-        throw OSErrorException(fnfErr);
+    return {};
 }
 
 std::shared_ptr<DirectoryItem> LocalVolume::resolveDir(long dirID)
 {
-    try
-    {
-        if(auto dirItem = std::dynamic_pointer_cast<DirectoryItem>(resolve(dirID)))
-            return dirItem;
-        else
-            throw OSErrorException(dirNFErr); // not a directory
-    }
-    catch(OSErrorException& e)
-    {
-        if(e.code == fnfErr)
-            throw OSErrorException(dirNFErr);
-        else
-            throw;
-    }
+    if(auto dirItem = std::dynamic_pointer_cast<DirectoryItem>(itemCache->tryResolve(dirID)))
+        return dirItem;
+    else
+        throw OSErrorException(dirNFErr); // not a directory
 }
 
 std::shared_ptr<DirectoryItem> LocalVolume::resolveDir(short vRef, long dirID)
@@ -238,7 +137,7 @@ ItemPtr LocalVolume::resolve(mac_string_view name, short vRef, long dirID)
     else
     {
         std::shared_ptr<DirectoryItem> dir = resolveDir(vRef, dirID);
-        cacheDirectory(dir);
+        itemCache->cacheDirectory(dir);
         if(auto file = dir->tryResolve(name))
             return file;
         else
@@ -268,7 +167,7 @@ ItemPtr LocalVolume::resolveRelative(const std::shared_ptr<DirectoryItem>& base,
     }
     else
     {
-        cacheDirectory(base);
+        itemCache->cacheDirectory(base);
         item = base->tryResolve(mac_string_view(p, colon));
         if(!item)
         {
@@ -294,7 +193,7 @@ ItemPtr LocalVolume::resolveForInfo(mac_string_view name, short vRef, long dirID
     if(index > 0)
     {
         auto dir = resolveDir(vRef, dirID);
-        cacheDirectory(dir);
+        itemCache->cacheDirectory(dir);
         return dir->resolve(index, includeDirectories);
     }
     else if(index == 0 && !name.empty())
@@ -523,7 +422,7 @@ LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name,
         name = mac_string_view(name.begin() + colon+1, name.end());
     }
 
-    cacheDirectory(parent);
+    itemCache->cacheDirectory(parent);
     if(parent->tryResolve(name))
         throw OSErrorException(dupFNErr);
     
@@ -534,7 +433,7 @@ void LocalVolume::createCommon(NonexistentFile file)
 {
     fs::path parentPath = file.parent->path();
     defaultItemFactory->createFile(parentPath, file.name);
-    flushDirectoryCache(file.parent);
+    itemCache->flushDirectoryCache(file.parent);
 }
 void LocalVolume::PBCreate(ParmBlkPtr pb)
 {
@@ -551,9 +450,9 @@ void LocalVolume::PBDirCreate(HParmBlkPtr pb)
     fs::path fn = toUnicodeFilename(name);
     fs::create_directory(parent->path() / fn);
 
-    flushDirectoryCache(parent);
+    itemCache->flushDirectoryCache(parent);
 
-    cacheDirectory(parent);
+    itemCache->cacheDirectory(parent);
     auto item = parent->tryResolve(name);
     if(!item)
         throw OSErrorException(ioErr);
@@ -563,11 +462,7 @@ void LocalVolume::PBDirCreate(HParmBlkPtr pb)
 
 void LocalVolume::deleteCommon(ItemPtr item)
 {
-    item->deleteItem();
-    
-    items.erase(item->cnid());
-    cnidMapper->deleteCNID(item->cnid());
-    flushDirectoryCache(item->parID());
+    itemCache->deleteItem(item);
 }
 
 void LocalVolume::PBDelete(ParmBlkPtr pb)
@@ -585,14 +480,11 @@ void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
         throw OSErrorException(bdNamErr);
 
     auto parent = resolveDir(item->parID());
-    cacheDirectory(parent);
+    itemCache->cacheDirectory(parent);
     if(parent->tryResolve(newName))
         throw OSErrorException(dupFNErr);
     
-    item->renameItem(newName);
-
-    cnidMapper->moveCNID(item->cnid(), item->path());
-    flushDirectoryCache(parent);
+    itemCache->renameItem(item, newName);
 }
 
 
@@ -736,16 +628,11 @@ void LocalVolume::PBCatMove(CMovePBPtr pb)
 
     auto name = item->name();
 
-    auto parent = resolveDir(item->parID());
-    cacheDirectory(newParent);
+    itemCache->cacheDirectory(newParent);
     if(newParent->tryResolve(mac_string_view(name.data(), name.size())))
         throw OSErrorException(dupFNErr);
 
-    item->moveItem(newParent->path());
-    cnidMapper->moveCNID(item->cnid(), item->path());
-
-    flushDirectoryCache(parent);
-    flushDirectoryCache(newParent);
+    itemCache->moveItem(item, newParent);
 }
 
 void LocalVolume::PBFlushFile(ParmBlkPtr pb)
@@ -822,7 +709,7 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
     auto path = fs::canonical(inPath, ec);
     if(ec)
         return {};
-    ItemPtr item = resolve(cnidMapper->cnidForPath(path));
+    ItemPtr item = itemCache->tryResolve(path);
 
     if(item)
     {
