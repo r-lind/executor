@@ -388,44 +388,6 @@ Executor::expandPath(std::string name)
     return name;
 }
 
-#if defined(MSDOS) || defined(CYGWIN32)
-
-#define MACCDROM \
-    (ROMlib_mac_cdromp ? (char *)ROMlib_mac_cdromp->chars : "DOS/EXTRA/LIBRARY/MACCDROM.HFV")
-
-#if defined(MSDOS) || defined(CYGWIN32)
-static char *cd_big_hfv = 0;
-
-static void
-check_for_executor_cd(const char *drive)
-{
-    if(!cd_big_hfv)
-    {
-        struct stat sbuf;
-
-        cd_big_hfv = malloc(strlen(drive) + strlen(MACCDROM) + 1);
-        sprintf(cd_big_hfv, "%s%s", drive, MACCDROM);
-        if(stat(cd_big_hfv, &sbuf) != 0)
-        {
-            free(cd_big_hfv);
-            cd_big_hfv = 0;
-        }
-    }
-}
-
-static bool
-e2_is_mounted(void)
-{
-    bool retval;
-    const char e2_name[] = "Executor2";
-
-    retval = !!vlookupbyname(e2_name, e2_name + strlen(e2_name));
-    return retval;
-}
-#endif
-
-#endif
-
 StringPtr Executor::ROMlib_exefname;
 
 std::string Executor::ROMlib_ConfigurationFolder;
@@ -474,23 +436,6 @@ parse_offset_file(void)
         fclose(fp);
     }
 }
-
-#if defined(MSDOS)
-
-static uint32_t
-drive_char_to_bit(char c)
-{
-    uint32_t retval;
-
-    if(c >= 'a' && c <= 'z')
-        retval = 1 << (c - 'a');
-    else if(c >= 'A' && c <= 'Z')
-        retval = 1 << (c - 'A');
-    else
-        retval = 0;
-    return retval;
-}
-#endif
 
 static bool
 is_unix_path(const char *pathname)
