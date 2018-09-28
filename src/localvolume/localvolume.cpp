@@ -262,6 +262,11 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8
         FCBExtension& fcbx = openFCBX();
         fcbx.access = std::move(access);
         fcbx.fcb->fcbFlNum = CL(fileItem->cnid());
+        fcbx.fcb->fcbMdRByt = 0;
+        if(fork == Fork::resource)
+            fcbx.fcb->fcbMdRByt |= RESOURCEBIT;
+        if(permission != fsRdPerm)
+            fcbx.fcb->fcbMdRByt |= WRITEBIT;
         fcbx.file = fileItem;
         refNum = CW(fcbx.refNum);
 
@@ -340,7 +345,7 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
     }
     else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
     {
-        pb->hFileInfo.ioFlAttrib = 0;
+        pb->hFileInfo.ioFlAttrib = open_attrib_bits(item->cnid(), &vcb, &pb->hFileInfo.ioFRefNum);
         pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
 
         // TODO:
