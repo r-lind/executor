@@ -10,3 +10,9 @@
 [submodule "tests/googletest"]
 	path = tests/googletest
 	url = https://github.com/google/googletest.git
+[submodule "lmdb"]
+	path = lmdb
+	url = https://github.com/LMDB/lmdb.git
+[submodule "lmdbxx"]
+	path = lmdbxx
+	url = https://github.com/autc04/lmdbxx.git

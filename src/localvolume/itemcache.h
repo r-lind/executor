@@ -16,7 +16,7 @@ class DirectoryItem;
 using ItemPtr = std::shared_ptr<Item>;
 using DirectoryItemPtr = std::shared_ptr<DirectoryItem>;
 
-using CNID = long;
+using CNID = int32_t;
 
 class ItemCache
 {

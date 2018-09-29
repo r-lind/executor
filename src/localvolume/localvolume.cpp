@@ -15,6 +15,7 @@
 #include "appledouble.h"
 
 #include "simplecnidmapper.h"
+#include "lmdbcnidmapper.h"
 #include "itemcache.h"
 
 using namespace Executor;
@@ -35,7 +36,8 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     itemCache = std::make_unique<ItemCache>(
             root,
             getVolumeName(),
-            std::make_unique<SimpleCNIDMapper>(root),
+            //std::make_unique<SimpleCNIDMapper>(root),
+            std::make_unique<LMDBCNIDMapper>(root),
             static_cast<ItemFactory*>(this)
         );
 

@@ -54,7 +54,7 @@ void ItemCache::flushDirectoryCache(DirectoryItemPtr item)
     }
 }
 
-void ItemCache::flushDirectoryCache(long dirID)
+void ItemCache::flushDirectoryCache(CNID dirID)
 {
     auto it = items.find(dirID);
     if(it != items.end())
@@ -78,7 +78,12 @@ ItemPtr ItemCache::getItemForDirEntry(CNID parID, const fs::directory_entry& ent
     if(itemIt != items.end())
     {
         if(auto itemPtr = itemIt->second.lock())
+        {
+            assert(itemPtr->cnid() == cnid);
+            assert(itemPtr->parID() == parID);
+            assert(itemPtr->path() == entry.path());
             return itemPtr;
+        }
     }
 
     ItemPtr item = itemFactory->createItemForDirEntry(*this, parID, cnid, entry);

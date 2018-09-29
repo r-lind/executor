@@ -6,11 +6,13 @@
 namespace Executor
 {
 
-using CNID = long;
+using CNID = int32_t;
 
 class CNIDMapper
 {
 public:
+    virtual ~CNIDMapper() = default;
+
     virtual CNID cnidForPath(fs::path path) = 0;
     virtual std::optional<fs::path> pathForCNID(CNID cnid) = 0;
     virtual void deleteCNID(CNID cnid) = 0;

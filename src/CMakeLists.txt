@@ -142,6 +142,8 @@ set(file_sources
     localvolume/cnidmapper.h
     localvolume/simplecnidmapper.h
     localvolume/simplecnidmapper.cpp
+    localvolume/lmdbcnidmapper.h
+    localvolume/lmdbcnidmapper.cpp
     )
 
 source_group(Files FILES ${file_sources})
@@ -429,6 +431,7 @@ add_library(romlib ${sources}
 target_include_directories(romlib PUBLIC include/ ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(romlib front-end-${FRONT_END} arch-${HOST_ARCH})
+target_link_libraries(romlib lmdb)
 
 if(HOST_OS STREQUAL win32 OR HOST_OS STREQUAL macosx)
     target_link_libraries(romlib os-${HOST_OS})

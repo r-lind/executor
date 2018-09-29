@@ -13,7 +13,7 @@ class ItemCache;
 class LocalVolume;
 class OpenFile;
 
-using CNID = long;
+using CNID = int32_t;
 
 class Item;
 class DirectoryItem;

@@ -61,14 +61,14 @@ void DirectoryItem::populateCache()
 {
     if(cache_valid_)
         return;
-    
+
     for(const auto& e : fs::directory_iterator(path_))
     {
         if(ItemPtr item = itemcache_.getItemForDirEntry(cnid(), e))
         {
             mac_string nameUpr = item->name();
             ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-            auto inserted = contents_by_name_.emplace(nameUpr, item).second;
+            auto [it, inserted] = contents_by_name_.emplace(nameUpr, item);
             if(inserted)
             {
                 contents_.push_back(item);
@@ -78,6 +78,8 @@ void DirectoryItem::populateCache()
             else
             {
                 std::cerr << "duplicate name mapping: " << e.path() << std::endl; 
+                std::cerr << "  and: " << it->second->path() << std::endl;
+                std::cerr << "  mapped to: " << toUnicodeFilename(nameUpr) << std::endl;
             }
         }
     }
