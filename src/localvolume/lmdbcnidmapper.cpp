@@ -1,15 +1,14 @@
 #include "lmdbcnidmapper.h"
-#include <iostream>
+#include <rsys/file.h>
 
 using namespace Executor;
 
 LMDBCNIDMapper::LMDBCNIDMapper(fs::path root)
     : env_(lmdb::env::create())
 {
-    boost::system::error_code ec;
-    fs::create_directory("executor.mdb", ec);
+    fs::create_directories(ROMlib_DirectoryMap);
     env_.set_max_dbs(2);
-    env_.open("executor.mdb");
+    env_.open(ROMlib_DirectoryMap.string().c_str());
 
     auto txn = lmdb::txn::begin(env_);
     pathToId_ = lmdb::dbi::open(txn, "pathToId", MDB_CREATE);

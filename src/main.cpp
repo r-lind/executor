@@ -1021,12 +1021,12 @@ int main(int argc, char **argv)
 
     memset(&LM(EventQueue), 0, sizeof(LM(EventQueue)));
     memset(&LM(VBLQueue), 0, sizeof(LM(VBLQueue)));
-    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
-    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
-    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
+    //memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));     // inited in ROMlib_fileinit
+    //memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));     // inited in ROMlib_fileinit
+    //memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));       // inited in ROMlib_fileinit
     LM(TESysJust) = 0;
     LM(BootDrive) = 0;
-    LM(DefVCBPtr) = 0;
+    //LM(DefVCBPtr) = 0;  // inited in ROMlib_fileinit
     LM(CurMap) = 0;
     LM(TopMapHndl) = 0;
     LM(DSAlertTab) = 0;
@@ -1083,7 +1083,7 @@ int main(int argc, char **argv)
     LM(MBSaveLoc) = 0;
 
     LM(SysVersion) = CW(system_version);
-    LM(FSFCBLen) = CWC(94);
+    //LM(FSFCBLen) = CWC(94);   // inited in ROMlib_fileinit
     LM(ScrapState) = CWC(-1);
 
     LM(TheZone) = LM(SysZone);

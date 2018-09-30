@@ -15,13 +15,6 @@ public:
     virtual void SetUp() override
     {
         Executor::InitMemory(thingOnStack);
-
-        memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
-        memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
-        memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
-        LM(DefVCBPtr) = 0;
-        LM(FSFCBLen) = CWC(94);
-
         Executor::ROMlib_fileinit();
 
         if(auto fsspec = nativePathToFSSpec(fs::current_path()))

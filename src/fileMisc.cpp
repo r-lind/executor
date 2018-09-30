@@ -392,8 +392,7 @@ StringPtr Executor::ROMlib_exefname;
 
 std::string Executor::ROMlib_ConfigurationFolder;
 static std::string ROMlib_SystemFolder;
-std::string Executor::ROMlib_PublicDirectoryMap;
-std::string Executor::ROMlib_PrivateDirectoryMap;
+fs::path Executor::ROMlib_DirectoryMap;
 static std::string ROMlib_MacVolumes;
 std::string Executor::ROMlib_ScreenDumpFile;
 static std::string ROMlib_OffsetFile;
@@ -464,6 +463,11 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     char *p, *ep;
 
     LM(CurDirStore) = CLC(2);
+    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
+    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
+    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
+    LM(DefVCBPtr) = 0;
+    LM(FSFCBLen) = CWC(94);
 
     savezone = LM(TheZone);
     LM(TheZone) = LM(SysZone);
@@ -505,8 +509,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 
     ROMlib_ConfigurationFolder = initpath("Configuration", "+/Configuration");
     ROMlib_SystemFolder = initpath("SystemFolder", "+/ExecutorVolume/System Folder");
-    ROMlib_PublicDirectoryMap = initpath("PublicDirectoryMap", "+/DirectoryMap");
-    ROMlib_PrivateDirectoryMap = initpath("PrivateDirectoryMap", "~/.ExecutorDirectoryMap");
+    ROMlib_DirectoryMap = initpath("ExecutorDirectoryMap", "~/.ExecutorDirectoryMap");
     ROMlib_MacVolumes = initpath("MacVolumes", "+/exsystem.hfv;+"); // this is wrong: only first + is replaced
     ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");
     ROMlib_OffsetFile = initpath("OffsetFile", "+/offset_file");
@@ -521,9 +524,8 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
  *     share files between machines of different endianness.
  */
 
-#if defined(LITTLEENDIAN)
-    ROMlib_PublicDirectoryMap += "-le";
-    ROMlib_PrivateDirectoryMap += "-le";
+#if !defined(LITTLEENDIAN)
+    ROMlib_DirectoryMap += "-be";
 #endif /* defined(LITTLEENDIAN) */
 
     ROMlib_hfsinit();

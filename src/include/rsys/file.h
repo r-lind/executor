@@ -75,8 +75,7 @@ extern char ROMlib_startdir[MAXPATHLEN];
 extern char ROMlib_start_drive;
 #endif
 extern std::string ROMlib_ConfigurationFolder;
-extern std::string ROMlib_PublicDirectoryMap;
-extern std::string ROMlib_PrivateDirectoryMap;
+extern fs::path ROMlib_DirectoryMap;
 extern std::string ROMlib_ScreenDumpFile;
 
 /* Internal structure of access path info */
