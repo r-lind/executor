@@ -122,7 +122,10 @@ ItemPtr ItemCache::tryResolve(CNID cnid)
         return item;
     }
     else
+    {
+        cnidMapper->deleteCNID(cnid);
         return {};
+    }
 }
 
 ItemPtr ItemCache::tryResolve(fs::path path)

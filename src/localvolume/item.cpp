@@ -62,6 +62,8 @@ void DirectoryItem::populateCache()
     if(cache_valid_)
         return;
 
+    // TODO: clean stale entries from the cnidMapper database
+
     for(const auto& e : fs::directory_iterator(path_))
     {
         if(ItemPtr item = itemcache_.getItemForDirEntry(cnid(), e))
