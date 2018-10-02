@@ -383,7 +383,8 @@ void Executor::C_ROMlib_Fgetenv(INTEGER *dp, INTEGER sel)
     env = 0;
 #else
     // FIXME: #warning ROMlib_Fgetenv not implemented!
-    gui_abort();
+    env = 0;
+    //gui_abort();
 #endif
 
     /* We now ignore what exceptions the hardware thinks is enabled,

@@ -23,6 +23,7 @@ public:
 
 class PlainDataFork : public OpenFile
 {
+protected:
     int fd;
     fs::path path_;
 

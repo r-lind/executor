@@ -4,6 +4,7 @@
 #include <rsys/macstrings.h>
 #include <memory>
 #include <chrono>
+#include <unordered_map>
 
 namespace Executor
 {

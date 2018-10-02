@@ -442,7 +442,11 @@ endif()
 target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 
 #target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
-target_link_libraries(romlib ${Boost_LIBRARIES})
+if(WIN32) # MXE hack
+    target_link_libraries(romlib ${Boost_LIBRARIES})
+else()
+    target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
+endif()
 
 add_executable(executor main.cpp)
 target_link_libraries(executor romlib)

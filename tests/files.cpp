@@ -1332,10 +1332,10 @@ TEST_F(FileTest, SetFInfo_MdDat)
     constexpr unsigned long date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
 
     testSetFInfoCommon(
-        [](auto& hpb) {
+        [date](auto& hpb) {
             hpb.fileParam.ioFlMdDat = date;
         },
-        [](auto& hpb) {
+        [date](auto& hpb) {
             EXPECT_EQ(date, hpb.fileParam.ioFlMdDat);
         }
     );
@@ -1345,10 +1345,10 @@ TEST_F(FileTest, SetFInfo_CrDat)
     constexpr unsigned long date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
 
     testSetFInfoCommon(
-        [](auto& hpb) {
+        [date](auto& hpb) {
             hpb.fileParam.ioFlCrDat = date;
         },
-        [](auto& hpb) {
+        [date](auto& hpb) {
             EXPECT_EQ(date, hpb.fileParam.ioFlCrDat);
         }
     );

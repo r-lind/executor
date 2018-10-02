@@ -363,8 +363,7 @@ struct GuestWrapper : GuestWrapperBase<TT>
         return *this;
     }
 
-    template<typename T2, typename = typename std::enable_if<std::is_convertible<TT, T2>::value>::type> // && sizeof(TT) == sizeof(T2)>::type>
-    operator T2() const { return this->get(); }
+    operator TT() const { return this->get(); }
 #else
     GuestWrapper(std::nullptr_t)
     {
