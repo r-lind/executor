@@ -326,12 +326,14 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         pb->hFileInfo.ioFlParID = CL(item->parID());    // a.k.a. pb->dirInfo.ioDrParID
     }
 
-    if(DirectoryItem *dirItem = dynamic_cast<DirectoryItem*>(item.get()))
+    if(DirectoryItemPtr dirItem = std::dynamic_pointer_cast<DirectoryItem>(item))
     {
         if(infoKind != InfoKind::CatInfo)
             throw OSErrorException(fnfErr);
 
         pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
+        
+        itemCache->cacheDirectory(dirItem);
         pb->dirInfo.ioDrNmFls = CW(dirItem->countItems());
 
         // TODO:
@@ -350,13 +352,15 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         pb->hFileInfo.ioFlAttrib = open_attrib_bits(item->cnid(), &vcb, &pb->hFileInfo.ioFRefNum);
         pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
 
-        // TODO:
-        // ioFlStBlk
-        // ioFlLgLen
-        // ioFlPyLen
-        // ioFlRStBlk
-        // ioFlRPyLen
+        size_t dsize = fileItem->open()->getEOF();
+        size_t rsize = fileItem->openRF()->getEOF();
+        
+        pb->hFileInfo.ioFlLgLen = CL(dsize);
+        pb->hFileInfo.ioFlPyLen = CL(dsize);
+        pb->hFileInfo.ioFlRLgLen = CL(rsize);
+        pb->hFileInfo.ioFlRLgLen = CL(rsize);
 
+        // TODO:
         // ioFlCrDat
         // ioFlMdDat
 
