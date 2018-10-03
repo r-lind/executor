@@ -518,15 +518,9 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 
     parse_offset_file();
 
-/*
- * NOTE: The following is a hack that will remain in place until we have
- *     a replacement for using the ndbm routines which apparently can't
- *     share files between machines of different endianness.
- */
-
 #if !defined(LITTLEENDIAN)
     ROMlib_DirectoryMap += "-be";
-#endif /* defined(LITTLEENDIAN) */
+#endif /* !defined(LITTLEENDIAN) */
 
     ROMlib_hfsinit();
     initLocalVol();
