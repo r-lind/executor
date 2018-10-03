@@ -1,6 +1,9 @@
 #include "itemcache.h"
 #include "item.h"
 #include "cnidmapper.h"
+#include <OSUtil.h>
+#include <set>
+#include <iostream>
 
 using namespace Executor;
 
@@ -35,14 +38,35 @@ void ItemCache::cleanDirectoryCache()
     }
 }
 
-void ItemCache::cacheDirectory(DirectoryItemPtr item)
+void ItemCache::cacheDirectory(DirectoryItemPtr dir)
 {
     cleanDirectoryCache();
-    if(!item->isCached())
+    if(dir->isCached())
+        return;
+    cachedDirectories.push_back({dir, std::chrono::steady_clock::now()});
+
+    std::vector<ItemPtr> items;
+    std::set<mac_string> names;
+
+    try
     {
-        item->populateCache();
-        cachedDirectories.push_back({item, std::chrono::steady_clock::now()});
+        for(const auto& e : fs::directory_iterator(dir->path()))
+        {
+            if(ItemPtr item = getItemForDirEntry(dir->cnid(), e))
+            {
+                mac_string nameUpr = item->name();
+                ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
+                if(names.insert(nameUpr).second)
+                    items.push_back(item);
+            }
+        }
     }
+    catch(boost::filesystem::filesystem_error& exc)
+    {
+        std::cerr << exc.what() << std::endl;
+        throw OSErrorException(ioErr);
+    }
+    dir->populateCache(std::move(items));
 }
 
 void ItemCache::flushDirectoryCache(DirectoryItemPtr item)

@@ -57,32 +57,29 @@ void DirectoryItem::clearCache()
     files_.clear();
 }
 
-void DirectoryItem::populateCache()
+void DirectoryItem::populateCache(std::vector<ItemPtr> items)
 {
     if(cache_valid_)
         return;
 
-    // TODO: clean stale entries from the cnidMapper database
+    contents_ = std::move(items);
 
-    for(const auto& e : fs::directory_iterator(path_))
+    for(const ItemPtr& item : contents_)
     {
-        if(ItemPtr item = itemcache_.getItemForDirEntry(cnid(), e))
+        mac_string nameUpr = item->name();
+        ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
+
+        auto [it, inserted] = contents_by_name_.emplace(nameUpr, item);
+        if(inserted)
         {
-            mac_string nameUpr = item->name();
-            ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-            auto [it, inserted] = contents_by_name_.emplace(nameUpr, item);
-            if(inserted)
-            {
-                contents_.push_back(item);
-                if(!dynamic_cast<DirectoryItem*>(item.get()))
-                    files_.push_back(item);
-            }
-            else
-            {
-                std::cerr << "duplicate name mapping: " << e.path() << std::endl; 
-                std::cerr << "  and: " << it->second->path() << std::endl;
-                std::cerr << "  mapped to: " << toUnicodeFilename(nameUpr) << std::endl;
-            }
+            if(!dynamic_cast<DirectoryItem*>(item.get()))
+                files_.push_back(item);
+        }
+        else
+        {
+            std::cerr << "duplicate name mapping: " << item->path() << std::endl; 
+            std::cerr << "  and: " << it->second->path() << std::endl;
+            std::cerr << "  mapped to: " << toUnicodeFilename(nameUpr) << std::endl;
         }
     }
 

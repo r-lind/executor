@@ -34,8 +34,6 @@ public:
     Item(ItemCache& itemcache, CNID parID, CNID cnid, fs::path p, mac_string_view name = {});
     virtual ~Item();
 
-    operator const fs::path& () const { return path_; }
-
     const fs::path& path() const { return path_; }
 
     CNID parID() const { return parID_; }
@@ -76,7 +74,7 @@ class DirectoryItem : public Item
 
     friend class ItemCache;
     void clearCache();
-    void populateCache();
+    void populateCache(std::vector<ItemPtr> items);
     bool isCached() const { return cache_valid_; }
 public:
     using Item::Item;
