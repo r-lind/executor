@@ -44,12 +44,11 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     itemFactories.push_back(std::make_unique<DirectoryItemFactory>());
     itemFactories.push_back(std::make_unique<AppleSingleItemFactory>());
     //defaultItemFactory = itemFactories.back().get();
-#ifdef MACOSX
-    itemFactories.push_back(std::make_unique<MacItemFactory>());
-    defaultItemFactory = itemFactories.back().get();
-#else
     itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>());
     itemFactories.push_back(std::make_unique<BasiliskItemFactory>());
+    defaultItemFactory = itemFactories.back().get();
+#ifdef MACOSX
+    itemFactories.push_back(std::make_unique<MacItemFactory>());
     defaultItemFactory = itemFactories.back().get();
 #endif
     itemFactories.push_back(std::make_unique<ExtensionItemFactory>());
@@ -351,7 +350,7 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
     {
         pb->hFileInfo.ioFlAttrib = open_attrib_bits(item->cnid(), &vcb, &pb->hFileInfo.ioFRefNum);
         pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
-
+        
         size_t dsize = fileItem->open()->getEOF();
         size_t rsize = fileItem->openRF()->getEOF();
         
