@@ -145,7 +145,6 @@ TEST(Files, CreateDeleteDir)
     EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
 }
 
-
 class FileTest : public testing::Test
 {
 protected:
@@ -957,6 +956,7 @@ TEST_F(FileTest, SetEOF_BothForks)
 
 TEST(Files, CatMove)
 {
+        // get vRefNum and dirID of current working directory
     WDPBRec wdpb;
     memset(&wdpb, 42, sizeof(wdpb));
     wdpb.ioCompletion = nullptr;
@@ -971,7 +971,7 @@ TEST(Files, CatMove)
     short vRefNum = wdpb.ioWDVRefNum;
     long dirID = wdpb.ioWDDirID;
 
-
+        // create a directory
     HParamBlockRec pb;
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
@@ -983,6 +983,7 @@ TEST(Files, CatMove)
     ASSERT_EQ(noErr, pb.ioParam.ioResult);
     long newDirID = pb.fileParam.ioDirID;
     
+        // create a file outside the directory
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
@@ -991,6 +992,24 @@ TEST(Files, CatMove)
     PBHCreateSync(&pb);
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
 
+        // get the cnid of the file
+    CInfoPBRec ipb;
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    ipb.hFileInfo.ioNamePtr = PSTR("temp-test");
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = dirID;
+
+    PBGetCatInfoSync(&ipb);
+
+    long cnid = ipb.hFileInfo.ioDirID;
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+    EXPECT_GT(cnid, 0);
+    EXPECT_NE(dirID, cnid);
+    EXPECT_NE(newDirID, cnid);
+
+        // move the file to the directory
     CMovePBRec mpb;
     
     memset(&mpb, 42, sizeof(mpb));
@@ -1004,6 +1023,20 @@ TEST(Files, CatMove)
 
     EXPECT_EQ(noErr, mpb.ioResult);
 
+        // check the cnid of the file at the new location
+    memset(&ipb, 42, sizeof(ipb));
+    ipb.hFileInfo.ioCompletion = nullptr;
+    ipb.hFileInfo.ioVRefNum = vRefNum;
+    ipb.hFileInfo.ioNamePtr = PSTR("temp-test");
+    ipb.hFileInfo.ioFDirIndex = 0;
+    ipb.hFileInfo.ioDirID = newDirID;
+
+    PBGetCatInfoSync(&ipb);
+
+    EXPECT_EQ(noErr, ipb.hFileInfo.ioResult);
+    EXPECT_EQ(cnid, ipb.hFileInfo.ioDirID);
+
+        // try to delete the file at its old location (expect fnfErr)
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
@@ -1013,6 +1046,7 @@ TEST(Files, CatMove)
 
     EXPECT_EQ(fnfErr, pb.ioParam.ioResult);
 
+        // try to delete the file at its new location (expect noErr)
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
@@ -1022,7 +1056,7 @@ TEST(Files, CatMove)
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
 
-
+        // delete directory
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
     pb.ioParam.ioVRefNum = vRefNum;
