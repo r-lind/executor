@@ -21,19 +21,19 @@ using CNID = int32_t;
 
 class ItemCache
 {
-    std::unique_ptr<CNIDMapper> cnidMapper;
-    ItemFactory *itemFactory;
+    std::unique_ptr<CNIDMapper> cnidMapper_;
+    ItemFactory *itemFactory_;
 
-    std::unordered_map<CNID, std::weak_ptr<Item>> items; 
+    std::unordered_map<CNID, std::weak_ptr<Item>> items_; 
     
-    DirectoryItemPtr rootDirItem;
+    DirectoryItemPtr rootDirItem_;
 
     struct CachedDirectory
     {
         DirectoryItemPtr directory;
         std::chrono::steady_clock::time_point timestamp;
     };
-    std::list<CachedDirectory> cachedDirectories;
+    std::list<CachedDirectory> cachedDirectories_;
 
     void cleanDirectoryCache();
 public:
@@ -48,7 +48,6 @@ public:
     ItemPtr tryResolve(CNID cnid);
     ItemPtr tryResolve(fs::path path);
 
-    ItemPtr getItemForDirEntry(CNID parID, const fs::directory_entry& path);
 
     void cacheDirectory(DirectoryItemPtr item);
     void flushDirectoryCache(DirectoryItemPtr item);

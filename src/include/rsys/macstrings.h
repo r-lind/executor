@@ -54,7 +54,7 @@ std::u32string toUnicode(mac_string_view sv);
 mac_string toMacRoman(const std::u32string& s);
 
 fs::path toUnicodeFilename(mac_string_view sv);
-mac_string toMacRomanFilename(const fs::path& s);
+mac_string toMacRomanFilename(const fs::path& s, int index = 0);
 
 bool matchesMacRomanFilename(const fs::path& s, mac_string_view sv);
 

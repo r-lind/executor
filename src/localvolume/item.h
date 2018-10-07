@@ -80,6 +80,7 @@ public:
     using Item::Item;
 
     ItemPtr tryResolve(mac_string_view name);
+    ItemPtr tryResolve(fs::path name);
     ItemPtr resolve(int index, bool includeDirectories);
 
     long dirID() const { return cnid(); }

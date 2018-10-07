@@ -27,7 +27,7 @@ LMDBCNIDMapper::LMDBCNIDMapper(fs::path root)
 LMDBCNIDMapper::~LMDBCNIDMapper()
 {
 }
-
+#if 0
 CNID LMDBCNIDMapper::cnidForPath(fs::path path)
 {
     auto txn = lmdb::txn::begin(env_);
@@ -104,3 +104,4 @@ void LMDBCNIDMapper::moveCNID(CNID cnid, fs::path path)
     txn.commit();
 }
 
+#endif

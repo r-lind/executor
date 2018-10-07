@@ -15,13 +15,13 @@ class LMDBCNIDMapper : public CNIDMapper
     lmdb::dbi pathToId_;
     lmdb::dbi idToPath_;
 public:
-    LMDBCNIDMapper(fs::path root);
+    explicit LMDBCNIDMapper(fs::path root);
     ~LMDBCNIDMapper();
 
-    virtual CNID cnidForPath(fs::path path) override;
-    virtual std::optional<fs::path> pathForCNID(CNID cnid) override;
-    virtual void deleteCNID(CNID cnid) override;
-    virtual void moveCNID(CNID cnid, fs::path path) override;
+//    virtual std::vector<Mapping> mapDirectoryContents(CNID dirID, std::vector<fs::directory_entry> realPaths) override;
+//    virtual std::optional<Mapping> lookupCNID(CNID cnid) override;
+//    virtual void deleteCNID(CNID cnid) override;
+//    virtual void moveCNID(CNID cnid, fs::path path) override;
 };
 
 }

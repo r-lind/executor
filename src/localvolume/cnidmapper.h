@@ -1,6 +1,7 @@
 #pragma once
 
 #include <rsys/filesystem.h>
+#include <rsys/macstrings.h>
 #include <optional>
 
 namespace Executor
@@ -13,10 +14,20 @@ class CNIDMapper
 public:
     virtual ~CNIDMapper() = default;
 
-    virtual CNID cnidForPath(fs::path path) = 0;
-    virtual std::optional<fs::path> pathForCNID(CNID cnid) = 0;
+    struct Mapping
+    {
+        CNID parID;
+        CNID cnid;
+        fs::directory_entry entry;
+        mac_string macname;
+    };
+
+    virtual std::vector<Mapping> mapDirectoryContents(CNID dirID, std::vector<fs::directory_entry> realPaths) = 0;
+    virtual std::optional<Mapping> lookupCNID(CNID cnid) = 0;
+
     virtual void deleteCNID(CNID cnid) = 0;
-    virtual void moveCNID(CNID cnid, fs::path path) = 0;
+    virtual void moveCNID(CNID cnid, CNID newParent, std::function<fs::path()> fsop) = 0;
+    virtual void renameCNID(CNID cnid, mac_string_view newMacName, std::function<fs::path()> fsop) = 0;
 };
 
 }

@@ -201,11 +201,20 @@ fs::path Executor::toUnicodeFilename(mac_string_view sv)
     return s;
 }
 
-mac_string Executor::toMacRomanFilename(const fs::path& p)
+mac_string Executor::toMacRomanFilename(const fs::path& p, int index)
 {
     mac_string dst;
     std::wstring ws;
     
+    char idxbuf[16];
+    mac_string_view suffix;
+    if(index)
+    {
+        int n = sprintf(idxbuf, "#%d", index);
+        if(n > 0)
+            suffix = mac_string_view(reinterpret_cast<unsigned char*>(idxbuf), n);
+    }
+
     try
     {
         ws = p.wstring();
@@ -218,7 +227,7 @@ mac_string Executor::toMacRomanFilename(const fs::path& p)
         const std::string& s = p.string();
         for(char c : s)
         {
-            if(dst.size() == 30 && s.size() > 31)
+            if(dst.size() == 30-suffix.size() && s.size() > 31-suffix.size())
             {
                 dst.push_back(0xC9); // ellipsis
                 break;
@@ -230,14 +239,14 @@ mac_string Executor::toMacRomanFilename(const fs::path& p)
                 dst.push_back('?');
             else
                 dst.push_back(c);
-            return dst;
         }
+        return dst + mac_string(suffix);
     }
 
-    dst.reserve(std::min((size_t)31, ws.size()));
+    dst.reserve(std::min((size_t)31, ws.size() + suffix.size()));
     for(wchar_t c : ws)
     {
-        if(dst.size() == 30 && ws.size() > 31)
+        if(dst.size() == 30-suffix.size() && ws.size() > 31-suffix.size())
         {
             dst.push_back(0xC9); // ellipsis
             break;
@@ -255,7 +264,7 @@ mac_string Executor::toMacRomanFilename(const fs::path& p)
         }
     }
 
-    return dst;
+    return dst + mac_string(suffix);
 }
 
 bool Executor::matchesMacRomanFilename(const fs::path& s, mac_string_view sv)

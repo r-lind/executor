@@ -9,16 +9,17 @@ namespace Executor
 
 class SimpleCNIDMapper : public CNIDMapper
 {
-    long nextCNID = 3;
-    std::map<fs::path, CNID> pathToId;
-    std::unordered_map<CNID, fs::path> idToPath; 
+    CNID nextCNID_ = 3;
+    std::unordered_map<CNID, Mapping> mappings_;
+    std::unordered_map<CNID, std::vector<CNID>> directories_; 
 public:
-    SimpleCNIDMapper(fs::path root);
+    explicit SimpleCNIDMapper(fs::path root, mac_string volumeName);
 
-    virtual CNID cnidForPath(fs::path path) override;
-    virtual std::optional<fs::path> pathForCNID(CNID cnid) override;
+    virtual std::vector<Mapping> mapDirectoryContents(CNID dirID, std::vector<fs::directory_entry> realPaths) override;
+    virtual std::optional<Mapping> lookupCNID(CNID cnid) override;
     virtual void deleteCNID(CNID cnid) override;
-    virtual void moveCNID(CNID cnid, fs::path path) override;
+    virtual void moveCNID(CNID cnid, CNID newParent, std::function<fs::path()> fsop) override;
+    virtual void renameCNID(CNID cnid, mac_string_view newMacName, std::function<fs::path()> fsop) override;
 };
 
 }

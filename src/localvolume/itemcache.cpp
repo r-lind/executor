@@ -12,10 +12,10 @@ ItemCache::ItemCache(fs::path root,
                 std::unique_ptr<CNIDMapper> cnidMapper,
                 ItemFactory *itemFactory
                 )
-    : cnidMapper(std::move(cnidMapper))
-    , itemFactory(itemFactory)
+    : cnidMapper_(std::move(cnidMapper))
+    , itemFactory_(itemFactory)
 {
-    items[2] = rootDirItem = std::make_shared<DirectoryItem>(*this, 1, 2, root, volumeName);
+    items_[2] = rootDirItem_ = std::make_shared<DirectoryItem>(*this, 1, 2, root, volumeName);
 }
 
 ItemCache::~ItemCache()
@@ -29,12 +29,12 @@ void ItemCache::cleanDirectoryCache()
     const size_t maxCachedDirectories = 20;
     const auto now = std::chrono::steady_clock::now();
     
-    while(!cachedDirectories.empty()
-        && (cachedDirectories.front().timestamp + cacheExpiryTime < now
-            || cachedDirectories.size() > maxCachedDirectories))
+    while(!cachedDirectories_.empty()
+        && (cachedDirectories_.front().timestamp + cacheExpiryTime < now
+            || cachedDirectories_.size() > maxCachedDirectories))
     {
-        cachedDirectories.front().directory->clearCache();
-        cachedDirectories.pop_front();
+        cachedDirectories_.front().directory->clearCache();
+        cachedDirectories_.pop_front();
     }
 }
 
@@ -43,22 +43,15 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
     cleanDirectoryCache();
     if(dir->isCached())
         return;
-    cachedDirectories.push_back({dir, std::chrono::steady_clock::now()});
+    cachedDirectories_.push_back({dir, std::chrono::steady_clock::now()});
 
-    std::vector<ItemPtr> items;
-    std::set<mac_string> names;
-
+    std::vector<fs::directory_entry> entries;
     try
     {
         for(const auto& e : fs::directory_iterator(dir->path()))
         {
-            if(ItemPtr item = getItemForDirEntry(dir->cnid(), e))
-            {
-                mac_string nameUpr = item->name();
-                ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-                if(names.insert(nameUpr).second)
-                    items.push_back(item);
-            }
+            if(!itemFactory_->isHidden(e))
+                entries.push_back(e);
         }
     }
     catch(boost::filesystem::filesystem_error& exc)
@@ -66,6 +59,31 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
         std::cerr << exc.what() << std::endl;
         throw OSErrorException(ioErr);
     }
+    
+    std::vector<CNIDMapper::Mapping> mappings =
+        cnidMapper_->mapDirectoryContents(dir->cnid(), std::move(entries));
+
+    std::vector<ItemPtr> items;
+    items.reserve(mappings.size());
+
+    for(auto& m : mappings)
+    {
+        ItemPtr item;
+
+        auto itemIt = items_.find(m.cnid);
+        if(itemIt != items_.end())
+            item = itemIt->second.lock();
+
+        if(!item)
+            item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry);
+
+        if(!item)
+            continue;
+        
+        items.push_back(item);
+        items_.emplace(m.cnid, item);
+    }
+
     dir->populateCache(std::move(items));
 }
 
@@ -74,14 +92,14 @@ void ItemCache::flushDirectoryCache(DirectoryItemPtr item)
     if(item->isCached())
     {
         item->clearCache();
-        cachedDirectories.remove_if([&](const auto& p) { return p.directory == item; });
+        cachedDirectories_.remove_if([&](const auto& p) { return p.directory == item; });
     }
 }
 
 void ItemCache::flushDirectoryCache(CNID dirID)
 {
-    auto it = items.find(dirID);
-    if(it != items.end())
+    auto it = items_.find(dirID);
+    if(it != items_.end())
     {
         if(auto item = it->second.lock())
         {
@@ -91,96 +109,92 @@ void ItemCache::flushDirectoryCache(CNID dirID)
     }
 }
 
-ItemPtr ItemCache::getItemForDirEntry(CNID parID, const fs::directory_entry& entry)
-{
-    if(itemFactory->isHidden(entry))
-        return {};
-
-    CNID cnid = cnidMapper->cnidForPath(entry.path());
-
-    auto itemIt = items.find(cnid);
-    if(itemIt != items.end())
-    {
-        if(auto itemPtr = itemIt->second.lock())
-        {
-            assert(itemPtr->cnid() == cnid);
-            assert(itemPtr->parID() == parID);
-            assert(itemPtr->path() == entry.path());
-            return itemPtr;
-        }
-    }
-
-    ItemPtr item = itemFactory->createItemForDirEntry(*this, parID, cnid, entry);
-
-    if(item)
-        items.emplace(item->cnid(), item);
-
-    return item;
-}
-
 void ItemCache::noteItemFreed(CNID cnid)
 {
-    items.erase(cnid);
+    items_.erase(cnid);
 }
 
 ItemPtr ItemCache::tryResolve(CNID cnid)
 {
     {
-        auto it = items.find(cnid);
-        if(it != items.end())
+        auto it = items_.find(cnid);
+        if(it != items_.end())
             if(ItemPtr item = it->second.lock())
                 return item;
     }
 
-    fs::path path;
-    if(auto optionalPath = cnidMapper->pathForCNID(cnid))
-        path = *optionalPath;
-    else
+    auto optionalMapping = cnidMapper_->lookupCNID(cnid);
+    if(!optionalMapping)
         return {};
-
-    CNID parID = cnidMapper->cnidForPath(path.parent_path());
-
-    if(ItemPtr item = itemFactory->createItemForDirEntry(*this, parID, cnid, fs::directory_entry(path)))
+    auto& m = *optionalMapping;
+    
+    if(ItemPtr item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry))
     {
-        items.emplace(item->cnid(), item);
+        items_.emplace(item->cnid(), item);
         return item;
     }
     else
     {
-        cnidMapper->deleteCNID(cnid);
+        cnidMapper_->deleteCNID(cnid);
         return {};
     }
 }
 
-ItemPtr ItemCache::tryResolve(fs::path path)
+ItemPtr ItemCache::tryResolve(fs::path inPath)
 {
-    return tryResolve(cnidMapper->cnidForPath(path));
+    if(!fs::exists(inPath))
+        return {};
+
+    boost::system::error_code ec;
+    inPath = fs::canonical(inPath, ec);
+    if(ec)
+        return {};
+    auto relpath = fs::relative(inPath, rootDirItem_->path(), ec);
+    if(ec)
+        return {};
+
+    ItemPtr item = rootDirItem_;
+    for(auto elem : relpath)
+    {
+        if(auto dir = std::dynamic_pointer_cast<DirectoryItem>(item))
+        {
+            cacheDirectory(dir);
+            item = dir->tryResolve(elem);
+            if(!item)
+                return {};
+        }
+        else
+            return {};
+
+    }
+    return item;
 }
 
 void ItemCache::deleteItem(ItemPtr item)
 {
     item->deleteItem();
     
-    items.erase(item->cnid());
-    cnidMapper->deleteCNID(item->cnid());
+    items_.erase(item->cnid());
+    cnidMapper_->deleteCNID(item->cnid());
     flushDirectoryCache(item->parID());
 }
 
 void ItemCache::renameItem(ItemPtr item, mac_string_view newName)
 {
-    item->renameItem(newName);
-
-    cnidMapper->moveCNID(item->cnid(), item->path());
     flushDirectoryCache(item->parID());
+    cnidMapper_->renameCNID(item->cnid(), newName, [&] {
+        item->renameItem(newName);
+        return item->path();
+    });
 }
 
 void ItemCache::moveItem(ItemPtr item, DirectoryItemPtr newParent)
 {
     flushDirectoryCache(item->parID());
-    
-    item->moveItem(newParent->path());
-    cnidMapper->moveCNID(item->cnid(), item->path());
-
-    flushDirectoryCache(newParent);
+    flushDirectoryCache(newParent->cnid());
+    cnidMapper_->moveCNID(item->cnid(), newParent->cnid(), [&] {
+        item->moveItem(newParent->path());
+        return item->path();
+    });
 }
 
