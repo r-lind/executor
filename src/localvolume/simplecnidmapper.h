@@ -18,8 +18,7 @@ public:
     virtual std::vector<Mapping> mapDirectoryContents(CNID dirID, std::vector<fs::directory_entry> realPaths) override;
     virtual std::optional<Mapping> lookupCNID(CNID cnid) override;
     virtual void deleteCNID(CNID cnid) override;
-    virtual void moveCNID(CNID cnid, CNID newParent, std::function<fs::path()> fsop) override;
-    virtual void renameCNID(CNID cnid, mac_string_view newMacName, std::function<fs::path()> fsop) override;
+    virtual void moveCNID(CNID cnid, CNID newParent, mac_string_view newMacName, std::function<fs::path()> fsop) override;
 };
 
 }

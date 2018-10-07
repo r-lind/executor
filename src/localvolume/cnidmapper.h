@@ -26,8 +26,7 @@ public:
     virtual std::optional<Mapping> lookupCNID(CNID cnid) = 0;
 
     virtual void deleteCNID(CNID cnid) = 0;
-    virtual void moveCNID(CNID cnid, CNID newParent, std::function<fs::path()> fsop) = 0;
-    virtual void renameCNID(CNID cnid, mac_string_view newMacName, std::function<fs::path()> fsop) = 0;
+    virtual void moveCNID(CNID cnid, CNID newParent, mac_string_view newMacName, std::function<fs::path()> fsop) = 0;
 };
 
 }

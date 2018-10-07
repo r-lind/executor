@@ -135,7 +135,6 @@ ItemPtr ItemCache::tryResolve(CNID cnid)
     }
     else
     {
-        cnidMapper_->deleteCNID(cnid);
         return {};
     }
 }
@@ -182,19 +181,22 @@ void ItemCache::deleteItem(ItemPtr item)
 void ItemCache::renameItem(ItemPtr item, mac_string_view newName)
 {
     flushDirectoryCache(item->parID());
-    cnidMapper_->renameCNID(item->cnid(), newName, [&] {
-        item->renameItem(newName);
-        return item->path();
-    });
+    cnidMapper_->moveCNID(item->cnid(), 0, newName, 
+        [&] {
+            item->renameItem(newName);
+            return item->path();
+        });
+
 }
 
 void ItemCache::moveItem(ItemPtr item, DirectoryItemPtr newParent)
 {
     flushDirectoryCache(item->parID());
     flushDirectoryCache(newParent->cnid());
-    cnidMapper_->moveCNID(item->cnid(), newParent->cnid(), [&] {
-        item->moveItem(newParent->path());
-        return item->path();
-    });
+    cnidMapper_->moveCNID(item->cnid(), newParent->cnid(), mac_string_view(), 
+        [&] {
+            item->moveItem(newParent->path());
+            return item->path();
+        });
 }
 
