@@ -9,15 +9,20 @@ using namespace Executor;
 class ExecutorTestEnvironment : public testing::Environment
 {
     char *thingOnStack;
+    fs::path tempDir;
 public:
     ExecutorTestEnvironment(char* thingOnStack) : thingOnStack(thingOnStack) {}
 
     virtual void SetUp() override
     {
+        tempDir = fs::current_path() / fs::unique_path();
+
         Executor::InitMemory(thingOnStack);
         Executor::ROMlib_fileinit();
 
-        if(auto fsspec = nativePathToFSSpec(fs::current_path()))
+        fs::create_directory(tempDir);
+
+        if(auto fsspec = nativePathToFSSpec(tempDir))
         {
             WDPBRec wdpb;
 
@@ -28,6 +33,12 @@ public:
             PBOpenWD(&wdpb, false);
             SetVol(nullptr, wdpb.ioVRefNum);
         }
+    }
+
+    virtual void TearDown() override
+    {
+        if(!tempDir.empty())
+            fs::remove_all(tempDir);
     }
 };
 
