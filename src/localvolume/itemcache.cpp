@@ -45,13 +45,13 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
         return;
     cachedDirectories_.push_back({dir, std::chrono::steady_clock::now()});
 
-    std::vector<fs::path> paths;
+    std::vector<fs::directory_entry> entries;
     try
     {
         for(const auto& e : fs::directory_iterator(dir->path()))
         {
             if(!itemFactory_->isHidden(e))
-                paths.push_back(e.path());
+                entries.push_back(e);
         }
     }
     catch(boost::filesystem::filesystem_error& exc)
@@ -61,7 +61,7 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
     }
     
     std::vector<CNIDMapper::Mapping> mappings =
-        cnidMapper_->mapDirectoryContents(dir->cnid(), std::move(paths));
+        cnidMapper_->mapDirectoryContents(dir->cnid(), std::move(entries));
 
     std::vector<ItemPtr> items;
     items.reserve(mappings.size());
@@ -74,8 +74,8 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
         if(itemIt != items_.end())
             item = itemIt->second.lock();
 
-        if(!item)   // FIXME: fs::directory_entry can throw
-            item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, fs::directory_entry(m.path));
+        if(!item)
+            item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry);
 
         if(!item)
             continue;
@@ -128,8 +128,7 @@ ItemPtr ItemCache::tryResolve(CNID cnid)
         return {};
     auto& m = *optionalMapping;
     
-        // FIXME: fs::directory_entry can throw
-    if(ItemPtr item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, fs::directory_entry(m.path)))
+    if(ItemPtr item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry))
     {
         items_.emplace(item->cnid(), item);
         return item;

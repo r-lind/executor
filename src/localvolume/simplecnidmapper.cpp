@@ -14,7 +14,7 @@ SimpleCNIDMapper::SimpleCNIDMapper(fs::path root, mac_string volumeName)
 }
 
 std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dirID,
-        std::vector<fs::path> realPaths)
+        std::vector<fs::directory_entry> realPaths)
 {
     auto& cachedContents = directories_[dirID];
     
@@ -27,13 +27,13 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
     newContents.reserve(realPaths.size());
 
     auto cacheIt = cachedContents.begin(), cacheEnd = cachedContents.end();
-    Mapping* mapping = cacheIt != cacheEnd ? &mappings_.at(*cacheIt) : nullptr;
+    StoredMapping* mapping = cacheIt != cacheEnd ? &mappings_.at(*cacheIt) : nullptr;
     
     std::set<mac_string> usedNames;
 
-    for(auto& path : realPaths)
+    for(auto& entry : realPaths)
     {
-        while(mapping && mapping->path < path)
+        while(mapping && mapping->path < entry.path())
         {
             // discard mapping
             deleteCNID(mapping->cnid);
@@ -41,10 +41,10 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
             mapping = cacheIt != cacheEnd ? &mappings_.at(*cacheIt) : nullptr;
         }
 
-        if(mapping && mapping->path == path)
+        if(mapping && mapping->path == entry.path())
         {
             // use existing mapping
-            dirMappings.push_back(*mapping);
+            dirMappings.push_back({mapping->parID, mapping->cnid, std::move(entry), mapping->macname});
             newContents.push_back(mapping->cnid);
 
             ++cacheIt;
@@ -54,7 +54,7 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
         {
             // new mapping
             mac_string macname;
-            const fs::path& name = path.filename();
+            const fs::path& name = entry.path();
             int index = 0;
 
             bool nameIsFree;
@@ -68,12 +68,16 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
 
             Mapping newMapping {
                 dirID, nextCNID_++,
-                std::move(path),
+                std::move(entry),
                 std::move(macname)
             };
             dirMappings.push_back(newMapping);
             newContents.push_back(newMapping.cnid);
-            mappings_.emplace(newMapping.cnid, std::move(newMapping));
+            mappings_.emplace(newMapping.cnid, StoredMapping{
+                newMapping.parID, newMapping.cnid,
+                newMapping.entry.path(),
+                std::move(newMapping.macname)
+            });
         }
     }
 
@@ -89,12 +93,27 @@ std::optional<CNIDMapper::Mapping> SimpleCNIDMapper::lookupCNID(CNID cnid)
         return {};
 
     if(fs::exists(it->second.path))
-        return it->second;
-    else
     {
-        deleteCNID(cnid);
-        return {};
+        boost::system::error_code ec;
+
+        try
+        {
+            return Mapping {
+                it->second.parID,
+                it->second.cnid,
+                fs::directory_entry(it->second.path),
+                it->second.macname
+            };
+        }
+        catch(fs::filesystem_error)
+        {
+            // file no longer exists,
+            // pass through
+        }
     }
+        
+    deleteCNID(cnid);
+    return {};
 }
 
 

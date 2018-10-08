@@ -6,60 +6,57 @@
 
 using namespace Executor;
 
-namespace
+class LMDBCNIDMapper::BinMapping
 {
-    class BinMapping
-    {
-        std::vector<char> data_;
-        lmdb::val val_;
-        CNID cnid;
-        lmdb::val cnidval_;
-    public:
-        BinMapping(const CNIDMapper::Mapping& mapping);
+    std::vector<char> data_;
+    lmdb::val val_;
+    CNID cnid;
+    lmdb::val cnidval_;
+public:
+    BinMapping(const LMDBCNIDMapper::StoredMapping& mapping);
 
-        lmdb::val& val() { return val_; }
-        lmdb::val& cnidval() { return cnidval_; }
+    lmdb::val& val() { return val_; }
+    lmdb::val& cnidval() { return cnidval_; }
+};
+
+LMDBCNIDMapper::StoredMapping LMDBCNIDMapper::decodeMapping(CNID cnid, lmdb::val val)
+{
+    char *data = val.data();
+    CNID parId = *reinterpret_cast<CNID*>(data);
+    data += sizeof(CNID);
+    uint8_t macNameLen = *reinterpret_cast<uint8_t*>(data);
+    data++;
+    mac_string macName(reinterpret_cast<unsigned char*>(data), macNameLen);
+    data += macNameLen;
+    uint16_t pathLen = *reinterpret_cast<uint16_t*>(data);
+    data += sizeof(uint16_t);
+    std::string pathString(data, pathLen);
+
+    return StoredMapping {
+        parId, cnid,
+        fs::path(std::move(pathString)),
+        std::move(macName)
     };
-
-    CNIDMapper::Mapping decodeMapping(CNID cnid, lmdb::val val)
-    {
-        char *data = val.data();
-        CNID parId = *reinterpret_cast<CNID*>(data);
-        data += sizeof(CNID);
-        uint8_t macNameLen = *reinterpret_cast<uint8_t*>(data);
-        data++;
-        mac_string macName(reinterpret_cast<unsigned char*>(data), macNameLen);
-        data += macNameLen;
-        uint16_t pathLen = *reinterpret_cast<uint16_t*>(data);
-        data += sizeof(uint16_t);
-        std::string pathString(data, pathLen);
-
-        return CNIDMapper::Mapping {
-            parId, cnid,
-            fs::path(std::move(pathString)),
-            std::move(macName)
-        };
-    }
-    
-    BinMapping::BinMapping(const CNIDMapper::Mapping& mapping)
-        : data_(sizeof(CNID) + 1 + mapping.macname.size() + 2 + mapping.path.string().size())
-        , val_(data_.data(), data_.size())
-        , cnid(mapping.cnid)
-        , cnidval_(&cnid, sizeof(CNID))
-    {
-        char *data = data_.data();
-        *reinterpret_cast<CNID*>(data) = mapping.parID;
-        data += sizeof(CNID);
-        *reinterpret_cast<uint8_t*>(data) = mapping.macname.size();
-        data++;
-        memcpy(data, mapping.macname.data(), mapping.macname.size());
-        data += mapping.macname.size();
-        *reinterpret_cast<uint16_t*>(data) = mapping.path.string().size();
-        data += sizeof(uint16_t);
-        memcpy(data, mapping.path.string().data(), mapping.path.string().size());
-    }
-
 }
+
+LMDBCNIDMapper::BinMapping::BinMapping(const StoredMapping& mapping)
+    : data_(sizeof(CNID) + 1 + mapping.macname.size() + 2 + mapping.path.string().size())
+    , val_(data_.data(), data_.size())
+    , cnid(mapping.cnid)
+    , cnidval_(&cnid, sizeof(CNID))
+{
+    char *data = data_.data();
+    *reinterpret_cast<CNID*>(data) = mapping.parID;
+    data += sizeof(CNID);
+    *reinterpret_cast<uint8_t*>(data) = mapping.macname.size();
+    data++;
+    memcpy(data, mapping.macname.data(), mapping.macname.size());
+    data += mapping.macname.size();
+    *reinterpret_cast<uint16_t*>(data) = mapping.path.string().size();
+    data += sizeof(uint16_t);
+    memcpy(data, mapping.path.string().data(), mapping.path.string().size());
+}
+
 
 LMDBCNIDMapper::LMDBCNIDMapper(fs::path root, mac_string volumeName)
     : env_(lmdb::env::create())
@@ -88,7 +85,7 @@ LMDBCNIDMapper::~LMDBCNIDMapper()
 {
 }
 
-std::optional<CNIDMapper::Mapping> LMDBCNIDMapper::getMapping(lmdb::txn& txn, CNID cnid)
+std::optional<LMDBCNIDMapper::StoredMapping> LMDBCNIDMapper::getMapping(lmdb::txn& txn, CNID cnid)
 {
     lmdb::val mapping;
 
@@ -98,7 +95,7 @@ std::optional<CNIDMapper::Mapping> LMDBCNIDMapper::getMapping(lmdb::txn& txn, CN
         return {};
 }
 
-void LMDBCNIDMapper::setMapping(lmdb::txn& txn, Mapping m)
+void LMDBCNIDMapper::setMapping(lmdb::txn& txn, StoredMapping m)
 {
     BinMapping binMapping{m};
     mappings_.put(txn, binMapping.cnidval(), binMapping.val());
@@ -129,7 +126,7 @@ void LMDBCNIDMapper::setDirectory(lmdb::txn& txn, CNID cnid, const std::vector<C
     
 
 std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID,
-        std::vector<fs::path> realPaths)
+        std::vector<fs::directory_entry> realPaths)
 {
     auto txn = lmdb::txn::begin(env_);
 
@@ -141,7 +138,7 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
     std::vector<CNID> newContents;
     newContents.reserve(realPaths.size());
 
-    std::vector<Mapping> mappings;
+    std::vector<StoredMapping> mappings;
 
     for(CNID cnid : getDirectory(txn, dirID))
     {
@@ -162,19 +159,19 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
     std::set<mac_string> usedNames;
 
     auto cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
-    for(auto& path : realPaths)
+    for(auto& entry : realPaths)
     {
-        while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < path)
+        while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < entry.path())
         {
             // discard mapping
             deleteCNID(txn, cachedMappingIt->cnid);
             ++cachedMappingIt;
         }
 
-        if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == path)
+        if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == entry.path())
         {
             // use existing mapping
-            dirMappings.push_back(*cachedMappingIt);
+            dirMappings.push_back({cachedMappingIt->parID, cachedMappingIt->cnid, std::move(entry), cachedMappingIt->macname});
             newContents.push_back(cachedMappingIt->cnid);
 
             ++cachedMappingIt;
@@ -183,7 +180,7 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
         {
             // new mapping
             mac_string macname;
-            const fs::path& name = path.filename();
+            const fs::path& name = entry.path().filename();
             int index = 0;
 
             bool nameIsFree;
@@ -197,13 +194,17 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
 
             Mapping newMapping {
                 dirID, newCNID++,
-                std::move(path),
+                std::move(entry),
                 std::move(macname)
             };
             dirMappings.push_back(newMapping);
             newContents.push_back(newMapping.cnid);
 
-            setMapping(txn, newMapping);
+            setMapping(txn, {
+                newMapping.parID, newMapping.cnid,
+                newMapping.entry.path(),
+                std::move(newMapping.macname)
+            });
         }
     }
 
@@ -224,13 +225,28 @@ std::optional<CNIDMapper::Mapping> LMDBCNIDMapper::lookupCNID(CNID cnid)
         return {};
         
     if(fs::exists(mapping->path))
-        return mapping;
-    else
     {
-        deleteCNID(txn, cnid);
-        txn.commit();
-        return {};
+        boost::system::error_code ec;
+
+        try
+        {
+            return Mapping {
+                mapping->parID,
+                mapping->cnid,
+                fs::directory_entry(mapping->path),
+                mapping->macname
+            };
+        }
+        catch(fs::filesystem_error)
+        {
+            // file no longer exists,
+            // pass through
+        }
     }
+        
+    deleteCNID(cnid);
+    txn.commit();
+    return {};
 }
 
 void LMDBCNIDMapper::deleteCNID(lmdb::txn& txn, CNID cnid)
