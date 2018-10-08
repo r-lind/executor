@@ -8,13 +8,13 @@ SimpleCNIDMapper::SimpleCNIDMapper(fs::path root, mac_string volumeName)
 {
     mappings_[2] = {
         1, 2,
-        fs::directory_entry(root),
+        root,
         volumeName
     };
 }
 
 std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dirID,
-        std::vector<fs::directory_entry> realPaths)
+        std::vector<fs::path> realPaths)
 {
     auto& cachedContents = directories_[dirID];
     
@@ -31,9 +31,9 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
     
     std::set<mac_string> usedNames;
 
-    for(auto& entry : realPaths)
+    for(auto& path : realPaths)
     {
-        while(mapping && mapping->entry.path() < entry.path())
+        while(mapping && mapping->path < path)
         {
             // discard mapping
             deleteCNID(mapping->cnid);
@@ -41,7 +41,7 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
             mapping = cacheIt != cacheEnd ? &mappings_.at(*cacheIt) : nullptr;
         }
 
-        if(mapping && mapping->entry.path() == entry.path())
+        if(mapping && mapping->path == path)
         {
             // use existing mapping
             dirMappings.push_back(*mapping);
@@ -54,7 +54,7 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
         {
             // new mapping
             mac_string macname;
-            const fs::path& name = entry.path();
+            const fs::path& name = path.filename();
             int index = 0;
 
             bool nameIsFree;
@@ -68,7 +68,7 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
 
             Mapping newMapping {
                 dirID, nextCNID_++,
-                std::move(entry),
+                std::move(path),
                 std::move(macname)
             };
             dirMappings.push_back(newMapping);
@@ -88,7 +88,7 @@ std::optional<CNIDMapper::Mapping> SimpleCNIDMapper::lookupCNID(CNID cnid)
     if(it == mappings_.end())
         return {};
 
-    if(fs::exists(it->second.entry.path()))
+    if(fs::exists(it->second.path))
         return it->second;
     else
     {
@@ -114,7 +114,7 @@ void SimpleCNIDMapper::deleteCNID(CNID cnid)
 
     mappings_.erase(it);
 
-    auto dirIt = directories_.find(parID);
+    auto dirIt = directories_.find(cnid);
     if(dirIt != directories_.end())
     {
         // deleteCNID is only invoked for empty directories by ItemCacher,
@@ -122,7 +122,7 @@ void SimpleCNIDMapper::deleteCNID(CNID cnid)
         // on files and directories that have been deleted or moved by other programs.
         for(CNID child : dirIt->second)
             deleteCNID(child);
-        directories_.erase(parID);
+        directories_.erase(cnid);
     }
 }
 
@@ -141,7 +141,7 @@ void SimpleCNIDMapper::moveCNID(CNID cnid, CNID newParent, mac_string_view newMa
 
     fs::path newPath = fsop();
 
-    it->second.entry = fs::directory_entry(newPath);
+    it->second.path = newPath;
     it->second.parID = newParent;
     if(!newMacName.empty())
         it->second.macname = newMacName;
@@ -155,7 +155,7 @@ void SimpleCNIDMapper::moveCNID(CNID cnid, CNID newParent, mac_string_view newMa
     cachedContentsTo.insert(
         std::upper_bound(cachedContentsTo.begin(), cachedContentsTo.end(), cnid,
             [&](CNID a, CNID b) {
-                return mappings_.at(a).entry.path() < mappings_.at(b).entry.path();
+                return mappings_.at(a).path < mappings_.at(b).path;
             }),
         cnid);
 }

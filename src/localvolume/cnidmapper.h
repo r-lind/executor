@@ -18,11 +18,11 @@ public:
     {
         CNID parID;
         CNID cnid;
-        fs::directory_entry entry;
+        fs::path path;
         mac_string macname;
     };
 
-    virtual std::vector<Mapping> mapDirectoryContents(CNID dirID, std::vector<fs::directory_entry> realPaths) = 0;
+    virtual std::vector<Mapping> mapDirectoryContents(CNID dirID, std::vector<fs::path> realPaths) = 0;
     virtual std::optional<Mapping> lookupCNID(CNID cnid) = 0;
 
     virtual void deleteCNID(CNID cnid) = 0;
