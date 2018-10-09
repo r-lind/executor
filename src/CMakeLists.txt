@@ -323,6 +323,7 @@ set(include_sources hintemplate.h
                   include/rsys/m68kint.h
                   include/rsys/macros.h
                   include/rsys/mactype.h
+                  include/rsys/macstrings.h
                   include/rsys/memsize.h
                   include/rsys/menu.h
                   include/rsys/mixed_mode.h
