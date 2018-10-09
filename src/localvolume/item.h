@@ -53,7 +53,8 @@ public:
     virtual ~ItemFactory() = default;
 
     virtual bool isHidden(const fs::directory_entry& e) { return false; }
-    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) = 0;
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+        const fs::directory_entry& e, mac_string_view macname) = 0;
     virtual void createFile(const fs::path& parentPath, mac_string_view name)
         { throw std::logic_error("createFile unimplemented"); }
 };
@@ -62,7 +63,8 @@ public:
 class DirectoryItemFactory : public ItemFactory
 {
 public:
-    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+        const fs::directory_entry& e, mac_string_view macname) override;
 };
 
 class DirectoryItem : public Item

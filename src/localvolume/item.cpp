@@ -7,12 +7,8 @@
 using namespace Executor;
 
 Item::Item(ItemCache& itemcache, CNID parID, CNID cnid, fs::path p, mac_string_view name)
-    : itemcache_(itemcache), parID_(parID), cnid_(cnid), path_(std::move(p))
+    : itemcache_(itemcache), parID_(parID), cnid_(cnid), path_(std::move(p)), name_(name)
 {
-    if(name.empty())
-        name_ = toMacRomanFilename(path_.filename());
-    else
-        name_ = name;
 }
 
 Item::~Item()
@@ -40,11 +36,12 @@ void Item::moveItem(const fs::path& newParent)
     path_ = std::move(newPath);
 }
 
-ItemPtr DirectoryItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr DirectoryItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+    const fs::directory_entry& e, mac_string_view macname)
 {
     if(fs::is_directory(e.path()))
     {
-        return std::make_shared<DirectoryItem>(itemcache, parID, cnid, e.path());
+        return std::make_shared<DirectoryItem>(itemcache, parID, cnid, e.path(), macname);
     }
     return nullptr;
 }
@@ -69,18 +66,11 @@ void DirectoryItem::populateCache(std::vector<ItemPtr> items)
         mac_string nameUpr = item->name();
         ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
 
-        auto [it, inserted] = contents_by_name_.emplace(nameUpr, item);
-        if(inserted)
-        {
-            if(!dynamic_cast<DirectoryItem*>(item.get()))
-                files_.push_back(item);
-        }
-        else
-        {
-            std::cerr << "duplicate name mapping: " << item->path() << std::endl; 
-            std::cerr << "  and: " << it->second->path() << std::endl;
-            std::cerr << "  mapped to: " << toUnicodeFilename(nameUpr) << std::endl;
-        }
+        auto inserted = contents_by_name_.emplace(nameUpr, item).second;
+        assert(inserted);
+
+        if(!dynamic_cast<DirectoryItem*>(item.get()))
+            files_.push_back(item);
     }
 
     cache_valid_ = true;

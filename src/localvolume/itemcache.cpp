@@ -75,7 +75,7 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
             item = itemIt->second.lock();
 
         if(!item)
-            item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry);
+            item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry, m.macname);
 
         if(!item)
             continue;
@@ -128,7 +128,7 @@ ItemPtr ItemCache::tryResolve(CNID cnid)
         return {};
     auto& m = *optionalMapping;
     
-    if(ItemPtr item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry))
+    if(ItemPtr item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry, m.macname))
     {
         items_.emplace(item->cnid(), item);
         return item;

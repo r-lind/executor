@@ -24,6 +24,7 @@ void MacResourceFork::setEOF(size_t sz)
     // ftruncate does not work for resouce forks on APFS volumes on High Sierra.
     size_t actual = lseek(fd, 0, SEEK_END);
 
+    // FIXME: ... and on Mojave, removexattr fails while the file is open.
     if(actual > sz)
     {
         if(sz < 16 * 1024 * 1024)   // 16 MB is the maximum size for a resfork
@@ -45,11 +46,12 @@ void MacResourceFork::setEOF(size_t sz)
     }
 }
 
-ItemPtr MacItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr MacItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+    const fs::directory_entry& e, mac_string_view macname)
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<MacFileItem>(itemcache, parID, cnid, e.path());
+        return std::make_shared<MacFileItem>(itemcache, parID, cnid, e.path(), macname);
     }
     return nullptr;
 }
@@ -69,7 +71,7 @@ std::unique_ptr<OpenFile> MacFileItem::open()
 std::unique_ptr<OpenFile> MacFileItem::openRF()
 {
     fs::path rsrc = path() / "..namedfork/rsrc";
-    return std::make_unique<MacResourceFork>(rsrc);
+    return std::make_unique<MacResourceFork>(rsrc, PlainDataFork::create);
 }
 
 FInfo MacFileItem::getFInfo()

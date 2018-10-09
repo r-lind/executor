@@ -21,11 +21,12 @@
 using namespace Executor;
 
 
-ItemPtr ExtensionItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr ExtensionItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+    const fs::directory_entry& e, mac_string_view macname)
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<PlainFileItem>(itemcache, parID, cnid, e.path());
+        return std::make_shared<PlainFileItem>(itemcache, parID, cnid, e.path(), macname);
     }
     return nullptr;
 }
@@ -64,11 +65,12 @@ bool LocalVolume::isHidden(const fs::directory_entry& e)
     return false;
 }
 
-ItemPtr LocalVolume::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr LocalVolume::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+    const fs::directory_entry& e, mac_string_view macname)
 {
     for(auto& itemFactory : itemFactories)
     {
-        if(ItemPtr item = itemFactory->createItemForDirEntry(itemcache, parID, cnid, e))
+        if(ItemPtr item = itemFactory->createItemForDirEntry(itemcache, parID, cnid, e, macname))
             return item;
     }
     return {};

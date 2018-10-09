@@ -75,7 +75,8 @@ class LocalVolume : public Volume, private ItemFactory
     void getInfoCommon(CInfoPBPtr pb, InfoKind infoKind);
 
     virtual bool isHidden(const fs::directory_entry& e) override;
-    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+        const fs::directory_entry& e, mac_string_view macname) override;
 
 public:
     std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
@@ -139,7 +140,8 @@ public:
 class ExtensionItemFactory : public ItemFactory
 {
 public:
-    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e) override;
+    virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+        const fs::directory_entry& e, mac_string_view macname) override;
 };
 
 

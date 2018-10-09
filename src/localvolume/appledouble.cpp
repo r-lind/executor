@@ -12,14 +12,15 @@ bool AppleDoubleItemFactory::isHidden(const fs::directory_entry& e)
     return false;
 }
 
-ItemPtr AppleDoubleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr AppleDoubleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+    const fs::directory_entry& e, mac_string_view macname)
 {
     if(fs::is_regular_file(e.path()))
     {
         fs::path adpath = e.path().parent_path() / ("%" + e.path().filename().string());
         
         if(fs::is_regular_file(adpath))
-            return std::make_shared<AppleDoubleFileItem>(itemcache, parID, cnid, e.path());
+            return std::make_shared<AppleDoubleFileItem>(itemcache, parID, cnid, e.path(), macname);
     }
     return nullptr;
 }
@@ -38,7 +39,7 @@ void AppleDoubleItemFactory::createFile(const fs::path& parentPath, mac_string_v
 std::shared_ptr<AppleSingleDoubleFile> AppleDoubleFileItem::access()
 {
     std::shared_ptr<AppleSingleDoubleFile> p;
-    if(p = openedFile.lock())
+    if((p = openedFile.lock()))
         return p;
     else
     {
@@ -112,7 +113,8 @@ void AppleDoubleFileItem::moveItem(const fs::path& newParent)
 }
 
 
-ItemPtr AppleSingleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid, const fs::directory_entry& e)
+ItemPtr AppleSingleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
+    const fs::directory_entry& e, mac_string_view macname)
 {
     if(!fs::is_regular(e.path()))
         return nullptr;
@@ -120,7 +122,7 @@ ItemPtr AppleSingleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID
     fs::ifstream(e.path(), std::ios::binary).read((char*)&guestref(magic), 8);
 
     if(magic == 0x0005160000020000)
-        return std::make_shared<AppleSingleFileItem>(itemcache, parID, cnid, e.path());
+        return std::make_shared<AppleSingleFileItem>(itemcache, parID, cnid, e.path(), macname);
     else
         return nullptr;
 }
@@ -138,7 +140,7 @@ void AppleSingleItemFactory::createFile(const fs::path& parentPath, mac_string_v
 std::shared_ptr<AppleSingleDoubleFile> AppleSingleFileItem::access()
 {
     std::shared_ptr<AppleSingleDoubleFile> p;
-    if(p = openedFile.lock())
+    if((p = openedFile.lock()))
         return p;
     else
     {
