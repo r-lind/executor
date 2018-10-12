@@ -29,6 +29,7 @@ class LocalVolume : public Volume, private ItemFactory
     std::unique_ptr<ItemCache> itemCache;
     std::vector<std::unique_ptr<ItemFactory>> itemFactories;
     ItemFactory *defaultItemFactory;
+    ItemFactory *upgradedItemFactory;
 
 
     //ItemPtr resolve(long cnid);
@@ -71,12 +72,14 @@ class LocalVolume : public Volume, private ItemFactory
         CatInfo
     };
 
-    void setInfoCommon(Item& item, CInfoPBPtr pb, InfoKind infoKind);
+    void setInfoCommon(const ItemPtr& item, CInfoPBPtr pb, InfoKind infoKind);
     void getInfoCommon(CInfoPBPtr pb, InfoKind infoKind);
 
     virtual bool isHidden(const fs::directory_entry& e) override;
     virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
         const fs::directory_entry& e, mac_string_view macname) override;
+
+    FileItemPtr upgradeItem(FileItemPtr item, ItemFactory* betterFactory);
 
 public:
     std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
@@ -142,6 +145,7 @@ class ExtensionItemFactory : public ItemFactory
 public:
     virtual ItemPtr createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
         const fs::directory_entry& e, mac_string_view macname) override;
+    virtual void createFile(const fs::path& newPath) override;
 };
 
 

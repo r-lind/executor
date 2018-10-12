@@ -5,15 +5,21 @@
 
 namespace Executor
 {
+class UpgradeRequiredException : std::runtime_error
+{
+public:
+    UpgradeRequiredException() : std::runtime_error("file metadata representation update required") {}
+};
+
 class OpenFile
 {
 public:
     virtual ~OpenFile() = default;
 
     virtual size_t getEOF() = 0;
-    virtual void setEOF(size_t sz) { throw OSErrorException(wrPermErr); }
+    virtual void setEOF(size_t sz) { throw UpgradeRequiredException(); }
     virtual size_t read(size_t offset, void *p, size_t n) = 0;
-    virtual size_t write(size_t offset, void *p, size_t n) { throw OSErrorException(wrPermErr); }
+    virtual size_t write(size_t offset, void *p, size_t n) { throw UpgradeRequiredException(); }
 };
 
 class EmptyFork : public OpenFile

@@ -8,7 +8,6 @@
 
 namespace Executor
 {
-    
 class Item;
 class ItemFactory;
 class CNIDMapper;
@@ -52,6 +51,7 @@ public:
     void cacheDirectory(DirectoryItemPtr item);
     void flushDirectoryCache(DirectoryItemPtr item);
     void flushDirectoryCache(CNID dirID);
+    void flushItem(ItemPtr item);
 
     void deleteItem(ItemPtr item);
     void renameItem(ItemPtr item, mac_string_view newName);

@@ -31,6 +31,11 @@ ItemPtr ExtensionItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID p
     return nullptr;
 }
 
+void ExtensionItemFactory::createFile(const fs::path& newPath)
+{
+    PlainDataFork data(newPath, PlainDataFork::create);
+}
+
 LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     : Volume(vcb), root(root)
 {
@@ -46,11 +51,13 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     itemFactories.push_back(std::make_unique<AppleSingleItemFactory>());
     //defaultItemFactory = itemFactories.back().get();
     itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>());
-    itemFactories.push_back(std::make_unique<BasiliskItemFactory>());
+    upgradedItemFactory = itemFactories.back().get();
     defaultItemFactory = itemFactories.back().get();
+    itemFactories.push_back(std::make_unique<BasiliskItemFactory>());
+    //defaultItemFactory = itemFactories.back().get();
 #ifdef MACOSX
     itemFactories.push_back(std::make_unique<MacItemFactory>());
-    defaultItemFactory = itemFactories.back().get();
+//    upgradedItemFactory = itemFactories.back().get();
 #endif
     itemFactories.push_back(std::make_unique<ExtensionItemFactory>());
 }
@@ -216,7 +223,7 @@ struct LocalVolume::FCBExtension
     filecontrolblock *fcb;
     short refNum;
     std::unique_ptr<OpenFile> access;
-    std::shared_ptr<FileItem> file;
+    FileItemPtr file;
 
     FCBExtension() = default;
     FCBExtension(filecontrolblock *fcb, short refNum)
@@ -246,6 +253,81 @@ LocalVolume::FCBExtension& LocalVolume::openFCBX()
     fcbExtensions[index] = FCBExtension(fcb, refNum);
 
     return fcbExtensions[index];
+}
+
+FileItemPtr LocalVolume::upgradeItem(FileItemPtr item, ItemFactory *betterFactory)
+{
+    CNID cnid = item->cnid();
+
+    for(int i = 0; i < NFCB; i++)
+    {
+        if(CL(ROMlib_fcblocks[i].fdfnum) == cnid
+           && MR(ROMlib_fcblocks[i].fcvptr) == &vcb)
+        {
+            FCBExtension& fcbx = fcbExtensions[i];
+            assert(fcbx.refNum == i * 94 + 2);
+            fcbx.file = {};
+            fcbx.access = {};
+        }
+    }
+
+    fs::path path = item->path();
+    fs::path tempPath = path.parent_path() / fs::unique_path();
+
+    itemCache->flushItem(item);
+    item->moveItem(tempPath, mac_string_view());
+    betterFactory->createFile(path);
+    auto newItem = std::dynamic_pointer_cast<FileItem>(itemCache->tryResolve(cnid));
+
+    assert(newItem->cnid() == cnid);
+
+    auto copydata = [](const std::unique_ptr<OpenFile>& from, const std::unique_ptr<OpenFile>& to) {
+        size_t sz = from->getEOF();
+        to->setEOF(sz);
+
+        const size_t bufSize = 1024 * 1024;
+        std::unique_ptr<uint8_t[]> buffer(new uint8_t[bufSize]);
+        for(size_t offset = 0; offset < sz; offset += bufSize)
+        {
+            size_t sz1 = std::min(bufSize, sz - offset);
+            from->read(offset, buffer.get(), sz1);
+            to->write(offset, buffer.get(), sz1);
+        }
+    };
+
+    try
+    {
+        copydata(item->open(), newItem->open());
+        copydata(item->openRF(), newItem->openRF());
+    }
+    catch(std::exception e)
+    {
+        std::cout << e.what() << std::endl;
+    }
+    newItem->setInfo(item->getInfo());
+    item->deleteItem();
+
+
+    newItem->resWriteAccessRefNum = item->resWriteAccessRefNum;
+    newItem->dataWriteAccessRefNum = item->dataWriteAccessRefNum;
+
+    for(int i = 0; i < NFCB; i++)
+    {
+        if(CL(ROMlib_fcblocks[i].fdfnum) == cnid
+           && MR(ROMlib_fcblocks[i].fcvptr) == &vcb)
+        {
+            FCBExtension& fcbx = fcbExtensions[i];
+            assert(fcbx.refNum == i * 94 + 2);
+            fcbx.file = newItem;
+
+            if(fcbx.fcb->fcbMdRByt & RESOURCEBIT)
+                fcbx.access = newItem->openRF();
+            else
+                fcbx.access = newItem->open();
+        }
+    }
+
+    return newItem;
 }
 
 void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8_t permission)
@@ -390,9 +472,9 @@ void LocalVolume::PBGetFInfo(ParmBlkPtr pb)
     getInfoCommon(reinterpret_cast<CInfoPBPtr>(pb), InfoKind::FInfo);
 }
 
-void LocalVolume::setInfoCommon(Item& item, CInfoPBPtr pb, InfoKind infoKind)
+void LocalVolume::setInfoCommon(const ItemPtr& item, CInfoPBPtr pb, InfoKind infoKind)
 {
-    if(FileItem *fitem = dynamic_cast<FileItem*>(&item))
+    if(FileItemPtr fitem = std::dynamic_pointer_cast<FileItem>(item))
     {
         ItemInfo info;
 
@@ -401,8 +483,15 @@ void LocalVolume::setInfoCommon(Item& item, CInfoPBPtr pb, InfoKind infoKind)
         else
             info = fitem->getInfo();
         info.file.info = pb->hFileInfo.ioFlFndrInfo;
-        fitem->setInfo(info); 
-
+        try
+        {
+            fitem->setInfo(info);
+        }
+        catch(UpgradeRequiredException)
+        {
+            fitem = upgradeItem(fitem, upgradedItemFactory);
+            fitem->setInfo(info);
+        }
         // TODO: if(infoKind == InfoKind::CatInfo)) ioFlBkDat
         // TODO: pb->hFileInfo.ioFlCrDat
         // TODO: pb->hFileInfo.ioFlMdDat
@@ -413,17 +502,17 @@ void LocalVolume::setInfoCommon(Item& item, CInfoPBPtr pb, InfoKind infoKind)
 
 void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
 {
-    setInfoCommon(*resolve(MR(pb->hFileInfo.ioNamePtr), CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID)),
+    setInfoCommon(resolve(MR(pb->hFileInfo.ioNamePtr), CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID)),
         pb, InfoKind::CatInfo);
 }
 void LocalVolume::PBSetFInfo(ParmBlkPtr pb)
 {
-    setInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0),
+    setInfoCommon(resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0),
         reinterpret_cast<CInfoPBPtr>(pb), InfoKind::FInfo);
 }
 void LocalVolume::PBHSetFInfo(HParmBlkPtr pb)
 {
-    setInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)),
+    setInfoCommon(resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)),
         reinterpret_cast<CInfoPBPtr>(pb), InfoKind::HFInfo);
 }
 
@@ -555,7 +644,19 @@ void LocalVolume::PBWrite(ParmBlkPtr pb)
     pb->ioParam.ioActCount = 0;
     setFPosCommon(pb, false);
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
-    size_t n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+    
+    
+    size_t n;
+    try
+    {
+        n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+    }
+    catch(UpgradeRequiredException)
+    {
+        upgradeItem(fcbx.file, upgradedItemFactory);
+        n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+    }
+    
     pb->ioParam.ioActCount = CL(n);
     pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + n );
 }
@@ -636,7 +737,15 @@ void LocalVolume::PBGetEOF(ParmBlkPtr pb)
 void LocalVolume::PBSetEOF(ParmBlkPtr pb)
 {
     auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
-    fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
+    try
+    {
+        fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
+    }
+    catch(UpgradeRequiredException)
+    {
+        upgradeItem(fcbx.file, upgradedItemFactory);
+        fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
+    }
 }
 
 void LocalVolume::PBCatMove(CMovePBPtr pb)

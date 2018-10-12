@@ -120,4 +120,6 @@ ItemInfo PlainFileItem::getInfo()
 
 void PlainFileItem::setInfo(ItemInfo info)
 {
+    if(info.file.info.fdType != TICKX("TEXT"))
+        throw UpgradeRequiredException();
 }

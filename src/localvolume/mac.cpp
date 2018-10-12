@@ -1,6 +1,7 @@
 #include "mac.h"
 #include "host-os-config.h"
 #include "plain.h"
+#include <rsys/macros.h>
 
 #ifdef MACOSX
 using namespace Executor;
@@ -9,10 +10,16 @@ using namespace Executor;
 #include <unistd.h>
 #include <sys/xattr.h>
 
-class MacResourceFork : public PlainDataFork
+class MacResourceFork : public OpenFile
 {
+    int fd;
 public:
-    using PlainDataFork::PlainDataFork;
+    struct create_t {};
+    static constexpr create_t create = {};
+
+    MacResourceFork(fs::path path);
+    MacResourceFork(fs::path path, create_t);
+    ~MacResourceFork();
 
     virtual size_t getEOF() override;
     virtual void setEOF(size_t sz) override;
@@ -31,6 +38,30 @@ public:
 // a resource fork is 16MB, we just read the whole thing into RAM,
 // remove the attribute, and write it again at the desired size.
 
+MacResourceFork::MacResourceFork(fs::path path)
+{
+    fd = open(path.string().c_str(), O_RDWR | O_BINARY, 0644);
+}
+
+MacResourceFork::MacResourceFork(fs::path path, create_t)
+{
+    fd = open(path.string().c_str(), O_RDWR | O_CREAT | O_BINARY, 0644);
+
+        // Note:
+        // I'm tempted to initialize type and creator to 0,
+        // but then Mac OS X swallows the attribute
+        // and the MacItemFactory does not trigger
+    ItemInfo info;
+    info.file.info.fdType = TICKX("BINA");
+    info.file.info.fdCreator = TICKX("EXEC");
+    fsetxattr(fd, XATTR_FINDERINFO_NAME, &info, 32, 0, 0);
+}
+
+MacResourceFork::~MacResourceFork()
+{
+    close(fd);
+}
+
 size_t MacResourceFork::getEOF()
 {
     errno = 0;
@@ -46,7 +77,7 @@ void MacResourceFork::setEOF(size_t sz)
 {
     errno = 0;
     ssize_t curSz = fgetxattr(fd, XATTR_RESOURCEFORK_NAME, nullptr, 0, 0, 0);
-    if(curSz < 0 && errno != ENOATTR)
+    if(curSz < 0 && errno == ENOATTR)
         curSz = 0;
     if(curSz < 0)
         throw OSErrorException(ioErr);
@@ -86,14 +117,19 @@ ItemPtr MacItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, 
 {
     if(fs::is_regular_file(e.path()))
     {
-        return std::make_shared<MacFileItem>(itemcache, parID, cnid, e.path(), macname);
+        const char *fn = e.path().string().c_str();
+        if(getxattr(fn, XATTR_FINDERINFO_NAME, nullptr, 0, 0, 0) > 0
+            || getxattr(fn, XATTR_RESOURCEFORK_NAME, nullptr, 0, 0, 0) > 0)
+        {
+            return std::make_shared<MacFileItem>(itemcache, parID, cnid, e.path(), macname);
+        }
     }
     return nullptr;
 }
 
 void MacItemFactory::createFile(const fs::path& path)
 {
-    PlainDataFork data(path, PlainDataFork::create);
+    MacResourceFork data(path, MacResourceFork::create);
 }
 
 std::unique_ptr<OpenFile> MacFileItem::open()

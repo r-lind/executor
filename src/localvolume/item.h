@@ -17,9 +17,11 @@ using CNID = int32_t;
 
 class Item;
 class DirectoryItem;
+class FileItem;
 
 using ItemPtr = std::shared_ptr<Item>;
 using DirectoryItemPtr = std::shared_ptr<DirectoryItem>;
+using FileItemPtr = std::shared_ptr<FileItem>;
 
 union ItemInfo
 {
@@ -32,6 +34,7 @@ union ItemInfo
         DXInfo xinfo;
     } dir;
 };
+
 
 class Item
 {
@@ -58,6 +61,9 @@ public:
 
     virtual ItemInfo getInfo();
     virtual void setInfo(ItemInfo info);
+
+        // for use by ItemCache only
+    void noteItemFlushed() { cnid_ = -1; }
 };
 
 
