@@ -561,7 +561,7 @@ void Executor::C_PrOpenPage(TPPrPort port, TPRect pPageFrame)
                     ROMlib_paper_size_name.c_str(), ROMlib_paper_size_name_terminator.c_str(),
                     ROMlib_rotation, ROMlib_translate_x, ROMlib_translate_y,
                     72.0 / ROMlib_resolution_x, -1 * 72.0 / ROMlib_resolution_y);
-        ROMlib_suppressclip = 0;
+        ROMlib_suppressclip = false;
     }
     page_is_open = true;
 }

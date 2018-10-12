@@ -45,10 +45,6 @@ static rotation_t rotation;
 
 FILE *ROMlib_printfile;
 #define DPSContext long
-#if !defined(MACOSX_)
-typedef enum { NO,
-               YES } boolean;
-#endif
 
 static DPSContext DPSGetCurrentContext(void)
 {
@@ -700,7 +696,7 @@ static void doimage(LONGINT verb, Rect *rp, GrafPtr thePortp)
             if(pnMode == patCopy)
                 PSsendint(1);
             else
-                PSsendboolean(YES);
+                PSsendboolean(true);
             matrix[0] = 72 / (float)72;
             matrix[1] = 0;
             matrix[2] = 0;
@@ -737,8 +733,8 @@ void Executor::ROMlib_grestore(void)
     PSgrestore();
 }
 
-char Executor::ROMlib_suppressclip = NO;
-static char reloadclip = NO;
+bool Executor::ROMlib_suppressclip = false;
+static bool reloadclip = false;
 
 static double save_xoffset, save_yoffset;
 
@@ -746,7 +742,7 @@ void Executor::ROMlib_rotatebegin(LONGINT flippage, LONGINT angle)
 {
     PSrotate(angle);
     PStranslate(-save_xoffset, -save_yoffset);
-    ROMlib_suppressclip = YES;
+    ROMlib_suppressclip = true;
     printport.pnLoc.h = CWC(-32768); /* force reload */
     printport.txFont = CWC(-32768); /* force reload */
 }
@@ -769,8 +765,8 @@ void Executor::ROMlib_rotatecenter(double yoffset, double xoffset)
 void Executor::ROMlib_rotateend(void)
 {
     PSgrestore();
-    ROMlib_suppressclip = NO;
-    reloadclip = YES;
+    ROMlib_suppressclip = false;
+    reloadclip = true;
 }
 
 static void NeXTClip(Rect *rp)
@@ -858,7 +854,7 @@ static char match255c(StringPtr str, char *p)
 
     n = strlen(p);
     if(n != str[0])
-        return NO;
+        return false;
     else
         return strncmp((char *)str + 1, p, n) == 0;
 }
@@ -977,9 +973,9 @@ static int matchpercentage(char *value, int indx, const char *tomatch)
     if((dash && strncmp(value, tomatch, dash - tomatch) == 0) || (!dash && strcmp(value, tomatch) == 0))
     {
         ++dash;
-        isnormal = lookfor(dash, (char **)normals, NELEM(normals), YES);
-        isbold = lookfor(dash, (char **)bolds, NELEM(bolds), YES);
-        isitalic = lookfor(dash, (char **)italics, NELEM(italics), NO);
+        isnormal = lookfor(dash, (char **)normals, NELEM(normals), true);
+        isbold = lookfor(dash, (char **)bolds, NELEM(bolds), true);
+        isitalic = lookfor(dash, (char **)italics, NELEM(italics), false);
         switch(indx)
         {
             case 0:
@@ -1406,7 +1402,7 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
             PSsendint((int)srcwidth);
             PSsendint(srcheight);
             if(mode != srcCopy)
-                PSsendboolean(YES);
+                PSsendboolean(true);
             else
             {
                 if(direct_color_p)

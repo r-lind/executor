@@ -74,8 +74,7 @@ enum
 extern GrafPort printport;
 extern INTEGER ROMlib_printresfile;
 extern LONGINT pagewanted;
-extern char ROMlib_needtorestore;
-extern char ROMlib_suppressclip;
+extern bool ROMlib_suppressclip;
 
 extern char *ROMlib_spool_file;
 extern ini_key_t ROMlib_printer;
