@@ -449,85 +449,15 @@ is_unix_path(const char *pathname)
     return retval;
 }
 
-void Executor::ROMlib_fileinit() /* INTERNAL */
+static void MountMacVolumes(std::string macVolumes)
 {
-    INTEGER i;
-    CInfoPBRec cpb;
-    WDPBRec wpb;
-    INTEGER wdlen;
     GUEST<LONGINT> m;
-    GUEST<THz> savezone;
-    struct stat sbuf;
-    char *sysname;
-    int sysnamelen;
     char *p, *ep;
-
-    LM(CurDirStore) = CLC(2);
-    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
-    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
-    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
-    LM(DefVCBPtr) = 0;
-    LM(FSFCBLen) = CWC(94);
-
-    savezone = LM(TheZone);
-    LM(TheZone) = LM(SysZone);
-    LM(FCBSPtr) = RM(NewPtr((Size)sizeof(fcbhidden)));
-    ((fcbhidden *)MR(LM(FCBSPtr)))->nbytes = CW(sizeof(fcbhidden));
-
-    for(i = 0; i < NFCB; i++)
-    {
-        ROMlib_fcblocks[i].fdfnum = 0;
-        ROMlib_fcblocks[i].fcleof = CL(i + 1);
-        ROMlib_fcblocks[i].fcbTypByt = 0;
-        ROMlib_fcblocks[i].fcbSBlk = 0;
-        ROMlib_fcblocks[i].fcPLen = 0;
-        ROMlib_fcblocks[i].fcbCrPs = 0;
-        ROMlib_fcblocks[i].fcbBfAdr = 0;
-        ROMlib_fcblocks[i].fcbFlPos = 0;
-        ROMlib_fcblocks[i].fcbClmpSize = CLC(1);
-        ROMlib_fcblocks[i].fcbFType = 0;
-        ROMlib_fcblocks[i].zero[0] = 0;
-        ROMlib_fcblocks[i].zero[1] = 0;
-        ROMlib_fcblocks[i].zero[2] = 0;
-        ROMlib_fcblocks[i].fcname[0] = 0;
-    }
-    ROMlib_fcblocks[NFCB - 1].fcleof = CLC(-1);
-
-#define NWDENTRIES 40
-    wdlen = NWDENTRIES * sizeof(wdentry) + sizeof(INTEGER);
-    LM(WDCBsPtr) = RM(NewPtr((Size)wdlen));
-    LM(TheZone) = savezone;
-    memset(MR(LM(WDCBsPtr)), 0, wdlen);
-    *(GUEST<INTEGER> *)MR(LM(WDCBsPtr)) = CW(wdlen);
-
-    auto initpath = [](const char *varname, const char *defval) {
-        if(auto v = getenv(varname))
-            return expandPath(v);
-        else
-            return expandPath(defval);
-    };
-
-    ROMlib_ConfigurationFolder = initpath("Configuration", "+/Configuration");
-    ROMlib_SystemFolder = initpath("SystemFolder", "+/ExecutorVolume/System Folder");
-    ROMlib_DirectoryMap = initpath("ExecutorDirectoryMap", "~/.ExecutorDirectoryMap");
-    ROMlib_MacVolumes = initpath("MacVolumes", "+/exsystem.hfv;+"); // this is wrong: only first + is replaced
-    ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");
-    ROMlib_OffsetFile = initpath("OffsetFile", "+/offset_file");
-    ROMlib_PrintersIni = initpath("PrintersIni", "+/printers.ini");
-    ROMlib_PrintDef = initpath("PrintDef", "+/printdef.ini");
-
-    parse_offset_file();
-
-#if !defined(LITTLEENDIAN)
-    ROMlib_DirectoryMap += "-be";
-#endif /* !defined(LITTLEENDIAN) */
-
-    ROMlib_hfsinit();
-    initLocalVol();
+    struct stat sbuf;
 
     m = 0;
-    p = (char *)alloca(ROMlib_MacVolumes.size() + 1);
-    strcpy(p, ROMlib_MacVolumes.c_str());
+    p = (char *)alloca(macVolumes.size() + 1);
+    strcpy(p, macVolumes.c_str());
     while(p && *p)
     {
         ep = strchr(p, ';');
@@ -577,9 +507,17 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
             p = 0;
     }
 
-    if(is_unix_path(ROMlib_SystemFolder.c_str()))
+    futzwithdosdisks();
+}
+
+static void InitSystemFolder(std::string systemFolder)
+{
+    CInfoPBRec cpb;
+    WDPBRec wpb;
+
+    if(is_unix_path(systemFolder.c_str()))
     {
-        if(auto sysSpec = nativePathToFSSpec(fs::path(ROMlib_SystemFolder) / "System")) // FIXME: SYSMACNAME
+        if(auto sysSpec = nativePathToFSSpec(fs::path(systemFolder) / "System")) // FIXME: SYSMACNAME
         {
             cpb.hFileInfo.ioNamePtr = RM((StringPtr)SYSMACNAME);
             cpb.hFileInfo.ioVRefNum = sysSpec->vRefNum;
@@ -587,16 +525,16 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
         }
         else
         {
-            fprintf(stderr, "Couldn't find '%s'\n", ROMlib_SystemFolder.c_str());
+            fprintf(stderr, "Couldn't find '%s'\n", systemFolder.c_str());
             exit(1);
         }
     }
     else
     {
-        sysnamelen = 1 + ROMlib_SystemFolder.size() + 1 + strlen(SYSMACNAME + 1) + 1;
-        sysname = (char *)alloca(sysnamelen);
+        int sysnamelen = 1 + systemFolder.size() + 1 + strlen(SYSMACNAME + 1) + 1;
+        char *sysname = (char *)alloca(sysnamelen);
         *sysname = sysnamelen - 2; /* don't count first byte or nul */
-        sprintf(sysname + 1, "%s:%s", ROMlib_SystemFolder.c_str(), SYSMACNAME + 1);
+        sprintf(sysname + 1, "%s:%s", systemFolder.c_str(), SYSMACNAME + 1);
         cpb.hFileInfo.ioNamePtr = RM((StringPtr)sysname);
         cpb.hFileInfo.ioVRefNum = 0;
         cpb.hFileInfo.ioDirID = 0;
@@ -616,7 +554,80 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
         fprintf(stderr, "Couldn't open System: '%s'\n", ROMlib_SystemFolder.c_str());
         exit(1);
     }
-    futzwithdosdisks();
+}
+
+void Executor::ROMlib_fileinit() /* INTERNAL */
+{
+    INTEGER i;
+    INTEGER wdlen;
+    GUEST<THz> savezone;
+
+    LM(CurDirStore) = CLC(2);
+    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
+    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
+    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
+    LM(DefVCBPtr) = 0;
+    LM(FSFCBLen) = CWC(94);
+
+    savezone = LM(TheZone);
+    LM(TheZone) = LM(SysZone);
+    LM(FCBSPtr) = RM(NewPtr((Size)sizeof(fcbhidden)));
+    ((fcbhidden *)MR(LM(FCBSPtr)))->nbytes = CW(sizeof(fcbhidden));
+
+    for(i = 0; i < NFCB; i++)
+    {
+        ROMlib_fcblocks[i].fdfnum = 0;
+        ROMlib_fcblocks[i].fcleof = CL(i + 1);
+        ROMlib_fcblocks[i].fcbTypByt = 0;
+        ROMlib_fcblocks[i].fcbSBlk = 0;
+        ROMlib_fcblocks[i].fcPLen = 0;
+        ROMlib_fcblocks[i].fcbCrPs = 0;
+        ROMlib_fcblocks[i].fcbBfAdr = 0;
+        ROMlib_fcblocks[i].fcbFlPos = 0;
+        ROMlib_fcblocks[i].fcbClmpSize = CLC(1);
+        ROMlib_fcblocks[i].fcbFType = 0;
+        ROMlib_fcblocks[i].zero[0] = 0;
+        ROMlib_fcblocks[i].zero[1] = 0;
+        ROMlib_fcblocks[i].zero[2] = 0;
+        ROMlib_fcblocks[i].fcname[0] = 0;
+    }
+    ROMlib_fcblocks[NFCB - 1].fcleof = CLC(-1);
+
+#define NWDENTRIES 40
+    wdlen = NWDENTRIES * sizeof(wdentry) + sizeof(INTEGER);
+    LM(WDCBsPtr) = RM(NewPtr((Size)wdlen));
+    LM(TheZone) = savezone;
+    memset(MR(LM(WDCBsPtr)), 0, wdlen);
+    *(GUEST<INTEGER> *)MR(LM(WDCBsPtr)) = CW(wdlen);
+
+    auto initpath = [](const char *varname, const char *defval) {
+        if(auto v = getenv(varname))
+            return expandPath(v);
+        else
+            return expandPath(defval);
+    };
+
+    ROMlib_ConfigurationFolder = initpath("Configuration", "+/Configuration");
+    ROMlib_SystemFolder = initpath("SystemFolder", "+/ExecutorVolume/System Folder");
+    ROMlib_DirectoryMap = initpath("ExecutorDirectoryMap", "~/.ExecutorDirectoryMap");
+    ROMlib_MacVolumes = initpath("MacVolumes", "+");
+    ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");
+    ROMlib_OffsetFile = initpath("OffsetFile", "+/offset_file");
+    ROMlib_PrintersIni = initpath("PrintersIni", "+/printers.ini");
+    ROMlib_PrintDef = initpath("PrintDef", "+/printdef.ini");
+
+    parse_offset_file();
+
+#if !defined(LITTLEENDIAN)
+    ROMlib_DirectoryMap += "-be";
+#endif /* !defined(LITTLEENDIAN) */
+
+    ROMlib_hfsinit();
+    initLocalVol();
+
+    MountMacVolumes(ROMlib_MacVolumes);
+
+    InitSystemFolder(ROMlib_SystemFolder);
 }
 
 fcbrec *
