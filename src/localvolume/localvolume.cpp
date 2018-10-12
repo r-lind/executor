@@ -277,7 +277,6 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8
         {
             writeAccessRef = fcbx.refNum;
         }
-
     }
     else
         throw OSErrorException(paramErr);    // TODO: what's the correct error?
@@ -300,8 +299,6 @@ void LocalVolume::PBOpenRF(ParmBlkPtr pb)
 {
     openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::resource, pb->ioParam.ioPermssn);
 }
-
-
 
 void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
 {
@@ -351,7 +348,8 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
     else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
     {
         pb->hFileInfo.ioFlAttrib = open_attrib_bits(item->cnid(), &vcb, &pb->hFileInfo.ioFRefNum);
-        pb->hFileInfo.ioFlFndrInfo = fileItem->getFInfo();
+        auto info = fileItem->getInfo();
+        pb->hFileInfo.ioFlFndrInfo = info.file.info;
         
         size_t dsize = fileItem->open()->getEOF();
         size_t rsize = fileItem->openRF()->getEOF();
@@ -368,7 +366,7 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         if(infoKind == InfoKind::CatInfo)
         {
             // ioFlBkDat
-            // ioFlXFndrInfo
+            pb->hFileInfo.ioFlXFndrInfo = info.file.xinfo;
 
             // ioFlClpSiz
         }
@@ -390,32 +388,41 @@ void LocalVolume::PBGetFInfo(ParmBlkPtr pb)
     getInfoCommon(reinterpret_cast<CInfoPBPtr>(pb), InfoKind::FInfo);
 }
 
-void LocalVolume::setFInfoCommon(Item& item, ParmBlkPtr pb)
+void LocalVolume::setInfoCommon(Item& item, CInfoPBPtr pb, InfoKind infoKind)
 {
     if(FileItem *fitem = dynamic_cast<FileItem*>(&item))
     {
-        fitem->setFInfo(pb->fileParam.ioFlFndrInfo);
+        ItemInfo info;
+
+        if(infoKind == InfoKind::CatInfo)
+            info.file.xinfo = pb->hFileInfo.ioFlXFndrInfo;
+        else
+            info = fitem->getInfo();
+        info.file.info = pb->hFileInfo.ioFlFndrInfo;
+        fitem->setInfo(info); 
+
+        // TODO: if(infoKind == InfoKind::CatInfo)) ioFlBkDat
+        // TODO: pb->hFileInfo.ioFlCrDat
+        // TODO: pb->hFileInfo.ioFlMdDat
     }
     else
         throw OSErrorException(paramErr);   // TODO: item is a directory
-    
-    // pb->fileParam.ioFlCrDat      TODO
-    // pb->fileParam.ioFlMdDat      TODO
 }
 
 void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
 {
-    setFInfoCommon(*resolve(MR(pb->hFileInfo.ioNamePtr), CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID)),
-        reinterpret_cast<ParmBlkPtr>(pb));
+    setInfoCommon(*resolve(MR(pb->hFileInfo.ioNamePtr), CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID)),
+        pb, InfoKind::CatInfo);
 }
 void LocalVolume::PBSetFInfo(ParmBlkPtr pb)
 {
-    setFInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0), pb);
+    setInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0),
+        reinterpret_cast<CInfoPBPtr>(pb), InfoKind::FInfo);
 }
 void LocalVolume::PBHSetFInfo(HParmBlkPtr pb)
 {
-    setFInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)),
-        reinterpret_cast<ParmBlkPtr>(pb));
+    setInfoCommon(*resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)),
+        reinterpret_cast<CInfoPBPtr>(pb), InfoKind::HFInfo);
 }
 
 

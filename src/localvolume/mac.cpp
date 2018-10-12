@@ -74,34 +74,18 @@ std::unique_ptr<OpenFile> MacFileItem::openRF()
     return std::make_unique<MacResourceFork>(rsrc, PlainDataFork::create);
 }
 
-FInfo MacFileItem::getFInfo()
+ItemInfo MacFileItem::getInfo()
 {
-    struct
-    {
-        FInfo finfo;
-        FXInfo fxinfo;
-    } buffer;
-    
-    if(getxattr(path().string().c_str(), XATTR_FINDERINFO_NAME, &buffer, 32, 0, 0) < 0)
-        memset(&buffer, 0, sizeof(buffer));
+    ItemInfo info = {0};
 
-    return buffer.finfo;
+    getxattr(path().string().c_str(), XATTR_FINDERINFO_NAME, &info, 32, 0, 0);
+
+    return info;
 }
 
-void MacFileItem::setFInfo(FInfo info)
+void MacFileItem::setInfo(ItemInfo info)
 {
-    struct
-    {
-        FInfo finfo;
-        FXInfo fxinfo;
-    } buffer;
-    
-    if(getxattr(path().string().c_str(), XATTR_FINDERINFO_NAME, &buffer, 32, 0, 0) < 0)
-        memset(&buffer, 0, sizeof(buffer));
-    
-    buffer.finfo = info;
-    
-    setxattr(path().string().c_str(), XATTR_FINDERINFO_NAME, &buffer, 32, 0, 0);
+    setxattr(path().string().c_str(), XATTR_FINDERINFO_NAME, &info, 32, 0, 0);
     
     // TODO: errors
 }

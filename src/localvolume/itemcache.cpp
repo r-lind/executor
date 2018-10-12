@@ -200,4 +200,3 @@ void ItemCache::moveItem(ItemPtr item, DirectoryItemPtr newParent)
             return item->path();
         });
 }
-

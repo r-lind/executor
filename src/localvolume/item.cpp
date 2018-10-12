@@ -36,6 +36,15 @@ void Item::moveItem(const fs::path& newParent)
     path_ = std::move(newPath);
 }
 
+ItemInfo Item::getInfo()
+{
+    return ItemInfo{};
+}
+
+void Item::setInfo(ItemInfo info)
+{
+}
+
 ItemPtr DirectoryItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
     const fs::directory_entry& e, mac_string_view macname)
 {
@@ -106,7 +115,6 @@ ItemPtr DirectoryItem::resolve(int index, bool includeDirectories)
         return array[index-1];
     throw OSErrorException(fnfErr);
 }
-
 
 void DirectoryItem::deleteItem()
 {

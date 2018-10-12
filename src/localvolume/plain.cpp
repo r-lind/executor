@@ -105,13 +105,19 @@ std::unique_ptr<OpenFile> PlainFileItem::openRF()
     return std::make_unique<EmptyFork>();
 }
 
-FInfo PlainFileItem::getFInfo()
+ItemInfo PlainFileItem::getInfo()
 {
-    return FInfo{
+    ItemInfo info = {0};
+    info.file.info = {
         TICKX("TEXT"),
         TICKX("ttxt"),
         CWC(0), // fdFlags
         { CWC(0), CWC(0) }, // fdLocation
         CWC(0) // fdFldr
     };
+    return info;
+}
+
+void PlainFileItem::setInfo(ItemInfo info)
+{
 }

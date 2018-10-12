@@ -21,6 +21,18 @@ class DirectoryItem;
 using ItemPtr = std::shared_ptr<Item>;
 using DirectoryItemPtr = std::shared_ptr<DirectoryItem>;
 
+union ItemInfo
+{
+    struct {
+        FInfo info;
+        FXInfo xinfo;
+    } file;
+    struct {
+        DInfo info;
+        DXInfo xinfo;
+    } dir;
+};
+
 class Item
 {
 protected:
@@ -44,6 +56,9 @@ public:
     virtual void deleteItem();
     virtual void renameItem(mac_string_view newName);
     virtual void moveItem(const fs::path& newParent);
+
+    virtual ItemInfo getInfo();
+    virtual void setInfo(ItemInfo info);
 };
 
 
@@ -101,9 +116,6 @@ class FileItem : public Item
 public:
     using Item::Item;
 
-
-    virtual FInfo getFInfo() = 0;
-    virtual void setFInfo(FInfo finfo) = 0;
     virtual std::unique_ptr<OpenFile> open() = 0;
     virtual std::unique_ptr<OpenFile> openRF() = 0;
 };

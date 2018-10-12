@@ -19,8 +19,8 @@ class BasiliskFileItem : public FileItem
 public:
     using FileItem::FileItem;
 
-    virtual FInfo getFInfo() override;
-    virtual void setFInfo(FInfo finfo) override;
+    virtual ItemInfo getInfo() override;
+    virtual void setInfo(ItemInfo info) override;
     virtual std::unique_ptr<OpenFile> open() override;
     virtual std::unique_ptr<OpenFile> openRF() override;
 

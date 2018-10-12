@@ -53,7 +53,6 @@ class LocalVolume : public Volume, private ItemFactory
     NonexistentFile resolveForCreate(mac_string_view name, short vRefNum, CNID dirID);
 
     void createCommon(NonexistentFile file);
-    void setFInfoCommon(Item& item, ParmBlkPtr pb);
 
     enum class Fork
     {
@@ -72,6 +71,7 @@ class LocalVolume : public Volume, private ItemFactory
         CatInfo
     };
 
+    void setInfoCommon(Item& item, CInfoPBPtr pb, InfoKind infoKind);
     void getInfoCommon(CInfoPBPtr pb, InfoKind infoKind);
 
     virtual bool isHidden(const fs::directory_entry& e) override;

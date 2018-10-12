@@ -58,16 +58,16 @@ std::unique_ptr<OpenFile> AppleDoubleFileItem::openRF()
     return std::make_unique<AppleSingleDoubleFork>(access(), 2);
 }
 
-FInfo AppleDoubleFileItem::getFInfo()
+ItemInfo AppleDoubleFileItem::getInfo()
 {
-    FInfo info = {0};
+    ItemInfo info = {0};
 
     access()->read(9, 0, &info, sizeof(info));
 
     return info;
 }
 
-void AppleDoubleFileItem::setFInfo(FInfo info)
+void AppleDoubleFileItem::setInfo(ItemInfo info)
 {
     access()->write(9, 0, &info, sizeof(info));
 }
@@ -158,16 +158,16 @@ std::unique_ptr<OpenFile> AppleSingleFileItem::openRF()
     return std::make_unique<AppleSingleDoubleFork>(access(), 2);
 }
 
-FInfo AppleSingleFileItem::getFInfo()
+ItemInfo AppleSingleFileItem::getInfo()
 {
-    FInfo info = {0};
+    ItemInfo info = {0};
 
     access()->read(9, 0, &info, sizeof(info));
 
     return info;
 }
 
-void AppleSingleFileItem::setFInfo(FInfo info)
+void AppleSingleFileItem::setInfo(ItemInfo info)
 {
     access()->write(9, 0, &info, sizeof(info));
 }

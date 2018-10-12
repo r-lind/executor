@@ -25,8 +25,8 @@ class AppleDoubleFileItem : public FileItem
 public:
     using FileItem::FileItem;
 
-    virtual FInfo getFInfo() override;
-    virtual void setFInfo(FInfo finfo) override;
+    virtual ItemInfo getInfo() override;
+    virtual void setInfo(ItemInfo info) override;
     virtual std::unique_ptr<OpenFile> open() override;
     virtual std::unique_ptr<OpenFile> openRF() override;
 
@@ -51,10 +51,10 @@ class AppleSingleFileItem : public FileItem
 public:
     using FileItem::FileItem;
 
-    virtual FInfo getFInfo();
-    virtual void setFInfo(FInfo finfo);
-    virtual std::unique_ptr<OpenFile> open();
-    virtual std::unique_ptr<OpenFile> openRF();
+    virtual ItemInfo getInfo() override;
+    virtual void setInfo(ItemInfo info) override;
+    virtual std::unique_ptr<OpenFile> open() override;
+    virtual std::unique_ptr<OpenFile> openRF() override;
 };
 
 class AppleSingleDoubleFile

@@ -51,17 +51,17 @@ std::unique_ptr<OpenFile> BasiliskFileItem::openRF()
     return std::make_unique<PlainDataFork>(rsrc);
 }
 
-FInfo BasiliskFileItem::getFInfo()
+ItemInfo BasiliskFileItem::getInfo()
 {
     fs::path finf = path().parent_path() / ".finf" / path().filename();
 
-    FInfo info = {0};
+    ItemInfo info = {0};
     fs::ifstream(finf, std::ios::binary).read((char*)&info, sizeof(info));
 
     return info;
 }
 
-void BasiliskFileItem::setFInfo(FInfo info)
+void BasiliskFileItem::setInfo(ItemInfo info)
 {
     fs::path finf = path().parent_path() / ".finf" / path().filename();
 
