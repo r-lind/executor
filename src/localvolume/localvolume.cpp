@@ -49,17 +49,15 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
 
     itemFactories.push_back(std::make_unique<DirectoryItemFactory>());
     itemFactories.push_back(std::make_unique<AppleSingleItemFactory>());
-    //defaultItemFactory = itemFactories.back().get();
     itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>());
     upgradedItemFactory = itemFactories.back().get();
-    defaultItemFactory = itemFactories.back().get();
     itemFactories.push_back(std::make_unique<BasiliskItemFactory>());
-    //defaultItemFactory = itemFactories.back().get();
 #ifdef MACOSX
     itemFactories.push_back(std::make_unique<MacItemFactory>());
-//    upgradedItemFactory = itemFactories.back().get();
+    upgradedItemFactory = itemFactories.back().get();
 #endif
     itemFactories.push_back(std::make_unique<ExtensionItemFactory>());
+    defaultItemFactory = itemFactories.back().get();
 }
 
 bool LocalVolume::isHidden(const fs::directory_entry& e)
