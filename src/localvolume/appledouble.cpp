@@ -80,38 +80,20 @@ void AppleDoubleFileItem::deleteItem()
     fs::remove(adpath, ec);
 }
 
-void AppleDoubleFileItem::renameItem(mac_string_view newName)
+void AppleDoubleFileItem::moveItem(const fs::path& newPath, mac_string_view newName)
 {
-    fs::path newFN = toUnicodeFilename(newName);
-    fs::path newPath = path().parent_path() / newFN;
-
     fs::path adpathOld = path().parent_path() / ("%" + path().filename().string());
-    fs::path adpathNew = path().parent_path() / ("%" + newFN.string());
+    fs::path adpathNew = newPath.parent_path() / ("%" + newPath.filename().string());
 
     fs::rename(path(), newPath);
 
     boost::system::error_code ec;
     fs::rename(adpathOld, adpathNew, ec);
 
-    path_ = std::move(newPath);
-    name_ = newName;
+    path_ = newPath;
+    if(!newName.empty())
+        name_ = newName;
 }
-
-void AppleDoubleFileItem::moveItem(const fs::path& newParent)
-{
-    fs::path newPath = newParent / path().filename();
-
-    fs::path adpathOld = path().parent_path() / ("%" + path().filename().string());
-    fs::path adpathNew = newParent / ("%" + path().filename().string());
-
-    fs::rename(path(), newPath);
-
-    boost::system::error_code ec;
-    fs::rename(adpathOld, adpathNew, ec);
-
-    path_ = std::move(newPath);
-}
-
 
 ItemPtr AppleSingleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,
     const fs::directory_entry& e, mac_string_view macname)

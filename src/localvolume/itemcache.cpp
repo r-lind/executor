@@ -181,10 +181,11 @@ void ItemCache::deleteItem(ItemPtr item)
 
 void ItemCache::renameItem(ItemPtr item, mac_string_view newName)
 {
+    fs::path newPath = item->path().parent_path() / toUnicodeFilename(newName);
     flushDirectoryCache(item->parID());
     cnidMapper_->moveCNID(item->cnid(), 0, newName, 
         [&] {
-            item->renameItem(newName);
+            item->moveItem(newPath, newName);
             return item->path();
         });
 
@@ -194,9 +195,10 @@ void ItemCache::moveItem(ItemPtr item, DirectoryItemPtr newParent)
 {
     flushDirectoryCache(item->parID());
     flushDirectoryCache(newParent->cnid());
+    fs::path newPath = newParent->path() / item->path().filename();
     cnidMapper_->moveCNID(item->cnid(), newParent->cnid(), mac_string_view(), 
         [&] {
-            item->moveItem(newParent->path());
+            item->moveItem(newPath, mac_string_view());
             return item->path();
         });
 }

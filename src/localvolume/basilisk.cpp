@@ -78,15 +78,12 @@ void BasiliskFileItem::deleteItem()
     fs::remove(finf, ec);
 }
 
-void BasiliskFileItem::renameItem(mac_string_view newName)
+void BasiliskFileItem::moveItem(const fs::path& newPath, mac_string_view newName)
 {
-    fs::path newFN = toUnicodeFilename(newName);
-    fs::path newPath = path().parent_path() / newFN;
-
     fs::path rsrcOld = path().parent_path() / ".rsrc" / path().filename();
     fs::path finfOld = path().parent_path() / ".finf" / path().filename();
-    fs::path rsrcNew = path().parent_path() / ".rsrc" / newFN;
-    fs::path finfNew = path().parent_path() / ".finf" / newFN;
+    fs::path rsrcNew = newPath.parent_path() / ".rsrc" / newPath.filename();
+    fs::path finfNew = newPath.parent_path() / ".finf" / newPath.filename();
 
     fs::rename(path(), newPath);
 
@@ -95,27 +92,6 @@ void BasiliskFileItem::renameItem(mac_string_view newName)
     fs::rename(finfOld, finfNew, ec);
 
     path_ = std::move(newPath);
-    name_ = newName;
-}
-
-void BasiliskFileItem::moveItem(const fs::path& newParent)
-{
-    fs::path newPath = newParent / path().filename();
-
-    fs::path rsrcOld = path().parent_path() / ".rsrc" / path().filename();
-    fs::path finfOld = path().parent_path() / ".finf" / path().filename();
-    fs::path rsrcNew = newParent / ".rsrc" / path().filename();
-    fs::path finfNew = newParent / ".finf" / path().filename();
-
-    fs::create_directory(newParent / ".rsrc");
-    fs::create_directory(newParent / ".finf");
-
-    fs::rename(path(), newPath);
-
-    boost::system::error_code ec;
-    fs::rename(rsrcOld, rsrcNew, ec);
-    fs::rename(finfOld, finfNew, ec);
-
-    path_ = std::move(newPath);
-
+    if(!newName.empty())
+        name_ = newName;
 }

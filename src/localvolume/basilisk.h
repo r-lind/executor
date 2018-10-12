@@ -25,7 +25,6 @@ public:
     virtual std::unique_ptr<OpenFile> openRF() override;
 
     virtual void deleteItem() override;
-    virtual void renameItem(mac_string_view newName) override;
-    virtual void moveItem(const fs::path &newParent) override;
+    virtual void moveItem(const fs::path& newPath, mac_string_view newName) override;
 };
 } // namespace Executor

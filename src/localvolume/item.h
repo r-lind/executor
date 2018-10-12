@@ -54,8 +54,7 @@ public:
     const mac_string& name() const { return name_; }
 
     virtual void deleteItem();
-    virtual void renameItem(mac_string_view newName);
-    virtual void moveItem(const fs::path& newParent);
+    virtual void moveItem(const fs::path& newPath, mac_string_view newName);
 
     virtual ItemInfo getInfo();
     virtual void setInfo(ItemInfo info);

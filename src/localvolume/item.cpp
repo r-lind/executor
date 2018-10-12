@@ -21,19 +21,12 @@ void Item::deleteItem()
     fs::remove(path());
 }
 
-void Item::renameItem(mac_string_view newName)
+void Item::moveItem(const fs::path& newPath, mac_string_view newName)
 {
-    fs::path newPath = path().parent_path() / toUnicodeFilename(newName);
     fs::rename(path(), newPath);
-    path_ = std::move(newPath);
-    name_ = newName;
-}
-
-void Item::moveItem(const fs::path& newParent)
-{
-    fs::path newPath = newParent / path().filename();
-    fs::rename(path(), newPath);
-    path_ = std::move(newPath);
+    path_ = newPath;
+    if(!newName.empty())
+        name_ = newName;
 }
 
 ItemInfo Item::getInfo()
