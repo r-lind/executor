@@ -123,28 +123,25 @@ void LMDBCNIDMapper::setDirectory(lmdb::txn& txn, CNID cnid, const std::vector<C
     lmdb::val contentVal = lmdb::val(contents.data(), contents.size() * sizeof(CNID));    
     directories_.put(txn, lmdb::val(&cnid, sizeof(cnid)), contentVal);
 }
-    
 
-std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID,
-        std::vector<fs::directory_entry> realPaths)
+std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::updateDirectoryContents(CNID dirID,
+        std::vector<fs::directory_entry> sortedRealDirEntries)
 {
     auto txn = lmdb::txn::begin(env_);
 
-    std::sort(realPaths.begin(), realPaths.end());
-
-    std::vector<Mapping> dirMappings;
-    dirMappings.reserve(realPaths.size());
-
-    std::vector<CNID> newContents;
-    newContents.reserve(realPaths.size());
+    auto directoryContents = getDirectory(txn, dirID);
 
     std::vector<StoredMapping> mappings;
+    mappings.reserve(directoryContents.size());
 
-    for(CNID cnid : getDirectory(txn, dirID))
+    for(CNID cnid : directoryContents)
     {
         if(auto optMapping = getMapping(txn, cnid))
             mappings.push_back(std::move(*optMapping));
     }
+
+    std::vector<CNID> newContents;
+    newContents.reserve(sortedRealDirEntries.size());
     
     CNID newCNID;
     {
@@ -159,7 +156,23 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
     std::set<mac_string> usedNames;
 
     auto cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
-    for(auto& entry : realPaths)
+    for(auto& entry : sortedRealDirEntries)
+    {
+        while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < entry.path())
+            ++cachedMappingIt;
+
+        if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == entry.path())
+        {
+            usedNames.emplace(cachedMappingIt->macname);
+            ++cachedMappingIt;
+        }
+    }
+
+    std::vector<Mapping> dirMappings;
+    dirMappings.reserve(sortedRealDirEntries.size());
+
+    cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
+    for(auto& entry : sortedRealDirEntries)
     {
         while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < entry.path())
         {
@@ -212,6 +225,55 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
 
     txn.commit();
 
+    return dirMappings;
+}
+
+
+std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID,
+        std::vector<fs::directory_entry> realDirEntries)
+{
+    auto txn = lmdb::txn::begin(env_, nullptr, MDB_RDONLY);
+    auto directoryContents = getDirectory(txn, dirID);
+    std::sort(realDirEntries.begin(), realDirEntries.end());
+
+    if(directoryContents.size() != realDirEntries.size())
+    {
+        txn.abort();
+        return updateDirectoryContents(dirID, realDirEntries);
+    }
+
+    std::vector<StoredMapping> mappings;
+    mappings.reserve(realDirEntries.size());
+
+    {
+        auto cachedIt = directoryContents.begin(), cachedEnd = directoryContents.end();
+        auto realIt = realDirEntries.begin();
+        for(;cachedIt != cachedEnd; ++cachedIt, ++realIt)
+        {
+            auto optMapping = getMapping(txn, *cachedIt);
+
+            if(!optMapping || optMapping->path != realIt->path())
+            {
+                txn.abort();
+                return updateDirectoryContents(dirID, realDirEntries);
+            }
+
+            mappings.push_back(std::move(*optMapping));
+        }
+    }
+
+    std::vector<Mapping> dirMappings;
+    dirMappings.reserve(mappings.size());
+
+    {
+        auto cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
+        auto realIt = realDirEntries.begin();
+        for(;cachedMappingIt != cachedMappingEnd; ++cachedMappingIt, ++realIt)
+        {
+            dirMappings.push_back({cachedMappingIt->parID, cachedMappingIt->cnid, std::move(*realIt), cachedMappingIt->macname});
+        }
+    }
+    
     return dirMappings;
 }
 

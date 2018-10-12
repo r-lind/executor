@@ -34,6 +34,8 @@ class LMDBCNIDMapper : public CNIDMapper
     void setDirectory(lmdb::txn& txn, CNID cnid, const std::vector<CNID>& contents);
     
     void deleteCNID(lmdb::txn& txn, CNID cnid);
+
+    std::vector<Mapping> updateDirectoryContents(CNID dirID, std::vector<fs::directory_entry> realPaths);
 public:
     LMDBCNIDMapper(fs::path root, mac_string volumeName);
     ~LMDBCNIDMapper();
