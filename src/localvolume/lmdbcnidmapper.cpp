@@ -279,35 +279,41 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
 
 std::optional<CNIDMapper::Mapping> LMDBCNIDMapper::lookupCNID(CNID cnid)
 {
-    auto txn = lmdb::txn::begin(env_);
-
-    auto mapping = getMapping(txn, cnid);
-
-    if(!mapping)
-        return {};
-        
-    if(fs::exists(mapping->path))
+    for(int pass = 0; pass < 2; pass++)
     {
-        boost::system::error_code ec;
+        auto txn = lmdb::txn::begin(env_, nullptr, pass ? MDB_RDONLY : 0);
 
-        try
+        auto mapping = getMapping(txn, cnid);
+
+        if(!mapping)
+            return {};
+            
+        if(fs::exists(mapping->path))
         {
-            return Mapping {
-                mapping->parID,
-                mapping->cnid,
-                fs::directory_entry(mapping->path),
-                mapping->macname
-            };
+            boost::system::error_code ec;
+
+            try
+            {
+                return Mapping {
+                    mapping->parID,
+                    mapping->cnid,
+                    fs::directory_entry(mapping->path),
+                    mapping->macname
+                };
+            }
+            catch(fs::filesystem_error)
+            {
+                // file no longer exists,
+                // pass through
+            }
         }
-        catch(fs::filesystem_error)
+            
+        if(pass)
         {
-            // file no longer exists,
-            // pass through
+            deleteCNID(txn, cnid);
+            txn.commit();
         }
     }
-        
-    deleteCNID(cnid);
-    txn.commit();
     return {};
 }
 
