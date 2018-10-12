@@ -91,11 +91,8 @@ ItemPtr MacItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, 
     return nullptr;
 }
 
-void MacItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
+void MacItemFactory::createFile(const fs::path& path)
 {
-    fs::path fn = toUnicodeFilename(name);
-    fs::path path = parentPath / fn;
-
     PlainDataFork data(path, PlainDataFork::create);
 }
 

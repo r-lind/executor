@@ -27,9 +27,10 @@ ItemPtr BasiliskItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID pa
     return nullptr;
 }
 
-void BasiliskItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
+void BasiliskItemFactory::createFile(const fs::path& newPath)
 {
-    fs::path fn = toUnicodeFilename(name);
+    fs::path parentPath = newPath.parent_path();
+    fs::path fn = newPath.filename();
 
     fs::ofstream(parentPath / fn);
 

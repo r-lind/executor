@@ -25,11 +25,9 @@ ItemPtr AppleDoubleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID
     return nullptr;
 }
 
-void AppleDoubleItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
+void AppleDoubleItemFactory::createFile(const fs::path& path)
 {
-    fs::path fn = toUnicodeFilename(name);
-    fs::path path = parentPath / fn;
-    fs::path adpath = parentPath / ("%" + fn.filename().string());
+    fs::path adpath = path.parent_path() / ("%" + path.filename().string());
 
     PlainDataFork data(path, PlainDataFork::create);
     AppleSingleDoubleFile rsrc(std::make_unique<PlainDataFork>(adpath, PlainDataFork::create),
@@ -109,11 +107,8 @@ ItemPtr AppleSingleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID
         return nullptr;
 }
 
-void AppleSingleItemFactory::createFile(const fs::path& parentPath, mac_string_view name)
+void AppleSingleItemFactory::createFile(const fs::path& path)
 {
-    fs::path fn = toUnicodeFilename(name);
-    fs::path path = parentPath / fn;
-
     AppleSingleDoubleFile rsrc(std::make_unique<PlainDataFork>(path, PlainDataFork::create),
                                 AppleSingleDoubleFile::create_single);
 }

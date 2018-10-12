@@ -453,7 +453,7 @@ LocalVolume::NonexistentFile LocalVolume::resolveForCreate(mac_string_view name,
 void LocalVolume::createCommon(NonexistentFile file)
 {
     fs::path parentPath = file.parent->path();
-    defaultItemFactory->createFile(parentPath, file.name);
+    defaultItemFactory->createFile(parentPath / toUnicodeFilename(file.name));
     itemCache->flushDirectoryCache(file.parent);
 }
 void LocalVolume::PBCreate(ParmBlkPtr pb)
