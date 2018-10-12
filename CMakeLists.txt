@@ -15,7 +15,8 @@ enable_testing()
 
 add_library(lmdb
     lmdb/libraries/liblmdb/lmdb.h lmdb/libraries/liblmdb/mdb.c
-    lmdb/libraries/liblmdb/midl.h lmdb/libraries/liblmdb/midl.c)
+    lmdb/libraries/liblmdb/midl.h lmdb/libraries/liblmdb/midl.c
+    lmdbxx/lmdb++.h)
 target_include_directories(lmdb PUBLIC lmdb/libraries/liblmdb lmdbxx)
 
 add_subdirectory(syn68k)

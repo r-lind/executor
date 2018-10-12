@@ -293,6 +293,7 @@ set(include_sources hintemplate.h
                   include/rsys/evil.h
                   include/rsys/executor.h
                   include/rsys/file.h
+                  include/rsys/filesystem.h
                   include/rsys/flags.h
                   include/rsys/float.h
                   include/rsys/float_fcw.h
