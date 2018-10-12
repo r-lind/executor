@@ -22,7 +22,6 @@ class PlainDataFork : public OpenFile
 {
 protected:
     int fd;
-    fs::path path_;
 
 public:
     struct create_t {};
