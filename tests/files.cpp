@@ -435,7 +435,42 @@ TEST_F(FileTest, WriteRead)
 
     EXPECT_EQ(0, memcmp(buf1, buf2, 13));
 }
+TEST_F(FileTest, WriteReadRF)
+{
+    openRF();
 
+    char buf1[] = "Hello, world.";
+    char buf2[100];
+
+    ParamBlockRec pb;
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioRefNum = refNum;
+    pb.ioParam.ioPosMode = fsFromStart;
+    pb.ioParam.ioPosOffset = 0;
+    pb.ioParam.ioBuffer = (Ptr)buf1;
+    pb.ioParam.ioReqCount = 13;
+    PBWriteSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+    EXPECT_EQ(13, pb.ioParam.ioActCount);
+
+    memset(&pb, 42, sizeof(pb));
+    pb.ioParam.ioCompletion = nullptr;
+    pb.ioParam.ioRefNum = refNum;
+    pb.ioParam.ioPosMode = fsFromStart;
+    pb.ioParam.ioPosOffset = 0;
+    pb.ioParam.ioBuffer = (Ptr)buf2;
+    pb.ioParam.ioReqCount = 13;
+    PBReadSync(&pb);
+
+    EXPECT_EQ(noErr, pb.ioParam.ioResult);
+    EXPECT_EQ(13, pb.ioParam.ioActCount);
+
+    EXPECT_EQ(0, memcmp(buf1, buf2, 13));
+
+    close();
+}
 
 TEST_F(FileTest, ReadEOF)
 {
