@@ -74,6 +74,7 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
         if(itemIt != items_.end())
             item = itemIt->second.lock();
 
+        assert(m.macname.size());
         if(!item)
             item = itemFactory_->createItemForDirEntry(*this, m.parID, m.cnid, m.entry, m.macname);
 

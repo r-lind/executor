@@ -66,6 +66,7 @@ void DirectoryItem::populateCache(std::vector<ItemPtr> items)
         mac_string nameUpr = item->name();
         ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
 
+        assert(nameUpr.size());
         auto inserted = contents_by_name_.emplace(nameUpr, item).second;
         assert(inserted);
 

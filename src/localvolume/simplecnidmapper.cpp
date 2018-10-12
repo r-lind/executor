@@ -54,7 +54,7 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
         {
             // new mapping
             mac_string macname;
-            const fs::path& name = entry.path();
+            const fs::path& name = entry.path().filename();
             int index = 0;
 
             bool nameIsFree;
