@@ -5,6 +5,7 @@
 #include "rsys/common.h"
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -90,8 +91,8 @@ void Executor::C_RGB2HSL(RGBColor *rgb_color, HSLColor *hsl_color)
     unsigned long g = CW(rgb_color->green);
     unsigned long b = CW(rgb_color->blue);
 
-    unsigned long max = MAX(r, MAX(g, b));
-    unsigned long min = MIN(r, MIN(g, b));
+    unsigned long max = std::max(r, std::max(g, b));
+    unsigned long min = std::min(r, std::min(g, b));
 
     unsigned long h;
     unsigned long s;
@@ -222,8 +223,8 @@ void Executor::C_RGB2HSV(RGBColor *rgb_color, HSVColor *hsv_color)
     unsigned long g = CW(rgb_color->green);
     unsigned long b = CW(rgb_color->blue);
 
-    unsigned long max = MAX(r, MAX(g, b));
-    unsigned long min = MIN(r, MIN(g, b));
+    unsigned long max = std::max(r, std::max(g, b));
+    unsigned long min = std::min(r, std::min(g, b));
 
     unsigned long h;
     unsigned long s;

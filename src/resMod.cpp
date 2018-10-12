@@ -93,14 +93,14 @@ void Executor::C_ChangedResource(Handle res)
         return;
     }
     rr->ratr |= resChanged;
-    HxX(map, resfatr).raw_or(CWC(mapChanged));
+    HxX(map, resfatr) |= CWC(mapChanged);
     if(rr->doff[0] != 0xff || rr->doff[1] != 0xff || rr->doff[2] != 0xff)
     {
         oldsize = ROMlib_SizeResource(res, false);
         newsize = GetHandleSize((Handle)MR(rr->rhand));
         if(newsize > oldsize)
         {
-            HxX(map, resfatr).raw_or(CWC(mapCompact));
+            HxX(map, resfatr) |= CWC(mapCompact);
             rr->doff[0] = rr->doff[1] = rr->doff[2] = 0xff;
         }
     }
@@ -183,7 +183,7 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
     r.noff = CW(addname(map, name));
     r.ratr = CB(resChanged);
     r.doff[0] = r.doff[1] = r.doff[2] = 0xff;
-    HxX(map, resfatr).raw_or(CWC(mapChanged));
+    HxX(map, resfatr) |= CWC(mapChanged);
     r.rhand = RM(data);
     HSetRBit(data);
     tr = (typref *)((char *)STARH(map) + toff);
@@ -493,8 +493,8 @@ static void compactdata(resmaphand map)
                     Hx(map, rh.rdatoff));
     HSetState((Handle)st, ststate);
     HSetState((Handle)map, mapstate);
-    HxX(map, resfatr).raw_or(CWC(mapChanged));
-    HxX(map, resfatr).raw_and(CWC(~mapCompact));
+    HxX(map, resfatr) |= CWC(mapChanged);
+    HxX(map, resfatr) |= CWC(~mapCompact);
     HxX(map, rh.rmapoff) = CL(sizeof(reshead) + sizeof(rsrvrec) + datlen);
     HxX(map, rh.datlen) = CL(datlen);
     DisposeHandle((Handle)st);

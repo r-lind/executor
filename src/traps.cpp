@@ -39,11 +39,13 @@ syn68k_addr_t Executor::ostraptable[NOSENTRIES]; /* Gets filled in at run time *
 namespace Executor
 {
 RAW_68K_TRAP(Unimplemented, 0xA89F);
+void ReferenceAllTraps();
 }
 
 void traps::init(bool log)
 {
     logging::setEnabled(log);
+    ReferenceAllTraps();
     internal::DeferredInit::initAll();
     for(int i = 0; i < NTOOLENTRIES; i++)
     {

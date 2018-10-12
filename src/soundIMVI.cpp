@@ -13,7 +13,6 @@
 #include "TimeMgr.h"
 #include "FileMgr.h"
 #include "rsys/sounddriver.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/prefs.h"
 #include "rsys/soundopts.h"
 #include "rsys/functions.impl.h"

@@ -94,7 +94,7 @@ typedef GUEST<DialogTPtr> *DialogTHndl;
 
 // This has a 50% chance of being right.
 // It does not seem to be used, however.
-typedef struct PACKED
+typedef struct
 {
     unsigned boldItm4 : 1;
     unsigned boxDrwn4 : 1;

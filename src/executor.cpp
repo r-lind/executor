@@ -36,9 +36,9 @@
 #include "rsys/trapname.h"
 
 #include "rsys/options.h"
-#include "rsys/suffix_maps.h"
 #include "rsys/string.h"
 
+#include <algorithm>
 
 using namespace Executor;
 
@@ -65,10 +65,8 @@ void Executor::executor_main(void)
     INTEGER exevrefnum, toskip;
     AppFile thefile;
     Byte *p;
-    int i;
     WDPBRec wdpb;
     CInfoPBRec hpb;
-    Str255 name;
     StringPtr fName;
 
     EM_A5 = US_TO_SYN68K(&tmpA5);
@@ -84,7 +82,7 @@ void Executor::executor_main(void)
 
     /* ROMlib_WriteWhen(WriteInOSEvent); */
 
-    LM(FinderName)[0] = MIN(strlen(BROWSER_NAME), sizeof(LM(FinderName)) - 1);
+    LM(FinderName)[0] = std::min(strlen(BROWSER_NAME), sizeof(LM(FinderName)) - 1);
     memcpy(LM(FinderName) + 1, BROWSER_NAME, LM(FinderName)[0]);
 
     CountAppFiles(&mess, &count_s);
@@ -109,46 +107,13 @@ void Executor::executor_main(void)
     if(thefile.fType == CLC(FOURCC('A', 'P', 'P', 'L')))
         fName = thefile.fName;
     else
-    {
-        const char *p = NULL;
-
-        if(count > 0)
-        {
-            p = ROMlib_find_best_creator_type_match(CL(hpb.hFileInfo.ioFlFndrInfo.fdCreator),
-                                                    CL(hpb.hFileInfo.ioFlFndrInfo.fdType));
-        }
-        fName = name;
-        if(!p)
-            ExitToShell();
-        else
-        {
-            ROMlib_exit = true;
-            str255_from_c_string(fName, p);
-            hpb.hFileInfo.ioNamePtr = RM(fName);
-            hpb.hFileInfo.ioVRefNum = CWC(0);
-            hpb.hFileInfo.ioFDirIndex = CWC(0);
-            hpb.hFileInfo.ioDirID = CLC(0);
-            PBGetCatInfo(&hpb, false);
-
-            {
-                HParamBlockRec hp;
-                Str255 fName2;
-
-                memset(&hp, 0, sizeof hp);
-                str255assign(fName2, fName);
-                hp.ioParam.ioNamePtr = RM((StringPtr)fName2);
-                hp.volumeParam.ioVolIndex = CWC(-1);
-                PBHGetVInfo(&hp, false);
-                hpb.hFileInfo.ioVRefNum = hp.ioParam.ioVRefNum;
-            }
-        }
-    }
+        ExitToShell();
 
     for(p = fName + fName[0] + 1;
         p > fName && *--p != ':';)
         ;
     toskip = p - fName;
-    LM(CurApName)[0] = MIN(fName[0] - toskip, 31);
+    LM(CurApName)[0] = std::min(fName[0] - toskip, 31);
     BlockMoveData((Ptr)fName + 1 + toskip, (Ptr)LM(CurApName) + 1,
                   (Size)LM(CurApName)[0]);
 

@@ -23,7 +23,7 @@
 #include "rsys/hfs.h"
 #include "rsys/resource.h"
 #include "rsys/notmac.h"
-#include "rsys/stdfile.h"
+#include "rsys/futzwithdosdisks.h"
 #include "rsys/prefs.h"
 #include "rsys/options.h"
 #include "rsys/prefpanel.h"
@@ -34,7 +34,6 @@
 #include "rsys/vbl.h"
 #include "rsys/osutil.h"
 #include "rsys/osevent.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/keyboard.h"
 #include "rsys/parse.h"
 #include "rsys/refresh.h"
@@ -45,6 +44,8 @@
 #include "rsys/toolevent.h"
 #include "rsys/nextprint.h"
 #include "rsys/scrap.h"
+#include "rsys/time.h"
+#include <algorithm>
 
 #if !defined(WIN32)
 #include <sys/socket.h>
@@ -248,7 +249,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
 
     /* We tend to call this routine from various ROMlib modal loops, so this
      * is a good place to check for timer interrupts. */
-    check_virtual_interrupt();
+    syncint_check_interrupt();
 
     hle_reset();
 
@@ -515,7 +516,7 @@ BOOLEAN Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
             }
             else if(sleep > 0)
             {
-                Delay(MIN(sleep, 4), nullptr);
+                Delay(std::min(sleep, 4), nullptr);
                 sleep -= 4;
             }
             saved_h = p.h;

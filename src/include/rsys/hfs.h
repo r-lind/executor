@@ -345,8 +345,7 @@ typedef struct
 struct wdentry
 {
     GUEST_STRUCT;
-    // FIXME: #warning vcbp is stored as a native pointer.
-    GUEST<HVCBPtr> vcbp; // stored as native pointer!
+    GUEST<HVCBPtr> vcbp;
     GUEST<LONGINT> dirid;
     GUEST<LONGINT> cathint; /* ??? */
     GUEST<LONGINT> procid;
@@ -450,10 +449,6 @@ extern OSErr ROMlib_btpbindex(IOParam *pb, LONGINT dirid, HVCB **vcbpp,
                               filerec **frpp, catkey **catkeypp, BOOLEAN onlyfiles);
 extern OSErr ROMlib_cleancache(HVCB *vcbp);
 extern OSErr ROMlib_flushcachevcbp(HVCB *vcbp);
-
-/* public entries in changing.c */
-
-extern INTEGER ROMlib_flnumtorefnum(ULONGINT flnum, VCB *vcbp);
 
 /* public entries in file.c */
 

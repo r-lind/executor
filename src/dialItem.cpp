@@ -12,6 +12,7 @@
 #include "rsys/itm.h"
 #include "rsys/cquick.h"
 #include "rsys/mman.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -134,8 +135,8 @@ void Executor::AppendDITL(DialogPtr dp, Handle new_items_h, DITLMethod method)
 
             InvalRect(&itemp->itmr);
 
-            width = MAX(width, CW(itemp->itmr.left));
-            height = MAX(height, CW(itemp->itmr.bottom));
+            width = std::max<int>(width, CW(itemp->itmr.left));
+            height = std::max<int>(height, CW(itemp->itmr.bottom));
 
             BUMPIP(new_itemp);
         }

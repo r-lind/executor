@@ -26,6 +26,7 @@
 #include "rsys/notmac.h"
 #include "rsys/gestalt.h"
 #include "rsys/osevent.h"
+#include <algorithm>
 
 #define ABOUT_BOX_WIDTH 500
 #define ABOUT_BOX_HEIGHT 300
@@ -465,7 +466,7 @@ set_text(const char *text)
 {
     TESetText((Ptr)text, strlen(text), about_te);
     SetControlMaximum(about_scrollbar,
-              MAX(0, (TE_N_LINES(about_te)
+              std::max(0, (TE_N_LINES(about_te)
                       - ((TE_HEIGHT - 2) / TE_LINE_HEIGHT(about_te)))));
     SetControlValue(about_scrollbar, 0);
     TE_DEST_RECT(about_te) = TE_VIEW_RECT(about_te);

@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -94,7 +95,7 @@ guess_good_memory_settings(void)
     new_appl_size = physical_memory() / 4;
 
     if(new_appl_size > ROMlib_applzone_size)
-        ROMlib_applzone_size = MIN(MAX_APPLZONE_SIZE, new_appl_size);
+        ROMlib_applzone_size = std::min<unsigned long>(MAX_APPLZONE_SIZE, new_appl_size);
 }
 
 bool Executor::os_init(void)

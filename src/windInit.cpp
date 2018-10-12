@@ -152,42 +152,6 @@ Executor may die without warning because of this mismatch",
         issued_system_file_version_skew_warning_p = true;
     }
 
-#if defined(MSDOS)
-    {
-        static bool issued_cd_warning_p = false;
-
-        if(cd_mounted_by_trickery_p && !issued_cd_warning_p)
-        {
-            std::string warning_file;
-            struct stat sbuf;
-
-            warning_file = expandPath("+/cdinfo.txt");
-            if(warning_file)
-            {
-                if(stat(warning_file.c_str(), &sbuf) == 0)
-                {
-                    char buf[1024];
-                    int i;
-
-                    std::replace(warning_file.begin(), warning_file.end(), '/', '\\');
-
-                    sprintf(buf, "From DOS or Windows, please read the "
-                                 "file \"%s\".  "
-                                 "If you don't, Executor won't be "
-                                 "able to read Mac CD-ROMS (except "
-                                 "the Executor CD-ROM, which is special).",
-                            warning_file.c_str());
-                    system_error(buf, 0,
-                                 "Exit", "Continue", NULL,
-                                 exit_executor, NULL, NULL);
-                }
-                free(warning_file);
-            }
-            issued_cd_warning_p = true;
-        }
-    }
-#endif
-
     switch(ROMlib_launch_failure)
     {
         case launch_no_failure:

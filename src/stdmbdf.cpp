@@ -21,6 +21,7 @@
 #include "rsys/image.h"
 #include "rsys/executor.h"
 #include "rsys/options.h"
+#include <algorithm>
 
 /* apple image */
 namespace Executor
@@ -364,22 +365,6 @@ save(int16_t offset, Rect *rect)
     gd = MR(LM(TheGDevice));
     gd_pixmap = GD_PMAP(gd);
 
-#define FAIL goto failure
-#define DONE goto done
-#define DO_BLOCK_WITH_FAILURE(try_block, fail_block) \
-    {                                                \
-        {                                            \
-            try_block                                \
-        }                                            \
-        goto done;                                   \
-    failure:                                         \
-    {                                                \
-        fail_block                                   \
-    }                                                \
-    /* fall through */                               \
-    done:;                                           \
-    }
-
     {
         HLockGuard guard(MR(LM(MBSaveLoc)));
 
@@ -391,71 +376,72 @@ save(int16_t offset, Rect *rect)
 
         mep->mbRectSave = *rect;
 
-        DO_BLOCK_WITH_FAILURE({
-	   PixMapHandle save_pmh;
-	   int gd_bpp;
-	   int row_bytes;
-	   
-	   Rect *bounds;
-	   int height;
-	   int width;
-	   
-	   save_pmh = NewPixMap ();
-	   if (save_pmh == NULL)
-		   FAIL;
-	   
-	   mep->mbMenuDir = CWC (MBRIGHTDIR);
-	   mep->mbMLOffset = CW (offset);
-	   mup = (muelem *) ((char *) STARH (MR (LM(MenuList))) + offset);
-	   mep->mbMLHandle = mup->muhandle;
-	   mep->mbReserved = CLC (0);
-	   save_rect.top    = CW (CW (rect->top) - 1);
-	   save_rect.left   = CW (CW (rect->left) - 1);
-	   save_rect.bottom = CW (CW (rect->bottom) + 2);
-	   save_rect.right  = CW (CW (rect->right) + 2);
-			 
-	   bounds = &PIXMAP_BOUNDS (save_pmh);
-	   
-	   *bounds = save_rect;
-	   /* long align the left boundary */
-	   bounds->left = CW (CW (save_rect.left) & ~31);
-	   bounds->right = CW (MIN (CW (bounds->right),
-				    CW (PORT_BOUNDS(thePort).right)));
-	   
-	   height = RECT_HEIGHT (bounds);
-	   width  = RECT_WIDTH (bounds);
-	   
-	   gd_bpp = PIXMAP_PIXEL_SIZE (gd_pixmap);
-	   
-	   ROMlib_copy_ctab (PIXMAP_TABLE (gd_pixmap),
-						 PIXMAP_TABLE (save_pmh));
-	   
-	   pixmap_set_pixel_fields (STARH (save_pmh), gd_bpp);
-	   
-	   row_bytes = ((width * gd_bpp + 31) / 32) * 4;
-	   PIXMAP_SET_ROWBYTES_X (save_pmh, CW (row_bytes));
-	   
-	   p = NewPtr (height * row_bytes);
-	   if (LM(MemErr) != CWC (noErr))
-	   {
-		   DisposePixMap (save_pmh);
-		   FAIL;
-	   }
-	   PIXMAP_BASEADDR_X (save_pmh) = RM (p);
-	   
-	   {
-		   WRAPPER_PIXMAP_FOR_COPY (wrapper);
-		   
-		   WRAPPER_SET_PIXMAP_X (wrapper, RM (save_pmh));
-		   
-		   CopyBits (PORT_BITS_FOR_COPY (thePort), wrapper,
-					 &save_rect, &save_rect, srcCopy, NULL);
-	   }
-	   
-	   mep->mbBitsSave =  RM ((Handle)save_pmh); },
-                              {
-                                  mep->mbBitsSave = NULL;
-                              });
+        PixMapHandle save_pmh;
+        int gd_bpp;
+        int row_bytes;
+
+        Rect *bounds;
+        int height;
+        int width;
+
+        save_pmh = NewPixMap();
+        if(save_pmh == NULL)
+            goto failure;
+
+        mep->mbMenuDir = CWC(MBRIGHTDIR);
+        mep->mbMLOffset = CW(offset);
+        mup = (muelem *)((char *)STARH(MR(LM(MenuList))) + offset);
+        mep->mbMLHandle = mup->muhandle;
+        mep->mbReserved = CLC(0);
+        save_rect.top = CW(CW(rect->top) - 1);
+        save_rect.left = CW(CW(rect->left) - 1);
+        save_rect.bottom = CW(CW(rect->bottom) + 2);
+        save_rect.right = CW(CW(rect->right) + 2);
+
+        bounds = &PIXMAP_BOUNDS(save_pmh);
+
+        *bounds = save_rect;
+        /* long align the left boundary */
+        bounds->left = CW(CW(save_rect.left) & ~31);
+        bounds->right = CW(std::min(CW(bounds->right),
+                               CW(PORT_BOUNDS(thePort).right)));
+
+        height = RECT_HEIGHT(bounds);
+        width = RECT_WIDTH(bounds);
+
+        gd_bpp = PIXMAP_PIXEL_SIZE(gd_pixmap);
+
+        ROMlib_copy_ctab(PIXMAP_TABLE(gd_pixmap),
+                         PIXMAP_TABLE(save_pmh));
+
+        pixmap_set_pixel_fields(STARH(save_pmh), gd_bpp);
+
+        row_bytes = ((width * gd_bpp + 31) / 32) * 4;
+        PIXMAP_SET_ROWBYTES_X(save_pmh, CW(row_bytes));
+
+        p = NewPtr(height * row_bytes);
+        if(LM(MemErr) != CWC(noErr))
+        {
+            DisposePixMap(save_pmh);
+            goto failure;
+        }
+        PIXMAP_BASEADDR_X(save_pmh) = RM(p);
+
+        {
+            WRAPPER_PIXMAP_FOR_COPY(wrapper);
+
+            WRAPPER_SET_PIXMAP_X(wrapper, RM(save_pmh));
+
+            CopyBits(PORT_BITS_FOR_COPY(thePort), wrapper,
+                     &save_rect, &save_rect, srcCopy, NULL);
+        }
+
+        mep->mbBitsSave = RM((Handle)save_pmh);
+
+        goto done;
+    failure:
+        mep->mbBitsSave = NULL;
+    done:;
     }
 
     /* Erase to white -- colored backgrounds can be drawn by individual
@@ -542,7 +528,7 @@ static Rect *getrect(LONGINT offset)
     if(hiword)
     { /* hierarchical */
         /* note 7 and 5 below are guesses */
-        r.top = CW(MAX(Hx(MBSAVELOC, mbItemRect.top), CW(LM(MBarHeight)) + 7));
+        r.top = CW(std::max<INTEGER>(Hx(MBSAVELOC, mbItemRect.top), CW(LM(MBarHeight)) + 7));
         r.left = CW(Hx(MBSAVELOC, mbItemRect.right) - 5);
         r.bottom = CW(CW(r.top) + Hx(mh, menuHeight));
         r.right = CW(CW(r.left) + Hx(mh, menuWidth));

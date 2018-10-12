@@ -11,9 +11,9 @@
 #include "SoundMgr.h"
 #include "FileMgr.h"
 #include "rsys/sounddriver.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/mman.h"
 #include "rsys/functions.impl.h"
+#include "rsys/syncint.h"
 
 using namespace Executor;
 
@@ -104,7 +104,7 @@ static inline void
 wait_on_channel(volatile SndChannelPtr vchanp)
 {
     while(!qempty_p(vchanp) || SND_CHAN_CMDINPROG_P(vchanp))
-        check_virtual_interrupt();
+        syncint_check_interrupt();
 }
 
 static snd_time
@@ -828,7 +828,7 @@ OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
                     volatile SndChannelPtr vchanp = chanp;
 
                     while(qfull_p(vchanp))
-                        check_virtual_interrupt();
+                        syncint_check_interrupt();
                     retval = noErr;
                 }
             }
@@ -1023,13 +1023,10 @@ OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, BOOLEAN quitnow)
                 retval = SndDoImmediate(chanp, &cmd);
             }
 #if 0
-	block = block_virtual_ints ();
 	vchanp = chanp;
 	while (vchanp->flags & CWC(CHAN_BUSY_FLAG)) {
-	    restore_virtual_ints (block);
-	    block = block_virtual_ints ();
+           // ###
 	}
-	restore_virtual_ints (block);
 	nextmp = CL(chanp->firstMod);
 	while ((mp = nextmp)) {
 	    nextmp = CL(mp->nextStub);
@@ -1069,10 +1066,8 @@ OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, BOOLEAN quitnow)
 void ROMlib_soundcomplete(void *vp)
 {
     SndChannelPtr chanp;
-    virtual_int_state_t block;
 
     chanp = vp;
-    block = block_virtual_ints();
     if(chanp->flags & CWC(CHAN_IMMEDIATE_FLAG))
         chanp->flags &= CWC(~CHAN_IMMEDIATE_FLAG);
     else
@@ -1085,6 +1080,5 @@ void ROMlib_soundcomplete(void *vp)
         else
             recsndcmd(chanp, &chanp->queue[CW(chanp->qHead)], CL(chanp->firstMod));
     }
-    restore_virtual_ints(block);
 }
 #endif

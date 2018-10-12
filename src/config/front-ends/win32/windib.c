@@ -49,13 +49,13 @@ bool vdriver_init(int _max_width, int _max_height, int _max_bpp,
     /* Verify the video mode parameters */
     if(!_max_width)
     {
-        _max_width = MIN(GetSystemMetrics(SM_CXFULLSCREEN),
-                         MAX(VDRIVER_DEFAULT_SCREEN_WIDTH, flag_width));
+        _max_width = std::min(GetSystemMetrics(SM_CXFULLSCREEN),
+                         std::max(VDRIVER_DEFAULT_SCREEN_WIDTH, flag_width));
     }
     if(!_max_height)
     {
-        _max_height = MIN(GetSystemMetrics(SM_CYFULLSCREEN),
-                          MAX(VDRIVER_DEFAULT_SCREEN_HEIGHT, flag_height));
+        _max_height = std::min(GetSystemMetrics(SM_CYFULLSCREEN),
+                          std::max(VDRIVER_DEFAULT_SCREEN_HEIGHT, flag_height));
     }
     if(_max_bpp && (_max_bpp != 8))
         return (false);

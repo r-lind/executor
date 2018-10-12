@@ -13,15 +13,7 @@
 /* Forward declarations in StdFilePkg.h (DO NOT DELETE THIS LINE) */
 
 #include "rsys/common.h"
-
-#if defined(LINUX)
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <linux/cdrom.h>
-#endif
+#include "rsys/stdfile.h"
 
 #include "DialogMgr.h"
 #include "FileMgr.h"
@@ -40,7 +32,6 @@
 #include "rsys/wind.h"
 #include "rsys/hfs.h"
 #include "rsys/file.h"
-#include "rsys/stdfile.h"
 #include "rsys/arrowkeys.h"
 #include "rsys/glue.h"
 #include "rsys/resource.h"
@@ -53,10 +44,9 @@
 #include "rsys/string.h"
 #include "rsys/dcache.h"
 #include "rsys/menu.h"
-#include "rsys/stdfile.h"
 
 #include "rsys/executor.h"
-
+#include "rsys/osutil.h"
 #include "rsys/osevent.h"
 #include "rsys/prefs.h"
 
@@ -894,15 +884,28 @@ static LONGINT getparent(LONGINT dirid)
 
 static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
 {
+#if 1
+    /*
+        This function is the counterpart to `unixcore`.
+        It finds the parent of a mount point,
+        whereas `getparent()` above finds the parent directory within a filesystem.
+
+        Yay for function names. ;-)
+
+        See also the comment in `unixcore`.
+     */
+
+    return false;
+#else
     HVCB *vcbp;
     BOOLEAN retval;
     struct stat sbuf;
     char *namecpy, *slashp;
     INTEGER namelen;
 
-    vcbp = ROMlib_vcbbyvrn(CW(*vrefp));
     retval = false;
-    if(!vcbp->vcbCTRef)
+    vcbp = ROMlib_vcbbyvrn(CW(*vrefp));
+    if(((VCBExtra *)vcbp)->unixname)
     {
         namelen = strlen(((VCBExtra *)vcbp)->unixname);
         if(namelen != 1 + SLASH_CHAR_OFFSET)
@@ -927,6 +930,7 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
         }
     }
     return retval;
+#endif
 }
 
 static BOOLEAN moveuponedir(DialogPtr dp)
@@ -1543,210 +1547,15 @@ static BOOLEAN ejected(HParmBlkPtr pb)
 
 static bool single_tree_fs_p(HParmBlkPtr pb)
 {
-#if defined(MSDOS) || defined(CYGWIN32)
+#if true || defined(MSDOS) || defined(CYGWIN32)
     return false;
 #else
     HVCB *vcbp = ROMlib_vcbbyvrn(CW(pb->volumeParam.ioVRefNum));
 
-    return vcbp && !vcbp->vcbCTRef;
+    return vcbp && ((VCBExtra *)vcbp)->unixname;
 #endif
 }
 
-#if defined(LINUX)
-int Executor::linuxfloppy_open(int disk, LONGINT *bsizep,
-                               drive_flags_t *flagsp, const char *dname)
-{
-    int retval;
-    struct cdrom_subchnl sub_info;
-    bool force_read_only;
-
-    force_read_only = false;
-    *flagsp = 0;
-#define FLOPPY_PREFIX "/dev/fd"
-    if(strncmp(dname, FLOPPY_PREFIX, sizeof(FLOPPY_PREFIX) - 1) == 0)
-        *flagsp |= DRIVE_FLAGS_FLOPPY;
-
-    if(!force_read_only)
-        retval = Uopen(dname, O_RDWR, 0);
-#if !defined(LETGCCWAIL)
-    else
-        retval = noErr;
-#endif
-    if(force_read_only || retval < 0)
-    {
-        retval = Uopen(dname, O_RDONLY, 0);
-        if(retval >= 0)
-            *flagsp |= DRIVE_FLAGS_LOCKED;
-    }
-
-    memset(&sub_info, 0, sizeof sub_info);
-    sub_info.cdsc_format = CDROM_MSF;
-    if(retval >= 0 && ioctl(retval, CDROMSUBCHNL, &sub_info) != -1)
-    {
-        switch(sub_info.cdsc_audiostatus)
-        {
-            case CDROM_AUDIO_PLAY:
-            case CDROM_AUDIO_PAUSED:
-            case CDROM_AUDIO_COMPLETED:
-            case CDROM_AUDIO_ERROR:
-                close(retval);
-                return -1;
-        }
-    }
-
-    *bsizep = 512;
-    if(retval >= 0)
-    {
-        /* *ejectablep = true; DRIVE_FLAGS_FIXED not set */
-    }
-
-    return retval;
-}
-
-int Executor::linuxfloppy_close(int disk)
-{
-    return close(disk);
-}
-#endif
-
-typedef struct
-{
-    const char *dname;
-    DrvQExtra *dqp;
-    BOOLEAN loaded;
-    int fd;
-} dosdriveinfo_t;
-
-#define IGNORED (-1) /* doesn't really matter */
-
-#if defined(MSDOS) || defined(CYGWIN32)
-
-#define N_DRIVES (32)
-
-static bool drive_loaded[N_DRIVES] = { 0 };
-
-static char *
-drive_name_of(int i)
-{
-    static char retval[] = "A:";
-
-    retval[0] = 'A' + i;
-    return retval;
-}
-
-enum
-{
-    NUM_FLOPPIES = 2,
-    NON_FLOPPY_BIT = 0x80
-};
-
-static int
-fd_of(int i)
-{
-    int retval;
-
-#if defined(CYGWIN32)
-    retval = i;
-#else
-    if(i < NUM_FLOPPIES)
-        retval = i;
-    else
-        retval = i - NUM_FLOPPIES + NON_FLOPPY_BIT;
-#endif
-    return retval;
-}
-
-#define DRIVE_NAME_OF(x) drive_name_of(x)
-#define FD_OF(x) fd_of(x)
-#define DRIVE_LOADED(x) drive_loaded[x]
-
-#else
-
-#define DRIVE_NAME_OF(x) drives[x].dname
-
-#define FD_OF(x) drives[x].fd
-
-#define DRIVE_LOADED(x) drives[x].loaded
-
-#endif
-
-void Executor::futzwithdosdisks(void)
-{
-#if defined(MSDOS) || defined(LINUX) || defined(CYGWIN32)
-    int i, fd;
-    GUEST<LONGINT> mess_s;
-    LONGINT mess;
-    LONGINT blocksize;
-    drive_flags_t flags;
-#if defined(MSDOS) || defined(CYGWIN32)
-/* #warning "We're cheating on DOS drive specs: ejectable, bsize, maxsize, writable" */
-#define OPEN_ROUTINE dosdisk_open
-#define CLOSE_ROUTINE dosdisk_close
-#define EXTRA_CLOSE_PARAM , false
-#define MARKER DOSFDBIT
-#define EXTRA_PARAM
-#define ROMLIB_MACDRIVES ROMlib_macdrives
-#elif defined(LINUX)
-    static dosdriveinfo_t drives[] = {
-        { "/dev/fd0", (DrvQExtra *)0, false, IGNORED },
-        { "/dev/cdrom", (DrvQExtra *)0, false, IGNORED },
-#if 0
-	{ "/dev/fd1", (DrvQExtra *) 0, false, IGNORED },
-#endif
-    };
-#define N_DRIVES NELEM(drives)
-#define OPEN_ROUTINE linuxfloppy_open
-#define CLOSE_ROUTINE linuxfloppy_close
-#define EXTRA_CLOSE_PARAM
-#define MARKER 0
-#define EXTRA_PARAM , (DRIVE_NAME_OF(i))
-#define ROMLIB_MACDRIVES (~0)
-#endif
-
-    /* Since we're scanning for new disks, let's be paranoid and
-     * flush all cached disk information.
-     */
-    dcache_invalidate_all(true);
-
-    if(!nodrivesearch_p)
-    {
-        for(i = 0; i < N_DRIVES; ++i)
-        {
-            if(/* DRIVE_LOADED(i) */ ROMLIB_MACDRIVES & (1 << i))
-            {
-                if(((fd = OPEN_ROUTINE(FD_OF(i), &blocksize, &flags EXTRA_PARAM)) >= 0)
-                   || (flags & DRIVE_FLAGS_FLOPPY))
-                {
-                    try_to_mount_disk(DRIVE_NAME_OF(i), fd | MARKER, &mess_s,
-                                      blocksize, 16 * PHYSBSIZE,
-                                      flags, 0);
-                    mess = CL(mess_s);
-                    if(mess)
-                    {
-                        if(mess >> 16 == 0)
-                        {
-                            DRIVE_LOADED(i) = true;
-                            PPostEvent(diskEvt, mess, (GUEST<EvQElPtr> *)0);
-                            /* TODO: we probably should post if mess returns an
-		     error, but I think we get confused if we do */
-                        }
-                        else
-                        {
-                            if(!(flags & DRIVE_FLAGS_FLOPPY))
-                                CLOSE_ROUTINE(fd EXTRA_CLOSE_PARAM);
-                        }
-                    }
-                    else
-                    {
-                        if(!(flags & DRIVE_FLAGS_FLOPPY))
-                            CLOSE_ROUTINE(fd EXTRA_CLOSE_PARAM);
-                    }
-                }
-            }
-        }
-    }
-#endif
-}
 
 static void bumpsavedisk(DialogPtr dp, BOOLEAN always)
 {
@@ -1914,6 +1723,8 @@ void adjustdrivebutton(DialogPtr dp)
         vcbp = (HVCB *)MR(vcbp->qLink))
         if(vcbp->vcbCTRef && vcbp->vcbDrvNum)
             ++count;
+        else if(((VCBExtra*)vcbp)->volume)
+            ++count;
         else if(!seenunix)
         {
             ++count;
@@ -1954,60 +1765,18 @@ static GUEST<OSType> gettypeX(StringPtr name, INTEGER vref, LONGINT dirid)
 static OSErr
 unixcore(StringPtr namep, INTEGER *vrefnump, LONGINT *diridp)
 {
-    INTEGER vrefnum;
-    HVCB *vcbp;
-    char *newname;
-    INTEGER namelen;
-    OSErr err;
-    ParamBlockRec pb;
-    char *pathname, *filename, *endname;
-    VCBExtra *vcbp2;
-    struct stat sbuf;
-    LONGINT templ;
-    char *tempcp;
-    ParamBlockRec pbr;
+    // if (namep, *vrefnump, *diridp) refers to a mount point
+    // (a concept which doesn't exist on real Macs),
+    // set *vrefnump and *diridp and return noErr.
+    // Otherwise, return nsvErr.
 
-    vrefnum = *vrefnump;
-#if 0
-  vcbp = ROMlib_vcbbyvrn(vrefnum);
-#else
-    pbr.ioParam.ioNamePtr = nullptr;
-    pbr.ioParam.ioVRefNum = CW(vrefnum);
-    vcbp = ROMlib_breakoutioname(&pbr, &templ, &tempcp, (BOOLEAN *)0, true);
-    free(tempcp);
-#endif
-    if(vcbp && !vcbp->vcbCTRef)
-    {
-        pb.ioParam.ioNamePtr = nullptr;
-        pb.ioParam.ioVRefNum = pbr.ioParam.ioVRefNum;
-        err = ROMlib_nami(&pb, *diridp, NoIndex, &pathname, &filename,
-                          &endname, false, &vcbp2, &sbuf);
-        if(err == noErr)
-        {
-            VCBExtra *vcbextrap;
+    // Real MacOS Classic under Mac OS X simulates alias files
+    // for mount points.
 
-            namelen = endname - pathname - 1;
-            newname = (char *)alloca(namelen + 1 + namep[0] + 1);
-            strncpy(newname, pathname, namelen);
-            newname[namelen] = '/';
-            strncpy(newname + namelen + 1, (char *)namep + 1, namep[0]);
-            newname[namelen + 1 + namep[0]] = 0;
-            ROMlib_automount(newname);
-            vcbextrap = ROMlib_vcbbyunixname(newname);
-            if(vcbextrap)
-            {
-                *vrefnump = CW(vcbextrap->vcb.vcbVRefNum);
-                if(*diridp == vcbextrap->u.ufs.ino)
-                    *diridp = 2;
-            }
-            else
-                err = nsvErr;
-            free(pathname);
-        }
-    }
-    else
-        err = nsvErr;
-    return err;
+    // Executor used to handle mount points via this routine,
+    // and currently pretends everything on Unix is one volume.
+
+    return nsvErr;
 }
 
 OSErr Executor::C_unixmount(CInfoPBRec *cbp)

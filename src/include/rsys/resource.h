@@ -179,9 +179,10 @@ extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
 #define warn_resource_not_found_name(type, name)                 \
     do                                                           \
     {                                                            \
-        char *c_string;                                          \
+        char c_string[256];                                      \
                                                                  \
-        c_string = TEMP_C_STRING_FROM_STR255(name);              \
+        memcpy(c_string, name+1, name[0]);                       \
+        c_string[name[0]] = 0;                                   \
         warning_trap_failure("resource '%c%c%c%c':%s not found", \
                              ((type) >> 24) & 0xFF,              \
                              ((type) >> 16) & 0xFF,              \

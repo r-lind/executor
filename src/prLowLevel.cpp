@@ -29,6 +29,7 @@
 #include "rsys/osevent.h"
 #include "rsys/functions.impl.h"
 #include "rsys/prefs.h"
+#include <algorithm>
 
 #ifdef MACOSX_
 //#include "contextswitch.h"
@@ -40,6 +41,8 @@
 
 using namespace Executor;
 
+/* optional resolution other than 72dpix72dpi for printing */
+INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
 
 void Executor::C_PrDrvrOpen() /* TODO */
 {
@@ -733,7 +736,7 @@ str255assignc(Str255 str, const char *cstr)
         str[0] = 0;
     else
     {
-        str[0] = MIN((int)strlen(cstr), 255);
+        str[0] = std::min((int)strlen(cstr), 255);
         memcpy(str + 1, cstr, (unsigned char)str[0]);
     }
 }

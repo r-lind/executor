@@ -14,7 +14,6 @@
 #include <malloc.h>
 #include "win_screen.h"
 
-/* #include <ndbm.h> */
 /* #include <sys/vfs.h> */
 /* #include <sys/param.h> */
 

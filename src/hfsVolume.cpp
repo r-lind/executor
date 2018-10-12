@@ -292,54 +292,6 @@ static HVCB *vcbbyname(StringPtr name)
 #define VCB_CMP_FUNC strcmp
 #endif
 
-HVCB *Executor::ROMlib_vcbbybiggestunixname(const char *name)
-{
-    HVCB *vcbp, *bestvcbp;
-    int namesize, bestsize;
-
-    if(strchr(name, '\\'))
-    {
-        int len;
-        char *new_name, *op, c;
-        const char *ip;
-
-        len = strlen(name) + 1;
-        new_name = (char *)alloca(len);
-        for(op = new_name, ip = name; (c = *ip++);)
-            *op++ = c == '\\' ? '/' : c;
-        *op++ = 0;
-        name = new_name;
-    }
-
-    bestvcbp = 0;
-    bestsize = -1;
-    for(vcbp = (HVCB *)MR(LM(VCBQHdr).qHead); vcbp;
-        vcbp = (HVCB *)MR(vcbp->qLink))
-    {
-        if(!vcbp->vcbCTRef)
-        {
-            namesize = strlen(((VCBExtra *)vcbp)->unixname);
-            if(namesize > bestsize && VCB_CMPN_FUNC(((VCBExtra *)vcbp)->unixname, name, namesize) == 0)
-            {
-                bestsize = namesize;
-                bestvcbp = vcbp;
-            }
-        }
-    }
-    return bestvcbp;
-}
-
-VCBExtra *
-Executor::ROMlib_vcbbyunixname(const char *name)
-{
-    HVCB *vcbp;
-
-    for(vcbp = (HVCB *)MR(LM(VCBQHdr).qHead); vcbp && (vcbp->vcbCTRef || VCB_CMP_FUNC(((VCBExtra *)vcbp)->unixname, name) != 0);
-        vcbp = (HVCB *)MR(vcbp->qLink))
-        ;
-    return (VCBExtra *)vcbp;
-}
-
 HVCB *Executor::ROMlib_vcbbydrive(short vrefnum)
 {
     HVCB *vcbp;
@@ -502,6 +454,7 @@ Executor::hfsPBMountVol(ParmBlkPtr pb, LONGINT floppyfd, LONGINT offset, LONGINT
     else
     {
         vcbp = (HVCB *)NewPtr((Size)sizeof(VCBExtra));
+        memset(vcbp, 0, sizeof(VCBExtra));
         ((VCBExtra *)vcbp)->u.hfs.fd = floppyfd;
         ((VCBExtra *)vcbp)->u.hfs.offset = offset;
         ((VCBExtra *)vcbp)->u.hfs.bsize = bsize;
@@ -525,7 +478,6 @@ Executor::hfsPBMountVol(ParmBlkPtr pb, LONGINT floppyfd, LONGINT offset, LONGINT
                         vcbp2->vcbMAdr = vcbp->vcbMAdr;
                         vcbp2->vcbCtlBuf = vcbp->vcbCtlBuf;
 #endif
-                        ((VCBExtra *)vcbp2)->unixname = ((VCBExtra *)vcbp)->unixname;
                         ((VCBExtra *)vcbp2)->u.hfs.fd = ((VCBExtra *)vcbp)->u.hfs.fd;
                         DisposePtr((Ptr)vcbp);
                         alreadythere = true;

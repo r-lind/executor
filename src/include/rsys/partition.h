@@ -1,4 +1,6 @@
+#pragma once
 
+#include "rsys/mactype.h"
 /*
  * These data structures are from IMV-579 and IMIV-292 (the SCSI manager
  * sections).  They're used for partitioned hard drives.
@@ -9,10 +11,6 @@
 
 namespace Executor
 {
-#if !defined(PACKED)
-#define PACKED __attribute__((packed))
-typedef unsigned long ULONGINT;
-#endif
 
 struct partmapentry_t
 {

@@ -69,8 +69,8 @@ BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
 #define DIALOGEVTS \
     (mDownMask | mUpMask | keyDownMask | autoKeyMask | updateMask | activMask)
 
-using modalprocp = UPP<BOOLEAN (DialogPtr dial, EventRecord *evtp,
-                                     GUEST<INTEGER> *iht)>;
+using modalprocp = UPP<BOOLEAN(DialogPtr dial, EventRecord *evtp,
+                               GUEST<INTEGER> *iht)>;
 
 #define CALLMODALPROC(dp, evtp, ip, fp2) \
     ROMlib_CALLMODALPROC((dp), (evtp), (ip), (modalprocp)(fp2))
@@ -83,7 +83,7 @@ ROMlib_CALLMODALPROC(DialogPtr dp,
     return fp(dp, evtp, ip);
 }
 
-using useritemp = UPP<void (WindowPtr wp, INTEGER item)>;
+using useritemp = UPP<void(WindowPtr wp, INTEGER item)>;
 
 #define CALLUSERITEM(dp, inum, temph) \
     ROMlib_CALLUSERITEM(dp, inum, (useritemp)(temph))
@@ -96,16 +96,16 @@ ROMlib_CALLUSERITEM(DialogPtr dp,
     temph(dp, inum);
 }
 
-#define _FindWindow(pt, wp)             \
-    ({                                  \
-        GUEST<WindowPtr> __wp;          \
-        int retval;                     \
-                                        \
-        retval = FindWindow(pt, &__wp); \
-        *(wp) = MR(__wp);               \
-                                        \
-        retval;                         \
-    })
+inline int _FindWindow(Point pt, WindowPtr *wp)
+{
+    GUEST<WindowPtr> __wp;
+    int retval;
+
+    retval = FindWindow(pt, &__wp);
+    *(wp) = MR(__wp);
+
+    return retval;
+}
 
 #define ALLOW_MOVABLE_MODAL /* we've made so many other changes, we \
                    may as well go whole hog */
@@ -278,10 +278,7 @@ BOOLEAN Executor::C_IsDialogEvent(EventRecord *evt) /* IMI-416 */
             TEIdle(MR(dp->textH));
         p.h = CW(evt->where.h);
         p.v = CW(evt->where.v);
-        /*-->*/ return evt->what != CWC(mouseDown) || (FindWindow(p,
-                                                                  &wp)
-                                                           == inContent
-                                                       && MR(wp) == (WindowPtr)dp);
+        /*-->*/ return evt->what != CWC(mouseDown) || (FindWindow(p, &wp) == inContent && MR(wp) == (WindowPtr)dp);
     }
     return false;
 }
@@ -370,7 +367,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
 
         *subsrc = '^';
         sp = subsrc + 1;
-        
+
         nh_s = ip->itmhand;
         HandToHand(&nh_s);
         nh = MR(nh_s);
@@ -400,7 +397,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
         {
             HLockGuard guard(text_h);
             TETextBox(STARH(text_h), GetHandleSize(text_h),
-                    &r, teFlushDefault);
+                      &r, teFlushDefault);
         }
 
         PORT_PEN_SIZE(thePort).h = PORT_PEN_SIZE(thePort).v = CWC(1);
@@ -673,7 +670,8 @@ void Executor::BEEPER(INTEGER n)
         else
         {
             ROMlib_hook(dial_soundprocnumber);
-            MR(LM(DABeeper))(n);
+            MR(LM(DABeeper))
+            (n);
         }
     }
 }

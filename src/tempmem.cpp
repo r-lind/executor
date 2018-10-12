@@ -6,6 +6,7 @@
 
 #include "MemoryMgr.h"
 #include "rsys/mman.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -25,7 +26,7 @@ int32_t Executor::C_TempFreeMem()
         applfree = FreeMem();
     }
     sysfree = FreeMemSys();
-    retval = MAX(applfree, sysfree);
+    retval = std::max(applfree, sysfree);
     return retval;
 #endif
 }
@@ -44,7 +45,7 @@ Size Executor::C_TempMaxMem(GUEST<Size> *grow_s)
         applmax = MaxMem(grow_s ? grow_s : &tmp);
     }
     sysfree = FreeMemSys();
-    retval = MAX(applmax, sysfree);
+    retval = std::max(applmax, sysfree);
     return retval;
 #endif
 }

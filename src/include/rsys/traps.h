@@ -143,8 +143,19 @@ class TrapVariant;
 template<typename Trap, typename Ret, typename... Args, bool... flags>
 class TrapVariant<Trap, Ret (Args...), flags...>  : public internal::DeferredInit
 {
+    template<class T1>
+    struct cast_any_t
+    {
+        T1 x;
+
+        template<class T2>
+        operator T2() { return (T2)x; }
+    };
+
+    template<class T1>
+    cast_any_t<T1> cast_any(const T1& x) const { return {x}; }
 public:
-    Ret operator()(Args... args) const { return trap(args..., flags...); }
+    Ret operator()(Args... args) const { return trap(cast_any(args)..., flags...); }
 
     virtual void init() override;
     TrapVariant(const Trap& trap, const char* name, const char* exportToLib = nullptr);
@@ -242,8 +253,8 @@ private:
             callconv::Register<D0 (A0, TrapBit<ASYNCBIT>, TrapBit<HFSBIT>)>>); \
     TRAP_VARIANT(NAME##Sync, NAME, OSErr(ParmBlkPtr), false, false); \
     TRAP_VARIANT(NAME##Async, NAME, OSErr(ParmBlkPtr), true, false); \
-    TRAP_VARIANT(HNAME##Sync, NAME, OSErr(ParmBlkPtr), false, true); \
-    TRAP_VARIANT(HNAME##Async, NAME, OSErr(ParmBlkPtr), true, true)
+    TRAP_VARIANT(HNAME##Sync, NAME, OSErr(HParmBlkPtr), false, true); \
+    TRAP_VARIANT(HNAME##Async, NAME, OSErr(HParmBlkPtr), true, true)
 
 #define HFS_SUBTRAP(NAME, HNAME, PBTYPE, TRAP, SELECTOR, TRAPNAME) \
     inline OSErr NAME##_##HNAME(ParmBlkPtr pb, Boolean async, Boolean hfs) \
@@ -257,8 +268,8 @@ private:
             callconv::Register<D0 (A0, TrapBit<ASYNCBIT>, TrapBit<HFSBIT>)>>); \
     TRAP_VARIANT(NAME##Sync, NAME, OSErr(ParmBlkPtr), false, false); \
     TRAP_VARIANT(NAME##Async, NAME, OSErr(ParmBlkPtr), true, false); \
-    TRAP_VARIANT(HNAME##Sync, NAME, OSErr(ParmBlkPtr), false, true); \
-    TRAP_VARIANT(HNAME##Async, NAME, OSErr(ParmBlkPtr), true, true)
+    TRAP_VARIANT(HNAME##Sync, NAME, OSErr(HParmBlkPtr), false, true); \
+    TRAP_VARIANT(HNAME##Async, NAME, OSErr(HParmBlkPtr), true, true)
 
 
 

@@ -10,6 +10,7 @@
 #include "rsys/mman.h"
 
 #include "rsys/image.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -165,7 +166,7 @@ void Executor::image_update_ctab(pixel_image_t *image, const RGBColor *new_color
     bits_ctab_table = CTAB_TABLE(bits_ctab);
 
     ctab_changed_p = 0;
-    for(i = MIN(bits_ctab_size, max_color); i >= 0; i--)
+    for(i = std::min(bits_ctab_size, max_color); i >= 0; i--)
     {
         if(memcmp(&bits_ctab_table[i].rgb,
                   &new_colors[i], sizeof bits_ctab_table[i].rgb))

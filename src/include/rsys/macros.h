@@ -1,22 +1,6 @@
 #if !defined(_MACROS_H_)
 #define _MACROS_H_
 
-#if !defined(MAX)
-#define MAX(a, b) ({ decltype (a) _maxa = (a); \
-		      decltype (b) _maxb = (b); \
-		      _maxa > _maxb ? _maxa : _maxb; })
-#endif
-
-#if !defined(MIN)
-#define MIN(a, b) ({ decltype (a) _mina = (a); \
-		      decltype (b) _minb = (b); \
-		      _mina < _minb ? _mina : _minb; })
-#endif
-
-#if !defined(ABS)
-#define ABS(x) ({ decltype (x) _absx = (x);  (_absx < 0) ? -_absx : _absx; })
-#endif
-
 #if 0 /* This should be defined by target-os-config.h */
       /* if we define it here, then we get warning messages when we */
       /* include target-os-config.h after this file has been included */
@@ -33,7 +17,11 @@
 #endif
 
 #if !defined(PACKED)
+#ifdef _MSC_VER
+#define PACKED /* FIXME: check where this is used, we might need somethig */
+#else
 #define PACKED __attribute__((packed))
+#endif
 #endif
 
 #if !defined(U)
@@ -42,7 +30,7 @@
 
 #if !defined(ALLOCABEGIN)
 #define ALLOCABEGIN /* nothing */
-#define ALLOCA(n) __builtin_alloca(n)
+#define ALLOCA(n) alloca(n)
 #define ALLOCAEND /* nothing */
 #endif
 

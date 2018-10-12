@@ -16,11 +16,10 @@
 #include "rsys/hfs.h"
 #include "rsys/file.h"
 #include "rsys/notmac.h"
-#include "rsys/stdfile.h"
+#include "rsys/futzwithdosdisks.h"
 #include "rsys/ini.h"
 #include "rsys/string.h"
 #include "rsys/segment.h"
-#include "rsys/suffix_maps.h"
 
 #if !defined(WIN32)
 #include <pwd.h>
@@ -33,6 +32,124 @@
 #include <algorithm>
 
 using namespace Executor;
+
+namespace Executor
+{
+int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
+char ROMlib_startdir[MAXPATHLEN];
+#if defined(WIN32)
+char ROMlib_start_drive;
+#endif
+std::string ROMlib_appname;
+}
+
+
+#if !defined(NDEBUG)
+void Executor::fs_err_hook(OSErr err)
+{
+}
+#endif
+
+int ROMlib_lasterrnomapped;
+
+#define MAX_ERRNO 50
+
+#define install_errno(uerr, merr)         \
+    do                                    \
+    {                                     \
+        gui_assert(uerr < NELEM(xtable)); \
+        xtable[uerr] = merr;              \
+    } while(false);
+
+OSErr Executor::ROMlib_maperrno() /* INTERNAL */
+{
+    OSErr retval;
+    static OSErr xtable[MAX_ERRNO + 1];
+    static char been_here = false;
+    int errno_save;
+
+    if(!been_here)
+    {
+        int i;
+
+        for(i = 0; i < (int)NELEM(xtable); ++i)
+            xtable[i] = fsDSIntErr;
+
+        install_errno(0, noErr);
+        install_errno(EPERM, permErr);
+        install_errno(ENOENT, fnfErr);
+        install_errno(EIO, ioErr);
+        install_errno(ENXIO, paramErr);
+        install_errno(EBADF, fnOpnErr);
+        install_errno(EAGAIN, fLckdErr);
+        install_errno(ENOMEM, memFullErr);
+        install_errno(EACCES, permErr);
+        install_errno(EFAULT, paramErr);
+        install_errno(EBUSY, fBsyErr);
+        install_errno(EEXIST, dupFNErr);
+        install_errno(EXDEV, fsRnErr);
+        install_errno(ENODEV, nsvErr);
+        install_errno(ENOTDIR, dirNFErr);
+        install_errno(EINVAL, paramErr);
+        install_errno(ENFILE, tmfoErr);
+        install_errno(EMFILE, tmfoErr);
+        install_errno(EFBIG, dskFulErr);
+        install_errno(ENOSPC, dskFulErr);
+        install_errno(ESPIPE, posErr);
+        install_errno(EROFS, wPrErr);
+        install_errno(EMLINK, dirFulErr);
+#if !defined(WIN32)
+        install_errno(ETXTBSY, fBsyErr);
+        install_errno(EWOULDBLOCK, permErr);
+#endif
+
+        been_here = true;
+    }
+
+    errno_save = errno;
+    ROMlib_lasterrnomapped = errno_save;
+
+    if(errno_save < 0 || errno_save >= (int)NELEM(xtable))
+        retval = fsDSIntErr;
+    else
+        retval = xtable[errno_save];
+
+    if(retval == fsDSIntErr)
+        warning_unexpected("fsDSIntErr errno = %d", errno_save);
+
+    if(retval == dirNFErr)
+        warning_trace_info("dirNFErr errno = %d", errno_save);
+
+    fs_err_hook(retval);
+    return retval;
+}
+
+
+Byte
+Executor::open_attrib_bits(LONGINT file_id, VCB *vcbp, GUEST<INTEGER> *refnump)
+{
+    Byte retval;
+    int i;
+
+    retval = 0;
+    *refnump = 0;
+    for(i = 0; i < NFCB; i++)
+    {
+        if(CL(ROMlib_fcblocks[i].fdfnum) == file_id
+           && MR(ROMlib_fcblocks[i].fcvptr) == vcbp)
+        {
+            if(*refnump == CW(0))
+                *refnump = CW(i * 94 + 2);
+            if(ROMlib_fcblocks[i].fcflags & fcfisres)
+                retval |= ATTRIB_RESOPEN;
+            else
+                retval |= ATTRIB_DATAOPEN;
+        }
+    }
+    if(retval & (ATTRIB_RESOPEN | ATTRIB_DATAOPEN))
+        retval |= ATTRIB_ISOPEN;
+    return retval;
+}
 
 /* NOTE:  calling most of the routines here is a sign that the user may
 	  be depending on the internal layout of things a bit too much */
@@ -56,56 +173,61 @@ QHdrPtr Executor::GetDrvQHdr() /* IMIV-182 */
     return (&LM(DrvQHdr));
 }
 
-OSErr Executor::ufsPBGetFCBInfo(FCBPBPtr pb, BOOLEAN a) /* INTERNAL */
+/*
+ * NOTE:  This is *the* PCBGetFCBInfo that we use whether
+ *	  we're looking at hfs or ufs stuff.
+ */
+
+OSErr Executor::PBGetFCBInfo(FCBPBPtr pb, BOOLEAN async)
 {
-    int rn;
-    OSErr err;
-    fcbrec *fp;
-    int i, count;
+    filecontrolblock *fcbp, *efcbp;
+    INTEGER i;
 
-#if !defined(LETGCCWAIL)
-    rn = -1;
-    fp = 0;
-#endif /* LETGCCWAIL */
-
-    err = noErr;
-    if(pb->ioFCBIndx == CWC(0))
+    if((i = CW(pb->ioFCBIndx)) > 0)
     {
-        rn = Cx(pb->ioRefNum);
-        fp = PRNTOFPERR(rn, &err);
-    }
-    else if(Cx(pb->ioFCBIndx) > 0)
-    {
-        for(count = 0, i = 0; i < NFCB && count < Cx(pb->ioFCBIndx); i++)
-            if(ROMlib_fcblocks[i].fdfnum && (!pb->ioVRefNum || MR(ROMlib_fcblocks[i].fcvptr)->vcbVRefNum == pb->ioVRefNum))
-                count++;
-        if(count == Cx(pb->ioFCBIndx))
+        fcbp = (filecontrolblock *)(MR(LM(FCBSPtr)) + sizeof(INTEGER));
+        efcbp = (filecontrolblock *)(MR(LM(FCBSPtr)) + CW(*(GUEST<INTEGER> *)MR(LM(FCBSPtr))));
+        if(CW(pb->ioVRefNum) < 0)
         {
-            fp = ROMlib_fcblocks + i - 1;
-            rn = (Ptr)fp - MR(LM(FCBSPtr));
+            for(; fcbp != efcbp; fcbp++)
+                if(fcbp->fcbFlNum && MR(fcbp->fcbVPtr)->vcbVRefNum == pb->ioVRefNum && --i <= 0)
+                    break;
         }
-        else
-            err = paramErr;
+        else if(pb->ioVRefNum == CWC(0))
+        {
+            for(; fcbp != efcbp && (fcbp->fcbFlNum == CLC(0) || --i > 0); fcbp++)
+                ;
+        }
+        else /* if (CW(pb->ioVRefNum) > 0 */
+        {
+            for(; fcbp != efcbp; fcbp++)
+                if(fcbp->fcbFlNum && MR(fcbp->fcbVPtr)->vcbDrvNum == pb->ioVRefNum && --i <= 0)
+                    break;
+        }
+        if(fcbp == efcbp)
+            PBRETURN(pb, fnOpnErr);
+        pb->ioRefNum = CW((char *)fcbp - (char *)MR(LM(FCBSPtr)));
     }
     else
-        err = paramErr;
-    if(err == noErr)
     {
-        if(pb->ioNamePtr)
-            str255assign(MR(pb->ioNamePtr), fp->fcname);
-        pb->ioVRefNum = MR(fp->fcvptr)->vcbVRefNum;
-        pb->ioRefNum = CW(rn);
-        pb->ioFCBFlNm = fp->fdfnum;
-        pb->ioFCBFlags = CW((fp->fcflags << 8) | (unsigned char)fp->fcbTypByt);
-        pb->ioFCBStBlk = CW(0);
-        pb->ioFCBEOF = fp->fcleof;
-        pb->ioFCBPLen = fp->fcleof;
-        pb->ioFCBCrPs = CL(lseek(fp->fcfd, 0, SEEK_CUR) - FORKOFFSET(fp));
-        pb->ioFCBVRefNum = MR(fp->fcvptr)->vcbVRefNum; /* what's this? */
-        pb->ioFCBClpSiz = MR(fp->fcvptr)->vcbClpSiz;
-        pb->ioFCBParID = fp->fcparid;
+        fcbp = ROMlib_refnumtofcbp(CW(pb->ioRefNum));
+        if(!fcbp)
+            PBRETURN(pb, rfNumErr);
     }
-    return err;
+    if(pb->ioNamePtr)
+        str255assign(MR(pb->ioNamePtr), fcbp->fcbCName);
+    pb->ioFCBFlNm = fcbp->fcbFlNum;
+    pb->ioFCBFlags = CW((fcbp->fcbMdRByt << 8) | (unsigned char)fcbp->fcbTypByt);
+    pb->ioFCBStBlk = fcbp->fcbSBlk;
+    pb->ioFCBEOF = fcbp->fcbEOF;
+    pb->ioFCBCrPs = fcbp->fcbCrPs; 
+    pb->ioFCBPLen = fcbp->fcbPLen;
+    pb->ioFCBVRefNum = MR(fcbp->fcbVPtr)->vcbVRefNum;
+    if(CW(pb->ioFCBIndx) <= 0 || pb->ioVRefNum == CWC(0))
+        pb->ioVRefNum = pb->ioFCBVRefNum;
+    pb->ioFCBClpSiz = fcbp->fcbClmpSize;
+    pb->ioFCBParID = fcbp->fcbDirID;
+    PBRETURN(pb, noErr);
 }
 
 static bool
@@ -236,183 +358,6 @@ Executor::ROMlib_addtodq(ULONGINT drvsize, const char *devicename, INTEGER parti
     return dqp;
 }
 
-static bool
-root_directory_p(const char *path, dev_t our_dev)
-{
-    const char *slash;
-    bool retval;
-
-    /* we used to just compare our_inode to 2, but that doesn't work with
-     NFS mounted filesystems that aren't mounted at the root directory or
-     with DOS filesystems mounted under Linux */
-
-    slash = strrchr(path, '/');
-    if(!slash || ((slash == path + SLASH_CHAR_OFFSET) && !slash[1]))
-        retval = true;
-    else
-    {
-        struct stat sbuf;
-
-        if(slash == path + SLASH_CHAR_OFFSET)
-            ++slash;
-        std::string tmp(path, slash);
-        if(Ustat(tmp.c_str(), &sbuf) != 0)
-            retval = true;
-        else
-            retval = sbuf.st_dev != our_dev;
-    }
-    return retval;
-}
-
-/*
- * ROMlib_volumename is a magic global variable that tells MountVol
- * the name of the volume that you're mounting (since there is no
- * way to map the "drive number" into such a string)
- */
-
-std::string Executor::ROMlib_volumename;
-
-static void ROMlib_automount_helper(const char *cpath, char *aliasp)
-{
-    char *path = (char *)alloca(strlen(cpath) + 1);
-    strcpy(path, cpath);
-
-    struct stat sbuf;
-    ParamBlockRec pb;
-    int sret;
-    int i;
-    LONGINT dirid;
-    INTEGER retval;
-    HVCB *vcbp;
-    DrvQExtra *dqp;
-    char *oldsavep;
-    char *savep;
-    char save;
-
-#if defined(WIN32)
-    {
-        char *temppath, *op, c;
-        int len;
-
-        len = strlen(path) + 1;
-
-        /* If we don't have x:/ then we need to prepend the start drive */
-        if(path[0] && (path[1] != ':' || path[2] != '/'))
-            len += 2;
-        temppath = (char*)alloca(len);
-        if(path[0] && (path[1] != ':' || path[2] != '/'))
-        {
-            temppath[0] = ROMlib_start_drive;
-            temppath[1] = ':';
-            temppath += 2;
-        }
-
-        /* convert backslashes to slashes */
-        op = temppath;
-        while((c = *path++))
-            *op++ = c == '\\' ? '/' : c;
-        *op = 0;
-        path = temppath;
-    }
-#endif
-
-    retval = 0;
-#if !defined(LETGCCWAIL)
-    save = 0;
-#endif
-    if(path[0] == '/'
-#if defined(WIN32)
-       || (path[1] == ':' && path[2] == '/')
-#endif
-           )
-    {
-#if 1 /*!defined(WIN32)*/
-        ROMlib_undotdot(path);
-#else
-        char *newpath = (char*)alloca(strlen(path) + 3); /* one for null, two for drive */
-        _fixpath(path, newpath);
-        path = newpath;
-#endif
-        /* Make two passes:  On the first pass (i == 0) we identify
-	   filesystems and mount them.  On the second pass (i == 1) we
-	   store away intermediate directory numbers */
-
-        for(i = 0; i < 2; ++i)
-        {
-            bool done;
-            sret = Ustat(path, &sbuf);
-            savep = 0;
-            oldsavep = 0;
-            done = false;
-            do
-            {
-                if(sret == 0 && S_ISDIR(sbuf.st_mode))
-                {
-                    if(root_directory_p(path, sbuf.st_dev) || aliasp)
-                    {
-                        if(i == 0)
-                        {
-                            ROMlib_volumename = path;
-                            dqp = ROMlib_addtodq(2048L * 50,
-                                                 ROMlib_volumename.c_str(), 0,
-                                                 OURUFSDREF,
-                                                 DRIVE_FLAGS_FIXED, 0);
-                            pb.ioParam.ioVRefNum = dqp->dq.dQDrive;
-                            ufsPBMountVol(&pb);
-                            if(aliasp)
-                            {
-                                HVCB *vcbp;
-
-                                vcbp = ROMlib_vcbbyvrn(CW(pb.ioParam.ioVRefNum));
-                                str255_from_c_string(vcbp->vcbVN, aliasp);
-                                /* hack in name */
-                                /*-->*/ return;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if(i == 1)
-                        {
-                            vcbp = ROMlib_vcbbybiggestunixname(path);
-                            gui_assert(vcbp);
-                            dirid = ST_INO(sbuf);
-                            ROMlib_dbm_store((VCBExtra *)vcbp, path, &dirid,
-                                             false);
-                        }
-                    }
-                }
-                if(savep == path + SLASH_CHAR_OFFSET + 1)
-                    done = true;
-                else
-                {
-                    savep = strrchr(path, '/');
-                    if(savep == path + SLASH_CHAR_OFFSET)
-                        ++savep;
-                    if(oldsavep)
-                        *oldsavep = save;
-                    save = *savep;
-                    *savep = 0;
-                    oldsavep = savep;
-                    sret = Ustat(path, &sbuf);
-                }
-            } while(!done);
-            if(oldsavep)
-                *oldsavep = save;
-        }
-    }
-}
-
-void Executor::ROMlib_automount(const char *path)
-{
-    ROMlib_automount_helper(path, NULL);
-}
-
-void ROMlib_volume_alias(const char *path, const char *alias_name)
-{
-    ROMlib_automount_helper((char *)path, (char *)alias_name);
-}
-
 std::string
 Executor::expandPath(std::string name)
 {
@@ -443,53 +388,11 @@ Executor::expandPath(std::string name)
     return name;
 }
 
-#if defined(MSDOS) || defined(CYGWIN32)
-bool cd_mounted_by_trickery_p = false;
-
-#define MACCDROM \
-    (ROMlib_mac_cdromp ? (char *)ROMlib_mac_cdromp->chars : "DOS/EXTRA/LIBRARY/MACCDROM.HFV")
-
-#if defined(MSDOS) || defined(CYGWIN32)
-static char *cd_big_hfv = 0;
-
-static void
-check_for_executor_cd(const char *drive)
-{
-    if(!cd_big_hfv)
-    {
-        struct stat sbuf;
-
-        cd_big_hfv = malloc(strlen(drive) + strlen(MACCDROM) + 1);
-        sprintf(cd_big_hfv, "%s%s", drive, MACCDROM);
-        if(stat(cd_big_hfv, &sbuf) != 0)
-        {
-            free(cd_big_hfv);
-            cd_big_hfv = 0;
-        }
-    }
-}
-
-static bool
-e2_is_mounted(void)
-{
-    bool retval;
-    const char e2_name[] = "Executor2";
-
-    retval = !!vlookupbyname(e2_name, e2_name + strlen(e2_name));
-    return retval;
-}
-#endif
-
-#endif
-
 StringPtr Executor::ROMlib_exefname;
-char *Executor::ROMlib_exeuname;
 
 std::string Executor::ROMlib_ConfigurationFolder;
-std::string Executor::ROMlib_SystemFolder;
-std::string Executor::ROMlib_DefaultFolder;
-std::string Executor::ROMlib_PublicDirectoryMap;
-std::string Executor::ROMlib_PrivateDirectoryMap;
+static std::string ROMlib_SystemFolder;
+fs::path Executor::ROMlib_DirectoryMap;
 static std::string ROMlib_MacVolumes;
 std::string Executor::ROMlib_ScreenDumpFile;
 static std::string ROMlib_OffsetFile;
@@ -533,23 +436,6 @@ parse_offset_file(void)
     }
 }
 
-#if defined(MSDOS)
-
-static uint32_t
-drive_char_to_bit(char c)
-{
-    uint32_t retval;
-
-    if(c >= 'a' && c <= 'z')
-        retval = 1 << (c - 'a');
-    else if(c >= 'A' && c <= 'Z')
-        retval = 1 << (c - 'A');
-    else
-        retval = 0;
-    return retval;
-}
-#endif
-
 static bool
 is_unix_path(const char *pathname)
 {
@@ -569,7 +455,6 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     CInfoPBRec cpb;
     WDPBRec wpb;
     INTEGER wdlen;
-    HVCB *vcbp;
     GUEST<LONGINT> m;
     GUEST<THz> savezone;
     struct stat sbuf;
@@ -578,6 +463,11 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     char *p, *ep;
 
     LM(CurDirStore) = CLC(2);
+    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
+    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
+    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
+    LM(DefVCBPtr) = 0;
+    LM(FSFCBLen) = CWC(94);
 
     savezone = LM(TheZone);
     LM(TheZone) = LM(SysZone);
@@ -619,9 +509,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 
     ROMlib_ConfigurationFolder = initpath("Configuration", "+/Configuration");
     ROMlib_SystemFolder = initpath("SystemFolder", "+/ExecutorVolume/System Folder");
-    ROMlib_PublicDirectoryMap = initpath("PublicDirectoryMap", "+/DirectoryMap");
-    ROMlib_PrivateDirectoryMap = initpath("PrivateDirectoryMap", "~/.ExecutorDirectoryMap");
-    ROMlib_DefaultFolder = initpath("DefaultFolder", "+/ExecutorVolume");
+    ROMlib_DirectoryMap = initpath("ExecutorDirectoryMap", "~/.ExecutorDirectoryMap");
     ROMlib_MacVolumes = initpath("MacVolumes", "+/exsystem.hfv;+"); // this is wrong: only first + is replaced
     ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");
     ROMlib_OffsetFile = initpath("OffsetFile", "+/offset_file");
@@ -630,26 +518,13 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 
     parse_offset_file();
 
-/*
- * NOTE: The following is a hack that will remain in place until we have
- *     a replacement for using the ndbm routines which apparently can't
- *     share files between machines of different endianness.
- */
-
-#if defined(LITTLEENDIAN)
-    ROMlib_PublicDirectoryMap += "-le";
-    ROMlib_PrivateDirectoryMap += "-le";
-#endif /* defined(LITTLEENDIAN) */
+#if !defined(LITTLEENDIAN)
+    ROMlib_DirectoryMap += "-be";
+#endif /* !defined(LITTLEENDIAN) */
 
     ROMlib_hfsinit();
-    ROMlib_automount(ROMlib_SystemFolder.c_str());
+    initLocalVol();
 
-#if 0
-    m = 0;
-    if (Ustat(ROMlib_DefaultFolder, &sbuf) == 0)
-	if ((sbuf.st_mode & S_IFMT) == S_IFREG)
-	    ROMlib_openharddisk(ROMlib_DefaultFolder, &m);
-#else
     m = 0;
     p = (char *)alloca(ROMlib_MacVolumes.size() + 1);
     strcpy(p, ROMlib_MacVolumes.c_str());
@@ -701,27 +576,20 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
         else
             p = 0;
     }
-#endif
 
-    ROMlib_automount(ROMlib_startdir);
-    ROMlib_automount(ROMlib_DefaultFolder.c_str());
-    if(is_unix_path(ROMlib_DefaultFolder.c_str())
-       && Ustat(ROMlib_DefaultFolder.c_str(), &sbuf) == 0)
-    {
-        LM(CurDirStore) = CL((LONGINT)ST_INO(sbuf));
-        vcbp = ROMlib_vcbbybiggestunixname(ROMlib_DefaultFolder.c_str());
-        LM(SFSaveDisk) = CW(-CW(vcbp->vcbVRefNum));
-    }
     if(is_unix_path(ROMlib_SystemFolder.c_str()))
     {
-        if(Ustat(ROMlib_SystemFolder.c_str(), &sbuf) < 0)
+        if(auto sysSpec = nativePathToFSSpec(fs::path(ROMlib_SystemFolder) / "System")) // FIXME: SYSMACNAME
+        {
+            cpb.hFileInfo.ioNamePtr = RM((StringPtr)SYSMACNAME);
+            cpb.hFileInfo.ioVRefNum = sysSpec->vRefNum;
+            cpb.hFileInfo.ioDirID = sysSpec->parID;
+        }
+        else
         {
             fprintf(stderr, "Couldn't find '%s'\n", ROMlib_SystemFolder.c_str());
             exit(1);
         }
-        cpb.hFileInfo.ioNamePtr = RM((StringPtr)SYSMACNAME);
-        cpb.hFileInfo.ioVRefNum = CWC(-1);
-        cpb.hFileInfo.ioDirID = CL((LONGINT)ST_INO(sbuf));
     }
     else
     {
@@ -748,86 +616,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
         fprintf(stderr, "Couldn't open System: '%s'\n", ROMlib_SystemFolder.c_str());
         exit(1);
     }
-#if defined(MSDOS) || defined(CYGWIN32)
-    {
-        static char drive_to_mount[4] = "x:/";
-
-#if defined(MSDOS)
-        if(ROMlib_dosdrives == ~0)
-        {
-            struct mntent *mp;
-            FILE *mnt_fp;
-
-            mnt_fp = setmntent("", "");
-            if(mnt_fp)
-            {
-                while((mp = getmntent(mnt_fp)))
-                {
-                    drive_to_mount[0] = mp->mnt_dir[0];
-                    {
-                        struct statfs sbuf;
-                        static char stat_test[] = "x:";
-
-                        stat_test[0] = mp->mnt_dir[0];
-                        if(statfs(stat_test, &sbuf) == 0)
-                        {
-                            uint32_t bit;
-
-                            bit = drive_char_to_bit(stat_test[0]);
-                            ROMlib_automount(drive_to_mount);
-                            check_for_executor_cd(drive_to_mount);
-                        }
-                    }
-                }
-                endmntent(mnt_fp);
-            }
-        }
-        else
-#endif
-        {
-            int i;
-
-            for(i = 0; i <= 31; ++i)
-            {
-                uint32_t bit;
-
-                bit = 1 << i;
-                if(ROMlib_dosdrives & bit)
-                {
-                    drive_to_mount[0] = 'a' + i;
-#if defined(CYGWIN32)
-                    drive_to_mount[0] += 'A' - 'a';
-                    if(win_access(drive_to_mount))
-                    {
-#endif
-                        ROMlib_automount(drive_to_mount);
-#if defined(MSDOS) || defined(CYGWIN32)
-                        check_for_executor_cd(drive_to_mount);
-#endif
-#if defined(CYGWIN32)
-                    }
-#endif
-                }
-            }
-        }
-    }
-#endif
-
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(ROMlib_dosdrives)
-#endif
-        futzwithdosdisks();
-
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(!e2_is_mounted() && cd_big_hfv)
-    {
-        LONGINT m;
-
-        ROMlib_openharddisk(cd_big_hfv, &m);
-        if(m)
-            cd_mounted_by_trickery_p = true;
-    }
-#endif
+    futzwithdosdisks();
 }
 
 fcbrec *

@@ -18,6 +18,7 @@
 #include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/dirtyrect.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -213,9 +214,9 @@ INTEGER Executor::C_PMgrVersion()
 static inline int
 rgb_delta(RGBColor *c1, RGBColor *c2)
 {
-    return MAX(MAX(ABS(CW(c1->red) - CW(c2->red)),
-                   ABS(CW(c1->green) - CW(c2->green))),
-               ABS(CW(c1->blue) - CW(c2->blue)));
+    return std::max(std::max(std::abs(CW(c1->red) - CW(c2->red)),
+                   std::abs(CW(c1->green) - CW(c2->green))),
+               std::abs(CW(c1->blue) - CW(c2->blue)));
 }
 
 int pm_allocate_animated_elt(ColorSpec *elt, int elt_i, ColorInfo *entry,
@@ -1353,8 +1354,8 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
     palette = STARH(dst_window_palette_h);
 
     /* Compute the number of entries in the table to modify. */
-    dst_length = MIN((CTAB_SIZE(src_ctab) + 1) - src_index, dst_length);
-    dst_length = MIN(CW(palette->pmEntries) - dst_entry, dst_length);
+    dst_length = std::min<INTEGER>((CTAB_SIZE(src_ctab) + 1) - src_index, dst_length);
+    dst_length = std::min<INTEGER>(CW(palette->pmEntries) - dst_entry, dst_length);
 
     src_cspec = &CTAB_TABLE(src_ctab)[src_index];
 

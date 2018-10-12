@@ -81,7 +81,6 @@
 #include <rsys/ctl.h>
 #include <rsys/dial.h>
 #include <rsys/emustubs.h>
-#include <rsys/filedouble.h>
 #include <rsys/file.h>
 #include <rsys/float.h>
 #include <rsys/font.h>
@@ -472,15 +471,6 @@ void Executor::check_structs(void)
 
     ///* rsys/dial.h */
     //check (icon_item_template_t, 18);
-
-    /* rsys/filedouble.h */
-    check(Single_descriptor, 12);
-    check(Single_header, 26);
-    check(Single_dates, 16);
-    check(Single_finfo, 32);
-    check(Single_attribs, 4);
-    check(defaulthead_t, 146);
-    check(defaultentries_t, 52);
 
     /* rsys/file.h */
     check(hfs_access_t, 16);

@@ -104,6 +104,7 @@ PASCAL_SUBTRAP(LRect, 0xA9E7, 0x004C, Pack0);
 extern BOOLEAN
 C_LSearch(Ptr dp,
           INTEGER dl, Ptr proc, GUEST<Cell> *cellp, ListHandle list);
+PASCAL_SUBTRAP(LSearch, 0xA9E7, 0x0054, Pack0);
 extern void C_LSize(INTEGER width,
                                 INTEGER height, ListHandle list);
 PASCAL_SUBTRAP(LSize, 0xA9E7, 0x0060, Pack0);

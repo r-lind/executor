@@ -622,8 +622,6 @@ NOTRAP_FUNCTION2(RstFLock);
 extern OSErr Rename(StringPtr filen, INTEGER vrn,
                     StringPtr newf);
 NOTRAP_FUNCTION2(Rename);
-extern unsigned char ROMlib_fromhex(unsigned char c);
-extern INTEGER ROMlib_UNIX7_to_Mac(char *name, INTEGER length);
 extern void FInitQueue(void);
 extern QHdrPtr GetFSQHdr(void);
 extern QHdrPtr GetVCBQHdr(void);
@@ -817,8 +815,8 @@ FILE_SUBTRAP(PBHCopyFile, HParmBlkPtr, 0xA260, 0x36, FSDispatch);
 extern OSErr PBHMoveRename(HParmBlkPtr pb, BOOLEAN a);
 FILE_SUBTRAP(PBHMoveRename, HParmBlkPtr, 0xA260, 0x37, FSDispatch);
 
-extern OSErr OpenDeny(HParmBlkPtr pb, BOOLEAN a);
-FILE_SUBTRAP(OpenDeny, HParmBlkPtr, 0xA260, 0x38, FSDispatch);
+extern OSErr PBHOpenDeny(HParmBlkPtr pb, BOOLEAN a);
+FILE_SUBTRAP(PBHOpenDeny, HParmBlkPtr, 0xA260, 0x38, FSDispatch);
 
 /* prototypes for the high level filesystem dispatch traps */
 DISPATCHER_TRAP(HighLevelFSDispatch, 0xAA52, D0<0xF>);

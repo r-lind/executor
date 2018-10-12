@@ -22,6 +22,7 @@
 #include "rsys/options.h"
 #include "rsys/toolutil.h"
 #include "rsys/gestalt.h"
+#include <algorithm>
 
 #if defined(LINUX) || defined(MACOSX)
 #include <sys/mman.h>
@@ -34,6 +35,10 @@
 
 #ifdef MACOSX_
 #include <mach/mach_error.h>
+#endif
+
+#if defined(LINUX)
+extern char _etext, _end; /* boundaries of data+bss sections, supplied by the linker */
 #endif
 
 namespace Executor
@@ -453,6 +458,59 @@ void ROMlib_InitZones()
 
 #if ERROR_SUPPORTED_P(ERROR_MEMORY_MANAGER_SLAM)
     error_set_enabled(ERROR_MEMORY_MANAGER_SLAM, old_debug_enabled_p);
+#endif
+}
+
+
+void InitMemory(void *thingOnStack)
+{
+    ROMlib_InitZones();
+
+#if SIZEOF_CHAR_P > 4
+    /*
+    On 64-bit platforms, there is no single ROMlib_offset, but rather
+    a four-element array. The high two bits of the 69K address are mapped
+    to an index in this array.
+    This way, we can access:
+        0 - the regular emulated memory
+        1 - video memory.
+        2 - local variables of executor's main thread
+        3 - executor's global variables (which includes syn68K callback addresses)
+
+    Block 0 is set up in ROMlib_InitZones.
+    Block 1 is set up later, when video memory is allocated.
+    Global variables are in block 3 so that we don't need to figure out
+    the exact boundaries for that address range.
+   */
+
+    // mark the slot as occupied until we explicitly set it later
+    ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 30);
+    ROMlib_sizes[1] = 0;
+
+    // assume an arbitrary maximum stack size of 16MB.
+    ROMlib_offsets[2] = (uintptr_t)thingOnStack - 16 * 1024 * 1024;
+    ROMlib_offsets[2] -= ROMlib_offsets[2] & 3;
+    ROMlib_offsets[2] -= (2UL << 30);
+    ROMlib_sizes[2] = 16 * 1024 * 1024 + 4096;  // 4KB of slop above the "thingOnStack"
+
+#if defined(LINUX)
+    ROMlib_offsets[3] = (uintptr_t)&_etext;
+    ROMlib_offsets[3] -= ROMlib_offsets[3] & 3;
+    ROMlib_offsets[3] -= (3UL << 30);
+    ROMlib_sizes[3] = &_end - &_etext;
+#else
+    /* Mac OS X doesn't have _etext and _end, and the functions in
+       mach/getsect.h don't give the correct results when ASLR is active.
+       Win32 might also have a way to get the addresses, or it might not.
+
+       So we just use the address of a static variable and 512MB in each direction.
+     */
+    static char staticThing[32];
+    ROMlib_offsets[3] = (uintptr_t)&staticThing - 0x20000000;
+    ROMlib_offsets[3] -= ROMlib_offsets[2] & 3;
+    ROMlib_offsets[3] -= (3UL << 30);
+    ROMlib_sizes[3] = 0x3FFFFFFF;
+#endif
 #endif
 }
 
@@ -1784,7 +1842,7 @@ int32_t _MaxBlock_flags(bool sys_p)
     LM(TheZone) = save_zone;
     SET_MEM_ERR(noErr);
     MM_SLAM("exit");
-    return MAX(total_free, max_free) - HDRSIZE;
+    return std::max(total_free, max_free) - HDRSIZE;
 }
 
 void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys_p)
@@ -1833,7 +1891,7 @@ void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys
 
     SET_MEM_ERR(noErr);
     *total_out = CL(total_free - HDRSIZE);
-    *contig_out = CL(MAX(this_contig, max_contig) - HDRSIZE);
+    *contig_out = CL(std::max(this_contig, max_contig) - HDRSIZE);
     MM_SLAM("exit");
 }
 

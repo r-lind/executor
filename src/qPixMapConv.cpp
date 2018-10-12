@@ -16,6 +16,7 @@
 #include "rsys/picture.h"
 #include "rsys/mman.h"
 #include "rsys/vdriver.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -342,7 +343,7 @@ sort_color_table(CTabHandle dsth, const CTabHandle srch)
     /* Claris Home Page has some PICTs with color tables that are too large,
      so we make sure we don't try to copy too much. */
 
-    src_ct_size = MIN(CW(src->ctSize), CW(dst->ctSize));
+    src_ct_size = std::min(CW(src->ctSize), CW(dst->ctSize));
 
     if(src->ctFlags & CTAB_GDEVICE_BIT_X)
     {

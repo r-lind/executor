@@ -13,7 +13,8 @@
 #include "rsys/glue.h"
 #include "mkvol/mkvol.h"
 #include "rsys/hfs.h"
-#include "rsys/blockinterrupts.h"
+#include "rsys/syncint.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -71,7 +72,7 @@ raw_read_write(func_t func, our_file_info_t *op, LONGINT *lengthp,
     OSErr retval;
     ParamBlockRec pbr;
 
-    check_virtual_interrupt();
+    syncint_check_interrupt();
     pbr.ioParam.ioVRefNum = CW(op->vref);
     pbr.ioParam.ioRefNum = CW(op->dref);
     pbr.ioParam.ioBuffer = RM((Ptr)buf);
@@ -195,7 +196,7 @@ writefunc(int magic, const void *buf, size_t buf_len)
         uint32_t n_bytes_left, n_to_copy;
 
         n_bytes_left = N_TRACK_BYTES - length;
-        n_to_copy = MIN(n_bytes_left, buf_len_remaining);
+        n_to_copy = std::min(n_bytes_left, buf_len_remaining);
         memcpy(track_bufp + length, bufp, n_to_copy);
         length += n_to_copy;
         if(length == N_TRACK_BYTES)

@@ -6,6 +6,7 @@
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
 #include "rsys/cquick.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -626,9 +627,9 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     ((void)(redr = red1 + red2,                \
             greenr = green1 + green2,          \
             bluer = blue1 + blue2,             \
-            redr = MIN(redr, op_red),          \
-            greenr = MIN(greenr, op_green),    \
-            bluer = MIN(bluer, op_blue)))
+            redr = std::min(redr, op_red),          \
+            greenr = std::min(greenr, op_green),    \
+            bluer = std::min(bluer, op_blue)))
 #define SUB_OVER_TRANSFORM(red1, green1, blue1, \
                            red2, green2, blue2, \
                            redr, greenr, bluer) \
@@ -641,21 +642,21 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     ((void)(redr = red1 - red2,                \
             greenr = green1 - green2,          \
             bluer = blue1 - blue2,             \
-            redr = MAX(redr, op_red),          \
-            greenr = MAX(greenr, op_green),    \
-            bluer = MAX(bluer, op_blue)))
+            redr = std::max(redr, op_red),          \
+            greenr = std::max(greenr, op_green),    \
+            bluer = std::max(bluer, op_blue)))
 #define AD_MAX_TRANSFORM(red1, green1, blue1, \
                          red2, green2, blue2, \
                          redr, greenr, bluer) \
-    ((void)(redr = MAX(red1, red2),           \
-            greenr = MAX(green1, green2),     \
-            bluer = MAX(blue1, blue2)))
+    ((void)(redr = std::max(red1, red2),           \
+            greenr = std::max(green1, green2),     \
+            bluer = std::max(blue1, blue2)))
 #define AD_MIN_TRANSFORM(red1, green1, blue1, \
                          red2, green2, blue2, \
                          redr, greenr, bluer) \
-    ((void)(redr = MIN(red1, red2),           \
-            greenr = MIN(green1, green2),     \
-            bluer = MIN(blue1, blue2)))
+    ((void)(redr = std::min(red1, red2),           \
+            greenr = std::min(green1, green2),     \
+            bluer = std::min(blue1, blue2)))
 #define BLEND_TRANSFORM(red1, green1, blue1,                                    \
                         red2, green2, blue2,                                    \
                         redr, greenr, bluer)                                    \

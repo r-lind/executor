@@ -17,7 +17,7 @@ guess_good_memory_settings(void)
 
     new_appl_size = physical_memory() / 4;
     if(new_appl_size > (unsigned long)ROMlib_applzone_size)
-        ROMlib_applzone_size = MIN((unsigned long)MAX_APPLZONE_SIZE,
+        ROMlib_applzone_size = std::min((unsigned long)MAX_APPLZONE_SIZE,
                                    new_appl_size);
 }
 

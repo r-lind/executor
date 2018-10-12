@@ -108,6 +108,13 @@ inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(const void* addr)
         return US_TO_SYN68K_CHECK0(addr);
 }
 
+template<typename T, typename... Args>
+inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(T (*addr)(Args...))
+{
+    return US_TO_SYN68K_CHECK0_CHECKNEG1((const void*) addr);
+}
+
+
 template<typename T, typename = void>
 struct GuestTypeTraits;
 
@@ -322,6 +329,8 @@ public:
 
 };
 
+//#define AUTOMATIC_CONVERSIONS
+
 template<typename TT>
 struct GuestWrapper : GuestWrapperBase<TT>
 {
@@ -342,10 +351,25 @@ struct GuestWrapper : GuestWrapperBase<TT>
         return *this;
     }
 
+#ifdef AUTOMATIC_CONVERSIONS
+    GuestWrapper(const TT &y)
+    {
+        this->set(y);
+    }
+
+    GuestWrapper<TT> &operator=(const TT &y)
+    {
+        this->set(y);
+        return *this;
+    }
+
+    operator TT() const { return this->get(); }
+#else
     GuestWrapper(std::nullptr_t)
     {
         this->raw(0);
     }
+#endif
 
     static GuestWrapper<TT> fromRaw(typename GuestWrapper<TT>::RawGuestType r)
     {
@@ -382,13 +406,6 @@ struct GuestWrapper : GuestWrapperBase<TT>
         this->raw_and(x.raw());
         return *this;
     }
-
-    // Map implicit operations to *raw* access.
-    // This should go away, and once we're sure it's gone,
-    // we can wrap it to proper converted access.
-    //GuestWrapper(TT x) { this->raw((typename GuestWrapper<TT>::RawGuestType)x); }
-    //GuestWrapper<TT>& operator=(TT y) { this->raw((typename GuestWrapper<TT>::RawGuestType)y); return *this; }
-    //operator TT() const { return (TT)this->raw(); }
 };
 
 template<typename TT>

@@ -20,6 +20,8 @@
 
 #include "rsys/alias.h"
 
+#include <algorithm>
+
 #define paramErr (-50)
 
 using namespace Executor;
@@ -93,6 +95,8 @@ get_sys_vref_and_dirid(INTEGER *sys_vrefp, LONGINT *sys_diridp)
 static OSErr
 try_to_find(INTEGER vref, const char *str, INTEGER *vrefp, LONGINT *diridp)
 {
+    return nsvErr;
+#if 0
     OSErr err;
     HVCB *vcbp;
 
@@ -132,6 +136,7 @@ try_to_find(INTEGER vref, const char *str, INTEGER *vrefp, LONGINT *diridp)
     }
     warning_trace_info("err = %d", err);
     return err;
+#endif
 }
 
 static OSErr
@@ -218,32 +223,6 @@ get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
         "c:/"
 #endif
     };
-
-    {
-        static bool been_here_p = false;
-
-        if(!been_here_p)
-        {
-            int j;
-
-#if defined(CYGWIN32)
-            guesses[0] = win_temp();
-#endif
-
-            for(j = 0; j < (int)NELEM(guesses); ++j)
-            {
-                char *p;
-
-                if(guesses[j])
-                {
-                    p = (char *)alloca(strlen(guesses[j]) + 1);
-                    strcpy(p, guesses[j]);
-                    ROMlib_automount(p);
-                }
-            }
-            been_here_p = true;
-        }
-    }
 
     retval = look_for_volume("tmp:", tmp_vrefp, tmp_diridp);
 
@@ -492,7 +471,7 @@ parse2 (AliasHandle ah, const void *addrs[], int count)
 		
       headp = (alias_head_t *) STARH (ah);
       partp = (INTEGER *) (&headp[1]);
-      ep = (INTEGER *) ((char *) headp + MIN (size, CW (headp->length)));
+      ep = (INTEGER *) ((char *) headp + std::min(size, CW (headp->length)));
       memset (addrs, 0, count * sizeof addrs[0]);
       for (; partp < ep && *partp != CWC (-1);
 	   partp = (INTEGER *) ((char *) partp + EVENUP (4 + CW (partp[1]))))
@@ -582,7 +561,7 @@ init_tail(alias_tail_t *tailp, Str32 zoneName, Str31 serverName,
     {
         int name_len;
 
-        name_len = MIN(GetHandleSize(h), 31);
+        name_len = std::min(GetHandleSize(h), 31);
         memcpy(tailp->network_identity_owner_name, STARH(h), name_len);
     }
     tailp->weird_info[0] = CWC(0x00A8);
@@ -752,7 +731,7 @@ OSErr Executor::C_NewAliasMinimal(FSSpecPtr fsp, GUEST<AliasHandle> *ahp)
             {
                 int len;
 
-                len = MIN(GetHandleSize(h), 32);
+                len = std::min(GetHandleSize(h), 32);
                 memcpy(serverName, STARH(h), len);
             }
             init_tail(&tail, (StringPtr) "\1*", serverName, volName);

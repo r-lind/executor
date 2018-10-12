@@ -1227,12 +1227,12 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
                        &geom_width, &geom_height);
     }
     if(!_max_width)
-        _max_width = MAX(VDRIVER_DEFAULT_SCREEN_WIDTH,
-                         (MAX(geom_width, flag_width)));
+        _max_width = std::max<int>(VDRIVER_DEFAULT_SCREEN_WIDTH,
+                         (std::max<int>(geom_width, flag_width)));
     max_width = _max_width;
     if(!_max_height)
-        _max_height = MAX(VDRIVER_DEFAULT_SCREEN_HEIGHT,
-                          MAX(geom_height, flag_height));
+        _max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT,
+                          std::max<int>(geom_height, flag_height));
     max_height = _max_height;
     if(!_max_bpp)
         _max_bpp = 32;
@@ -1520,7 +1520,7 @@ void alloc_x_window(int width, int height, int bpp, bool grayscale_p)
     /* #### allow command line options to select {16, 32}bpp modes, but
      don't make them the default since they still have problems */
     if(bpp == 0)
-        bpp = MIN(max_bpp, 8);
+        bpp = std::min(max_bpp, 8);
     else if(bpp > max_bpp)
         bpp = max_bpp;
 
@@ -2230,7 +2230,7 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
     {
         bpp = vdriver_bpp;
         if(bpp == 0)
-            bpp = MIN(8, vdriver_max_bpp);
+            bpp = std::min(8, vdriver_max_bpp);
     }
 
     if(!vdriver_acceptable_mode_p(width, height, bpp, grayscale_p,

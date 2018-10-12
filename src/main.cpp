@@ -50,7 +50,6 @@
 #include "rsys/segment.h"
 #include "rsys/version.h"
 #include "rsys/m68kint.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/rgbutil.h"
 #include "rsys/refresh.h"
 #include "rsys/executor.h"
@@ -63,12 +62,10 @@
 #include "rsys/parseopt.h"
 #include "rsys/print.h"
 #include "rsys/memsize.h"
-#include "rsys/stdfile.h"
 #include "rsys/autorefresh.h"
 #include "rsys/sounddriver.h"
 #include "rsys/dcache.h"
 #include "rsys/system_error.h"
-#include "rsys/filedouble.h"
 #include "rsys/option.h"
 #include "rsys/emustubs.h"
 #include "rsys/float.h"
@@ -115,8 +112,6 @@ static void setstartdir(char *);
 using namespace Executor;
 using namespace std;
 
-/* optional resolution other than 72dpix72dpi for printing */
-INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
 
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
@@ -257,12 +252,6 @@ const option_vec Executor::common_opts = {
 specify that executor should run in grayscale mode even if it is \
 capable of color.",
       opt_no_arg, "" },
-    { "netatalk", "use netatalk naming conventions for AppleDouble files",
-      opt_no_arg, "" },
-    { "afpd", "use afpd conventions for AppleDouble files (implies -netatalk)",
-      opt_no_arg, "" },
-    { "rsrc", "use native resource forks on Mac OS X",
-      opt_no_arg, "" },
 
     { "cities", "Don't use Helvetica for Geneva, Courier for Monaco and Times "
                 "for New York when generating PostScript",
@@ -362,12 +351,6 @@ check_arg(string argname, int *arg, int min, int max)
     }
 }
 
-char Executor::ROMlib_startdir[MAXPATHLEN];
-INTEGER ROMlib_startdirlen;
-#if defined(WIN32)
-char Executor::ROMlib_start_drive;
-#endif
-std::string Executor::ROMlib_appname;
 
 #if !defined(LINUX)
 #define SHELL "/bin/sh"
@@ -440,39 +423,22 @@ static void setstartdir(char *argv0)
     if(suffix)
         *suffix = 0;
     getcwd(savedir, sizeof savedir);
-    Uchdir(lookhere);
+    chdir(lookhere);
     if(suffix)
         *suffix = '/';
     getcwd(ROMlib_startdir, sizeof ROMlib_startdir);
-    Uchdir(savedir);
-    ROMlib_startdirlen = strlen(ROMlib_startdir) + 1;
+    chdir(savedir);
 #else /* defined(MSDOS) || defined(CYGWIN32) */
 
     if(argv0[1] == ':')
     {
         char *lastslash;
-#if 1
-        static char cd_to[] = "C:/";
 
         ROMlib_start_drive = argv0[0];
-        cd_to[0] = argv0[0];
-        Uchdir(cd_to);
-#if 0
-	strcpy(ROMlib_startdir, argv0 + 2);
-#else
-        /* We now include the drive letter in with ROMlib_startdir. */
-
         strcpy(ROMlib_startdir, argv0);
-#endif
-
-#else
-        strcpy(ROMlib_startdir, argv0);
-#endif
         lastslash = strrchr(ROMlib_startdir, '/');
-#if defined(WIN32)
         if(!lastslash)
             lastslash = strrchr(ROMlib_startdir, '\\');
-#endif
         if(lastslash)
             *lastslash = 0;
     }
@@ -481,7 +447,6 @@ static void setstartdir(char *argv0)
         ROMlib_start_drive = 0;
         strcpy(ROMlib_startdir, ".");
     }
-    ROMlib_startdirlen = strlen(ROMlib_startdir);
 #endif /* defined(MSDOS) */
 }
 
@@ -696,9 +661,6 @@ construct_command_line_string(int argc, char **argv)
 #define READ_IMPLIES_EXEC 0x0400000
 #endif
 
-#if defined(LINUX)
-extern char _etext, _end; /* boundaries of data+bss sections, supplied by the linker */
-#endif
 
 int main(int argc, char **argv)
 {
@@ -707,7 +669,6 @@ int main(int argc, char **argv)
 
     INTEGER i;
     uint32_t l;
-    virtual_int_state_t int_state;
     static void (*reg_funcs[])(void) = {
         vdriver_opt_register,
         NULL,
@@ -862,15 +823,6 @@ int main(int argc, char **argv)
 
     use_native_code_p = !opt_val(common_db, "notnative", NULL);
 
-    if(opt_val(common_db, "netatalk", NULL))
-        setup_resfork_format(ResForkFormat::netatalk);
-    else if(opt_val(common_db, "afpd", NULL))
-        setup_resfork_format(ResForkFormat::afpd);
-    else if(opt_val(common_db, "rsrc", NULL))
-        setup_resfork_format(ResForkFormat::native);
-    else
-        setup_resfork_format(ResForkFormat::standard);
-
     substitute_fonts_p = !opt_val(common_db, "cities", NULL);
 
 #if defined(CYGWIN32)
@@ -1024,54 +976,7 @@ int main(int argc, char **argv)
         exit(-10);
     }
 
-    ROMlib_InitZones();
-
-#if SIZEOF_CHAR_P > 4
-    /*
-    On 64-bit platforms, there is no single ROMlib_offset, but rather
-    a four-element array. The high two bits of the 69K address are mapped
-    to an index in this array.
-    This way, we can access:
-        0 - the regular emulated memory
-        1 - video memory.
-        2 - local variables of executor's main thread
-        3 - executor's global variables (which includes syn68K callback addresses)
-
-    Block 0 is set up in ROMlib_InitZones.
-    Block 1 is set up later, when video memory is allocated.
-    Global variables are in block 3 so that we don't need to figure out
-    the exact boundaries for that address range.
-   */
-
-    // mark the slot as occupied until we explicitly set it later
-    ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 30);
-    ROMlib_sizes[1] = 0;
-
-    // assume an arbitrary maximum stack size of 16MB.
-    ROMlib_offsets[2] = (uintptr_t)&thingOnStack - 16 * 1024 * 1024;
-    ROMlib_offsets[2] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[2] -= (2UL << 30);
-    ROMlib_sizes[2] = 16 * 1024 * 1024;
-
-#if defined(LINUX)
-    ROMlib_offsets[3] = (uintptr_t)&_etext;
-    ROMlib_offsets[3] -= ROMlib_offsets[3] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = &_end - &_etext;
-#else
-    /* Mac OS X doesn't have _etext and _end, and the functions in
-       mach/getsect.h don't give the correct results when ASLR is active.
-       Win32 might also have a way to get the addresses, or it might not.
-
-       So we just use the address of a static variable and 512MB in each direction.
-     */
-    static char staticThing[32];
-    ROMlib_offsets[3] = (uintptr_t)&staticThing - 0x20000000;
-    ROMlib_offsets[3] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = 0x3FFFFFFF;
-#endif
-#endif
+    InitMemory(&thingOnStack);
 
     {
         uint32_t save_a7;
@@ -1085,9 +990,6 @@ int main(int argc, char **argv)
 
         EM_A7 = save_a7;
     }
-
-    /* Block virtual interrupts, until the system is fully set up. */
-    int_state = block_virtual_ints();
 
     if(graphics_p && !vdriver_init(0, 0, 0, false, &argc, argv))
     {
@@ -1119,12 +1021,12 @@ int main(int argc, char **argv)
 
     memset(&LM(EventQueue), 0, sizeof(LM(EventQueue)));
     memset(&LM(VBLQueue), 0, sizeof(LM(VBLQueue)));
-    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
-    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
-    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
+    //memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));     // inited in ROMlib_fileinit
+    //memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));     // inited in ROMlib_fileinit
+    //memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));       // inited in ROMlib_fileinit
     LM(TESysJust) = 0;
     LM(BootDrive) = 0;
-    LM(DefVCBPtr) = 0;
+    //LM(DefVCBPtr) = 0;  // inited in ROMlib_fileinit
     LM(CurMap) = 0;
     LM(TopMapHndl) = 0;
     LM(DSAlertTab) = 0;
@@ -1181,7 +1083,7 @@ int main(int argc, char **argv)
     LM(MBSaveLoc) = 0;
 
     LM(SysVersion) = CW(system_version);
-    LM(FSFCBLen) = CWC(94);
+    //LM(FSFCBLen) = CWC(94);   // inited in ROMlib_fileinit
     LM(ScrapState) = CWC(-1);
 
     LM(TheZone) = LM(SysZone);
@@ -1351,8 +1253,6 @@ int main(int argc, char **argv)
     sound_init();
 
     set_refresh_rate(ROMlib_refresh);
-
-    restore_virtual_ints(int_state);
 
     LM(WWExist) = LM(QDExist) = EXIST_NO;
 

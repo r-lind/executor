@@ -11,6 +11,7 @@
 #include "rsys/list.h"
 #include "rsys/hook.h"
 #include "rsys/functions.impl.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -199,10 +200,10 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
                 MoveControl(cv, newright, Hx(list, rView.top) - 1);
                 SizeControl(cv, 16, newbottom - Hx(list, rView.top) + 2);
             }
-            r.top = CW(MIN(oldbottom, newbottom));
-            r.bottom = CW(MAX(oldbottom, newbottom));
+            r.top = CW(std::min(oldbottom, newbottom));
+            r.bottom = CW(std::max(oldbottom, newbottom));
             r.left = CW(Hx(list, rView.left) - 1);
-            r.right = CW(MAX(oldright, newright));
+            r.right = CW(std::max(oldright, newright));
             if(ch)
                 r.bottom = CW(CW(r.bottom) + (16));
             RectRgn(rectrgn, &r);
@@ -217,10 +218,10 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
             if(cv)
                 MoveControl(cv, newright, Hx(list, rView.top) - 1);
         }
-        r.left = CW(MIN(oldright, newright));
-        r.right = CW(MAX(oldright, newright));
+        r.left = CW(std::min(oldright, newright));
+        r.right = CW(std::max(oldright, newright));
         r.top = CW(Hx(list, rView.top) - 1);
-        r.bottom = CW(MAX(oldbottom, newbottom));
+        r.bottom = CW(std::max(oldbottom, newbottom));
         if(cv)
             r.right = CW(CW(r.right) + (16));
         RectRgn(rectrgn, &r);
@@ -234,10 +235,10 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
         {
             SizeControl(cv, 16, newbottom - Hx(list, rView.top) + 2);
         }
-        r.top = CW(MIN(oldbottom, newbottom));
-        r.bottom = CW(MAX(oldbottom, newbottom));
+        r.top = CW(std::min(oldbottom, newbottom));
+        r.bottom = CW(std::max(oldbottom, newbottom));
         r.left = CW(Hx(list, rView.left) - 1);
-        r.right = CW(MAX(oldright, newright));
+        r.right = CW(std::max(oldright, newright));
         if(ch)
             r.bottom = CW(CW(r.bottom) + (16));
         RectRgn(rectrgn, &r);

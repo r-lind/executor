@@ -27,6 +27,7 @@ typedef Byte Str32[33];
 typedef Byte Str63[64];
 typedef Byte Str255[256];
 typedef Byte *StringPtr;
+typedef const unsigned char *ConstStringPtr;
 
 typedef GUEST<StringPtr> *StringHandle;
 
@@ -48,6 +49,14 @@ typedef LONGINT Size;
 typedef INTEGER OSErr;
 typedef LONGINT OSType;
 typedef LONGINT ResType;
+
+class OSErrorException : public std::runtime_error
+{
+public:
+    OSErr code;
+
+    OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
+};
 
 struct QHdr
 {

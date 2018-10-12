@@ -19,13 +19,11 @@
 #include "rsys/glue.h"
 #include "rsys/notmac.h"
 #include "rsys/mman.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/trapglue.h"
 #include "rsys/osutil.h"
 #include "rsys/host.h"
 #include "rsys/time.h"
 #include "rsys/toolevent.h"
-#include "rsys/stdfile.h"
 #include "rsys/syncint.h"
 #include "rsys/emustubs.h"
 #include "rsys/cpu.h"
@@ -207,11 +205,11 @@ static unsigned char order[256] = {
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
 };
 
-LONGINT Executor::ROMlib_RelString(unsigned char *s1, unsigned char *s2,
+LONGINT Executor::ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
                                    BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0)
 {
     INTEGER n1, n2;
-    unsigned char *s, *t;
+    const unsigned char *s, *t;
     unsigned char c1, c2;
 
     s = s1;
@@ -789,9 +787,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
 void Executor::Enqueue(QElemPtr e, QHdrPtr h)
 {
     GUEST<QElemPtr> *qpp;
-    virtual_int_state_t block;
 
-    block = block_virtual_ints();
     for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && MR(*qpp) != e;
         qpp = (GUEST<QElemPtr> *)MR(*qpp))
         ;
@@ -804,17 +800,14 @@ void Executor::Enqueue(QElemPtr e, QHdrPtr h)
             h->qHead = RM(e);
         h->qTail = RM(e);
     }
-    restore_virtual_ints(block);
 }
 
 OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
 {
-    GUEST<QElemPtr> *qpp;
+    GUEST<QElemPtr> *qpp;       // ### HORRIBLE REINTERPRET-CASTING CODE OBFUSCATION....
     OSErr retval;
-    virtual_int_state_t block;
 
     retval = qErr;
-    block = block_virtual_ints();
     for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && MR(*qpp) != e;
         qpp = (GUEST<QElemPtr> *)MR(*qpp))
         ;
@@ -822,10 +815,9 @@ OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
     {
         *qpp = e->evQElem.qLink;
         if(MR(h->qTail) == e)
-            h->qTail = qpp == (GUEST<QElemPtr> *)&h->qHead ? nullptr : RM((QElemPtr)qpp);
+            h->qTail = RM( (qpp == (GUEST<QElemPtr> *)&h->qHead) ? nullptr : (QElemPtr)qpp );
         retval = noErr;
     }
-    restore_virtual_ints(block);
     return retval;
 }
 
@@ -855,8 +847,7 @@ void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
         PrimeTime((QElemPtr)&tm, n * 1000 / 60);
         while(!shouldbeawake)
         {
-            syncint_wait();
-            check_virtual_interrupt();
+            syncint_wait_interrupt();
         }
         RmvTime((QElemPtr)&tm);
     }
@@ -988,7 +979,7 @@ LONGINT Executor::C_GetToolTrapAddress(INTEGER trap_no)
     d0 = trap_no;
     ROMlib_GetTrapAddress_helper(&d0, 0xA746, &a0);
     retval = (LONGINT)a0;
-    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    warning_trace_info("trap = 0x%x, retval = 0x%08x", trap_no, retval);
     return retval;
 }
 
@@ -1000,7 +991,7 @@ LONGINT Executor::C_GetOSTrapAddress(INTEGER trap_no)
     d0 = trap_no;
     ROMlib_GetTrapAddress_helper(&d0, 0xA346, &a0);
     retval = (LONGINT)a0;
-    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    warning_trace_info("trap = 0x%x, retval = 0x%08x", trap_no, retval);
     return retval;
 }
 

@@ -38,7 +38,7 @@ sigio_multiplex_hdlr(int signo)
         int fd;
 
         fd = sigio_hdlrs[i].fd;
-        max_fd = MAX(max_fd, fd);
+        max_fd = std::max(max_fd, fd);
         FD_SET(fd, &read_set);
     }
 

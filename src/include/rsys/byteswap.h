@@ -194,6 +194,8 @@ public:
     operator GUEST<T>*() { return &guest; }
     operator GUEST<T>&() { return guest; }
 
+    GUEST<T>* operator&() { return &guest; }
+
     ~GuestRef()
     {
         native = MR(guest);

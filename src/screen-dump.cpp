@@ -17,7 +17,7 @@
 #include "rsys/tempalloc.h"
 #include "rsys/prefs.h"
 #include "rsys/uniquefile.h"
-#include "rsys/notmac.h"
+#include "rsys/file.h"
 #include "rsys/vdriver.h"
 #include "rsys/screen-dump.h"
 

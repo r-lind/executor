@@ -129,149 +129,6 @@ OSErr Executor::C_FSMakeFSSpec(int16_t vRefNum, int32_t dir_id,
     return retval;
 }
 
-#if 0
-
-typedef struct save_fcb_info_str
-{
-  filecontrolblock fcb;
-  HVCB *vptr;
-  struct save_fcb_info_str *next;
-  INTEGER refnum; /* zero if this is just info gathered for switching
-		     purposes */
-}
-save_fcb_info_t;
-
-static LONGINT
-get_file_num (FSSpecPtr fsp)
-{
-  return 0; /* TODO */
-}
-
-/*
- * get_fcb_info squirrels away all the FCB entries that match a particular
- * file.  It then alters them so that we can open files that are already
- * open without trouble.
- */
-
-static save_fcb_info_t *
-get_fcb_info (FSSpecPtr fsp)
-{
-  filecontrolblock *fcbp, *efcbp;
-  INTEGER total_length, fcb_size;
-  save_fcb_info_t *retval;
-  char *fcbsptr;
-  INTEGER swapped_vrefnum;
-  LONGINT swapped_fnum;
-
-
-  retval = 0;
-
-  swapped_vrefnum = fsp->vRefNum;
-  swapped_fnum = CL (get_file_num (fsp));
-
-  fcbsptr = (char *) CL (LM(FCBSPtr));
-  total_length = CW(*(short *)fcbsptr);
-  fcbp = (filecontrolblock *) ((short *)CL(LM(FCBSPtr))+1);
-  efcbp = (filecontrolblock *) ((char *)CL(LM(FCBSPtr)) + total_length);
-  fcb_size = CW (LM(FSFCBLen));
-  for (;fcbp < efcbp; fcbp = (filecontrolblock *) ((char *)fcbp + fcb_size))
-    {
-      HVCB *vptr;
-
-      vptr = CL (fcbp->fcbVPtr);
-      if (vptr && vptr->vcbVRefNum == swapped_vrefnum
-	  && fcbp->fcbFlNum == swapped_fnum)
-	{
-	  save_fcb_info_t *newp;
-
-	  newp = malloc (sizeof *newp);
-	  newp->refnum = (char *) fcbp - fcbsptr;
-	  newp->fcb = *fcbp;
-	  newp->next = retval;
-	  newp->vptr = fcbp->fcbVPtr;
-	  fcbp->fcbVPtr = 0; /* hide this open file */
-	  retval = newp;
-	}
-    }
-  return retval;
-}
-
-static OSErr
-exchange_forks (FSSpecPtr src, FSSpecPtr dst, forktype type)
-{
-  /* TODO */
-  return paramErr;
-}
-
-static void
-exchange_fcb (const save_fcb_info_t *dstp, const save_fcb_info_t *srcp)
-{
-  /* TODO */
-}
-
-/*
- * make_fcb_info looks up the info that we need in order to swap fcb info
- * when we only have information about one side
- */
-
-static save_fcb_info_t *
-make_fcb_info (FSSpecPtr fsp)
-{
-  save_fcb_info_t *retval;
-
-  retval = malloc (sizeof *retval);
-  retval->next = 0;
-  retval->vptr = 0; /* not needed */
-  retval->refnum = 0; /* means we're not associated with a real FCB */
-  return retval;
-}
-
-static void
-exchange_fcbs (FSSpecPtr fs1, const save_fcb_info_t *savefcbp1,
-	       FSSpecPtr fs2, const save_fcb_info_t *savefcbp2)
-{
-  if (savefcbp1 || savefcbp2)
-    {
-      if (!savefcbp1)
-	savefcbp1 = make_fcb_info (fs1);
-      else if (!savefcbp2)
-	savefcbp2 = make_fcb_info (fs2);
-    }
-  exchange_fcb (savefcbp1, savefcbp2);
-  exchange_fcb (savefcbp2, savefcbp1);
-}
-
-static void
-restore_fcb (const save_fcb_info_t *infop)
-{
-  char *fcbsptr;
-
-  fcbsptr = (char *) CL (LM(FCBSPtr));
-  if (infop)
-    {
-      if (infop->refnum)
-	{
-	  filecontrolblock *fcbp;
-
-	  fcbp = (filecontrolblock *) (fcbsptr + infop->refnum);
-	  fcbp->fcbVPtr = infop->vptr;
-	}
-      restore_fcb (infop->next);
-    }
-}
-
-static void
-release_fcb_info (save_fcb_info_t *infop)
-{
-  if (infop)
-    {
-      release_fcb_info (infop->next);
-      free (infop);
-    }
-}
-
-#endif
-
 /*
  * Part of ugly PAUP-specific hack below
  */
@@ -299,35 +156,6 @@ create_temp_name(Str63 name, int i)
 
 OSErr Executor::C_FSpExchangeFiles(FSSpecPtr src, FSSpecPtr dst)
 {
-#if 0
-  save_fcb_info_t *src_fcb_info, *dst_fcb_info;
-  OSErr retval;
-
-  src_fcb_info = get_fcb_info (src);
-  dst_fcb_info = get_fcb_info (dst);
-
-  retval = exchange_forks (src, dst, datafork);
-  if (retval == noErr)
-    {
-      retval = exchange_forks (src, dst, resourcefork);
-      if (retval != noErr)
-	exchange_forks (src, dst, datafork); /* try to put things back
-						together */
-    }
-
-  if (retval == noErr)
-    exchange_fcbs (src, src_fcb_info, dst, dst_fcb_info);
-  else
-    {
-      restore_fcb (src_fcb_info);
-      restore_fcb (dst_fcb_info);
-    }
-
-  release_fcb_info (src_fcb_info);
-  release_fcb_info (dst_fcb_info);
-
-  return retval;
-#else
     OSErr retval;
 
     warning_unimplemented("poorly implemented");
@@ -365,7 +193,6 @@ OSErr Executor::C_FSpExchangeFiles(FSSpecPtr src, FSSpecPtr dst)
         }
     }
     return retval;
-#endif
 }
 
 typedef OSErr (*open_procp)(HParmBlkPtr pb, BOOLEAN sync);
@@ -386,7 +213,6 @@ open_helper(FSSpecPtr spec, SignedByte perms, GUEST<int16_t> *refoutp,
         perms = fsRdWrPerm;
     }
     hpb.ioParam.ioPermssn = perms;
-    warning_unimplemented("poorly implemented ... will try to open drivers");
     retval = procp(&hpb, false);
     if(retval == noErr)
         *refoutp = hpb.ioParam.ioRefNum;
@@ -396,7 +222,7 @@ open_helper(FSSpecPtr spec, SignedByte perms, GUEST<int16_t> *refoutp,
 OSErr Executor::C_FSpOpenDF(FSSpecPtr spec, SignedByte perms,
                             GUEST<int16_t> *refoutp)
 {
-    return open_helper(spec, perms, refoutp, PBHOpen);
+    return open_helper(spec, perms, refoutp, PBHOpenDF);
 }
 
 OSErr Executor::C_FSpOpenRF(FSSpecPtr spec, SignedByte perms,
@@ -629,5 +455,444 @@ Executor::HOpen(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
     retval = PBHOpen(&hpb, false);
     if(retval == noErr)
         *refp = hpb.ioParam.ioRefNum;
+    return retval;
+}
+
+
+OSErr Executor::GetVInfo(INTEGER drv, StringPtr voln, GUEST<INTEGER> *vrn,
+                         GUEST<LONGINT> *freeb) /* IMIV-107 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.volumeParam.ioVolIndex = 0;
+    pbr.volumeParam.ioVRefNum = CW(drv);
+    pbr.volumeParam.ioNamePtr = RM(voln);
+    temp = PBGetVInfo(&pbr, 0);
+    *vrn = pbr.volumeParam.ioVRefNum;
+    *freeb = CL(Cx(pbr.volumeParam.ioVFrBlk) * Cx(pbr.volumeParam.ioVAlBlkSiz));
+    return (temp);
+}
+
+OSErr Executor::GetVol(StringPtr voln, GUEST<INTEGER> *vrn) /* IMIV-107 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.volumeParam.ioNamePtr = RM(voln);
+    temp = PBGetVol(&pbr, 0);
+    *vrn = pbr.volumeParam.ioVRefNum;
+    return (temp);
+}
+
+OSErr Executor::SetVol(StringPtr voln, INTEGER vrn) /* IMIV-107 */
+{
+    ParamBlockRec pbr;
+
+    pbr.volumeParam.ioNamePtr = RM(voln);
+    pbr.volumeParam.ioVRefNum = CW(vrn);
+    return (PBSetVol(&pbr, 0));
+}
+
+OSErr Executor::FlushVol(StringPtr voln, INTEGER vrn) /* IMIV-108 */
+{
+    ParamBlockRec pbr;
+
+    pbr.ioParam.ioNamePtr = RM(voln);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    return (PBFlushVol(&pbr, 0));
+}
+
+OSErr Executor::UnmountVol(StringPtr voln, INTEGER vrn) /* IMIV-108 */
+{
+    ParamBlockRec pbr;
+
+    pbr.ioParam.ioNamePtr = RM(voln);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    return (PBUnmountVol(&pbr));
+}
+
+OSErr Executor::Eject(StringPtr voln, INTEGER vrn) /* IMIV-108 */
+{
+    ParamBlockRec pbr;
+
+    pbr.ioParam.ioNamePtr = RM(voln);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    return (PBEject(&pbr));
+}
+
+
+OSErr Executor::FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioNamePtr = RM(filen);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    pbr.ioParam.ioVersNum = 0;
+    pbr.ioParam.ioPermssn = fsCurPerm;
+    pbr.ioParam.ioMisc = 0;
+    temp = PBOpen(&pbr, 0);
+    *rn = pbr.ioParam.ioRefNum;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr Executor::OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioNamePtr = RM(filen);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    pbr.ioParam.ioVersNum = 0;
+    pbr.ioParam.ioPermssn = fsCurPerm;
+    pbr.ioParam.ioMisc = 0;
+    temp = PBOpenRF(&pbr, 0);
+    *rn = pbr.ioParam.ioRefNum;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr Executor::OpenDF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioNamePtr = RM(filen);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    pbr.ioParam.ioVersNum = 0;
+    pbr.ioParam.ioPermssn = fsCurPerm;
+    pbr.ioParam.ioMisc = 0;
+    temp = PBOpenDF(&pbr, 0);
+    *rn = pbr.ioParam.ioRefNum;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+
+OSErr Executor::FSRead(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp) /* IMIV-109 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioRefNum = CW(rn);
+    pbr.ioParam.ioBuffer = RM(buffp);
+    pbr.ioParam.ioReqCount = *count;
+    pbr.ioParam.ioPosMode = CWC(fsAtMark);
+    temp = PBRead(&pbr, 0);
+    *count = pbr.ioParam.ioActCount;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr
+Executor::FSReadAll(INTEGER rn, GUEST<LONGINT> *countp, Ptr buffp)
+{
+    OSErr retval;
+
+    GUEST<LONGINT> orig_count = *countp;
+    retval = FSRead(rn, countp, buffp);
+    if(retval == noErr && *countp != orig_count)
+        retval = eofErr;
+    return retval;
+}
+
+OSErr Executor::FSWrite(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp) /* IMIV-110 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioRefNum = CW(rn);
+    pbr.ioParam.ioBuffer = RM(buffp);
+    pbr.ioParam.ioReqCount = *count;
+    pbr.ioParam.ioPosMode = CWC(fsAtMark);
+    temp = PBWrite(&pbr, 0);
+    *count = pbr.ioParam.ioActCount;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr
+Executor::FSWriteAll(INTEGER rn, GUEST<LONGINT> *countp, Ptr buffp)
+{
+    GUEST<LONGINT> orig_count;
+    OSErr retval;
+
+    orig_count = *countp;
+    retval = FSWrite(rn, countp, buffp);
+    if(retval == noErr && *countp != orig_count)
+        retval = ioErr;
+    return retval;
+}
+
+OSErr Executor::GetFPos(INTEGER rn, GUEST<LONGINT> *filep) /* IMIV-110 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioRefNum = CW(rn);
+    temp = PBGetFPos(&pbr, 0);
+    *filep = pbr.ioParam.ioPosOffset;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr Executor::SetFPos(INTEGER rn, INTEGER posmode,
+                        LONGINT possoff) /* IMIV-110 */
+{
+    ParamBlockRec pbr;
+    OSErr err;
+
+    pbr.ioParam.ioRefNum = CW(rn);
+    pbr.ioParam.ioPosMode = CW(posmode);
+    pbr.ioParam.ioPosOffset = Cx(possoff);
+    err = PBSetFPos(&pbr, 0);
+    fs_err_hook(err);
+    return err;
+}
+
+OSErr Executor::GetEOF(INTEGER rn, GUEST<LONGINT> *eof) /* IMIV-111 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioRefNum = Cx(rn);
+    temp = PBGetEOF(&pbr, 0);
+    *eof = pbr.ioParam.ioMisc;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr Executor::SetEOF(INTEGER rn, LONGINT eof) /* IMIV-111 */
+{
+    ParamBlockRec pbr;
+    OSErr err;
+
+    pbr.ioParam.ioRefNum = Cx(rn);
+    pbr.ioParam.ioMisc = Cx(eof);
+    err = PBSetEOF(&pbr, 0);
+    fs_err_hook(err);
+    return (err);
+}
+
+OSErr Executor::Allocate(INTEGER rn, GUEST<LONGINT> *count) /* IMIV-112 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioRefNum = Cx(rn);
+    pbr.ioParam.ioReqCount = *count;
+    temp = PBAllocate(&pbr, 0);
+    *count = pbr.ioParam.ioActCount;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr Executor::AllocContig(INTEGER rn, GUEST<LONGINT> *count)
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.ioParam.ioRefNum = Cx(rn);
+    pbr.ioParam.ioReqCount = *count;
+    temp = PBAllocContig(&pbr, 0);
+    *count = pbr.ioParam.ioActCount;
+    fs_err_hook(temp);
+    return (temp);
+}
+
+OSErr Executor::FSClose(INTEGER rn) /* IMIV-112 */
+{
+    ParamBlockRec pbr;
+    OSErr err;
+
+    pbr.ioParam.ioRefNum = Cx(rn);
+    err = PBClose(&pbr, 0);
+    fs_err_hook(err);
+    return err;
+}
+
+
+OSErr Executor::GetFInfo(StringPtr filen, INTEGER vrn,
+                         FInfo *fndrinfo) /* IMIV-113 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+
+    pbr.fileParam.ioNamePtr = RM(filen);
+    pbr.fileParam.ioVRefNum = CW(vrn);
+    pbr.fileParam.ioFVersNum = 0;
+    pbr.fileParam.ioFDirIndex = CWC(0);
+    temp = PBGetFInfo(&pbr, 0);
+    if(temp == noErr)
+    {
+        fndrinfo->fdType = pbr.fileParam.ioFlFndrInfo.fdType;
+        fndrinfo->fdCreator = pbr.fileParam.ioFlFndrInfo.fdCreator;
+        fndrinfo->fdFlags = pbr.fileParam.ioFlFndrInfo.fdFlags;
+        fndrinfo->fdLocation = pbr.fileParam.ioFlFndrInfo.fdLocation;
+        fndrinfo->fdFldr = pbr.fileParam.ioFlFndrInfo.fdFldr;
+    }
+    return temp;
+}
+
+OSErr Executor::HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name, FInfo *fndrinfo)
+{
+    HParamBlockRec pbr;
+    OSErr retval;
+
+    memset(&pbr, 0, sizeof pbr);
+    pbr.fileParam.ioNamePtr = RM(name);
+    pbr.fileParam.ioVRefNum = CW(vref);
+    pbr.fileParam.ioDirID = CL(dirid);
+    retval = PBHGetFInfo(&pbr, false);
+    if(retval == noErr)
+    {
+        fndrinfo->fdType = pbr.fileParam.ioFlFndrInfo.fdType;
+        fndrinfo->fdCreator = pbr.fileParam.ioFlFndrInfo.fdCreator;
+        fndrinfo->fdFlags = pbr.fileParam.ioFlFndrInfo.fdFlags;
+        fndrinfo->fdLocation = pbr.fileParam.ioFlFndrInfo.fdLocation;
+        fndrinfo->fdFldr = pbr.fileParam.ioFlFndrInfo.fdFldr;
+    }
+
+    return retval;
+}
+
+OSErr Executor::SetFInfo(StringPtr filen, INTEGER vrn,
+                         FInfo *fndrinfo) /* IMIV-114 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+    GUEST<ULONGINT> t;
+
+    pbr.fileParam.ioNamePtr = RM(filen);
+    pbr.fileParam.ioVRefNum = CW(vrn);
+    pbr.fileParam.ioFVersNum = 0;
+    pbr.fileParam.ioFDirIndex = CWC(0);
+    temp = PBGetFInfo(&pbr, 0);
+    if(temp != noErr)
+        return (temp);
+    pbr.fileParam.ioFlFndrInfo.fdType = fndrinfo->fdType;
+    pbr.fileParam.ioFlFndrInfo.fdCreator = fndrinfo->fdCreator;
+    pbr.fileParam.ioFlFndrInfo.fdFlags = fndrinfo->fdFlags;
+    pbr.fileParam.ioFlFndrInfo.fdLocation = fndrinfo->fdLocation;
+    pbr.fileParam.ioFlFndrInfo.fdFldr = fndrinfo->fdFldr = pbr.fileParam.ioFlFndrInfo.fdFldr;
+
+    GetDateTime(&t);
+    pbr.fileParam.ioFlMdDat = t;
+
+    return (PBSetFInfo(&pbr, 0));
+}
+
+OSErr Executor::SetFLock(StringPtr filen, INTEGER vrn) /* IMIV-114 */
+{
+    ParamBlockRec pbr;
+
+    pbr.fileParam.ioNamePtr = RM(filen);
+    pbr.fileParam.ioVRefNum = CW(vrn);
+    pbr.fileParam.ioFVersNum = 0;
+    return (PBSetFLock(&pbr, 0));
+}
+
+OSErr Executor::RstFLock(StringPtr filen, INTEGER vrn) /* IMIV-114 */
+{
+    ParamBlockRec pbr;
+
+    pbr.fileParam.ioNamePtr = RM(filen);
+    pbr.fileParam.ioVRefNum = CW(vrn);
+    pbr.fileParam.ioFVersNum = 0;
+    return (PBRstFLock(&pbr, 0));
+}
+
+OSErr Executor::Rename(StringPtr filen, INTEGER vrn,
+                       StringPtr newf) /* IMIV-114 */
+{
+    ParamBlockRec pbr;
+
+    pbr.ioParam.ioNamePtr = RM(filen);
+    pbr.ioParam.ioVRefNum = CW(vrn);
+    pbr.ioParam.ioVersNum = 0;
+    pbr.ioParam.ioMisc = guest_cast<LONGINT>(RM(newf));
+    return (PBRename(&pbr, 0));
+}
+
+
+OSErr Executor::Create(StringPtr filen, INTEGER vrn, OSType creator,
+                       OSType filtyp) /* IMIV-112 */
+{
+    ParamBlockRec pbr;
+    OSErr temp;
+    GUEST<ULONGINT> t;
+
+    pbr.fileParam.ioNamePtr = RM(filen);
+    pbr.fileParam.ioVRefNum = CW(vrn);
+    pbr.fileParam.ioFVersNum = 0;
+
+    temp = PBCreate(&pbr, 0);
+    if(temp != noErr)
+        return (temp);
+
+    pbr.fileParam.ioFlFndrInfo.fdType = CL(filtyp);
+    pbr.fileParam.ioFlFndrInfo.fdCreator = CL(creator);
+    pbr.fileParam.ioFlFndrInfo.fdFlags = 0;
+    ZEROPOINT(pbr.fileParam.ioFlFndrInfo.fdLocation);
+    pbr.fileParam.ioFlFndrInfo.fdFldr = 0;
+
+    GetDateTime(&t);
+    pbr.fileParam.ioFlCrDat = t;
+    pbr.fileParam.ioFlMdDat = t;
+
+    temp = PBSetFInfo(&pbr, 0);
+    /*
+ * The dodge below of not returning fnfErr is necessary because people might
+ * want to create a file in a directory without a .Rsrc.  This has some
+ * unpleasant side effects (notably no file type and no logical eof), but we
+ * allow it anyway (for now).
+ */
+    return temp == fnfErr ? noErr : temp;
+}
+
+OSErr Executor::FSDelete(StringPtr filen, INTEGER vrn) /* IMIV-113 */
+{
+    ParamBlockRec pbr;
+
+    pbr.fileParam.ioNamePtr = RM(filen);
+    pbr.fileParam.ioVRefNum = CW(vrn);
+    pbr.fileParam.ioFVersNum = 0;
+    return (PBDelete(&pbr, 0));
+}
+
+
+OSErr Executor::PBHOpenDeny(HParmBlkPtr pb, BOOLEAN a) /* IMV-397 */
+{ /* HACK */
+    HParamBlockRec block;
+    OSErr retval;
+
+    block.ioParam.ioCompletion = pb->ioParam.ioCompletion;
+    block.ioParam.ioNamePtr = pb->ioParam.ioNamePtr;
+    block.ioParam.ioVRefNum = pb->ioParam.ioVRefNum;
+    block.ioParam.ioVersNum = 0;
+    switch(pb->ioParam.ioPermssn & 3)
+    {
+        case 0:
+            block.ioParam.ioPermssn = fsCurPerm;
+            break;
+        case 1:
+            block.ioParam.ioPermssn = fsRdPerm;
+            break;
+        case 2:
+            block.ioParam.ioPermssn = fsWrPerm;
+            break;
+        case 3:
+            block.ioParam.ioPermssn = fsRdWrPerm;
+            break;
+    }
+    block.ioParam.ioMisc = 0;
+    block.fileParam.ioDirID = pb->fileParam.ioDirID;
+
+    retval = PBHOpen(&block, a);
+    pb->ioParam.ioResult = block.ioParam.ioResult;
+    pb->ioParam.ioRefNum = block.ioParam.ioRefNum;
+    fs_err_hook(retval);
     return retval;
 }

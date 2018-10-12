@@ -1,15 +1,8 @@
-project(Executor)
 cmake_minimum_required(VERSION 3.9)
-set(CMAKE_CXX_STANDARD 17)
 
 find_program(PERL_COMMAND perl)
 
-if(WIN32)
-else()
-find_library(DB_LIBRARY db)
-find_path(DB_INCLUDE_PATH db.h ndbm.h)
-include_directories(${DB_INCLUDE_PATH})
-endif()
+find_package(Boost COMPONENTS filesystem system)
 
 find_program(BISON_COMMAND bison)
 find_package(Threads REQUIRED)
@@ -43,8 +36,8 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 add_subdirectory(config/front-ends/x)
-add_subdirectory(config/front-ends/sdl)
-add_subdirectory(config/front-ends/sdl2)
+#add_subdirectory(config/front-ends/sdl)
+#add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
 add_subdirectory(config/arch/generic_le)
 add_subdirectory(config/os/win32)
@@ -119,12 +112,44 @@ set(dial_sources dialAlert.cpp dialCreate.cpp dialHandle.cpp dialInit.cpp dialMa
     dialDispatch.cpp dialItem.cpp)
 source_group(Dialogs FILES ${dial_sources})
 
-set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileInfo.cpp
-    fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp)
+set(file_sources 
+    fileMisc.cpp
+    fileHighlevel.cpp  fileUnimplemented.cpp
+    dcache.cpp
+    volume.cpp
+    macstrings.cpp
+    
+    localvolume/localvolume.h 
+    localvolume/localvolume.cpp 
+
+    localvolume/openfile.h
+
+    localvolume/item.h 
+    localvolume/item.cpp
+
+    localvolume/itemcache.h
+    localvolume/itemcache.cpp
+
+    localvolume/basilisk.h
+    localvolume/basilisk.cpp
+    localvolume/appledouble.h
+    localvolume/appledouble.cpp
+    localvolume/plain.h
+    localvolume/plain.cpp
+    localvolume/mac.h
+    localvolume/mac.cpp
+
+    localvolume/cnidmapper.h
+    localvolume/simplecnidmapper.h
+    localvolume/simplecnidmapper.cpp
+    localvolume/lmdbcnidmapper.h
+    localvolume/lmdbcnidmapper.cpp
+    )
+
 source_group(Files FILES ${file_sources})
 
 set(hfs_sources hfsBtree.cpp hfsChanging.cpp hfsCreate.cpp hfsFile.cpp hfsHelper.cpp
-    hfsHier.cpp hfsMisc.cpp hfsVolume.cpp hfsWorkingdir.cpp hfsXbar.cpp)
+    hfsHier.cpp hfsMisc.cpp hfsVolume.cpp hfsWorkingdir.cpp hfsXbar.cpp futzwithdosdisks.cpp)
 source_group(HFS FILES ${hfs_sources})
 
 set(list_sources listAccess.cpp listAddDel.cpp listCreate.cpp listDisplay.cpp
@@ -179,17 +204,17 @@ set(misc_sources
   traps.cpp logging.cpp builtinlibs.cpp
   debugger.cpp cpu.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp trapname.cpp font.cpp
-  gestalt.cpp globals.cpp iu.cpp launch.cpp main.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
+  gestalt.cpp globals.cpp iu.cpp launch.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
   osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
   slash.cpp stdfile.cpp romlib_stubs.cpp syserr.cpp toolevent.cpp toolutil.cpp time.cpp
-  vbl.cpp syncint.cpp virtualint.cpp refresh.cpp autorefresh.cpp aboutbox.cpp
+  vbl.cpp syncint.cpp refresh.cpp autorefresh.cpp aboutbox.cpp
   option.cpp parseopt.cpp parsenum.cpp
   version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
   process.cpp alias.cpp string.cpp tempmem.cpp edition.cpp fontIMVI.cpp balloon.cpp
   error.cpp adb.cpp color_wheel_bits.cpp finder.cpp system_error.cpp ibm_keycodes.cpp
   icon.cpp redrawscreen.cpp ini.cpp qt.cpp
-  paramline.c fauxdbm.cpp commtool.cpp cfm.cpp pef_hash.cpp
-  mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
+  paramline.c commtool.cpp cfm.cpp pef_hash.cpp
+  mixed_mode.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
   executor.cpp  crc.cpp
   prefpanel.cpp dispatcher.cpp options.cpp)
@@ -242,7 +267,6 @@ set(include_sources hintemplate.h
                   include/rsys/arrowkeys.h
                   include/rsys/autorefresh.h
                   include/rsys/blockdev.h
-                  include/rsys/blockinterrupts.h
                   include/rsys/builtinlibs.h
                   include/rsys/byteswap.h
                   include/rsys/cfm.h
@@ -268,9 +292,8 @@ set(include_sources hintemplate.h
                   include/rsys/everything.h
                   include/rsys/evil.h
                   include/rsys/executor.h
-                  include/rsys/fauxdbm.h
                   include/rsys/file.h
-                  include/rsys/filedouble.h
+                  include/rsys/filesystem.h
                   include/rsys/flags.h
                   include/rsys/float.h
                   include/rsys/float_fcw.h
@@ -278,6 +301,7 @@ set(include_sources hintemplate.h
                   include/rsys/font.h
                   include/rsys/functions.h
                   include/rsys/functions.impl.h
+                  include/rsys/futzwithdosdisks.h
                   include/rsys/gestalt.h
                   include/rsys/glue.h
                   include/rsys/gworld.h
@@ -300,6 +324,7 @@ set(include_sources hintemplate.h
                   include/rsys/m68kint.h
                   include/rsys/macros.h
                   include/rsys/mactype.h
+                  include/rsys/macstrings.h
                   include/rsys/memsize.h
                   include/rsys/menu.h
                   include/rsys/mixed_mode.h
@@ -347,7 +372,6 @@ set(include_sources hintemplate.h
                   include/rsys/stdfile.h
                   include/rsys/stdio_smashage.h
                   include/rsys/string.h
-                  include/rsys/suffix_maps.h
                   include/rsys/syncint.h
                   include/rsys/syserr.h
                   include/rsys/system_error.h
@@ -365,6 +389,7 @@ set(include_sources hintemplate.h
                   include/rsys/vbl.h
                   include/rsys/vdriver.h
                   include/rsys/version.h
+                  include/rsys/volume.h
                   include/rsys/wind.h
                   include/rsys/xdata.h
                   include/rsys/xdblt.h
@@ -401,17 +426,29 @@ set(sources ${ctl_sources} ${dial_sources}
     ${trap_instance_sources}
     ${include_sources})
 
-add_executable(executor ${sources}
+add_library(romlib ${sources}
         ${GENERATED_FILES}
     )
 
-target_link_libraries(executor front-end-${FRONT_END} arch-${HOST_ARCH})
+target_include_directories(romlib PUBLIC include/ ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(romlib front-end-${FRONT_END} arch-${HOST_ARCH})
+target_link_libraries(romlib lmdb)
 
 if(HOST_OS STREQUAL win32 OR HOST_OS STREQUAL macosx)
-    target_link_libraries(executor os-${HOST_OS})
+    target_link_libraries(romlib os-${HOST_OS})
 else()
-    target_link_libraries(executor ${DB_LIBRARY})
+    target_link_libraries(romlib ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k PowerCore mon)
+target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 
+#target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
+if(WIN32) # MXE hack
+    target_link_libraries(romlib ${Boost_LIBRARIES})
+else()
+    target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
+endif()
+
+add_executable(executor main.cpp)
+target_link_libraries(executor romlib)

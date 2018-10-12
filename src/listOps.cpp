@@ -8,6 +8,7 @@
 #include "ListMgr.h"
 #include "MemoryMgr.h"
 #include "rsys/list.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -153,7 +154,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
 
     lp = STARH(list);
     if(!(lp->cellSize.h = CW(csize.h)))
-        lp->cellSize.h = CW((CW(lp->rView.right) - CW(lp->rView.left)) / MAX(1, (CW(lp->dataBounds.right)
+        lp->cellSize.h = CW((CW(lp->rView.right) - CW(lp->rView.left)) / std::max(1, (CW(lp->dataBounds.right)
                                                                                  - CW(lp->dataBounds.left))));
     if(!(lp->cellSize.v = CW(csize.v)))
     {

@@ -9,7 +9,6 @@
 #include "OSUtil.h"
 #include "TimeMgr.h"
 
-#include "rsys/blockinterrupts.h"
 #include "rsys/osutil.h"
 #include "rsys/vbl.h"
 #include "rsys/time.h"
@@ -28,9 +27,6 @@ QHdr Executor::ROMlib_timehead;
 
 /* Actual time at which Executor started running, GMT. */
 struct timeval ROMlib_start_time;
-
-/* Current state of virtual interrupt enabling. */
-virtual_int_state_t Executor::_virtual_interrupts_blocked = false;
 
 /* Msecs during last interrupt. */
 static unsigned long last_interrupt_msecs;
@@ -218,7 +214,6 @@ static void ROMlib_PrimeTime(QElemPtr taskp, LONGINT count)
 {
     static char beenhere = false;
     LONGINT msecs_until_next;
-    virtual_int_state_t block;
     unsigned long now_msecs;
 
 /*
@@ -236,8 +231,6 @@ static void ROMlib_PrimeTime(QElemPtr taskp, LONGINT count)
 
     if(count <= 0)
         count = 1;
-
-    block = block_virtual_ints();
 
     now_msecs = msecs_elapsed();
     if(!beenhere)
@@ -267,8 +260,6 @@ static void ROMlib_PrimeTime(QElemPtr taskp, LONGINT count)
 
         next_interrupt_msecs = now_msecs + count;
     }
-
-    restore_virtual_ints(block);
 }
 
 void Executor::InsTime(QElemPtr taskp)

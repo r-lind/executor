@@ -16,6 +16,8 @@
 #include "rsys/ctl.h"
 #include "rsys/menu.h"
 
+#include <algorithm>
+
 using namespace Executor;
 
 #if 0 /* It's not clear why Cotton had all these global variables, \
@@ -192,7 +194,7 @@ draw(ControlHandle ctl, draw_state_t draw_state,
 
     icon_p = get_icon_info(item_info, &icon_info, true);
 
-    item_total_height = ((icon_p ? MAX(icon_info.height, height)
+    item_total_height = ((icon_p ? std::max(icon_info.height, height)
                                  : height)
                          + 4);
 

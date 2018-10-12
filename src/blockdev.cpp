@@ -6,6 +6,7 @@
 #include "rsys/blockdev.h"
 #include "rsys/dcache.h"
 #include "rsys/file.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -100,7 +101,7 @@ bool Executor::blockdev_read(blockdev_t *b, uint32_t offset, void *buf, uint32_t
                 }
 
                 /* Actually read the bytes in. */
-                bytes_to_read = MIN(b->max_xfer_size, num_bytes - n);
+                bytes_to_read = std::min(b->max_xfer_size, num_bytes - n);
                 if(b->read_func(b->fd, p, bytes_to_read) != bytes_to_read)
                     goto done;
                 b->fpos += bytes_to_read;
@@ -156,7 +157,7 @@ bool Executor::blockdev_write(blockdev_t *b, uint32_t offset, const void *buf,
             }
 
             /* Actually write the bytes out. */
-            bytes_to_write = MIN(b->max_xfer_size, num_bytes - n);
+            bytes_to_write = std::min(b->max_xfer_size, num_bytes - n);
             if(b->write_func(b->fd, p, bytes_to_write) != bytes_to_write)
                 goto done;
 

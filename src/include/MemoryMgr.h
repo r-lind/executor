@@ -167,6 +167,8 @@ REGISTER_FLAG_TRAP(_PurgeSpace_flags, PurgeSpace, PurgeSpaceSys,
 extern void ROMlib_installhandle(Handle sh, Handle dh);
 
 extern void ROMlib_InitZones();
+extern void InitMemory(void *thingOnStack);
+
 extern OSErr C_MemError(void);
 NOTRAP_FUNCTION(MemError);
 

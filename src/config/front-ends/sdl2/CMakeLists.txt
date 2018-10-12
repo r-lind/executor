@@ -15,5 +15,5 @@ if(SDL2_FOUND)
     target_link_libraries(front-end-sdl2 syn68k ${SDL2_LIBRARIES})
     target_include_directories(front-end-sdl2
         PUBLIC .
-        PRIVATE ${SDL2_INCLUDE_DIRS})
+        PRIVATE ${SDL2_INCLUDE_DIRS} ${SDL2_INCLUDE_DIRS}/SDL2)
 endif()

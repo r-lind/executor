@@ -5,6 +5,9 @@
 #include <QMouseEvent>
 #include <QBitmap>
 #include <QScreen>
+#ifdef STATIC_WINDOWS_QT
+#include <QtPlugin>
+#endif
 
 #include "rsys/common.h"
 #include "rsys/host.h"
@@ -33,6 +36,10 @@
 void macosx_hide_menu_bar(int mouseY);
 #endif
 #include "../x/x_keycodes.h"
+
+#ifdef STATIC_WINDOWS_QT
+Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
+#endif
 
 namespace Executor
 {

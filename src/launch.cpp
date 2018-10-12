@@ -45,7 +45,6 @@
 #include "rsys/flags.h"
 #include "rsys/segment.h"
 #include "rsys/tesave.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/resource.h"
 #include "rsys/hfs.h"
 #include "rsys/osutil.h"
@@ -70,6 +69,7 @@
 #include "rsys/print.h"
 #include "rsys/gestalt.h"
 #include "rsys/osevent.h"
+#include "rsys/time.h"
 
 #include "rsys/cfm.h"
 #include "rsys/launch.h"
@@ -82,6 +82,9 @@
 #include <rsys/cpu.h>
 #include <PowerCore.h>
 
+#include <rsys/macstrings.h>
+#include <algorithm>
+
 using namespace Executor;
 
 static bool ppc_launch_p = false;
@@ -93,21 +96,6 @@ void Executor::ROMlib_set_ppc(bool val)
 
 #define CONFIGEXTENSION ".ecf"
 
-static int16_t name0stripappl(StringPtr name)
-{
-    char *p;
-    int16_t retval;
-
-    retval = name[0];
-    if(name[0] >= 5)
-    {
-        p = (char *)name + name[0] + 1 - 5;
-        if(p[0] == '.' && (p[1] == 'a' || p[1] == 'A') && (p[2] == 'p' || p[2] == 'P') && (p[3] == 'p' || p[3] == 'P') && (p[4] == 'l' || p[4] == 'L'))
-            retval -= 5;
-    }
-    return retval;
-}
-
 /*
  * NOTE: ParseConfigFile now has three arguments.  The second is a standard
  * OSType and will be expanded to 0x1234ABCD.ecf if exefname.ecf
@@ -115,18 +103,11 @@ static int16_t name0stripappl(StringPtr name)
  * the user has changed things by hand).
  */
 
-static void ParseConfigFile(StringPtr exefname, OSType type)
+static void ParseConfigFile(std::string appname, OSType type)
 {
-    int strwidth;
-    char *newtitle;
-    char *dot;
-    INTEGER fname0;
-
     ROMlib_WindowName.clear();
     ROMlib_Comments.clear();
     ROMlib_desired_bpp = 0;
-    fname0 = name0stripappl(exefname);
-    std::string appname(exefname + 1, exefname + 1 + fname0);
 
     ROMlib_configfilename = ROMlib_ConfigurationFolder + "/" + appname + CONFIGEXTENSION;
     configfile = Ufopen(ROMlib_configfilename.c_str(), "r");
@@ -222,17 +203,7 @@ static void ParseConfigFile(StringPtr exefname, OSType type)
     if(!ROMlib_WindowName.empty())
         ROMlib_SetTitle(ROMlib_WindowName.c_str());
     else
-    {
-        strwidth = fname0;
-        newtitle = (char *)alloca(strwidth + 1);
-        memcpy(newtitle, exefname + 1, strwidth);
-        newtitle[strwidth] = 0;
-        dot = strrchr(newtitle, '.');
-        if(dot && (strcmp(dot, ".appl") == 0 || strcmp(dot, ".APPL") == 0))
-            *dot = 0;
-        // TODO: convert from MacRoman to UTF-8 (at least for SDL2 frontend)
-        ROMlib_SetTitle(newtitle);
-    }
+        ROMlib_SetTitle(appname.c_str());
 #if 0
     if (ROMlib_ScreenLocation.first != INITIALPAIRVALUE)
 	ROMlib_HideScreen();
@@ -402,17 +373,16 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     INTEGER toskip;
     Byte *p;
     WDPBRec wdpb;
-    StringPtr ename;
-    INTEGER elen;
     char quickbytes[grafSize];
     LONGINT tmpa5;
 
     for(p = fName + fName[0] + 1; p > fName && *--p != ':';)
         ;
     toskip = p - fName;
-    LM(CurApName)[0] = MIN(fName[0] - toskip, 31);
+    LM(CurApName)[0] = std::min(fName[0] - toskip, 31);
     BlockMoveData((Ptr)fName + 1 + toskip, (Ptr)LM(CurApName) + 1,
                   (Size)LM(CurApName)[0]);
+    std::string appNameUTF8 = toUnicodeFilename(LM(CurApName)).string();
 #if 0
     Munger(MR(LM(AppParmHandle)), 2L*sizeof(INTEGER), (Ptr) 0,
 				  (LONGINT) sizeof(AppFile), (Ptr) "", 0L);
@@ -455,15 +425,6 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
 
     process_create(false, CL(finfo.fdType), CL(finfo.fdCreator));
 
-    if(ROMlib_exeuname)
-        free(ROMlib_exeuname);
-    ROMlib_exeuname = ROMlib_newunixfrommac((char *)ROMlib_exefname + 1,
-                                            ROMlib_exefname[0]);
-    elen = strlen(ROMlib_exeuname);
-    ename = (StringPtr)alloca(elen + 1);
-    BlockMoveData((Ptr)ROMlib_exeuname, (Ptr)ename + 1, elen);
-    ename[0] = elen;
-
     ROMlib_creator = CL(finfo.fdCreator);
 
 #define LEMMINGSHACK
@@ -495,8 +456,8 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     ROMlib_MacSize.first = INITIALPAIRVALUE;
     ROMlib_directdiskaccess = false;
     ROMlib_clear_gestalt_list();
-    ParseConfigFile((StringPtr) "\017ExecutorDefault", 0);
-    ParseConfigFile(ename, err == noErr ? CL(finfo.fdCreator) : 0);
+    ParseConfigFile("ExecutorDefault", 0);
+    ParseConfigFile(appNameUTF8, err == noErr ? CL(finfo.fdCreator) : 0);
     ROMlib_clockonoff(!ROMlib_noclock);
     if((ROMlib_ScreenSize.first != INITIALPAIRVALUE
         || ROMlib_MacSize.first != INITIALPAIRVALUE))
@@ -1056,9 +1017,6 @@ void Executor::empty_timer_queues(void)
 {
     TMTask *tp, *nexttp;
     VBLTaskPtr vp, nextvp;
-    virtual_int_state_t bt;
-
-    bt = block_virtual_ints();
 
     dequeue_refresh_task();
     clear_pending_sounds();
@@ -1072,8 +1030,6 @@ void Executor::empty_timer_queues(void)
         nexttp = (TMTask *)MR(tp->qLink);
         RmvTime((QElemPtr)tp);
     }
-
-    restore_virtual_ints(bt);
 }
 
 static void reinitialize_things(void)
@@ -1135,23 +1091,6 @@ static void reinitialize_things(void)
     ROMlib_destroy_blocks(0, ~0, false);
 }
 
-static OSErr
-ROMlib_filename_from_fsspec(char **strp, FSSpec *fsp)
-{
-    OSErr retval;
-    ParamBlockRec pbr;
-    char *filename, *endname;
-    VCBExtra *vcbp;
-    struct stat sbuf;
-
-    memset(&pbr, 0, sizeof pbr);
-    pbr.ioParam.ioVRefNum = fsp->vRefNum;
-    pbr.ioParam.ioNamePtr = RM((StringPtr)fsp->name);
-    retval = ROMlib_nami(&pbr, CL(fsp->parID), NoIndex, strp, &filename,
-                         &endname, false, &vcbp, &sbuf);
-    return retval;
-}
-
 OSErr
 Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRec *lpbp)
 {
@@ -1178,6 +1117,7 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
         extended_p = false;
     }
 
+#if 0
     if(extended_p && (lpbp->launchControlFlags & CWC(launchContinue)))
     {
         int n_filenames;
@@ -1209,6 +1149,7 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
             free(filenames[i]);
     }
     else
+#endif
     {
         /* This setjmp/longjmp code might be better put in launchchain */
         if(!beenhere)

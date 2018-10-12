@@ -14,7 +14,6 @@
 #include "rsys/wind.h"
 #include "rsys/host.h"
 #include "rsys/vdriver.h"
-#include "rsys/blockinterrupts.h"
 #include "rsys/flags.h"
 #include "rsys/autorefresh.h"
 #include "rsys/redrawscreen.h"
@@ -406,7 +405,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 {
     PixMapHandle gd_pixmap;
     WindowPeek tw;
-    virtual_int_state_t int_state;
 
     if(gdh != MR(LM(MainDevice)))
     {
@@ -419,7 +417,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     if(bpp == PIXMAP_PIXEL_SIZE(gd_pixmap))
         return noErr;
 
-    int_state = block_virtual_ints();
     HideCursor();
 
     note_executor_changed_screen(0, vdriver_height);
@@ -429,7 +426,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
         /* IMV says this2 returns non-zero in error case; not positive
 	 cDepthErr is correct; need to verify */
         ShowCursor();
-        restore_virtual_ints(int_state);
         return cDepthErr;
     }
 
@@ -443,7 +439,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     cursor_reset_current_cursor();
 
     ShowCursor();
-    restore_virtual_ints(int_state);
 
     /* FIXME: assuming (1) all windows are on the current
      graphics device, and (2) the rowbytes and baseaddr

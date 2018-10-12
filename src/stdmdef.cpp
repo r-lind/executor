@@ -16,6 +16,7 @@
 #include "rsys/cquick.h"
 #include "rsys/wind.h"
 #include "rsys/host.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -554,7 +555,7 @@ doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, BOOLEAN upordown,
 
         if(upordown == UP)
         {
-            offset = MIN(lineheight, CW(rp->top) - CW(LM(TopMenuItem)));
+            offset = std::min<INTEGER>(lineheight, CW(rp->top) - CW(LM(TopMenuItem)));
             LM(TopMenuItem) = CW(CW(LM(TopMenuItem)) + offset);
             LM(AtMenuBottom) = CW(CW(LM(AtMenuBottom)) + offset);
             if(TOP_ARROW_P())
@@ -571,7 +572,7 @@ doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, BOOLEAN upordown,
         }
         else
         {
-            offset = MAX(-lineheight, CW(rp->bottom) - CW(LM(AtMenuBottom)));
+            offset = std::max<INTEGER>(-lineheight, CW(rp->bottom) - CW(LM(AtMenuBottom)));
             LM(TopMenuItem) = CW(CW(LM(TopMenuItem)) + offset);
             LM(AtMenuBottom) = CW(CW(LM(AtMenuBottom)) + offset);
             if(BOTTOM_ARROW_P())
@@ -624,8 +625,8 @@ void choose_menu(MenuHandle mh, Rect *rp, Point p, GUEST<int16_t> *itemp, tableP
 
     valid_rect.left = rp->left;
     valid_rect.right = rp->right;
-    valid_rect.top = CW(MAX(CW(rp->top), CW(LM(TopMenuItem))));
-    valid_rect.bottom = CW(MIN(CW(rp->bottom), CW(LM(AtMenuBottom))));
+    valid_rect.top = CW(std::max(CW(rp->top), CW(LM(TopMenuItem))));
+    valid_rect.bottom = CW(std::min(CW(rp->bottom), CW(LM(AtMenuBottom))));
 
     clip_rect.left = rp->left;
     clip_rect.right = rp->right;
@@ -762,7 +763,7 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
         tabp->options = (mextp)(sp + (unsigned char)*sp + 1);
         tabp->top = v;
         get_icon_info(tabp->options, &icon_info, false);
-        v += icon_info.height ? MAX(icon_info.height, lineheight) : lineheight;
+        v += icon_info.height ? std::max<INTEGER>(icon_info.height, lineheight) : lineheight;
     }
     tabp->top = v;
     LM(AtMenuBottom) = CW(CW(LM(TopMenuItem)) + v);

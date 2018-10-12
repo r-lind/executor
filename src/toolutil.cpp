@@ -23,6 +23,7 @@
 #include "rsys/resource.h"
 #include "rsys/toolutil.h"
 #include <string>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -291,12 +292,12 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
             {                                                                \
                 out_type v = *(out_type *)ip;                                \
                 ip += sizeof(out_type);                                      \
-                for(count = MIN(1 - count, ep - op); count > 0; count--)     \
+                for(count = std::min<int>(1 - count, ep - op); count > 0; count--)     \
                     *op++ = v;                                               \
             }                                                                \
             else                                                             \
             {                                                                \
-                unsigned bytes = MIN(count + 1, ep - op) * sizeof(out_type); \
+                unsigned bytes = std::min<int>(count + 1, ep - op) * sizeof(out_type); \
                 memmove(op, ip, bytes);                                      \
                 op += bytes / sizeof *op;                                    \
                 ip += bytes;                                                 \

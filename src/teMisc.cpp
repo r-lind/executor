@@ -20,6 +20,7 @@
 #include "rsys/tesave.h"
 #include "rsys/hook.h"
 #include "rsys/text.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -484,7 +485,7 @@ void Executor::ROMlib_caltext(TEHandle te,
 
         /* start with the previous line, since deltion on the current line
        can cause the previous line's break to change */
-        for(current_lineno = MAX(first_lineno - 1, 0);; current_lineno++)
+        for(current_lineno = std::max(first_lineno - 1, 0);; current_lineno++)
         {
             int16_t current_line_start;
             int16_t orig_current_line_break;
@@ -521,7 +522,7 @@ void Executor::ROMlib_caltext(TEHandle te,
                 break;
             }
             else if(current_line_break == orig_current_line_break
-                    && current_line_break > MAX(sel, sel + n_added))
+                    && current_line_break > std::max<int16_t>(sel, sel + n_added))
             {
                 last_changed = LINE_START(line_starts + 1, current_lineno) - 1;
                 break;
@@ -530,7 +531,7 @@ void Executor::ROMlib_caltext(TEHandle te,
     }
 
     {
-        int lh_first_changed = -1;
+        int16_t lh_first_changed = -1;
 
         if(TE_STYLIZED_P(te)
            && TE_TX_SIZE_X(te) == CWC(-1))
@@ -541,7 +542,7 @@ void Executor::ROMlib_caltext(TEHandle te,
             if(first_changed == -1)
                 first_changed = lh_first_changed;
             else
-                first_changed = MIN(lh_first_changed, first_changed);
+                first_changed = std::min(lh_first_changed, first_changed);
             last_changed = length;
         }
     }

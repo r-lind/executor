@@ -23,23 +23,23 @@
     RGNP_SET_SIZE_AND_SPECIAL(rgnp, RGN_SMALL_SIZE, false)
 
 #define RGNP_SET_SIZE(rgnp, size)                               \
-    ((void)({                                                   \
+    do {                                                        \
         RgnPtr __rgnp = (rgnp);                                 \
         int16_t __orig_size_x;                                  \
                                                                 \
         __orig_size_x = __rgnp->rgnSize;                        \
         __rngp->rgnSize = ((__orig_size_x & RGN_SPECIAL_FLAG_X) \
                            | (CWV(size) & RGN_SIZE_MASK_X));    \
-    }))
+    } while(false)
 #define RGNP_SET_SPECIAL(rgnp, special_p)                 \
-    ((void)({                                             \
+    do {                                                 \
         RgnPtr __rgnp = (rgnp);                           \
                                                           \
         if(special_p)                                     \
             __rgnp->rgnSize.raw_or(RGN_SPECIAL_FLAG_X);   \
         else                                              \
             __rgnp->rgnSize.raw_and(~RGN_SPECIAL_FLAG_X); \
-    }))
+    } while(false)
 
 #define RGNP_BBOX(rgnp) ((rgnp)->rgnBBox)
 
@@ -57,9 +57,9 @@
 #define RGN_SET_SIZE_AND_SPECIAL(rgn, size, special_p) \
     (RGNP_SET_SIZE_AND_SPECIAL(STARH(rgn), size, special_p))
 #define RGN_SET_SIZE(rgn, size) \
-    (RGNP_SET_SIZE(STARH(rgn), size))
+    RGNP_SET_SIZE(STARH(rgn), size)
 #define RGN_SET_SPECIAL(rgn, special_p) \
-    (RGNP_SET_SPECIAL(STARH(rgn), special_p))
+    RGNP_SET_SPECIAL(STARH(rgn), special_p)
 
 #define RGN_BBOX(rgn) (RGNP_BBOX(STARH(rgn)))
 
