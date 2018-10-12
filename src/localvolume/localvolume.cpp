@@ -226,24 +226,26 @@ struct LocalVolume::FCBExtension
 
 LocalVolume::FCBExtension& LocalVolume::getFCBX(short refNum)
 {
-    if(refNum < 0 || refNum >= fcbExtensions.size())
+    int index = (refNum - 2) / 94;
+    if(refNum < 0 || refNum % 94 != 2 || index >= fcbExtensions.size())
         throw OSErrorException(paramErr);
-    return fcbExtensions[refNum];
+    return fcbExtensions[index];
 }
 
 LocalVolume::FCBExtension& LocalVolume::openFCBX()
 {
     filecontrolblock* fcb = ROMlib_getfreefcbp();
     short refNum = (char *)fcb - (char *)MR(LM(FCBSPtr));
+    int index = (refNum - 2) / 94;
 
     memset(fcb, 0, sizeof(*fcb));
     fcb->fcbVPtr = RM(&vcb);
 
-    if(fcbExtensions.size() < refNum + 1)
-        fcbExtensions.resize(refNum+1);
-    fcbExtensions[refNum] = FCBExtension(fcb, refNum);
+    if(fcbExtensions.size() < index + 1)
+        fcbExtensions.resize(index + 1);
+    fcbExtensions[index] = FCBExtension(fcb, refNum);
 
-    return fcbExtensions[refNum];
+    return fcbExtensions[index];
 }
 
 void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8_t permission)
