@@ -1248,7 +1248,6 @@ out:
             item_swapped = CW(tempi);
             MENUCALL(mChooseMsg, mh, &r, tempp, &item_swapped);
             tempi = CW(item_swapped);
-#if !defined(MACOSX_)
             if(LM(MenuFlash))
             {
                 for(i = 0; i < Cx(LM(MenuFlash)); i++)
@@ -1268,7 +1267,6 @@ out:
                 }
                 Delay(3L, nullptr);
             }
-#endif
         }
         else
             mid = 0;

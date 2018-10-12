@@ -109,12 +109,10 @@ get_phoney_name_resource(void)
     if(!ROMlib_phoney_name_string)
     {
         string name = "";
-#if defined(linux) || defined(MACOSX_)
+#if defined(linux) || defined(MACOSX)
         name = string(getlogin());
         if(!name.length())
             name = string(getenv("LOGNAME"));
-        if(!name.length())
-            name = "";
 #endif
         int len;
 

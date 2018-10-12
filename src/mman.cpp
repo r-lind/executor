@@ -24,19 +24,6 @@
 #include "rsys/gestalt.h"
 #include <algorithm>
 
-#if defined(LINUX) || defined(MACOSX)
-#include <sys/mman.h>
-
-#if !defined(MAP_ANONYMOUS)
-#define MAP_ANONYMOUS MAP_ANON
-#endif
-
-#endif /* LINUX */
-
-#ifdef MACOSX_
-#include <mach/mach_error.h>
-#endif
-
 #if defined(LINUX)
 extern char _etext, _end; /* boundaries of data+bss sections, supplied by the linker */
 #endif
@@ -353,8 +340,6 @@ void print_mem_full_message(void)
             "a smaller -memory size.\n");
 }
 
-unsigned long ROMlib_total_allocated_memory;
-
 void ROMlib_InitZones()
 {
     static bool beenhere = false;
@@ -395,7 +380,6 @@ void ROMlib_InitZones()
                                   + applzone_memory_segment_size
                                   + STACK_SIZE);
         total_allocated_memory = (total_allocated_memory + 8191) & ~8191;
-        ROMlib_total_allocated_memory = total_allocated_memory;
         /* Note the memory in gestalt, rounded down the next 8K page multiple. */
         gestalt_set_memory_size(total_mac_visible_memory);
 

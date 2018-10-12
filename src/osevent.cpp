@@ -42,11 +42,6 @@
 #include "rsys/string.h"
 #include "rsys/keyboard.h"
 
-#undef MACOSX_
-#if defined(MACOSX_)
-#include "contextswitch.h"
-#endif
-
 #include "DialogMgr.h"
 #include "SegmentLdr.h"
 
@@ -62,12 +57,6 @@ static EvQEl evs[NEVENT], *freeelem = evs + NEVENT - 1;
 INTEGER Executor::ROMlib_mods = btnState;
 static LONGINT autoticks;
 static LONGINT lastdown = -1;
-
-#if !defined(MACOSX_)
-short ROMlib_pinned = false;
-#else
-short ROMlib_pinned = true;
-#endif
 
 static Ptr kchr_ptr;
 
@@ -533,8 +522,8 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
         eventp->when = CL(TickCount());
 
         {
-#if defined(X) || defined(MACOSX_)
-            if(!ROMlib_pinned)
+#if defined(X)
+            if(true)
             {
                 LONGINT x, y;
                 LONGINT newmods;
@@ -571,15 +560,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
             ROMlib_bewaremovement = false;
         }
     }
-#if defined(MACOSX_)
-    if(ROMlib_printtimeout < 0)
-    { /* see MacViewClass.m */
-        dirty_rect_update_screen();
-        ROMlib_printtimeout = 1;
-    }
-    else
-#endif
-        if(ROMlib_when == WriteInOSEvent)
+    if(ROMlib_when == WriteInOSEvent)
     {
         dirty_rect_update_screen();
     }

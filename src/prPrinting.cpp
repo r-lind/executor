@@ -57,10 +57,6 @@ static bool page_is_open = false;
 }
 #include "rsys/nextprint.h"
 
-#if defined(MACOSX_)
-printstate_t Executor::printstate;
-#endif
-
 LONGINT Executor::pagewanted = 0;
 static int lastpagewanted = 0;
 
@@ -508,7 +504,6 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
     lastpagewanted = 9999;
 #endif
 
-#if !defined(MACOSX_)
     if(!already_open)
     {
 #if defined(QUESTIONABLE_FIX_FOR_LOGBOOK_THAT_BREAKS_PRINTING_UNDER_TESTGEN)
@@ -548,9 +543,7 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
         }
         pageno = 0;
     }
-#else
-    printstate = seenOpenDoc;
-#endif
+
     already_open = true;
     return port;
 }
@@ -561,7 +554,6 @@ void Executor::C_PrOpenPage(TPPrPort port, TPRect pPageFrame)
     ourinit(port, true);
     if(pageno >= pagewanted && pageno <= lastpagewanted)
     {
-#if !defined(MACOSX_)
         if(ROMlib_printfile)
             fprintf(ROMlib_printfile, ROMlib_page_begin, pageno - pagewanted + 1,
                     pageno - pagewanted + 1,
@@ -570,9 +562,6 @@ void Executor::C_PrOpenPage(TPPrPort port, TPRect pPageFrame)
                     ROMlib_rotation, ROMlib_translate_x, ROMlib_translate_y,
                     72.0 / ROMlib_resolution_x, -1 * 72.0 / ROMlib_resolution_y);
         ROMlib_suppressclip = 0;
-#else
-        printstate = seenOpenPage;
-#endif
     }
     page_is_open = true;
 }
@@ -583,13 +572,9 @@ void Executor::C_PrClosePage(TPPrPort pPrPort)
     {
         if(pageno >= pagewanted && pageno <= lastpagewanted)
         {
-#if !defined(MACOSX_)
             if(ROMlib_printfile)
                 fprintf(ROMlib_printfile, ROMlib_page_end,
                         -55 + (ROMlib_rotation ? 30 : 0));
-#else
-            printstate = seenClosePage;
-#endif
         }
     }
     page_is_open = false;
@@ -652,7 +637,6 @@ invoke_print_batch_file(const char *filename, ini_key_t printer, ini_key_t port)
 
 void Executor::C_PrCloseDoc(TPPrPort port)
 {
-#if !defined(MACOSX_)
     if(ROMlib_printfile)
     {
         fprintf(ROMlib_printfile, ROMlib_doc_end, pageno - pagewanted + 1,
@@ -697,19 +681,7 @@ void Executor::C_PrCloseDoc(TPPrPort port)
 #endif
     }
     ROMlib_printfile = 0;
-#else
-    printstate = __idle;
 
-#if 0 /* DO NOT call the dirty rect stuff ... we're still redirected away \
-     from the screen */
-  dirty_rect_accrue (0, 0, vdriver_height, vdriver_width);
-  dirty_rect_update_screen ();
-#endif
-
-    free(ROMlib_spool_file); /* so we'll do unique name again later */
-    ROMlib_spool_file = 0;
-
-#endif
     if(port->fOurPtr)
         DisposePtr((Ptr)port);
 #if defined(QUESTIONABLE_FIX_FOR_LOGBOOK_THAT_BREAKS_PRINTING_UNDER_TESTGEN)

@@ -1108,11 +1108,9 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
                         oldticks = -1000;
                         *ith = CW(opentoken);
                         retval = -1;
-                        //#if !defined(MACOSX_)
                         HiliteControl(h, inButton);
                         Delay((LONGINT)5, nullptr);
                         HiliteControl(h, 0);
-                        //#endif
                     }
                     break;
                 case ASCIIUPARROW:

@@ -24,11 +24,6 @@ extern void print_mem_full_message(void);
 /* We'll allow the user to specify zones up to this size. */
 #define MAX_ZONE_SIZE (2047L * 1024 * 1024)
 
-/* Always malloc Mac memory for now; someday we may return to
- * support mmap'd memory.
- */
-#define MALLOC_MAC_MEMORY
-
 extern int ROMlib_applzone_size, ROMlib_syszone_size, ROMlib_stack_size;
 
 extern Handle _NewHandle_copy_ptr_flags(Size size, const void *data_to_copy,

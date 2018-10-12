@@ -11,20 +11,8 @@
 
  */
 
-/* cottons: added `__' to idle because it conflits with posix
-   function of the same name */
 namespace Executor
 {
-typedef enum { __idle,
-               seenOpenDoc,
-               seenOpenPage,
-               seenClosePage,
-               seenPageSetUp } dontuse;
-
-typedef LONGINT printstate_t;
-
-extern printstate_t printstate;
-
 typedef enum {
     frameVerb,
     paintVerb,

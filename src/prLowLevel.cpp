@@ -492,9 +492,6 @@ void Executor::C_ROMlib_mystlproc(DialogPtr dp, INTEGER itemno)
     switch(itemno)
     {
         case LAYOUT_OK_NO:
-#if defined(MACOSX_)
-//	printstate = seenPageSetUp;
-#endif
             update_ROMlib_printer_vars((TPPrDlg)dp);
             break;
         case LAYOUT_PORTRAIT_ICON_NO:

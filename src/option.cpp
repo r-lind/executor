@@ -13,12 +13,6 @@
 #include "rsys/parsenum.h"
 #include "rsys/notmac.h"
 
-#undef MACOSX_
-#ifdef MACOSX_
-#import <Foundation/NSUserDefaults.h>
-#import <Foundation/NSString.h>
-#endif
-
 using namespace Executor;
 using namespace std;
 
@@ -320,35 +314,7 @@ opt_lookup(opt_database_t &db, const string &opt)
     opt_val_t *retval;
 
     retval = opt_lookup_helper(db, opt);
-#ifdef MACOSX_
-    if(!retval || retval->t_val == "")
-    {
-        NSUserDefaults *defaults;
-        NSString *try1;
 
-        defaults = [NSUserDefaults standardUserDefaults];
-        try1 = [defaults stringForKey:@(opt.c_str())];
-
-        if(try1)
-        {
-            if(retval)
-            {
-                char *str;
-                int len;
-
-                len = [try1 lengthOfBytesUsingEncoding:NSUTF8StringEncoding];
-                str = (char *)malloc(len + 1);
-                [try1 getCString:str maxLength:len encoding:NSUTF8StringEncoding];
-                retval->val = str;
-            }
-            else
-            {
-                opt_put_val(db, opt, [try1 UTF8String], pri_dwrite, false);
-                retval = opt_lookup_helper(db, opt);
-            }
-        }
-    }
-#endif
     return retval;
 }
 

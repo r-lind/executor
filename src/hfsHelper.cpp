@@ -35,19 +35,6 @@
 
 using namespace Executor;
 
-#if !defined(MAC)
-
-#define FLOPPYWORKSFS "/usr/filesystems/macintosh.fs"
-#define NEWFLOPPYWORKSFS "/usr/filesystems/macintosh.fs.SAVE"
-
-#define MAC30FS "/usr/filesystems/mac.fs"
-#define NEWMAC30FS "/usr/filesystems/mac.fs.SAVE"
-
-#define OURSOCK "/dev/HFS_XFer"
-
-#define HFSXFERDOTFS "/usr/filesystems/HFS_XFer.fs"
-#define HFSXFERUTIL HFSXFERDOTFS "/HFS_XFer.util"
-
 void Executor::ROMlib_hfsinit(void)
 {
 }
@@ -486,8 +473,6 @@ void Executor::ROMlib_openharddisk(const char *dname, GUEST<LONGINT> *messp)
         ROMlib_openfloppy(newbuf, messp);
     }
 }
-
-#endif
 
 #define JUMPTODONEIF(x) \
     if((x))             \

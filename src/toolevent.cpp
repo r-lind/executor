@@ -635,9 +635,6 @@ Executor::sendsuspendevent(void)
 
     shouldBeSuspended = true;
     if(
-#if defined(MACOSX_) || defined(MACOSX_)
-        printstate == __idle &&
-#endif
         (size_info.size_flags & SZacceptSuspendResumeEvents)
 #if defined(SANE_DEBUGGING)
         && !sane_debugging_on
@@ -666,9 +663,6 @@ Executor::sendresumeevent(bool cvtclip)
 
     shouldBeSuspended = false;
     if(
-#if defined(MACOSX_) || defined(MACOSX_)
-        printstate == __idle &&
-#endif
         (size_info.size_flags & SZacceptSuspendResumeEvents)
 #if defined(SANE_DEBUGGING)
         && !sane_debugging_on

@@ -183,10 +183,8 @@ const option_vec Executor::common_opts = {
       "tell program to print file; not useful unless you also "
       "specify a program to run and one or more documents to print.",
       opt_no_arg, "" },
-#if defined(MACOSX_) || defined(LINUX)
     { "nodotfiles", "do not display filenames that begin with dot", opt_no_arg,
       "" },
-#endif
 #if 0
   { "noclock",     "disable timer",               opt_no_arg,   "" },
 #endif
@@ -211,7 +209,6 @@ const option_vec Executor::common_opts = {
     {
         "version", "print the Executor version", opt_no_arg, "",
     },
-#if defined(MALLOC_MAC_MEMORY)
     {
         "memory",
         "specify the total memory you want reserved for use by the programs "
@@ -240,7 +237,6 @@ const option_vec Executor::common_opts = {
                    "available to Executor's internal system software.",
         opt_sep, "",
     },
-#endif /* MALLOC_MAC_MEMORY */
     { "system",
       "specify the system version that executor reports to applications",
       opt_sep, "" },
@@ -886,9 +882,7 @@ int main(int argc, char **argv)
     opt_bool_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
     opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
-#if defined(MACOSX_) || defined(LINUX)
-    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
-#endif
+    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);    // FIXME: currently ignored
 #if 0
   opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
 #endif
