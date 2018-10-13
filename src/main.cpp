@@ -354,8 +354,6 @@ check_arg(string argname, int *arg, int min, int max)
 #define WHICH "type -path "
 #endif
 
-#define APPWRAP "/Executor.app"
-
 static void
 set_appname(char *argv0)
 {
@@ -711,8 +709,6 @@ int main(int argc, char **argv)
 
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();
-
-    ROMlib_WriteWhen(WriteInOSEvent);
 
     setstartdir(argv[0]);
     set_appname(argv[0]);

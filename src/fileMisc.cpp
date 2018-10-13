@@ -623,7 +623,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 #endif /* !defined(LITTLEENDIAN) */
 
     ROMlib_hfsinit();
-    initLocalVol();
+    MountLocalVolume();
 
     MountMacVolumes(ROMlib_MacVolumes);
 

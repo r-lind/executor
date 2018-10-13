@@ -262,7 +262,6 @@ colon_colon_copy(StringPtr dst, const char *src)
 }
 
 static BOOLEAN argv_to_appfile(char *, AppFile *);
-void ROMlib_seginit(LONGINT, char **); /* INTERNAL */
 
 static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
 {
@@ -330,7 +329,7 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
 #define PATH_SEPARATER ';'
 #endif
 
-void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
+void Executor::ROMlib_seginit(LONGINT argc, char **argv)
 {
     char *path, *firstcolon;
     char *fullpathname;

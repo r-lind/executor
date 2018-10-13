@@ -853,7 +853,7 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
         return std::nullopt;
 }
 
-void Executor::initLocalVol()
+void Executor::MountLocalVolume()
 {
     VCBExtra *vp;
     GUEST<THz> savezone;

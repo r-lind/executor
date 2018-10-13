@@ -237,7 +237,7 @@ extern fcbrec *PRNTOFPERR(INTEGER prn, OSErr *errp);
 #define INODEMAP "inodemap"
 
 class Volume;
-void initLocalVol();
+void MountLocalVolume();
 std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
 std::optional<FSSpec> macPathToFSSpec(const std::string& p);
 
