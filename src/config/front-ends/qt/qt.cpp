@@ -9,6 +9,8 @@
 #include <QtPlugin>
 #endif
 
+#include <optional>
+
 #include "rsys/common.h"
 #include "rsys/host.h"
 #include "rsys/vdriver.h"
@@ -339,6 +341,8 @@ public:
 
 }
 
+std::optional<QBitmap> rootlessRegion;
+
 void Executor::vdriver_set_rootless_region(RgnHandle rgn)
 {
     ThePortGuard guard;
@@ -357,9 +361,12 @@ void Executor::vdriver_set_rootless_region(RgnHandle rgn)
 
     C_ClosePort(&grayRegionPort);
 
-    window->setMask(QBitmap::fromData(
+    rootlessRegion = QBitmap::fromData(
         QSize((vdriver_width + 31)&~31, vdriver_height),
-        (const uchar*)MR(grayRegionPort.portBits.baseAddr), QImage::Format_Mono));
+        (const uchar*)MR(grayRegionPort.portBits.baseAddr),
+        QImage::Format_Mono);
+    
+    window->setMask(*rootlessRegion);
 }
 
 void Executor::vdriver_opt_register(void)
@@ -491,6 +498,13 @@ void Executor::vdriver_shutdown(void)
 void Executor::vdriver_pump_events()
 {
     qapp->processEvents();
+    
+    static bool beenHere = false;
+    if(!beenHere && rootlessRegion)
+    {
+        window->setMask(*rootlessRegion);
+        beenHere = true;
+    }
 #if 0
             case SDL_WINDOWEVENT_FOCUS_GAINED:
                 //if(!we_lost_clipboard())
