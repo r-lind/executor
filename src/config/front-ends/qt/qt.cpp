@@ -465,26 +465,18 @@ void Executor::vdriver_get_colors(int first_color, int num_colors, ColorSpec *co
 void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *r,
                                            bool cursor_p)
 {
-#ifdef MACOSX   /* something went wrong on the mac; quick fix */
-    window->update();
-#else
     QRegion rgn;
     for(int i = 0; i < num_rects; i++)
     {
         rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
     }
     window->update(rgn);
-#endif
 }
 
 void Executor::vdriver_update_screen(int top, int left, int bottom, int right,
                                      bool cursor_p)
 {
-#ifdef MACOSX   /* something went wrong on the mac; quick fix */
-    window->update();
-#else
     window->update(QRect(left, top, right-left, bottom-top));
-#endif
 }
 
 void Executor::vdriver_flush_display(void)
