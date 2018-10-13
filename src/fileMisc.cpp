@@ -606,6 +606,7 @@ void Executor::InitPaths()
     fs::create_directories(systemFolder / "Preferences");
     ensureFile(systemFolder / "System");
     ensureFile(systemFolder / "Browser");
+    ensureFile(systemFolder / "Printer");
     ensureFile(systemFolder / "godata.sav");
     ensureFile(ROMlib_PrintDef);
     ensureFile(ROMlib_PrintersIni);
