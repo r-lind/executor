@@ -369,6 +369,7 @@ void Executor::vdriver_opt_register(void)
 bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
                             bool fixed_p, int *argc, char *argv[])
 {
+    qapp = new QGuiApplication(*argc, argv);
     return true;
 }
 
@@ -383,7 +384,6 @@ bool Executor::vdriver_acceptable_mode_p(int width, int height, int bpp,
 
 bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p)
 {
-    qapp = new QGuiApplication(fakeArgc, fakeArgv);
 #ifdef MACOSX
     macosx_hide_menu_bar(0);
     QVector<QRect> screenGeometries = getScreenGeometries();

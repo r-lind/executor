@@ -719,6 +719,16 @@ int main(int argc, char **argv)
     setstartdir(argv[0]);
     set_appname(argv[0]);
 
+        // FIXME: graphics_p is always true here.
+        //        Video drivers need to intercept arguments before normal
+        //        parsing, but there are options that set graphics_p to
+        //        false because initing video won't be necessary.
+    if(graphics_p && !vdriver_init(0, 0, 0, false, &argc, argv))
+    {
+        fprintf(stderr, "Unable to initialize video driver.\n");
+        exit(-12);
+    }
+
     opt_init();
     common_db = opt_alloc_db();
     opt_register("common", common_opts);
@@ -984,13 +994,6 @@ int main(int argc, char **argv)
 
         EM_A7 = save_a7;
     }
-
-    if(graphics_p && !vdriver_init(0, 0, 0, false, &argc, argv))
-    {
-        fprintf(stderr, "Unable to initialize video driver.\n");
-        exit(-12);
-    }
-
 
     if(opt_val(common_db, "logtraps", NULL))
         Executor::traps::init(true);
