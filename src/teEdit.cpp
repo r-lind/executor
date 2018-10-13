@@ -384,16 +384,21 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
     }
     else
     {
+        // TODO: check whether this shouldn't be done just in TEKey
         if(ptr && (*ptr == '\010' || *ptr == '\177'))
         {
+            bool forwardDelete = *ptr == '\177';
             ptr++;
             len--;
-            if(start > 0 && start == stop)
+            if(start == stop)
             {
-                if(*ptr == '\010' || !ROMlib_forward_del_p)
+                if(!forwardDelete)
                 {
-                    HxX(teh, selStart) = CW(Hx(teh, selStart) - 1);
-                    start = Hx(teh, selStart);
+                    if(start > 0)
+                    {
+                        HxX(teh, selStart) = CW(Hx(teh, selStart) - 1);
+                        start = Hx(teh, selStart);
+                    }
                 }
                 else
                 {

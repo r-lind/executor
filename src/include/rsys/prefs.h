@@ -42,7 +42,6 @@ extern bool ROMlib_pretend_script;
 extern bool ROMlib_pretend_edition;
 
 extern bool ROMlib_sticky_menus_p;
-extern bool ROMlib_forward_del_p;
 extern bool ROMlib_no_dot_files;
 
 extern bool nodrivesearch_p;

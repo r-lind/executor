@@ -125,8 +125,6 @@ static bool use_native_code_p = true;
 
 const option_vec Executor::common_opts = {
     { "sticky", "sticky menus", opt_no_arg, "" },
-    { "pceditkeys", "have Delete key delete one character forward",
-      opt_no_arg, "" },
     { "nobrowser", "don't run Browser", opt_no_arg, "" },
     { "bpp", "default screen depth", opt_sep, "" },
     { "size", "default screen size", opt_sep, "" },
@@ -889,7 +887,6 @@ int main(int argc, char **argv)
 
 
     opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
-    opt_bool_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
     opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
     opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);    // FIXME: currently ignored
