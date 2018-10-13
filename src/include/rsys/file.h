@@ -70,13 +70,6 @@ typedef struct
 extern int ROMlib_nosync;
 extern GUEST<LONGINT> DefDirID;
 
-extern char ROMlib_startdir[MAXPATHLEN];
-#if defined(WIN32)
-extern char ROMlib_start_drive;
-#endif
-extern std::string ROMlib_ConfigurationFolder;
-extern fs::path ROMlib_DirectoryMap;
-extern std::string ROMlib_ScreenDumpFile;
 
 /* Internal structure of access path info */
 

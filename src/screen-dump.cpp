@@ -20,6 +20,7 @@
 #include "rsys/file.h"
 #include "rsys/vdriver.h"
 #include "rsys/screen-dump.h"
+#include "rsys/paths.h"
 
 using namespace Executor;
 

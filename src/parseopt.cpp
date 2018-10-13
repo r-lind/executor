@@ -9,6 +9,7 @@
 #include "rsys/flags.h"
 #include "rsys/prefs.h"
 #include "rsys/version.h"
+#include "rsys/paths.h"
 
 #include <ctype.h>
 #include <string.h>
@@ -85,7 +86,7 @@ bool Executor::parse_system_version(string vers)
     else
     {
         fprintf(stderr, "%s: bad option `-system': invalid version\n",
-                program_name);
+                ROMlib_appname.c_str());
     }
 
     return retval;

@@ -26,6 +26,7 @@
 #include "rsys/notmac.h"
 #include "rsys/gestalt.h"
 #include "rsys/osevent.h"
+#include "rsys/paths.h"
 #include <algorithm>
 
 #define ABOUT_BOX_WIDTH 500

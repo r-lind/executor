@@ -12,9 +12,6 @@
 #include "rsys/commonevt.h"
 namespace Executor
 {
-
-extern std::string ROMlib_appname;
-
 extern BOOLEAN ROMlib_shouldalarm(void);
 
 extern void querypointerX(LONGINT *xp, LONGINT *yp, LONGINT *modp);

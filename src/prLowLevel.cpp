@@ -29,6 +29,7 @@
 #include "rsys/osevent.h"
 #include "rsys/functions.impl.h"
 #include "rsys/prefs.h"
+#include "rsys/paths.h"
 #include <algorithm>
 
 #ifdef MACOSX_

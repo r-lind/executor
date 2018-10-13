@@ -580,61 +580,6 @@ void Executor::C_PrClosePage(TPPrPort pPrPort)
     page_is_open = false;
 }
 
-#if defined(MSDOS) || defined(CYGWIN32)
-
-#include <process.h>
-
-#if !defined P_WAIT
-#define P_WAIT 1
-#endif
-
-#define BATCH_FILE_NAME "+\\print.bat"
-
-static void
-backslash_string(char *p)
-{
-    for(; *p; ++p)
-        if(*p == '/')
-            *p = '\\';
-}
-
-static void
-invoke_print_batch_file(const char *filename, ini_key_t printer, ini_key_t port)
-{
-    int spawn_result;
-    std::string batch_file;
-    char *backslashed_filename;
-    char *backslashed_start_dir;
-
-    batch_file = expandPath(BATCH_FILE_NAME);
-    backslashed_filename = alloca(strlen(filename) + 1);
-    strcpy(backslashed_filename, filename);
-    backslash_string(backslashed_filename);
-
-    backslashed_start_dir = alloca(strlen(ROMlib_startdir) + 1);
-    strcpy(backslashed_start_dir, ROMlib_startdir);
-    backslash_string(backslashed_start_dir);
-
-    if(deferred_printing_p)
-    {
-        add_to_cleanup("cd %s\n%s %s %s %s %s\n", backslashed_start_dir,
-                       batch_file.c_str(), backslashed_start_dir, backslashed_filename,
-                       printer, port);
-    }
-    else
-    {
-        spawn_result = spawnl(P_WAIT, batch_file.c_str(), BATCH_FILE_NAME,
-                              backslashed_start_dir, backslashed_filename,
-                              printer, port, 0);
-
-        warning_trace_info("spawn(\"%s\", \"%s\", \"%s\", \"%s\", \"%s\") = %d",
-                           batch_file.c_str(), backslashed_start_dir,
-                           backslashed_filename,
-                           printer, port, spawn_result);
-    }
-}
-#endif
-
 void Executor::C_PrCloseDoc(TPPrPort port)
 {
     if(ROMlib_printfile)
@@ -658,25 +603,12 @@ void Executor::C_PrCloseDoc(TPPrPort port)
     else if(ROMlib_printfile)
     {
         fclose(ROMlib_printfile);
-#if defined(MSDOS) || defined(CYGWIN32)
 #if defined(CYGWIN32)
         warning_trace_info("ROMlib_printer = %s, WIN32_TOKEN = %s",
                            ROMlib_printer, WIN32_TOKEN);
         if(strcmp(ROMlib_printer, WIN32_TOKEN) == 0)
         {
             print_file(ROMlib_wp, ROMlib_spool_file, NULL);
-        }
-        else
-#endif
-        {
-            if(strcmp(ROMlib_printer, "PostScript File") != 0 && strcmp(ROMlib_printer, "Direct To Port") != 0)
-            {
-                value_t printer, port;
-
-                printer = find_key("Printer", ROMlib_printer);
-                port = find_key("Port", ROMlib_port);
-                invoke_print_batch_file(ROMlib_spool_file, printer, port);
-            }
         }
 #endif
     }

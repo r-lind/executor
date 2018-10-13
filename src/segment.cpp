@@ -32,6 +32,7 @@
 #include "rsys/desk.h"
 #include "rsys/dcache.h"
 #include "rsys/launch.h"
+#include "rsys/paths.h"
 
 #include <ctype.h>
 #include <algorithm>
@@ -316,7 +317,7 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
     }
     else
     {
-        warning_unexpected("%s: unable to get info on `%s'\n", program_name,
+        warning_unexpected("%s: unable to get info on `%s'\n", ROMlib_appname.c_str(),
                            uname);
     }
     return retval;

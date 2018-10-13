@@ -11,7 +11,7 @@
 #include "rsys/flags.h"
 #include "rsys/option.h"
 #include "rsys/parsenum.h"
-#include "rsys/notmac.h"
+#include "rsys/paths.h"
 
 using namespace Executor;
 using namespace std;
@@ -252,7 +252,7 @@ void Executor::opt_register(string new_interface,
      help message */
         fprintf(ERRMSG_STREAM, "\
              %s: internal options error: opt register after help message generation.\n",
-                program_name);
+                ROMlib_appname.c_str());
         exit(-16);
     }
 
@@ -270,7 +270,7 @@ void Executor::opt_register(string new_interface,
                     /* conflicting options */
                     fprintf(ERRMSG_STREAM, "\
                    %s: opt internal error: `%s' and `%s' both request option `%s'\n",
-                            program_name,
+                            ROMlib_appname.c_str(),
                             interface.c_str(), new_interface.c_str(), opt_i->text.c_str());
                     exit(-16);
                 }
@@ -485,7 +485,7 @@ bool Executor::opt_parse(opt_database_t &db, option_vec opts,
                             {
                                 fprintf(ERRMSG_STREAM, "\
 %s: option `-%s' requires argument\n",
-                                        program_name, opt->text.c_str());
+                                        ROMlib_appname.c_str(), opt->text.c_str());
                                 parse_error_p = true;
                             }
                             break;
@@ -501,7 +501,7 @@ bool Executor::opt_parse(opt_database_t &db, option_vec opts,
                             {
                                 fprintf(ERRMSG_STREAM, "\
 %s: option `-%s' requires argument\n",
-                                        program_name, opt->text.c_str());
+                                        ROMlib_appname.c_str(), opt->text.c_str());
                                 parse_error_p = true;
                             }
                             goto next_arg;

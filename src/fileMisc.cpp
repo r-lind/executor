@@ -20,6 +20,7 @@
 #include "rsys/ini.h"
 #include "rsys/string.h"
 #include "rsys/segment.h"
+#include "rsys/paths.h"
 
 #if !defined(WIN32)
 #include <pwd.h>
@@ -608,7 +609,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     };
 
     ROMlib_ConfigurationFolder = initpath("Configuration", "+/Configuration");
-    ROMlib_SystemFolder = initpath("SystemFolder", "+/ExecutorVolume/System Folder");
+    ROMlib_SystemFolder = initpath("SystemFolder", "+/../Resources");
     ROMlib_DirectoryMap = initpath("ExecutorDirectoryMap", "~/.ExecutorDirectoryMap");
     ROMlib_MacVolumes = initpath("MacVolumes", "+");
     ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");

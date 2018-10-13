@@ -69,6 +69,7 @@
 #include "rsys/option.h"
 #include "rsys/emustubs.h"
 #include "rsys/float.h"
+#include "rsys/paths.h"
 
 #include "rsys/os.h"
 #include "rsys/arch.h"
@@ -336,7 +337,7 @@ check_arg(string argname, int *arg, int min, int max)
     if(*arg < min || *arg > max)
     {
         fprintf(stderr, "%s: invalid value for `%s': must be between ",
-                program_name, argname.c_str());
+                ROMlib_appname.c_str(), argname.c_str());
         print_command_line_value(stderr, min);
         fputs(" and ", stderr);
         print_command_line_value(stderr, max);
@@ -421,7 +422,7 @@ static void setstartdir(char *argv0)
     getcwd(ROMlib_startdir, sizeof ROMlib_startdir);
     chdir(savedir);
 #else /* defined(MSDOS) || defined(CYGWIN32) */
-
+    // TODO: replace by GetModuleFilename()
     if(argv0[1] == ':')
     {
         char *lastslash;
@@ -697,16 +698,6 @@ int main(int argc, char **argv)
         exit(-101);
     }
 
-    {
-        char *t;
-
-        t = strrchr(*argv, '/');
-        if(t)
-            program_name = &t[1];
-        else
-            program_name = *argv;
-    }
-
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();
 
@@ -959,7 +950,7 @@ int main(int argc, char **argv)
             if(argv[a][0] == '-')
             {
                 fprintf(stderr, "%s: unknown option `%s'\n",
-                        program_name, argv[a]);
+                        ROMlib_appname.c_str(), argv[a]);
                 bad_arg_p = true;
             }
         }
@@ -969,7 +960,7 @@ int main(int argc, char **argv)
     {
         fprintf(stderr,
                 "Type \"%s -help\" for a list of command-line options.\n",
-                program_name);
+                ROMlib_appname.c_str());
         exit(-10);
     }
 

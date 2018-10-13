@@ -10,9 +10,6 @@ extern int flag_width, flag_height;
 /* 0 means "use default". */
 extern int flag_bpp;
 
-/* *argv; name executor was invoked with */
-extern char *program_name;
-
 /* Approximate command line; argv[] elements separated by spaces. */
 extern const char *ROMlib_command_line;
 

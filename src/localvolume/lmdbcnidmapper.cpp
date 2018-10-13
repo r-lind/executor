@@ -3,6 +3,7 @@
 #include <set>
 #include <OSUtil.h>
 #include <iostream>
+#include "rsys/paths.h"
 
 using namespace Executor;
 

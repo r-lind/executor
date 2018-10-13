@@ -343,6 +343,7 @@ set(include_sources hintemplate.h
                   include/rsys/parsenum.h
                   include/rsys/parseopt.h
                   include/rsys/partition.h
+                  include/rsys/paths.h
                   include/rsys/pef.h
                   include/rsys/picture.h
                   include/rsys/prefpanel.h

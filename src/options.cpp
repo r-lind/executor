@@ -64,9 +64,6 @@ int flag_width, flag_height;
 /* 0 means "use default". */
 int flag_bpp;
 
-/* *argv; name executor was invoked with */
-char *program_name;
-
 /* Approximate command line; argv[] elements separated by spaces. */
 const char *ROMlib_command_line;
 

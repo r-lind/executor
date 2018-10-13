@@ -78,6 +78,8 @@
 
 #include "rsys/logging.h"
 
+#include "rsys/paths.h"
+
 #include <rsys/builtinlibs.h>
 #include <rsys/cpu.h>
 #include <PowerCore.h>

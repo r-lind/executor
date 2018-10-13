@@ -257,7 +257,7 @@ int x_error_handler(Display *err_dpy, XErrorEvent *err_evt)
         char t[256];
 
         XGetErrorText(err_dpy, err_evt->error_code, error_text, 256);
-        fprintf(stderr, "%s: XError `%d': %s\n", program_name,
+        fprintf(stderr, "%s: XError `%d': %s\n", ROMlib_appname.c_str(),
                 err_evt->error_code, error_text);
 
         sprintf(t, "%d", err_evt->request_code);
@@ -1189,7 +1189,7 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
     if(x_dpy == NULL)
     {
         fprintf(stderr, "%s: could not open x server `%s'.\n",
-                program_name, XDisplayName(""));
+                ROMlib_appname.c_str(), XDisplayName(""));
         exit(EXIT_FAILURE);
     }
     x_screen = XDefaultScreen(x_dpy);
@@ -1356,7 +1356,7 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
     if(visual == NULL)
     {
         fprintf(stderr, "%s: no acceptable visual found, exiting.\n",
-                program_name);
+                ROMlib_appname.c_str());
         exit(EXIT_FAILURE);
     }
 
@@ -1562,6 +1562,7 @@ void alloc_x_window(int width, int height, int bpp, bool grayscale_p)
         class_hint.res_name = "executor";
         class_hint.res_class = "Executor";
 
+        char *program_name = const_cast<char*>(ROMlib_appname.c_str());
         XStringListToTextProperty(&program_name, 1, &name);
 
         XSetWMProperties(x_dpy, x_window,
