@@ -32,6 +32,10 @@
 #include <ctype.h>
 #include <algorithm>
 
+#include <cmrc/cmrc.hpp>
+
+CMRC_DECLARE(resources);
+
 using namespace Executor;
 
 namespace Executor
@@ -511,7 +515,7 @@ static void MountMacVolumes(std::string macVolumes)
     futzwithdosdisks();
 }
 
-static void InitSystemFolder(std::string systemFolder)
+void Executor::InitSystemFolder(std::string systemFolder)
 {
     CInfoPBRec cpb;
     WDPBRec wpb;
@@ -557,10 +561,59 @@ static void InitSystemFolder(std::string systemFolder)
     }
 }
 
+void Executor::InitPaths()
+{
+    auto initpath = [](const char *varname, const char *defval) {
+        if(auto v = getenv(varname))
+            return expandPath(v);
+        else
+            return expandPath(defval);
+    };
+
+    ROMlib_ConfigurationFolder = initpath("Configuration", "~/.executor/Configuration");
+    ROMlib_SystemFolder = initpath("SystemFolder", "~/.executor/System Folder");
+    ROMlib_DirectoryMap = initpath("ExecutorDirectoryMap", "~/.executor/cnidmap");
+    ROMlib_MacVolumes = initpath("MacVolumes", "~/.executor/images");
+    ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");
+    ROMlib_OffsetFile = initpath("OffsetFile", "~/.executor/offset_file");
+    ROMlib_PrintersIni = initpath("PrintersIni", "~/.executor/printers.ini");
+    ROMlib_PrintDef = initpath("PrintDef", "~/.executor/printdef.ini");
+
+#if !defined(LITTLEENDIAN)
+    ROMlib_DirectoryMap += "-be";
+#endif /* !defined(LITTLEENDIAN) */
+
+    auto efs = cmrc::resources::get_filesystem();
+    fs::path systemFolder = ROMlib_SystemFolder;
+
+    auto copyfile = [&](fs::path dest, auto from) {
+        fs::ofstream out(dest);
+        std::ostreambuf_iterator<char> begin_dest(out);
+        std::copy(from.begin(), from.end(), begin_dest);
+    };
+
+    auto ensureFile = [&](fs::path dest) {
+        if(!fs::exists(dest))
+        {
+            copyfile(dest, efs.open(dest.filename().string()));
+            if(efs.is_file(dest.filename().string() + ".ad"))
+                copyfile(dest.parent_path() / ("%" + dest.filename().string()),
+                            efs.open(dest.filename().string() + ".ad"));
+        }
+    };
+
+    fs::create_directories(systemFolder);
+    fs::create_directories(systemFolder / "Preferences");
+    ensureFile(systemFolder / "System");
+    ensureFile(systemFolder / "Browser");
+    ensureFile(systemFolder / "godata.sav");
+    ensureFile(ROMlib_PrintDef);
+    ensureFile(ROMlib_PrintersIni);
+    fs::create_directories(ROMlib_ConfigurationFolder);
+}
+
 void Executor::ROMlib_fileinit() /* INTERNAL */
 {
-    INTEGER i;
-    INTEGER wdlen;
     GUEST<THz> savezone;
 
     LM(CurDirStore) = CLC(2);
@@ -575,7 +628,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     LM(FCBSPtr) = RM(NewPtr((Size)sizeof(fcbhidden)));
     ((fcbhidden *)MR(LM(FCBSPtr)))->nbytes = CW(sizeof(fcbhidden));
 
-    for(i = 0; i < NFCB; i++)
+    for(int i = 0; i < NFCB; i++)
     {
         ROMlib_fcblocks[i].fdfnum = 0;
         ROMlib_fcblocks[i].fcleof = CL(i + 1);
@@ -595,34 +648,15 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
     ROMlib_fcblocks[NFCB - 1].fcleof = CLC(-1);
 
 #define NWDENTRIES 40
-    wdlen = NWDENTRIES * sizeof(wdentry) + sizeof(INTEGER);
+    INTEGER wdlen = NWDENTRIES * sizeof(wdentry) + sizeof(INTEGER);
     LM(WDCBsPtr) = RM(NewPtr((Size)wdlen));
     LM(TheZone) = savezone;
     memset(MR(LM(WDCBsPtr)), 0, wdlen);
     *(GUEST<INTEGER> *)MR(LM(WDCBsPtr)) = CW(wdlen);
 
-    auto initpath = [](const char *varname, const char *defval) {
-        if(auto v = getenv(varname))
-            return expandPath(v);
-        else
-            return expandPath(defval);
-    };
-
-    ROMlib_ConfigurationFolder = initpath("Configuration", "+/Configuration");
-    ROMlib_SystemFolder = initpath("SystemFolder", "+/../Resources");
-    ROMlib_DirectoryMap = initpath("ExecutorDirectoryMap", "~/.ExecutorDirectoryMap");
-    ROMlib_MacVolumes = initpath("MacVolumes", "+");
-    ROMlib_ScreenDumpFile = initpath("ScreenDumpFile", "/tmp/excscrn*.tif");
-    ROMlib_OffsetFile = initpath("OffsetFile", "+/offset_file");
-    ROMlib_PrintersIni = initpath("PrintersIni", "+/printers.ini");
-    ROMlib_PrintDef = initpath("PrintDef", "+/printdef.ini");
+    InitPaths();
 
     parse_offset_file();
-
-#if !defined(LITTLEENDIAN)
-    ROMlib_DirectoryMap += "-be";
-#endif /* !defined(LITTLEENDIAN) */
-
     ROMlib_hfsinit();
     MountLocalVolume();
 

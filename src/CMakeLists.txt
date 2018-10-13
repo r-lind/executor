@@ -450,6 +450,7 @@ if(WIN32) # MXE hack
 else()
     target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
 endif()
+target_link_libraries(romlib resources)
 
 add_executable(executor main.cpp)
 target_link_libraries(executor romlib)

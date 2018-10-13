@@ -234,6 +234,9 @@ void MountLocalVolume();
 std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
 std::optional<FSSpec> macPathToFSSpec(const std::string& p);
 
+void ROMlib_fileinit(void);
+void InitSystemFolder(std::string systemFolder);
+void InitPaths();
 
 typedef struct
 {
@@ -324,8 +327,6 @@ extern DrvQExtra *ROMlib_addtodq(ULONGINT drvsize, const char *devicename,
 
 extern Byte open_attrib_bits(LONGINT file_id, VCB *vcbp, GUEST<INTEGER> *refnump);
 
-
-extern void ROMlib_fileinit(void);
 
 #if !defined(NDEBUG)
 

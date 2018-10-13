@@ -19,6 +19,21 @@ add_library(lmdb
     lmdbxx/lmdb++.h)
 target_include_directories(lmdb PUBLIC lmdb/libraries/liblmdb lmdbxx)
 
+include(cmrc/CMakeRC.cmake)
+cmrc_add_resource_library(resources
+        WHENCE res
+        res/System
+        res/System.ad
+        res/Browser
+        res/Browser.ad
+        res/Printer
+        res/Printer.ad
+        res/godata.sav
+        res/printdef.ini
+        res/printers.ini
+        res/tips.txt
+    )
+
 add_subdirectory(syn68k)
 add_subdirectory(PowerCore)
 add_subdirectory(cxmon)

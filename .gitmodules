@@ -16,3 +16,6 @@
 [submodule "lmdbxx"]
 	path = lmdbxx
 	url = https://github.com/autc04/lmdbxx.git
+[submodule "cmrc"]
+	path = cmrc
+	url = https://github.com/vector-of-bool/cmrc.git
