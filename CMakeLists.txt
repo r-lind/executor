@@ -31,7 +31,10 @@ cmrc_add_resource_library(resources
         res/godata.sav
         res/printdef.ini
         res/printers.ini
-        res/tips.txt
+
+        res/about/1_License.txt
+        res/about/2_Credits.txt
+        res/about/3_Tips.txt
     )
 
 add_subdirectory(syn68k)
