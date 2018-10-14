@@ -193,32 +193,6 @@ static void lastcomponent(StringPtr dest, StringPtr src)
     memmove(dest + 1, lastcolon, n);
 }
 
-#if defined(MSDOS) || defined(CYGWIN32)
-static char *
-canonicalize_potential_windows_path(char *uname)
-{
-    char *p;
-
-    for(p = uname; *p; ++p)
-        if(*p == '\\')
-            *p = '/';
-
-    return uname;
-}
-#endif
-
-static bool
-full_pathname_p(char *uname)
-{
-    bool retval;
-
-    retval = uname[0] == '/';
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(!retval && uname[0] && uname[1] == ':' && uname[2] == '/')
-        retval = true;
-#endif
-    return retval;
-}
 
 static uint8_t
 hexval(char c)
@@ -266,15 +240,11 @@ static BOOLEAN argv_to_appfile(char *, AppFile *);
 
 static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
 {
-    int namelen, pathlen;
-    unsigned char *path, *p;
-    VCBExtra *vcbp;
+    unsigned char *path;
     BOOLEAN retval;
-    INTEGER sysnamelen, totnamelen;
     CInfoPBRec cinfo;
     WDPBRec wpb;
-    struct stat sbuf;
-
+    
     FSSpec spec;
 
     if(auto unixSpec = nativePathToFSSpec(uname))

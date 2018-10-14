@@ -56,7 +56,7 @@ ItemInfo BasiliskFileItem::getInfo()
 {
     fs::path finf = path().parent_path() / ".finf" / path().filename();
 
-    ItemInfo info = {0};
+    ItemInfo info = {};
     fs::ifstream(finf, std::ios::binary).read((char*)&info, sizeof(info));
 
     return info;

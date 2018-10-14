@@ -166,18 +166,6 @@ scroll_stub(syn68k_addr_t junk, void *junk2)
     return retaddr;
 }
 
-static int
-find_button(const char *button_name)
-{
-    size_t i;
-
-    for(i = 0; i < about_box_buttons.size(); i++)
-        if(about_box_buttons[i].name == button_name)
-            break;
-    gui_assert(i < about_box_buttons.size());
-    return i;
-}
-
 /*
  * get an upper bound on the number of tips that may be in the buffer
  */

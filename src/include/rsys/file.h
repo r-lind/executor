@@ -222,13 +222,6 @@ extern fcbrec *PRNTOFPERR(INTEGER prn, OSErr *errp);
 #define ATTRIB_ISADIR (1 << 4)
 #define ATTRIB_ISOPEN (1 << 7)
 
-#define RESOURCEPREAMBLE 512
-#define MAGICWORD 0x41524449
-
-#define CHEATDIR __cheatdir
-
-#define INODEMAP "inodemap"
-
 class Volume;
 void MountLocalVolume();
 std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
