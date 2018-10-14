@@ -35,7 +35,7 @@
 #include <unordered_map>
 
 #ifdef MACOSX
-void macosx_hide_menu_bar(int mouseY);
+void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
 #endif
 #include "../x/x_keycodes.h"
 
@@ -213,16 +213,6 @@ public:
         }
     }
 
-    void mouseMoveEvent(QMouseEvent *ev)
-    {
-#ifdef MACOSX
-        macosx_hide_menu_bar(ev->y());
-#endif
-        LM(MouseLocation).h = CW(ev->x());
-        LM(MouseLocation).v = CW(ev->y());
-
-        adb_apeiron_hack(false);
-    }
     void mousePressRelease(QMouseEvent *ev)
     {
         bool down_p;
@@ -392,7 +382,7 @@ bool Executor::vdriver_acceptable_mode_p(int width, int height, int bpp,
 bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p)
 {
 #ifdef MACOSX
-    macosx_hide_menu_bar(0);
+    macosx_hide_menu_bar(500, 0, 1000, 1000);
     QVector<QRect> screenGeometries = getScreenGeometries();
 #else
     QVector<QRect> screenGeometries = getAvailableScreenGeometries();
@@ -491,6 +481,15 @@ void Executor::vdriver_pump_events()
 {
     qapp->processEvents();
     
+    auto cursorPos = QCursor::pos();
+#ifdef MACOSX
+    macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
+#endif
+    LM(MouseLocation).h = CW(cursorPos.x());
+    LM(MouseLocation).v = CW(cursorPos.y());
+
+    adb_apeiron_hack(false);
+
     static bool beenHere = false;
     if(!beenHere && rootlessRegion)
     {
