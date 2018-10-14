@@ -333,43 +333,41 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
         TRACE(16);
         retval = GetOSEvent(em, evt);
         TRACE(17);
-        if(retval && Cx(evt->what) == keyDown && LM(ScrDmpEnb) && (Cx(evt->modifiers) & (shiftKey | cmdKey)) == (shiftKey | cmdKey))
+
+        short fkeyModifiers = shiftKey | cmdKey;
+#ifdef MACOSX
+        fkeyModifiers = optionKey | cmdKey;
+#endif
+        if(retval && Cx(evt->what) == keyDown && LM(ScrDmpEnb) && (Cx(evt->modifiers) & fkeyModifiers) == fkeyModifiers)
         {
             TRACE(18);
-            switch((Cx(evt->message) & charCodeMask))
+            switch((Cx(evt->message) & keyCodeMask) >> 8)
             {
-                case '1':
-                case '!': /* command shift 1: About Box / Help */
+                case 0x12: /* command shift 1: About Box / Help */
                     retval = false;
                     do_about_box();
                     break;
-                case '2':
-                case '@': /* command shift 2: Floppy Stuff */
+                case 0x13: /* command shift 2: Floppy Stuff */
                     retval = false;
                     /* dofloppymount(); already done at a lower level */
                     break;
-                case '3':
-                case '#': /* command shift 3: Screen Dump to File */
+                case 0x14: /* command shift 3: Screen Dump to File */
                     retval = false;
                     do_dump_screen();
                     break;
-                case '4':
-                case '$': /* command shift 4: Screen Dump to Printer */
+                case 0x15: /* command shift 4: Screen Dump to Printer */
                     retval = false;
                     doscreendumptoprinter();
                     break;
-                case '5':
-                case '%': /* command shift 5: Preferences */
+                case 0x17: /* command shift 5: Preferences */
                     retval = false;
                     dopreferences();
                     break;
-                case '6':
-                case '^': /* command shift 6: Don't restart Executor */
+                case 0x16: /* command shift 6: Don't restart Executor */
                     retval = false;
                     doquitreallyquits();
                     break;
-                case '7':
-                case '&':
+                case 0x1a:
                     retval = false;
                     /* Reset the video mode.  Seems to be needed under DOS
 		 * sometimes when hotkeying around.
@@ -377,10 +375,9 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
                     vdriver_set_mode(0, 0, 0, vdriver_grayscale_p);
                     redraw_screen();
                     break;
-
+                // case 0x1c: // command shift 8
 #if defined(SUPPORT_LOG_ERR_TO_RAM)
-                case '9':
-                case '(': /* command shift 9: Dump RAM error log */
+                case 0x19: /* command shift 9: Dump RAM error log */
                     retval = false;
                     error_dump_ram_err_buf("\n *** cmd-shift-9 pressed ***\n");
                     break;
