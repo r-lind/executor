@@ -57,7 +57,12 @@ void ItemCache::cacheDirectory(DirectoryItemPtr dir)
     catch(boost::filesystem::filesystem_error& exc)
     {
         std::cerr << exc.what() << std::endl;
-        throw OSErrorException(ioErr);
+        //throw OSErrorException(ioErr);
+        // TODO: report this error the right way.
+        // throwing here makes listing the *parent* directory fail,
+        // which is not what we want.
+        // ignoring this error makes inaccessible directories look empty,
+        // which is not perfect, either.
     }
     
     std::vector<CNIDMapper::Mapping> mappings =
