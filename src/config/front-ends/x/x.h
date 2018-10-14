@@ -1,7 +1,4 @@
-/* define `X' the x front-end */
-#if !defined(X)
-#define X
-#endif /* !X */
+#define X11_FRONTEND
 
 extern syn68k_addr_t post_pending_x_events(syn68k_addr_t interrupt_addr,
                                            void *unused);

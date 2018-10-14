@@ -658,11 +658,11 @@ void Executor::C_TECopy(TEHandle te)
         HSetState((Handle)te_style, te_style_flags);
     }
     LM(TEScrpLength) = CW(len);
-#if defined(X) || defined(MACOSX_) || defined(SDL)
+#if defined(X11_FRONTEND) || defined(MACOSX_) || defined(SDL)
     /* ### should this lock `LM(TEScrpHandle)'? */
     PutScrapX(TICK("TEXT"), CW(LM(TEScrpLength)),
               (char *)STARH(MR(LM(TEScrpHandle))), CW(LM(ScrapCount)));
-#endif /* defined(X) */
+#endif /* defined(X11_FRONTEND) */
 
     HSetState(hText, hText_flags);
 }
@@ -675,13 +675,13 @@ void Executor::C_TECut(TEHandle teh)
 
 void Executor::C_TEPaste(TEHandle teh)
 {
-#if defined(X) || defined(MACOSX_) || defined(SDL)
+#if defined(X11_FRONTEND) || defined(MACOSX_) || defined(SDL)
     Size s;
 
     s = GetScrapX(TICK("TEXT"), MR(LM(TEScrpHandle)));
     if(s >= 0)
         LM(TEScrpLength) = CW(s);
-#endif /* defined(X) */
+#endif /* defined(X11_FRONTEND) */
     HLockGuard guard(MR(LM(TEScrpHandle)));
     ROMlib_tedoitall(teh, STARH(MR(LM(TEScrpHandle))), CW(LM(TEScrpLength)),
                      false, NULL);

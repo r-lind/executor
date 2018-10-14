@@ -860,7 +860,7 @@ void Executor::C_SysBeep(INTEGER i) /* SYSTEM DEPENDENT */
 {
 #if defined(MAC)
     DebugStr("\004Beep");
-#elif defined(X) || defined(MACOSX_) || defined(CYGWIN32)
+#elif defined(X11_FRONTEND) || defined(MACOSX_) || defined(CYGWIN32)
     host_beep_at_user();
 #else
     write(1, "\7", 1);

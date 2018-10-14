@@ -553,7 +553,7 @@ void Executor::C_ExitToShell()
 
     dcache_invalidate_all(true);
 
-#if defined(X)
+#if defined(X11_FRONTEND)
     autorepeatonX();
 #endif /* X */
     if(ROMlib_errorstring)

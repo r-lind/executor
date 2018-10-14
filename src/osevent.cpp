@@ -476,7 +476,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
     ROMlib_memnomove_p = false; /* this is an icky hack needed for Excel */
     ticks = TickCount();
 
-#if defined(X)
+#if defined(X11_FRONTEND)
     /* if we are running on a version of linux that doesn't support
        SIGIO this will handle events (although not asynchronously) */
 
@@ -522,7 +522,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
         eventp->when = CL(TickCount());
 
         {
-#if defined(X)
+#if defined(X11_FRONTEND)
             if(true)
             {
                 LONGINT x, y;

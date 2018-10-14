@@ -152,9 +152,9 @@ LONGINT Executor::C_PutScrap(LONGINT len, ResType rest, Ptr p)
         if(retval != noErr)
             /*-->*/ return (retval);
     }
-#if defined(X) || defined(MACOSX_) || defined(SDL)
+#if defined(X11_FRONTEND) || defined(MACOSX_) || defined(SDL)
     PutScrapX(rest, len, (char *)p, CW(LM(ScrapCount)));
-#endif /* defined(X) */
+#endif /* defined(X11_FRONTEND) */
     if(Cx(LM(ScrapState)) == 0)
     {
         retval = FSOpen(MR(LM(ScrapName)), CW(LM(BootDrive)), guestref(f));
@@ -263,14 +263,14 @@ LONGINT Executor::C_GetScrap(Handle h, ResType rest, GUEST<LONGINT> *off)
         h = temph;
     }
 
-#if defined(X) || defined(MACOSX_) || defined(SDL)
+#if defined(X11_FRONTEND) || defined(MACOSX_) || defined(SDL)
     s = GetScrapX(rest, h);
     if(s >= 0)
     {
         *off = 0; /* ack... could mess people up */
         /*-->*/ RETURN(s);
     }
-#endif /* defined(X) */
+#endif /* defined(X11_FRONTEND) */
     if(Cx(LM(ScrapState)) < 0)
     {
         retval = ZeroScrap();

@@ -835,7 +835,7 @@ void SetHandleSize(Handle h, Size newsize)
     bool save_memnomove_p;
     unsigned int state;
 
-#if defined(X) /* what about MACOSX_? */
+#if defined(X11_FRONTEND) /* what about MACOSX_? */
     if(h == MR(LM(TEScrpHandle)))
         WeOwnScrapX();
 #endif

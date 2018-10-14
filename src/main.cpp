@@ -104,7 +104,7 @@ static void setstartdir(char *);
 #include "win_print.h"
 #endif
 
-#if defined(X)
+#if defined(X11_FRONTEND)
 #include "x.h"
 #endif
 
@@ -294,7 +294,7 @@ capable of color.",
     { "clipleak", "UNSUPPORTED (ignored)", opt_no_arg, "" },
 #endif
 
-#if defined(X) || defined(SDL)
+#if defined(X11_FRONTEND) || defined(SDL)
     { "scancodes", "different form of key mapping (may be useful in "
                    "conjunction with -keyboard)",
       opt_no_arg, "" },
@@ -765,7 +765,7 @@ int main(int argc, char **argv)
         ROMlib_hwsurface_p = true;
 #endif
 
-#if defined(X) || (defined(CYGWIN32) && defined(SDL))
+#if defined(X11_FRONTEND) || (defined(CYGWIN32) && defined(SDL))
     if(opt_val(common_db, "scancodes", NULL))
         ROMlib_set_use_scancodes(true);
 #endif
