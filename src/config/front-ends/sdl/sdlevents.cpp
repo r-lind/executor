@@ -463,6 +463,11 @@ handle_sdl_mouse(syn68k_addr_t interrupt_addr, void *unused)
     return (MAGIC_RTE_ADDRESS);
 }
 
+void Executor::vdriver_pump_events()
+{
+    handle_sdl_events(/* dummy */ -1, /* dummy */ NULL);
+}
+
 syn68k_addr_t
 handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
 {

@@ -63,6 +63,12 @@
 
 static bool use_scan_codes = false;
 
+namespace Executor {
+        // FIXME: not including rsys/paths.h because that pulls in boost/filesystem, which CMake doesn't know about yet
+        // (the dependencies are the wrong way aroudn anyway)
+    extern std::string ROMlib_appname;
+}
+
 void
 ROMlib_set_use_scancodes(bool val)
 {
@@ -194,6 +200,8 @@ static XrmDatabase xdb;
 
 Display *x_dpy;
 static int x_screen;
+
+static void querypointerX(int *xp, int *yp, int *modp);
 
 int get_string_resource(char *resource, char **retval)
 {
@@ -985,7 +993,7 @@ x_modifier_p(unsigned int keysym, uint16_t *return_mac_modifier)
     return true;
 }
 
-bool x_event_pending_p(void)
+static bool x_event_pending_p(void)
 {
     fd_set fds;
     struct timeval no_wait;
@@ -998,7 +1006,7 @@ bool x_event_pending_p(void)
     return retval;
 }
 
-syn68k_addr_t
+static syn68k_addr_t
 post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
 {
     XEvent evt;
@@ -1162,29 +1170,8 @@ void x_event_handler(int signo)
     interrupt_generate(M68K_EVENT_PRIORITY);
 }
 
-bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
-                            bool fixed_p, int *argc, char *argv[])
-{
-    int i;
-
-    XVisualInfo *visuals, vistemplate;
-    int n_visuals;
-    int dummy_int;
-    unsigned int geom_width, geom_height;
-    int dummy_bpp;
-    int num_red_bits, low_red_bit;
-    int num_green_bits, low_green_bit;
-    int num_blue_bits, low_blue_bit;
-    char *geom;
-    char *t_str;
-
-    char *xdefs;
-    if(x_dpy != NULL)
+bool Executor::vdriver_cmdline(int *argc, char *argv[])
     {
-        gui_fatal("Internal error: vdriver_init() called twice!\n");
-        return false;
-    }
-
     x_dpy = XOpenDisplay("");
     if(x_dpy == NULL)
     {
@@ -1202,11 +1189,33 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
                                &shm_first_event,
                                &shm_first_error);
 
-    xdefs = XResourceManagerString(x_dpy);
+    char *xdefs = XResourceManagerString(x_dpy);
     if(xdefs)
         xdb = XrmGetStringDatabase(xdefs);
 
     XrmParseCommand(&xdb, opts, NELEM(opts), "Executor", argc, argv);
+
+    return true;
+}
+
+bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
+                            bool fixed_p, int *argc, char *argv[])
+{
+    int i;
+
+    XVisualInfo *visuals, vistemplate;
+    int n_visuals;
+    int dummy_int;
+    unsigned int geom_width, geom_height;
+    int dummy_bpp;
+    int num_red_bits, low_red_bit;
+    int num_green_bits, low_green_bit;
+    int num_blue_bits, low_blue_bit;
+    char *geom;
+    char *t_str;
+
+
+
 
     get_bool_resource("privateColormap", &private_cmap_p);
 
@@ -2345,6 +2354,20 @@ Executor::vdriver_accel_rect_fill(int top, int left, int bottom,
     return VDRIVER_ACCEL_HOST_SCREEN_UPDATE_ONLY;
 }
 
+void Executor::vdriver_pump_events()
+{
+    if(x_event_pending_p())
+        post_pending_x_events(/* dummy */ -1, /* dummy */ NULL);
+
+    LONGINT x, y;
+    LONGINT newmods;
+
+    querypointerX(&x, &y, &newmods);
+    LM(MouseLocation).h = CW(x);
+    LM(MouseLocation).v = CW(y);
+
+}
+
 /* stuff from x.c */
 
 void Executor::host_beep_at_user(void)
@@ -2462,13 +2485,7 @@ int lookupkeysymX(char *evt)
     return XLookupKeysym((XKeyEvent *)evt, 0);
 }
 
-void Executor::autorepeatonX(void)
-{
-    XAutoRepeatOn(x_dpy);
-    XSync(x_dpy, 0);
-}
-
-void Executor::querypointerX(int *xp, int *yp, int *modp)
+void querypointerX(int *xp, int *yp, int *modp)
 {
     Window dummy_window;
     Window child_window;

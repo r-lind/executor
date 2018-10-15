@@ -15,3 +15,5 @@ extern vdriver_x_mode_t vdriver_x_modes;
 #define vdriver_accel_wait()
 
 #define VDRIVER_BYPASS_INTERNAL_FBUF_P() false
+
+#define VDRIVER_PUMP_EVENTS

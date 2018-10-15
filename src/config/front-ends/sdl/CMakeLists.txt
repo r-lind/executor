@@ -1,5 +1,6 @@
 find_package(SDL)
 find_library(X11_LIBRARY X11)
+find_path (X11_INCLUDE_PATH X11/Xresource.h)
 
 if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
     set(OS_SPECIFIC)
@@ -46,5 +47,5 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         target_link_libraries(front-end-sdl ${X11_LIBRARY})
     endif()
 
-    target_include_directories(front-end-sdl PUBLIC . ${SDL_INCLUDE_DIR})
+    target_include_directories(front-end-sdl PUBLIC . ${SDL_INCLUDE_DIR}/.. ${X11_INCLUDE_PATH})
 endif()

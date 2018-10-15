@@ -206,14 +206,6 @@ static void ParseConfigFile(std::string appname, OSType type)
         ROMlib_SetTitle(ROMlib_WindowName.c_str());
     else
         ROMlib_SetTitle(appname.c_str());
-#if 0
-    if (ROMlib_ScreenLocation.first != INITIALPAIRVALUE)
-	ROMlib_HideScreen();
-    if (ROMlib_ScreenLocation.first != INITIALPAIRVALUE) {
-	ROMlib_SetLocation(&ROMlib_ScreenLocation);
-	ROMlib_ShowScreen();
-    }
-#endif
 }
 
 static void beginexecutingat(LONGINT startpc)

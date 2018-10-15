@@ -363,10 +363,15 @@ void Executor::vdriver_opt_register(void)
 {
 }
 
+bool Executor::vdriver_cmdline(int *argc, char *argv[])
+{
+    qapp = new QGuiApplication(*argc, argv);
+    return true;
+}
+
 bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
                             bool fixed_p, int *argc, char *argv[])
 {
-    qapp = new QGuiApplication(*argc, argv);
     return true;
 }
 

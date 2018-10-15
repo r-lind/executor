@@ -14,8 +14,6 @@ namespace Executor
 {
 extern BOOLEAN ROMlib_shouldalarm(void);
 
-extern void querypointerX(LONGINT *xp, LONGINT *yp, LONGINT *modp);
-extern void autorepeatonX(void);
 extern void PutScrapX(OSType type, LONGINT length, char *p, int scrap_cnt);
 extern LONGINT GetScrapX(OSType type, Handle h);
 }

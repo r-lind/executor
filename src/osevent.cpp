@@ -476,32 +476,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
     ROMlib_memnomove_p = false; /* this is an icky hack needed for Excel */
     ticks = TickCount();
 
-#if defined(X11_FRONTEND)
-    /* if we are running on a version of linux that doesn't support
-       SIGIO this will handle events (although not asynchronously) */
-
-    if(x_event_pending_p())
-        post_pending_x_events(/* dummy */ -1, /* dummy */ NULL);
-
-#endif /* X */
-
-#if defined(SDL)
-    /* if we are running SDL with the event thread disabled... */
-    handle_sdl_events(/* dummy */ -1, /* dummy */ NULL);
-
-#endif /* SDL */
-
-#if defined(CYGWIN32) && !defined(SDL)
-    /* Run the Win32 event loop, since currently we don't do this
-       in a separate thread. */
-    process_win32_events();
-
-#endif /* CYGWIN32 */
-
 #ifdef VDRIVER_PUMP_EVENTS
-    /* why oh why are there special cases for all those platforms above?
-       The following call was introduced for the SDL2 front-end,
-       which is newer than all of the above. */
     vdriver_pump_events();
 #endif
 
@@ -521,21 +496,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
     {
         eventp->when = CL(TickCount());
 
-        {
-#if defined(X11_FRONTEND)
-            if(true)
-            {
-                LONGINT x, y;
-                LONGINT newmods;
-
-                querypointerX(&x, &y, &newmods);
-                eventp->where.h = LM(MouseLocation2).h = ROMlib_curs.h = CW(x);
-                eventp->where.v = LM(MouseLocation2).v = ROMlib_curs.v = CW(y);
-            }
-            else
-#endif
-                LM(MouseLocation2) = eventp->where = ROMlib_curs;
-        }
+        LM(MouseLocation2) = eventp->where = ROMlib_curs;
 
         eventp->modifiers = CW(ROMlib_mods);
         if((evmask & autoKeyMask) && lastdown != -1 && ticks > autoticks)

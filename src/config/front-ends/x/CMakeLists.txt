@@ -1,5 +1,6 @@
 find_library(X11_LIBRARY X11)
 find_library(Xext_LIBRARY Xext)
+find_path (X11_INCLUDE_PATH X11/Xresource.h)
 
 if(X11_LIBRARY AND Xext_LIBRARY)
 
@@ -13,7 +14,7 @@ if(X11_LIBRARY AND Xext_LIBRARY)
             sigio_multiplex.cpp
 		)
 	target_link_libraries(front-end-x syn68k ${X11_LIBRARY} ${Xext_LIBRARY})
-	target_include_directories(front-end-x PUBLIC .)
+	target_include_directories(front-end-x PUBLIC . ${X11_INCLUDE_PATH})
     if(CMAKE_COMPILER_IS_GNUCXX)
         # X11 front-end is legacy code.
         # it doesn't pay to fix this.

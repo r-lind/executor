@@ -56,6 +56,10 @@ typedef enum {
 
 namespace Executor
 {
+#if !defined(vdriver_cmdline)
+extern bool vdriver_cmdline(int *argc, char *argv[]);
+#endif
+
 #if !defined(vdriver_init)
 extern bool vdriver_init(int max_width, int max_height, int max_bpp,
                          bool fixed_p, int *argc, char *argv[]);

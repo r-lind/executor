@@ -704,11 +704,7 @@ int main(int argc, char **argv)
     setstartdir(argv[0]);
     set_appname(argv[0]);
 
-        // FIXME: graphics_p is always true here.
-        //        Video drivers need to intercept arguments before normal
-        //        parsing, but there are options that set graphics_p to
-        //        false because initing video won't be necessary.
-    if(graphics_p && !vdriver_init(0, 0, 0, false, &argc, argv))
+    if(!vdriver_cmdline(&argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");
         exit(-12);
@@ -1141,6 +1137,12 @@ int main(int argc, char **argv)
 
     if(graphics_p)
     {
+        if(!vdriver_init(0, 0, 0, false, &argc, argv))
+        {
+            fprintf(stderr, "Unable to initialize video driver.\n");
+            exit(-12);
+        }
+
         /* Set up the current graphics mode appropriately. */
         if(!vdriver_set_mode(flag_width, flag_height, flag_bpp, grayscale_p))
             illegal_mode();

@@ -15,3 +15,5 @@
 #define vdriver_accel_rect_fill(t, l, b, r, c) VDRIVER_ACCEL_NO_UPDATE
 #define vdriver_accel_rect_scroll(t, l, b, r, dx, dy) VDRIVER_ACCEL_NO_UPDATE
 #define vdriver_accel_wait()
+
+#define VDRIVER_PUMP_EVENTS true
