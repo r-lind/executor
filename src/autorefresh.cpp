@@ -33,11 +33,11 @@ checksum_strip(int which_strip)
     const uint32_t *base;
     uint32_t sum;
 
-    strip_rows = vdriver_height / NUM_AUTOREFRESH_STRIPS;
-    base = (const uint32_t *)(vdriver_fbuf
-                              + which_strip * strip_rows * vdriver_row_bytes);
-    row_size = vdriver_row_bytes / (4U * sizeof(uint32_t));
-    next_row_delta = (vdriver_row_bytes * 2 / sizeof(uint32_t)) - (row_size * 4U);
+    strip_rows = vdriver->height() / NUM_AUTOREFRESH_STRIPS;
+    base = (const uint32_t *)(vdriver->framebuffer()
+                              + which_strip * strip_rows * vdriver->rowBytes());
+    row_size = vdriver->rowBytes() / (4U * sizeof(uint32_t));
+    next_row_delta = (vdriver->rowBytes() * 2 / sizeof(uint32_t)) - (row_size * 4U);
 
     /* Sum (most of) the longs on every other row in this strip. */
     for(sum = 0, n = strip_rows; n > 0; n -= 2)
@@ -81,7 +81,7 @@ void note_executor_changed_screen(int top, int bottom)
 {
     int i, first, last, strip_rows;
 
-    strip_rows = vdriver_height / NUM_AUTOREFRESH_STRIPS;
+    strip_rows = vdriver->height() / NUM_AUTOREFRESH_STRIPS;
     first = top / strip_rows;
     last = (bottom - 1) / strip_rows;
 

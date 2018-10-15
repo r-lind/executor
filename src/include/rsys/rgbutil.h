@@ -19,12 +19,14 @@ typedef struct
     uint16_t map[3][256]; /* Maps r,g,b to big endian INTEGER's. */
 } rgb_map_t;
 
-typedef void (*rgb_extract_func_t)(const struct rgb_spec *rgb_spec,
+struct rgb_spec_t;
+
+typedef void (*rgb_extract_func_t)(const rgb_spec_t *rgb_spec,
                                    uint32_t in,
                                    RGBColor *out);
 
 /* This struct describes the format of any RGB pixel. */
-typedef struct rgb_spec
+struct rgb_spec_t
 {
     int bpp; /* Bits per pixel, either 16 or 32. */
     bool big_endian_p; /* true iff a Mac-format pixel.     */
@@ -47,10 +49,10 @@ typedef struct rgb_spec
     rgb_map_t map;
     rgb_extract_func_t pixel_to_rgbcolor;
 
-    uint32_t (*rgbcolor_to_pixel)(const struct rgb_spec *rgb_spec,
+    uint32_t (*rgbcolor_to_pixel)(const rgb_spec_t *rgb_spec,
                                   const RGBColor *color,
                                   bool big_endian_rgbcolor_p);
-} rgb_spec_t;
+};
 
 extern void rgbutil_init(void);
 

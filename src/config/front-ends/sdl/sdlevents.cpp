@@ -28,7 +28,7 @@ using namespace Executor;
 static bool use_scan_codes = false;
 
 void
-ROMlib_set_use_scancodes(bool val)
+SDLVideoDriver::setUseScancodes(bool val)
 {
     use_scan_codes = val;
 }
@@ -592,7 +592,7 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
     return (MAGIC_RTE_ADDRESS);
 }
 
-void Executor::vdriver_pump_events()
+void SDLVideoDriver::pumpEvents()
 {
     handle_sdl_events(/* dummy */ -1, /* dummy */ NULL);
 }

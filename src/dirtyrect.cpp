@@ -239,11 +239,7 @@ clip_and_align_dirty_rects(void)
     vdriver_rect_t *r;
     int i;
 #if VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT
-    int log2_bpp;
-#endif
-
-#if VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT
-    log2_bpp = vdriver_log2_bpp;
+    int log2_bpp = ROMlib_log2[vdriver->bpp()];
 #endif
 
     /* Loop over all rects and canonicalize them. */
@@ -253,8 +249,8 @@ clip_and_align_dirty_rects(void)
 
         if(r->top < 0)
             r->top = 0;
-        if(r->bottom > vdriver_height)
-            r->bottom = vdriver_height;
+        if(r->bottom > vdriver->height())
+            r->bottom = vdriver->height();
 
         /* Pin left and round it down. */
         left = r->left;
@@ -269,8 +265,8 @@ clip_and_align_dirty_rects(void)
 
         /* Pin right and round it up. */
         right = r->right;
-        if(right > vdriver_width)
-            right = vdriver_width;
+        if(right > vdriver->width())
+            right = vdriver->width();
 #if VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT
         right = ((((right << log2_bpp) + ALIGN_BITS) & ~ALIGN_BITS)
                  >> log2_bpp);
@@ -322,6 +318,6 @@ void Executor::dirty_rect_update_screen(void)
         /* Copy rects to a local copy so we are reentrant. */
         memcpy(&dirty_rect_copy[0], &dirty_rect[0], ndr * sizeof dirty_rect[0]);
 
-        vdriver_update_screen_rects(ndr, &dirty_rect_copy[0], false);
+        vdriver->updateScreenRects(ndr, &dirty_rect_copy[0], false);
     }
 }

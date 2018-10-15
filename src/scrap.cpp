@@ -152,7 +152,7 @@ LONGINT Executor::C_PutScrap(LONGINT len, ResType rest, Ptr p)
         if(retval != noErr)
             /*-->*/ return (retval);
     }
-    PutScrapX(rest, len, (char *)p, CW(LM(ScrapCount)));
+    vdriver->putScrap(rest, len, (char *)p, CW(LM(ScrapCount)));
 
     if(Cx(LM(ScrapState)) == 0)
     {
@@ -262,7 +262,7 @@ LONGINT Executor::C_GetScrap(Handle h, ResType rest, GUEST<LONGINT> *off)
         h = temph;
     }
 
-    s = GetScrapX(rest, h);
+    s = vdriver->getScrap(rest, h);
     if(s >= 0)
     {
         *off = 0; /* ack... could mess people up */

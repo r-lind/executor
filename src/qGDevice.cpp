@@ -53,7 +53,7 @@ void Executor::gd_allocate_main_device(void)
 {
     GDHandle graphics_device;
 
-    if(vdriver_fbuf == NULL)
+    if(vdriver->framebuffer() == NULL)
         gui_fatal("vdriver not initialized, unable to allocate `LM(MainDevice)'");
 
     TheZoneGuard guard(LM(SysZone));
@@ -62,7 +62,7 @@ void Executor::gd_allocate_main_device(void)
     Rect *gd_rect;
 
     graphics_device = NewGDevice(/* no driver */ 0,
-                                 mode_from_bpp(vdriver_bpp));
+                                 mode_from_bpp(vdriver->bpp()));
 
     /* we are the main device, since there are currently no others */
     LM(TheGDevice) = LM(MainDevice) = RM(graphics_device);
@@ -80,17 +80,17 @@ void Executor::gd_allocate_main_device(void)
 						 be setting this bit.
 					    | (1 << noDriver) */));
 
-    gd_set_bpp(graphics_device, !vdriver_grayscale_p, vdriver_fixed_clut_p,
-               vdriver_bpp);
+    gd_set_bpp(graphics_device, !vdriver->isGrayscale(), vdriver->isFixedCLUT(),
+               vdriver->bpp());
 
     gd_pixmap = GD_PMAP(graphics_device);
-    PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver_row_bytes));
-    PIXMAP_BASEADDR_X(gd_pixmap) = RM((Ptr)vdriver_fbuf);
+    PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver->rowBytes()));
+    PIXMAP_BASEADDR_X(gd_pixmap) = RM((Ptr)vdriver->framebuffer());
 
     gd_rect = &GD_RECT(graphics_device);
     gd_rect->top = gd_rect->left = CWC(0);
-    gd_rect->bottom = CW(vdriver_height);
-    gd_rect->right = CW(vdriver_width);
+    gd_rect->bottom = CW(vdriver->height());
+    gd_rect->right = CW(vdriver->width());
     PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
 
     /* add ourselves to the device list */
@@ -98,7 +98,7 @@ void Executor::gd_allocate_main_device(void)
     LM(DeviceList) = RM(graphics_device);
 
     /* Assure that we're using the correct colors. */
-    vdriver_set_colors(0, 1 << vdriver_bpp,
+    vdriver->setColors(0, 1 << vdriver->bpp(),
                        CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(graphics_device))));
 }
 
@@ -202,7 +202,7 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
                 SetHandleSize((Handle)gd_color_table,
                               CTAB_STORAGE_FOR_SIZE((1 << bpp) - 1));
                 CTAB_SIZE_X(gd_color_table) = CW((1 << bpp) - 1);
-                vdriver_get_colors(0, 1 << bpp,
+                vdriver->getColors(0, 1 << bpp,
                                    CTAB_TABLE(gd_color_table));
 
                 CTAB_SEED_X(gd_color_table) = CL(GetCTSeed());
@@ -226,7 +226,7 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
         MakeITable(gd_color_table, GD_ITABLE(gd), GD_RES_PREF(gd));
 
         if(main_device_p && !fixed_p)
-            vdriver_set_colors(0, 1 << bpp, CTAB_TABLE(gd_color_table));
+            vdriver->setColors(0, 1 << bpp, CTAB_TABLE(gd_color_table));
     }
 }
 
@@ -393,9 +393,9 @@ INTEGER Executor::C_HasDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
        || bpp == 0)
         return false;
 
-    return (vdriver_acceptable_mode_p(0, 0, bpp, ((which_flags & (1 << gdDevType))
+    return (vdriver->isAcceptableMode(0, 0, bpp, ((which_flags & (1 << gdDevType))
                                                       ? (flags & (1 << gdDevType)) == (1 << gdDevType)
-                                                      : vdriver_grayscale_p),
+                                                      : vdriver->isGrayscale()),
                                       false));
 }
 
@@ -418,9 +418,9 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     HideCursor();
 
-    note_executor_changed_screen(0, vdriver_height);
+    note_executor_changed_screen(0, vdriver->height());
 
-    if(bpp == 0 || !vdriver_set_mode(0, 0, bpp, ((which_flags & (1 << gdDevType)) ? !(flags & (1 << gdDevType)) : vdriver_grayscale_p)))
+    if(bpp == 0 || !vdriver->setMode(0, 0, bpp, ((which_flags & (1 << gdDevType)) ? !(flags & (1 << gdDevType)) : vdriver->isGrayscale())))
     {
         /* IMV says this2 returns non-zero in error case; not positive
 	 cDepthErr is correct; need to verify */
@@ -428,12 +428,12 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
         return cDepthErr;
     }
 
-    if(vdriver_fbuf == NULL)
+    if(vdriver->framebuffer() == NULL)
         gui_fatal("vdriver not initialized, unable to change bpp");
-    gd_set_bpp(gdh, !vdriver_grayscale_p, vdriver_fixed_clut_p, bpp);
+    gd_set_bpp(gdh, !vdriver->isGrayscale(), vdriver->isFixedCLUT(), bpp);
 
-    PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver_row_bytes));
-    screenBitsX.rowBytes = CW(vdriver_row_bytes);
+    PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver->rowBytes()));
+    screenBitsX.rowBytes = CW(vdriver->rowBytes());
 
     cursor_reset_current_cursor();
 

@@ -1,6 +1,4 @@
-#include "rsys/common.h"
-#include "rsys/vdriver.h"
-#include "rsys/cquick.h" /* for ROMlib_log2 */
+#include "sdl2.h"
 #include "rsys/adb.h"
 #include "rsys/osevent.h"
 #include "rsys/scrap.h"
@@ -8,53 +6,24 @@
 #include "rsys/parse.h"
 #include "OSEvent.h"
 #include "ToolboxEvent.h"
-#include "SegmentLdr.h"
 #include "ScrapMgr.h"
+#include "SegmentLdr.h"
 
 #include "keycode_map.h"
 
 #include <SDL.h>
-#ifdef WIN32
-#include <SDL_syswm.h>
-#include "sdl2_hwnd.h"
-#endif
-
-namespace Executor
-{
-/* These variables are required by the vdriver interface. */
-uint8_t *vdriver_fbuf;
-int vdriver_row_bytes;
-int vdriver_width = 1024;
-int vdriver_height = 768;
-int vdriver_bpp = 8, vdriver_log2_bpp;
-int vdriver_max_bpp, vdriver_log2_max_bpp;
-vdriver_modes_t *vdriver_mode_list;
-
-int host_cursor_depth = 1;
-}
 
 using namespace Executor;
 
 namespace
 {
-vdriver_modes_t sdl_impotent_modes = { 0, 0 };
 SDL_Window *sdlWindow;
 /*SDL_Renderer *sdlRenderer;
 SDL_Texture *sdlTexture;*/
 SDL_Surface *sdlSurface;
 }
 
-void Executor::vdriver_opt_register(void)
-{
-}
-
-bool Executor::vdriver_cmdline(int *argc, char *argv[])
-{
-    return true;
-}
-
-bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
-                            bool fixed_p, int *argc, char *argv[])
+bool SDL2VideoDriver::init()
 {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
     {
@@ -64,47 +33,26 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
     return true;
 }
 
-bool Executor::vdriver_acceptable_mode_p(int width, int height, int bpp,
-                                         bool grayscale_p, bool exact_match_p)
-{
-    if(bpp == 1 || bpp == 4 || bpp == 8 || bpp == 16 || bpp == 32)
-        return true;
-    else
-        return false;
-}
-
-#ifdef WIN32
-HWND Executor::getMainSDLWindow()
-{
-    SDL_SysWMinfo info;
-    SDL_GetWindowWMInfo(sdlWindow, &info);
-    return info.info.win.window;
-}
-#endif
-
-bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p)
+bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     printf("set_mode: %d %d %d", width, height, bpp);
-    if(vdriver_fbuf)
-        delete[] vdriver_fbuf;
+    if(framebuffer_)
+        delete[] framebuffer_;
 
     if(width)
-        vdriver_width = width;
+        width_ = width;
     if(height)
-        vdriver_height = height;
+        height_ = height;
     if(bpp)
-        vdriver_bpp = bpp;
-    vdriver_row_bytes = vdriver_width * vdriver_bpp / 8;
-    vdriver_log2_bpp = ROMlib_log2[vdriver_bpp];
-    vdriver_mode_list = &sdl_impotent_modes;
+        bpp_ = bpp;
+    rowBytes_ = width_ * bpp_ / 8;
 
-    vdriver_max_bpp = 8; //32;
-    vdriver_log2_max_bpp = 3; //5;
+    maxBpp_ = 8; //32;
 
     sdlWindow = SDL_CreateWindow("Window",
                                  SDL_WINDOWPOS_UNDEFINED,
                                  SDL_WINDOWPOS_UNDEFINED,
-                                 vdriver_width, vdriver_height,
+                                 width_, height_,
                                  0);
     //SDL_WINDOW_FULLSCREEN_DESKTOP);
 
@@ -117,7 +65,7 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
 
     uint32_t pixelFormat;
 
-    switch(vdriver_bpp)
+    switch(bpp_)
     {
         case 1:
             pixelFormat = SDL_PIXELFORMAT_INDEX1LSB;
@@ -138,7 +86,7 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
             std::abort();
     }
 
-    vdriver_fbuf = new uint8_t[vdriver_width * vdriver_height * 4];
+    framebuffer_ = new uint8_t[width_ * height_ * 4];
 
 #if 1
     uint32_t rmask, gmask, bmask, amask;
@@ -146,23 +94,24 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
     SDL_PixelFormatEnumToMasks(pixelFormat, &sdlBpp, &rmask, &gmask, &bmask, &amask);
 
     sdlSurface = SDL_CreateRGBSurfaceFrom(
-        vdriver_fbuf,
-        vdriver_width, vdriver_height,
+        framebuffer_,
+        width_, height_,
         sdlBpp,
-        vdriver_row_bytes,
+        rowBytes_,
         rmask, gmask, bmask, amask);
 #else
     sdlSurface = SDL_CreateRGBSurfaceWithFormatFrom(
-        vdriver_fbuf,
-        vdriver_width, vdriver_height,
-        vdriver_bpp,
-        vdriver_row_bytes,
+        framebuffer_,
+        width_, height_,
+        bpp_,
+        rowBytes_,
         pixelFormat);
 #endif
 
     return true;
 }
-void Executor::vdriver_set_colors(int first_color, int num_colors, const ColorSpec *colors)
+
+void SDL2VideoDriver::setColors(int first_color, int num_colors, const ColorSpec *colors)
 {
     SDL_Color *sdlColors = (SDL_Color *)alloca(sizeof(SDL_Color) * num_colors);
     for(int i = 0; i < num_colors; i++)
@@ -176,45 +125,14 @@ void Executor::vdriver_set_colors(int first_color, int num_colors, const ColorSp
     SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, first_color, num_colors);
 }
 
-void Executor::vdriver_get_colors(int first_color, int num_colors, ColorSpec *colors)
-{
-    SDL_Color *sdlColors = sdlSurface->format->palette->colors;
-    for(int i = 0; i < num_colors; i++)
-    {
-        SDL_Color &c = sdlColors[first_color + i];
-
-        colors[i].value = CW(first_color + i);
-        colors[i].rgb.red = CW(c.r << 8 | c.r);
-        colors[i].rgb.green = CW(c.g << 8 | c.g);
-        colors[i].rgb.blue = CW(c.b << 8 | c.b);
-    }
-}
-void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *r,
-                                          bool cursor_p)
+void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
+                                        bool cursor_p)
 {
     /*SDL_UpdateTexture(sdlTexture, NULL, vdriver_fbuf, vdriver_row_bytes);
     SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
     SDL_RenderPresent(sdlRenderer);*/
     SDL_BlitSurface(sdlSurface, NULL, SDL_GetWindowSurface(sdlWindow), NULL);
     SDL_UpdateWindowSurface(sdlWindow);
-}
-
-void Executor::vdriver_update_screen(int top, int left, int bottom, int right,
-                                    bool cursor_p)
-{
-    /*SDL_UpdateTexture(sdlTexture, NULL, vdriver_fbuf, vdriver_row_bytes);
-    SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
-    SDL_RenderPresent(sdlRenderer);*/
-    SDL_BlitSurface(sdlSurface, NULL, SDL_GetWindowSurface(sdlWindow), NULL);
-    SDL_UpdateWindowSurface(sdlWindow);
-}
-
-void Executor::vdriver_flush_display(void)
-{
-}
-
-void Executor::vdriver_shutdown(void)
-{
 }
 
 static bool ConfirmQuit()
@@ -267,7 +185,7 @@ static bool isModifier(unsigned char virt, uint16_t *modstore)
     return true;
 }
 
-void Executor::vdriver_pump_events()
+void SDL2VideoDriver::pumpEvents()
 {
     SDL_Event event;
     static uint16_t keymod = 0;
@@ -363,23 +281,8 @@ void Executor::vdriver_pump_events()
     }
 }
 
-void Executor::ROMlib_SetTitle(const char *title)
-{
-}
-
-char *
-Executor::ROMlib_GetTitle(void)
-{
-    static char str[] = "Foo";
-    return str;
-}
-
-void Executor::ROMlib_FreeTitle(char *title)
-{
-}
-
 /* This is really inefficient.  We should hash the cursors */
-void Executor::host_set_cursor(char *cursor_data,
+void SDL2VideoDriver::setCursor(char *cursor_data,
                                unsigned short cursor_mask[16],
                                int hotspot_x, int hotspot_y)
 {
@@ -396,7 +299,7 @@ void Executor::host_set_cursor(char *cursor_data,
     }
 }
 
-int Executor::host_set_cursor_visible(int show_p)
+bool SDL2VideoDriver::setCursorVisible(bool show_p)
 {
     return (SDL_ShowCursor(show_p));
 }

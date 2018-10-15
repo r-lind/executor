@@ -9,6 +9,7 @@
  */
 
 #include "EventMgr.h"
+#include "QuickDraw.h"
 
 #define MODULE_NAME ToolboxEvent
 #include <rsys/api-module.h>

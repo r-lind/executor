@@ -6,6 +6,7 @@
 #include "rsys/string.h"
 #include "rsys/cquick.h"
 #include "rsys/parseopt.h"
+#include "rsys/vdriver.h"
 
 #include "DialogMgr.h"
 #include "SysErr.h"
@@ -371,14 +372,9 @@ int saveprefvalues(const char *savefilename, LONGINT locationx, LONGINT location
         }
         else
         {
-#if defined(VDRIVER_DISPLAYED_IN_WINDOW)
-            char *window_name;
-
-            window_name = ROMlib_GetTitle();
+            std::string window_name = vdriver->getTitle();
             clean(window_name);
-            fprintf(fp, "// WindowName = \"%s\";\n", window_name);
-            ROMlib_FreeTitle(window_name);
-#endif /* defined(VDRIVER_DISPLAYED_IN_WINDOW) */
+            fprintf(fp, "// WindowName = \"%s\";\n", window_name.c_str());
         }
         fprintf(fp, "BitsPerPixel = %d;\n",
                 PIXMAP_PIXEL_SIZE(GD_PMAP(MR(LM(MainDevice)))));

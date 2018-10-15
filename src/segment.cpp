@@ -440,8 +440,8 @@ static void launch_browser(void)
    */
     SetDepth(MR(LM(MainDevice)),
              (flag_bpp
-                  ? std::min(flag_bpp, vdriver_max_bpp)
-                  : vdriver_max_bpp),
+                  ? std::min(flag_bpp, vdriver->maxBpp())
+                  : vdriver->maxBpp()),
              0, 0);
     Launch(LM(FinderName), CW(LM(BootDrive)));
 }

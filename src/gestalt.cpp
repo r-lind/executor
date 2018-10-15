@@ -546,7 +546,7 @@ OSErr Executor::C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
     {
         case gestaltScreenSize:
             replace_physgestalt_selector(gestaltScreenSize,
-                                         ((vdriver_height << 16) | (uint16_t)vdriver_width));
+                                         ((vdriver->height() << 16) | (uint16_t)vdriver->width()));
             break;
 #if defined(CYGWIN32)
         case gestaltGhostScriptVersion:

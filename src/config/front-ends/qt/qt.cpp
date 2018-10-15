@@ -1,3 +1,4 @@
+#include "qt.h"
 
 #include <QGuiApplication>
 #include <QPainter>
@@ -11,17 +12,14 @@
 
 #include <optional>
 
-#include "rsys/common.h"
 #include "rsys/vdriver.h"
-#include "rsys/cquick.h" /* for ROMlib_log2 */
+#include "rsys/cquick.h" /* for ThePortGuard */
 #include "rsys/adb.h"
 #include "rsys/osevent.h"
 #include "rsys/scrap.h"
 #include "rsys/keyboard.h"
-#include "rsys/parse.h"
 #include "OSEvent.h"
 #include "ToolboxEvent.h"
-#include "SegmentLdr.h"
 #include "ScrapMgr.h"
 #include "rsys/refresh.h"
 
@@ -44,20 +42,11 @@ Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 
 namespace Executor
 {
-/* These variables are required by the vdriver interface. */
-uint8_t *vdriver_fbuf;
 int vdriver_row_bytes;
 int vdriver_width = 1024;
 int vdriver_height = 768;
-int vdriver_bpp = 8, vdriver_log2_bpp;
-int vdriver_max_bpp, vdriver_log2_max_bpp;
-vdriver_modes_t *vdriver_mode_list;
-
-int host_cursor_depth = 1;
-
-    int fakeArgc = 1;
-    char programName[] = "executor";
-    char *fakeArgv[] = { programName, nullptr };
+int vdriver_bpp = 8;
+int vdriver_max_bpp;
 }
 
 #undef white
@@ -68,7 +57,6 @@ using namespace Executor;
 namespace
 {
 class ExecutorWindow;
-vdriver_modes_t zero_modes = { 0, 0 };
 QGuiApplication *qapp;
 QImage *qimage;
 uint16_t keymod = 0;
@@ -332,16 +320,16 @@ public:
 
 std::optional<QBitmap> rootlessRegion;
 
-void Executor::vdriver_set_rootless_region(RgnHandle rgn)
+void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
     ThePortGuard guard;
     GrafPort grayRegionPort;
 
     C_OpenPort(&grayRegionPort);
-    short rowBytes = ((vdriver_width + 31) & ~31) / 8;
-    grayRegionPort.portBits.baseAddr = RM((Ptr) vdriver_fbuf + vdriver_row_bytes * vdriver_height * 4);
-    grayRegionPort.portBits.rowBytes = CW( rowBytes );
-    grayRegionPort.portBits.bounds = { CW(0), CW(0), CW(vdriver_height), CW(vdriver_width) };
+    short grayRegionRowBytes = ((width() + 31) & ~31) / 8;
+    grayRegionPort.portBits.baseAddr = RM((Ptr) framebuffer() + rowBytes() * height() * 4);
+    grayRegionPort.portBits.rowBytes = CW( grayRegionRowBytes );
+    grayRegionPort.portBits.bounds = { CW(0), CW(0), CW(height()), CW(width()) };
     grayRegionPort.portRect = grayRegionPort.portBits.bounds;
 
     C_SetPort(&grayRegionPort);
@@ -351,39 +339,20 @@ void Executor::vdriver_set_rootless_region(RgnHandle rgn)
     C_ClosePort(&grayRegionPort);
 
     rootlessRegion = QBitmap::fromData(
-        QSize((vdriver_width + 31)&~31, vdriver_height),
+        QSize((width() + 31)&~31, height()),
         (const uchar*)MR(grayRegionPort.portBits.baseAddr),
         QImage::Format_Mono);
     
     window->setMask(*rootlessRegion);
 }
 
-void Executor::vdriver_opt_register(void)
+bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
 {
-}
-
-bool Executor::vdriver_cmdline(int *argc, char *argv[])
-{
-    qapp = new QGuiApplication(*argc, argv);
+    qapp = new QGuiApplication(argc, argv);
     return true;
 }
 
-bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
-                            bool fixed_p, int *argc, char *argv[])
-{
-    return true;
-}
-
-bool Executor::vdriver_acceptable_mode_p(int width, int height, int bpp,
-                                         bool grayscale_p, bool exact_match_p)
-{
-    if(bpp == 1 || bpp == 4 || bpp == 8 || bpp == 16 || bpp == 32)
-        return true;
-    else
-        return false;
-}
-
-bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p)
+bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
 #ifdef MACOSX
     macosx_hide_menu_bar(500, 0, 1000, 1000);
@@ -393,31 +362,30 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
 #endif
 
     printf("set_mode: %d %d %d\n", width, height, bpp);
-    if(vdriver_fbuf)
-        delete[] vdriver_fbuf;
+    if(framebuffer_)
+        delete[] framebuffer_;
     
     QRect geom = screenGeometries[0];
 
-    vdriver_width = geom.width();
-    vdriver_height = geom.height();
+    width_ = geom.width();
+    height_ = geom.height();
+
+    isRootless_ = true;
     if(width)
-        vdriver_width = width;
+        width_ = width;
     if(height)
-        vdriver_height = height;
+        height_ = height;
     if(bpp)
-        vdriver_bpp = bpp;
-    vdriver_row_bytes = vdriver_width * vdriver_bpp / 8;
-    vdriver_row_bytes = (vdriver_row_bytes+3) & ~3;
-    vdriver_log2_bpp = ROMlib_log2[vdriver_bpp];
-    vdriver_mode_list = &zero_modes;
+        bpp_ = bpp;
+    rowBytes_ = width_ * bpp_ / 8;
+    rowBytes_ = (rowBytes_+3) & ~3;
 
-    vdriver_max_bpp = 8; //32;
-    vdriver_log2_max_bpp = 3; //5;
+    maxBpp_ = 8; //32;
 
-    vdriver_fbuf = new uint8_t[vdriver_row_bytes * vdriver_height * 5];
+    framebuffer_ = new uint8_t[rowBytes_ * height_ * 5];
 
-    qimage = new QImage(vdriver_fbuf, vdriver_width, vdriver_height, vdriver_row_bytes,
-        vdriver_bpp == 1 ? QImage::Format_Mono : QImage::Format_Indexed8);
+    qimage = new QImage(framebuffer_, width_, height_, rowBytes_,
+        bpp_ == 1 ? QImage::Format_Mono : QImage::Format_Indexed8);
     qimage->setColorTable({qRgb(0,0,0),qRgb(255,255,255)});
 
     window = new ExecutorWindow();
@@ -429,7 +397,7 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
 #endif
     return true;
 }
-void Executor::vdriver_set_colors(int first_color, int num_colors, const ColorSpec *colors)
+void QtVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *colors)
 {
     QVector<QRgb> qcolors(num_colors);
     for(int i = 0; i < num_colors; i++)
@@ -443,21 +411,9 @@ void Executor::vdriver_set_colors(int first_color, int num_colors, const ColorSp
     qimage->setColorTable(qcolors);
 }
 
-void Executor::vdriver_get_colors(int first_color, int num_colors, ColorSpec *colors)
-{
-    QVector<QRgb> qcolors = qimage->colorTable();
-    for(int i = 0; i < num_colors; i++)
-    {
-        colors[i].value = CW(first_color + i);
-        int r = qRed(qcolors[i]), g = qGreen(qcolors[i]), b = qBlue(qcolors[i]);
-        colors[i].rgb.red = CW(r << 8 | r);
-        colors[i].rgb.green = CW(g << 8 | g);
-        colors[i].rgb.blue = CW(b << 8 | b);
-    }
 
-}
-void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *r,
-                                           bool cursor_p)
+void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
+                                      bool cursor_p)
 {
     QRegion rgn;
     for(int i = 0; i < num_rects; i++)
@@ -467,21 +423,13 @@ void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *
     window->update(rgn);
 }
 
-void Executor::vdriver_update_screen(int top, int left, int bottom, int right,
-                                     bool cursor_p)
+void QtVideoDriver::updateScreen(int top, int left, int bottom, int right,
+                                 bool cursor_p)
 {
     window->update(QRect(left, top, right-left, bottom-top));
 }
 
-void Executor::vdriver_flush_display(void)
-{
-}
-
-void Executor::vdriver_shutdown(void)
-{
-}
-
-void Executor::vdriver_pump_events()
+void QtVideoDriver::pumpEvents()
 {
     qapp->processEvents();
     
@@ -521,25 +469,10 @@ void Executor::vdriver_pump_events()
 #endif
 }
 
-void Executor::ROMlib_SetTitle(const char *title)
-{
-}
 
-char *
-Executor::ROMlib_GetTitle(void)
-{
-    static char str[] = "Foo";
-    return str;
-}
-
-void Executor::ROMlib_FreeTitle(char *title)
-{
-}
-
-
-void Executor::host_set_cursor(char *cursor_data,
-                               unsigned short cursor_mask[16],
-                               int hotspot_x, int hotspot_y)
+void QtVideoDriver::setCursor(char *cursor_data,
+                              uint16_t cursor_mask[16],
+                              int hotspot_x, int hotspot_y)
 {
     static QCursor theCursor(Qt::ArrowCursor);
 
@@ -558,10 +491,10 @@ void Executor::host_set_cursor(char *cursor_data,
     window->setCursor(theCursor);   // TODO: should we check for visibility?
 }
 
-int Executor::host_set_cursor_visible(int show_p)
+bool QtVideoDriver::setCursorVisible(bool show_p)
 {
     if(show_p)
-        host_set_cursor(NULL, NULL, 0, 0);
+        setCursor(NULL, NULL, 0, 0);
     else
         window->setCursor(Qt::BlankCursor);
     return true;

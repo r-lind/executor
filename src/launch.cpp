@@ -202,9 +202,9 @@ static void ParseConfigFile(std::string appname, OSType type)
     }
 
     if(!ROMlib_WindowName.empty())
-        ROMlib_SetTitle(ROMlib_WindowName.c_str());
+        vdriver->setTitle(ROMlib_WindowName);
     else
-        ROMlib_SetTitle(appname.c_str());
+        vdriver->setTitle(appname);
 }
 
 static void beginexecutingat(LONGINT startpc)
@@ -1165,8 +1165,8 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
         AE_reinit();
         print_reinit();
 
-        gd_set_bpp(MR(LM(MainDevice)), !vdriver_grayscale_p, vdriver_fixed_clut_p,
-                   vdriver_bpp);
+        gd_set_bpp(MR(LM(MainDevice)), !vdriver->isGrayscale(), vdriver->isFixedCLUT(),
+                   vdriver->bpp());
         ROMlib_init_stdfile();
 #if ERROR_SUPPORTED_P(ERROR_UNEXPECTED)
         if(ERROR_ENABLED_P(ERROR_UNEXPECTED))

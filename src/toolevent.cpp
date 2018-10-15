@@ -372,7 +372,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
                     /* Reset the video mode.  Seems to be needed under DOS
 		 * sometimes when hotkeying around.
 		 */
-                    vdriver_set_mode(0, 0, 0, vdriver_grayscale_p);
+                    vdriver->setMode(0, 0, 0, vdriver->isGrayscale());
                     redraw_screen();
                     break;
                 // case 0x1c: // command shift 8

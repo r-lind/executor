@@ -900,7 +900,7 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
     ColorSpec *ctab_table;
     int ctab_changed_p, i;
     RGBColor *r1, *r2;
-    /* for calling `vdriver_set_colors ()' */
+    /* for calling `vdriver->setColors ()' */
     int first_color, num_colors;
 
     gd = MR(LM(TheGDevice));
@@ -972,7 +972,7 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
             if(num_colors > 0)
             {
                 dirty_rect_update_screen();
-                vdriver_set_colors(first_color, num_colors,
+                vdriver->setColors(first_color, num_colors,
                                    &ctab_table[first_color]);
             }
         }

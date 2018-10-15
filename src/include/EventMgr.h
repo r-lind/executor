@@ -8,7 +8,8 @@
 
  */
 
-#include "QuickDraw.h"
+#include "ExMacTypes.h"
+#include "rsys/lowglobals.h"
 
 namespace Executor
 {

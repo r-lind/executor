@@ -4,7 +4,6 @@ if(SDL2_FOUND)
     add_library(front-end-sdl2
         sdl2.h sdl2.cpp
         keycode_map.cpp
-        sdl2_hwnd.h
     )
 
         # workaround for SDL2_LIBRARIES containing trailing whitespace that is illegal in CMake 3.10

@@ -83,7 +83,11 @@
 
 #include "rsys/check_structs.h"
 
-#include "paramline.h"
+#include "qt.h"
+//#include "sdl2.h"
+//#include "sdl.h"
+//#include "x.h"
+
 
 static void setstartdir(char *);
 
@@ -100,10 +104,6 @@ static void setstartdir(char *);
 #include "win_queue.h"
 #include "win_clip.h"
 #include "win_print.h"
-#endif
-
-#if defined(X11_FRONTEND)
-#include "x.h"
 #endif
 
 #include <vector>
@@ -292,11 +292,9 @@ capable of color.",
     { "clipleak", "UNSUPPORTED (ignored)", opt_no_arg, "" },
 #endif
 
-#if defined(X11_FRONTEND) || defined(SDL)
     { "scancodes", "different form of key mapping (may be useful in "
                    "conjunction with -keyboard)",
-      opt_no_arg, "" },
-#endif
+      opt_no_arg, "" }, // FIXME: only applies to some vdrivers (X11, SDL1 on CYGWIN)
 
     { "ppc", "try to execute the PPC native code if possible (UNSUPPORTED)", opt_no_arg, "" },
 
@@ -569,29 +567,9 @@ static void illegal_mode(void) __attribute__((noreturn));
 static void
 illegal_mode(void)
 {
-    const vdriver_modes_t *vm;
-    int num_sizes, max_width, max_height, max_bpp;
+    vdriver->shutdown(); /* Just to be safe. */
 
-    vm = vdriver_mode_list;
-    num_sizes = vm->num_sizes;
-    max_bpp = vdriver_max_bpp;
-    if(num_sizes)
-    {
-        max_width = vm->size[num_sizes - 1].width;
-        max_height = vm->size[num_sizes - 1].height;
-    }
-    else
-        max_width = max_height = 0; /* quiet gcc */
-
-    vdriver_shutdown(); /* Just to be safe. */
-    if(num_sizes == 0)
-        fprintf(stderr, "Unable to find legal graphics mode.\n");
-    else
-    {
-        fprintf(stderr, "Invalid graphics mode.  Largest allowable "
-                        "screen %dx%d, %d bits per pixel.\n",
-                max_width, max_height, max_bpp);
-    }
+    fprintf(stderr, "Invalid graphics mode.\n");
 
     /* Don't call ExitToShell here; ROMlib isn't set up enough yet to do that. */
     exit(-1);
@@ -652,7 +630,6 @@ construct_command_line_string(int argc, char **argv)
 #define READ_IMPLIES_EXEC 0x0400000
 #endif
 
-
 int main(int argc, char **argv)
 {
     char thingOnStack; /* used to determine an approximation of the stack base address */
@@ -660,10 +637,6 @@ int main(int argc, char **argv)
 
     INTEGER i;
     uint32_t l;
-    static void (*reg_funcs[])(void) = {
-        vdriver_opt_register,
-        NULL,
-    };
     string arg;
 
 #if defined(LINUX) && defined(PERSONALITY_HACK)
@@ -702,7 +675,8 @@ int main(int argc, char **argv)
     setstartdir(argv[0]);
     set_appname(argv[0]);
 
-    if(!vdriver_cmdline(&argc, argv))
+    vdriver = new QtVideoDriver();
+    if(!vdriver->parseCommandLine(argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");
         exit(-12);
@@ -716,8 +690,7 @@ int main(int argc, char **argv)
     opt_register_pre_note("usage: `executor [option...] "
                           "[program [document1 document2 ...]]'");
 
-    for(i = 0; reg_funcs[i]; i++)
-        (*reg_funcs[i])();
+    vdriver->registerOptions();
 
     if(!bad_arg_p)
         bad_arg_p = opt_parse(common_db, common_opts,
@@ -759,10 +732,8 @@ int main(int argc, char **argv)
         ROMlib_hwsurface_p = true;
 #endif
 
-#if defined(X11_FRONTEND) || (defined(CYGWIN32) && defined(SDL))
     if(opt_val(common_db, "scancodes", NULL))
-        ROMlib_set_use_scancodes(true);
-#endif
+        vdriver->setUseScancodes(true);
 
 #if defined(Sound_SDL_Sound)
 
@@ -965,7 +936,7 @@ int main(int argc, char **argv)
 
         save_a7 = EM_A7;
         /* Set up syn68k. */
-        initialize_68k_emulator(vdriver_system_busy,
+        initialize_68k_emulator(nullptr,
                                 use_native_code_p,
                                 (uint32_t *)SYN68K_TO_US(0),
                                 0);
@@ -1024,7 +995,7 @@ int main(int argc, char **argv)
     LM(SoundActive) = soundactiveoff;
     LM(PortBUse) = 2; /* configured for Serial driver */
     memset(LM(KeyMap), 0, sizeof_KeyMap);
-    if(vdriver_grayscale_p || grayscale_p)
+    if(vdriver->isGrayscale() || grayscale_p)
     {
         /* Choose a nice light gray hilite color. */
         LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
@@ -1135,22 +1106,22 @@ int main(int argc, char **argv)
 
     if(graphics_p)
     {
-        if(!vdriver_init(0, 0, 0, false, &argc, argv))
+        if(!vdriver->init())
         {
             fprintf(stderr, "Unable to initialize video driver.\n");
             exit(-12);
         }
 
         /* Set up the current graphics mode appropriately. */
-        if(!vdriver_set_mode(flag_width, flag_height, flag_bpp, grayscale_p))
+        if(!vdriver->setMode(flag_width, flag_height, flag_bpp, grayscale_p))
             illegal_mode();
 
 #if SIZEOF_CHAR_P > 4
-        if(vdriver_fbuf == 0)
+        if(vdriver->framebuffer() == 0)
             abort();
-        ROMlib_offsets[1] = (uintptr_t)vdriver_fbuf;
+        ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
         ROMlib_offsets[1] -= (1UL << 30);
-        ROMlib_sizes[1] = vdriver_width * vdriver_height * 5; // ### //vdriver_row_bytes * vdriver_height;
+        ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5; // ### //vdriver->rowBytes() * vdriver->height();
 #endif
 
         /* initialize the mac rgb_spec's */
@@ -1226,7 +1197,7 @@ int main(int argc, char **argv)
    */
     if(!syncint_init())
     {
-        vdriver_shutdown();
+        vdriver->shutdown();
         fputs("Fatal error:  unable to initialize timer.\n", stderr);
         exit(-11);
     }

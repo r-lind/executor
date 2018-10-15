@@ -8,6 +8,8 @@
 
  */
 
+#include <QuickDraw.h>
+
 namespace Executor
 {
 typedef struct ccrsr_res

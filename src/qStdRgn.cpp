@@ -211,7 +211,7 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
-            vdriver_flush_display();
+            vdriver->flushDisplay();
         }
     }
 
@@ -345,7 +345,7 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
-            vdriver_flush_display();
+            vdriver->flushDisplay();
         }
     }
 }
@@ -453,7 +453,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
-            vdriver_flush_display();
+            vdriver->flushDisplay();
         }
     }
 }
@@ -605,7 +605,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
-            vdriver_flush_display();
+            vdriver->flushDisplay();
         }
     }
 

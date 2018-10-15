@@ -83,7 +83,7 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
 	   * coordinate system sludge.  Copying from the screen is
 	   * uncommon anyway.
 	   */
-            old_vis_p = host_set_cursor_visible(false);
+            old_vis_p = vdriver->setCursorVisible(false);
             cursor_maybe_changed_p = true;
         }
         else
@@ -99,7 +99,7 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
             left = CW(dst->bounds.left);
 
             /* Hide the cursor if necessary. */
-            old_vis_p |= (host_hide_cursor_if_intersects(CW(rp->rgnBBox.top) - top,
+            old_vis_p |= (vdriver->hideCursorIfIntersects(CW(rp->rgnBBox.top) - top,
                                                          CW(rp->rgnBBox.left) - left,
                                                          CW(rp->rgnBBox.bottom) - top,
                                                          CW(rp->rgnBBox.right) - left));
@@ -244,14 +244,14 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
     SETUP_SPECIAL_RGN(rh, srcblt_rgn_start);
 
     /* Make sure we have access to the raw screen bits. */
-    vdriver_accel_wait();
+    vdriver->accelWait();
 
     /* Actually do the blit. */
     srcblt_bitmap();
 
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
     if(cursor_maybe_changed_p)
-        host_set_cursor_visible(old_vis_p);
+        vdriver->setCursorVisible(old_vis_p);
 #endif
 
     return !VDRIVER_BYPASS_INTERNAL_FBUF_P();

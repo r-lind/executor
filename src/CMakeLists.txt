@@ -55,7 +55,7 @@ endfunction()
 
 linkheader("config/os" "host-os-config.h" ${HOST_OS})
 linkheader("config/arch" "host-arch-config.h" ${HOST_ARCH})
-linkheader("config/front-ends" "front-end-config.h" ${FRONT_END})
+#linkheader("config/front-ends" "front-end-config.h" ${FRONT_END})
 linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
 
 add_executable(map_to_c map_to_c/map_to_c.cpp)
@@ -217,7 +217,8 @@ set(misc_sources
   mixed_mode.cpp appearance.cpp lockrange.cpp
   emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
   executor.cpp  crc.cpp
-  prefpanel.cpp dispatcher.cpp options.cpp)
+  prefpanel.cpp dispatcher.cpp options.cpp
+  vdriver.cpp)
 
 set(include_sources hintemplate.h
                   include/ADB.h
@@ -431,7 +432,8 @@ add_library(romlib ${sources}
 
 target_include_directories(romlib PUBLIC include/ ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(romlib front-end-${FRONT_END} arch-${HOST_ARCH})
+# front-end-${FRONT_END}
+target_link_libraries(romlib arch-${HOST_ARCH})
 target_link_libraries(romlib lmdb)
 
 if(HOST_OS STREQUAL win32 OR HOST_OS STREQUAL macosx)
@@ -451,4 +453,4 @@ endif()
 target_link_libraries(romlib resources)
 
 add_executable(executor main.cpp)
-target_link_libraries(executor romlib)
+target_link_libraries(executor romlib front-end-qt)

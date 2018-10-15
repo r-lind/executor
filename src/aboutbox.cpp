@@ -335,10 +335,10 @@ create_about_box()
     int b;
 
     SetRect(&about_box_bounds,
-            (vdriver_width - ABOUT_BOX_WIDTH) / 2U,
-            (vdriver_height - ABOUT_BOX_HEIGHT) / 3U + 15,
-            (vdriver_width + ABOUT_BOX_WIDTH) / 2U,
-            (vdriver_height + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
+            (vdriver->width() - ABOUT_BOX_WIDTH) / 2U,
+            (vdriver->height() - ABOUT_BOX_HEIGHT) / 3U + 15,
+            (vdriver->width() + ABOUT_BOX_WIDTH) / 2U,
+            (vdriver->height() + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
 
     /* Create the window. */
     about_box = (WindowPtr)NewCWindow(NULL, &about_box_bounds,

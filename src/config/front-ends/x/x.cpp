@@ -2,9 +2,8 @@
  * Development, Inc.  All rights reserved.
  */
 
-// #warning Has some hard-coded Executors in it
 
-
+#include "x.h"
 #include "rsys/common.h"
 #include "QuickDraw.h"
 #include "ScrapMgr.h"
@@ -68,30 +67,9 @@ namespace Executor {
 }
 
 void
-ROMlib_set_use_scancodes(bool val)
+X11VideoDriver::setUseScancodes(bool val)
 {
     use_scan_codes = val;
-}
-
-/* These variables are required by the vdriver interface. */
-
-namespace Executor
-{
-uint8_t *vdriver_fbuf;
-
-int vdriver_row_bytes;
-
-int vdriver_width = VDRIVER_DEFAULT_SCREEN_WIDTH;
-
-int vdriver_height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
-
-int vdriver_bpp, vdriver_log2_bpp;
-
-int vdriver_max_bpp, vdriver_log2_max_bpp;
-
-rgb_spec_t *vdriver_rgb_spec;
-
-bool vdriver_grayscale_p;
 }
 
 using namespace Executor;
@@ -185,7 +163,7 @@ static XrmOptionDescRec opts[] = {
     { "-debug", ".debug", XrmoptionSepArg, 0 },
 };
 
-void Executor::vdriver_opt_register(void)
+void X11VideoDriver::registerOptions(void)
 {
     opt_register("vdriver", {
                                 { "synchronous", "run in synchronous mode", opt_no_arg }, { "geometry", "specify the executor window geometry", opt_sep }, { "privatecmap", "have executor use a private x colormap", opt_no_arg }, { "truecolor", "have executor use a TrueColor visual", opt_no_arg },
@@ -1129,7 +1107,7 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
             }
             case Expose:
                 if(colors_initialized_p)
-                    vdriver_update_screen(evt.xexpose.y, evt.xexpose.x,
+                    vdriver->updateScreen(evt.xexpose.y, evt.xexpose.x,
                                           evt.xexpose.y + evt.xexpose.height,
                                           evt.xexpose.x + evt.xexpose.width, false);
                 break;
@@ -1168,8 +1146,8 @@ void x_event_handler(int signo)
     interrupt_generate(M68K_EVENT_PRIORITY);
 }
 
-bool Executor::vdriver_cmdline(int *argc, char *argv[])
-    {
+bool X11VideoDriver::parseCommandLine(int& argc, char *argv[])
+{
     x_dpy = XOpenDisplay("");
     if(x_dpy == NULL)
     {
@@ -1191,13 +1169,12 @@ bool Executor::vdriver_cmdline(int *argc, char *argv[])
     if(xdefs)
         xdb = XrmGetStringDatabase(xdefs);
 
-    XrmParseCommand(&xdb, opts, NELEM(opts), "Executor", argc, argv);
+    XrmParseCommand(&xdb, opts, NELEM(opts), "Executor", &argc, argv);
 
     return true;
 }
 
-bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
-                            bool fixed_p, int *argc, char *argv[])
+bool X11VideoDriver::init()
 {
     int i;
 
@@ -1233,20 +1210,11 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
         XParseGeometry(geom, &dummy_int, &dummy_int,
                        &geom_width, &geom_height);
     }
-    if(!_max_width)
-        _max_width = std::max<int>(VDRIVER_DEFAULT_SCREEN_WIDTH,
+    max_width = std::max<int>(VDRIVER_DEFAULT_SCREEN_WIDTH,
                          (std::max<int>(geom_width, flag_width)));
-    max_width = _max_width;
-    if(!_max_height)
-        _max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT,
+    max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT,
                           std::max<int>(geom_height, flag_height));
-    max_height = _max_height;
-    if(!_max_bpp)
-        _max_bpp = 32;
-    max_bpp = _max_bpp;
-
-    vdriver_x_modes.size[1].width = max_width;
-    vdriver_x_modes.size[1].height = max_height;
+    max_bpp = 32;
 
     /* first attempt to find a 8bpp pseudocolor visual */
     vistemplate.screen = x_screen;
@@ -1372,13 +1340,12 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
     if(max_bpp > x_fbuf_bpp)
         max_bpp = x_fbuf_bpp;
 
-    vdriver_max_bpp = max_bpp;
-    vdriver_log2_max_bpp = ROMlib_log2[max_bpp];
+    maxBpp_ = max_bpp;
 
     alloc_x_image(max_bpp, max_width, max_height,
-                  &vdriver_row_bytes, &x_image, &vdriver_fbuf, &dummy_bpp);
-    fbuf_allocated_row_bytes = vdriver_row_bytes;
-    fbuf_size = vdriver_row_bytes * max_height;
+                  &rowBytes_, &x_image, &framebuffer_, &dummy_bpp);
+    fbuf_allocated_row_bytes = rowBytes_;
+    fbuf_size = rowBytes_ * max_height;
 
     cursor_init();
 
@@ -1408,18 +1375,15 @@ bool Executor::vdriver_init(int _max_width, int _max_height, int _max_bpp,
         x_event_handler(SIGIO);
     }
 
-    /* Force a cleanup on program exit. */
-    atexit(vdriver_shutdown);
-
     return true;
 }
 
-void Executor::vdriver_flush_display(void)
+void X11VideoDriver::flushDisplay(void)
 {
     XFlush(x_dpy);
 }
 
-void alloc_x_window(int width, int height, int bpp, bool grayscale_p)
+void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool grayscale_p)
 {
     XSetWindowAttributes xswa;
     XSizeHints size_hints;
@@ -1448,35 +1412,35 @@ void alloc_x_window(int width, int height, int bpp, bool grayscale_p)
         if(geom)
         {
             geom_mask = XParseGeometry(geom, &x, &y,
-                                       (unsigned int *)&vdriver_width,
-                                       (unsigned int *)&vdriver_height);
+                                       (unsigned int *)&width_,
+                                       (unsigned int *)&height_);
             if(geom_mask & WidthValue)
             {
-                if(vdriver_width < VDRIVER_MIN_SCREEN_WIDTH)
-                    vdriver_width = VDRIVER_MIN_SCREEN_WIDTH;
-                else if(vdriver_width > max_width)
-                    vdriver_width = max_width;
+                if(width_ < VDRIVER_MIN_SCREEN_WIDTH)
+                    width_ = VDRIVER_MIN_SCREEN_WIDTH;
+                else if(width_ > max_width)
+                    width_ = max_width;
 
                 size_hints.flags |= USSize;
             }
             if(geom_mask & HeightValue)
             {
-                if(vdriver_height < VDRIVER_MIN_SCREEN_HEIGHT)
-                    vdriver_height = VDRIVER_MIN_SCREEN_HEIGHT;
-                else if(vdriver_height > max_height)
-                    vdriver_height = max_height;
+                if(height_ < VDRIVER_MIN_SCREEN_HEIGHT)
+                    height_ = VDRIVER_MIN_SCREEN_HEIGHT;
+                else if(height_ > max_height)
+                    height_ = max_height;
                 size_hints.flags |= USSize;
             }
             if(geom_mask & XValue)
             {
                 if(geom_mask & XNegative)
-                    x = XDisplayWidth(x_dpy, x_screen) + x - vdriver_width;
+                    x = XDisplayWidth(x_dpy, x_screen) + x - width_;
                 size_hints.flags |= USPosition;
             }
             if(geom_mask & YValue)
             {
                 if(geom_mask & YNegative)
-                    y = XDisplayHeight(x_dpy, x_screen) + y - vdriver_height;
+                    y = XDisplayHeight(x_dpy, x_screen) + y - height_;
                 size_hints.flags |= USPosition;
             }
             switch(geom_mask & (XNegative | YNegative))
@@ -1512,14 +1476,14 @@ void alloc_x_window(int width, int height, int bpp, bool grayscale_p)
         else if(height > max_height)
             height = max_height;
 
-        vdriver_width = width;
-        vdriver_height = height;
+        width_ = width;
+        height_ = height;
     }
 
     size_hints.min_width = size_hints.max_width
-        = size_hints.base_width = size_hints.width = vdriver_width;
+        = size_hints.base_width = size_hints.width = width_;
     size_hints.min_height = size_hints.max_height
-        = size_hints.base_height = size_hints.height = vdriver_height;
+        = size_hints.base_height = size_hints.height = height_;
 
     size_hints.x = x;
     size_hints.y = y;
@@ -1531,14 +1495,13 @@ void alloc_x_window(int width, int height, int bpp, bool grayscale_p)
     else if(bpp > max_bpp)
         bpp = max_bpp;
 
-    vdriver_bpp = bpp;
-    vdriver_log2_bpp = ROMlib_log2[bpp];
+    bpp_ = bpp;
 
-    vdriver_grayscale_p = grayscale_p;
+    isGrayscale_ = grayscale_p;
 
     /* create the executor window */
     x_window = XCreateWindow(x_dpy, XRootWindow(x_dpy, x_screen),
-                             x, y, vdriver_width, vdriver_height,
+                             x, y, width_, height_,
                              0, 0, InputOutput, CopyFromParent, 0, &xswa);
 
     XDefineCursor(x_dpy, x_window, x_hidden_cursor);
@@ -1584,8 +1547,6 @@ void alloc_x_window(int width, int height, int bpp, bool grayscale_p)
     XFlush(x_dpy);
 }
 
-int Executor::host_cursor_depth = 1;
-
 ::Cursor
 create_x_cursor(char *data, char *mask,
                 int hotspot_x, int hotspot_y)
@@ -1630,9 +1591,9 @@ create_x_cursor(char *data, char *mask,
     return retval;
 }
 
-void Executor::host_set_cursor(char *cursor_data,
-                               unsigned short cursor_mask[16],
-                               int hotspot_x, int hotspot_y)
+void X11VideoDriver::setCursor(char *cursor_data,
+                              uint16_t cursor_mask[16],
+                              int hotspot_x, int hotspot_y)
 {
     ::Cursor orig_x_cursor = x_cursor;
 
@@ -1647,7 +1608,7 @@ void Executor::host_set_cursor(char *cursor_data,
         XFreeCursor(x_dpy, orig_x_cursor);
 }
 
-int Executor::host_set_cursor_visible(int show_p)
+bool X11VideoDriver::setCursorVisible(bool show_p)
 {
     int orig_cursor_visible_p = cursor_visible_p;
 
@@ -2002,24 +1963,18 @@ void init_x_cmap(void)
 static ColorSpec cmap[256];
 static uint8_t depth_table_space[DEPTHCONV_MAX_TABLE_SIZE];
 
-void Executor::vdriver_get_colors(int first_color, int num_colors,
-                                  ColorSpec *colors)
-{
-    gui_fatal("`!vdriver_fixed_clut_p' and `vdriver_get_colors ()' called");
-}
-
-void Executor::vdriver_set_colors(int first_color, int num_colors,
-                                  const ColorSpec *colors)
+void X11VideoDriver::setColors(int first_color, int num_colors,
+                               const ColorSpec *colors)
 {
     int i;
 
     if(x_fbuf_bpp > 8)
     {
-        if(vdriver_bpp > 8)
+        if(bpp() > 8)
         {
             const rgb_spec_t *mac_rgb_spec;
 
-            mac_rgb_spec = ((vdriver_bpp == 16)
+            mac_rgb_spec = ((bpp() == 16)
                                 ? &mac_16bpp_rgb_spec
                                 : &mac_32bpp_rgb_spec);
 
@@ -2032,9 +1987,9 @@ void Executor::vdriver_set_colors(int first_color, int num_colors,
             memcpy(&cmap[first_color], colors, num_colors * sizeof *colors);
 
             conversion_func
-                = depthconv_make_ind_to_rgb_table(depth_table_space, vdriver_bpp,
+                = depthconv_make_ind_to_rgb_table(depth_table_space, bpp(),
                                                   NULL, colors, &x_rgb_spec);
-            vdriver_update_screen(0, 0, vdriver_height, vdriver_width, false);
+            updateScreen(0, 0, height(), width(), false);
         }
     }
     else
@@ -2074,9 +2029,9 @@ void Executor::vdriver_set_colors(int first_color, int num_colors,
             cmap_mapping = _cmap_mapping;
 
             conversion_func
-                = depthconv_make_raw_table(depth_table_space, vdriver_bpp,
+                = depthconv_make_raw_table(depth_table_space, bpp(),
                                            x_fbuf_bpp, NULL, cmap_mapping);
-            vdriver_update_screen(0, 0, vdriver_height, vdriver_width, false);
+            updateScreen(0, 0, height(), width(), false);
         }
     }
     XSync(x_dpy, False);
@@ -2084,13 +2039,13 @@ void Executor::vdriver_set_colors(int first_color, int num_colors,
     colors_initialized_p = true;
 }
 
-void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *r,
-                                          bool cursor_p)
+void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
+                                       bool cursor_p)
 {
     bool convert_p;
     int i;
 
-    convert_p = (x_fbuf_bpp == vdriver_bpp
+    convert_p = (x_fbuf_bpp == bpp()
                  && conversion_func == NULL);
 
     if(!convert_p)
@@ -2109,7 +2064,7 @@ void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *
             else
             {
                 conversion_func
-                    = depthconv_make_raw_table(depth_table_space, vdriver_bpp,
+                    = depthconv_make_raw_table(depth_table_space, bpp(),
                                                x_fbuf_bpp, NULL, cmap_mapping);
             }
         }
@@ -2129,8 +2084,8 @@ void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *
         else
         {
             if(conversion_func)
-                (*conversion_func)(depth_table_space, vdriver_fbuf,
-                                   vdriver_row_bytes, x_fbuf, x_fbuf_row_bytes,
+                (*conversion_func)(depth_table_space, framebuffer(),
+                                   rowBytes(), x_fbuf, x_fbuf_row_bytes,
                                    top, left, bottom, right);
 
             (*x_put_image)(x_dpy, x_window, copy_gc, x_x_image,
@@ -2139,30 +2094,7 @@ void Executor::vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *
     }
 }
 
-void Executor::vdriver_update_screen(int top, int left, int bottom, int right,
-                                    bool cursor_p)
-{
-    vdriver_rect_t r;
-
-    if(top < 0)
-        top = 0;
-    if(left < 0)
-        left = 0;
-
-    if(bottom > vdriver_height)
-        bottom = vdriver_height;
-    if(right > vdriver_width)
-        right = vdriver_width;
-
-    r.top = top;
-    r.left = left;
-    r.bottom = bottom;
-    r.right = right;
-
-    vdriver_update_screen_rects(1, &r, cursor_p);
-}
-
-void Executor::vdriver_shutdown(void)
+void X11VideoDriver::shutdown(void)
 {
     if(x_dpy == NULL)
         return;
@@ -2178,26 +2110,16 @@ void Executor::vdriver_shutdown(void)
     x_dpy = NULL;
 }
 
-vdriver_x_mode_t vdriver_x_modes = {
-    /* contiguous_range_p */ true,
-    /* num_sizes */ 2,
-    {
-        /* min */ { 512, 342 },
-        /* default maximum */
-        /* max */ { VDRIVER_DEFAULT_SCREEN_WIDTH, VDRIVER_DEFAULT_SCREEN_HEIGHT },
-    },
-};
-
-bool Executor::vdriver_acceptable_mode_p(int width, int height, int bpp,
-                                         bool grayscale_p,
-                                         bool exact_match_p)
+bool X11VideoDriver::isAcceptableMode(int width, int height, int bpp,
+                                      bool grayscale_p,
+                                      bool exact_match_p)
 {
     if(width == 0)
-        width = vdriver_width;
+        width = this->width();
     if(height == 0)
-        height = vdriver_height;
+        height = this->height();
     if(bpp == 0)
-        bpp = vdriver_bpp;
+        bpp = this->bpp();
 
     if(width > max_width
        || width < 512
@@ -2212,7 +2134,7 @@ bool Executor::vdriver_acceptable_mode_p(int width, int height, int bpp,
     return true;
 }
 
-bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p)
+bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     if(!x_window)
     {
@@ -2221,14 +2143,14 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
     }
 
     if(width == 0)
-        width = vdriver_width;
+        width = width_;
     else if(width > max_width)
         width = max_width;
     else if(width < VDRIVER_MIN_SCREEN_WIDTH)
         width = VDRIVER_MIN_SCREEN_WIDTH;
 
     if(height == 0)
-        height = vdriver_height;
+        height = height_;
     else if(height > max_height)
         height = max_height;
     else if(height < VDRIVER_MIN_SCREEN_HEIGHT)
@@ -2236,64 +2158,63 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
 
     if(bpp == 0)
     {
-        bpp = vdriver_bpp;
+        bpp = bpp_;
         if(bpp == 0)
-            bpp = std::min(8, vdriver_max_bpp);
+            bpp = std::min(8, maxBpp_);
     }
 
-    if(!vdriver_acceptable_mode_p(width, height, bpp, grayscale_p,
-                                  /* ignored */ false))
+    if(!isAcceptableMode(width, height, bpp, grayscale_p,
+                         /* ignored */ false))
         return false;
 
-    if(width != vdriver_width
-       || height != vdriver_height)
+    if(width != width_
+       || height != height_)
     {
         /* resize; the event code will deal with things when the resize
 	 event comes through */
         XResizeWindow(x_dpy, x_window, width, height);
     }
-    if(bpp != vdriver_bpp)
+    if(bpp != bpp_)
     {
         /* change depth */
-        vdriver_bpp = bpp;
-        vdriver_log2_bpp = ROMlib_log2[bpp];
+        bpp_ = bpp;
 
         /* compute the new row bytes */
-        vdriver_row_bytes = ((width << vdriver_log2_bpp) + 31) / 32 * 4;
+        rowBytes_ = ((width * bpp_) + 31) / 32 * 4;
         /* ### i'm not sure we can just change the `bytes_per_line'
 	 field of a XImage structure and have it automagically work;
 	 but this will only happen when the allocated depth is greater
 	 than the `native' x depth, which probably doesn't happen
 	 right now */
-        if(vdriver_bpp == x_fbuf_bpp
-           && vdriver_row_bytes != fbuf_allocated_row_bytes)
+        if(bpp_ == x_fbuf_bpp
+           && rowBytes_ != fbuf_allocated_row_bytes)
             warning_unexpected("dubious assignment to `x_image->bytes_per_line'");
-        x_image->bytes_per_line = vdriver_row_bytes;
+        x_image->bytes_per_line = rowBytes_;
 
         /* ### if the bpp is greater than eight, we'll need to set it to
 	 something other than `0xFF' */
-        memset(vdriver_fbuf, 0xFF, vdriver_row_bytes * height);
+        memset(framebuffer_, 0xFF, rowBytes_ * height);
 
         /* invalidate the conversion function */
         conversion_func = NULL;
     }
 
-    if(vdriver_grayscale_p != grayscale_p)
+    if(isGrayscale_ != grayscale_p)
     {
-        vdriver_grayscale_p = grayscale_p;
+        isGrayscale_ = grayscale_p;
 
         /* invalidate the conversion function */
         conversion_func = NULL;
     }
 
     /* Compute the rgb spec. */
-    vdriver_rgb_spec = (conversion_func == NULL
+    rgbSpec_ = (conversion_func == NULL
                             ? (visual->c_class == TrueColor
                                    ? &x_rgb_spec
                                    : NULL)
-                            : (vdriver_bpp == 32
+                            : (this->bpp() == 32
                                    ? &mac_32bpp_rgb_spec
-                                   : (vdriver_bpp == 16
+                                   : (this->bpp() == 16
                                           ? &mac_16bpp_rgb_spec
                                           : NULL)));
 
@@ -2301,8 +2222,8 @@ bool Executor::vdriver_set_mode(int width, int height, int bpp, bool grayscale_p
 }
 
 vdriver_accel_result_t
-Executor::vdriver_accel_rect_fill(int top, int left, int bottom,
-                                  int right, uint32_t color)
+X11VideoDriver::accelFillRect(int top, int left, int bottom,
+                              int right, uint32_t color)
 {
     XGCValues gc_values;
     uint32_t x_color;
@@ -2318,9 +2239,9 @@ Executor::vdriver_accel_rect_fill(int top, int left, int bottom,
         x_color = cmap_mapping[color];
     else if(x_fbuf_bpp > 8)
     {
-        if(vdriver_bpp > 8)
+        if(bpp() > 8)
         {
-            rgb_spec_t *mac_rgb_spec = (vdriver_bpp == 32
+            rgb_spec_t *mac_rgb_spec = (bpp() == 32
                                             ? &mac_32bpp_rgb_spec
                                             : &mac_16bpp_rgb_spec);
             RGBColor rgb_color;
@@ -2352,7 +2273,7 @@ Executor::vdriver_accel_rect_fill(int top, int left, int bottom,
     return VDRIVER_ACCEL_HOST_SCREEN_UPDATE_ONLY;
 }
 
-void Executor::vdriver_pump_events()
+void X11VideoDriver::pumpEvents()
 {
     if(x_event_pending_p())
         post_pending_x_events(/* dummy */ -1, /* dummy */ NULL);
@@ -2368,13 +2289,13 @@ void Executor::vdriver_pump_events()
 
 /* stuff from x.c */
 
-void Executor::host_beep_at_user(void)
+void X11VideoDriver::beepAtUser(void)
 {
     /* 50 for now */
     XBell(x_dpy, 0);
 }
 
-void Executor::PutScrapX(OSType type, LONGINT length, char *p, int scrap_count)
+void X11VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_count)
 {
     if(type == TICK("TEXT"))
     {
@@ -2397,12 +2318,12 @@ void Executor::PutScrapX(OSType type, LONGINT length, char *p, int scrap_count)
     }
 }
 
-void Executor::WeOwnScrapX(void)
+void X11VideoDriver::weOwnScrap(void)
 {
     XSetSelectionOwner(x_dpy, XA_PRIMARY, x_window, CurrentTime);
 }
 
-int Executor::GetScrapX(OSType type, Handle h)
+int X11VideoDriver::getScrap(OSType type, Handle h)
 {
     int retval;
 
@@ -2455,27 +2376,26 @@ int Executor::GetScrapX(OSType type, Handle h)
     return retval;
 }
 
-void Executor::ROMlib_SetTitle(const char *newtitle)
+void X11VideoDriver::setTitle(const std::string& newtitle)
 {
     XSizeHints xsh;
 
     memset(&xsh, 0, sizeof xsh);
-    XSetStandardProperties(x_dpy, x_window, newtitle, newtitle, None,
+    char *newtitle_c = const_cast<char*>(newtitle.c_str());
+    XSetStandardProperties(x_dpy, x_window, newtitle_c, newtitle_c, None,
                            nullptr, 0, &xsh);
 }
 
-char *
-Executor::ROMlib_GetTitle(void)
+std::string X11VideoDriver::getTitle(void)
 {
-    char *retval;
+    char *cstr;
 
-    XFetchName(x_dpy, x_window, &retval);
+    XFetchName(x_dpy, x_window, &cstr);
+
+    std::string retval = cstr;
+    XFree(cstr);
+
     return retval;
-}
-
-void Executor::ROMlib_FreeTitle(char *title)
-{
-    XFree(title);
 }
 
 int lookupkeysymX(char *evt)

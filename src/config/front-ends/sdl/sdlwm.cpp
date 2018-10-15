@@ -1,25 +1,21 @@
 /* Copyright 1994, 1995, 1996 by Abacus Research and
  * Development, Inc.  All rights reserved.
  */
-
+#include "sdl.h"
 #include <stdio.h>
 #include "SDL/SDL.h"
 
 #include "rsys/common.h"
-#include "rsys/parse.h" /* FIXME: name one good reason why SetTitle should be declared in a file named parse.h */
-
-/* Globals */
-int Executor::host_cursor_depth = 1;
 
 /* Window manager interface functions */
 
-void Executor::ROMlib_SetTitle(const char *title)
+void SDLVideoDriver::setTitle(const std::string& title)
 {
-    SDL_WM_SetCaption(title, "executor");
+    SDL_WM_SetCaption(title.c_str(), "executor");
 }
 
-char *
-Executor::ROMlib_GetTitle(void)
+std::string
+SDLVideoDriver::getTitle(void)
 {
     char *retval;
 
@@ -27,12 +23,8 @@ Executor::ROMlib_GetTitle(void)
     return retval;
 }
 
-void Executor::ROMlib_FreeTitle(char *title)
-{
-}
-
 /* This is really inefficient.  We should hash the cursors */
-void Executor::host_set_cursor(char *cursor_data,
+void SDLVideoDriver::setCursor(char *cursor_data,
                                unsigned short cursor_mask[16],
                                int hotspot_x, int hotspot_y)
 {
@@ -49,7 +41,7 @@ void Executor::host_set_cursor(char *cursor_data,
     }
 }
 
-int Executor::host_set_cursor_visible(int show_p)
+bool SDLVideoDriver::setCursorVisible(bool show_p)
 {
     return (SDL_ShowCursor(show_p));
 }

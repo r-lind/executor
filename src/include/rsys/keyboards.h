@@ -36,9 +36,5 @@ extern unsigned char next_virt_to_mac_virt[NVIRTMAPS][NKEYSTOMAP];
 #define NSFIP_RIGHT_ARROW_KEYCODE 0x67
 #define NSFIP_UP_ARROW_KEYCODE 0x64
 #define NSFIP_DOWN_ARROW_KEYCODE 0x65
-
-#if defined(SDL) && defined(CYGWIN32)
-extern void ROMlib_set_use_scancodes(bool val);
-#endif
 }
 #endif

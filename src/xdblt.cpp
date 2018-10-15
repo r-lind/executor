@@ -121,7 +121,7 @@ hide_cursor_if_necessary(RgnHandle rh, const PixMap *dst, bool *old_vis)
     left = CW(dst->bounds.left);
     rp = STARH(rh);
 
-    *old_vis = host_hide_cursor_if_intersects(CW(rp->rgnBBox.top) - top,
+    *old_vis = vdriver->hideCursorIfIntersects(CW(rp->rgnBBox.top) - top,
                                               CW(rp->rgnBBox.left) - left,
                                               CW(rp->rgnBBox.bottom) - top,
                                               CW(rp->rgnBBox.right) - left);
@@ -220,9 +220,9 @@ bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
         top = CW(dst->bounds.top);
         left = CW(dst->bounds.left);
 
-        accel_result = vdriver_accel_rect_fill(CW(r->rgnBBox.top) - top, CW(r->rgnBBox.left) - left,
-                                               CW(r->rgnBBox.bottom) - top, CW(r->rgnBBox.right) - left,
-                                               xdblt_pattern_value & ROMlib_pixel_size_mask[x->log2_bpp]);
+        accel_result = vdriver->accelFillRect(CW(r->rgnBBox.top) - top, CW(r->rgnBBox.left) - left,
+                                              CW(r->rgnBBox.bottom) - top, CW(r->rgnBBox.right) - left,
+                                              xdblt_pattern_value & ROMlib_pixel_size_mask[x->log2_bpp]);
 
         if(accel_result != VDRIVER_ACCEL_NO_UPDATE)
             note_executor_changed_screen(CW(r->rgnBBox.top) - top,
@@ -244,7 +244,7 @@ bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
         SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
 
         /* Make sure we have access to the raw screen bits. */
-        vdriver_accel_wait();
+        vdriver->accelWait();
 
         /* Actually do the blit. */
         xdblt_canon_pattern();
@@ -252,7 +252,7 @@ bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
 
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
     if(cursor_maybe_changed_p)
-        host_set_cursor_visible(cursor_vis_p);
+        vdriver->setCursorVisible(cursor_vis_p);
 #endif
 
     return (!VDRIVER_BYPASS_INTERNAL_FBUF_P()
@@ -351,14 +351,14 @@ bool Executor::xdblt_xdata_short_narrow(RgnHandle rh, int mode,
     xdblt_pattern_end = &xdblt_pattern_value + 1;
 
     /* Make sure we have access to the raw screen bits. */
-    vdriver_accel_wait();
+    vdriver->accelWait();
 
     /* Actually do the blit. */
     xdblt_canon_pattern();
 
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
     if(cursor_maybe_changed_p)
-        host_set_cursor_visible(cursor_vis_p);
+        vdriver->setCursorVisible(cursor_vis_p);
 #endif
 
     return !VDRIVER_BYPASS_INTERNAL_FBUF_P();
@@ -515,13 +515,13 @@ bool Executor::xdblt_xdata_complex(RgnHandle rh, int mode,
     SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
 
     /* Make sure we have access to the raw screen bits. */
-    vdriver_accel_wait();
+    vdriver->accelWait();
 
     xdblt_canon_pattern();
 
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
     if(cursor_maybe_changed_p)
-        host_set_cursor_visible(cursor_vis_p);
+        vdriver->setCursorVisible(cursor_vis_p);
 #endif
 
     return !VDRIVER_BYPASS_INTERNAL_FBUF_P();
@@ -643,9 +643,9 @@ do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
         top = CW(dst->bounds.top);
         left = CW(dst->bounds.left);
 
-        accel_result = vdriver_accel_rect_fill(CW(r->rgnBBox.top) - top, CW(r->rgnBBox.left) - left,
-                                               CW(r->rgnBBox.bottom) - top, CW(r->rgnBBox.right) - left,
-                                               xdblt_pattern_value & ROMlib_pixel_size_mask[log2_bpp]);
+        accel_result = vdriver->accelFillRect(CW(r->rgnBBox.top) - top, CW(r->rgnBBox.left) - left,
+                                              CW(r->rgnBBox.bottom) - top, CW(r->rgnBBox.right) - left,
+                                              xdblt_pattern_value & ROMlib_pixel_size_mask[log2_bpp]);
 
         if(accel_result != VDRIVER_ACCEL_NO_UPDATE)
             note_executor_changed_screen(CW(r->rgnBBox.top) - top,
@@ -667,7 +667,7 @@ do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
         SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
 
         /* Make sure we have access to the raw screen bits. */
-        vdriver_accel_wait();
+        vdriver->accelWait();
 
         /* Actually do the blit. */
         xdblt_canon_pattern();
@@ -833,7 +833,7 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
 
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
     if(cursor_maybe_changed_p)
-        host_set_cursor_visible(cursor_vis_p);
+        vdriver->setCursorVisible(cursor_vis_p);
 #endif
 
     return update_dirty_p;

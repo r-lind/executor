@@ -428,7 +428,7 @@ update_port(DialogPtr dp)
             EraseRect(&r);
             HideDialogItem(dp, LAYOUT_PORT_LABEL_NO);
             HideDialogItem(dp, LAYOUT_PORT_MENU_NO);
-            vdriver_flush_display();
+            vdriver->flushDisplay();
 #endif
             ShowDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
             if(!filename_chosen_p)
@@ -457,7 +457,7 @@ update_port(DialogPtr dp)
             HideDialogItem(dp, LAYOUT_PORT_MENU_NO);
             HideDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
             HideDialogItem(dp, LAYOUT_FILENAME_NO);
-            vdriver_flush_display();
+            vdriver->flushDisplay();
             print_where = PRINT_TO_WIN32;
         }
     }
@@ -478,7 +478,7 @@ update_port(DialogPtr dp)
                 InvalRect(&r);
             }
 #else
-            vdriver_flush_display();
+            vdriver->flushDisplay();
 #endif
             print_where = PRINT_TO_PORT;
         }

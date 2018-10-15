@@ -288,10 +288,10 @@ Executor::pixmap_rgb_spec(const PixMap *pixmap)
     if(pixmap->pixelType == CWC(RGBDirect)
        || pixmap->pixelType == CWC(vdriver_rgb_pixel_type))
     {
-        if(vdriver_rgb_spec
+        if(vdriver->rgbSpec()
            && (active_screen_addr_p(pixmap)
                || pixmap->pixelType == CWC(vdriver_rgb_pixel_type)))
-            return vdriver_rgb_spec;
+            return vdriver->rgbSpec();
         else if(pixmap->pixelSize == CWC(16))
             return &mac_16bpp_rgb_spec;
         else if(pixmap->pixelSize == CWC(32))

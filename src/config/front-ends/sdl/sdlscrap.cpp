@@ -7,6 +7,7 @@
 
 /* Handle clipboard text and data in arbitrary formats */
 
+#include "sdl.h"
 #include <stdio.h>
 #include <limits.h>
 
@@ -18,13 +19,6 @@
 #include "rsys/common.h"
 
 #include "rsys/error.h"
-
-namespace Executor
-{
-// ### FIXME: clean up headers.
-extern void PutScrapX(OSType type, LONGINT length, char *p, int scrap_cnt);
-extern LONGINT GetScrapX(OSType type, Handle h);
-}
 
 using namespace Executor;
 
@@ -226,7 +220,7 @@ surface_from_dib(void *lp)
 #endif
 #endif
 
-#if defined(SDL) && defined(LINUX) /* DON'T USE THIS CODE FOR CYGWIN32! */
+#if defined(LINUX) /* DON'T USE THIS CODE FOR CYGWIN32! */
 
 #include "sdlscrap.h"
 
@@ -638,14 +632,14 @@ void export_scrap(const SDL_Event *event)
 }
 
 /* For Executor compatibility */
-LONGINT Executor::GetScrapX(LONGINT type, Executor::Handle h)
+LONGINT SDLVideoDriver::getScrap(LONGINT type, Executor::Handle h)
 {
     int scraplen;
 
     get_scrap(type, &scraplen, h);
     return (scraplen);
 }
-void Executor::PutScrapX(LONGINT type, LONGINT length, char *p, int scrap_count)
+void SDLVideoDriver::putScrap(LONGINT type, LONGINT length, char *p, int scrap_count)
 {
     put_scrap(type, length, p);
 }
@@ -661,11 +655,11 @@ we_lost_clipboard(void)
     return false; /* TODO */
 }
 
-LONGINT Executor::GetScrapX(LONGINT type, Handle h)
+LONGINT SDLVideoDriver::getScrap(LONGINT type, Handle h)
 {
     return -1; /* TODO */
 }
-void Executor::PutScrapX(LONGINT type, LONGINT length, char *p, int scrap_count)
+void SDLVideoDriver::putScrap(LONGINT type, LONGINT length, char *p, int scrap_count)
 {
     /* TODO */
 }

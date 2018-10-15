@@ -661,8 +661,8 @@ void Executor::C_TECopy(TEHandle te)
 
     // FIXME: I seem to dimly remember that the TE scrap was separate from the global scrap.
     /* ### should this lock `LM(TEScrpHandle)'? */
-    PutScrapX(TICK("TEXT"), CW(LM(TEScrpLength)),   
-              (char *)STARH(MR(LM(TEScrpHandle))), CW(LM(ScrapCount)));
+    vdriver->putScrap(TICK("TEXT"), CW(LM(TEScrpLength)),   
+                      (char *)STARH(MR(LM(TEScrpHandle))), CW(LM(ScrapCount)));
 
     HSetState(hText, hText_flags);
 }
@@ -677,7 +677,7 @@ void Executor::C_TEPaste(TEHandle teh)
 {
     Size s;
 
-    s = GetScrapX(TICK("TEXT"), MR(LM(TEScrpHandle)));
+    s = vdriver->getScrap(TICK("TEXT"), MR(LM(TEScrpHandle)));
     if(s >= 0)
         LM(TEScrpLength) = CW(s);
 

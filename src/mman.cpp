@@ -837,7 +837,7 @@ void SetHandleSize(Handle h, Size newsize)
     unsigned int state;
 
     if(h == MR(LM(TEScrpHandle)))
-        WeOwnScrapX();
+        vdriver->weOwnScrap();
 
     MM_SLAM("entry");
 

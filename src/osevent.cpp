@@ -474,9 +474,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
     ROMlib_memnomove_p = false; /* this is an icky hack needed for Excel */
     ticks = TickCount();
 
-#ifdef VDRIVER_PUMP_EVENTS
-    vdriver_pump_events();
-#endif
+    vdriver->pumpEvents();
 
     for(qp = (EvQEl *)MR(LM(EventQueue).qHead); qp && !((1 << Cx(qp->evtQWhat)) & evmask);
         qp = (EvQEl *)MR(qp->qLink))
@@ -588,7 +586,7 @@ Executor::display_keyboard_choices(void)
     INTEGER nres, i, nfound;
     unsigned char(*names)[256];
 
-    vdriver_shutdown();
+    vdriver->shutdown();
     printf("Available keyboard maps:\n");
     SetResLoad(false);
     nres = CountResources(TICK("KCHR"));

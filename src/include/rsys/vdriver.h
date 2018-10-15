@@ -2,12 +2,17 @@
 #if !defined(_VDRIVER_H_)
 #define _VDRIVER_H_
 
+
+#include <ExMacTypes.h>
+
 namespace Executor
 {
 struct ColorSpec;
+struct Region;
+typedef Region *RgnPtr;
+typedef GUEST<RgnPtr> *RgnHandle;
+struct rgb_spec_t;
 }
-
-#include "rsys/rgbutil.h"
 
 namespace Executor
 {
@@ -51,123 +56,107 @@ typedef enum {
 } vdriver_accel_result_t;
 }
 
-/* host_vdriver.h can override some of the following with macros. */
-#include "host_vdriver.h"
+/* We don't provide any accelerated display functions under SDL (yet) */
+#define VDRIVER_BYPASS_INTERNAL_FBUF_P() false
 
 namespace Executor
 {
-#if !defined(vdriver_cmdline)
-extern bool vdriver_cmdline(int *argc, char *argv[]);
-#endif
 
-#if !defined(vdriver_init)
-extern bool vdriver_init(int max_width, int max_height, int max_bpp,
-                         bool fixed_p, int *argc, char *argv[]);
-#endif
-
-#if !defined(vdriver_shutdown)
-extern void vdriver_shutdown(void);
-#endif
-
-#if !defined(vdriver_update_screen)
-extern void vdriver_update_screen(int top, int left, int bottom, int right,
+class VideoDriver
+{
+public:
+    virtual bool parseCommandLine(int& argc, char *argv[]);
+    virtual bool init();
+    virtual void shutdown();
+    virtual void updateScreen(int top, int left, int bottom, int right,
                                  bool cursor_p);
-#endif
-
-#if !defined(vdriver_update_screen_rects)
-extern void vdriver_update_screen_rects(int num_rects, const vdriver_rect_t *r,
+    virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r,
                                        bool cursor_p);
-#endif
-
-#if !defined(vdriver_acceptable_mode_p)
-extern bool vdriver_acceptable_mode_p(int width, int height, int bpp,
+    virtual bool isAcceptableMode(int width, int height, int bpp,
                                       bool grayscale_p,
                                       bool exact_match_p);
-#endif
+    virtual void setColors(int first_color, int num_colors,
+                               const struct ColorSpec *color_array) = 0;
+    virtual void getColors(int first_color, int num_colors,
+                                struct ColorSpec *color_array);
+    virtual bool setMode(int width, int height, int bpp,
+                                bool grayscale_p) = 0;
+    virtual void flushDisplay();
+    virtual void registerOptions();
 
-#if !defined(vdriver_set_colors)
-extern void vdriver_set_colors(int first_color, int num_colors,
-                               const struct ColorSpec *color_array);
-#endif
-
-#if !defined(vdriver_get_colors)
-extern void vdriver_get_colors(int first_color, int num_colors,
-                               struct ColorSpec *color_array);
-#endif
-
-#if !defined(vdriver_set_mode)
-extern bool vdriver_set_mode(int width, int height, int bpp,
-                             bool grayscale_p);
-#endif
-
-#if !defined(vdriver_flush_display)
-extern void vdriver_flush_display(void);
-#endif
-
-#if !defined(vdriver_system_busy)
-extern void vdriver_system_busy(bool busy_p);
-#endif
-
-#if !defined(vdriver_opt_register)
-extern void vdriver_opt_register(void);
-#endif
-
-#if !defined(vdriver_accel_rect_fill)
-extern vdriver_accel_result_t vdriver_accel_rect_fill(int top, int left,
+    virtual vdriver_accel_result_t accelFillRect(int top, int left,
                                                       int bottom, int right,
                                                       uint32_t color);
-#endif
 
-#if !defined(vdriver_accel_rect_scroll)
-extern vdriver_accel_result_t vdriver_accel_rect_scroll(int top, int left,
-                                                        int bottom, int right,
-                                                        int dx, int dy);
-#endif
+        // NOTE: this is never called, and there is no non-trivial implementation
+    virtual vdriver_accel_result_t accelScrollRect(int top, int left,
+                                                            int bottom, int right,
+                                                            int dx, int dy);
+    
+        // NOTE: there is no non-trivial implementation
+    virtual void accelWait();
 
-#if !defined(vdriver_accel_wait)
-extern void vdriver_accel_wait(void);
-#endif
 
-#if !defined(vdriver_fbuf)
-extern uint8_t *vdriver_fbuf;
-#endif
+    virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
+    virtual LONGINT getScrap(OSType type, Handle h);
+    virtual void weOwnScrap();
 
-#if !defined(vdriver_row_bytes)
-extern int vdriver_row_bytes;
-#endif
+    virtual void setTitle(const std::string& name);
+    virtual std::string getTitle();
 
-#if !defined(vdriver_width)
-extern int vdriver_width;
-#endif
+        // X & SDL1/windows only.
+        // TODO: should probably use registerOptions and add a custom option.
+    virtual void setUseScancodes(bool val);
 
-#if !defined(vdriver_height)
-extern int vdriver_height;
-#endif
+    
 
-#if !defined(vdriver_bpp)
-extern int vdriver_bpp;
-#endif
+    virtual void setCursor(char *cursor_data,
+                                uint16_t cursor_mask[16],
+                                int hotspot_x, int hotspot_y);
+    virtual bool setCursorVisible(bool show_p);
 
-#if !defined(vdriver_log2_bpp)
-extern int vdriver_log2_bpp;
-#endif
+    // called only if VDRIVER_SUPPORTS_REAL_SCREEN_BLITS only:
+    virtual bool hideCursorIfIntersects(int top, int left,
+                                        int bottom, int right);
 
-#if !defined(vdriver_max_bpp)
-extern int vdriver_max_bpp;
-#endif
 
-#if !defined(vdriver_log2_max_bpp)
-extern int vdriver_log2_max_bpp;
-#endif
+    virtual void pumpEvents();
+    virtual void setRootlessRegion(RgnHandle rgn);
 
-#if !defined(vdriver_mode_list)
-extern vdriver_modes_t *vdriver_mode_list;
-#endif
+        // TODO: should move to sound driver?
+    virtual void beepAtUser();
 
-#if !defined(vdriver_rgb_spec)
-extern rgb_spec_t *vdriver_rgb_spec;
-#endif
+    int cursorDepth() { return cursorDepth_; }
+    uint8_t *framebuffer() { return framebuffer_; }
+    int width() { return width_; }
+    int height() { return height_; }
+    int rowBytes() { return rowBytes_; }
+    int bpp() { return bpp_; }
+    int maxBpp() { return maxBpp_; }
+    rgb_spec_t *rgbSpec() { return rgbSpec_; }
+    bool isGrayscale() { return isGrayscale_; }
+    bool isFixedCLUT() { return isFixedCLUT_; }
+    bool isRootless() { return isRootless_; }
 
+public:
+    uint8_t* framebuffer_ = nullptr;
+    int width_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
+    int height_ = VDRIVER_DEFAULT_SCREEN_HEIGHT;
+    int bpp_ = 8;
+    int rowBytes_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
+    bool isGrayscale_ = false;
+
+    int maxBpp_ = 8;
+    int cursorDepth_ = 1;
+    bool isRootless_ = false;
+    bool isFixedCLUT_ = false;
+
+    rgb_spec_t *rgbSpec_ = nullptr;
+};
+
+extern VideoDriver *vdriver;
+
+// TODO: none of the existing front ends define this, but there is a lot of conditionally-defined code
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
 
 #if !defined(vdriver_flip_real_screen_pixels_p)
@@ -183,46 +172,12 @@ extern uint8_t *vdriver_real_screen_baseaddr;
 #endif
 
 #if !defined(vdriver_set_up_internal_screen)
-extern void vdriver_set_up_internal_screen(void);
+extern void vdriver_set_up_internal_screen();
 #endif
 
 #endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 
-#if !defined(vdriver_grayscale_p)
-extern bool vdriver_grayscale_p;
-#endif
-
-#if !defined(vdriver_fixed_clut_p)
-extern bool vdriver_fixed_clut_p;
-#endif
-
-#ifdef VDRIVER_PUMP_EVENTS
-extern void vdriver_pump_events();
-#endif
-
-#ifdef VDRIVER_ROOTLESS
-extern void vdriver_set_rootless_region(RgnHandle rgn);
-#endif
-
-extern void PutScrapX(OSType type, LONGINT length, char *p, int scrap_cnt);
-extern LONGINT GetScrapX(OSType type, Handle h);
-extern void WeOwnScrapX();
-
-extern void ROMlib_SetTitle(const char *name);
-extern char *ROMlib_GetTitle(void);
-extern void ROMlib_FreeTitle(char *title);
-
-extern void ROMlib_set_use_scancodes(bool val);
-
-extern int host_cursor_depth;
-
-extern void host_set_cursor(char *cursor_data,
-                            unsigned short cursor_mask[16],
-                            int hotspot_x, int hotspot_y);
-extern int host_set_cursor_visible(int show_p);
-extern bool host_hide_cursor_if_intersects(int top, int left,
-                                           int bottom, int right);
-extern void host_beep_at_user(void);
+// #define VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT number-of-bytes
 
 }
 #endif /* !_VDRIVER_H_ */

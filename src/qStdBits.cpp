@@ -578,7 +578,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 #if defined(SAVE_CURSOR)
         if(screen_src_p)
         {
-            save_cursor_visible_p = host_set_cursor_visible(false);
+            save_cursor_visible_p = vdriver->setCursorVisible(false);
             screen_src_p = false;
         }
 #endif /* SAVE_CURSOR */
@@ -660,7 +660,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 #if defined(SAVE_CURSOR)
         if(screen_src_p)
         {
-            save_cursor_visible_p = host_set_cursor_visible(false);
+            save_cursor_visible_p = vdriver->setCursorVisible(false);
             screen_src_p = false;
         }
 #endif /* SAVE_CURSOR */
@@ -723,7 +723,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 #if defined(SAVE_CURSOR)
         if(screen_src_p)
         {
-            save_cursor_visible_p = host_set_cursor_visible(false);
+            save_cursor_visible_p = vdriver->setCursorVisible(false);
             screen_src_p = false;
         }
 #endif /* SAVE_CURSOR */
@@ -776,7 +776,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 
 #if defined(SAVE_CURSOR)
     if(save_cursor_visible_p)
-        host_set_cursor_visible(true);
+        vdriver->setCursorVisible(true);
 #endif
 
     DisposeRgn(mask_region);
@@ -833,7 +833,7 @@ ROMlib_real_copy_bits(PixMap *src, PixMap *dst,
         screen_src_p = active_screen_addr_p(src);
         if(screen_src_p)
         {
-            save_cursor_visible_p = host_set_cursor_visible(false);
+            save_cursor_visible_p = vdriver->setCursorVisible(false);
             screen_src_p = false;
         }
 #endif /* SAVE_CURSOR */

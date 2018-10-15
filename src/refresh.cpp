@@ -12,6 +12,7 @@
 #include "TimeMgr.h"
 #include "OSEvent.h"
 #include "rsys/syncint.h"
+#include "rsys/cquick.h"
 
 using namespace Executor;
 
@@ -70,7 +71,7 @@ static bool shadow_screen_invalid_p;
 void Executor::set_refresh_rate(int new1)
 {
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    int old_vis = host_set_cursor_visible(false);
+    int old_vis = vdriver->setCursorVisible(false);
 #endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
     static int last_refresh_set = 0;
 
@@ -103,7 +104,7 @@ void Executor::set_refresh_rate(int new1)
     ROMlib_refresh = last_refresh_set = new1;
 
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    host_set_cursor_visible(old_vis);
+    vdriver->setCursorVisible(old_vis);
 #endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 }
 
@@ -298,21 +299,21 @@ static void flush_shadow_screen()
    */
     if(shadow_fbuf == NULL)
     {
-        shadow_fbuf = (uint8_t *)malloc(vdriver_row_bytes * vdriver_height);
-        memcpy(shadow_fbuf, vdriver_fbuf,
-               vdriver_row_bytes * vdriver_height);
-        vdriver_update_screen(0, 0, vdriver_height, vdriver_width, false);
+        shadow_fbuf = (uint8_t *)malloc(vdriver->rowBytes() * vdriver->height());
+        memcpy(shadow_fbuf, vdriver->framebuffer(),
+               vdriver->rowBytes() * vdriver->height());
+        vdriver->updateScreen(0, 0, vdriver->height(), vdriver->width(), false);
     }
-    else if(find_changed_rect_and_update_shadow((uint32_t *)vdriver_fbuf,
+    else if(find_changed_rect_and_update_shadow((uint32_t *)vdriver->framebuffer(),
                                                 (uint32_t *)shadow_fbuf,
-                                                (vdriver_row_bytes
+                                                (vdriver->rowBytes()
                                                  / sizeof(uint32_t)),
-                                                vdriver_height,
+                                                vdriver->height(),
                                                 &top_long, &left_long,
                                                 &bottom_long, &right_long))
     {
-        vdriver_update_screen(top_long, (left_long * 32) >> vdriver_log2_bpp,
+        vdriver->updateScreen(top_long, (left_long * 32) >> ROMlib_log2[vdriver->bpp()],
                               bottom_long,
-                              (right_long * 32) >> vdriver_log2_bpp, false);
+                              (right_long * 32) >> ROMlib_log2[vdriver->bpp()], false);
     }
 }

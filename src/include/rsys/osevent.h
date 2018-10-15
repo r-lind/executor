@@ -1,6 +1,8 @@
 #if !defined(_RSYS_OSEVENT_H_)
 #define _RSYS_OSEVENT_H_
 
+#include <EventMgr.h>
+
 namespace Executor
 {
 extern INTEGER ROMlib_mods;

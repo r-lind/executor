@@ -26,7 +26,7 @@
 
 using namespace Executor;
 
-#define HOST_SET_CURSOR(d, m, x, y) host_set_cursor(d, m, x, y)
+#define HOST_SET_CURSOR(d, m, x, y) vdriver->setCursor(d, m, x, y)
 
 #else
 
@@ -42,8 +42,8 @@ cursor_debug(const uint8_t *datap, const uint8_t *maskp, int hot_x, int hot_y)
     uint8_t *pixel;
     int offset;
 
-    pixel = vdriver_fbuf;
-    offset = vdriver_row_bytes - 16;
+    pixel = vdriver->framebuffer();
+    offset = vdriver->rowBytes() - 16;
     for(y = 0; y < 16; ++y)
     {
         uint16_t u, bit;
@@ -56,14 +56,14 @@ cursor_debug(const uint8_t *datap, const uint8_t *maskp, int hot_x, int hot_y)
     }
     dirty_rect_accrue(0, 0, 16, 16);
     dirty_rect_update_screen();
-    vdriver_flush_display();
+    vdriver->flushDisplay();
 }
 
 #define HOST_SET_CURSOR(d, m, x, y)  \
     do                               \
     {                                \
         cursor_debug(d, m, x, y);    \
-        host_set_cursor(d, m, x, y); \
+        vdriver->setCursor(d, m, x, y); \
     } while(false)
 
 #endif
@@ -87,7 +87,7 @@ void Executor::ROMlib_showcursor()
 {
     if(!LM(CrsrVis))
     {
-        host_set_cursor_visible(true);
+        vdriver->setCursorVisible(true);
         LM(CrsrVis) = true;
     }
 }
@@ -96,7 +96,7 @@ void Executor::ROMlib_restorecursor()
 {
     if(LM(CrsrVis))
     {
-        host_set_cursor_visible(false);
+        vdriver->setCursorVisible(false);
         LM(CrsrVis) = false;
     }
 }
@@ -116,7 +116,7 @@ void Executor::C_SetCursor(Cursor *cp)
        && !memcmp(&current_crsr, cp, sizeof(Cursor)))
         return;
 
-    if(host_cursor_depth == 1)
+    if(vdriver->cursorDepth() == 1)
     {
         HOST_SET_CURSOR((char *)cp->data, (unsigned short *)cp->mask,
                         CW(cp->hotSpot.h), CW(cp->hotSpot.v));
@@ -136,7 +136,7 @@ void Executor::C_SetCursor(Cursor *cp)
         data_pixmap.pixelSize = data_pixmap.cmpSize = CWC(1);
         data_pixmap.pmTable = RM(validate_relative_bw_ctab());
 
-        rowbytes = (16 * host_cursor_depth) / 8;
+        rowbytes = (16 * vdriver->cursorDepth()) / 8;
         data_baseaddr = (char *)alloca(16 * rowbytes);
 
         target_pixmap.baseAddr = RM((Ptr)data_baseaddr);
@@ -145,7 +145,7 @@ void Executor::C_SetCursor(Cursor *cp)
         target_pixmap.cmpCount = CWC(1);
         target_pixmap.pixelType = CWC(0);
         target_pixmap.pixelSize = target_pixmap.cmpSize
-            = CW(host_cursor_depth);
+            = CW(vdriver->cursorDepth());
         /* the target pixmap colortable is not used by `convert_pixmap ()'
 	 target_pixmap.pmTable = ...; */
 
@@ -344,22 +344,22 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
 
         hot_spot = &CCRSR_HOT_SPOT(ccrsr);
 
-        if(host_cursor_depth > 2)
+        if(vdriver->cursorDepth() > 2)
         {
             Handle ccrsr_xdata;
 
             ccrsr_xdata = CCRSR_XDATA(ccrsr);
             if(!ccrsr_xdata)
             {
-                ccrsr_xdata = NewHandle(32 * host_cursor_depth);
+                ccrsr_xdata = NewHandle(32 * vdriver->cursorDepth());
                 CCRSR_XDATA_X(ccrsr) = RM(ccrsr_xdata);
             }
 
             if(CCRSR_XVALID_X(ccrsr) == CWC(0)
-               || (CCRSR_XVALID(ccrsr) != host_cursor_depth)
+               || (CCRSR_XVALID(ccrsr) != vdriver->cursorDepth())
                || (CCRSR_ID_X(ccrsr) != CTAB_SEED_X(PIXMAP_TABLE(gd_pmap))))
             {
-                SetHandleSize(ccrsr_xdata, 32 * host_cursor_depth);
+                SetHandleSize(ccrsr_xdata, 32 * vdriver->cursorDepth());
 
                 HLockGuard guard1(CCRSR_MAP(ccrsr)), guard2(CCRSR_DATA(ccrsr));
 
@@ -369,8 +369,8 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
                 /* only fields used by `convert_pixmap ()',
 		       baseAddr is filled in below */
                 memset(&ccrsr_xmap, 0, sizeof ccrsr_xmap);
-                ccrsr_xmap.rowBytes = CW(2 * host_cursor_depth);
-                ccrsr_xmap.pixelSize = CW(host_cursor_depth);
+                ccrsr_xmap.rowBytes = CW(2 * vdriver->cursorDepth());
+                ccrsr_xmap.pixelSize = CW(vdriver->cursorDepth());
 
                 src = *STARH(CCRSR_MAP(ccrsr));
                 src.baseAddr = *CCRSR_DATA(ccrsr);
@@ -379,7 +379,7 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
                 convert_pixmap(&src, &ccrsr_xmap,
                                &ROMlib_cursor_rect, NULL);
 
-                CCRSR_XVALID_X(ccrsr) = CW(host_cursor_depth);
+                CCRSR_XVALID_X(ccrsr) = CW(vdriver->cursorDepth());
                 CCRSR_ID_X(ccrsr) = CTAB_SEED_X(PIXMAP_TABLE(gd_pmap));
             }
 

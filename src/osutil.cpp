@@ -25,7 +25,7 @@
 #include "rsys/syncint.h"
 #include "rsys/emustubs.h"
 #include "rsys/cpu.h"
-#include "rsys/vdriver.h"   /* for host_beep_at_user */
+#include "rsys/vdriver.h"   /* for beepAtUser */
 #include <PowerCore.h>
 
 using namespace Executor;
@@ -857,7 +857,7 @@ void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
 
 void Executor::C_SysBeep(INTEGER i) /* SYSTEM DEPENDENT */
 {
-    host_beep_at_user();
+    vdriver->beepAtUser();
 }
 
 char Executor::ROMlib_phoneyrom[10] = {
