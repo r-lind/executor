@@ -490,6 +490,7 @@ void Executor::vdriver_pump_events()
 #ifdef MACOSX
     macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
 #endif
+    cursorPos = window->mapFromGlobal(cursorPos);
     LM(MouseLocation).h = CW(cursorPos.x());
     LM(MouseLocation).v = CW(cursorPos.y());
 
