@@ -6,7 +6,6 @@
 
 #include <rsys/common.h>
 #include <rsys/file.h>
-#include <rsys/notmac.h>
 
 #include <stdarg.h>
 #include <string>

@@ -6,7 +6,6 @@
 #include "SDL/SDL.h"
 
 #include "rsys/common.h"
-#include "rsys/host.h"
 #include "rsys/parse.h" /* FIXME: name one good reason why SetTitle should be declared in a file named parse.h */
 
 /* Globals */

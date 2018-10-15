@@ -34,7 +34,6 @@
 #include "rsys/aboutbox.h"
 #include "rsys/system_error.h"
 #include "rsys/vdriver.h"
-#include "rsys/notmac.h"
 #include "rsys/version.h"
 #include "rsys/functions.impl.h"
 #include "rsys/prefs.h"

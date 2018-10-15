@@ -17,16 +17,15 @@
 #include "ToolboxEvent.h"
 
 #include "rsys/glue.h"
-#include "rsys/notmac.h"
 #include "rsys/mman.h"
 #include "rsys/trapglue.h"
 #include "rsys/osutil.h"
-#include "rsys/host.h"
 #include "rsys/time.h"
 #include "rsys/toolevent.h"
 #include "rsys/syncint.h"
 #include "rsys/emustubs.h"
 #include "rsys/cpu.h"
+#include "rsys/vdriver.h"   /* for host_beep_at_user */
 #include <PowerCore.h>
 
 using namespace Executor;
@@ -858,13 +857,7 @@ void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
 
 void Executor::C_SysBeep(INTEGER i) /* SYSTEM DEPENDENT */
 {
-#if defined(MAC)
-    DebugStr("\004Beep");
-#elif defined(X11_FRONTEND) || defined(MACOSX_) || defined(CYGWIN32)
     host_beep_at_user();
-#else
-    write(1, "\7", 1);
-#endif
 }
 
 char Executor::ROMlib_phoneyrom[10] = {

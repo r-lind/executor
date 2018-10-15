@@ -8,13 +8,6 @@
 
  */
 
-#include "rsys/options.h"
-
 extern int yyparse(void); /* ick -- that's what yacc produces */
-namespace Executor
-{
-extern void ROMlib_SetTitle(const char *name);
-extern char *ROMlib_GetTitle(void);
-extern void ROMlib_FreeTitle(char *title);
-}
+
 #endif

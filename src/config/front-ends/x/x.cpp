@@ -54,10 +54,8 @@
 #include "rsys/rgbutil.h"
 #include "rsys/option.h"
 #include "rsys/flags.h"
-#include "rsys/host.h"
 #include "rsys/parse.h"
 #include "rsys/osevent.h"
-#include "rsys/notmac.h"
 
 #include "x_keycodes.h"
 
@@ -2399,7 +2397,7 @@ void Executor::PutScrapX(OSType type, LONGINT length, char *p, int scrap_count)
     }
 }
 
-void WeOwnScrapX(void)
+void Executor::WeOwnScrapX(void)
 {
     XSetSelectionOwner(x_dpy, XA_PRIMARY, x_window, CurrentTime);
 }

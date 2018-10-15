@@ -16,7 +16,6 @@
 #include "rsys/mman.h"
 #include "rsys/dirtyrect.h"
 #include "rsys/prefs.h"
-#include "rsys/host.h"
 #include "rsys/autorefresh.h"
 
 using namespace Executor;

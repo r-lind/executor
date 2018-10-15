@@ -7,7 +7,6 @@
 #include "rsys/vdriver.h"
 #include "rsys/prefs.h"
 #include "rsys/dirtyrect.h"
-#include "rsys/host.h"
 #include "rsys/flags.h"
 #include "rsys/autorefresh.h"
 #include "TimeMgr.h"

@@ -203,5 +203,26 @@ extern void vdriver_pump_events();
 #ifdef VDRIVER_ROOTLESS
 extern void vdriver_set_rootless_region(RgnHandle rgn);
 #endif
+
+extern void PutScrapX(OSType type, LONGINT length, char *p, int scrap_cnt);
+extern LONGINT GetScrapX(OSType type, Handle h);
+extern void WeOwnScrapX();
+
+extern void ROMlib_SetTitle(const char *name);
+extern char *ROMlib_GetTitle(void);
+extern void ROMlib_FreeTitle(char *title);
+
+extern void ROMlib_set_use_scancodes(bool val);
+
+extern int host_cursor_depth;
+
+extern void host_set_cursor(char *cursor_data,
+                            unsigned short cursor_mask[16],
+                            int hotspot_x, int hotspot_y);
+extern int host_set_cursor_visible(int show_p);
+extern bool host_hide_cursor_if_intersects(int top, int left,
+                                           int bottom, int right);
+extern void host_beep_at_user(void);
+
 }
 #endif /* !_VDRIVER_H_ */

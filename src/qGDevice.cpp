@@ -12,7 +12,6 @@
 
 #include "rsys/cquick.h"
 #include "rsys/wind.h"
-#include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/flags.h"
 #include "rsys/autorefresh.h"

@@ -14,10 +14,8 @@
 #include "rsys/cquick.h"
 #include "rsys/picture.h"
 #include "rsys/prefs.h"
-#include "rsys/notmac.h"
 #include "rsys/mman.h"
 #include "rsys/flags.h"
-#include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/tempalloc.h"
 

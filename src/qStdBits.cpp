@@ -19,7 +19,6 @@
 #include "rsys/picture.h"
 #include "rsys/mman.h"
 #include "rsys/flags.h"
-#include "rsys/host.h"
 #include "rsys/tempalloc.h"
 
 using namespace Executor;

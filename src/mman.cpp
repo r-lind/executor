@@ -22,6 +22,7 @@
 #include "rsys/options.h"
 #include "rsys/toolutil.h"
 #include "rsys/gestalt.h"
+#include "rsys/vdriver.h"   /* for WeOwnScrapX */
 #include <algorithm>
 
 #if defined(LINUX)
@@ -835,10 +836,8 @@ void SetHandleSize(Handle h, Size newsize)
     bool save_memnomove_p;
     unsigned int state;
 
-#if defined(X11_FRONTEND) /* what about MACOSX_? */
     if(h == MR(LM(TEScrpHandle)))
         WeOwnScrapX();
-#endif
 
     MM_SLAM("entry");
 

@@ -12,7 +12,6 @@
 #include <optional>
 
 #include "rsys/common.h"
-#include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/cquick.h" /* for ROMlib_log2 */
 #include "rsys/adb.h"

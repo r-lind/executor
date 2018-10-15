@@ -15,7 +15,6 @@
 #include "rsys/quick.h"
 #include "rsys/cquick.h"
 #include "rsys/wind.h"
-#include "rsys/host.h"
 #include <algorithm>
 
 using namespace Executor;

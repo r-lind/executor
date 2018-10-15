@@ -10,7 +10,6 @@
 #include "ResourceMgr.h"
 
 #include "rsys/PSstrings.h"
-#include "rsys/notmac.h"
 #include "rsys/mman.h"
 #include "rsys/uniquefile.h"
 #include "rsys/print.h"

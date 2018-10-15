@@ -22,7 +22,6 @@
 #include "rsys/cquick.h"
 #include "rsys/hfs.h"
 #include "rsys/resource.h"
-#include "rsys/notmac.h"
 #include "rsys/futzwithdosdisks.h"
 #include "rsys/prefs.h"
 #include "rsys/options.h"
@@ -45,6 +44,7 @@
 #include "rsys/nextprint.h"
 #include "rsys/scrap.h"
 #include "rsys/time.h"
+#include "rsys/menu.h"
 #include <algorithm>
 
 #if !defined(WIN32)

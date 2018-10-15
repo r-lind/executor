@@ -13,7 +13,6 @@
 #include "rsys/cquick.h"
 #include "rsys/rgbutil.h"
 #include <syn68k_public.h>
-#include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/dirtyrect.h"
 #include "rsys/syncint.h"

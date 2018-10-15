@@ -47,5 +47,5 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         target_link_libraries(front-end-sdl ${X11_LIBRARY})
     endif()
 
-    target_include_directories(front-end-sdl PUBLIC . ${SDL_INCLUDE_DIR}/.. ${X11_INCLUDE_PATH})
+    target_include_directories(front-end-sdl PUBLIC . PRIVATE ${SDL_INCLUDE_DIR}/.. ${X11_INCLUDE_PATH})
 endif()

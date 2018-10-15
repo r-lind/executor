@@ -15,7 +15,6 @@
 #include "rsys/wind.h"
 #include "rsys/resource.h"
 #include "rsys/mman.h"
-#include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/dirtyrect.h"
 #include <algorithm>

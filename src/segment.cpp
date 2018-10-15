@@ -18,11 +18,9 @@
 
 #include "rsys/hfs.h"
 #include "rsys/cpu.h"
-#include "rsys/notmac.h"
 #include "rsys/glue.h"
 #include "rsys/wind.h"
 #include "rsys/segment.h"
-#include "rsys/host.h"
 #include "rsys/vdriver.h"
 #include "rsys/executor.h"
 #include "rsys/flags.h"

@@ -18,7 +18,6 @@
 #include "rsys/hook.h"
 #include "rsys/ctl.h"
 #include "rsys/ini.h"
-#include "rsys/notmac.h"
 #include <ctype.h>
 #include "MenuMgr.h"
 #include "rsys/vdriver.h"

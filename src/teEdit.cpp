@@ -17,10 +17,10 @@
 #include "rsys/mman.h"
 #include "rsys/tesave.h"
 #include "rsys/arrowkeys.h"
-#include "rsys/notmac.h"
 #include "rsys/osevent.h"
 #include "rsys/text.h"
 #include "rsys/prefs.h"
+#include "rsys/vdriver.h"
 
 using namespace Executor;
 
@@ -658,11 +658,11 @@ void Executor::C_TECopy(TEHandle te)
         HSetState((Handle)te_style, te_style_flags);
     }
     LM(TEScrpLength) = CW(len);
-#if defined(X11_FRONTEND) || defined(MACOSX_) || defined(SDL)
+
+    // FIXME: I seem to dimly remember that the TE scrap was separate from the global scrap.
     /* ### should this lock `LM(TEScrpHandle)'? */
-    PutScrapX(TICK("TEXT"), CW(LM(TEScrpLength)),
+    PutScrapX(TICK("TEXT"), CW(LM(TEScrpLength)),   
               (char *)STARH(MR(LM(TEScrpHandle))), CW(LM(ScrapCount)));
-#endif /* defined(X11_FRONTEND) */
 
     HSetState(hText, hText_flags);
 }
@@ -675,13 +675,12 @@ void Executor::C_TECut(TEHandle teh)
 
 void Executor::C_TEPaste(TEHandle teh)
 {
-#if defined(X11_FRONTEND) || defined(MACOSX_) || defined(SDL)
     Size s;
 
     s = GetScrapX(TICK("TEXT"), MR(LM(TEScrpHandle)));
     if(s >= 0)
         LM(TEScrpLength) = CW(s);
-#endif /* defined(X11_FRONTEND) */
+
     HLockGuard guard(MR(LM(TEScrpHandle)));
     ROMlib_tedoitall(teh, STARH(MR(LM(TEScrpHandle))), CW(LM(TEScrpLength)),
                      false, NULL);

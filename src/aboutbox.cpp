@@ -23,7 +23,6 @@
 #include "rsys/osutil.h"
 #include "SegmentLdr.h"
 #include "rsys/segment.h"
-#include "rsys/notmac.h"
 #include "rsys/gestalt.h"
 #include "rsys/osevent.h"
 #include "rsys/paths.h"

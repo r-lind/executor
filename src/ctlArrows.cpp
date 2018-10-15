@@ -14,7 +14,6 @@
 #include "rsys/ctl.h"
 
 #include "rsys/image.h"
-#include "rsys/host.h"
 #include "rsys/wind.h"
 
 using namespace Executor;

@@ -13,15 +13,14 @@
 #include "OSEvent.h"
 #include "MemoryMgr.h"
 
-#include "rsys/notmac.h"
 #include "rsys/cquick.h"
 #include "rsys/mman.h"
 #include "rsys/resource.h"
-#include "rsys/host.h"
 
 #include "rsys/osevent.h"
 
 #include "rsys/quick.h"
+#include "rsys/vdriver.h"
 
 #if !defined(CURSOR_DEBUG)
 

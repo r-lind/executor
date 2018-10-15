@@ -29,7 +29,6 @@
 #include "rsys/file.h"
 #include "rsys/prefs.h"
 #include "rsys/segment.h"
-#include "rsys/host.h"
 #include "rsys/executor.h"
 #include "rsys/hfs.h"
 #include "rsys/vdriver.h"

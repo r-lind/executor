@@ -8,7 +8,6 @@
 #include "rsys/xdblt.h"
 #include "rsys/vdriver.h"
 #include "rsys/prefs.h"
-#include "rsys/host.h"
 
 // FIXME: #warning This seems unsafe...
 

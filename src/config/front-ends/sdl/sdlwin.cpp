@@ -5,7 +5,6 @@
 #include "rsys/common.h"
 #include "rsys/srcblt.h"
 #include "rsys/refresh.h"
-#include "rsys/host.h"
 
 #if defined(CYGWIN32)
 #include "win_screen.h"

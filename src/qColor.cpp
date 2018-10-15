@@ -13,7 +13,6 @@
 #include "rsys/picture.h"
 #include "rsys/resource.h"
 
-#include "rsys/host.h"
 #include "rsys/qcolor.h"
 
 using namespace Executor;

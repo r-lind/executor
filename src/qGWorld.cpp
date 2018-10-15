@@ -9,7 +9,6 @@
 
 #include "rsys/cquick.h"
 #include "rsys/gworld.h"
-#include "rsys/host.h"
 #include "rsys/mman.h"
 #include "rsys/qcolor.h"
 

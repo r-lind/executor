@@ -308,7 +308,6 @@ set(include_sources hintemplate.h
                   include/rsys/hfs.h
                   include/rsys/hfs_plus.h
                   include/rsys/hook.h
-                  include/rsys/host.h
                   include/rsys/icon.h
                   include/rsys/image.h
                   include/rsys/ini.h
@@ -333,7 +332,6 @@ set(include_sources hintemplate.h
                   include/rsys/next.h
                   include/rsys/nextprint.h
                   include/rsys/noreturn.h
-                  include/rsys/notmac.h
                   include/rsys/option.h
                   include/rsys/options.h
                   include/rsys/os.h

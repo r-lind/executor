@@ -23,7 +23,6 @@
 #include "rsys/glue.h"
 #include "rsys/mman.h"
 #include "rsys/resource.h"
-#include "rsys/host.h"
 
 using namespace Executor;
 
