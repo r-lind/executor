@@ -105,7 +105,7 @@ ControlHandle Executor::C_GetNewControl(INTEGER cid, WindowPtr wst) /* IMI-321 *
     ctab_res_h = ROMlib_getrestid(TICK("cctb"), cid);
     retval = NewControl(wst, &(HxX(wh, _crect)),
                         (StringPtr)((char *)&HxX(wh, _crect) + 22), /* _ctitle */
-                        Hx(wh, _cvisible) ? 255 : 0, Hx(wh, _cvalue), Hx(wh, _cmin),
+                        Hx(wh, _cvisible) != 0, Hx(wh, _cvalue), Hx(wh, _cmin),
                         Hx(wh, _cmax), Hx(wh, _cprocid),
                         CL(*(GUEST<LONGINT> *)((char *)&HxX(wh, _crect) + 18))); /* _crefcon */
     if(ctab_res_h)

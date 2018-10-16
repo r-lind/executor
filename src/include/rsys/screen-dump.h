@@ -15,7 +15,10 @@ struct __attribute__((packed)) directory_entry
     int16_t tag;
     int16_t type;
     int32_t count;
-    int32_t value_offset;
+    union {
+        int16_t value_offset_16;
+        int32_t value_offset;
+    };
 };
 
 struct __attribute__((packed)) ifd 

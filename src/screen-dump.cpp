@@ -75,7 +75,7 @@ ifd_add_entry(struct ifd *ifd, int tag, int type, ...)
     switch(type)
     {
         case SHORT:
-            *(int16_t *)(&current_entry->value_offset) = (int16_t)va_arg(ap, int32_t);
+            current_entry->value_offset_16 = (int16_t)va_arg(ap, int32_t);
             break;
         case LONG:
             current_entry->value_offset = va_arg(ap, int32_t);
