@@ -18,6 +18,7 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
     endif()
 
     add_library(front-end-sdl
+        default_vdriver.h
         sdlevents.cpp
         sdl_mem.cpp
         sdlquit.cpp

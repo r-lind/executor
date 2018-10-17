@@ -453,4 +453,4 @@ endif()
 target_link_libraries(romlib resources)
 
 add_executable(executor main.cpp)
-target_link_libraries(executor romlib front-end-qt)
+target_link_libraries(executor romlib front-end-${FRONT_END})

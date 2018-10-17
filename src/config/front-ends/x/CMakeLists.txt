@@ -5,6 +5,7 @@ find_path (X11_INCLUDE_PATH X11/Xresource.h)
 if(X11_LIBRARY AND Xext_LIBRARY)
 
 	add_library(front-end-x
+            default_vdriver.h
 			x.cpp
 			x_keycodes.cpp
 			x.h

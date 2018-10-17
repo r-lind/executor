@@ -65,6 +65,8 @@ namespace Executor
 class VideoDriver
 {
 public:
+    virtual ~VideoDriver();
+
     virtual bool parseCommandLine(int& argc, char *argv[]);
     virtual bool init();
     virtual void shutdown();

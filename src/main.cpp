@@ -83,10 +83,7 @@
 
 #include "rsys/check_structs.h"
 
-#include "qt.h"
-//#include "sdl2.h"
-//#include "sdl.h"
-//#include "x.h"
+#include "default_vdriver.h"
 
 
 static void setstartdir(char *);
@@ -675,7 +672,7 @@ int main(int argc, char **argv)
     setstartdir(argv[0]);
     set_appname(argv[0]);
 
-    vdriver = new QtVideoDriver();
+    vdriver = new DefaultVDriver();
     if(!vdriver->parseCommandLine(argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");

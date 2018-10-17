@@ -5,6 +5,10 @@ using namespace Executor;
 
 VideoDriver *Executor::vdriver = nullptr;
 
+VideoDriver::~VideoDriver()
+{
+}
+
 bool VideoDriver::parseCommandLine(int& argc, char *argv[])
 {
     return true;
