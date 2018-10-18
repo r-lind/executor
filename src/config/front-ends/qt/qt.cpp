@@ -352,6 +352,14 @@ bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
     return true;
 }
 
+bool QtVideoDriver::isAcceptableMode(int width, int height, int bpp,
+                                      bool grayscale_p,
+                                      bool exact_match_p)
+{
+    return bpp == 1 || bpp == 2 || bpp == 4 || bpp == 8;
+}
+
+
 bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
 #ifdef MACOSX
@@ -427,7 +435,26 @@ void QtVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *
 
 void QtVideoDriver::convertRect(QRect r)
 {
-    if(bpp_ == 4)
+    if(bpp_ == 2)
+    {
+        r.setLeft(r.left() & ~3);
+
+        for(int y = r.top(); y <= r.bottom(); y++)
+        {
+            uint8_t *src = framebuffer_ + y * rowBytes_ + r.left() / 4;
+            uint8_t *dst = qimage->scanLine(y) + r.left();
+
+            for(int i = 0; i < (r.width() + 3) / 4; i++)
+            {
+                uint8_t packed = *src++;
+                *dst++ = (packed >> 6) & 3;
+                *dst++ = (packed >> 4) & 3;
+                *dst++ = (packed >> 2) & 3;
+                *dst++ = packed & 3;
+            }
+        }
+    }
+    else if(bpp_ == 4)
     {
         r.setLeft(r.left() & ~1);
 
@@ -438,8 +465,9 @@ void QtVideoDriver::convertRect(QRect r)
 
             for(int i = 0; i < (r.width() + 1) / 2; i++)
             {
-                *dst++ = (*src) >> 4;
-                *dst++ = (*src++) & 0xF;
+                uint8_t packed = *src++;
+                *dst++ = packed >> 4;
+                *dst++ = packed & 0xF;
             }
         }
     }
@@ -456,12 +484,8 @@ void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
 
     rgn &= QRect(0,0,width_,height_);
     if(bpp_ != 1 && bpp_ != 8)
-    {
         for(QRect rect : rgn)
-        {
             convertRect(rect);
-        }
-    }
 
     window->update(rgn);
 }

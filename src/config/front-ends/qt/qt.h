@@ -10,6 +10,7 @@ public:
     void setRootlessRegion(Executor::RgnHandle rgn) override;
     bool parseCommandLine(int& argc, char *argv[]) override;
     bool setMode(int width, int height, int bpp, bool grayscale_p) override;
+    bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p, bool exact_match_p) override;
     void setColors(int first_color, int num_colors, const Executor::ColorSpec *colors) override;
     void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r, bool cursor_p) override;
     void pumpEvents() override;
