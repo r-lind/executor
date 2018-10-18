@@ -388,6 +388,7 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         bpp_ == 1 ? QImage::Format_Mono : QImage::Format_Indexed8);
     qimage->setColorTable({qRgb(0,0,0),qRgb(255,255,255)});
 
+    if(!window)
     window = new ExecutorWindow();
     window->setGeometry(geom);
 #ifdef MACOSX

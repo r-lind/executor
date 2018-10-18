@@ -430,6 +430,14 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     if(vdriver->framebuffer() == NULL)
         gui_fatal("vdriver not initialized, unable to change bpp");
+
+#if SIZEOF_CHAR_P > 4
+    // FIXME: code duplication with main.cpp
+    ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
+    ROMlib_offsets[1] -= (1UL << 30);
+    ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5;
+#endif
+
     gd_set_bpp(gdh, !vdriver->isGrayscale(), vdriver->isFixedCLUT(), bpp);
 
     PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver->rowBytes()));
