@@ -384,15 +384,28 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 
     framebuffer_ = new uint8_t[rowBytes_ * height_ * 5];
 
-    qimage = new QImage(framebuffer_, width_, height_, rowBytes_,
-        bpp_ == 1 ? QImage::Format_Mono : QImage::Format_Indexed8);
-    qimage->setColorTable({qRgb(0,0,0),qRgb(255,255,255)});
+    switch(bpp_)
+    {
+        case 1:
+            qimage = new QImage(framebuffer_, width_, height_, rowBytes_, QImage::Format_Mono);
+            break;
+        case 2:
+        case 4:
+            qimage = new QImage(width_, height_, QImage::Format_Indexed8);
+            break;
+        case 8:
+            qimage = new QImage(framebuffer_, width_, height_, rowBytes_, QImage::Format_Indexed8);
+            break;
+    }
+    
+    if(bpp_ <= 8)
+        qimage->setColorTable({qRgb(0,0,0),qRgb(255,255,255)});
 
     if(!window)
-    window = new ExecutorWindow();
+        window = new ExecutorWindow();
     window->setGeometry(geom);
 #ifdef MACOSX
-    window->show();//Maximized();
+    window->show();
 #else
     window->showMaximized();
 #endif
@@ -412,6 +425,25 @@ void QtVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *
     qimage->setColorTable(qcolors);
 }
 
+void QtVideoDriver::convertRect(QRect r)
+{
+    if(bpp_ == 4)
+    {
+        r.setLeft(r.left() & ~1);
+
+        for(int y = r.top(); y <= r.bottom(); y++)
+        {
+            uint8_t *src = framebuffer_ + y * rowBytes_ + r.left() / 2;
+            uint8_t *dst = qimage->scanLine(y) + r.left();
+
+            for(int i = 0; i < (r.width() + 1) / 2; i++)
+            {
+                *dst++ = (*src) >> 4;
+                *dst++ = (*src++) & 0xF;
+            }
+        }
+    }
+}
 
 void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
                                       bool cursor_p)
@@ -421,13 +453,17 @@ void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
     {
         rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
     }
-    window->update(rgn);
-}
 
-void QtVideoDriver::updateScreen(int top, int left, int bottom, int right,
-                                 bool cursor_p)
-{
-    window->update(QRect(left, top, right-left, bottom-top));
+    rgn &= QRect(0,0,width_,height_);
+    if(bpp_ != 1 && bpp_ != 8)
+    {
+        for(QRect rect : rgn)
+        {
+            convertRect(rect);
+        }
+    }
+
+    window->update(rgn);
 }
 
 void QtVideoDriver::pumpEvents()
@@ -450,24 +486,6 @@ void QtVideoDriver::pumpEvents()
         window->setMask(*rootlessRegion);
         beenHere = true;
     }
-#if 0
-            case SDL_WINDOWEVENT_FOCUS_GAINED:
-                //if(!we_lost_clipboard())
-                sendresumeevent(false);
-                //else
-                //{
-                //    ZeroScrap();
-                //    sendresumeevent(true);
-                //}
-                break;
-            case SDL_WINDOWEVENT_FOCUS_LOST:
-                sendsuspendevent();
-                break;
-            case SDL_QUIT:
-                if(ConfirmQuit())
-                    ExitToShell();
-                break;
-#endif
 }
 
 
