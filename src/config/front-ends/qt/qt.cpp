@@ -327,7 +327,7 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 
     C_OpenPort(&grayRegionPort);
     short grayRegionRowBytes = ((width() + 31) & ~31) / 8;
-    grayRegionPort.portBits.baseAddr = RM((Ptr) framebuffer() + rowBytes() * height() * 4);
+    grayRegionPort.portBits.baseAddr = RM((Ptr) framebuffer() + rowBytes() * height());
     grayRegionPort.portBits.rowBytes = CW( grayRegionRowBytes );
     grayRegionPort.portBits.bounds = { CW(0), CW(0), CW(height()), CW(width()) };
     grayRegionPort.portRect = grayRegionPort.portBits.bounds;
@@ -390,7 +390,7 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 
     maxBpp_ = 8; //32;
 
-    framebuffer_ = new uint8_t[rowBytes_ * height_ * 5];
+    framebuffer_ = new uint8_t[rowBytes_ * height_ + width_ * height_];
 
     switch(bpp_)
     {
@@ -403,6 +403,12 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
             break;
         case 8:
             qimage = new QImage(framebuffer_, width_, height_, rowBytes_, QImage::Format_Indexed8);
+            break;
+        case 16:
+            qimage = new QImage(width_, height_, QImage::Format_RGB555);
+            break;
+        case 32:
+            qimage = new QImage(width_, height_, QImage::Format_RGB32);
             break;
     }
     
@@ -421,6 +427,9 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 }
 void QtVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *colors)
 {
+    if(bpp_ > 8)
+        return;
+
     QVector<QRgb> qcolors(num_colors);
     for(int i = 0; i < num_colors; i++)
     {
@@ -469,6 +478,28 @@ void QtVideoDriver::convertRect(QRect r)
                 *dst++ = packed >> 4;
                 *dst++ = packed & 0xF;
             }
+        }
+    }
+    else if(bpp_ == 16)
+    {
+        for(int y = r.top(); y <= r.bottom(); y++)
+        {
+            auto src = (GUEST<uint16_t>*) (framebuffer_ + y * rowBytes_) + r.left();
+            auto dst = (uint16_t*) (qimage->scanLine(y)) + r.left();
+
+            for(int i = 0; i < r.width(); i++)
+                *dst++ = CW(*src++);
+        }
+    }
+    else if(bpp_ == 32)
+    {
+        for(int y = r.top(); y <= r.bottom(); y++)
+        {
+            auto src = (GUEST<uint32_t>*) (framebuffer_ + y * rowBytes_) + r.left();
+            auto dst = (uint32_t*) (qimage->scanLine(y)) + r.left();
+
+            for(int i = 0; i < r.width(); i++)
+                *dst++ = CL(*src++);
         }
     }
 }
