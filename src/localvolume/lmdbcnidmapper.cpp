@@ -82,6 +82,22 @@ LMDBCNIDMapper::LMDBCNIDMapper(fs::path root, mac_string volumeName)
     txn.commit();
 }
 
+template <class F>
+auto growMapIfNecessary(lmdb::env& env, const F& f) -> decltype(f())
+{
+    try
+    {
+        return f();
+    }
+    catch(lmdb::map_full_error)
+    {
+        MDB_envinfo stat;
+        lmdb::env_info(env, &stat);
+        env.set_mapsize(stat.me_mapsize * 2);
+        return growMapIfNecessary(env, f);
+    }
+}
+
 LMDBCNIDMapper::~LMDBCNIDMapper()
 {
 }
@@ -104,7 +120,7 @@ void LMDBCNIDMapper::setMapping(lmdb::txn& txn, StoredMapping m)
 
 void LMDBCNIDMapper::deleteMapping(lmdb::txn& txn, CNID cnid)
 {
-
+    // TODO
 }
 
 std::vector<CNID> LMDBCNIDMapper::getDirectory(lmdb::txn& txn, CNID cnid)
@@ -128,105 +144,109 @@ void LMDBCNIDMapper::setDirectory(lmdb::txn& txn, CNID cnid, const std::vector<C
 std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::updateDirectoryContents(CNID dirID,
         std::vector<fs::directory_entry> sortedRealDirEntries)
 {
-    auto txn = lmdb::txn::begin(env_);
+    return growMapIfNecessary(env_, [this, dirID, sortedRealDirEntries] {
+        auto txn = lmdb::txn::begin(env_);
 
-    auto directoryContents = getDirectory(txn, dirID);
+        auto directoryContents = getDirectory(txn, dirID);
 
-    std::vector<StoredMapping> mappings;
-    mappings.reserve(directoryContents.size());
+        std::vector<StoredMapping> mappings;
+        mappings.reserve(directoryContents.size());
 
-    for(CNID cnid : directoryContents)
-    {
-        if(auto optMapping = getMapping(txn, cnid))
-            mappings.push_back(std::move(*optMapping));
-    }
-
-    std::vector<CNID> newContents;
-    newContents.reserve(sortedRealDirEntries.size());
-    
-    CNID newCNID;
-    {
-        auto cursor = lmdb::cursor::open(txn, mappings_);
-        lmdb::val cnidval;
-        if(cursor.get(cnidval, MDB_LAST))
-            newCNID = *cnidval.data<CNID>() + 1;
-        else
-            newCNID = 3;
-    }
-
-    std::set<mac_string> usedNames;
-
-    auto cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
-    for(auto& entry : sortedRealDirEntries)
-    {
-        while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < entry.path())
-            ++cachedMappingIt;
-
-        if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == entry.path())
+        for(CNID cnid : directoryContents)
         {
-            usedNames.emplace(cachedMappingIt->macname);
-            ++cachedMappingIt;
-        }
-    }
-
-    std::vector<Mapping> dirMappings;
-    dirMappings.reserve(sortedRealDirEntries.size());
-
-    cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
-    for(auto& entry : sortedRealDirEntries)
-    {
-        while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < entry.path())
-        {
-            // discard mapping
-            deleteCNID(txn, cachedMappingIt->cnid);
-            ++cachedMappingIt;
+            if(auto optMapping = getMapping(txn, cnid))
+                mappings.push_back(std::move(*optMapping));
         }
 
-        if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == entry.path())
+        std::vector<CNID> newContents;
+        newContents.reserve(sortedRealDirEntries.size());
+        
+        CNID newCNID;
         {
-            // use existing mapping
-            dirMappings.push_back({cachedMappingIt->parID, cachedMappingIt->cnid, std::move(entry), cachedMappingIt->macname});
-            newContents.push_back(cachedMappingIt->cnid);
-
-            ++cachedMappingIt;
+            auto cursor = lmdb::cursor::open(txn, mappings_);
+            lmdb::val cnidval;
+            if(cursor.get(cnidval, MDB_LAST))
+                newCNID = *cnidval.data<CNID>() + 1;
+            else
+                newCNID = 3;
         }
-        else
-        {
-            // new mapping
-            mac_string macname;
-            const fs::path& name = entry.path().filename();
-            int index = 0;
 
-            bool nameIsFree;
-            do
+        std::set<mac_string> usedNames;
+
+        auto cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
+        for(auto& entry : sortedRealDirEntries)
+        {
+            while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < entry.path())
+                ++cachedMappingIt;
+
+            if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == entry.path())
             {
-                macname = toMacRomanFilename(name, index++);
-                mac_string nameUpr = macname;
-                ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
-                nameIsFree = usedNames.emplace(std::move(nameUpr)).second;
-            } while(!nameIsFree);
-
-            Mapping newMapping {
-                dirID, newCNID++,
-                std::move(entry),
-                std::move(macname)
-            };
-            dirMappings.push_back(newMapping);
-            newContents.push_back(newMapping.cnid);
-
-            setMapping(txn, {
-                newMapping.parID, newMapping.cnid,
-                newMapping.entry.path(),
-                std::move(newMapping.macname)
-            });
+                usedNames.emplace(cachedMappingIt->macname);
+                ++cachedMappingIt;
+            }
         }
-    }
 
-    setDirectory(txn, dirID, newContents);
+        std::vector<Mapping> dirMappings;
+        dirMappings.reserve(sortedRealDirEntries.size());
 
-    txn.commit();
+        cachedMappingIt = mappings.begin(), cachedMappingEnd = mappings.end();
+        for(auto& entry : sortedRealDirEntries)
+        {
+            while(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path < entry.path())
+            {
+                // discard mapping
+                deleteCNID(txn, cachedMappingIt->cnid);
+                ++cachedMappingIt;
+            }
 
-    return dirMappings;
+            if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == entry.path())
+            {
+                // use existing mapping
+                dirMappings.push_back({cachedMappingIt->parID, cachedMappingIt->cnid, std::move(entry), cachedMappingIt->macname});
+                newContents.push_back(cachedMappingIt->cnid);
+
+                ++cachedMappingIt;
+            }
+            else
+            {
+                // new mapping
+                mac_string macname;
+                const fs::path& name = entry.path().filename();
+                int index = 0;
+
+                bool nameIsFree;
+                do
+                {
+                    macname = toMacRomanFilename(name, index++);
+                    mac_string nameUpr = macname;
+                    ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
+                    nameIsFree = usedNames.emplace(std::move(nameUpr)).second;
+                } while(!nameIsFree);
+
+                assert(macname.size());
+
+                Mapping newMapping {
+                    dirID, newCNID++,
+                    std::move(entry),
+                    std::move(macname)
+                };
+                dirMappings.push_back(newMapping);
+                newContents.push_back(newMapping.cnid);
+
+                setMapping(txn, {
+                    newMapping.parID, newMapping.cnid,
+                    newMapping.entry.path(),
+                    std::move(newMapping.macname)
+                });
+            }
+        }
+
+        setDirectory(txn, dirID, newContents);
+
+        txn.commit();
+
+        return dirMappings;
+    });
 }
 
 
@@ -280,42 +300,44 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::mapDirectoryContents(CNID dirID
 
 std::optional<CNIDMapper::Mapping> LMDBCNIDMapper::lookupCNID(CNID cnid)
 {
-    for(int pass = 0; pass < 2; pass++)
-    {
-        auto txn = lmdb::txn::begin(env_, nullptr, pass ? MDB_RDONLY : 0);
-
-        auto mapping = getMapping(txn, cnid);
-
-        if(!mapping)
-            return {};
-            
-        if(fs::exists(mapping->path))
+    return growMapIfNecessary(env_, [this, cnid]() -> std::optional<CNIDMapper::Mapping> {
+        for(int pass = 0; pass < 2; pass++)
         {
-            boost::system::error_code ec;
+            auto txn = lmdb::txn::begin(env_, nullptr, pass ? MDB_RDONLY : 0);
 
-            try
+            auto mapping = getMapping(txn, cnid);
+
+            if(!mapping)
+                return {};
+                
+            if(fs::exists(mapping->path))
             {
-                return Mapping {
-                    mapping->parID,
-                    mapping->cnid,
-                    fs::directory_entry(mapping->path),
-                    mapping->macname
-                };
+                boost::system::error_code ec;
+
+                try
+                {
+                    return Mapping {
+                        mapping->parID,
+                        mapping->cnid,
+                        fs::directory_entry(mapping->path),
+                        mapping->macname
+                    };
+                }
+                catch(fs::filesystem_error)
+                {
+                    // file no longer exists,
+                    // pass through
+                }
             }
-            catch(fs::filesystem_error)
+                
+            if(pass)
             {
-                // file no longer exists,
-                // pass through
+                deleteCNID(txn, cnid);
+                txn.commit();
             }
         }
-            
-        if(pass)
-        {
-            deleteCNID(txn, cnid);
-            txn.commit();
-        }
-    }
-    return {};
+        return {};
+    });
 }
 
 void LMDBCNIDMapper::deleteCNID(lmdb::txn& txn, CNID cnid)
@@ -346,52 +368,55 @@ void LMDBCNIDMapper::deleteCNID(lmdb::txn& txn, CNID cnid)
 
 void LMDBCNIDMapper::deleteCNID(CNID cnid)
 {
-    auto txn = lmdb::txn::begin(env_);
-    deleteCNID(txn, cnid);
-    txn.commit();
+    growMapIfNecessary(env_, [this, cnid] {
+        auto txn = lmdb::txn::begin(env_);
+        deleteCNID(txn, cnid);
+        txn.commit();
+    });
 }
-void LMDBCNIDMapper::moveCNID(CNID cnid, CNID newParent, mac_string_view newMacName, std::function<fs::path()> fsop)
+void LMDBCNIDMapper::moveCNID(CNID cnid, CNID newParentOrZero, mac_string_view newMacName, std::function<fs::path()> fsop)
 {
-    auto txn = lmdb::txn::begin(env_);
+    growMapIfNecessary(env_, [=] {
+        auto txn = lmdb::txn::begin(env_);
 
-    auto mapping = getMapping(txn, cnid);
-    if(!mapping)
-        return;
+        auto mapping = getMapping(txn, cnid);
+        if(!mapping)
+            return;
 
-    CNID oldParent = mapping->parID;
-    if(newParent == 0)
-        newParent = oldParent;
-    if(oldParent == newParent && newMacName.empty())
-        return;
+        CNID oldParent = mapping->parID;
+        CNID newParent = newParentOrZero ? newParentOrZero : oldParent;
+        if(oldParent == newParent && newMacName.empty())
+            return;
 
-    fs::path newPath = fsop();
+        fs::path newPath = fsop();
 
-    mapping->path = newPath;
-    mapping->parID = newParent;
-    if(!newMacName.empty())
-        mapping->macname = newMacName;
+        mapping->path = newPath;
+        mapping->parID = newParent;
+        if(!newMacName.empty())
+            mapping->macname = newMacName;
 
-    setMapping(txn, *mapping);
+        setMapping(txn, *mapping);
 
-    auto cachedContents = getDirectory(txn, oldParent);
-    cachedContents.erase(
-        std::remove(cachedContents.begin(), cachedContents.end(), cnid),
-        cachedContents.end());
+        auto cachedContents = getDirectory(txn, oldParent);
+        cachedContents.erase(
+            std::remove(cachedContents.begin(), cachedContents.end(), cnid),
+            cachedContents.end());
 
-    if(newParent != oldParent)
-    {
-        setDirectory(txn, oldParent, cachedContents);
-        cachedContents = getDirectory(txn, newParent);
-    }
+        if(newParent != oldParent)
+        {
+            setDirectory(txn, oldParent, cachedContents);
+            cachedContents = getDirectory(txn, newParent);
+        }
 
-    cachedContents.insert(
-        std::upper_bound(cachedContents.begin(), cachedContents.end(), cnid,
-            [&](CNID a, CNID b) {
-                return getMapping(txn, a)->path < getMapping(txn, b)->path;
-            }),
-        cnid);
+        cachedContents.insert(
+            std::upper_bound(cachedContents.begin(), cachedContents.end(), cnid,
+                [&](CNID a, CNID b) {
+                    return getMapping(txn, a)->path < getMapping(txn, b)->path;
+                }),
+            cnid);
 
-    setDirectory(txn, newParent, cachedContents);
+        setDirectory(txn, newParent, cachedContents);
 
-    txn.commit();
+        txn.commit();
+    });
 }
