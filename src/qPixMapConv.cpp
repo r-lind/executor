@@ -241,12 +241,7 @@ void Executor::ROMlib_fg_bk(uint32_t *fg_pixel_out, uint32_t *bk_pixel_out,
         }
         else
         {
-            uint32_t black_pixel, white_pixel;
-
-            black_pixel = pixel_from_rgb(&ROMlib_black_rgb_color,
-                                         rgb_spec);
-            white_pixel = pixel_from_rgb(&ROMlib_white_rgb_color,
-                                         rgb_spec);
+            const uint32_t black_pixel = 1, white_pixel = 0;
 
             if(PORT_FG_COLOR(current_port) == whiteColor)
             {
