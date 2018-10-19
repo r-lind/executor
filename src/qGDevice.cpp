@@ -98,8 +98,9 @@ void Executor::gd_allocate_main_device(void)
     LM(DeviceList) = RM(graphics_device);
 
     /* Assure that we're using the correct colors. */
-    vdriver->setColors(0, 1 << vdriver->bpp(),
-                       CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(graphics_device))));
+    if(vdriver->bpp() <= 8)
+        vdriver->setColors(0, 1 << vdriver->bpp(),
+                           CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(graphics_device))));
 }
 
 GDHandle Executor::C_NewGDevice(INTEGER ref_num, LONGINT mode)
@@ -225,7 +226,7 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
         CTAB_FLAGS_X(gd_color_table) = CTAB_GDEVICE_BIT_X;
         MakeITable(gd_color_table, GD_ITABLE(gd), GD_RES_PREF(gd));
 
-        if(main_device_p && !fixed_p)
+        if(main_device_p && !fixed_p && bpp <= 8)
             vdriver->setColors(0, 1 << bpp, CTAB_TABLE(gd_color_table));
     }
 }
