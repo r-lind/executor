@@ -201,6 +201,34 @@ struct GuestTypeTraits<Point>
     static HostType reg_to_host(uint32_t x) { return Point{ int16_t(x >> 16), int16_t(x & 0xFFFF) }; }
 };
 
+template<size_t size>
+struct MakeRawType
+{
+    using type = std::enable_if_t<size <= 8, uint64_t>;
+};
+
+template<>
+struct MakeRawType<1>
+{
+    using type = uint8_t;
+};
+template<>
+struct MakeRawType<2>
+{
+    using type = uint16_t;
+};
+template<>
+struct MakeRawType<3>
+{
+    using type = uint32_t;
+};
+template<>
+struct MakeRawType<4>
+{
+    using type = uint32_t;
+};
+
+
 
 template<typename ActualType>
 union HiddenValue
@@ -208,6 +236,8 @@ union HiddenValue
     uint8_t data[sizeof(ActualType)];
     Aligner<ActualType> align;
 public:
+    using RawType = typename MakeRawType<sizeof(ActualType)>::type;
+
     HiddenValue() = default;
     HiddenValue(const HiddenValue<ActualType> &y) = default;
     HiddenValue<ActualType> &operator=(const HiddenValue<ActualType> &y) = default;
@@ -232,7 +262,7 @@ struct GuestWrapperBase
     HiddenValue<TT> hidden;
 
     using WrappedType = TT;
-    using RawGuestType = TT;
+    using RawType = typename MakeRawType<sizeof(TT)>::type;
 
     WrappedType get() const
     {
@@ -244,12 +274,12 @@ struct GuestWrapperBase
         hidden.raw(SwapTyped(x));
     }
 
-    RawGuestType raw() const
+    RawType raw() const
     {
         return hidden.raw();
     }
 
-    void raw(RawGuestType x)
+    void raw(RawType x)
     {
         hidden.raw(x);
     }
@@ -264,12 +294,12 @@ struct GuestWrapperBase
     }
 
 
-    void raw_and(RawGuestType x)
+    void raw_and(RawType x)
     {
         hidden.raw(hidden.raw() & x);
     }
 
-    void raw_or(RawGuestType x)
+    void raw_or(RawType x)
     {
         hidden.raw(hidden.raw() | x);
     }
@@ -295,7 +325,7 @@ private:
 
 public:
     using WrappedType = TT *;
-    using RawGuestType = uint32_t;
+    using RawType = uint32_t;
 
     WrappedType get() const
     {
@@ -308,12 +338,12 @@ public:
         this->raw(swap32(US_TO_SYN68K_CHECK0_CHECKNEG1(ptr)));
     }
 
-    RawGuestType raw() const
+    RawType raw() const
     {
         return p.raw();
     }
 
-    void raw(RawGuestType x)
+    void raw(RawType x)
     {
         p.raw(x);
     }
@@ -371,7 +401,7 @@ struct GuestWrapper : GuestWrapperBase<TT>
     }
 #endif
 
-    static GuestWrapper<TT> fromRaw(typename GuestWrapper<TT>::RawGuestType r)
+    static GuestWrapper<TT> fromRaw(typename GuestWrapper<TT>::RawType r)
     {
         GuestWrapper<TT> w;
         w.raw(r);
@@ -466,7 +496,7 @@ struct GuestWrapper<Point>
     GuestWrapper<INTEGER> h;
 
     using WrappedType = Point;
-    using RawGuestType = Point;
+    using RawType = Point;
 
     Point get() const
     {
@@ -481,7 +511,7 @@ struct GuestWrapper<Point>
 
     Point raw() const
     {
-        return Point{ v.raw(), h.raw() };
+        return Point{ (int16_t)v.raw(), (int16_t)h.raw() };
     }
 
     void raw(Point x)
@@ -627,7 +657,7 @@ private:
 
 public:
     using WrappedType = UPP<Ret(Args...),CallConv>;
-    using RawGuestType = uint32_t;
+    using RawType = uint32_t;
 
     WrappedType get() const
     {
@@ -640,12 +670,12 @@ public:
         this->raw(swap32(US_TO_SYN68K_CHECK0_CHECKNEG1(ptr.ptr)));
     }
 
-    RawGuestType raw() const
+    RawType raw() const
     {
         return p.raw();
     }
 
-    void raw(RawGuestType x)
+    void raw(RawType x)
     {
         p.raw(x);
     }

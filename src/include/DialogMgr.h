@@ -92,23 +92,7 @@ typedef DialogTemplate *DialogTPtr;
 
 typedef GUEST<DialogTPtr> *DialogTHndl;
 
-// This has a 50% chance of being right.
-// It does not seem to be used, however.
-typedef struct
-{
-    unsigned boldItm4 : 1;
-    unsigned boxDrwn4 : 1;
-    unsigned sound4 : 2;
-    unsigned boldItm3 : 1;
-    unsigned boxDrwn3 : 1;
-    unsigned sound3 : 2;
-    unsigned boldItm2 : 1;
-    unsigned boxDrwn2 : 1;
-    unsigned sound2 : 2;
-    unsigned boldItm1 : 1;
-    unsigned boxDrwn1 : 1;
-    unsigned sound1 : 2;
-} StageList;
+typedef int16_t StageList;
 
 struct AlertTemplate
 {

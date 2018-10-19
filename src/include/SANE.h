@@ -40,33 +40,13 @@ typedef comp_t native_comp_t;
 #endif /* Not LITTLEENDIAN */
 
 /* "Packed" IEEE 80 bit FP representation (zero field omitted). */
-/* Sign and exponent. */
 
-/* Mantissa. */
-typedef struct PACKED
+struct x80_t
 {
-    /* Sign and exponent. */
-    union {
-#if !defined(LITTLEENDIAN)
-        struct PACKED
-        { /* Here for added efficiency when BIGENDIAN. */
-            unsigned short sgn : 1;
-            unsigned short exp : 15;
-        } s;
-#endif
-        unsigned short sgn_and_exp;
-    } se;
-
-    /* Mantissa. */
-    union {
-        struct PACKED
-        {
-            ULONGINT man_hi;
-            ULONGINT man_lo;
-        } hilo;
-        unsigned long long man;
-    } man;
-} x80_t;
+    GUEST_STRUCT;
+    GUEST<uint16_t> sgn_and_exp;
+    GUEST<uint64_t> mantissa;
+};
 
 /* For backwards compatibility with old stuff. */
 typedef x80_t extended80;

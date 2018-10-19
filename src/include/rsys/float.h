@@ -21,23 +21,12 @@ const LowMemGlobal<Byte[6]> macfpstate { 0xA4A }; // unknown ToolEqu.a (true-b);
     ((c).val == (signed long long)0x8000000000000000ULL)
 
 /* Macros for manipulating the sgn and exponent fields of an x80_t. */
-#if !defined(LITTLEENDIAN)
-#define GET_X80_SGN(x) ((x)->se.s.sgn)
-#define SET_X80_SGN(x, v) ((x)->se.s.sgn = (v))
-#define GET_X80_EXP(x) ((x)->se.s.exp)
-#define SET_X80_EXP(x, v) ((x)->se.s.exp = (v))
-#else /* LITTLEENDIAN */
-#define EXP_BIT_MASK 0x80
-#define GET_X80_SGN(x) (((x)->se.sgn_and_exp >> 7) & 1)
-#define SET_X80_SGN(x, v)                        \
-    ((x)->se.sgn_and_exp = (((x)->se.sgn_and_exp \
-                             & (~EXP_BIT_MASK))  \
-                            | ((v) << 7)))
-#define GET_X80_EXP(x) (SWAPUW((x)->se.sgn_and_exp) & 0x7FFF)
-#define SET_X80_EXP(x, v)                                 \
-    ((x)->se.sgn_and_exp = ((SWAPUW(v) & (~EXP_BIT_MASK)) \
-                            | ((x)->se.sgn_and_exp & EXP_BIT_MASK)))
-#endif /* LITTLEENDIAN */
+
+#define GET_X80_SGN(x) (MR((x)->sgn_and_exp) >> 15)
+#define SET_X80_SGN(x, v) ((x)->sgn_and_exp = CW((CW((x)->sgn_and_exp) & 0x7FFF) | (v << 15)))
+#define GET_X80_EXP(x) (MR((x)->sgn_and_exp) & 0x7FFF)
+#define SET_X80_EXP(x, v) ((x)->sgn_and_exp = CW((CW((x)->sgn_and_exp) & 0x8000) | v))
+
 
 /* This is meant to represent an IEEE FP value with 80 bits of precision.
  * Unfortunately, there may be no C type with that many bits available; in

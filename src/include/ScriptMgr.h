@@ -186,15 +186,13 @@ struct NumFormatStringRec
     GUEST<SignedByte[254]> data;
 };
 
-typedef union {
-    char a[2];
-    INTEGER b;
-} WideChar;
+typedef uint16_t WideChar;
 
 typedef struct
 {
-    INTEGER size PACKED;
-    WideChar data[10] PACKED;
+    GUEST_STRUCT;
+    GUEST<INTEGER> size;
+    GUEST<WideChar> data[10];
 } WideCharArr;
 
 struct NumberParts
