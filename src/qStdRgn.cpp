@@ -320,6 +320,7 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     }
     else
     {
+        dst_pixmap.pixelType = CWC(Indirect);
         dst_pixmap.pixelSize = CWC(1);
         dst_pixmap.baseAddr = dst->baseAddr;
         dst_pixmap.rowBytes = dst->rowBytes | PIXMAP_DEFAULT_ROWBYTES_X;

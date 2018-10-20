@@ -464,13 +464,8 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
             if(CGrafPort_p(gp))
             {
-                PixMapHandle window_pixmap;
-
-                window_pixmap = CPORT_PIXMAP(gp);
-                PIXMAP_PIXEL_SIZE_X(window_pixmap)
-                    = PIXMAP_PIXEL_SIZE_X(gd_pixmap);
-                PIXMAP_CMP_SIZE_X(window_pixmap)
-                    = PIXMAP_PIXEL_SIZE_X(gd_pixmap);
+                PixMapHandle window_pixmap = CPORT_PIXMAP(gp);
+                pixmap_set_pixel_fields(MR(*window_pixmap), bpp);
                 PIXMAP_SET_ROWBYTES_X(window_pixmap,
                                       PIXMAP_ROWBYTES_X(gd_pixmap));
 
@@ -490,14 +485,10 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
         /* do the same for the LM(WMgrCPort) */
         {
-            PixMapHandle wmgr_cport_pixmap;
+            PixMapHandle wmgr_cport_pixmap = CPORT_PIXMAP(MR(LM(WMgrCPort)));
 
-            wmgr_cport_pixmap = CPORT_PIXMAP(MR(LM(WMgrCPort)));
-
-            PIXMAP_PIXEL_SIZE_X(wmgr_cport_pixmap)
-                = PIXMAP_PIXEL_SIZE_X(gd_pixmap);
-            PIXMAP_CMP_SIZE_X(wmgr_cport_pixmap)
-                = PIXMAP_PIXEL_SIZE_X(gd_pixmap);
+            pixmap_set_pixel_fields(MR(*wmgr_cport_pixmap), bpp);
+                
             PIXMAP_SET_ROWBYTES_X(wmgr_cport_pixmap,
                                   PIXMAP_ROWBYTES_X(gd_pixmap));
 
