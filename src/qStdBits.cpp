@@ -557,6 +557,15 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
     ROMlib_fg_bk(&fg_color, &bk_color, NULL, NULL, dst_rgb_spec,
                  active_screen_addr_p(dst), dst_depth <= 8);
 
+    if(dst_depth == 1)
+    {   // FIXME: HACK - do not colorize when dst is 1-bit
+        // need to check behaviour of real macs,
+        // maybe this is only needed because CopyMask calls CopyBits
+        // to copy the mask without setting a port
+        fg_color = 1;
+        bk_color = 0;
+    }
+
     /* if the source and dest differ in depths, perform a depth
      conversion on the src, so it matches that of the depth */
     if(src->pixelSize != dst->pixelSize

@@ -50,13 +50,13 @@ sort_table(CTabPtr old, CTabPtr new1, unsigned max_color)
         CONVERT_BITS(READ_DIRECT16_PIXEL, READ_DIRECT16_PIXEL,     \
                      WRITE_DIRECT16_PIXEL,                         \
                      NONPAT_NEXT1,                                 \
-                     macro, 8);                                    \
+                     macro, 16);                                   \
         break;                                                     \
     case MUNGE(name, 32, false):                                   \
         CONVERT_BITS(READ_DIRECT32_PIXEL, READ_DIRECT32_PIXEL,     \
                      WRITE_DIRECT32_PIXEL,                         \
                      NONPAT_NEXT1,                                 \
-                     macro, 8);                                    \
+                     macro, 32);                                   \
         break;                                                     \
     case MUNGE(name, 2, true):                                     \
         CONVERT_BITS(READ_PAT_INDIRECT_PIXEL, READ_INDIRECT_PIXEL, \
@@ -80,13 +80,13 @@ sort_table(CTabPtr old, CTabPtr new1, unsigned max_color)
         CONVERT_BITS(READ_PAT_DIRECT16_PIXEL, READ_DIRECT16_PIXEL, \
                      WRITE_DIRECT16_PIXEL,                         \
                      PAT_NEXT1,                                    \
-                     macro, 8);                                    \
+                     macro, 16);                                   \
         break;                                                     \
     case MUNGE(name, 32, true):                                    \
         CONVERT_BITS(READ_PAT_DIRECT32_PIXEL, READ_DIRECT32_PIXEL, \
                      WRITE_DIRECT32_PIXEL,                         \
                      PAT_NEXT1,                                    \
-                     macro, 8);                                    \
+                     macro, 32);                                    \
         break
 
 void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
