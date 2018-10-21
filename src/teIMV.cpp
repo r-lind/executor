@@ -33,9 +33,9 @@ void Executor::generic_elt_calc_height_ascent(generic_elt_t *elt)
     Style saveface;
     FontInfo font_info;
 
-    savesize = PORT_TX_SIZE(thePort);
-    savefont = PORT_TX_FONT(thePort);
-    saveface = PORT_TX_FACE_X(thePort);
+    savesize = PORT_TX_SIZE(MR(qdGlobals().thePort));
+    savefont = PORT_TX_FONT(MR(qdGlobals().thePort));
+    saveface = PORT_TX_FACE_X(MR(qdGlobals().thePort));
     TextSize(GENERIC_ELT_SIZE(elt));
     TextFont(GENERIC_ELT_FONT(elt));
     TextFace(GENERIC_ELT_FACE(elt));
@@ -462,9 +462,9 @@ TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
     style_table = (STHandle)NewHandle(sizeof(STElement));
     HASSIGN_7(style_table,
               stCount, CWC(1),
-              stFont, PORT_TX_FONT_X(thePort),
-              stFace, PORT_TX_FACE(thePort),
-              stSize, PORT_TX_SIZE_X(thePort),
+              stFont, PORT_TX_FONT_X(MR(qdGlobals().thePort)),
+              stFace, PORT_TX_FACE(MR(qdGlobals().thePort)),
+              stSize, PORT_TX_SIZE_X(MR(qdGlobals().thePort)),
               stColor, ROMlib_black_rgb_color,
               stHeight, CW(font_height),
               stAscent, font_info.ascent);
@@ -488,9 +488,9 @@ TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
     HxX(stsh, scrpNStyles) = CWC(0);
 
     stp = HxX(stsh, scrpStyleTab);
-    stp->scrpFont = PORT_TX_FONT_X(thePort);
-    stp->scrpFace = PORT_TX_FACE_X(thePort);
-    stp->scrpSize = PORT_TX_SIZE_X(thePort);
+    stp->scrpFont = PORT_TX_FONT_X(MR(qdGlobals().thePort));
+    stp->scrpFace = PORT_TX_FACE_X(MR(qdGlobals().thePort));
+    stp->scrpSize = PORT_TX_SIZE_X(MR(qdGlobals().thePort));
     stp->scrpColor.red = 0; /* black ? */
     stp->scrpColor.green = 0; /* black ? */
     stp->scrpColor.blue = 0; /* black ? */
@@ -921,11 +921,11 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
     {
         warning_unimplemented(NULL_STRING);
         if(*modep & CWC(doFont))
-            TS_FONT_X(ts_out) = PORT_TX_FONT_X(thePort);
+            TS_FONT_X(ts_out) = PORT_TX_FONT_X(MR(qdGlobals().thePort));
         if(*modep & CWC(doFace))
-            TS_FACE(ts_out) = PORT_TX_FACE_X(thePort);
+            TS_FACE(ts_out) = PORT_TX_FACE_X(MR(qdGlobals().thePort));
         if(*modep & CWC(doSize))
-            TS_SIZE_X(ts_out) = PORT_TX_SIZE_X(thePort);
+            TS_SIZE_X(ts_out) = PORT_TX_SIZE_X(MR(qdGlobals().thePort));
         if(*modep & CWC(doColor))
             TS_COLOR(ts_out) = ROMlib_black_rgb_color;
         return true;

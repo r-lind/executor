@@ -156,7 +156,7 @@ void Executor::C_ZoomWindow(WindowPtr wp, INTEGER part,
         PaintBehind(WINDOW_NEXT_WINDOW(wp), behind);
 
 #if !defined(THEPORTNEEDNTBEWMGRPORT)
-        gp = thePort;
+        gp = MR(qdGlobals().thePort);
         SetPort(MR(wmgr_port));
 #endif /* THEPORTNEEDNTBEWMGRPORT */
         SetClip(WINDOW_STRUCT_REGION(wp));

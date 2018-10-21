@@ -190,7 +190,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
                    proc_id, (CWindowPtr)behind, go_away_flag, ref_con);
         if(w_ctab && CTAB_SIZE(w_ctab) > -1)
         {
-            ThePortGuard guard(thePort);
+            ThePortGuard guard(MR(qdGlobals().thePort));
             SetWinColor(DIALOG_WINDOW(dp), w_ctab);
         }
     }

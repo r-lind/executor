@@ -117,7 +117,7 @@ void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
         /*-->*/ return;
     }
 
-    if(thePort->picSave)
+    if(MR(qdGlobals().thePort)->picSave)
     {
         ROMlib_drawingverbrectpicupdate(verb, r);
         PICOP(OP_frameArc + (int)verb);
@@ -128,12 +128,12 @@ void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
         PICWRITE(&swappedarca, sizeof(swappedarca));
     }
 
-    if(PORT_PEN_VIS(thePort) < 0)
+    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
         /*-->*/ return;
-    saveloc = PORT_PEN_LOC(thePort);
+    saveloc = PORT_PEN_LOC(MR(qdGlobals().thePort));
     PAUSERECORDING;
-    tmpvis = PORT_PEN_VIS_X(thePort);
-    PORT_PEN_VIS_X(thePort) = CWC(0);
+    tmpvis = PORT_PEN_VIS_X(MR(qdGlobals().thePort));
+    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = CWC(0);
     OpenRgn();
     enda = starta + arca;
     if(arca < 0)
@@ -197,13 +197,13 @@ void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
     LineTo(left + (right - left) / 2, top + (bottom - top) / 2);
     rh = NewRgn();
     CloseRgn(rh);
-    PORT_PEN_VIS_X(thePort) = tmpvis;
-    saveclip = PORT_CLIP_REGION_X(thePort);
+    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = tmpvis;
+    saveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort));
     SectRgn(MR(saveclip), rh, rh);
-    PORT_CLIP_REGION_X(thePort) = RM(rh);
+    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(rh);
     StdOval(verb, r);
-    PORT_CLIP_REGION_X(thePort) = saveclip;
+    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclip;
     DisposeRgn(rh);
     RESUMERECORDING;
-    PORT_PEN_LOC(thePort) = saveloc;
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = saveloc;
 }

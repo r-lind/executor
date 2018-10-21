@@ -353,17 +353,17 @@ void Executor::C_StdLine(Point p)
     PAUSEDECL;
 
     r32767 = 32767;
-    x1 = CW(PORT_PEN_LOC(thePort).h);
-    y1 = CW(PORT_PEN_LOC(thePort).v);
+    x1 = CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h);
+    y1 = CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v);
     x2 = p.h;
     y2 = p.v;
 
-    px = CW(PORT_PEN_SIZE(thePort).h);
-    py = CW(PORT_PEN_SIZE(thePort).v);
+    px = CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).h);
+    py = CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).v);
 
-    if(PORT_POLY_SAVE_X(thePort) && (x1 != x2 || y1 != y2))
+    if(PORT_POLY_SAVE_X(MR(qdGlobals().thePort)) && (x1 != x2 || y1 != y2))
     {
-        ph = (PolyHandle)PORT_POLY_SAVE(thePort);
+        ph = (PolyHandle)PORT_POLY_SAVE(MR(qdGlobals().thePort));
         psize = GetHandleSize((Handle)ph);
         if(psize == SMALLPOLY)
         {
@@ -383,11 +383,11 @@ void Executor::C_StdLine(Point p)
         *oip++ = CW_RAW(x2);
     }
 
-    if(thePort->picSave)
+    if(MR(qdGlobals().thePort)->picSave)
     {
         ROMlib_drawingpicupdate();
         PICOP(OP_Line);
-        PICWRITE(&PORT_PEN_LOC(thePort), sizeof(PORT_PEN_LOC(thePort)));
+        PICWRITE(&PORT_PEN_LOC(MR(qdGlobals().thePort)), sizeof(PORT_PEN_LOC(MR(qdGlobals().thePort))));
         swappedp.h = CW(p.h);
         swappedp.v = CW(p.v);
         PICWRITE(&swappedp, sizeof(swappedp));
@@ -408,14 +408,14 @@ void Executor::C_StdLine(Point p)
             SWAP(x1, x2);
         if(y2 < y1)
             SWAP(y1, y2);
-        if(PORT_PEN_VIS(thePort) >= 0)
+        if(PORT_PEN_VIS(MR(qdGlobals().thePort)) >= 0)
         {
             SetRect(&r, x1, y1, x2 + px, y2 + py);
             PAUSERECORDING;
             StdRect(paint, &r);
             RESUMERECORDING;
         }
-        if(PORT_REGION_SAVE_X(thePort) && y1 == y2 && x1 != x2)
+        if(PORT_REGION_SAVE_X(MR(qdGlobals().thePort)) && y1 == y2 && x1 != x2)
         {
             RgnPtr tmpRP;
             tmpRP = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + 5 * sizeof(INTEGER));
@@ -432,8 +432,8 @@ void Executor::C_StdLine(Point p)
             *oip++ = RGN_STOP_X;
             rp = RM(tmpRP);
             XorRgn(&rp,
-                   (RgnHandle)PORT_REGION_SAVE(thePort),
-                   (RgnHandle)PORT_REGION_SAVE(thePort));
+                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
+                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
         }
         ALLOCAEND
         /*-->*/ return;
@@ -447,7 +447,7 @@ void Executor::C_StdLine(Point p)
     dy = y2 - y1;
     dx = std::abs(x2 - x1);
 
-    if(PORT_REGION_SAVE_X(thePort))
+    if(PORT_REGION_SAVE_X(MR(qdGlobals().thePort)))
     {
         /* size allocated below is overkill */
         RgnPtr tmpRP;
@@ -470,11 +470,11 @@ void Executor::C_StdLine(Point p)
         tmpRP->rgnSize = CW((char *)op - (char *)tmpRP);
         rp = RM(tmpRP);
         XorRgn(&rp,
-               (RgnHandle)PORT_REGION_SAVE(thePort),
-               (RgnHandle)PORT_REGION_SAVE(thePort));
+               (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
+               (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
     }
 
-    if(PORT_PEN_VIS(thePort) < 0)
+    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
     {
         ALLOCAEND
         /*-->*/ return;
@@ -562,29 +562,29 @@ void Executor::C_StdLine(Point p)
     regionify1(destpoints, destpoints2, tmpRP);
 
     rh = NewRgn();
-    SectRect(&PORT_BOUNDS(thePort), &PORT_RECT(thePort), &r);
+    SectRect(&PORT_BOUNDS(MR(qdGlobals().thePort)), &PORT_RECT(MR(qdGlobals().thePort)), &r);
     RectRgn(rh, &r);
-    SectRgn(rh, PORT_VIS_REGION(thePort), rh);
-    SectRgn(rh, PORT_CLIP_REGION(thePort), rh);
+    SectRgn(rh, PORT_VIS_REGION(MR(qdGlobals().thePort)), rh);
+    SectRgn(rh, PORT_CLIP_REGION(MR(qdGlobals().thePort)), rh);
     rp = RM(tmpRP);
     SectRgn(&rp, rh, rh);
 
-    if(GWorld_p(thePort))
-        LockPixels(CPORT_PIXMAP(thePort));
+    if(GWorld_p(MR(qdGlobals().thePort)))
+        LockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
 
     {
         INTEGER adjusted_mode;
 
-        adjusted_mode = PORT_PEN_MODE(thePort);
+        adjusted_mode = PORT_PEN_MODE(MR(qdGlobals().thePort));
         if(adjusted_mode < blend)
             adjusted_mode = adjusted_mode % 0x40 | 8;
         ROMlib_blt_pn(rh, adjusted_mode);
     }
-    /* ROMlib_bltrgn (rh, thePort->pnPat, Cx(thePort->pnMode) % 0x40 | 8,
+    /* ROMlib_bltrgn (rh, MR(qdGlobals().thePort)->pnPat, Cx(MR(qdGlobals().thePort)->pnMode) % 0x40 | 8,
    (Rect *) 0, (Rect *) 0); */
 
-    if(GWorld_p(thePort))
-        UnlockPixels(CPORT_PIXMAP(thePort));
+    if(GWorld_p(MR(qdGlobals().thePort)))
+        UnlockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
 
     DisposeRgn(rh);
     ALLOCAEND

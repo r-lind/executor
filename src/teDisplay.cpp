@@ -83,14 +83,14 @@ void Executor::C_TEScroll(int16_t dh, int16_t dv, TEHandle te)
     ScrollRect(&r, dh, dv, rh);
     OffsetRect(&TE_DEST_RECT(te), dh, dv);
 
-    save_vis = PORT_VIS_REGION(thePort);
+    save_vis = PORT_VIS_REGION(MR(qdGlobals().thePort));
     SectRgn(rh, save_vis, rh);
-    PORT_VIS_REGION_X(thePort) = RM(rh);
+    PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = RM(rh);
 
-    vis_rgn_bbox = RGN_BBOX(PORT_VIS_REGION(thePort));
+    vis_rgn_bbox = RGN_BBOX(PORT_VIS_REGION(MR(qdGlobals().thePort)));
     TEUpdate(&vis_rgn_bbox, te);
 
-    PORT_VIS_REGION_X(thePort) = RM(save_vis);
+    PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = RM(save_vis);
     DisposeRgn(rh);
 
     TE_SLAM(te);

@@ -201,9 +201,9 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
    bounds as thePort's bits (portBits or portPixMap) */
 #define BITMAP_IS_THEPORT_P(bitmap)                         \
     (!memcmp(bitmap,                                        \
-             (CGrafPort_p(thePort)                          \
+             (CGrafPort_p(MR(qdGlobals().thePort))                          \
                   ? (BitMap *)STARH(CPORT_PIXMAP(theCPort)) \
-                  : &PORT_BITS(thePort)),                   \
+                  : &PORT_BITS(MR(qdGlobals().thePort))),                   \
              sizeof(BitMap)))
 
 /* Return the port bits of the given port suitable for passing
@@ -741,18 +741,18 @@ class ThePortGuard
 
 public:
     ThePortGuard(GrafPtr port)
-        : savePort(thePortX)
+        : savePort(qdGlobals().thePort)
     {
         SetPort(port);
     }
     ThePortGuard()
-        : savePort(thePortX)
+        : savePort(qdGlobals().thePort)
     {
     }
     ThePortGuard(const ThePortGuard &) = delete;
     ~ThePortGuard()
     {
-        thePortX = savePort;
+        qdGlobals().thePort = savePort;
     }
 };
 

@@ -407,7 +407,7 @@ draw(ControlHandle ctl, draw_state_t draw_state,
         dst_rect.bottom = CW(center - 3 + /* arrows are `6' tall */ 6);
         dst_rect.right = CW(right - 22
                             + /* arrows are `11' wide */ 11);
-        CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(thePort),
+        CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
                  &arrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
     }
 }

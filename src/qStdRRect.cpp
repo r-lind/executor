@@ -208,7 +208,7 @@ void Executor::C_StdRRect(GrafVerb verb, Rect *r, INTEGER width, INTEGER height)
     GUEST<Point> p;
     PAUSEDECL;
 
-    if(thePort->picSave)
+    if(MR(qdGlobals().thePort)->picSave)
     {
         p.h = CW(width);
         p.v = CW(height);
@@ -217,8 +217,8 @@ void Executor::C_StdRRect(GrafVerb verb, Rect *r, INTEGER width, INTEGER height)
         PICWRITE(r, sizeof(*r));
     }
 
-    if(PORT_PEN_VIS(thePort) < 0
-       && (!PORT_REGION_SAVE(thePort) || verb != frame))
+    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0
+       && (!PORT_REGION_SAVE(MR(qdGlobals().thePort)) || verb != frame))
         /*-->*/ return;
 
     PAUSERECORDING;

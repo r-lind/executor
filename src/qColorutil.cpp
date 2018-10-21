@@ -60,7 +60,7 @@ Executor::validate_fg_bk_ctab(void)
     old_fg = *fg;
     old_bk = *bk;
 
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         if(pixel_size > 8)
         {
@@ -68,21 +68,21 @@ Executor::validate_fg_bk_ctab(void)
 
             rgb_spec = pixel_size == 16 ? &mac_16bpp_rgb_spec
                                         : &mac_32bpp_rgb_spec;
-            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_FG_COLOR(thePort), fg));
-            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_BK_COLOR(thePort), bk));
+            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_FG_COLOR(MR(qdGlobals().thePort)), fg));
+            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_BK_COLOR(MR(qdGlobals().thePort)), bk));
         }
         else
         {
-            *fg = gd_ctab_table[PORT_FG_COLOR(thePort)].rgb;
-            *bk = gd_ctab_table[PORT_BK_COLOR(thePort)].rgb;
+            *fg = gd_ctab_table[PORT_FG_COLOR(MR(qdGlobals().thePort))].rgb;
+            *bk = gd_ctab_table[PORT_BK_COLOR(MR(qdGlobals().thePort))].rgb;
         }
     }
     else
     {
         /* determine rgb values of the current bk/fg
 	 via `LM(QDColors)' */
-        *fg = *ROMlib_qd_color_to_rgb(PORT_FG_COLOR(thePort));
-        *bk = *ROMlib_qd_color_to_rgb(PORT_BK_COLOR(thePort));
+        *fg = *ROMlib_qd_color_to_rgb(PORT_FG_COLOR(MR(qdGlobals().thePort)));
+        *bk = *ROMlib_qd_color_to_rgb(PORT_BK_COLOR(MR(qdGlobals().thePort)));
     }
 
     if(memcmp(&old_fg, fg, sizeof old_fg)

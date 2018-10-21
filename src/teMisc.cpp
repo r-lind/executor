@@ -219,9 +219,9 @@ int16_t nextbreak(TEHandle teh, int16_t off, int16_t len,
             /* Only the size face and font need to be saved so this is
              overkill. */
             TESAVE(teh);
-            PORT_TX_SIZE_X(thePort) = TE_TX_SIZE_X(teh);
-            PORT_TX_FACE(thePort) = TE_TX_FACE(teh);
-            PORT_TX_FONT_X(thePort) = TE_TX_FONT_X(teh);
+            PORT_TX_SIZE_X(MR(qdGlobals().thePort)) = TE_TX_SIZE_X(teh);
+            PORT_TX_FACE(MR(qdGlobals().thePort)) = TE_TX_FACE(teh);
+            PORT_TX_FONT_X(MR(qdGlobals().thePort)) = TE_TX_FONT_X(teh);
             while(width <= max_width && sp != ep && *sp != '\r')
                 width += CharWidth(*sp++);
             TERESTORE();

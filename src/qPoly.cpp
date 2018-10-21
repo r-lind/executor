@@ -21,7 +21,7 @@ PolyHandle Executor::C_OpenPoly()
 
     ph = (PolyHandle)NewHandle((Size)SMALLPOLY);
     HxX(ph, polySize) = CWC(SMALLPOLY);
-    PORT_POLY_SAVE_X(thePort) = RM((Handle)ph);
+    PORT_POLY_SAVE_X(MR(qdGlobals().thePort)) = RM((Handle)ph);
     HidePen();
     return (ph);
 }
@@ -33,7 +33,7 @@ void Executor::C_ClosePoly()
     INTEGER i;
     PolyHandle ph;
 
-    ph = (PolyHandle)PORT_POLY_SAVE(thePort);
+    ph = (PolyHandle)PORT_POLY_SAVE(MR(qdGlobals().thePort));
     for(ip = (GUEST<INTEGER> *)((char *)STARH(ph) + SMALLPOLY),
     ep = (GUEST<INTEGER> *)((char *)STARH(ph) + Hx(ph, polySize));
         ip != ep;)
@@ -53,7 +53,7 @@ void Executor::C_ClosePoly()
     HxX(ph, polyBBox.left) = CW(left);
     HxX(ph, polyBBox.bottom) = CW(bottom);
     HxX(ph, polyBBox.right) = CW(right);
-    PORT_POLY_SAVE_X(thePort) = nullptr;
+    PORT_POLY_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
     ShowPen();
 }
 

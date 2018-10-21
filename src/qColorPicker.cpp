@@ -561,7 +561,7 @@ text_box_miniarrow_update(struct text_box *box,
             center_x - 13 / 2, center_y - 22 / 2,
             center_x - 13 / 2 + 13, center_y - 22 / 2 + 22);
 
-    CopyBits(&miniarrow_bitmap, PORT_BITS_FOR_COPY(thePort),
+    CopyBits(&miniarrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
              &miniarrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
 }
 
@@ -673,10 +673,10 @@ compare_box_update(void)
     /* draw the color comparison box */
 
     RGBForeColor(&orig_color);
-    FillRect(orig_compare_box_bounds, black);
+    FillRect(orig_compare_box_bounds, qdGlobals().black);
 
     RGBForeColor(&current_color);
-    FillRect(current_compare_box_bounds, black);
+    FillRect(current_compare_box_bounds, qdGlobals().black);
 
     PenSize(2, 2);
     ForeColor(blackColor);
@@ -1173,7 +1173,7 @@ color_wheel_target_update(bool short_cut_p)
     OffsetRect(&src_rect, -CW(color_wheel_bounds->left),
                -CW(color_wheel_bounds->top));
 
-    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(thePort),
+    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
              &src_rect, &dst_rect, srcCopy, NULL);
 
     PenSize(1, 1);
@@ -1205,7 +1205,7 @@ color_wheel_target_update(bool short_cut_p)
 static void
 color_wheel_update(void)
 {
-    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(thePort),
+    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
              &color_wheel_pixmap.bounds, color_wheel_bounds, srcCopy, NULL);
 
     MoveTo(470 - StringWidth(label_0_degs),

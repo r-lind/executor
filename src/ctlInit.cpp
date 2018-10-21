@@ -40,7 +40,7 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
 
     if(!title)
         title = (StringPtr) ""; /* nothing ("\p" == "") */
-    gp = thePort;
+    gp = MR(qdGlobals().thePort);
     SetPort((GrafPtr)wst);
 
     tmp = MR(LM(AuxCtlHead));

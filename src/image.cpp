@@ -94,7 +94,7 @@ Executor::image_init(pixel_image_desc_t *image_desc)
     return retval;
 }
 
-/* all image_... functions assume thePort as target */
+/* all image_... functions assume MR(qdGlobals().thePort) as target */
 void Executor::image_copy(pixel_image_t *image, int color_p /* visual */,
                           Rect *dst_rect, int mode)
 {
@@ -113,7 +113,7 @@ void Executor::image_copy(pixel_image_t *image, int color_p /* visual */,
   RGBBackColor (&ROMlib_white_rgb_color);
 #endif
 
-    CopyBits(wrapper, PORT_BITS_FOR_COPY(thePort),
+    CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
              &x_bits_bounds, dst_rect, mode, NULL);
 }
 

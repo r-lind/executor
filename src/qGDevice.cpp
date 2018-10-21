@@ -63,7 +63,7 @@ void Executor::gd_allocate_main_device(void)
 
     SET_HILITE_BIT();
     LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = CLC_NULL;
-    
+
     graphics_device = NewGDevice(/* no driver */ 0,
                                  mode_from_bpp(vdriver->bpp()));
 
@@ -321,7 +321,7 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
     GUEST<RgnHandle> save_vis_rgn_x;
     RgnHandle sect_rgn, gd_rect_rgn;
 
-    save_vis_rgn_x = PORT_VIS_REGION_X(thePort);
+    save_vis_rgn_x = PORT_VIS_REGION_X(MR(qdGlobals().thePort));
 
     sect_rgn = NewRgn();
     gd_rect_rgn = NewRgn();
@@ -342,9 +342,9 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
             {
                 Rect gd_rect, *port_bounds;
 
-                /* Map the GDevice rect into thePort local coordinates. */
+                /* Map the GDevice rect into MR(qdGlobals().thePort) local coordinates. */
                 gd_rect = GD_RECT(gd);
-                port_bounds = &(PORT_BOUNDS(thePort));
+                port_bounds = &(PORT_BOUNDS(MR(qdGlobals().thePort)));
                 OffsetRect(&gd_rect,
                            CW(port_bounds->left),
                            CW(port_bounds->top));
@@ -353,10 +353,10 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
                 RectRgn(gd_rect_rgn, &gd_rect);
                 SectRgn(gd_rect_rgn, rgn, sect_rgn);
 
-                SectRgn(sect_rgn, PORT_VIS_REGION(thePort), sect_rgn);
+                SectRgn(sect_rgn, PORT_VIS_REGION(MR(qdGlobals().thePort)), sect_rgn);
 
-                /* Save it away in thePort. */
-                PORT_VIS_REGION_X(thePort) = RM(sect_rgn);
+                /* Save it away in MR(qdGlobals().thePort). */
+                PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = RM(sect_rgn);
             }
 
             if((flags & allDevices) || !EmptyRgn(sect_rgn))
@@ -366,7 +366,7 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
             }
         }
 
-    PORT_VIS_REGION_X(thePort) = save_vis_rgn_x;
+    PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = save_vis_rgn_x;
 
     DisposeRgn(gd_rect_rgn);
     DisposeRgn(sect_rgn);
@@ -445,7 +445,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     gd_set_bpp(gdh, !vdriver->isGrayscale(), vdriver->isFixedCLUT(), bpp);
 
     PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver->rowBytes()));
-    screenBitsX.rowBytes = CW(vdriver->rowBytes());
+    qdGlobals().screenBits.rowBytes = CW(vdriver->rowBytes());
 
     cursor_reset_current_cursor();
 

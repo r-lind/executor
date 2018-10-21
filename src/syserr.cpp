@@ -148,7 +148,7 @@ static void drawicon(INTEGER id, INTEGER offsetx, INTEGER offsety)
         bm.bounds.right = bm.bounds.bottom = CWC(32);
         old_loc = ip->loc;
         C_OffsetRect(&ip->loc, offsetx, offsety);
-        CopyBits(&bm, PORT_BITS_FOR_COPY(thePort),
+        CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
                  &bm.bounds, &ip->loc, srcCopy, NULL);
         ip->loc = old_loc;
     }
@@ -321,7 +321,7 @@ void Executor::C_SysError(short errorcode)
     else
     {
         r = LM(DSAlertRect);
-        FillRect(&r, white);
+        FillRect(&r, qdGlobals().white);
 #if defined(OLDSTYLEALERT)
         r.right = CW(CW(r.right) - (2));
         r.bottom = CW(CW(r.bottom) - (2));

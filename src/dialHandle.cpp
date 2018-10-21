@@ -119,8 +119,8 @@ inline int _FindWindow(Point pt, WindowPtr *wp)
 void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI-415 */
 {
     /*
-   * The code used to save thePort and restore it at the end of the
-   * function, but CALLMODALPROC expects thePort to be unchanged which
+   * The code used to save MR(qdGlobals().thePort) and restore it at the end of the
+   * function, but CALLMODALPROC expects MR(qdGlobals().thePort) to be unchanged which
    * caused a bug in Macwrite II when size/fontsize... and clicking on
    * a size on the left.
    */
@@ -192,8 +192,8 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
 void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI-415 */
 {
     /*
-   * The code used to save thePort and restore it at the end of the
-   * function, but CALLMODALPROC expects thePort to be unchanged which
+   * The code used to save MR(qdGlobals().thePort) and restore it at the end of the
+   * function, but CALLMODALPROC expects MR(qdGlobals().thePort) to be unchanged which
    * caused a bug in Macwrite II when size/fontsize... and clicking on
    * a size on the left.
    */
@@ -400,7 +400,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
                       &r, teFlushDefault);
         }
 
-        PORT_PEN_SIZE(thePort).h = PORT_PEN_SIZE(thePort).v = CWC(1);
+        PORT_PEN_SIZE(MR(qdGlobals().thePort)).h = PORT_PEN_SIZE(MR(qdGlobals().thePort)).v = CWC(1);
         InsetRect(&r, -3, -3);
         FrameRect(&r);
     }
@@ -465,7 +465,7 @@ void Executor::C_DrawDialog(DialogPtr dp) /* IMI-418 */
 
     if(dp)
     {
-        gp = thePort;
+        gp = MR(qdGlobals().thePort);
         SetPort((GrafPtr)dp);
         if(Cx(((DialogPeek)dp)->editField) != -1)
             TEDeactivate(MR(((DialogPeek)dp)->textH));
@@ -507,7 +507,7 @@ void Executor::C_UpdateDialog(DialogPtr dp, RgnHandle rgn) /* IMIV-60 */
     GrafPtr gp;
     SignedByte state;
 
-    gp = thePort;
+    gp = MR(qdGlobals().thePort);
     SetPort((GrafPtr)dp);
     ShowWindow((WindowPtr)dp);
     DrawControls((WindowPtr)dp);
@@ -547,7 +547,7 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
     {
         case mouseDown:
             glocalp = evt->where;
-            gp = thePort;
+            gp = MR(qdGlobals().thePort);
             SetPort((GrafPtr)dp);
             GlobalToLocal(&glocalp);
             localp = glocalp.get();

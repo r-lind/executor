@@ -326,9 +326,9 @@ void toggle_box_active(enum box_flag which_box, Point origin)
     if(rounded_window_p)
     {
         /* invert the set bits of the box */
-        PORT_FG_COLOR_X(thePort)
-            = CL((1 << PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(thePort))) - 1);
-        PORT_FG_COLOR_X(thePort) = CLC(0);
+        PORT_FG_COLOR_X(MR(qdGlobals().thePort))
+            = CL((1 << PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(MR(qdGlobals().thePort)))) - 1);
+        PORT_FG_COLOR_X(MR(qdGlobals().thePort)) = CLC(0);
     }
     else
     {
@@ -357,7 +357,7 @@ void toggle_box_active(enum box_flag which_box, Point origin)
         else
             target_color = &ROMlib_white_rgb_color;
 
-        PORT_FG_COLOR_X(thePort)
+        PORT_FG_COLOR_X(MR(qdGlobals().thePort))
             = CL(Color2Index(target_color) ^ Color2Index(frame));
     }
 
@@ -390,7 +390,7 @@ void hilite_window(int left, int top, int right, int bottom)
     int l, r;
 
     /* we are called from `draw_frame ()' only, pen is (1, 1), patCopy,
-     pattern black */
+     pattern qdGlobals().black */
 
     /* draw title bar shadow/tinge */
     if(color_p)
@@ -492,7 +492,7 @@ void draw_title(GrafPtr w,
         th = WINDOW_TITLE(w);
         {
             HLockGuard guard(th);
-            PORT_TX_MODE_X(thePort) = CWC(srcCopy);
+            PORT_TX_MODE_X(MR(qdGlobals().thePort)) = CWC(srcCopy);
             MoveTo(title_start + 6, top - 5);
             DrawString(STARH(th));
         }
@@ -561,7 +561,7 @@ void draw_frame(GrafPtr w, int draw_zoom_p, bool goaway_override)
 
     PenSize(1, 1);
     /* draw with the current foreground color */
-    PenPat(black);
+    PenPat(qdGlobals().black);
     PenMode(patCopy);
 
     /* bounds of the title bar */
@@ -765,7 +765,7 @@ void draw_grow_icon(GrafPtr w)
     right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
     bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
 
-    PenPat(black);
+    PenPat(qdGlobals().black);
     PenSize(1, 1);
     PenMode(patCopy);
 
@@ -801,7 +801,7 @@ void erase_grow_icon(GrafPtr w)
     right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
     bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
 
-    PenPat(black);
+    PenPat(qdGlobals().black);
     PenSize(1, 1);
     PenMode(patCopy);
     MoveTo(left, bottom - 15);
@@ -809,7 +809,7 @@ void erase_grow_icon(GrafPtr w)
     MoveTo(right - 15, top);
     LineTo(right - 15, bottom - 1);
     SetRect(&r, right - 14, bottom - 14, right, bottom);
-    FillRect(&r, white);
+    FillRect(&r, qdGlobals().white);
 }
 
 LONGINT
@@ -1136,9 +1136,9 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
                       -CW(PORT_BOUNDS(w).left),
                       -CW(PORT_BOUNDS(w).top));
 
-            CopyRgn(PORT_CLIP_REGION(thePort), save_clip);
-            SectRgn(PORT_CLIP_REGION(thePort), temp_rgn,
-                    PORT_CLIP_REGION(thePort));
+            CopyRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), save_clip);
+            SectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), temp_rgn,
+                    PORT_CLIP_REGION(MR(qdGlobals().thePort)));
 
             if(varcode == documentProc)
             {
@@ -1148,7 +1148,7 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
                     erase_grow_icon((GrafPtr)w);
             }
 
-            CopyRgn(save_clip, PORT_CLIP_REGION(thePort));
+            CopyRgn(save_clip, PORT_CLIP_REGION(MR(qdGlobals().thePort)));
 
             DisposeRgn(temp_rgn);
             DisposeRgn(save_clip);
@@ -1179,7 +1179,7 @@ void hilite_rounded_window(WindowPeek w,
     SectRgn(rh1, rh2, rh1);
 
     RGBForeColor(title_bar_bk);
-    PenPat(black);
+    PenPat(qdGlobals().black);
     PaintRgn(rh1);
 
     DisposeRgn(rh2);
@@ -1198,7 +1198,7 @@ void draw_rounded_doc(GrafPtr w)
     bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
 
     SetRect(&r, left - 1, top - 19, right + 1, top);
-    FillRect(&r, white);
+    FillRect(&r, qdGlobals().white);
     RGBForeColor(frame);
     FrameRgn(WINDOW_STRUCT_REGION(w));
     PenSize(1, 1);

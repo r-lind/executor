@@ -62,7 +62,7 @@ void Executor::C_InitWindows()
     LM(SaveVisRgn) = NULL;
 
     {
-        ThePortGuard guard(thePort);
+        ThePortGuard guard(MR(qdGlobals().thePort));
 
         /* FIXME: is this a memory leak, to just call InitPort () again? */
         InitPort(MR(LM(WMgrPort)));
@@ -106,9 +106,9 @@ void Executor::C_InitWindows()
         PaintRgn(corners);
         CopyRgn(MR(LM(GrayRgn)), PORT_VIS_REGION(MR(wmgr_port)));
         DiffRgn(MR(LM(GrayRgn)), mrgn, MR(LM(GrayRgn)));
-        PenPat(white);
+        PenPat(qdGlobals().white);
         PaintRgn(mrgn);
-        PenPat(black);
+        PenPat(qdGlobals().black);
         MoveTo(0, CW(LM(MBarHeight)) - 1);
         Line(CW(GD_BOUNDS(MR(LM(TheGDevice))).right), 0);
         if(!ROMlib_rootless_drawdesk(MR(LM(GrayRgn))))
@@ -127,7 +127,7 @@ void Executor::C_InitWindows()
         LM(PaintWhite) = CWC(-1);
         LM(DeskHook) = NULL;
         LM(GhostWindow) = NULL;
-        PATASSIGN(LM(DragPattern), gray);
+        PATASSIGN(LM(DragPattern), qdGlobals().gray);
     }
     ROMlib_rootless_update();
 
@@ -275,7 +275,7 @@ ROMlib_new_window_common(WindowPeek w,
     AuxWinHandle t_aux_w;
     GrafPtr save_port;
 
-    save_port = thePort;
+    save_port = MR(qdGlobals().thePort);
     if(!title)
         title = (StringPtr) ""; /* thank MS Word for pointing this out */
     if(!behind)
@@ -392,7 +392,7 @@ ROMlib_new_window_common(WindowPeek w,
         WINDCALL((WindowPtr)w, wCalcRgns, 0);
         SetClip(WINDOW_STRUCT_REGION(w));
         ClipAbove(w);
-        PenPat(black);
+        PenPat(qdGlobals().black);
         WINDCALL((WindowPtr)w, wDraw, 0);
         CalcVis(w);
         EraseRgn(WINDOW_CONT_REGION(w));
@@ -507,7 +507,7 @@ CWindowPtr Executor::C_GetNewCWindow(INTEGER window_id, Ptr window_storage,
     win_ctab_res = ROMlib_getrestid(TICK("wctb"), window_id);
     if(win_ctab_res != NULL)
     {
-        ThePortGuard guard(thePort);
+        ThePortGuard guard(MR(qdGlobals().thePort));
         SetWinColor((WindowPtr)new_cwin, (CTabHandle)win_ctab_res);
     }
 
@@ -589,7 +589,7 @@ void Executor::C_CloseWindow(WindowPtr w)
 
     /* NOTE: we can't use THEPORT_SAVE_EXCURSION here, becuase of this
        odd behavior */
-    savgp = thePort == (GrafPtr)w ? (GrafPtr)MR(wmgr_port) : thePort;
+    savgp = MR(qdGlobals().thePort) == (GrafPtr)w ? (GrafPtr)MR(wmgr_port) : MR(qdGlobals().thePort);
     SetPort(MR(wmgr_port));
     SetClip(MR(LM(GrayRgn)));
     PaintBehind(WINDOW_NEXT_WINDOW(w), WINDOW_STRUCT_REGION(w));

@@ -66,9 +66,9 @@ int16_t Executor::ROMlib_StyleTextWidth(TEPtr tep,
     style_table_flags = HGetState((Handle)style_table);
     styles = STARH(style_table);
 
-    save_size = PORT_TX_SIZE_X(thePort);
-    save_face = PORT_TX_FACE(thePort);
-    save_font = PORT_TX_FONT_X(thePort);
+    save_size = PORT_TX_SIZE_X(MR(qdGlobals().thePort));
+    save_face = PORT_TX_FACE(MR(qdGlobals().thePort));
+    save_font = PORT_TX_FONT_X(MR(qdGlobals().thePort));
 
     current_run_index = te_char_to_run_index(te_style, start);
     retval = 0;
@@ -88,18 +88,18 @@ int16_t Executor::ROMlib_StyleTextWidth(TEPtr tep,
 
         style = &styles[RUN_STYLE_INDEX(current_run)];
 
-        PORT_TX_SIZE_X(thePort) = ST_ELT_SIZE_X(style);
-        PORT_TX_FACE(thePort) = ST_ELT_FACE(style);
-        PORT_TX_FONT_X(thePort) = ST_ELT_FONT_X(style);
+        PORT_TX_SIZE_X(MR(qdGlobals().thePort)) = ST_ELT_SIZE_X(style);
+        PORT_TX_FACE(MR(qdGlobals().thePort)) = ST_ELT_FACE(style);
+        PORT_TX_FONT_X(MR(qdGlobals().thePort)) = ST_ELT_FONT_X(style);
 
         retval += TextWidth(Text, start, run_len);
         count -= run_len;
         start = next_run_start;
     }
 
-    PORT_TX_SIZE_X(thePort) = save_size;
-    PORT_TX_FACE(thePort) = save_face;
-    PORT_TX_FONT_X(thePort) = save_font;
+    PORT_TX_SIZE_X(MR(qdGlobals().thePort)) = save_size;
+    PORT_TX_FACE(MR(qdGlobals().thePort)) = save_face;
+    PORT_TX_FONT_X(MR(qdGlobals().thePort)) = save_font;
 
     HSetState((Handle)style_table, style_table_flags);
     HSetState((Handle)te_style, te_style_flags);
@@ -200,10 +200,10 @@ togglecaret(TEHandle teh, int16_t sel, bool paint_p)
     Point p;
     int16_t pm;
 
-    pm = PORT_PEN_MODE(thePort);
+    pm = PORT_PEN_MODE(MR(qdGlobals().thePort));
     TE_CHAR_TO_POINT(teh, sel, &p);
     MoveTo(p.h, p.v);
-    PORT_PEN_MODE_X(thePort) = CWC(patXor);
+    PORT_PEN_MODE_X(MR(qdGlobals().thePort)) = CWC(patXor);
     if(TE_STYLIZED_P(teh))
     {
         TEStyleHandle te_style;
@@ -250,65 +250,65 @@ void Executor::ROMlib_tesave(tesave *t, TEHandle teh)
     TEPtr tp;
 
     tp = STARH(teh);
-    t->_tport = thePortX;
-    thePortX = tp->inPort;
+    t->_tport = qdGlobals().thePort;
+    qdGlobals().thePort = tp->inPort;
 
-    t->_tpvis = PORT_PEN_VIS_X(thePort);
-    t->_tfont = PORT_TX_FONT_X(thePort);
-    t->_tmode = PORT_TX_MODE_X(thePort);
-    t->_tsize = PORT_TX_SIZE_X(thePort);
-    t->_tstyle = PORT_TX_FACE_X(thePort);
+    t->_tpvis = PORT_PEN_VIS_X(MR(qdGlobals().thePort));
+    t->_tfont = PORT_TX_FONT_X(MR(qdGlobals().thePort));
+    t->_tmode = PORT_TX_MODE_X(MR(qdGlobals().thePort));
+    t->_tsize = PORT_TX_SIZE_X(MR(qdGlobals().thePort));
+    t->_tstyle = PORT_TX_FACE_X(MR(qdGlobals().thePort));
 
-    t->fg_color = PORT_FG_COLOR_X(thePort);
-    t->bk_color = PORT_BK_COLOR_X(thePort);
+    t->fg_color = PORT_FG_COLOR_X(MR(qdGlobals().thePort));
+    t->bk_color = PORT_BK_COLOR_X(MR(qdGlobals().thePort));
 
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
-        t->rgb_fg_color = CPORT_RGB_FG_COLOR(thePort);
-        t->rgb_bk_color = CPORT_RGB_BK_COLOR(thePort);
+        t->rgb_fg_color = CPORT_RGB_FG_COLOR(MR(qdGlobals().thePort));
+        t->rgb_bk_color = CPORT_RGB_BK_COLOR(MR(qdGlobals().thePort));
     }
 
     GetPenState(&t->_tpstate);
 
-    PORT_PEN_SIZE(thePort).h = PORT_PEN_SIZE(thePort).v = CWC(1);
-    PORT_PEN_MODE_X(thePort) = CWC(patCopy);
-    PORT_TX_FONT_X(thePort) = tp->txFont;
-    PORT_TX_MODE_X(thePort) = tp->txMode;
-    PORT_TX_SIZE_X(thePort) = tp->txSize;
-    PORT_TX_FACE_X(thePort) = tp->txFace;
+    PORT_PEN_SIZE(MR(qdGlobals().thePort)).h = PORT_PEN_SIZE(MR(qdGlobals().thePort)).v = CWC(1);
+    PORT_PEN_MODE_X(MR(qdGlobals().thePort)) = CWC(patCopy);
+    PORT_TX_FONT_X(MR(qdGlobals().thePort)) = tp->txFont;
+    PORT_TX_MODE_X(MR(qdGlobals().thePort)) = tp->txMode;
+    PORT_TX_SIZE_X(MR(qdGlobals().thePort)) = tp->txSize;
+    PORT_TX_FACE_X(MR(qdGlobals().thePort)) = tp->txFace;
 
-    PenPat(black);
+    PenPat(qdGlobals().black);
 
-    t->_tsaveclip = PORT_CLIP_REGION_X(thePort);
-    PORT_CLIP_REGION_X(thePort) = RM(NewRgn());
-    HxX(PORT_CLIP_REGION(thePort), rgnBBox) = HxX(teh, viewRect);
-    SectRgn(PORT_CLIP_REGION(thePort), MR(t->_tsaveclip),
-            PORT_CLIP_REGION(thePort));
+    t->_tsaveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort));
+    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(NewRgn());
+    HxX(PORT_CLIP_REGION(MR(qdGlobals().thePort)), rgnBBox) = HxX(teh, viewRect);
+    SectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), MR(t->_tsaveclip),
+            PORT_CLIP_REGION(MR(qdGlobals().thePort)));
 }
 
 void Executor::ROMlib_terestore(tesave *t)
 {
     SetPenState(&t->_tpstate);
 
-    DisposeRgn(PORT_CLIP_REGION(thePort));
-    PORT_CLIP_REGION_X(thePort) = t->_tsaveclip;
+    DisposeRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = t->_tsaveclip;
 
-    PORT_TX_FACE_X(thePort) = t->_tstyle;
-    PORT_TX_SIZE_X(thePort) = t->_tsize;
-    PORT_TX_MODE_X(thePort) = t->_tmode;
-    PORT_TX_FONT_X(thePort) = t->_tfont;
-    PORT_PEN_VIS_X(thePort) = t->_tpvis;
+    PORT_TX_FACE_X(MR(qdGlobals().thePort)) = t->_tstyle;
+    PORT_TX_SIZE_X(MR(qdGlobals().thePort)) = t->_tsize;
+    PORT_TX_MODE_X(MR(qdGlobals().thePort)) = t->_tmode;
+    PORT_TX_FONT_X(MR(qdGlobals().thePort)) = t->_tfont;
+    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = t->_tpvis;
 
-    PORT_FG_COLOR_X(thePort) = t->fg_color;
-    PORT_BK_COLOR_X(thePort) = t->bk_color;
+    PORT_FG_COLOR_X(MR(qdGlobals().thePort)) = t->fg_color;
+    PORT_BK_COLOR_X(MR(qdGlobals().thePort)) = t->bk_color;
 
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
-        CPORT_RGB_FG_COLOR(thePort) = t->rgb_fg_color;
-        CPORT_RGB_BK_COLOR(thePort) = t->rgb_bk_color;
+        CPORT_RGB_FG_COLOR(MR(qdGlobals().thePort)) = t->rgb_fg_color;
+        CPORT_RGB_BK_COLOR(MR(qdGlobals().thePort)) = t->rgb_bk_color;
     }
 
-    thePortX = t->_tport;
+    qdGlobals().thePort = t->_tport;
 }
 
 void Executor::C_TEIdle(TEHandle teh)
@@ -333,9 +333,9 @@ void Executor::C_TEIdle(TEHandle teh)
 
 void style_update_port(STElement *style)
 {
-    PORT_TX_SIZE_X(thePort) = ST_ELT_SIZE_X(style);
-    PORT_TX_FONT_X(thePort) = ST_ELT_FONT_X(style);
-    PORT_TX_FACE(thePort) = ST_ELT_FACE(style);
+    PORT_TX_SIZE_X(MR(qdGlobals().thePort)) = ST_ELT_SIZE_X(style);
+    PORT_TX_FONT_X(MR(qdGlobals().thePort)) = ST_ELT_FONT_X(style);
+    PORT_TX_FACE(MR(qdGlobals().thePort)) = ST_ELT_FACE(style);
     RGBForeColor(&ST_ELT_COLOR(style));
 }
 
@@ -399,7 +399,7 @@ void te_draw(TEPtr tep,
         int16_t clip_rect_top, clip_rect_bottom;
 
         view_rect = &TEP_VIEW_RECT(tep);
-        vis_rect = &RGN_BBOX(PORT_VIS_REGION(thePort));
+        vis_rect = &RGN_BBOX(PORT_VIS_REGION(MR(qdGlobals().thePort)));
         clip_rect = (Rect *)alloca(sizeof *clip_rect);
 
 #if 0
@@ -530,7 +530,7 @@ void te_draw(TEPtr tep,
         if(current_run_end < current_line_end)
         {
 #if 0
-	  Point orig_pn = PORT_PEN_LOC (thePort);
+	  Point orig_pn = PORT_PEN_LOC (MR(qdGlobals().thePort));
 #endif
 
             DrawText(Text, current_posn, current_run_end - current_posn);
@@ -538,7 +538,7 @@ void te_draw(TEPtr tep,
 	  gui_assert (CW (orig_pn.h)
 		      + TextWidth (Text, current_posn,
 				   current_run_end - current_posn)
-		      == CW (PORT_PEN_LOC (thePort).h));
+		      == CW (PORT_PEN_LOC (MR(qdGlobals().thePort)).h));
 #endif
             current_run++;
             style_update_port(&styles[RUN_STYLE_INDEX(current_run)]);
@@ -818,7 +818,7 @@ INTEGER ROMlib_dotext(void)
 
     retval = C_ROMlib_dotext(tep, first, last, what);
 
-    EM_A0 = US_TO_SYN68K(thePort);
+    EM_A0 = US_TO_SYN68K(MR(qdGlobals().thePort));
     EM_D0 = retval;
     return retval;
 }

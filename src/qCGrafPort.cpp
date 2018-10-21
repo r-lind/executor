@@ -69,7 +69,7 @@ void Executor::C_InitCPort(CGrafPtr p)
         return;
 
     /* set the port early so we can call convenience functions
-     that operate on thePort */
+     that operate on MR(qdGlobals().thePort) */
     SetPort((GrafPtr)p);
 
     CPORT_VERSION_X(p) = CPORT_FLAG_BITS_X;
@@ -99,11 +99,11 @@ void Executor::C_InitCPort(CGrafPtr p)
     PORT_POLY_SAVE_X(p) = CLC_NULL;
     PORT_GRAF_PROCS_X(p) = CLC_NULL;
 
-    PenPat(black);
-    BackPat(white);
+    PenPat(qdGlobals().black);
+    BackPat(qdGlobals().white);
 
     /* hack */
-    ROMlib_fill_pat(black);
+    ROMlib_fill_pat(qdGlobals().black);
 
     /* initialize default values for newly allocated
      CGrafPtr */
@@ -158,7 +158,7 @@ static const LONGINT high_bits_to_colors[2][2][2] = {
 
 void Executor::C_RGBForeColor(RGBColor *color)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         CPORT_RGB_FG_COLOR(theCPort) = *color;
 
@@ -193,7 +193,7 @@ void Executor::C_RGBBackColor(RGBColor *color)
     }
 #endif
 
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         CPORT_RGB_BK_COLOR(theCPort) = *color;
 
@@ -217,23 +217,23 @@ void Executor::C_RGBBackColor(RGBColor *color)
 
 void Executor::C_GetForeColor(RGBColor *color)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
         *color = CPORT_RGB_FG_COLOR(theCPort);
     else
-        *color = *(ROMlib_qd_color_to_rgb(PORT_FG_COLOR(thePort)));
+        *color = *(ROMlib_qd_color_to_rgb(PORT_FG_COLOR(MR(qdGlobals().thePort))));
 }
 
 void Executor::C_GetBackColor(RGBColor *color)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
         *color = CPORT_RGB_BK_COLOR(theCPort);
     else
-        *color = *(ROMlib_qd_color_to_rgb(PORT_BK_COLOR(thePort)));
+        *color = *(ROMlib_qd_color_to_rgb(PORT_BK_COLOR(MR(qdGlobals().thePort))));
 }
 
 void Executor::C_PenPixPat(PixPatHandle new_pen)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         PixPatHandle old_pen;
 
@@ -247,12 +247,12 @@ void Executor::C_PenPixPat(PixPatHandle new_pen)
         CPORT_PEN_PIXPAT_X(theCPort) = RM(new_pen);
     }
     else
-        PATASSIGN(PORT_PEN_PAT(thePort), PIXPAT_1DATA(new_pen));
+        PATASSIGN(PORT_PEN_PAT(MR(qdGlobals().thePort)), PIXPAT_1DATA(new_pen));
 }
 
 void Executor::C_BackPixPat(PixPatHandle new_bk)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         PixPatHandle old_bk;
 
@@ -266,12 +266,12 @@ void Executor::C_BackPixPat(PixPatHandle new_bk)
         CPORT_BK_PIXPAT_X(theCPort) = RM(new_bk);
     }
     else
-        PATASSIGN(PORT_BK_PAT(thePort), PIXPAT_1DATA(new_bk));
+        PATASSIGN(PORT_BK_PAT(MR(qdGlobals().thePort)), PIXPAT_1DATA(new_bk));
 }
 
 void Executor::ROMlib_fill_pixpat(PixPatHandle new_fill)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         PixPatHandle old_fill;
 
@@ -287,14 +287,14 @@ void Executor::ROMlib_fill_pixpat(PixPatHandle new_fill)
         CPORT_FILL_PIXPAT_X(theCPort) = RM(new_fill);
     }
     else
-        PATASSIGN(PORT_BK_PAT(thePort), PIXPAT_1DATA(new_fill));
+        PATASSIGN(PORT_BK_PAT(MR(qdGlobals().thePort)), PIXPAT_1DATA(new_fill));
 }
 
 /* where is FillPixPat */
 
 void Executor::C_OpColor(RGBColor *color)
 {
-    if(!CGrafPort_p(thePort))
+    if(!CGrafPort_p(MR(qdGlobals().thePort)))
         return;
 
     HxX(CPORT_GRAFVARS(theCPort), rgbOpColor) = *color;
@@ -302,7 +302,7 @@ void Executor::C_OpColor(RGBColor *color)
 
 void Executor::C_HiliteColor(RGBColor *color)
 {
-    if(!CGrafPort_p(thePort))
+    if(!CGrafPort_p(MR(qdGlobals().thePort)))
         return;
 
     HxX(CPORT_GRAFVARS(theCPort), rgbHiliteColor) = *color;

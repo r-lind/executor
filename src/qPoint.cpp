@@ -35,18 +35,18 @@ BOOLEAN Executor::C_EqualPt(Point p1, Point p2)
 
 void Executor::C_LocalToGlobal(GUEST<Point> *pt)
 {
-    if(thePortX)
+    if(qdGlobals().thePort)
     {
-        pt->h = CW(CW(pt->h) - (CW(PORT_BOUNDS(thePort).left)));
-        pt->v = CW(CW(pt->v) - (CW(PORT_BOUNDS(thePort).top)));
+        pt->h = CW(CW(pt->h) - (CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left)));
+        pt->v = CW(CW(pt->v) - (CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top)));
     }
 }
 
 void Executor::C_GlobalToLocal(GUEST<Point> *pt)
 {
-    if(thePortX)
+    if(qdGlobals().thePort)
     {
-        pt->h = CW(CW(pt->h) + (Cx(PORT_BOUNDS(thePort).left)));
-        pt->v = CW(CW(pt->v) + (Cx(PORT_BOUNDS(thePort).top)));
+        pt->h = CW(CW(pt->h) + (Cx(PORT_BOUNDS(MR(qdGlobals().thePort)).left)));
+        pt->v = CW(CW(pt->v) + (Cx(PORT_BOUNDS(MR(qdGlobals().thePort)).top)));
     }
 }

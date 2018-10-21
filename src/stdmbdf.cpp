@@ -100,7 +100,7 @@ draw_menu_title(muelem *elt,
                                             &title_color);
             RGBForeColor(&title_color);
         }
-        PORT_TX_MODE_X(thePort) = CWC(srcCopy);
+        PORT_TX_MODE_X(MR(qdGlobals().thePort)) = CWC(srcCopy);
         MoveTo(CW(elt->muleft) + MENULEFT - 3, 14);
         if(ROMlib_AppleChar && title[0] == 1 && title[1] == APPLE_CHAR)
         {
@@ -112,11 +112,11 @@ draw_menu_title(muelem *elt,
             DrawString((StringPtr)title);
         if(dither_title_p)
         {
-            PenPat(gray);
+            PenPat(qdGlobals().gray);
             PenMode(notPatBic);
             PaintRect(&dstr);
             PenMode(patCopy);
-            PenPat(black);
+            PenPat(qdGlobals().black);
         }
         /* resent the fg/bk colors */
         RGBForeColor(&ROMlib_black_rgb_color);
@@ -404,7 +404,7 @@ save(int16_t offset, Rect *rect)
         /* long align the left boundary */
         bounds->left = CW(CW(save_rect.left) & ~31);
         bounds->right = CW(std::min(CW(bounds->right),
-                               CW(PORT_BOUNDS(thePort).right)));
+                               CW(PORT_BOUNDS(MR(qdGlobals().thePort)).right)));
 
         height = RECT_HEIGHT(bounds);
         width = RECT_WIDTH(bounds);
@@ -432,7 +432,7 @@ save(int16_t offset, Rect *rect)
 
             WRAPPER_SET_PIXMAP_X(wrapper, RM(save_pmh));
 
-            CopyBits(PORT_BITS_FOR_COPY(thePort), wrapper,
+            CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), wrapper,
                      &save_rect, &save_rect, srcCopy, NULL);
         }
 
@@ -499,7 +499,7 @@ restore(void)
             WRAPPER_PIXMAP_FOR_COPY(wrapper);
 
             WRAPPER_SET_PIXMAP_X(wrapper, RM(save_pmh));
-            CopyBits(wrapper, PORT_BITS_FOR_COPY(thePort),
+            CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
                      &save_rect, &save_rect, srcCopy, NULL);
         }
 
@@ -540,10 +540,10 @@ static Rect *getrect(LONGINT offset)
         r.bottom = CW(CW(r.top) + Hx(mh, menuHeight));
         r.right = CW(CW(r.left) + Hx(mh, menuWidth));
     }
-    dh = CW(screenBitsX.bounds.right) - 10 - CW(r.right);
+    dh = CW(qdGlobals().screenBits.bounds.right) - 10 - CW(r.right);
     if(dh > 0)
         dh = 0;
-    dv = CW(screenBitsX.bounds.bottom) - 10 - CW(r.bottom);
+    dv = CW(qdGlobals().screenBits.bounds.bottom) - 10 - CW(r.bottom);
     if(dv > 0)
         dv = 0;
     OffsetRect(&r, dh, dv);

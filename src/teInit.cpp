@@ -63,11 +63,11 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
                just, CWC(teFlushDefault),
                crOnly, CWC(1),
                clikLoop, RM((ProcPtr)&default_clik_loop[0]),
-               inPort, thePortX,
-               txFont, PORT_TX_FONT_X(thePort),
-               txFace, PORT_TX_FACE(thePort),
-               txMode, PORT_TX_MODE_X(thePort),
-               txSize, PORT_TX_SIZE_X(thePort),
+               inPort, qdGlobals().thePort,
+               txFont, PORT_TX_FONT_X(MR(qdGlobals().thePort)),
+               txFace, PORT_TX_FACE(MR(qdGlobals().thePort)),
+               txMode, PORT_TX_MODE_X(MR(qdGlobals().thePort)),
+               txSize, PORT_TX_SIZE_X(MR(qdGlobals().thePort)),
                hText, hText);
 
     tehlinestarts = HxX(teh, lineStarts);

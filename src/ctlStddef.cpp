@@ -111,21 +111,21 @@ void validate_colors_for_control(ControlHandle ctl)
         }
 
         current_control_colors[frame_color] = ctl_ctab_colors[frame_color];
-        PATASSIGN(frame_pattern, black);
+        PATASSIGN(frame_pattern, qdGlobals().black);
     }
     else
     {
-        if(!CGrafPort_p(thePort)
+        if(!CGrafPort_p(MR(qdGlobals().thePort))
            || !AVERAGE_COLOR(&ctl_ctab_colors[cFrameColor],
                              &ctl_ctab_colors[cBodyColor], 0x8000,
                              &current_control_colors[frame_color]))
         {
             current_control_colors[frame_color] = ctl_ctab_colors[frame_color];
-            PATASSIGN(frame_pattern, gray);
+            PATASSIGN(frame_pattern, qdGlobals().gray);
         }
         else
         {
-            PATASSIGN(frame_pattern, black);
+            PATASSIGN(frame_pattern, qdGlobals().black);
         }
 
         text_mode = grayishTextOr;
@@ -168,7 +168,7 @@ drawlabel(StringPtr str, Rect *rp, justenum just)
 
     RGBForeColor(&current_control_colors[text_color]);
 
-    text_mode_save = PORT_TX_MODE(thePort);
+    text_mode_save = PORT_TX_MODE(MR(qdGlobals().thePort));
     TextMode(text_mode);
 
     GetFontInfo(&fi);
@@ -374,7 +374,7 @@ LONGINT Executor::C_cdef0(INTEGER var, ControlHandle c, INTEGER mess,
     switch(mess)
     {
         case drawCntl:
-            if(Hx(c, contrlVis) && SectRect(&HxX(PORT_VIS_REGION(thePort), rgnBBox),
+            if(Hx(c, contrlVis) && SectRect(&HxX(PORT_VIS_REGION(MR(qdGlobals().thePort)), rgnBBox),
                                             &HxX(c, contrlRect), &r))
             {
                 PenNormal();

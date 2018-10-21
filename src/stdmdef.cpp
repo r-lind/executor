@@ -150,7 +150,7 @@ void size_menu(MenuHandle mh, tablePtr tablep)
 
     width = height = actual_height = 0;
     /* the 32 is just a guess */
-    max_height = CW(screenBitsX.bounds.bottom) - 32;
+    max_height = CW(qdGlobals().screenBits.bounds.bottom) - 32;
     for(tp = tablep->entry, ep = tp + tablep->count; tp != ep; tp++)
     {
         icon_info_t icon_info;
@@ -210,7 +210,7 @@ draw_right_arrow(Rect *menu_rect, MenuHandle mh, int item, int invert_p)
     dst_rect.bottom = CW(y + 11);
     dst_rect.right = CW(x + 6);
 
-    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(thePort),
+    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
              &arrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
 }
 
@@ -274,7 +274,7 @@ draw_arrow(Rect *menu_rect, MenuHandle mh, arrowtype arrdir)
     dst_rect.bottom = CW(top_of_item + 5 + /* arrows are `6' tall */ 6);
     dst_rect.right = CW(CW(menu_rect->left) + checksize
                         + /* arrows are `11' wide */ 11);
-    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(thePort),
+    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
              &arrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
 
     /* resent the fg/bk colors */
@@ -454,9 +454,9 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
                 r = rtmp;
                 r.left = CW(new_left);
                 PenMode(notPatBic);
-                PenPat(gray);
+                PenPat(qdGlobals().gray);
                 PaintRect(&r);
-                PenPat(black);
+                PenPat(qdGlobals().black);
                 PenMode(patCopy);
             }
         }
@@ -465,9 +465,9 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
     if(dither_p)
     {
         PenMode(notPatBic);
-        PenPat(gray);
+        PenPat(qdGlobals().gray);
         PaintRect(&rtmp);
-        PenPat(black);
+        PenPat(qdGlobals().black);
         PenMode(patCopy);
     }
     cleanup_icon_info(&icon_info);
@@ -703,7 +703,7 @@ static void popuprect(MenuHandle mh, Rect *rp, Point p, GUEST<INTEGER> *itemp,
 
     rp->bottom = CW(CW(rp->top) + Hx(mh, menuHeight));
 
-    vmax = CW(screenBitsX.bounds.bottom) - 2; /* subtract 2 for frame */
+    vmax = CW(qdGlobals().screenBits.bounds.bottom) - 2; /* subtract 2 for frame */
     for(tp = tablep->entry + tablep->count - 1; CW(rp->bottom) > vmax; --tp)
         rp->bottom = CW(CW(rp->bottom) - (tp[1].top - tp[0].top));
     rp->top = CW(CW(rp->bottom) - Hx(mh, menuHeight));
@@ -731,9 +731,9 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
 
 #define MSWTEST
 #if defined(MSWTEST)
-    PORT_TX_FONT_X(thePort) = LM(SysFontFam);
-    PORT_TX_FACE_X(thePort) = 0;
-    PORT_TX_MODE_X(thePort) = CWC(srcOr);
+    PORT_TX_FONT_X(MR(qdGlobals().thePort)) = LM(SysFontFam);
+    PORT_TX_FACE_X(MR(qdGlobals().thePort)) = 0;
+    PORT_TX_MODE_X(MR(qdGlobals().thePort)) = CWC(srcOr);
 #endif /* MSWTEST */
 
     GetFontInfo(&fi);

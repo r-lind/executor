@@ -30,14 +30,18 @@ INTEGER Executor::C_Random()
 {
     INTEGER retval;
 
+        // FIXME: what is going on here?
     LM(RndSeed) = Cx(TickCount()); /* what better? */
-    if(RANDSEED >= 0x80000000)
-        randSeedX = CL((RANDSEED & 0x7FFFFFFF) + 1);
-    randSeedX = CL((RANDSEED * 16807 + ((((RANDSEED >> 14) * 16807) + (((RANDSEED & ((1 << 14) - 1)) * 16807) >> 14))
+
+    int32_t randSeed = CL(qdGlobals().randSeed);
+    if(randSeed >= 0x80000000)
+        randSeed = (randSeed & 0x7FFFFFFF) + 1;
+    randSeed = (randSeed * 16807 + ((((randSeed >> 14) * 16807) + (((randSeed & ((1 << 14) - 1)) * 16807) >> 14))
                                         >> 17))
-                   & 0x7FFFFFFF);
-    if(RANDSEED == 0x7FFFFFFF)
-        randSeedX = 0;
+                   & 0x7FFFFFFF;
+    if(randSeed == 0x7FFFFFFF)
+        randSeed = 0;
+    qdGlobals().randSeed = CL(randSeed);
     retval = randSeed;
     return retval == -32768 ? 0 : retval;
 }
@@ -48,7 +52,7 @@ BOOLEAN Executor::C_GetPixel(INTEGER h, INTEGER v)
     unsigned char temp_fbuf[4];
     Rect src_rect, dst_rect;
 
-    gui_assert(!CGrafPort_p(thePort));
+    gui_assert(!CGrafPort_p(MR(qdGlobals().thePort)));
 
     temp_bm.baseAddr = RM((Ptr)temp_fbuf);
     temp_bm.bounds.top = CWC(0);
@@ -64,7 +68,7 @@ BOOLEAN Executor::C_GetPixel(INTEGER h, INTEGER v)
 
     dst_rect = temp_bm.bounds;
 
-    CopyBits(PORT_BITS_FOR_COPY(thePort), &temp_bm,
+    CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), &temp_bm,
              &src_rect, &dst_rect, srcCopy, NULL);
 
     return (*temp_fbuf & 0x80) != 0;

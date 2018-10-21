@@ -66,7 +66,7 @@ void Executor::C_StdPutPic(const void  *sp, INTEGER bc)
     LONGINT oldhowfar, newhowfar;
     Size newsize;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
 
     if(pch)
     {

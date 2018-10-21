@@ -67,7 +67,7 @@ void Executor::C_donotPrArc(GrafVerb verb, Rect *r, INTEGER starta,
 void Executor::C_PrArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrArc(verb, r, starta, arca, thePort);
+        NeXTPrArc(verb, r, starta, arca, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dstrp,
@@ -80,7 +80,7 @@ void Executor::C_PrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dst
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrBits(srcbmp, srcrp, dstrp,
-                   mode, mask, thePort);
+                   mode, mask, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrLine(Point p)
@@ -95,7 +95,7 @@ void Executor::C_PrLine(Point p)
 
         cp.h = p.h;
         cp.v = p.v;
-        NeXTPrLine(cp, thePort);
+        NeXTPrLine(cp, MR(qdGlobals().thePort));
     }
 }
 
@@ -106,7 +106,7 @@ void Executor::C_donotPrOval(GrafVerb v, Rect *rp)
 void Executor::C_PrOval(GrafVerb v, Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrOval(v, rp, thePort);
+        NeXTPrOval(v, rp, MR(qdGlobals().thePort));
 }
 
 void Executor::C_textasPS(INTEGER n, Ptr textbufp, Point num, Point den)
@@ -133,7 +133,7 @@ void Executor::C_PrGetPic(Ptr dp, INTEGER bc)
 {
     gui_abort();
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrGetPic(dp, bc, thePort);
+        NeXTPrGetPic(dp, bc, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrPutPic(Ptr sp, INTEGER bc)
@@ -143,7 +143,7 @@ void Executor::C_donotPrPutPic(Ptr sp, INTEGER bc)
 void Executor::C_PrPutPic(Ptr sp, INTEGER bc)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrPutPic(sp, bc, thePort);
+        NeXTPrPutPic(sp, bc, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrPoly(GrafVerb verb, PolyHandle ph)
@@ -153,7 +153,7 @@ void Executor::C_donotPrPoly(GrafVerb verb, PolyHandle ph)
 void Executor::C_PrPoly(GrafVerb verb, PolyHandle ph)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrPoly(verb, ph, thePort);
+        NeXTPrPoly(verb, ph, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrRRect(GrafVerb verb, Rect *r, INTEGER width,
@@ -164,7 +164,7 @@ void Executor::C_donotPrRRect(GrafVerb verb, Rect *r, INTEGER width,
 void Executor::C_PrRRect(GrafVerb verb, Rect *r, INTEGER width, INTEGER height)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrRRect(verb, r, width, height, thePort);
+        NeXTPrRRect(verb, r, width, height, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrRect(GrafVerb v, Rect *rp)
@@ -174,7 +174,7 @@ void Executor::C_donotPrRect(GrafVerb v, Rect *rp)
 void Executor::C_PrRect(GrafVerb v, Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrRect(v, rp, thePort);
+        NeXTPrRect(v, rp, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrRgn(GrafVerb verb, RgnHandle rgn)
@@ -184,7 +184,7 @@ void Executor::C_donotPrRgn(GrafVerb verb, RgnHandle rgn)
 void Executor::C_PrRgn(GrafVerb verb, RgnHandle rgn)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrRgn(verb, rgn, thePort);
+        NeXTPrRgn(verb, rgn, MR(qdGlobals().thePort));
 }
 
 INTEGER Executor::C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
@@ -192,7 +192,7 @@ INTEGER Executor::C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
 {
     StdTxMeas(n, p, nump, denp, finfop);
     return NeXTPrTxMeas(n, p, nump, denp,
-                        finfop, thePort);
+                        finfop, MR(qdGlobals().thePort));
 }
 
 void Executor::C_donotPrText(INTEGER n, Ptr textbufp, Point num, Point den)
@@ -203,7 +203,7 @@ void Executor::C_PrText(INTEGER n, Ptr textbufp, Point num, Point den)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
     {
-        NeXTPrText(n, textbufp, num, den, thePort);
+        NeXTPrText(n, textbufp, num, den, MR(qdGlobals().thePort));
     }
 }
 
@@ -242,8 +242,8 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                 fp = (GUEST<Fixed> *)STARH(hand);
                 yoffset = CL(fp[0]);
                 xoffset = CL(fp[1]);
-                ROMlib_rotatecenter(Cx(thePort->pnLoc.v) + (double)yoffset / (1L << 16),
-                                    Cx(thePort->pnLoc.h) + (double)xoffset / (1L << 16));
+                ROMlib_rotatecenter(Cx(MR(qdGlobals().thePort)->pnLoc.v) + (double)yoffset / (1L << 16),
+                                    Cx(MR(qdGlobals().thePort)->pnLoc.h) + (double)xoffset / (1L << 16));
                 break;
             case rotateend:
                 ROMlib_rotateend();
@@ -259,7 +259,7 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                         ROMlib_gsave();
                         need_restore = true;
                     }
-                    thePort->grafProcs = RM(&sendpsprocs);
+                    MR(qdGlobals().thePort)->grafProcs = RM(&sendpsprocs);
                 }
                 break;
             case postscriptend:
@@ -270,12 +270,12 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                         ROMlib_grestore();
                         need_restore = false;
                     }
-                    thePort->grafProcs = RM(&prprocs);
+                    MR(qdGlobals().thePort)->grafProcs = RM(&prprocs);
                 }
                 break;
             case postscripttextis:
                 if(ROMlib_passpostscript)
-                    (PORT_GRAF_PROCS(thePort))->textProc
+                    (PORT_GRAF_PROCS(MR(qdGlobals().thePort)))->textProc
                         = RM(&textasPS);
                 break;
             case postscripthandle:

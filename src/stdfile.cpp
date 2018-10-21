@@ -174,11 +174,11 @@ static void drawminiicon(INTEGER icon)
     bm.rowBytes = CWC(2);
     bm.bounds.left = bm.bounds.top = CWC(0);
     bm.bounds.right = bm.bounds.bottom = CWC(16);
-    r.top = PORT_PEN_LOC(thePort).v;
-    r.left = PORT_PEN_LOC(thePort).h;
+    r.top = PORT_PEN_LOC(MR(qdGlobals().thePort)).v;
+    r.left = PORT_PEN_LOC(MR(qdGlobals().thePort)).h;
     r.bottom = CW(CW(r.top) + 16);
     r.right = CW(CW(r.left) + 16);
-    CopyBits(&bm, PORT_BITS_FOR_COPY(thePort),
+    CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
              &bm.bounds, &r, srcCopy, NULL);
     HUnlock(h);
 }
@@ -243,7 +243,7 @@ static void safeflflip(fltype *f, INTEGER sel)
         r.right = f->flrect.right;
         r.top = CW(CW(f->flrect.top) + (sel - fltop) * f->fllinht);
         r.bottom = CW(CW(r.top) + f->fllinht);
-        if(EmptyRgn(MR(((WindowPeek)thePort)->updateRgn))) /* stuff to draw? */
+        if(EmptyRgn(MR(((WindowPeek)MR(qdGlobals().thePort))->updateRgn))) /* stuff to draw? */
             InvertRect(&r); /* no: we can flip */
         else
             InvalRect(&r); /* yes: flip later */
@@ -277,9 +277,9 @@ static void flupdate(fltype *f, INTEGER st, INTEGER n)
         {
             r.bottom = CW(CW(r.top) + f->fllinht);
             PenMode(notPatBic);
-            PenPat(gray);
+            PenPat(qdGlobals().gray);
             PaintRect(&r);
-            PenPat(black);
+            PenPat(qdGlobals().black);
             PenMode(patCopy);
             r.bottom = CW(f->flascent);
         }
@@ -771,7 +771,7 @@ static void flfill(fltype *f)
         HiliteControl(f->flch, 255);
     /* i'm not sure this is right, but there is no obvious way to
        save/restore the cursor */
-    SetCursor(&arrowX);
+    SetCursor(&qdGlobals().arrow);
 }
 
 /*
@@ -807,7 +807,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
                      WINDFL(dp)->flnmlin);
             break;
         case getDotted:
-            FillRect(&r, gray);
+            FillRect(&r, qdGlobals().gray);
             break;
         case getDiskName:
             /*  case putDiskName:	getDiskName and putDiskName are the same */
@@ -1372,7 +1372,7 @@ static BOOLEAN trackdirs(DialogPeek dp)
             void *save_bits_mem;
 
             save_bits = NewPixMap();
-            port_pixmap = CPORT_PIXMAP(thePort);
+            port_pixmap = CPORT_PIXMAP(MR(qdGlobals().thePort));
 
             bounds = &PIXMAP_BOUNDS(save_bits);
             bounds->top = CWC(0);
@@ -1392,7 +1392,7 @@ static BOOLEAN trackdirs(DialogPeek dp)
             PIXMAP_BASEADDR_X(save_bits) = RM((Ptr)save_bits_mem);
             WRAPPER_SET_PIXMAP_X(wrapper, RM(save_bits));
 
-            CopyBits(PORT_BITS_FOR_COPY(thePort), wrapper,
+            CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), wrapper,
                      &therect, bounds, srcCopy, NULL);
         }
 
@@ -1480,7 +1480,7 @@ static BOOLEAN trackdirs(DialogPeek dp)
         therect.bottom = CW(CW(therect.bottom) + 1);
 
         /* restore the rect and clean up after ourselves */
-        CopyBits(wrapper, PORT_BITS_FOR_COPY(thePort),
+        CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
                  &PIXMAP_BOUNDS(save_bits), &therect, srcCopy, NULL);
         DisposePixMap(save_bits);
     }
@@ -1976,7 +1976,7 @@ do_new_folder(fltype *f)
     DialogPtr dp;
 
     retval = false;
-    gp = thePort;
+    gp = MR(qdGlobals().thePort);
     dp = GetNewDialog(-6044, (Ptr)0, (WindowPtr)-1);
     if(dp)
     {
@@ -2144,7 +2144,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
                 f.fl_cancel_item = sfItemCancelButton;
             }
         }
-        gp = thePort;
+        gp = MR(qdGlobals().thePort);
         dp = GetNewDialog(dig, (Ptr)0, (WindowPtr)-1);
         bumpsavedisk(dp, false);
         SetPort(dp);
@@ -2252,8 +2252,8 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
         }
         // FIXME: #warning not 64-bit clean
         SetWRefCon((WindowPtr)dp, US_TO_SYN68K(&f));
-        if(CW(dp->portRect.bottom) + p.v + 7 > CW(screenBitsX.bounds.bottom))
-            p.v = CW(screenBitsX.bounds.bottom) - CW(dp->portRect.bottom) - 7;
+        if(CW(dp->portRect.bottom) + p.v + 7 > CW(qdGlobals().screenBits.bounds.bottom))
+            p.v = CW(qdGlobals().screenBits.bounds.bottom) - CW(dp->portRect.bottom) - 7;
         if(p.v < CW(LM(MBarHeight)) + 7)
             p.v = CW(LM(MBarHeight)) + 7;
         MoveWindow((WindowPtr)dp, p.h, p.v, false);

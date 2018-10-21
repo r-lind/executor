@@ -228,15 +228,15 @@ static void xSeedFill(unsigned char *srcp, unsigned char *dstp, INTEGER srcr,
     if(!useseeds)
         transfer((INTEGER *)0, (INTEGER *)dstp, 0, dstr, height,
                  width, Negate);
-    if(dstp >= (unsigned char *)MR(screenBitsX.baseAddr))
+    if(dstp >= (unsigned char *)MR(qdGlobals().screenBits.baseAddr))
     {
-        byteoff = dstp - (unsigned char *)MR(screenBitsX.baseAddr);
-        voff = byteoff / CW(screenBitsX.rowBytes);
-        if(voff < CW(screenBitsX.bounds.bottom) - CW(screenBitsX.bounds.top))
+        byteoff = dstp - (unsigned char *)MR(qdGlobals().screenBits.baseAddr);
+        voff = byteoff / CW(qdGlobals().screenBits.rowBytes);
+        if(voff < CW(qdGlobals().screenBits.bounds.bottom) - CW(qdGlobals().screenBits.bounds.top))
         {
-            dirty_rect_accrue(CW(screenBitsX.bounds.top) + voff,
-                              (CW(screenBitsX.bounds.left)
-                               + (byteoff % CW(screenBitsX.rowBytes) * 8L)),
+            dirty_rect_accrue(CW(qdGlobals().screenBits.bounds.top) + voff,
+                              (CW(qdGlobals().screenBits.bounds.left)
+                               + (byteoff % CW(qdGlobals().screenBits.rowBytes) * 8L)),
                               CW(temprect.top) + height,
                               CW(temprect.left) + (LONGINT)width * 16);
         }
@@ -365,16 +365,16 @@ copy_mask_1(BitMap *src_bm, BitMap *mask_bm, BitMap *dst_bm,
 
         MapRgn(mask_rgn, mask_rect, dst_rect);
 
-        save_pic_handle = PORT_PIC_SAVE_X(thePort);
-        save_graf_procs = PORT_GRAF_PROCS_X(thePort);
+        save_pic_handle = PORT_PIC_SAVE_X(MR(qdGlobals().thePort));
+        save_graf_procs = PORT_GRAF_PROCS_X(MR(qdGlobals().thePort));
 
-        PORT_PIC_SAVE_X(thePort) = RM(nullptr);
-        PORT_GRAF_PROCS_X(thePort) = RM(nullptr);
+        PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = RM(nullptr);
+        PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = RM(nullptr);
 
         CopyBits(src_bm, dst_bm, src_rect, dst_rect, srcCopy, mask_rgn);
 
-        PORT_PIC_SAVE_X(thePort) = save_pic_handle;
-        PORT_GRAF_PROCS_X(thePort) = save_graf_procs;
+        PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = save_pic_handle;
+        PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = save_graf_procs;
 
         DisposeRgn(mask_rect_rgn);
         DisposeRgn(mask_rgn);

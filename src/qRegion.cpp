@@ -97,7 +97,7 @@ void Executor::C_OpenRgn()
     /* sentinel */
     (RGN_DATA(rh))[0] = RGN_STOP_X;
 
-    PORT_REGION_SAVE_X(thePort) = RM((Handle)rh);
+    PORT_REGION_SAVE_X(MR(qdGlobals().thePort)) = RM((Handle)rh);
     HidePen();
 }
 
@@ -198,15 +198,15 @@ void Executor::C_CopyRgn(RgnHandle s, RgnHandle d)
 
 void Executor::C_CloseRgn(RgnHandle rh)
 {
-    RgnHandle rgn_save = (RgnHandle)PORT_REGION_SAVE(thePort);
+    RgnHandle rgn_save = (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort));
 
     if(RGN_SIZE_X(rgn_save) == CWC(RGN_SMALL_SIZE + sizeof(INTEGER))
        || rgn_is_rect_p(rgn_save))
         RGN_SET_SMALL(rgn_save);
 
-    ROMlib_installhandle(PORT_REGION_SAVE(thePort), (Handle)rh);
+    ROMlib_installhandle(PORT_REGION_SAVE(MR(qdGlobals().thePort)), (Handle)rh);
     SetHandleSize((Handle)rh, RGN_SIZE(rh));
-    PORT_REGION_SAVE_X(thePort) = nullptr;
+    PORT_REGION_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
     ShowPen();
 }
 

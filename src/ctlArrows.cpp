@@ -136,7 +136,7 @@ validate_colors_for_control(ControlHandle ctl)
     int i;
 
     /* FIXME: tmp hack */
-    current_ctl_color_p = (CGrafPort_p(thePort) != 0);
+    current_ctl_color_p = (CGrafPort_p(MR(qdGlobals().thePort)) != 0);
 
     hilited_p = (CTL_HILITE_X(ctl) != 255
                  && CTL_MIN(ctl) < CTL_MAX(ctl));
@@ -350,7 +350,7 @@ void draw_page(ControlHandle ctl)
      currently hilited */
     RGBForeColor(&current_ctl_colors[page_bk]);
     RGBBackColor(&current_ctl_colors[page_fg]);
-    FillRect(&r, ltGray);
+    FillRect(&r, qdGlobals().ltGray);
 
     rp = &HxX(CTL_DATA(ctl), rgnBBox);
     rp->top = rp->bottom = 0;
@@ -414,8 +414,8 @@ LocalToGlobalRect(Rect *rp)
 static void
 GlobalToLocalRgn(RgnHandle rgn)
 {
-    OffsetRgn(rgn, CW(PORT_BOUNDS(thePort).left),
-              CW(PORT_BOUNDS(thePort).top));
+    OffsetRgn(rgn, CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left),
+              CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top));
 }
 
 typedef struct
@@ -646,17 +646,17 @@ save_and_switch_to_color_port_if_needed(save_t *sp)
 {
     bool retval;
 
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
         retval = false;
     else
     {
         CGrafPtr wp;
 
-        sp->port = thePort;
-        sp->cp = *(CGrafPtr)thePort;
+        sp->port = MR(qdGlobals().thePort);
+        sp->cp = *(CGrafPtr)MR(qdGlobals().thePort);
         wp = (CGrafPtr)MR(wmgr_port);
         sp->cp.portPixMap = RM((PixMapHandle)CopyMacHandle((Handle)MR(wp->portPixMap)));
-        PIXMAP_BOUNDS(PPR(sp->cp.portPixMap)) = thePort->portBits.bounds;
+        PIXMAP_BOUNDS(PPR(sp->cp.portPixMap)) = MR(qdGlobals().thePort)->portBits.bounds;
         sp->cp.portVersion = wp->portVersion;
         sp->cp.grafVars = wp->grafVars;
         sp->cp.chExtra = wp->chExtra;
@@ -715,7 +715,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
     {
         case drawCntl:
             if(Hx(c, contrlVis)
-               && SectRect(&HxX(PORT_VIS_REGION(thePort), rgnBBox),
+               && SectRect(&HxX(PORT_VIS_REGION(MR(qdGlobals().thePort)), rgnBBox),
                            &HxX(c, contrlRect), &r))
             {
                 validate_colors_for_control(c);

@@ -216,22 +216,22 @@ static void txratio(Point num, Point den)
 
 static void line(Point op, Point np)
 {
-    PORT_PEN_LOC(thePort).h = CW(op.h);
-    PORT_PEN_LOC(thePort).v = CW(op.v);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(op.h);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(op.v);
     CALLLINE(np);
-    PORT_PEN_LOC(thePort).h = CW(np.h);
-    PORT_PEN_LOC(thePort).v = CW(np.v);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(np.h);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(np.v);
 }
 
 static void shrtline(Point op, SignedByte dh, SignedByte dv)
 {
-    PORT_PEN_LOC(thePort).h = CW(op.h);
-    PORT_PEN_LOC(thePort).v = CW(op.v);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(op.h);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(op.v);
     op.h += dh;
     op.v += dv;
     CALLLINE(op);
-    PORT_PEN_LOC(thePort).h = CW(op.h);
-    PORT_PEN_LOC(thePort).v = CW(op.v);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(op.h);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(op.v);
 }
 
 static void setnumerdenom(Point *nump, Point *denp)
@@ -289,14 +289,14 @@ static void longtext(Point pt, StringPtr s, GUEST<Point> *pp)
     GUEST<Point> save;
     Point numer, denom;
 
-    save = PORT_PEN_LOC(thePort);
+    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
     pp->h = CW(pt.h);
     pp->v = CW(pt.v);
-    PORT_PEN_LOC(thePort).h = CW(pt.h);
-    PORT_PEN_LOC(thePort).v = CW(pt.v);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(pt.h);
+    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(pt.v);
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(thePort) = save;
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
 }
 
 static void dhtext(unsigned char dh, StringPtr s, GUEST<Point> *pp)
@@ -305,11 +305,11 @@ static void dhtext(unsigned char dh, StringPtr s, GUEST<Point> *pp)
     Point numer, denom;
 
     pp->h = CW(CW(pp->h) + (dh));
-    save = PORT_PEN_LOC(thePort);
-    PORT_PEN_LOC(thePort) = *pp;
+    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = *pp;
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(thePort) = save;
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
 }
 
 static void dvtext(unsigned char dv, StringPtr s, GUEST<Point> *pp)
@@ -318,11 +318,11 @@ static void dvtext(unsigned char dv, StringPtr s, GUEST<Point> *pp)
     Point numer, denom;
 
     pp->v = CW(CW(pp->v) + (dv));
-    save = PORT_PEN_LOC(thePort);
-    PORT_PEN_LOC(thePort) = *pp;
+    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = *pp;
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(thePort) = save;
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
 }
 
 static void dhdvtext(Byte dh, Byte dv, StringPtr s, GUEST<Point> *pp)
@@ -332,11 +332,11 @@ static void dhdvtext(Byte dh, Byte dv, StringPtr s, GUEST<Point> *pp)
 
     pp->h = CW(CW(pp->h) + (dh));
     pp->v = CW(CW(pp->v) + (dv));
-    save = PORT_PEN_LOC(thePort);
-    PORT_PEN_LOC(thePort) = *pp;
+    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = *pp;
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(thePort) = save;
+    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
 }
 
 static void fillrct(Rect *r)
@@ -404,7 +404,7 @@ static void hilitemode()
 
 static void fillpixpat(PixPatHandle ph)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         GUEST<Handle> tmp = RM((Handle)ph);
         HandToHand(&tmp);
@@ -1569,7 +1569,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     saveFractEnable = LM(FractEnable);
     saveFScaleDisable = LM(FScaleDisable);
     begin_assoc();
-    the_port = thePort;
+    the_port = MR(qdGlobals().thePort);
     if(CGrafPort_p(the_port))
         the_cport = theCPort;
     else
@@ -1603,9 +1603,9 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     }
 
     /* These will replace the junk pixpats we just installed. */
-    BackPat(white);
-    ROMlib_fill_pat(black);
-    PenPat(black);
+    BackPat(qdGlobals().white);
+    ROMlib_fill_pat(qdGlobals().black);
+    PenPat(qdGlobals().black);
 
     /* Free these up now, since they are no longer used. */
     if(CGrafPort_p(the_port))

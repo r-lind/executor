@@ -55,9 +55,9 @@ void Executor::C_TESetText(Ptr p, LONGINT length, TEHandle teh)
         GetFontInfo(&finfo);
         HASSIGN_7(style_table,
                   stCount, CWC(1),
-                  stFont, PORT_TX_FONT_X(thePort),
-                  stFace, PORT_TX_FACE(thePort),
-                  stSize, PORT_TX_SIZE_X(thePort),
+                  stFont, PORT_TX_FONT_X(MR(qdGlobals().thePort)),
+                  stFace, PORT_TX_FACE(MR(qdGlobals().thePort)),
+                  stSize, PORT_TX_SIZE_X(MR(qdGlobals().thePort)),
                   stColor, ROMlib_black_rgb_color,
                   stHeight, CW(CW(finfo.ascent)
                                + CW(finfo.descent)

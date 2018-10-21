@@ -132,7 +132,7 @@ settexth(DialogPeek dp, itmp ip, int item_no)
     TEPtr tep;
     int16_t length;
 
-    current_port = thePort;
+    current_port = MR(qdGlobals().thePort);
 
     te = DIALOG_TEXTH(dp);
     tep = STARH(te);

@@ -19,7 +19,7 @@ void Executor::ROMlib_rootless_update(RgnHandle extra)
     if(vdriver->isRootless())
     {
         RgnHandle rgn = NewRgn();
-        SetRectRgn(rgn, 0,0, CW(screenBitsX.bounds.right), CW(LM(MBarHeight)));
+        SetRectRgn(rgn, 0,0, CW(qdGlobals().screenBits.bounds.right), CW(LM(MBarHeight)));
 
         for(WindowPeek wp = MR(LM(WindowList)); wp; wp = WINDOW_NEXT_WINDOW(wp))
         {

@@ -22,7 +22,7 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
 
 #define MOREINSANECOMPATIBILITY
 #if defined(MOREINSANECOMPATIBILITY)
-    if(v == frame && PORT_REGION_SAVE_X(thePort))
+    if(v == frame && PORT_REGION_SAVE_X(MR(qdGlobals().thePort)))
     {
         if(CW(rp->left) > CW(rp->right))
         {
@@ -48,8 +48,8 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
             rh = NewRgn();
             RectRgn(rh, rp);
             XorRgn(rh,
-                   (RgnHandle)PORT_REGION_SAVE(thePort),
-                   (RgnHandle)PORT_REGION_SAVE(thePort));
+                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
+                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
             DisposeRgn(rh);
             /*-->*/ return;
         }
@@ -59,7 +59,7 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
     if(EmptyRect(rp))
         /*-->*/ return;
 
-    if(thePort->picSave)
+    if(MR(qdGlobals().thePort)->picSave)
     {
         ROMlib_drawingverbrectpicupdate(v, rp);
         PICOP(OP_frameRect + (int)v);
@@ -72,17 +72,17 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
     switch(v)
     {
         case frame:
-            if(PORT_REGION_SAVE_X(thePort))
+            if(PORT_REGION_SAVE_X(MR(qdGlobals().thePort)))
                 XorRgn(rh,
-                       (RgnHandle)PORT_REGION_SAVE(thePort),
-                       (RgnHandle)PORT_REGION_SAVE(thePort));
-            if(PORT_PEN_VIS(thePort) >= 0)
+                       (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
+                       (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
+            if(PORT_PEN_VIS(MR(qdGlobals().thePort)) >= 0)
             {
                 rh2 = NewRgn();
                 RectRgn(rh2, rp);
                 InsetRgn(rh2,
-                         Cx(PORT_PEN_SIZE(thePort).h),
-                         Cx(PORT_PEN_SIZE(thePort).v));
+                         Cx(PORT_PEN_SIZE(MR(qdGlobals().thePort)).h),
+                         Cx(PORT_PEN_SIZE(MR(qdGlobals().thePort)).v));
                 XorRgn(rh, rh2, rh);
                 StdRgn(paint, rh);
                 DisposeRgn(rh2);

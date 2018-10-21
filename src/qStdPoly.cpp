@@ -32,8 +32,8 @@ static void polyrgn(PolyHandle ph, RgnHandle rh)
     if(CW(ep[-1].h) == firstp.h && CW(ep[-1].v) == firstp.v)
         ep--;
 
-    tmpvis = PORT_PEN_VIS_X(thePort);
-    PORT_PEN_VIS_X(thePort) = CWC(0);
+    tmpvis = PORT_PEN_VIS_X(MR(qdGlobals().thePort));
+    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = CWC(0);
     OpenRgn();
     MoveTo(CW(pp->h), CW(pp->v));
     pp++;
@@ -44,7 +44,7 @@ static void polyrgn(PolyHandle ph, RgnHandle rh)
     }
     LineTo(firstp.h, firstp.v);
     CloseRgn(rh);
-    PORT_PEN_VIS_X(thePort) = tmpvis;
+    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = tmpvis;
     HSetState((Handle)ph, state);
 }
 
@@ -62,14 +62,14 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
 
     state = HGetState((Handle)ph);
     HLock((Handle)ph);
-    if(thePort->picSave)
+    if(MR(qdGlobals().thePort)->picSave)
     {
         ROMlib_drawingverbpicupdate(verb);
         PICOP(OP_framePoly + (int)verb);
         PICWRITE(STARH(ph), Hx(ph, polySize));
     }
 
-    if(PORT_PEN_VIS(thePort) < 0 && !PORT_REGION_SAVE_X(thePort)
+    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0 && !PORT_REGION_SAVE_X(MR(qdGlobals().thePort))
        && verb != frame)
     {
         HSetState((Handle)ph, state);
@@ -93,7 +93,7 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
                 p.h = CW(pp[0].h);
                 p.v = CW(pp[0].v);
                 StdLine(p);
-                PORT_PEN_LOC(thePort) = pp[0];
+                PORT_PEN_LOC(MR(qdGlobals().thePort)) = pp[0];
             }
 
             break;

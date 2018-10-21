@@ -207,7 +207,7 @@ void Executor::ROMlib_fg_bk(uint32_t *fg_pixel_out, uint32_t *bk_pixel_out,
     uint32_t fg_pixel, bk_pixel;
     RGBColor fg_rgb, bk_rgb;
 
-    current_port = thePort;
+    current_port = MR(qdGlobals().thePort);
     if(CGrafPort_p(current_port))
     {
         if(indirect_p)

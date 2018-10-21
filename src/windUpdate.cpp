@@ -14,7 +14,7 @@ using namespace Executor;
 
 void Executor::C_InvalRect(Rect *r)
 {
-    if(thePort)
+    if(MR(qdGlobals().thePort))
     {
         RgnHandle rh;
         Rect r_copy;
@@ -22,10 +22,10 @@ void Executor::C_InvalRect(Rect *r)
         r_copy = *r; /* Just in case NewRgn moves memory */
         rh = NewRgn();
         RectRgn(rh, &r_copy);
-        OffsetRgn(rh, -CW(PORT_BOUNDS(thePort).left),
-                  -CW(PORT_BOUNDS(thePort).top));
-        UnionRgn(rh, WINDOW_UPDATE_REGION(thePort),
-                 WINDOW_UPDATE_REGION(thePort));
+        OffsetRgn(rh, -CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left),
+                  -CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top));
+        UnionRgn(rh, WINDOW_UPDATE_REGION(MR(qdGlobals().thePort)),
+                 WINDOW_UPDATE_REGION(MR(qdGlobals().thePort)));
         DisposeRgn(rh);
     }
 }
@@ -36,7 +36,7 @@ void Executor::C_InvalRgn(RgnHandle r)
     RgnHandle update_rgn;
     int top, left;
 
-    current_port = thePort;
+    current_port = MR(qdGlobals().thePort);
     top = CW(PORT_BOUNDS(current_port).top);
     left = CW(PORT_BOUNDS(current_port).left);
 
@@ -54,21 +54,21 @@ void Executor::C_ValidRect(Rect *r)
 
     rh = NewRgn();
     RectRgn(rh, r);
-    OffsetRgn(rh, -CW(PORT_BOUNDS(thePort).left),
-              -CW(PORT_BOUNDS(thePort).top));
-    DiffRgn(WINDOW_UPDATE_REGION(thePort), rh,
-            WINDOW_UPDATE_REGION(thePort));
+    OffsetRgn(rh, -CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left),
+              -CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top));
+    DiffRgn(WINDOW_UPDATE_REGION(MR(qdGlobals().thePort)), rh,
+            WINDOW_UPDATE_REGION(MR(qdGlobals().thePort)));
     DisposeRgn(rh);
 }
 
 void Executor::C_ValidRgn(RgnHandle r)
 {
-    OffsetRgn(r, -CW(PORT_BOUNDS(thePort).left),
-              -CW(PORT_BOUNDS(thePort).top));
-    DiffRgn(WINDOW_UPDATE_REGION(thePort), r,
-            WINDOW_UPDATE_REGION(thePort));
-    OffsetRgn(r, CW(PORT_BOUNDS(thePort).left),
-              CW(PORT_BOUNDS(thePort).top));
+    OffsetRgn(r, -CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left),
+              -CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top));
+    DiffRgn(WINDOW_UPDATE_REGION(MR(qdGlobals().thePort)), r,
+            WINDOW_UPDATE_REGION(MR(qdGlobals().thePort)));
+    OffsetRgn(r, CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left),
+              CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top));
 }
 
 int Executor::ROMlib_emptyvis = 0;

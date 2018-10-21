@@ -681,7 +681,7 @@ static void newwidthtable(FMInput *fmip)
     HLock((Handle)MR(LM(WidthTabHandle)));
     LM(WidthPtr) = *MR(LM(WidthTabHandle));
 
-    WIDTHPTR->sExtra = PORT_SP_EXTRA_X(thePort);
+    WIDTHPTR->sExtra = PORT_SP_EXTRA_X(MR(qdGlobals().thePort));
     WIDTHPTR->inNumer = fmip->numer;
     WIDTHPTR->inDenom = fmip->denom;
     WIDTHPTR->aFID = fmip->family;
@@ -916,11 +916,11 @@ void Executor::C_FontMetrics(FMetricRec *metrp) /* IMIV-32 */
     FMInput fmi;
     FMOutPtr fmop;
 
-    fmi.family = PORT_TX_FONT_X(thePort);
-    fmi.size = PORT_TX_SIZE_X(thePort);
-    fmi.face = PORT_TX_FACE_X(thePort);
+    fmi.family = PORT_TX_FONT_X(MR(qdGlobals().thePort));
+    fmi.size = PORT_TX_SIZE_X(MR(qdGlobals().thePort));
+    fmi.face = PORT_TX_FACE_X(MR(qdGlobals().thePort));
     fmi.needBits = CB(false);
-    fmi.device = PORT_DEVICE_X(thePort);
+    fmi.device = PORT_DEVICE_X(MR(qdGlobals().thePort));
     fmi.numer.v = CWC(1);
     fmi.numer.h = CWC(1);
     fmi.denom.v = CWC(1);
@@ -928,7 +928,7 @@ void Executor::C_FontMetrics(FMetricRec *metrp) /* IMIV-32 */
 
     fmop = FMSwapFont(&fmi);
 
-    /* TODO:  check out thePort->device and use the FOND stuff if not
+    /* TODO:  check out MR(qdGlobals().thePort)->device and use the FOND stuff if not
 	      going to the screen */
 
     metrp->ascent = CL(SCALE(Cx(fmop->ascent)));

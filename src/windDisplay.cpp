@@ -174,7 +174,7 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
         }
         if(content_color)
             RGBBackColor(content_color);
-        FillRgn(WINDOW_CONT_REGION(w), white);
+        FillRgn(WINDOW_CONT_REGION(w), qdGlobals().white);
         if(content_color)
             RGBBackColor(&ROMlib_white_rgb_color);
 
@@ -328,12 +328,12 @@ void Executor::C_DrawGrowIcon(WindowPtr w)
         OffsetRgn(WINDOW_STRUCT_REGION(w),
                   CW(PORT_BOUNDS(w).left),
                   CW(PORT_BOUNDS(w).top));
-        SectRgn(PORT_CLIP_REGION(thePort), WINDOW_STRUCT_REGION(w),
-                PORT_CLIP_REGION(thePort));
+        SectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), WINDOW_STRUCT_REGION(w),
+                PORT_CLIP_REGION(MR(qdGlobals().thePort)));
         OffsetRgn(WINDOW_STRUCT_REGION(w),
                   -CW(PORT_BOUNDS(w).left),
                   -CW(PORT_BOUNDS(w).top));
-        OffsetRgn(PORT_CLIP_REGION(thePort),
+        OffsetRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)),
                   -CW(PORT_BOUNDS(w).left),
                   -CW(PORT_BOUNDS(w).top));
         ClipAbove((WindowPeek)w);

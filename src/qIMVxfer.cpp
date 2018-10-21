@@ -200,11 +200,11 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
                 ? RGB_TO_DIRECT_PIXEL(bpp, rgb, pixel) \
                 : RGB_TO_INDIRECT_PIXEL(rgb, pixel)))
 
-    if(CGrafPort_p(thePort))
-        bk_color = PORT_BK_COLOR(thePort);
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
+        bk_color = PORT_BK_COLOR(MR(qdGlobals().thePort));
     else
     {
-        if(active_screen_addr_p(&PORT_BITS(thePort)))
+        if(active_screen_addr_p(&PORT_BITS(MR(qdGlobals().thePort))))
         {
             int i;
 
@@ -212,7 +212,7 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
             bk_color = 0;
 
             for(i = 0; i < 8; i++)
-                if(PORT_BK_COLOR(thePort) == ROMlib_QDColors[i].value)
+                if(PORT_BK_COLOR(MR(qdGlobals().thePort)) == ROMlib_QDColors[i].value)
                 {
                     RGB_TO_PIXEL(bits_per_pixel,
                                  &ROMlib_QDColors[i].rgb, bk_color);
@@ -222,13 +222,13 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
         else
         {
             /* FIXME: this might not be right */
-            bk_color = (PORT_BK_COLOR(thePort) == whiteColor
+            bk_color = (PORT_BK_COLOR(MR(qdGlobals().thePort)) == whiteColor
                             ? 0
                             : ((1 << bits_per_pixel) - 1));
         }
     }
 
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
         hilite_rgb = &CPORT_HILITE_COLOR(theCPort);
     else
         hilite_rgb = &LM(HiliteRGB);

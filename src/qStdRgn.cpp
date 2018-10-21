@@ -249,7 +249,7 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
 #define BLT_PAT_SIMPLE(rh, mode, pixpat_accessor, pattern_accessor)                 \
     do                                                                              \
     {                                                                               \
-        GrafPtr the_port = thePort;                                                 \
+        GrafPtr the_port = MR(qdGlobals().thePort);                                                 \
         if(CGrafPort_p(the_port))                                                   \
             blt_pixpat_to_pixmap_simple_mode(rh, mode,                              \
                                              pixpat_accessor((CGrafPtr)the_port),   \
@@ -262,7 +262,7 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
 #define BLT_PAT_FANCY(rh, mode, pixpat_accessor, pattern_accessor)            \
     do                                                                        \
     {                                                                         \
-        GrafPtr the_port = thePort;                                           \
+        GrafPtr the_port = MR(qdGlobals().thePort);                                           \
         if(CGrafPort_p(the_port))                                             \
         {                                                                     \
             PixMapHandle cport_pmap = CPORT_PIXMAP((CGrafPtr)the_port);       \
@@ -308,7 +308,7 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     screen_dst_p = active_screen_addr_p(dst);
     bpp = PIXMAP_PIXEL_SIZE(main_gd_pmap);
 
-    the_port = thePort;
+    the_port = MR(qdGlobals().thePort);
 
     /* ### is this if necessary? */
     if(screen_dst_p)
@@ -363,7 +363,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
         HLockGuard guard1(srch), guard2(dsth);
         PixPat *src = STARH(srch);
         PixMap *dst = STARH(dsth);
-        GrafPtr the_port = thePort;
+        GrafPtr the_port = MR(qdGlobals().thePort);
 
         screen_dst_p = active_screen_addr_p(dst);
 
@@ -572,7 +572,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
         ctab = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
         itab = GD_ITABLE(MR(LM(TheGDevice)));
 
-        if(CGrafPort_p(thePort))
+        if(CGrafPort_p(MR(qdGlobals().thePort)))
             op_color = CPORT_OP_COLOR(theCPort);
         else /* I have no idea what I'm supposed to do in this case */
             op_color = ROMlib_black_rgb_color;
@@ -620,7 +620,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
 static inline int
 theport_bpp(void)
 {
-    GrafPtr the_port = thePort;
+    GrafPtr the_port = MR(qdGlobals().thePort);
     int bpp;
 
     if(CGrafPort_p(the_port))
@@ -677,7 +677,7 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
         return;
     }
 
-    if(thePort->picSave)
+    if(MR(qdGlobals().thePort)->picSave)
     {
         ROMlib_drawingverbpicupdate(verb);
         PICOP(OP_frameRgn + (int)verb);
@@ -689,7 +689,7 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
     /* intersect the region to be drawn with the
      port bounds and port rect */
     rh = NewRgn();
-    r = PORT_BOUNDS(thePort);
+    r = PORT_BOUNDS(MR(qdGlobals().thePort));
 
     RectRgn(rh, &r);
     SectRgn(rgn, rh, rh);
@@ -701,8 +701,8 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
 
         /* remove the current region from rgnSave */
         /* #warning "How does XOR remove it?  e.g. two framerects in a row." */
-        pen_size = PORT_PEN_SIZE(thePort);
-        rsave = (RgnHandle)PORT_REGION_SAVE(thePort);
+        pen_size = PORT_PEN_SIZE(MR(qdGlobals().thePort));
+        rsave = (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort));
         if(rsave)
             XorRgn(rgn, rsave, rsave);
 
@@ -719,22 +719,22 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
     /* if verb == frame, we juke region_save above, so this check
    * probably can't be moved up.  on the other hand, are we supposed
    * to juke region_save if the pen isn't visible? -Mat */
-    if(PORT_PEN_VIS(thePort) < 0)
+    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
     {
         DisposeRgn(rh);
         return;
     }
 
-    SectRgn(rh, PORT_VIS_REGION(thePort), rh);
-    SectRgn(rh, PORT_CLIP_REGION(thePort), rh);
+    SectRgn(rh, PORT_VIS_REGION(MR(qdGlobals().thePort)), rh);
+    SectRgn(rh, PORT_CLIP_REGION(MR(qdGlobals().thePort)), rh);
 
-    if(GWorld_p(thePort))
-        LockPixels(CPORT_PIXMAP(thePort));
+    if(GWorld_p(MR(qdGlobals().thePort)))
+        LockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
 
     switch(verb)
     {
         case paint:
-            ROMlib_blt_pn(rh, PORT_PEN_MODE(thePort));
+            ROMlib_blt_pn(rh, PORT_PEN_MODE(MR(qdGlobals().thePort)));
             break;
         case erase:
             BLT_PAT_SIMPLE(rh, patCopy, CPORT_BK_PIXPAT, PORT_BK_PAT);
@@ -743,7 +743,7 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
         {
             int bpp = theport_bpp();
             /* FIXME: is it ok to thrash the fill pattern here? */
-            ROMlib_fill_pat(black);
+            ROMlib_fill_pat(qdGlobals().black);
             if(bpp == 1 || (LM(HiliteMode) & 128))
                 BLT_PAT_SIMPLE(rh, patXor, CPORT_FILL_PIXPAT, PORT_FILL_PAT);
             else
@@ -758,8 +758,8 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
             break;
     }
 
-    if(GWorld_p(thePort))
-        UnlockPixels(CPORT_PIXMAP(thePort));
+    if(GWorld_p(MR(qdGlobals().thePort)))
+        UnlockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
 
     SET_HILITE_BIT();
     DisposeRgn(rh);

@@ -24,7 +24,7 @@ PicHandle Executor::ROMlib_OpenPicture_helper(
 
     HidePen();
     pch = (piccachehand)NewHandle(sizeof(piccache));
-    PORT_PIC_SAVE_X(thePort) = RM((Handle)pch);
+    PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = RM((Handle)pch);
     ph = (PicHandle)NewHandle((Size)INITIALPICSIZE);
     HxX(pch, pichandle) = RM(ph);
 
@@ -68,7 +68,7 @@ PicHandle Executor::ROMlib_OpenPicture_helper(
     HxX(pch, picclip) = temprh;
     /* -32766 below is an attempt to force a reload */
     SetRectRgn(HxP(pch, picclip), -32766, -32766, 32767, 32767);
-    PATASSIGN(HxX(pch, picbkpat), white);
+    PATASSIGN(HxX(pch, picbkpat), qdGlobals().white);
     HxX(pch, picfont) = 0;
     HxX(pch, picface) = 0;
     HxX(pch, picfiller) = 0;
@@ -86,8 +86,8 @@ PicHandle Executor::ROMlib_OpenPicture_helper(
     HxX(pch, picpnsize.h) = CWC(1);
     HxX(pch, picpnsize.v) = CWC(1);
     HxX(pch, picpnmode) = CWC(patCopy);
-    PATASSIGN(HxX(pch, picpnpat), black);
-    PATASSIGN(HxX(pch, picfillpat), black);
+    PATASSIGN(HxX(pch, picpnpat), qdGlobals().black);
+    PATASSIGN(HxX(pch, picfillpat), qdGlobals().black);
     HxX(pch, piclastrect.top) = 0;
     HxX(pch, piclastrect.left) = 0;
     HxX(pch, piclastrect.bottom) = 0;
@@ -113,16 +113,16 @@ static void updateclip(void)
     piccachehand pch;
     SignedByte state;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    if(!EqualRgn(PORT_CLIP_REGION(thePort), HxP(pch, picclip)))
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    if(!EqualRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), HxP(pch, picclip)))
     {
-        CopyRgn(PORT_CLIP_REGION(thePort), HxP(pch, picclip));
+        CopyRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), HxP(pch, picclip));
         PICOP(OP_Clip);
-        state = HGetState((Handle)PORT_CLIP_REGION(thePort));
-        HLock((Handle)PORT_CLIP_REGION(thePort));
-        PICWRITE(STARH(PORT_CLIP_REGION(thePort)),
-                 Hx(PORT_CLIP_REGION(thePort), rgnSize));
-        HSetState((Handle)PORT_CLIP_REGION(thePort), state);
+        state = HGetState((Handle)PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+        HLock((Handle)PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+        PICWRITE(STARH(PORT_CLIP_REGION(MR(qdGlobals().thePort))),
+                 Hx(PORT_CLIP_REGION(MR(qdGlobals().thePort)), rgnSize));
+        HSetState((Handle)PORT_CLIP_REGION(MR(qdGlobals().thePort)), state);
     }
 }
 
@@ -171,92 +171,92 @@ static void updatebkpat(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
     /* #warning Questionable code in updatebkpat */
     /* FIXME */
-    if(CGrafPort_p(thePort))
-        updateapat(PIXPAT_1DATA(CPORT_BK_PIXPAT(thePort)),
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
+        updateapat(PIXPAT_1DATA(CPORT_BK_PIXPAT(MR(qdGlobals().thePort))),
                    HxX(pch, picbkpat), OP_BkPat);
     else
-        updateapat(PORT_BK_PAT(thePort), HxX(pch, picbkpat), OP_BkPat);
+        updateapat(PORT_BK_PAT(MR(qdGlobals().thePort)), HxX(pch, picbkpat), OP_BkPat);
 }
 
 static void updatepnpat(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)MR(thePort->picSave);
+    pch = (piccachehand)MR(MR(qdGlobals().thePort)->picSave);
     /* #warning Questionable code in updatepnpat */
     /* FIXME */
-    if(CGrafPort_p(thePort))
-        updateapat(PIXPAT_1DATA(CPORT_PEN_PIXPAT(thePort)),
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
+        updateapat(PIXPAT_1DATA(CPORT_PEN_PIXPAT(MR(qdGlobals().thePort))),
                    HxX(pch, picpnpat), OP_PnPat);
     else
-        updateapat(PORT_PEN_PAT(thePort), HxX(pch, picpnpat), OP_PnPat);
+        updateapat(PORT_PEN_PAT(MR(qdGlobals().thePort)), HxX(pch, picpnpat), OP_PnPat);
 }
 
 static void updatefillpat(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)MR(thePort->picSave);
-    if(CGrafPort_p(thePort))
+    pch = (piccachehand)MR(MR(qdGlobals().thePort)->picSave);
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
         /* #warning Questionable code in updatefillpat */
-        updateapat(PIXPAT_1DATA(CPORT_FILL_PIXPAT(thePort)),
+        updateapat(PIXPAT_1DATA(CPORT_FILL_PIXPAT(MR(qdGlobals().thePort))),
                    HxX(pch, picfillpat), OP_FillPat);
     else
-        updateapat(PORT_FILL_PAT(thePort), HxX(pch, picfillpat), OP_FillPat);
+        updateapat(PORT_FILL_PAT(MR(qdGlobals().thePort)), HxX(pch, picfillpat), OP_FillPat);
 }
 
 static void updatefont(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    updateaninteger(PORT_TX_FONT(thePort), &HxX(pch, picfont), OP_TxFont);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    updateaninteger(PORT_TX_FONT(MR(qdGlobals().thePort)), &HxX(pch, picfont), OP_TxFont);
 }
 
 static void updatetxmode(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    updateaninteger(PORT_TX_MODE(thePort), &HxX(pch, pictxmode), OP_TxMode);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    updateaninteger(PORT_TX_MODE(MR(qdGlobals().thePort)), &HxX(pch, pictxmode), OP_TxMode);
 }
 
 static void updatetxsize(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    updateaninteger(PORT_TX_SIZE(thePort), &HxX(pch, pictxsize), OP_TxSize);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    updateaninteger(PORT_TX_SIZE(MR(qdGlobals().thePort)), &HxX(pch, pictxsize), OP_TxSize);
 }
 
 static void updatepnmode(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    updateaninteger(PORT_PEN_MODE(thePort), &HxX(pch, picpnmode), OP_PnMode);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    updateaninteger(PORT_PEN_MODE(MR(qdGlobals().thePort)), &HxX(pch, picpnmode), OP_PnMode);
 }
 
 static void updateforeColor(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    if(CGrafPort_p(thePort))
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         /* ### this isn't quite correct since we only want to write the
 	 current color if it has changed.  that requires we record the
 	 current color, but the current `piccache' doesn't contain
 	 that info */
         PICOP(OP_RGBFgCol);
-        PICWRITE(&CPORT_RGB_FG_COLOR(thePort),
-                 sizeof CPORT_RGB_FG_COLOR(thePort));
+        PICWRITE(&CPORT_RGB_FG_COLOR(MR(qdGlobals().thePort)),
+                 sizeof CPORT_RGB_FG_COLOR(MR(qdGlobals().thePort)));
     }
     else
-        updatealongint(&PORT_FG_COLOR_X(thePort), &HxX(pch, picforeColor),
+        updatealongint(&PORT_FG_COLOR_X(MR(qdGlobals().thePort)), &HxX(pch, picforeColor),
                        OP_FgColor);
 }
 
@@ -264,16 +264,16 @@ static void updatebackColor(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    if(CGrafPort_p(thePort))
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         /* ### see comment in `updateforeColor ()' */
         PICOP(OP_RGBBkCol);
-        PICWRITE(&CPORT_RGB_BK_COLOR(thePort),
-                 sizeof CPORT_RGB_BK_COLOR(thePort));
+        PICWRITE(&CPORT_RGB_BK_COLOR(MR(qdGlobals().thePort)),
+                 sizeof CPORT_RGB_BK_COLOR(MR(qdGlobals().thePort)));
     }
     else
-        updatealongint(&PORT_BK_COLOR_X(thePort),
+        updatealongint(&PORT_BK_COLOR_X(MR(qdGlobals().thePort)),
                        &HxX(pch, picbackColor),
                        OP_BkColor);
 }
@@ -282,15 +282,15 @@ static void updatespextra(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    updatealongint(&PORT_SP_EXTRA_X(thePort), &HxX(pch, picspextra), OP_SpExtra);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    updatealongint(&PORT_SP_EXTRA_X(MR(qdGlobals().thePort)), &HxX(pch, picspextra), OP_SpExtra);
 }
 
 static void updatetxnumtxden(Point num, Point den)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
     if(Hx(pch, pictxnum.h) != num.h || Hx(pch, pictxnum.v) != num.v || Hx(pch, pictxden.v) != den.v || Hx(pch, pictxden.h) != den.h)
     {
         HxX(pch, pictxnum.h) = CW(num.h);
@@ -310,8 +310,8 @@ static void updatepnsize(void)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    updatealongint((GUEST<LONGINT> *)&thePort->pnSize,
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    updatealongint((GUEST<LONGINT> *)&MR(qdGlobals().thePort)->pnSize,
                    (GUEST<LONGINT> *)&HxX(pch, picpnsize), OP_PnSize);
 }
 
@@ -320,11 +320,11 @@ static void updatetxface(void)
     piccachehand pch;
     Style f;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
-    if(HxX(pch, picface) != PORT_TX_FACE_X(thePort))
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    if(HxX(pch, picface) != PORT_TX_FACE_X(MR(qdGlobals().thePort)))
     {
-        HxX(pch, picface) = PORT_TX_FACE_X(thePort);
-        f = PORT_TX_FACE(thePort);
+        HxX(pch, picface) = PORT_TX_FACE_X(MR(qdGlobals().thePort));
+        f = PORT_TX_FACE(MR(qdGlobals().thePort));
         PICOP(OP_TxFace);
         PICWRITE(&f, sizeof(f));
         if(sizeof(f) & 1)
@@ -336,7 +336,7 @@ static void updateoval(GUEST<Point> *ovp)
 {
     piccachehand pch;
 
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
     if(HxX(pch, picov.h) != ovp->h || HxX(pch, picov.v) != ovp->v)
     {
         HxX(pch, picov) = *ovp;
@@ -397,7 +397,7 @@ void Executor::ROMlib_drawingverbrectpicupdate(GrafVerb v, Rect *rp)
     piccachehand pch;
 
     ROMlib_drawingverbpicupdate(v);
-    pch = (piccachehand)PORT_PIC_SAVE(thePort);
+    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
     HxX(pch, piclastrect) = *rp; /* currently unused */
 }
 
@@ -412,7 +412,7 @@ void Executor::C_ClosePicture()
 {
     piccachehand pch;
 
-    if((pch = (piccachehand)PORT_PIC_SAVE(thePort)))
+    if((pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort))))
     {
         PicHandle ph;
 
@@ -421,7 +421,7 @@ void Executor::C_ClosePicture()
         SetHandleSize((Handle)ph, Hx(pch, pichowfar));
         DisposeRgn(HxP(pch, picclip));
         DisposeHandle((Handle)pch);
-        PORT_PIC_SAVE_X(thePort) = nullptr;
+        PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
         ShowPen();
     }
 }

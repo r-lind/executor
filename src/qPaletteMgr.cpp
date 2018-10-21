@@ -181,7 +181,7 @@ get_current_palette(void)
 {
     window_palette_alist_t elt;
 
-    elt = window_palette_alist_elt((WindowPtr)thePort);
+    elt = window_palette_alist_elt((WindowPtr)MR(qdGlobals().thePort));
     if(!elt)
         elt = window_palette_alist_elt(FrontWindow());
     return elt ? elt->palette : NULL;
@@ -1181,15 +1181,15 @@ PaletteHandle Executor::C_GetPalette(WindowPtr src_window)
             int gd_index_mask;                                                         \
                                                                                        \
             gd_index_mask = CTAB_SIZE(PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice)))));          \
-            index_macro_x(thePort) = CL((entry)&gd_index_mask);                        \
+            index_macro_x(MR(qdGlobals().thePort)) = CL((entry)&gd_index_mask);                        \
         }                                                                              \
         else if(CI_USAGE_X(info) & CWC(pmAnimated))                                    \
         {                                                                              \
             if(CI_ALLOCATED_ENTRY_P(info))                                             \
             {                                                                          \
-                index_macro_x(thePort) = CI_ENTRY_INDEX_X(info);                       \
+                index_macro_x(MR(qdGlobals().thePort)) = CI_ENTRY_INDEX_X(info);                       \
                 /* this necessary? */                                                  \
-                rgb_macro(thePort) = CI_RGB(info);                                     \
+                rgb_macro(MR(qdGlobals().thePort)) = CI_RGB(info);                                     \
             }                                                                          \
             else                                                                       \
             {                                                                          \

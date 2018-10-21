@@ -35,7 +35,7 @@ void Executor::ROMlib_CALLTEXT(INTEGER bc, Ptr bufp, Point num, Point den)
 
     if(text_is_enabled_p)
     {
-        if((gp = MR(thePort->grafProcs))
+        if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
            && (pp = MR(gp->textProc)) != &StdText)
         {
             ROMlib_hook(q_textprocnumber);
@@ -51,7 +51,7 @@ void Executor::ROMlib_CALLLINE(Point p)
     QDProcsPtr gp;
     lineProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->lineProc)) != &StdLine)
     {
         ROMlib_hook(q_lineprocnumber);
@@ -66,7 +66,7 @@ void Executor::ROMlib_CALLRECT(GrafVerb v, Rect *rp)
     QDProcsPtr gp;
     rectProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->rectProc)) != &StdRect)
     {
         ROMlib_hook(q_rectprocnumber);
@@ -81,7 +81,7 @@ void Executor::ROMlib_CALLOVAL(GrafVerb v, Rect *rp)
     QDProcsPtr gp;
     ovalProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->ovalProc)) != &StdOval)
     {
         ROMlib_hook(q_ovalprocnumber);
@@ -96,7 +96,7 @@ void Executor::ROMlib_CALLRRECT(GrafVerb v, Rect *rp, INTEGER ow, INTEGER oh)
     QDProcsPtr gp;
     rRectProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->rRectProc)) != &StdRRect)
     {
         ROMlib_hook(q_rrectprocnumber);
@@ -111,7 +111,7 @@ void Executor::ROMlib_CALLARC(GrafVerb v, Rect *rp, INTEGER starta, INTEGER arca
     QDProcsPtr gp;
     arcProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->arcProc)) != &StdArc)
     {
         ROMlib_hook(q_arcprocnumber);
@@ -126,7 +126,7 @@ void Executor::ROMlib_CALLRGN(GrafVerb v, RgnHandle rh)
     QDProcsPtr gp;
     rgnProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->rgnProc)) != &StdRgn)
     {
         ROMlib_hook(q_rgnprocnumber);
@@ -141,7 +141,7 @@ void Executor::ROMlib_CALLPOLY(GrafVerb v, PolyHandle rh)
     QDProcsPtr gp;
     polyProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->polyProc)) != &StdPoly)
     {
         ROMlib_hook(q_polyprocnumber);
@@ -157,7 +157,7 @@ void Executor::ROMlib_CALLBITS(BitMap *bmp, const Rect *srcrp, const Rect *dstrp
     QDProcsPtr gp;
     bitsProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->bitsProc)) != &StdBits)
     {
         ROMlib_hook(q_bitsprocnumber);
@@ -172,7 +172,7 @@ void Executor::ROMlib_CALLCOMMENT(INTEGER kind, INTEGER size, Handle datah)
     QDProcsPtr gp;
     commentProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->commentProc)) != &StdComment)
     {
         ROMlib_hook(q_commentprocnumber);
@@ -190,7 +190,7 @@ Executor::ROMlib_CALLTXMEAS(INTEGER bc, Ptr bufp, GUEST<Point> *nump, GUEST<Poin
     txMeasProc_t pp;
     INTEGER retval;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->txMeasProc)) != &StdTxMeas)
     {
         ROMlib_hook(q_txmeasprocnumber);
@@ -206,7 +206,7 @@ void Executor::ROMlib_PICWRITE(Ptr addr, INTEGER count)
     QDProcsPtr gp;
     putPicProc_t pp;
 
-    if((gp = MR(thePort->grafProcs))
+    if((gp = MR(MR(qdGlobals().thePort)->grafProcs))
        && (pp = MR(gp->putPicProc)) != &StdPutPic)
     {
         ROMlib_hook(q_putpicprocnumber);

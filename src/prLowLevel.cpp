@@ -202,7 +202,7 @@ add_orientation_icons_to_update_region(DialogPtr dp)
     Rect r;
     GUEST<INTEGER> unused;
 
-    gp = thePort;
+    gp = MR(qdGlobals().thePort);
     SetPort(dp);
     GetDialogItem(dp, LAYOUT_PORTRAIT_NO, &unused, NULL, &r);
     InvalRect(&r);
@@ -413,7 +413,7 @@ update_port(DialogPtr dp)
     GrafPtr gp;
     char *keyp;
 
-    gp = thePort;
+    gp = MR(qdGlobals().thePort);
     SetPort(dp);
 
     keyp = strdup(find_item_key(dp, LAYOUT_PRINTER_TYPE_NO).c_str());
@@ -586,7 +586,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
             GUEST<INTEGER> unused;
 
             glocalp = evt->where;
-            gp = thePort;
+            gp = MR(qdGlobals().thePort);
             SetPort(dlg);
             GlobalToLocal(&glocalp);
             localp = glocalp.get();
@@ -860,9 +860,9 @@ void Executor::C_ROMlib_orientation(DialogPtr dp, INTEGER which)
     PenSize(1, 1);
     InsetRect(&r, 1, 1);
     if((which == LAYOUT_PORTRAIT_NO) != (ROMlib_paper_orientation == "Portrait"))
-        PenPat(white);
+        PenPat(qdGlobals().white);
     FrameRect(&r);
-    PenPat(black);
+    PenPat(qdGlobals().black);
 }
 
 std::string Executor::ROMlib_PrintersIni;
@@ -902,7 +902,7 @@ adjust_menu_common(TPPrDlg dlg, INTEGER item, heading_t heading, ini_key_t defke
                 GrafPtr gp;
                 INTEGER max_wid;
 
-                gp = thePort;
+                gp = MR(qdGlobals().thePort);
                 SetPort((GrafPtr)dlg);
                 default_index = -1;
                 max_wid = 0;

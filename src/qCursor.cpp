@@ -170,7 +170,7 @@ void Executor::C_SetCursor(Cursor *cp)
 void Executor::C_InitCursor()
 {
     LM(CrsrState) = 0;
-    SetCursor(&arrowX);
+    SetCursor(&qdGlobals().arrow);
     LM(CrsrVis) = false;
     ROMlib_showcursor();
 }

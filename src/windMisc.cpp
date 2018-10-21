@@ -123,7 +123,7 @@ LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, Rect *limit,
     LONGINT l;
     int drawn;
 
-    bool onDesktop = (thePortX == LM(WMgrPort)) || (thePortX == guest_cast<GrafPtr>(LM(WMgrCPort)));
+    bool onDesktop = (qdGlobals().thePort == LM(WMgrPort)) || (qdGlobals().thePort == guest_cast<GrafPtr>(LM(WMgrCPort)));
 
     rh = NewRgn();
     CopyRgn(rgn, rh);
@@ -221,7 +221,7 @@ LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, Rect *limit,
 LONGINT Executor::C_DragGrayRgn(RgnHandle rgn, Point startp, Rect *limit,
                                 Rect *slop, INTEGER axis, ProcPtr proc)
 {
-    PATASSIGN(LM(DragPattern), gray);
+    PATASSIGN(LM(DragPattern), qdGlobals().gray);
     return DragTheRgn(rgn, startp, limit, slop, axis, proc);
 }
 

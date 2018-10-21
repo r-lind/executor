@@ -158,7 +158,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
                                                                                  - CW(lp->dataBounds.left))));
     if(!(lp->cellSize.v = CW(csize.v)))
     {
-        gp = thePort;
+        gp = MR(qdGlobals().thePort);
         SetPort(MR(lp->port));
         GetFontInfo(&fi);
         lp = STARH(list); /* could have moved */

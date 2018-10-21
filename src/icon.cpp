@@ -91,7 +91,7 @@ void Executor::C_PlotIcon(const Rect *rect, Handle icon)
         bm.bounds.bottom = CWC(32);
     }
     bm.bounds.right = bm.bounds.bottom;
-    CopyBits(&bm, PORT_BITS_FOR_COPY(thePort), &bm.bounds, rect,
+    CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), &bm.bounds, rect,
              srcCopy, NULL);
 }
 
@@ -120,7 +120,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
     if(!icon)
         return;
 
-    current_port = thePort;
+    current_port = MR(qdGlobals().thePort);
 
     cgrafport_p = CGrafPort_p(current_port);
     if(cgrafport_p)
@@ -500,7 +500,7 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
     if(transform != ttNone)
         warning_unimplemented("unhandled icon transform `%d'", transform);
 
-    current_port = thePort;
+    current_port = MR(qdGlobals().thePort);
     little_rect_p = (RECT_WIDTH(rect) < 32
                      && RECT_HEIGHT(rect) < 32);
     port_bpp = (CGrafPort_p(current_port)

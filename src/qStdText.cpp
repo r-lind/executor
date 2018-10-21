@@ -71,7 +71,7 @@ static void charblit(BitMap *fbmp, BitMap *tbmp, Rect *srect, Rect *drect,
  * shifted over and shift them back one pixel at a time later.
  * Only do this once (the firsttime)
  */
-    if((PORT_TX_FACE(thePort) & (int)italic) && firsttime)
+    if((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic) && firsttime)
     {
         INTEGER temp;
         temp = (numrows) / 2;
@@ -218,7 +218,7 @@ static void charblit(BitMap *fbmp, BitMap *tbmp, Rect *srect, Rect *drect,
             lastmask = 0xFFFFFFFF << (16 - lastmaskend);                      \
     }
 
-    if((PORT_TX_FACE(thePort) & (int)italic) && firsttime)
+    if((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic) && firsttime)
     {
         if(!((i = numrows) & 1))
         {
@@ -303,11 +303,11 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         if(n <= 0)
             /*-->*/ return retval;
 
-        if(thePort->picSave)
+        if(MR(qdGlobals().thePort)->picSave)
         {
             ROMlib_textpicupdate(num, den);
             PICOP(OP_LongText);
-            PICWRITE(&PORT_PEN_LOC(thePort), sizeof(PORT_PEN_LOC(thePort)));
+            PICWRITE(&PORT_PEN_LOC(MR(qdGlobals().thePort)), sizeof(PORT_PEN_LOC(MR(qdGlobals().thePort))));
             count = n;
             PICWRITE(&count, sizeof(count));
             PICWRITE(p, count);
@@ -315,7 +315,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
                 PICWRITE("", 1); /* even things out */
         }
 
-        if(PORT_PEN_VIS(thePort) < 0)
+        if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
         {
             GUEST<Point> swapped_num;
             GUEST<Point> swapped_den;
@@ -324,7 +324,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
             swapped_num.v = CW(num.v);
             swapped_den.h = CW(den.h);
             swapped_den.v = CW(den.v);
-            PORT_PEN_LOC(thePort).h = CW(CW(PORT_PEN_LOC(thePort).h)
+            PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)
                                          + (CALLTXMEAS(n, textbufp,
                                                        &swapped_num,
                                                        &swapped_den, 0)));
@@ -333,10 +333,10 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     }
 
     fmi.needBits = CB(true);
-    fmi.family = PORT_TX_FONT_X(thePort);
-    fmi.size = PORT_TX_SIZE_X(thePort);
-    fmi.face = PORT_TX_FACE_X(thePort);
-    fmi.device = PORT_DEVICE_X(thePort);
+    fmi.family = PORT_TX_FONT_X(MR(qdGlobals().thePort));
+    fmi.size = PORT_TX_SIZE_X(MR(qdGlobals().thePort));
+    fmi.face = PORT_TX_FACE_X(MR(qdGlobals().thePort));
+    fmi.device = PORT_DEVICE_X(MR(qdGlobals().thePort));
     fmi.numer.h = CW(num.h);
     fmi.numer.v = CW(num.v);
     fmi.denom.h = CW(den.h);
@@ -369,7 +369,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     fixed_extra = FIXED(extra);
     widthstate = HGetState((Handle)MR(LM(WidthTabHandle)));
     HLock((Handle)MR(LM(WidthTabHandle)));
-    if((PORT_TX_FACE(thePort) & (int)underline) && Cx(fmop->descent) < 2)
+    if((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)underline) && Cx(fmop->descent) < 2)
         descent = 2;
     else
         descent = Cx(fmop->descent);
@@ -394,15 +394,15 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     //        INTEGER missing = *(widp + Cx(fp->lastChar) - Cx(fp->firstChar) + 1) & 0xff;
     misrect.left = *(locp + Cx(fp->lastChar) - Cx(fp->firstChar) + 1);
     misrect.right = *(locp + Cx(fp->lastChar) - Cx(fp->firstChar) + 2);
-    drect.left = PORT_PEN_LOC(thePort).h;
-    drect.top = CW(CW(PORT_PEN_LOC(thePort).v) - CW(fp->ascent));
+    drect.left = PORT_PEN_LOC(MR(qdGlobals().thePort)).h;
+    drect.top = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v) - CW(fp->ascent));
     drect.bottom = CW(CW(drect.top) + Cx(fp->fRectHeight));
 
     hOutput = Cx(WIDTHPTR->hOutput);
     vOutput = Cx(WIDTHPTR->vOutput);
     hOutputInverse = FixRatio(1 << 8, hOutput);
 
-    space_extra = PORT_SP_EXTRA(thePort);
+    space_extra = PORT_SP_EXTRA(MR(qdGlobals().thePort));
     spacewidth = (CL(WIDTHPTR->tabData[(unsigned)' ']) + space_extra
                   - CL(WIDTHPTR->sExtra));
 
@@ -427,12 +427,12 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
 #endif
 
     /* SPEEDUP:  make the stylemap be of the same alignment as
-     thePort.portBits when it matters to the blitter */
+     MR(qdGlobals().thePort).portBits when it matters to the blitter */
 
-    rightitalicoffset = ((PORT_TX_FACE(thePort) & (int)italic)
+    rightitalicoffset = ((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic)
                              ? CB(fmop->ascent) / 2 - 1
                              : 0);
-    leftitalicoffset = ((PORT_TX_FACE(thePort) & (int)italic)
+    leftitalicoffset = ((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic)
                             ? descent / 2 + 1
                             : 0);
 
@@ -442,23 +442,23 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
             /*-->*/ return 0;
 
         stylemap.rowBytes = CW((strwidth - Cx(fp->kernMax) + leftitalicoffset + rightitalicoffset + 31) / 32 * 4);
-        stylemap.bounds.top = CW(CW(PORT_PEN_LOC(thePort).v)
+        stylemap.bounds.top = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v)
                                  - CB(fmop->ascent));
 #if 0
-      stylemap.bounds.bottom = CW (CW (PORT_PEN_LOC (thePort).v)
+      stylemap.bounds.bottom = CW (CW (PORT_PEN_LOC (MR(qdGlobals().thePort)).v)
 				   + descent);
 #else
         {
             int height;
 
             height = std::max<int>(CB(fmop->ascent) + descent, Cx(fp->fRectHeight));
-            stylemap.bounds.bottom = CW(CW(PORT_PEN_LOC(thePort).v)
+            stylemap.bounds.bottom = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v)
                                         - CB(fmop->ascent) + height);
         }
 #endif
-        stylemap.bounds.left = CW(CW(PORT_PEN_LOC(thePort).h)
+        stylemap.bounds.left = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)
                                   + Cx(fp->kernMax) - leftitalicoffset);
-        stylemap.bounds.right = CW(CW(PORT_PEN_LOC(thePort).h)
+        stylemap.bounds.right = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)
                                    + strwidth + rightitalicoffset);
         if(fmop->shadow)
             stylemap.bounds.left = CW(CW(stylemap.bounds.left) - 1);
@@ -487,7 +487,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     max = Cx(fp->lastChar) - Cx(fp->firstChar);
     misintwidth = CW(misrect.right) - CW(misrect.left);
     misfixwidth = FIXED(misintwidth);
-    left = FIXED(CW(PORT_PEN_LOC(thePort).h)) + FIXEDONEHALF;
+    left = FIXED(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)) + FIXEDONEHALF;
     left_begin = left;
     widths = WIDTHPTR->tabData;
     kernmax = Cx(fp->kernMax);
@@ -554,7 +554,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     {
         ASSERT_SAFE(MR(stylemap.baseAddr));
         stylemap.bounds.right = CW((left >> 16) + rightitalicoffset);
-        if(PORT_TX_FACE(thePort) & (int)bold)
+        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)bold)
         {
             stylemap2 = stylemap;
             stylemap2.baseAddr = RM((Ptr)ALLOCA(nbytes));
@@ -579,7 +579,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         }
 
         ASSERT_SAFE(MR(stylemap.baseAddr));
-        if(PORT_TX_FACE(thePort) & (int)underline)
+        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)underline)
         {
             p = ((unsigned char *)MR(bmp->baseAddr) + BITMAP_ROWBYTES(bmp) * (CB(fmop->ascent) + 1));
             for(i = 0; i++ < Cx(fmop->ulThick);)
@@ -609,7 +609,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         }
         ASSERT_SAFE(MR(stylemap.baseAddr));
 
-        if(PORT_TX_FACE(thePort) & (int)(outline | shadow))
+        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)(outline | shadow))
         {
             stylemap2 = stylemap;
             stylemap3 = stylemap;
@@ -687,9 +687,9 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         srect = bmp->bounds;
         srect.left = CW(leftmost);
         ASSERT_SAFE(MR(stylemap.baseAddr));
-        StdBits(bmp, &srect, &drect, PORT_TX_MODE(thePort) & 0x37, (RgnHandle)0);
+        StdBits(bmp, &srect, &drect, PORT_TX_MODE(MR(qdGlobals().thePort)) & 0x37, (RgnHandle)0);
         ASSERT_SAFE(MR(stylemap.baseAddr));
-        if(PORT_TX_FACE(thePort) & (int)(outline | shadow))
+        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)(outline | shadow))
         {
             ASSERT_SAFE(MR(stylemap.baseAddr));
             StdBits(&stylemap2, &srect, &drect, srcXor, (RgnHandle)0);
@@ -697,7 +697,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
             ASSERT_SAFE(MR(stylemap2.baseAddr));
         }
 
-        PORT_PEN_LOC(thePort).h = CW(CW(drect.right) - (FixMul((LONGINT)rightitalicoffset << 16,
+        PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(CW(drect.right) - (FixMul((LONGINT)rightitalicoffset << 16,
                                                                (Fixed)hOutput << 8)
                                                         >> 16));
         ASSERT_SAFE(MR(stylemap.baseAddr));

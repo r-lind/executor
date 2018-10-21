@@ -465,17 +465,25 @@ struct MatchRec
 
 typedef Byte *BytePtr;
 
-#define thePort (STARH(STARH((GUEST<GUEST<GrafPtr> *> *)SYN68K_TO_US(EM_A5))))
-#define thePortX ((*STARH((GUEST<GUEST<GrafPtr> *> *)SYN68K_TO_US(EM_A5))))
-#define white (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 8)
-#define black (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 16)
-#define gray (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 24)
-#define ltGray (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 32)
-#define dkGray (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 40)
-#define arrowX (*(Cursor *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 108))
-#define screenBitsX (*(BitMap *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 122))
-#define randSeed CL(*(GUEST<LONGINT> *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 126))
-#define randSeedX ((*(GUEST<LONGINT> *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 126)))
+struct QDGlobals
+{
+    char privates[76];
+    GUEST<int32_t> randSeed;
+    BitMap screenBits;
+    Cursor arrow;
+    Pattern dkGray;
+    Pattern ltGray;
+    Pattern gray;
+    Pattern black;
+    Pattern white;
+    GUEST<GrafPtr> thePort;
+};
+
+inline QDGlobals& qdGlobals()
+{
+    Ptr thePortPtr = MR(*(GUEST<Ptr> *)SYN68K_TO_US(EM_A5));
+    return *(QDGlobals*)(thePortPtr - offsetof(QDGlobals, thePort));
+}
 
 const LowMemGlobal<INTEGER> ScrVRes { 0x102 }; // QuickDraw IMI-473 (true);
 const LowMemGlobal<INTEGER> ScrHRes { 0x104 }; // QuickDraw IMI-473 (true);

@@ -17,32 +17,32 @@ using namespace Executor;
 
 void Executor::C_TextFont(INTEGER f)
 {
-    if(thePort)
-        PORT_TX_FONT_X(thePort) = CW(f);
+    if(MR(qdGlobals().thePort))
+        PORT_TX_FONT_X(MR(qdGlobals().thePort)) = CW(f);
 }
 
 void Executor::C_TextFace(INTEGER thef)
 {
-    if(thePort)
-        PORT_TX_FACE_X(thePort) = thef;
+    if(MR(qdGlobals().thePort))
+        PORT_TX_FACE_X(MR(qdGlobals().thePort)) = thef;
 }
 
 void Executor::C_TextMode(INTEGER m)
 {
-    if(thePort)
-        PORT_TX_MODE_X(thePort) = CW(m);
+    if(MR(qdGlobals().thePort))
+        PORT_TX_MODE_X(MR(qdGlobals().thePort)) = CW(m);
 }
 
 void Executor::C_TextSize(INTEGER s)
 {
-    if(thePort)
-        PORT_TX_SIZE_X(thePort) = CW(s);
+    if(MR(qdGlobals().thePort))
+        PORT_TX_SIZE_X(MR(qdGlobals().thePort)) = CW(s);
 }
 
 void Executor::C_SpaceExtra(Fixed e)
 {
-    if(thePort)
-        PORT_SP_EXTRA_X(thePort) = CL(e);
+    if(MR(qdGlobals().thePort))
+        PORT_SP_EXTRA_X(MR(qdGlobals().thePort)) = CL(e);
 }
 
 void Executor::C_DrawChar(CharParameter thec)

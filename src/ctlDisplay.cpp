@@ -61,10 +61,10 @@ void Executor::C_HideControl(ControlHandle c) /* IMI-322 */
 		  use Cmd-= to create a check-box, if you check and un-check
 		  the check-box. */
 
-            if(CGrafPort_p(thePort))
+            if(CGrafPort_p(MR(qdGlobals().thePort)))
             {
-                RGBForeColor(&CPORT_RGB_FG_COLOR(thePort));
-                RGBBackColor(&CPORT_RGB_BK_COLOR(thePort));
+                RGBForeColor(&CPORT_RGB_FG_COLOR(MR(qdGlobals().thePort)));
+                RGBBackColor(&CPORT_RGB_BK_COLOR(MR(qdGlobals().thePort)));
             }
 
             EraseRgn(rh);

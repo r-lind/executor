@@ -565,7 +565,7 @@ static void ROMlib_circledefault(DialogPtr dp)
     Rect r;
     GrafPtr saveport;
 
-    saveport = thePort;
+    saveport = MR(qdGlobals().thePort);
     SetPort(dp);
     GetDialogItem(dp, 1, &type, &h, &r);
     PenSize(3, 3);

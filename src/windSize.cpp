@@ -31,7 +31,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
     WindowPeek w;
 
     w = (WindowPeek)wp;
-    gp = thePort;
+    gp = MR(qdGlobals().thePort);
     if(WINDOW_VISIBLE_X(w))
     {
         SetPort(MR(wmgr_port));
@@ -194,14 +194,14 @@ void Executor::C_DragWindow(WindowPtr wp, Point p, Rect *rp)
     do                      \
     {                       \
         SetPort(p);         \
-        PenPat(gray);       \
+        PenPat(qdGlobals().gray);       \
         PenMode(notPatXor); \
     } while(false)
 
 #define RESTORE_PORT(p)   \
     do                    \
     {                     \
-        PenPat(black);    \
+        PenPat(qdGlobals().black);    \
         PenMode(patCopy); \
         SetPort(p);       \
     } while(false)
@@ -245,7 +245,7 @@ LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, Rect *rp)
     if(CW(pinr.bottom) <= CW(r.top) && CW(rp->bottom) > 0)
         pinr.bottom = CWC(32767);
 
-    gp = thePort;
+    gp = MR(qdGlobals().thePort);
     SETUP_PORT((GrafPtr)MR(LM(WMgrPort)));
     SETUP_PORT(MR(wmgr_port));
     ClipRect(&GD_BOUNDS(MR(LM(TheGDevice))));

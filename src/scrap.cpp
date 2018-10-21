@@ -593,7 +593,7 @@ pict_from_gworld(GWorldPtr gp, int *lenp)
         {
             ClipRect(&pict_frame);
             HLock((Handle)pm);
-            CopyBits((BitMap *)STARH(pm), PORT_BITS_FOR_COPY(thePort),
+            CopyBits((BitMap *)STARH(pm), PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
                      &pict_frame, &pict_frame, srcCopy, NULL);
             HUnlock((Handle)pm);
             ClosePicture();

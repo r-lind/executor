@@ -74,7 +74,7 @@ void Executor::C_ForeColor(LONGINT c)
 {
     GrafPtr the_port;
 
-    the_port = thePort;
+    the_port = MR(qdGlobals().thePort);
     if(the_port)
     {
         if(CGrafPort_p(the_port))
@@ -88,7 +88,7 @@ void Executor::C_BackColor(LONGINT c)
 {
     GrafPtr the_port;
 
-    the_port = thePort;
+    the_port = MR(qdGlobals().thePort);
     if(the_port)
     {
         if(CGrafPort_p(the_port))
@@ -100,7 +100,7 @@ void Executor::C_BackColor(LONGINT c)
 
 void Executor::C_ColorBit(INTEGER b)
 {
-    PORT_COLR_BIT_X(thePort) = CW(b);
+    PORT_COLR_BIT_X(MR(qdGlobals().thePort)) = CW(b);
 }
 
 typedef CTabHandle clut_res_handle;

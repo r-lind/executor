@@ -127,7 +127,7 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
     GUEST<GrafPtr> save_portX;
     int gd_allocated_p = false;
 
-    save_portX = thePortX;
+    save_portX = qdGlobals().thePort;
 
     if(!depth)
     {
@@ -283,7 +283,7 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
 
     *graphics_world_out = RM(graphics_world);
 
-    thePortX = save_portX;
+    qdGlobals().thePort = save_portX;
     return noErr;
 }
 
@@ -488,8 +488,8 @@ void Executor::C_DisposeGWorld(GWorldPtr graphics_world)
 {
     gw_info_t *gw_info;
 
-    if((GrafPtr)graphics_world == thePort)
-        thePortX = LM(WMgrPort);
+    if((GrafPtr)graphics_world == MR(qdGlobals().thePort))
+        qdGlobals().thePort = LM(WMgrPort);
     /* FIXME: set the gdevice to something sane as well? */
 
     gw_info = lookup_gw_info_by_gw(graphics_world);

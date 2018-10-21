@@ -5,19 +5,7 @@
 #include <QuickDraw.h>
 #include <ResourceMgr.h>
 using namespace Executor;
-struct QDGlobals
-{
-    char privates[76];
-    GUEST<int32_t> x_randSeed;
-    BitMap screenBits;
-    Cursor arrow;
-    Pattern x_dkGray;
-    Pattern x_ltGray;
-    Pattern x_gray;
-    Pattern x_black;
-    Pattern x_white;
-    GUEST<GrafPtr> x_thePort;
-};
+
 QDGlobals qd;
 
 #include <rsys/cquick.h>
@@ -56,10 +44,8 @@ TEST(QuickDraw, init1)
     InitResources();
     ROMlib_InitGDevices();
     LM(TheZone) = LM(ApplZone);
-    InitGraf((Ptr)&qd.x_thePort);
-#else
-    InitGraf((Ptr)&qd.thePort);
 #endif
+    InitGraf((Ptr)&qd.thePort);
 
     GrafPort port;
     OpenPort(&port);

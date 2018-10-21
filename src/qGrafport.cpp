@@ -26,20 +26,20 @@ void Executor::C_InitGraf(Ptr gp)
 
     main_gd_pixmap = GD_PMAP(MR(LM(MainDevice)));
 
-    /* screenBitsX flag bits must not be set */
-    screenBitsX.baseAddr = PIXMAP_BASEADDR_X(main_gd_pixmap);
-    screenBitsX.rowBytes = CW(PIXMAP_ROWBYTES(main_gd_pixmap) / PIXMAP_PIXEL_SIZE(main_gd_pixmap));
-    screenBitsX.bounds = PIXMAP_BOUNDS(main_gd_pixmap);
+    /* qdGlobals().screenBits flag bits must not be set */
+    qdGlobals().screenBits.baseAddr = PIXMAP_BASEADDR_X(main_gd_pixmap);
+    qdGlobals().screenBits.rowBytes = CW(PIXMAP_ROWBYTES(main_gd_pixmap) / PIXMAP_PIXEL_SIZE(main_gd_pixmap));
+    qdGlobals().screenBits.bounds = PIXMAP_BOUNDS(main_gd_pixmap);
 
 #define patinit(d, s) (*(GUEST<LONGINT> *)d = CLC(s), *((GUEST<LONGINT> *)d + 1) = CLC(s))
 
     TheZoneGuard guard(LM(SysZone));
 
-    patinit(white, 0x00000000);
-    patinit(black, 0xffffffff);
-    patinit(gray, 0xaa55aa55);
-    patinit(ltGray, 0x88228822);
-    patinit(dkGray, 0x77dd77dd);
+    patinit(qdGlobals().white, 0x00000000);
+    patinit(qdGlobals().black, 0xffffffff);
+    patinit(qdGlobals().gray, 0xaa55aa55);
+    patinit(qdGlobals().ltGray, 0x88228822);
+    patinit(qdGlobals().dkGray, 0x77dd77dd);
 
     LM(WMgrPort) = RM((WindowPtr)NewPtr(sizeof(GrafPort)));
     OpenPort(MR(LM(WMgrPort)));
@@ -47,22 +47,22 @@ void Executor::C_InitGraf(Ptr gp)
     LM(WMgrCPort) = RM((CWindowPtr)NewPtr(sizeof(CGrafPort)));
     OpenCPort(MR(LM(WMgrCPort)));
 
-    thePortX = guest_cast<GrafPtr>(LM(WMgrCPort));
-    LM(ScrnBase) = screenBitsX.baseAddr;
+    qdGlobals().thePort = guest_cast<GrafPtr>(LM(WMgrCPort));
+    LM(ScrnBase) = qdGlobals().screenBits.baseAddr;
 
-    StuffHex((Ptr)arrowX.data,
+    StuffHex((Ptr)qdGlobals().arrow.data,
              (StringPtr)("\100000040006000700078007c007e007f"
                          "007f807c006c0046000600030003000000"));
-    StuffHex((Ptr)arrowX.mask,
+    StuffHex((Ptr)qdGlobals().arrow.mask,
              (StringPtr)("\100c000e000f000f800fc00fe00ff00ff"
                          "80ffc0ffe0fe00ef00cf00878007800380"));
-    arrowX.hotSpot.h = arrowX.hotSpot.v = CWC(1);
+    qdGlobals().arrow.hotSpot.h = qdGlobals().arrow.hotSpot.v = CWC(1);
     LM(CrsrState) = 0;
 
     LM(RndSeed) = CL(TickCount());
     LM(ScrVRes) = LM(ScrHRes) = CWC(72);
-    LM(ScreenRow) = screenBitsX.rowBytes;
-    randSeedX = CLC(1);
+    LM(ScreenRow) = qdGlobals().screenBits.rowBytes;
+    qdGlobals().randSeed = CLC(1);
     LM(QDExist) = EXIST_YES;
 }
 
@@ -80,11 +80,11 @@ void Executor::ROMlib_initport(GrafPtr p) /* INTERNAL */
     p->portBits.rowBytes = CWC(0);
 
     PORT_DEVICE_X(p) = 0;
-    PORT_BITS(p) = screenBitsX;
-    PORT_RECT(p) = screenBitsX.bounds;
-    PATASSIGN(PORT_BK_PAT(p), white);
-    PATASSIGN(PORT_FILL_PAT(p), black);
-    PATASSIGN(PORT_PEN_PAT(p), black);
+    PORT_BITS(p) = qdGlobals().screenBits;
+    PORT_RECT(p) = qdGlobals().screenBits.bounds;
+    PATASSIGN(PORT_BK_PAT(p), qdGlobals().white);
+    PATASSIGN(PORT_FILL_PAT(p), qdGlobals().black);
+    PATASSIGN(PORT_PEN_PAT(p), qdGlobals().black);
     PORT_PEN_LOC(p).h = PORT_PEN_LOC(p).v = CWC(0);
     PORT_PEN_SIZE(p).h = PORT_PEN_SIZE(p).v = CWC(1);
     PORT_PEN_MODE_X(p) = CWC(patCopy);
@@ -110,7 +110,7 @@ void Executor::C_SetPort(GrafPtr p)
 {
     if(p == NULL)
         warning_unexpected("SetPort(NULL_STRING)");
-    thePortX = RM(p);
+    qdGlobals().thePort = RM(p);
 }
 
 void Executor::C_InitPort(GrafPtr p)
@@ -118,7 +118,7 @@ void Executor::C_InitPort(GrafPtr p)
     ROMlib_initport(p);
     SetEmptyRgn(PORT_VIS_REGION(p));
     SetEmptyRgn(PORT_CLIP_REGION(p));
-    HxX(PORT_VIS_REGION(p), rgnBBox) = screenBitsX.bounds;
+    HxX(PORT_VIS_REGION(p), rgnBBox) = qdGlobals().screenBits.bounds;
 
     SetRect(&HxX(PORT_CLIP_REGION(p), rgnBBox), -32767, -32767, 32767, 32767);
     SetPort(p);
@@ -161,24 +161,24 @@ void Executor::C_ClosePort(GrafPtr p)
 
 void Executor::C_GetPort(GUEST<GrafPtr> *pp)
 {
-    *pp = thePortX;
+    *pp = qdGlobals().thePort;
 }
 
 void Executor::C_GrafDevice(INTEGER d)
 {
-    PORT_DEVICE_X(thePort) = Cx(d);
+    PORT_DEVICE_X(MR(qdGlobals().thePort)) = Cx(d);
 }
 
 void Executor::C_SetPortBits(BitMap *bm)
 {
-    if(!CGrafPort_p(thePort))
-        PORT_BITS(thePort) = *bm;
+    if(!CGrafPort_p(MR(qdGlobals().thePort)))
+        PORT_BITS(MR(qdGlobals().thePort)) = *bm;
 }
 
 void Executor::C_PortSize(INTEGER w, INTEGER h)
 {
-    PORT_RECT(thePort).bottom = CW(CW(PORT_RECT(thePort).top) + h);
-    PORT_RECT(thePort).right = CW(CW(PORT_RECT(thePort).left) + w);
+    PORT_RECT(MR(qdGlobals().thePort)).bottom = CW(CW(PORT_RECT(MR(qdGlobals().thePort)).top) + h);
+    PORT_RECT(MR(qdGlobals().thePort)).right = CW(CW(PORT_RECT(MR(qdGlobals().thePort)).left) + w);
 }
 
 void Executor::C_MovePortTo(INTEGER lg, INTEGER tg)
@@ -187,7 +187,7 @@ void Executor::C_MovePortTo(INTEGER lg, INTEGER tg)
     Rect *port_bounds, *port_rect;
     int w, h;
 
-    current_port = thePort;
+    current_port = MR(qdGlobals().thePort);
     port_bounds = &PORT_BOUNDS(current_port);
     port_rect = &PORT_RECT(current_port);
     lg = CW(port_rect->left) - lg;
@@ -201,9 +201,9 @@ void Executor::C_SetOrigin(INTEGER h, INTEGER v)
 {
     int32_t dh, dv;
 
-    dh = h - Cx(PORT_RECT(thePort).left);
-    dv = v - Cx(PORT_RECT(thePort).top);
-    if(thePort->picSave)
+    dh = h - Cx(PORT_RECT(MR(qdGlobals().thePort)).left);
+    dv = v - Cx(PORT_RECT(MR(qdGlobals().thePort)).top);
+    if(MR(qdGlobals().thePort)->picSave)
     {
         GUEST<int16_t> swappeddh;
         GUEST<int16_t> swappeddv;
@@ -215,21 +215,21 @@ void Executor::C_SetOrigin(INTEGER h, INTEGER v)
         swappeddv = CW(dv);
         PICWRITE(&swappeddv, sizeof swappeddv);
     }
-    OffsetRect(&PORT_BOUNDS(thePort), dh, dv);
-    OffsetRect(&PORT_RECT(thePort), dh, dv);
-    OffsetRgn(PORT_VIS_REGION(thePort), dh, dv);
+    OffsetRect(&PORT_BOUNDS(MR(qdGlobals().thePort)), dh, dv);
+    OffsetRect(&PORT_RECT(MR(qdGlobals().thePort)), dh, dv);
+    OffsetRgn(PORT_VIS_REGION(MR(qdGlobals().thePort)), dh, dv);
     if(LM(SaveVisRgn))
         OffsetRgn(MR(LM(SaveVisRgn)), dh, dv);
 }
 
 void Executor::C_SetClip(RgnHandle r)
 {
-    CopyRgn(r, PORT_CLIP_REGION(thePort));
+    CopyRgn(r, PORT_CLIP_REGION(MR(qdGlobals().thePort)));
 }
 
 void Executor::C_GetClip(RgnHandle r)
 {
-    CopyRgn(PORT_CLIP_REGION(thePort), r);
+    CopyRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), r);
 }
 
 void Executor::C_ClipRect(Rect *r)
@@ -240,12 +240,12 @@ void Executor::C_ClipRect(Rect *r)
    * during the RectRgn.
    */
     r_copy = *r;
-    RectRgn(PORT_CLIP_REGION(thePort), &r_copy);
+    RectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), &r_copy);
 }
 
 void Executor::C_BackPat(Pattern pp)
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         PixPatHandle old_bk;
 
@@ -268,12 +268,12 @@ void Executor::C_BackPat(Pattern pp)
         /* #warning BackPat not currently implemented properly ... */
     }
     else
-        PATASSIGN(PORT_BK_PAT(thePort), pp);
+        PATASSIGN(PORT_BK_PAT(MR(qdGlobals().thePort)), pp);
 }
 
 void Executor::ROMlib_fill_pat(Pattern pp) /* INTERNAL */
 {
-    if(CGrafPort_p(thePort))
+    if(CGrafPort_p(MR(qdGlobals().thePort)))
     {
         PixPatHandle old_fill;
 
@@ -295,5 +295,5 @@ void Executor::ROMlib_fill_pat(Pattern pp) /* INTERNAL */
         /* #warning ROMlib_fill_pat not currently implemented properly... */
     }
     else
-        PATASSIGN(PORT_FILL_PAT(thePort), pp);
+        PATASSIGN(PORT_FILL_PAT(MR(qdGlobals().thePort)), pp);
 }

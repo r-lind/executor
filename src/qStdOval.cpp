@@ -21,7 +21,7 @@ void Executor::C_StdOval(GrafVerb v, Rect *rp)
 
     if(!EmptyRect(rp))
     {
-        if(thePort->picSave)
+        if(MR(qdGlobals().thePort)->picSave)
         {
             ROMlib_drawingverbrectpicupdate(v, rp);
             PICOP(OP_frameOval + (int)v);
@@ -37,16 +37,16 @@ void Executor::C_StdOval(GrafVerb v, Rect *rp)
             switch(v)
             {
                 case frame:
-                    if(PORT_REGION_SAVE_X(thePort))
+                    if(PORT_REGION_SAVE_X(MR(qdGlobals().thePort)))
                         XorRgn(rh,
-                               (RgnHandle)PORT_REGION_SAVE(thePort),
-                               (RgnHandle)PORT_REGION_SAVE(thePort));
-                    if(PORT_PEN_VIS(thePort) >= 0)
+                               (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
+                               (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
+                    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) >= 0)
                     {
-                        r.top = CW(CW(rp->top) + CW(PORT_PEN_SIZE(thePort).v));
-                        r.left = CW(CW(rp->left) + CW(PORT_PEN_SIZE(thePort).h));
-                        r.bottom = CW(CW(rp->bottom) - CW(PORT_PEN_SIZE(thePort).v));
-                        r.right = CW(CW(rp->right) - CW(PORT_PEN_SIZE(thePort).h));
+                        r.top = CW(CW(rp->top) + CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).v));
+                        r.left = CW(CW(rp->left) + CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).h));
+                        r.bottom = CW(CW(rp->bottom) - CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).v));
+                        r.right = CW(CW(rp->right) - CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).h));
                         if(CW(r.top) < CW(r.bottom) && CW(r.left) < CW(r.right))
                         {
                             rh2 = ROMlib_circrgn(&r);

@@ -408,12 +408,12 @@ void Executor::dump_grafport_real(GrafPtr x)
 GrafPtr
 theport(void)
 {
-    return thePort;
+    return MR(qdGlobals().thePort);
 }
 
 void Executor::dump_theport(void)
 {
-    dump_grafport(thePort);
+    dump_grafport(MR(qdGlobals().thePort));
 }
 
 void Executor::dump_rgb_color(RGBColor *x)

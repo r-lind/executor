@@ -419,12 +419,12 @@ void Executor::ROMlib_bogo_stdbits(BitMap *src_bogo_map, BitMap *dst_bogo_map,
     canonicalize_bogo_map(src_bogo_map, &src, &cleanup_info[0]);
     canonicalize_bogo_map(dst_bogo_map, &dst, &cleanup_info[1]);
 
-    if(thePort->picSave)
+    if(MR(qdGlobals().thePort)->picSave)
     {
         write_copybits_picdata(src, dst, src_rect, dst_rect, mode, mask);
     }
 
-    if(PORT_PEN_VIS(thePort) < 0)
+    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
         return;
 
     ROMlib_real_copy_bits(src, dst, src_rect, dst_rect, mode, mask);
@@ -442,7 +442,7 @@ void Executor::StdBitsPicSaveFlag(const BitMap *src_bogo_map,
 
     /* we want the actual port bits, no fooling; so don't use the
      accessor macros */
-    BitMap *dst_bogo_map = &thePort->portBits;
+    BitMap *dst_bogo_map = &MR(qdGlobals().thePort)->portBits;
 
     PixMap dummy_space[2];
     PixMap *src = &dummy_space[0], *dst = &dummy_space[1];
@@ -472,13 +472,13 @@ void Executor::StdBitsPicSaveFlag(const BitMap *src_bogo_map,
 
     if(savepic)
     {
-        if(thePort->picSave)
+        if(MR(qdGlobals().thePort)->picSave)
         {
             write_copybits_picdata(src, dst, src_rect, dst_rect, mode, mask);
         }
     }
 
-    if(PORT_PEN_VIS(thePort) < 0)
+    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
         return;
 
     ROMlib_real_copy_bits(src, dst, src_rect, dst_rect, mode, mask);
@@ -529,7 +529,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 
     the_gd = MR(LM(TheGDevice));
     the_gd_pmap = GD_PMAP(the_gd);
-    current_port = thePort;
+    current_port = MR(qdGlobals().thePort);
 
 #if defined(SAVE_CURSOR)
     screen_src_p = active_screen_addr_p(src);
@@ -698,7 +698,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 
     /* compute the mask region before checking if the source and dest
      overlap becuase we only double buffer if dy is nonzero */
-    /* intersect the region mask with thePort bounds, thePort rect, the
+    /* intersect the region mask with MR(qdGlobals().thePort) bounds, MR(qdGlobals().thePort) rect, the
      destination rect, and the port {clip, vis} regions */
     mask_region = NewRgn();
 

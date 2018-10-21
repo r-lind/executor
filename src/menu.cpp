@@ -1108,12 +1108,12 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                         LM(TopMenuItem) = r2.top;
                         PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
                         PORT_TX_FONT_X(MR(wmgr_port)) = CWC(0);
-                        saveclip = PORT_CLIP_REGION_X(thePort);
-                        PORT_CLIP_REGION_X(thePort) = RM(NewRgn());
-                        RectRgn(PORT_CLIP_REGION(thePort), &r2);
+                        saveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort));
+                        PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(NewRgn());
+                        RectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), &r2);
                         MENUCALL(mDrawMsg, newmh, &r2, dummy_pt, nullptr);
-                        DisposeRgn(PORT_CLIP_REGION(thePort));
-                        PORT_CLIP_REGION_X(thePort) = saveclip;
+                        DisposeRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+                        PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclip;
                         nmenusdisplayed++;
                         MBDFCALL(mbSaveAlt, 0, tempi);
                         LM(TopMenuItem) = oldtopmenuitem;
@@ -1155,12 +1155,12 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                     LM(TopMenuItem) = LM(MBarHeight);
                     PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
                     PORT_TX_FONT_X(MR(wmgr_port)) = CWC(0);
-                    saveclip = PORT_CLIP_REGION_X(thePort); /* ick */
-                    PORT_CLIP_REGION_X(thePort) = RM(NewRgn());
-                    RectRgn(PORT_CLIP_REGION(thePort), &r);
+                    saveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort)); /* ick */
+                    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(NewRgn());
+                    RectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), &r);
                     MENUCALL(mDrawMsg, mh, &r, dummy_pt, nullptr);
-                    DisposeRgn(PORT_CLIP_REGION(thePort));
-                    PORT_CLIP_REGION_X(thePort) = saveclip;
+                    DisposeRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+                    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclip;
                     nmenusdisplayed++;
                     whichmenuhit = wheretowhich(where);
                 }

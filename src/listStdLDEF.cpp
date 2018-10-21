@@ -14,7 +14,7 @@ static void draw(BOOLEAN sel, Rect *rect, INTEGER doff, INTEGER dl,
 {
     GrafPtr savePort;
 
-    savePort = thePort;
+    savePort = MR(qdGlobals().thePort);
     SetPort(HxP(list, port));
     EraseRect(rect);
     MoveTo(CW(rect->left) + Hx(list, indent.h), CW(rect->top) + Hx(list, indent.v));
@@ -35,7 +35,7 @@ void Executor::C_ldef0(INTEGER msg, BOOLEAN sel, Rect *rect, Cell cell,
     switch(msg)
     {
         case lInitMsg:
-            savePort = thePort;
+            savePort = MR(qdGlobals().thePort);
             SetPort(HxP(list, port));
             GetFontInfo(&fi);
             HxX(list, indent.h) = CWC(5);
@@ -46,7 +46,7 @@ void Executor::C_ldef0(INTEGER msg, BOOLEAN sel, Rect *rect, Cell cell,
             draw(sel, rect, doff, dl, list);
             break;
         case lHiliteMsg:
-            savePort = thePort;
+            savePort = MR(qdGlobals().thePort);
             SetPort(HxP(list, port));
             InvertRect(rect);
             SetPort(savePort);
