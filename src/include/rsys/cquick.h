@@ -9,10 +9,10 @@
 namespace Executor
 {
 #define SET_HILITE_BIT() \
-    (BitSet((Ptr)&LM(HiliteMode), pHiliteBit))
+    (LM(HiliteMode) |= 1 << hiliteBit)
 
 #define CLEAR_HILITE_BIT() \
-    (BitClr((Ptr)&LM(HiliteMode), pHiliteBit))
+    (LM(HiliteMode) &= ~(1 << hiliteBit))
 
 typedef struct GrafVars
 {
@@ -697,6 +697,7 @@ extern void gd_set_main_device_bpp(void);
 extern void gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p,
                        int bpp);
 extern void ROMlib_InitGWorlds(void);
+extern void ROMlib_InitGDevices();
 
 extern void pixmap_set_pixel_fields(PixMap *pixmap, int bpp);
 extern const rgb_spec_t *pixmap_rgb_spec(const PixMap *pixmap);

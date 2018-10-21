@@ -254,6 +254,7 @@ typedef enum { blend = 32,
 enum
 {
     pHiliteBit = 0,
+    hiliteBit = 7
 };
 
 enum

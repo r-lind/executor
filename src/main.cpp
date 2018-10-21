@@ -559,18 +559,6 @@ setup_trap_vectors(void)
         }
 }
 
-static void illegal_mode(void) __attribute__((noreturn));
-
-static void
-illegal_mode(void)
-{
-    vdriver->shutdown(); /* Just to be safe. */
-
-    fprintf(stderr, "Invalid graphics mode.\n");
-
-    /* Don't call ExitToShell here; ROMlib isn't set up enough yet to do that. */
-    exit(-1);
-}
 
 
 /* This is to tell people about the switch from "-applzone 4096" to
@@ -649,8 +637,6 @@ int main(int argc, char **argv)
             execv(argv[0], argv);
     }
 #endif
-
-    int grayscale_p = false;
 
     ROMlib_command_line = construct_command_line_string(argc, argv);
 
@@ -851,7 +837,7 @@ int main(int argc, char **argv)
     opt_int_val(common_db, "refresh", &ROMlib_refresh, &bad_arg_p);
     check_arg("refresh", &ROMlib_refresh, 0, 60);
 
-    opt_int_val(common_db, "grayscale", &grayscale_p, &bad_arg_p);
+    opt_bool_val(common_db, "grayscale", &flag_grayscale, &bad_arg_p);
 
 #if defined(LINUX)
     opt_bool_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
@@ -992,21 +978,6 @@ int main(int argc, char **argv)
     LM(SoundActive) = soundactiveoff;
     LM(PortBUse) = 2; /* configured for Serial driver */
     memset(LM(KeyMap), 0, sizeof_KeyMap);
-    if(vdriver->isGrayscale() || grayscale_p)
-    {
-        /* Choose a nice light gray hilite color. */
-        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).blue = CWC((unsigned short)0xAAAA);
-    }
-    else
-    {
-        /* how about a nice yellow hilite color? no, it's ugly. */
-        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).blue = CWC((unsigned short)0xFFFF);
-    }
-
     {
         static GUEST<uint16_t> ret = CWC((unsigned short)0x4E75);
 
@@ -1102,40 +1073,9 @@ int main(int argc, char **argv)
     LM(loadtrap) = 0;
 
     if(graphics_p)
-    {
-        if(!vdriver->init())
-        {
-            fprintf(stderr, "Unable to initialize video driver.\n");
-            exit(-12);
-        }
-
-        /* Set up the current graphics mode appropriately. */
-        if(!vdriver->setMode(flag_width, flag_height, flag_bpp, grayscale_p))
-            illegal_mode();
-
-#if SIZEOF_CHAR_P > 4
-        if(vdriver->framebuffer() == 0)
-            abort();
-        ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
-        ROMlib_offsets[1] -= (1UL << 30);
-        ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5; // ### //vdriver->rowBytes() * vdriver->height();
-#endif
-
-        /* initialize the mac rgb_spec's */
-        make_rgb_spec(&mac_16bpp_rgb_spec,
-                      16, true, 0,
-                      5, 10, 5, 5, 5, 0,
-                      CL_RAW(GetCTSeed()));
-
-        make_rgb_spec(&mac_32bpp_rgb_spec,
-                      32, true, 0,
-                      8, 16, 8, 8, 8, 0,
-                      CL_RAW(GetCTSeed()));
-
-        gd_allocate_main_device();
-    }
-
-    ROMlib_eventinit(graphics_p);
+        ROMlib_InitGDevices();
+    
+    ROMlib_eventinit();
     hle_init();
 
     ROMlib_fileinit();

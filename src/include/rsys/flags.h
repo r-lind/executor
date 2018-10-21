@@ -10,6 +10,8 @@ extern int flag_width, flag_height;
 /* 0 means "use default". */
 extern int flag_bpp;
 
+extern bool flag_grayscale;
+
 /* Approximate command line; argv[] elements separated by spaces. */
 extern const char *ROMlib_command_line;
 

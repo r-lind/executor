@@ -61,6 +61,9 @@ void Executor::gd_allocate_main_device(void)
     PixMapHandle gd_pixmap;
     Rect *gd_rect;
 
+    SET_HILITE_BIT();
+    LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = CLC_NULL;
+    
     graphics_device = NewGDevice(/* no driver */ 0,
                                  mode_from_bpp(vdriver->bpp()));
 
@@ -433,7 +436,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
         gui_fatal("vdriver not initialized, unable to change bpp");
 
 #if SIZEOF_CHAR_P > 4
-    // FIXME: code duplication with main.cpp
+    // code duplication with ROMlib_InitGDevices() below
     ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
     ROMlib_offsets[1] -= (1UL << 30);
     ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5;
@@ -506,4 +509,58 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
         redraw_screen();
 
     return noErr;
+}
+
+void Executor::ROMlib_InitGDevices()
+{
+    if(!vdriver->init())
+    {
+        fprintf(stderr, "Unable to initialize video driver.\n");
+        exit(-12);
+    }
+
+    /* Set up the current graphics mode appropriately. */
+    if(!vdriver->setMode(flag_width, flag_height, flag_bpp, flag_grayscale))
+    {
+        fprintf(stderr, "Could not set graphics mode.\n");
+        exit(-12);
+    }
+
+#if SIZEOF_CHAR_P > 4
+    if(vdriver->framebuffer() == 0)
+        abort();
+    ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
+    ROMlib_offsets[1] -= (1UL << 30);
+    ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5; // ### //vdriver->rowBytes() * vdriver->height();
+#endif
+
+    if(vdriver->isGrayscale())
+    {
+        /* Choose a nice light gray hilite color. */
+        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
+        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
+        LM(HiliteRGB).blue = CWC((unsigned short)0xAAAA);
+    }
+    else
+    {
+        /* how about a nice yellow hilite color? no, it's ugly. */
+        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
+        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
+        LM(HiliteRGB).blue = CWC((unsigned short)0xFFFF);
+    }
+
+
+
+    /* initialize the mac rgb_spec's */
+    make_rgb_spec(&mac_16bpp_rgb_spec,
+                    16, true, 0,
+                    5, 10, 5, 5, 5, 0,
+                    CL_RAW(GetCTSeed()));
+
+    make_rgb_spec(&mac_32bpp_rgb_spec,
+                    32, true, 0,
+                    8, 16, 8, 8, 8, 0,
+                    CL_RAW(GetCTSeed()));
+
+    gd_allocate_main_device();
 }

@@ -35,7 +35,7 @@ enum
 extern LONGINT ROMlib_xlate(INTEGER virt, INTEGER modifiers,
                             bool down_p);
 
-extern void ROMlib_eventinit(bool graphics_valid_p);
+extern void ROMlib_eventinit();
 
 extern void post_keytrans_key_events(INTEGER evcode, LONGINT keywhat,
                                      int32_t when, Point where,
