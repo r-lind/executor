@@ -85,6 +85,8 @@ INTEGER Executor::C_InitResources()
     Handle versh;
     int32_t versnum;
 
+    LM(TopMapHndl) = nullptr;
+
     ROMlib_setreserr(noErr);
     str255assign(LM(SysResName), SYSMACNAME);
     LM(SysMap) = CW(OpenRFPerm((StringPtr)SYSMACNAME, Cx(LM(BootDrive)),
