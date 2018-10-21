@@ -87,26 +87,29 @@ void Executor::executor_main(void)
     CountAppFiles(&mess, &count_s);
     count = CW(count_s);
     if(count > 0)
+    {
         GetAppFiles(1, &thefile);
+    
+        if(thefile.fType == CLC(FOURCC('A', 'P', 'P', 'L')))
+        {
+            ClrAppFiles(1);
+            Munger(MR(LM(AppParmHandle)), 2L * sizeof(INTEGER), (Ptr)0,
+                (LONGINT)sizeof(AppFile), (Ptr) "", 0L);
+
+            fName = thefile.fName;
+        }
+    }
     else
         thefile.fType = 0;
 
-    if(thefile.fType == CLC(FOURCC('A', 'P', 'P', 'L')))
-    {
-        ClrAppFiles(1);
-        Munger(MR(LM(AppParmHandle)), 2L * sizeof(INTEGER), (Ptr)0,
-               (LONGINT)sizeof(AppFile), (Ptr) "", 0L);
-    }
+    if(thefile.fType != CLC(FOURCC('A', 'P', 'P', 'L')))
+        ExitToShell();
+
     hpb.hFileInfo.ioNamePtr = RM(&thefile.fName[0]);
     hpb.hFileInfo.ioVRefNum = thefile.vRefNum;
     hpb.hFileInfo.ioFDirIndex = CWC(0);
     hpb.hFileInfo.ioDirID = CLC(0);
     PBGetCatInfo(&hpb, false);
-
-    if(thefile.fType == CLC(FOURCC('A', 'P', 'P', 'L')))
-        fName = thefile.fName;
-    else
-        ExitToShell();
 
     for(p = fName + fName[0] + 1;
         p > fName && *--p != ':';)

@@ -332,8 +332,9 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
     grayRegionPort.portBits.bounds = { CW(0), CW(0), CW(height()), CW(width()) };
     grayRegionPort.portRect = grayRegionPort.portBits.bounds;
 
+    memset(framebuffer() + rowBytes() * height(), 0, grayRegionRowBytes * height());
+
     C_SetPort(&grayRegionPort);
-    C_EraseRect(&grayRegionPort.portRect);
     C_PaintRgn(rgn);
 
     C_ClosePort(&grayRegionPort);

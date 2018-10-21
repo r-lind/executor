@@ -68,7 +68,10 @@ Executor::image_init(pixel_image_desc_t *image_desc)
             CTAB_SIZE_X(bits_ctab) = CW((1 << bpp) - 1);
             bits_ctab_table = CTAB_TABLE(bits_ctab);
             for(j = 0; j <= (1 << bpp) - 1; j++)
+            {
                 bits_ctab_table[j].value = CW(j);
+                bits_ctab_table[j].rgb = {};
+            }
             CTAB_FLAGS_X(bits_ctab) = CWC(0);
             CTAB_SEED_X(bits_ctab) = CL(GetCTSeed());
         }

@@ -24,7 +24,8 @@ PlainDataFork::PlainDataFork(fs::path path, create_t)
 
 PlainDataFork::~PlainDataFork()
 {
-    close(fd);
+    if(fd > 0)
+        close(fd);
     //std::cout << "CLOSING FILE: " << fd << std::endl;
 }
 
