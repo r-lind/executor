@@ -6,6 +6,31 @@
 
 using namespace Executor;
 
+QDGlobals qd;
+#include <rsys/cquick.h>
+#include <rsys/vdriver.h>
+#include <ResourceMgr.h>
+
+class MockVDriver : public VideoDriver
+{
+    virtual void setColors(int first_color, int num_colors,
+                               const struct ColorSpec *color_array) override
+    {
+
+    }
+
+    virtual bool setMode(int width, int height, int bpp,
+                                bool grayscale_p) override
+    {
+        width_ = 512;
+        height_ = 342;
+        rowBytes_ = 64;
+        framebuffer_ = new uint8_t[64*342];
+        bpp_ = 1;
+        return true;
+    }
+};
+
 class ExecutorTestEnvironment : public testing::Environment
 {
     char *thingOnStack;
@@ -33,6 +58,14 @@ public:
             PBOpenWD(&wdpb, false);
             SetVol(nullptr, wdpb.ioVRefNum);
         }
+
+        vdriver = new MockVDriver();
+        initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
+        InitResources();
+        ROMlib_InitGDevices();
+        LM(TheZone) = LM(ApplZone);
+
+        InitGraf((Ptr)&qd.thePort);
     }
 
     virtual void TearDown() override

@@ -1,4 +1,5 @@
 #include "gtest/gtest.h"
+#include <Quickdraw.h>
 
 extern "C"
 int mkdir(const char*, mode_t)
@@ -17,6 +18,8 @@ char *getcwd(char *buf, size_t size)
 int main(int argc, char **argv)
 {
     freopen("out", "w", stdout);
+    InitGraf(&qd.thePort);
+
     testing::InitGoogleTest(&argc, argv);
     int result = RUN_ALL_TESTS();
     //fgetc(stdin);

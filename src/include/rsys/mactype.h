@@ -20,6 +20,8 @@
 #error C++ required
 #endif
 
+//#define AUTOMATIC_CONVERSIONS
+
 namespace Executor
 {
 
@@ -357,9 +359,11 @@ public:
         this->raw(swap32(x));
     }
 
+#ifdef AUTOMATIC_CONVERSIONS
+    std::enable_if_t<!std::is_void_v<TT>, TT>& operator*() const { return *this->get(); }
+    TT* operator->() const { return this->get(); }
+#endif
 };
-
-//#define AUTOMATIC_CONVERSIONS
 
 template<typename TT>
 struct GuestWrapper : GuestWrapperBase<TT>
