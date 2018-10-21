@@ -10,11 +10,15 @@ using namespace Executor;
 extern QDGlobals qd;
 
 #define PTR(x) (&guestref(x))
+
+    // FIXME: Executor still defines Pattern as an array, rather than an array wrapped in a struct
+#define PATREF(pat) (pat)
 #else
 #include <Quickdraw.h>
 #include <QDOffscreen.h>
 
 #define PTR(x) (&x)
+#define PATREF(pat) (&(pat))
 #endif
 
 struct OffscreenPort
@@ -145,4 +149,92 @@ TEST(QuickDraw, GWorld32)
     
     EXPECT_EQ(0, world.data32(0,0));
     EXPECT_EQ(0x00FFFFFF, world.data32(0,1));
+}
+
+TEST(QuickDraw, BasicQDColorBW)
+{
+    OffscreenPort port;
+
+    FillRect(&port.r, PATREF(qd.gray));
+    EXPECT_EQ(0x80, port.data(0,0));
+    EXPECT_EQ(0x40, port.data(1,0));
+    
+    ForeColor(whiteColor);
+    BackColor(redColor);
+    FillRect(&port.r, PATREF(qd.gray));
+
+    EXPECT_EQ(0x40, port.data(0,0));
+    EXPECT_EQ(0x80, port.data(1,0));
+
+    EXPECT_EQ(whiteColor, port.port.fgColor);
+    EXPECT_EQ(redColor, port.port.bkColor);
+}
+
+TEST(QuickDraw, BasicQDColor32)
+{
+    OffscreenWorld world(32);
+
+
+    FillRect(&world.r, PATREF(qd.gray));
+    EXPECT_EQ(0x00000000, world.data32(0,0));
+    EXPECT_EQ(0x00FFFFFF, world.data32(0,1));
+    EXPECT_EQ(0x00FFFFFF, world.data32(1,0));
+    EXPECT_EQ(0x00000000, world.data32(1,1));
+    
+    ForeColor(whiteColor);
+    BackColor(redColor);
+
+    const uint32_t rgbRed = 0xDD0806;
+
+    EXPECT_EQ(0x00FFFFFF, world.world->fgColor);
+    EXPECT_EQ(rgbRed, world.world->bkColor);
+
+    FillRect(&world.r, PATREF(qd.gray));
+
+    EXPECT_EQ(0x00FFFFFF, world.data32(0,0));
+    EXPECT_EQ(rgbRed, world.data32(0,1));
+    EXPECT_EQ(rgbRed, world.data32(1,0));
+    EXPECT_EQ(0x00FFFFFF, world.data32(1,1));
+} 
+
+TEST(QuickDraw, GrayPattern32)
+{
+    OffscreenWorld world(32);
+
+    FillRect(&world.r, PATREF(qd.gray));
+    EXPECT_EQ(0x00000000, world.data32(0,0));
+    EXPECT_EQ(0x00FFFFFF, world.data32(0,1));
+    EXPECT_EQ(0x00FFFFFF, world.data32(1,0));
+    EXPECT_EQ(0x00000000, world.data32(1,1));
+}
+
+TEST(QuickDraw, GrayPattern8)
+{
+    OffscreenWorld world(8);
+
+    FillRect(&world.r, PATREF(qd.gray));
+    EXPECT_EQ(0xFF, world.data(0,0));
+    EXPECT_EQ(0x00, world.data(0,1));
+    EXPECT_EQ(0x00, world.data(1,0));
+    EXPECT_EQ(0xFF, world.data(1,1));
+}
+
+TEST(QuickDraw, GrayPattern1)
+{
+    OffscreenPort port;
+
+    FillRect(&port.r, PATREF(qd.gray));
+    EXPECT_EQ(0x80, port.data(0,0));
+    EXPECT_EQ(0x40, port.data(1,0));
+}
+
+TEST(QuickDraw, BlackPattern32)
+{
+    OffscreenWorld world(32);
+
+    FillRect(&world.r, PATREF(qd.black));
+    EXPECT_EQ(0x00000000, world.data32(0,0));
+    EXPECT_EQ(0x00000000, world.data32(0,1));
+    EXPECT_EQ(0x00000000, world.data32(1,0));
+    EXPECT_EQ(0x00000000, world.data32(1,1));
 }

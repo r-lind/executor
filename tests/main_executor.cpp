@@ -65,6 +65,8 @@ public:
         ROMlib_InitGDevices();
         LM(TheZone) = LM(ApplZone);
 
+        ROMlib_color_init();
+
         InitGraf((Ptr)&qd.thePort);
     }
 
