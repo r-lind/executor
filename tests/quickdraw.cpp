@@ -57,7 +57,7 @@ struct OffscreenPort
 
 struct OffscreenWorld
 {
-    GWorldPtr world;
+    GWorldPtr world = nullptr;
     Rect r;
     
     OffscreenWorld(int depth, int height = 2, int width = 2)

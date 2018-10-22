@@ -27,9 +27,6 @@
 #include "rsys/lowglobals.h"
 #endif
 
-
-#include "front-end-config.h"
-
 namespace Executor
 {
 
