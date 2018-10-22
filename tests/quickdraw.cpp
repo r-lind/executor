@@ -49,9 +49,10 @@ struct OffscreenPort
         SetPort(&port);
     }
 
-    uint8_t data(int row, int offset)
+    uint8_t& data(int row, int offset)
     {
-        return port.portBits.baseAddr[row * port.portBits.rowBytes + offset];
+        return reinterpret_cast<uint8_t&>(
+            port.portBits.baseAddr[row * port.portBits.rowBytes + offset]);
     }
 };
 
@@ -80,7 +81,7 @@ struct OffscreenWorld
         SetGWorld(world, nullptr);
     }
 
-    uint8_t data(int row, int offset)
+    uint8_t& data(int row, int offset)
     {
         Ptr baseAddr = (*world->portPixMap)->baseAddr;
         uint8_t *data = (uint8_t*)baseAddr;
@@ -237,4 +238,124 @@ TEST(QuickDraw, BlackPattern32)
     EXPECT_EQ(0x00000000, world.data32(0,1));
     EXPECT_EQ(0x00000000, world.data32(1,0));
     EXPECT_EQ(0x00000000, world.data32(1,1));
+}
+
+TEST(QuickDraw, CopyBit8)
+{
+    OffscreenWorld world1(8);
+
+    world1.data(0,0) = 1;
+    world1.data(0,1) = 2;
+    world1.data(1,0) = 3;
+    world1.data(1,1) = 4;
+    OffscreenWorld world2(8);
+    EraseRect(&world2.r);
+
+    RgnHandle rgn1 = NewRgn();
+    SetRectRgn(rgn1, 0,0,2,1);
+    RgnHandle rgn2 = NewRgn();
+    SetRectRgn(rgn2, 0,0,1,2);
+    UnionRgn(rgn1, rgn2, rgn1);
+    DisposeRgn(rgn2);
+
+    CopyBits(
+        &GrafPtr(world1.world)->portBits,
+        &GrafPtr(world2.world)->portBits,
+        &world1.r, &world2.r, srcCopy, rgn1);
+
+    DisposeRgn(rgn1);
+
+    EXPECT_EQ(1, world2.data(0,0));
+    EXPECT_EQ(2, world2.data(0,1));
+    EXPECT_EQ(3, world2.data(1,0));
+    EXPECT_EQ(0, world2.data(1,1));
+}
+
+TEST(QuickDraw, CopyBit32)
+{
+    OffscreenWorld world1(32);
+
+    world1.data(0,3) = 1;
+    world1.data(0,7) = 2;
+    world1.data(1,3) = 3;
+    world1.data(1,7) = 4;
+    OffscreenWorld world2(32);
+    EraseRect(&world2.r);
+
+    RgnHandle rgn1 = NewRgn();
+    SetRectRgn(rgn1, 0,0,2,1);
+    RgnHandle rgn2 = NewRgn();
+    SetRectRgn(rgn2, 0,0,1,2);
+    UnionRgn(rgn1, rgn2, rgn1);
+    DisposeRgn(rgn2);
+
+    CopyBits(
+        &GrafPtr(world1.world)->portBits,
+        &GrafPtr(world2.world)->portBits,
+        &world1.r, &world2.r, srcCopy, rgn1);
+
+    DisposeRgn(rgn1);
+
+    EXPECT_EQ(1, world2.data(0,3));
+    EXPECT_EQ(2, world2.data(0,7));
+    EXPECT_EQ(3, world2.data(1,3));
+    EXPECT_EQ(255, world2.data(1,7));
+}
+
+TEST(QuickDraw, CopyMask8)
+{
+    OffscreenPort mask;
+
+    mask.data(0,0) = 0xC0;
+    mask.data(1,0) = 0x80;
+    
+    OffscreenWorld world1(8);
+
+    world1.data(0,0) = 1;
+    world1.data(0,1) = 2;
+    world1.data(1,0) = 3;
+    world1.data(1,1) = 4;
+    OffscreenWorld world2(8);
+    EraseRect(&world2.r);
+
+    CopyMask(
+        &GrafPtr(world1.world)->portBits,
+        &mask.port.portBits,
+        &GrafPtr(world2.world)->portBits,
+        &world1.r, &mask.r, &world2.r);
+
+
+    EXPECT_EQ(1, world2.data(0,0));
+    EXPECT_EQ(2, world2.data(0,1));
+    EXPECT_EQ(3, world2.data(1,0));
+    EXPECT_EQ(0, world2.data(1,1));
+}
+
+TEST(QuickDraw, CopyMask32)
+{
+    OffscreenPort mask;
+
+    mask.data(0,0) = 0xC0;
+    mask.data(1,0) = 0x80;
+    
+    OffscreenWorld world1(32);
+
+    world1.data(0,3) = 1;
+    world1.data(0,7) = 2;
+    world1.data(1,3) = 3;
+    world1.data(1,7) = 4;
+    OffscreenWorld world2(32);
+    EraseRect(&world2.r);
+
+    CopyMask(
+        &GrafPtr(world1.world)->portBits,
+        &mask.port.portBits,
+        &GrafPtr(world2.world)->portBits,
+        &world1.r, &mask.r, &world2.r);
+
+
+    EXPECT_EQ(1, world2.data(0,3));
+    EXPECT_EQ(2, world2.data(0,7));
+    EXPECT_EQ(3, world2.data(1,3));
+    EXPECT_EQ(255, world2.data(1,7));
 }
