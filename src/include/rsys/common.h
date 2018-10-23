@@ -8,24 +8,16 @@
 #include "host-os-config.h"
 #include "host-arch-config.h"
 
-#if !defined(CYGWIN32) && !defined(WIN32) && defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
-#undef USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
-#endif
-
 #include "rsys/macros.h"
 #include "rsys/functions.h"
 #include "rsys/traps.h"
 #include "rsys/mactype.h"
 #include "rsys/byteswap.h"
 
-#include <syn68k_public.h>
-
 #include "ExMacTypes.h"
 #include "rsys/slash.h"
 #include "rsys/error.h"
-#if !defined USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 #include "rsys/lowglobals.h"
-#endif
 
 namespace Executor
 {

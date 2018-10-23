@@ -3,10 +3,6 @@
 
 #include <string>
 
-#if !defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
-
-/* #warning ioCompletion code isn't being called */
-
 /*
  * Copyright 1986 - 1998 by Abacus Research and Development, Inc.
  * All rights reserved.
@@ -339,9 +335,6 @@ extern OSErr FSReadAll(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
 extern OSErr FSWriteAll(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp);
 
 extern LONGINT ROMlib_magic_offset;
-
-
-#endif
 
 #if !defined(ST_INO)
 #define ST_INO(buf) ((uint32_t)((buf).st_ino))

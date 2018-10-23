@@ -306,14 +306,11 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
 
                 if(p)
                 {
-                    long to_backup;
+                    int32_t to_backup;
 
                     retval = noErr; /* we couldn't have gotten EOF yet */
                     to_backup = act_count - (p + 1 - buf);
-                    SWAPPED_OPL(pb->ioParam.ioActCount, -, to_backup);
-#if 0
-		SWAPPED_OPL (pb->ioParam.ioPosOffset, -, to_backup);
-#else
+                    pb->ioParam.ioActCount = RM( MR(pb->ioParam.ioActCount) - to_backup );
                     {
                         ParamBlockRec newpb;
                         OSErr newerr;
@@ -325,7 +322,7 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
                         if(newerr != noErr)
                             warning_unexpected("err = %d", newerr);
                     }
-#endif
+
                     if(ROMlib_newlinetocr && to_find == '\r')
                         *p = '\r';
                 }

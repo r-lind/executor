@@ -12,6 +12,7 @@ namespace Executor
 
 namespace traps
 {
+#define TOOLBIT (0x0800)
 
 namespace selectors
 {

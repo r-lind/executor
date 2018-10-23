@@ -22,18 +22,18 @@ void Executor::C_SetRect(Rect *r, INTEGER left, INTEGER top, INTEGER right,
 
 void Executor::C_OffsetRect(Rect *r, INTEGER dh, INTEGER dv)
 {
-    SWAPPED_OPW(r->top, +, dv);
-    SWAPPED_OPW(r->bottom, +, dv);
-    SWAPPED_OPW(r->left, +, dh);
-    SWAPPED_OPW(r->right, +, dh);
+    r->top    = CW( CW(r->top)    + dv );
+    r->bottom = CW( CW(r->bottom) + dv );
+    r->left   = CW( CW(r->left)   + dh );
+    r->right  = CW( CW(r->right)  + dh );
 }
 
 void Executor::C_InsetRect(Rect *r, INTEGER dh, INTEGER dv)
 {
-    SWAPPED_OPW(r->top, +, dv);
-    SWAPPED_OPW(r->bottom, -, dv);
-    SWAPPED_OPW(r->left, +, dh);
-    SWAPPED_OPW(r->right, -, dh);
+    r->top    = CW( CW(r->top)    + dv );
+    r->bottom = CW( CW(r->bottom) - dv );
+    r->left   = CW( CW(r->left)   + dh );
+    r->right  = CW( CW(r->right)  - dh );
 
 #if defined(INCOMPATIBLEBUTSANE)
     if(CW(r->top) >= CW(r->bottom) || CW(r->left) >= CW(r->right))

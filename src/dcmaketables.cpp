@@ -184,7 +184,7 @@ DEPTH_INCREASING_BY_FACTOR_OF_2(8, 16)
                 new1 |= (v & (0xFFFFFFFFUL >> (32 - bpp2))) << l;               \
                 if(l == 0)                                                      \
                 {                                                               \
-                    *dst++ = Cx_RAW(new1);                                      \
+                    *dst++ = SwapTyped(new1);                                   \
                     l = (8 * sizeof new1) - bpp2;                               \
                     new1 = 0;                                                   \
                 }                                                               \

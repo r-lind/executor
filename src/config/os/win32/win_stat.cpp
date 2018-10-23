@@ -6,8 +6,6 @@
    avoid collisions.  Unfortunately, it didn't have the property that
    the same directory would have the same name between runs of Executor */
 
-#define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
-
 #include "rsys/common.h"
 
 #include <windows.h>

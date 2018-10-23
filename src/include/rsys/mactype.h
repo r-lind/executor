@@ -28,10 +28,7 @@ namespace Executor
 typedef int16_t INTEGER;
 typedef int32_t LONGINT;
 typedef uint32_t ULONGINT;
-
-#if !defined(WIN32) || !defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
 typedef int8_t BOOLEAN;
-#endif
 
 typedef int16_t CharParameter; /* very important not to use this as char */
 
@@ -75,10 +72,7 @@ T SwapTyped(T x) { return x; }
 inline Point SwapPoint(Point x) { return x; }
 
 #else
-inline unsigned char SwapTyped(unsigned char x)
-{
-    return x;
-}
+inline unsigned char SwapTyped(unsigned char x) { return x; }
 inline signed char SwapTyped(signed char x) { return x; }
 inline char SwapTyped(char x) { return x; }
 
@@ -496,8 +490,8 @@ template<>
 struct GuestWrapper<Point>
 {
     GUEST_STRUCT;
-    GuestWrapper<INTEGER> v;
-    GuestWrapper<INTEGER> h;
+    GuestWrapper<int16_t> v;
+    GuestWrapper<int16_t> h;
 
     using WrappedType = Point;
     using RawType = Point;
@@ -530,7 +524,6 @@ struct GuestWrapper<Point>
         w.set(x);
         return w;
     }
-
 };
 
 template<typename TT, typename SFINAE = void>
@@ -539,34 +532,12 @@ struct GuestType
     using type = GuestWrapper<TT>;
 };
 
-namespace internal
-{
-    // equivalent to C++17 void_t
-    template<typename... Ts>
-    struct make_void
-    {
-        typedef void type;
-    };
-    template<typename... Ts>
-    using void_t = typename make_void<Ts...>::type;
-}
 
 template<typename TT>
-struct GuestType<TT, internal::void_t<typename TT::is_guest_struct>>
+struct GuestType<TT, std::void_t<typename TT::is_guest_struct>>
 {
     using type = TT;
 };
-
-// forward declare.
-// uses template specialization to bypass the above,
-// so a GUEST_STRUCT on the actual declaration is redundant (but still fine)
-#define FORWARD_GUEST_STRUCT(CLS) \
-    struct CLS;                   \
-    template<>                    \
-    struct GuestType<CLS>         \
-    {                             \
-        using type = CLS;         \
-    }
 
 template<typename TT>
 using GUEST = typename GuestType<TT>::type;
@@ -588,21 +559,6 @@ struct GuestType<unsigned char>
 {
     using type = unsigned char;
 };
-
-/*
-template<typename TT>
-struct GuestType<TT*>
-{
-    using type = GuestPointerWrapper<GUEST<TT>>;
-};
-
-
-template<typename RT, typename... Args>
-struct GuestType<RT (*)(Args...)>
-{
-    using type = GuestPointerWrapper<void>;
-};
-*/
 
 template<typename TT, int n>
 struct GuestType<TT[n]>
@@ -637,12 +593,6 @@ inline unsigned char MR(unsigned char c) { return c; }
 inline signed char MR(signed char c) { return c; }
 
 
-/*
-template<typename TO, typename FROM>
-GUEST<TO*> guest_ptr_cast(GUEST<FROM*> p)
-{
-    return GUEST<TO*>((FROM*)p);
-}*/
 template<typename TO, typename FROM, typename = std::enable_if<sizeof(GUEST<TO>) == sizeof(GUEST<FROM>)>>
 GUEST<TO> guest_cast(GuestWrapper<FROM> p)
 {
@@ -695,17 +645,6 @@ public:
     Ret operator()(Args... args); // definition in rsys/functions.impl.h to reduce dependencies
 };
 
-template<typename TT, typename CallConv>
-GUEST<UPP<TT,CallConv>> RM(UPP<TT,CallConv> p)
-{
-    return GUEST<UPP<TT,CallConv>>::fromHost(p);
-}
-
-template<typename TT, typename CallConv>
-UPP<TT,CallConv> MR(GuestWrapper<UPP<TT, CallConv>> p)
-{
-    return p.get();
-}
 
 }
 

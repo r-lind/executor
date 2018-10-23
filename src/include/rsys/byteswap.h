@@ -71,19 +71,6 @@ TT Cx(GuestWrapper<TT> x) { return x.get(); }
 template<class TT>
 TT Cx(TT x); // no definition. Make sure we get a linker error if an unexpected version of Cx is used.
 
-inline unsigned char Cx_RAW(unsigned char x) { return x; }
-inline signed char Cx_RAW(signed char x) { return x; }
-inline char Cx_RAW(char x) { return x; }
-
-inline uint16_t Cx_RAW(uint16_t x) { return CW_RAW(x); }
-inline int16_t Cx_RAW(int16_t x) { return CW_RAW(x); }
-
-inline uint32_t Cx_RAW(uint32_t x) { return CL_RAW(x); }
-inline int32_t Cx_RAW(int32_t x) { return CL_RAW(x); }
-
-template<class TT>
-TT Cx_RAW(TT x); // no definition. Make sure we get a linker error if an unexpected version of Cx is used.
-
 
 inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
 
@@ -100,48 +87,21 @@ inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
 
 #define CWC(rhs) CW(rhs)
 #define CLC(rhs) CL(rhs)
-#define CWV(rhs) CW(rhs)
-#define CLV(rhs) CL(rhs)
 
 #else /* !defined (BIGENDIAN) */
 
-namespace internal
-{
-    template<typename T0, typename TT, typename T2 = typename std::conditional<std::is_signed<T0>::value, int16_t, uint16_t>::type>
-    inline GUEST<T2>
-    wordFromRaw(TT x) { return GUEST<T2>::fromRaw(x); }
-    template<typename T0, typename TT, typename T2 = typename std::conditional<std::is_signed<T0>::value, int32_t, uint32_t>::type>
-    inline GUEST<T2>
-    longwordFromRaw(TT x) { return GUEST<T2>::fromRaw(x); }
-}
-
-#define CWC(n) (internal::wordFromRaw<decltype(n)>(      \
-    (signed short)(((((unsigned short)n) << 8) & 0xFF00) \
+#define CWC_RAW(n) ((std::conditional_t<std::is_signed_v<decltype(n)>, int16_t, uint16_t>)(                       \
+    (((((unsigned short)n) << 8) & 0xFF00) \
                    | ((((unsigned short)n) >> 8) & 0x00FF))))
-#define CLC(n) (internal::longwordFromRaw<decltype(n)>(  \
-    (int)((((unsigned int)((n) | 0) & 0x000000FF) << 24) \
+#define CLC_RAW(n) ((std::conditional_t<std::is_signed_v<decltype(n)>, int32_t, uint32_t>)(                       \
+    ((((unsigned int)((n) | 0) & 0x000000FF) << 24) \
           | (((unsigned int)(n)&0x0000FF00) << 8)        \
           | (((unsigned int)(n)&0x00FF0000) >> 8)        \
           | (((unsigned int)(n)&0xFF000000)              \
              >> 24))))
 
-#define CWC_RAW(n) ((decltype(n))(                       \
-    (signed short)(((((unsigned short)n) << 8) & 0xFF00) \
-                   | ((((unsigned short)n) >> 8) & 0x00FF))))
-#define CLC_RAW(n) ((decltype(n))(                       \
-    (int)((((unsigned int)((n) | 0) & 0x000000FF) << 24) \
-          | (((unsigned int)(n)&0x0000FF00) << 8)        \
-          | (((unsigned int)(n)&0x00FF0000) >> 8)        \
-          | (((unsigned int)(n)&0xFF000000)              \
-             >> 24))))
-
-/* These are better versions of CW and CL, but should not be nested
- * because of exponential growth in the preprocessed code size.
- */
-#define CWV(n) \
-    ((__builtin_constant_p((n)) ? (decltype(CW(n)))CWC(n) : CW(n)))
-#define CLV(n) \
-    ((__builtin_constant_p((n)) ? (decltype(CL(n)))CLC(n) : CL(n)))
+#define CWC(n) (GUEST<decltype(CWC_RAW(n))>::fromRaw(CWC_RAW(n)))
+#define CLC(n) (GUEST<decltype(CLC_RAW(n))>::fromRaw(CLC_RAW(n)))
 
 #endif /* !defined (BIGENDIAN) */
 
@@ -149,20 +109,18 @@ namespace internal
 
 #define CB(rhs) (rhs)
 #define CBC(rhs) (rhs)
-#define CBV(rhs) (rhs)
 
 #define STARH(h) MR(*h)
-#define HxP(handle, field) MR(STARH(handle)->field)
-#define HxX(handle, field) (STARH(handle)->field)
-#define HxZ(handle, field) HxX(handle, field)
+
 // HxZ is a handle dereference where the member selected is itself some form
 // of packed pointer, but we're only checking to see if it's zero or non-zero
 // (e.g. if (HxZ(hand)) )
 
-#define Hx(handle, field) Cx(STARH(handle)->field)
+#define Hx(handle, field) MR(STARH(handle)->field)
+#define HxX(handle, field) (STARH(handle)->field)
 
-#define SWAPPED_OPW(bevalue, op, v) (bevalue).set((bevalue).get() op(v))
-#define SWAPPED_OPL(bevalue, op, v) (bevalue).set((bevalue).get() op(v))
+#define HxP(handle, field) Hx(handle, field)
+#define HxZ(handle, field) HxX(handle, field)
 
 template<typename TT>
 TT ptr_from_longint(int32_t l)

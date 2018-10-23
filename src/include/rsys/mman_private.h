@@ -61,7 +61,7 @@ typedef struct block_header
 
 #define SETUSE(block, use) ((block)->flags = (((block)->flags & 0x3F) \
                                               | (use) << 6))
-#define SETPSIZE(block, _size) ((block)->size = CLV(_size))
+#define SETPSIZE(block, _size) ((block)->size = CL(_size))
 #define SETSIZEC(block, sizec) ((block)->size_correction = (sizec))
 
 /* ### fixme; we also need to set the other reserved bits (in the

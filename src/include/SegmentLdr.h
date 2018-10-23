@@ -20,8 +20,6 @@ namespace Executor
 extern void C_ExitToShell(void);
 PASCAL_TRAP(ExitToShell, 0xA9F4);
 
-#if !defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
-
 enum
 {
     appOpen = 0,
@@ -77,6 +75,5 @@ PASCAL_TRAP(UnloadSeg, 0xA9F1);
 
 extern void C_LoadSeg(INTEGER volatile segno);
 
-#endif
 }
 #endif /* __SEGMENT__ */

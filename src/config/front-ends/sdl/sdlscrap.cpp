@@ -14,8 +14,6 @@
 #include "syswm_vars.h"
 #include "sdl_mem.h"
 
-#define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
-
 #include "rsys/common.h"
 
 #include "rsys/error.h"

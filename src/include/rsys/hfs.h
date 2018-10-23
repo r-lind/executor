@@ -13,7 +13,6 @@
 #define ASPIFDBIT 0x20000000 /* or this into a fd to show that we \
                 need to use ctm's ASPI routines */
 
-#if !defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
 
 #include <OSUtil.h>
 #include <FileMgr.h>
@@ -582,6 +581,5 @@ extern void ROMlib_OurClose(void);
 extern long ROMlib_priv_open(const char *filename, long mode);
 extern void vcbsync(HVCB *vcbp);
 
-#endif
 }
 #endif /* !defined(__RSYS_HFS__) */

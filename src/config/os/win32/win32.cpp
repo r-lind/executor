@@ -1,4 +1,3 @@
-#define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 #include <windows.h>
 #include <rsys/common.h>
 #include "rsys/lockunlock.h"

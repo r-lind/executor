@@ -52,7 +52,7 @@ uintptr_t ROMlib_memtop;
     do                     \
     {                      \
         GEN_MEM_ERR(err);  \
-        LM(MemErr) = CWV(err); \
+        LM(MemErr) = CW(err); \
     } while(false)
 
 SignedByte

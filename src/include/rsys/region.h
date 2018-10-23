@@ -14,7 +14,7 @@
     (RGNP_SIZE_X(rgnp) == RGN_SMALL_SIZE_X)
 
 #define RGNP_SET_SIZE_AND_SPECIAL(rgnp, size, special_p)     \
-    ((void)((rgnp)->rgnSize = ((CWV(size) & RGN_SIZE_MASK_X) \
+    ((void)((rgnp)->rgnSize = ((CW(size) & RGN_SIZE_MASK_X) \
                                | ((special_p)                \
                                       ? RGN_SPECIAL_FLAG_X   \
                                       : CWC(0)))))
@@ -29,7 +29,7 @@
                                                                 \
         __orig_size_x = __rgnp->rgnSize;                        \
         __rngp->rgnSize = ((__orig_size_x & RGN_SPECIAL_FLAG_X) \
-                           | (CWV(size) & RGN_SIZE_MASK_X));    \
+                           | (CW(size) & RGN_SIZE_MASK_X));    \
     } while(false)
 #define RGNP_SET_SPECIAL(rgnp, special_p)                 \
     do {                                                 \
