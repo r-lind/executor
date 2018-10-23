@@ -142,6 +142,7 @@ void Executor::image_validate_x_bits(pixel_image_t *image, int color_p /* visual
     {
         PIXMAP_CMP_SIZE_X(x_bits) = PIXMAP_PIXEL_SIZE_X(x_bits)
             = gd_bpp_x;
+        STARH(x_bits)->pixelType = STARH(gd_pixmap)->pixelType;
         ROMlib_copy_ctab(gd_pixmap_ctab, PIXMAP_TABLE(x_bits));
 
         HLockGuard guard1(bits), guard2(x_bits);
