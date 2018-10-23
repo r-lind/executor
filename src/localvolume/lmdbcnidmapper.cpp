@@ -89,7 +89,7 @@ auto growMapIfNecessary(lmdb::env& env, const F& f) -> decltype(f())
     {
         return f();
     }
-    catch(lmdb::map_full_error&)
+    catch(const lmdb::map_full_error&)
     {
         MDB_envinfo stat;
         lmdb::env_info(env, &stat);
@@ -325,7 +325,7 @@ std::optional<CNIDMapper::Mapping> LMDBCNIDMapper::lookupCNID(CNID cnid)
                         mapping->macname
                     };
                 }
-                catch(fs::filesystem_error)
+                catch(const fs::filesystem_error&)
                 {
                     // file no longer exists,
                     // pass through

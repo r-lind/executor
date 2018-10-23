@@ -154,7 +154,7 @@ OSErr handleExceptions(Volume& v, void (Volume::*member)(PB*), PB* pb)
         (v.*member)(pb);
         return noErr;
     }
-    catch(OSErrorException& e)
+    catch(const OSErrorException& e)
     {
         return e.code;
     }

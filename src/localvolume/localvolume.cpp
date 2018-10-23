@@ -298,7 +298,7 @@ FileItemPtr LocalVolume::upgradeItem(FileItemPtr item, ItemFactory *betterFactor
         copydata(item->open(), newItem->open());
         copydata(item->openRF(), newItem->openRF());
     }
-    catch(std::exception e)
+    catch(const std::exception& e)
     {
         std::cout << e.what() << std::endl;
     }
@@ -485,7 +485,7 @@ void LocalVolume::setInfoCommon(const ItemPtr& item, CInfoPBPtr pb, InfoKind inf
         {
             fitem->setInfo(info);
         }
-        catch(UpgradeRequiredException)
+        catch(const UpgradeRequiredException&)
         {
             fitem = upgradeItem(fitem, upgradedItemFactory);
             fitem->setInfo(info);
@@ -649,7 +649,7 @@ void LocalVolume::PBWrite(ParmBlkPtr pb)
     {
         n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
     }
-    catch(UpgradeRequiredException)
+    catch(const UpgradeRequiredException&)
     {
         upgradeItem(fcbx.file, upgradedItemFactory);
         n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
@@ -739,7 +739,7 @@ void LocalVolume::PBSetEOF(ParmBlkPtr pb)
     {
         fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
     }
-    catch(UpgradeRequiredException)
+    catch(const UpgradeRequiredException&)
     {
         upgradeItem(fcbx.file, upgradedItemFactory);
         fcbx.access->setEOF(CL(pb->ioParam.ioMisc));

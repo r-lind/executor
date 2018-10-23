@@ -106,7 +106,7 @@ std::optional<CNIDMapper::Mapping> SimpleCNIDMapper::lookupCNID(CNID cnid)
                 it->second.macname
             };
         }
-        catch(fs::filesystem_error)
+        catch(const fs::filesystem_error&)
         {
             // file no longer exists,
             // pass through
