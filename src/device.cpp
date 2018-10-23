@@ -142,10 +142,10 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             else
                 retval = fsDSIntErr;
             if(routine == Open)
-                HxX(h, dCtlFlags).raw_or(CWC(DRIVEROPENBIT));
+                HxX(h, dCtlFlags) |= CWC(DRIVEROPENBIT);
             else if(routine == Close)
             {
-                HxX(h, dCtlFlags).raw_and(~CWC(DRIVEROPENBIT));
+                HxX(h, dCtlFlags) &= ~CWC(DRIVEROPENBIT);
                 HUnlock((Handle)h);
                 HUnlock((Handle)ramdh);
                 LM(MBarEnable) = 0;

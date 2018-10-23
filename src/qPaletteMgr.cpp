@@ -47,9 +47,9 @@ using namespace Executor;
 #define PALETTE_MODIFIED_P(palette) \
     (HxX(palette, pmPrivate) & PALETTE_MODIFIED_BIT_X)
 #define PALETTE_SET_MODIFIED(palette) \
-    (HxX(palette, pmPrivate).raw_or(PALETTE_MODIFIED_BIT_X))
+    (HxX(palette, pmPrivate) |= PALETTE_MODIFIED_BIT_X)
 #define PALETTE_CLEAR_MODIFIED(palette) \
-    (HxX(palette, pmPrivate).raw_and(~PALETTE_MODIFIED_BIT_X))
+    (HxX(palette, pmPrivate) &= ~PALETTE_MODIFIED_BIT_X)
 
 #define PALETTE_SEED_X(palette) \
     (*(GUEST<LONGINT> *)STARH(HxP(palette, pmSeeds)))
@@ -1142,8 +1142,8 @@ void Executor::C_NSetPalette(WindowPtr dst_window, PaletteHandle src_palette,
 
 void Executor::C_SetPaletteUpdates(PaletteHandle palette, INTEGER update)
 {
-    PALETTE_PRIVATE_X(palette).raw_and(~PALETTE_UPDATE_FLAG_BITS_X);
-    PALETTE_PRIVATE_X(palette).raw_or(CW(update));
+    PALETTE_PRIVATE_X(palette) &= ~PALETTE_UPDATE_FLAG_BITS_X;
+    PALETTE_PRIVATE_X(palette) |= CW(update);
 }
 
 INTEGER Executor::C_GetPaletteUpdates(PaletteHandle palette)

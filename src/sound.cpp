@@ -363,7 +363,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
                 if(cmd.cmd & CWC(0x8000))
                 {
                     cmd.param2 = guest_cast<LONGINT>(RM((resp + CL(cmd.param2))));
-                    cmd.cmd.raw_and(CWC(~0x8000));
+                    cmd.cmd &= CWC(~0x8000);
                 }
 
                 /* Need to figure this out properly; FIXME */
@@ -567,7 +567,7 @@ snd_duration(SoundHeaderPtr hp)
     return CL(hp->length);
 }
 
-#define CMD_DONE(c) (SND_CHAN_FLAGS_X(c).raw_and(CWC(~CHAN_CMDINPROG_FLAG)))
+#define CMD_DONE(c) (SND_CHAN_FLAGS_X(c) &= CWC(~CHAN_CMDINPROG_FLAG))
 
 static void
 do_current_command(SndChannelPtr chanp, struct hunger_info info)
@@ -635,7 +635,7 @@ do_current_command(SndChannelPtr chanp, struct hunger_info info)
     }
 }
 
-#define SND_DB_DONE(c) (SND_CHAN_FLAGS_X(c).raw_and(CWC(~CHAN_DBINPROG_FLAG)))
+#define SND_DB_DONE(c) (SND_CHAN_FLAGS_X(c) &= CWC(~CHAN_DBINPROG_FLAG))
 
 static void
 do_current_db(SndChannelPtr chanp, struct hunger_info info)
@@ -750,7 +750,7 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
             else if(!qempty_p(chanp))
             {
                 chanp->cmdInProg = deq(chanp);
-                SND_CHAN_FLAGS_X(chanp).raw_or(CWC(CHAN_CMDINPROG_FLAG));
+                SND_CHAN_FLAGS_X(chanp) |= CWC(CHAN_CMDINPROG_FLAG);
                 did_something = 1;
             }
             else
@@ -835,7 +835,7 @@ OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
             if(retval == noErr)
             {
                 enq(chanp, *cmdp);
-                chanp->flags.raw_or(CWC(CHAN_BUSY_FLAG));
+                chanp->flags |= CWC(CHAN_BUSY_FLAG);
             }
             break;
     }
@@ -891,7 +891,7 @@ OSErr Executor::C_SndDoImmediate(SndChannelPtr chanp, SndCommand *cmdp)
                     case bufferCmd:
                         warning_sound_log("bufferCmd");
                         chanp->cmdInProg = cmd;
-                        SND_CHAN_FLAGS_X(chanp).raw_or(CWC(CHAN_CMDINPROG_FLAG));
+                        SND_CHAN_FLAGS_X(chanp) |= CWC(CHAN_CMDINPROG_FLAG);
                         SND_CHAN_CURRENT_START(chanp) = SND_PROMOTE(SND_CHAN_TIME(chanp));
                         retval = noErr;
                         break;

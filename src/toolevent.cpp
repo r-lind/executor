@@ -312,7 +312,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
             TRACE(15);
             evt->what = CW(activateEvt);
             evt->message = guest_cast<LONGINT>(LM(CurActivate));
-            evt->modifiers.raw_or(CW(activeFlag));
+            evt->modifiers |= CW(activeFlag);
             if(remflag)
                 LM(CurActivate) = nullptr;
             retval = true;

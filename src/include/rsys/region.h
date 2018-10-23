@@ -32,13 +32,13 @@
                            | (CW(size) & RGN_SIZE_MASK_X));    \
     } while(false)
 #define RGNP_SET_SPECIAL(rgnp, special_p)                 \
-    do {                                                 \
+    do {                                                  \
         RgnPtr __rgnp = (rgnp);                           \
                                                           \
         if(special_p)                                     \
-            __rgnp->rgnSize.raw_or(RGN_SPECIAL_FLAG_X);   \
+            __rgnp->rgnSize |= RGN_SPECIAL_FLAG_X;        \
         else                                              \
-            __rgnp->rgnSize.raw_and(~RGN_SPECIAL_FLAG_X); \
+            __rgnp->rgnSize &= ~RGN_SPECIAL_FLAG_X;       \
     } while(false)
 
 #define RGNP_BBOX(rgnp) ((rgnp)->rgnBBox)

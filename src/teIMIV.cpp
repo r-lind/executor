@@ -151,7 +151,7 @@ void Executor::C_TESelView(TEHandle teh) /* IMIV-57 */
 void Executor::C_TEAutoView(BOOLEAN autoflag, TEHandle teh) /* IMIV-57 */
 {
     if(autoflag)
-        STARH(TEHIDDENH(teh))->flags.raw_or(CLC(TEAUTOVIEWBIT));
+        STARH(TEHIDDENH(teh))->flags |= CLC(TEAUTOVIEWBIT);
     else
-        STARH(TEHIDDENH(teh))->flags.raw_and(CLC(~TEAUTOVIEWBIT));
+        STARH(TEHIDDENH(teh))->flags &= CLC(~TEAUTOVIEWBIT);
 }

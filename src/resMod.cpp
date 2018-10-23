@@ -257,7 +257,7 @@ void Executor::C_RemoveResource(Handle res)
     }
     else
         nmoff = 0x7fff;
-    HxX(map, resfatr).raw_or(CWC(mapChanged | mapCompact));
+    HxX(map, resfatr) |= CWC(mapChanged | mapCompact);
     Munger((Handle)map, rroff, (Ptr)0, (LONGINT)sizeof(resref),
            (Ptr) "", (LONGINT)0);
     rroff -= TYPEOFF(map);
@@ -308,7 +308,7 @@ static OSErr writemap(resmaphand map)
     lc = Hx(map, rh.maplen);
     terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)STARH(map));
     if(terr == noErr)
-        HxX(map, resfatr).raw_and(CWC(~(mapChanged)));
+        HxX(map, resfatr) &= CWC(~(mapChanged));
     return (terr);
 }
 

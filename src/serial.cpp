@@ -310,7 +310,7 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
         if(otherp && (otherp->dCtlFlags & CWC(OPENBIT)))
         {
             *STARH(h) = *STARH((hiddenh)MR(otherp->dCtlStorage));
-            dcp->dCtlFlags.raw_or(CWC(OPENBIT));
+            dcp->dCtlFlags |= CWC(OPENBIT);
         }
         else
         {
@@ -338,7 +338,7 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 #else
                 HxX(h, fd) = (CW(pbp->cntrlParam.ioCRefNum) == AINREFNUM || CW(pbp->cntrlParam.ioCRefNum) == AOUTREFNUM) ? 0 : 1;
 #endif
-                    dcp->dCtlFlags.raw_or(CWC(OPENBIT));
+                    dcp->dCtlFlags |= CWC(OPENBIT);
                     SerReset(CW(pbp->cntrlParam.ioCRefNum),
                              (CW(pbp->cntrlParam.ioCRefNum) == AINREFNUM || CW(pbp->cntrlParam.ioCRefNum) == AOUTREFNUM) ? CW(LM(SPPortA)) : CW(LM(SPPortB)));
 #if defined(LINUX) || defined(MACOSX)
@@ -988,7 +988,7 @@ OSErr Executor::C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     {
         h = (hiddenh)MR(dcp->dCtlStorage);
         restorecloseanddispose(h);
-        dcp->dCtlFlags.raw_and(CWC(~OPENBIT));
+        dcp->dCtlFlags &= CWC(~OPENBIT);
         err = noErr;
     }
     else

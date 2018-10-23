@@ -274,7 +274,7 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
     }
 
     /* mark as a GWorld and not a CGrafPort */
-    CPORT_VERSION_X(graphics_world).raw_or(GW_FLAG_BIT_X);
+    CPORT_VERSION_X(graphics_world) |= GW_FLAG_BIT_X;
 
     install_new_gw_info(graphics_world, gw_gd, 0, gd_allocated_p);
 

@@ -57,7 +57,7 @@ void Executor::C_GetPenState(PenState *ps)
         {
             /* high bit indicates there is a pixpat (not a pattern)
 	     stored in the pnPat field */
-            ps->pnMode.raw_or(CWC(0x8000));
+            ps->pnMode |= CWC(0x8000);
             *(PixPatHandle *)&ps->pnPat[0] = pen_pixpat;
         }
     }
