@@ -5,8 +5,6 @@ add_library(os-win32
             win_serial.cpp
             win_serial.h
             win_launch.cpp
-            cleanup.h
-            cleanup.cpp
             winfs.h
             winfs.cpp
             win_stat.h

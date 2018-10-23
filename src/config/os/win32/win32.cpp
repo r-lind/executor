@@ -3,14 +3,11 @@
 #include <rsys/common.h>
 #include "rsys/lockunlock.h"
 #include "rsys/os.h"
-#include "cleanup.h"
 
 using namespace Executor;
 
 bool Executor::os_init()
 {
-    atexit(call_cleanup_bat);
-
     return true;
 }
 
