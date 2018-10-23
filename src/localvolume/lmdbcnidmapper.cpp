@@ -89,7 +89,7 @@ auto growMapIfNecessary(lmdb::env& env, const F& f) -> decltype(f())
     {
         return f();
     }
-    catch(lmdb::map_full_error)
+    catch(lmdb::map_full_error&)
     {
         MDB_envinfo stat;
         lmdb::env_info(env, &stat);
@@ -181,7 +181,9 @@ std::vector<CNIDMapper::Mapping> LMDBCNIDMapper::updateDirectoryContents(CNID di
 
             if(cachedMappingIt != cachedMappingEnd && cachedMappingIt->path == entry.path())
             {
-                usedNames.emplace(cachedMappingIt->macname);
+                mac_string nameUpr = cachedMappingIt->macname;
+                ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
+                usedNames.emplace(std::move(nameUpr));
                 ++cachedMappingIt;
             }
         }

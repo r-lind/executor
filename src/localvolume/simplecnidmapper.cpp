@@ -30,6 +30,7 @@ std::vector<CNIDMapper::Mapping> SimpleCNIDMapper::mapDirectoryContents(CNID dir
     StoredMapping* mapping = cacheIt != cacheEnd ? &mappings_.at(*cacheIt) : nullptr;
     
     std::set<mac_string> usedNames;
+    // FIXME: add names that are already in use by existing mappings
 
     for(auto& entry : realPaths)
     {
