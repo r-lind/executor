@@ -25,12 +25,6 @@
 namespace Executor
 {
 
-typedef int16_t INTEGER;
-typedef int32_t LONGINT;
-typedef uint32_t ULONGINT;
-typedef int8_t BOOLEAN;
-
-typedef int16_t CharParameter; /* very important not to use this as char */
 
 struct Point
 {
@@ -38,6 +32,55 @@ struct Point
     int16_t h;
 };
 
+#if defined(BIGENDIAN)
+template<typename T>
+T SwapTyped(T x) { return x; }
+
+inline Point SwapPoint(Point x) { return x; }
+
+#else
+inline unsigned char SwapTyped(unsigned char x) { return x; }
+inline signed char SwapTyped(signed char x) { return x; }
+inline char SwapTyped(char x) { return x; }
+
+inline uint16_t SwapTyped(uint16_t x) { return swap16(x); }
+inline int16_t SwapTyped(int16_t x) { return swap16((uint16_t)x); }
+
+inline uint32_t SwapTyped(uint32_t x) { return swap32(x); }
+inline int32_t SwapTyped(int32_t x) { return swap32((uint32_t)x); }
+
+inline uint64_t SwapTyped(uint64_t x) { return swap64(x); }
+inline int64_t SwapTyped(int64_t x) { return swap64((uint64_t)x); }
+
+inline Point SwapPoint(Point x) { return Point { SwapTyped(x.v), SwapTyped(x.h) }; }
+#endif
+
+
+inline uint16_t *SYN68K_TO_US_CHECK0_CHECKNEG1(syn68k_addr_t addr)
+{
+    if(addr == (syn68k_addr_t)-1)
+        return (uint16_t*) -1;
+    else
+        return SYN68K_TO_US_CHECK0(addr);
+}
+
+inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(const void* addr)
+{
+    if(addr == (void*)-1)
+        return (syn68k_addr_t) -1;
+    else
+        return US_TO_SYN68K_CHECK0(addr);
+}
+
+template<typename T, typename... Args>
+inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(T (*addr)(Args...))
+{
+    return US_TO_SYN68K_CHECK0_CHECKNEG1((const void*) addr);
+}
+
+
+namespace guestvalues
+{
 
 // Define alignment.
 
@@ -65,50 +108,6 @@ struct Aligner<signed char>
     uint8_t align;
 };
 
-#if defined(BIGENDIAN)
-template<typename T>
-T SwapTyped(T x) { return x; }
-
-inline Point SwapPoint(Point x) { return x; }
-
-#else
-inline unsigned char SwapTyped(unsigned char x) { return x; }
-inline signed char SwapTyped(signed char x) { return x; }
-inline char SwapTyped(char x) { return x; }
-
-inline uint16_t SwapTyped(uint16_t x) { return swap16(x); }
-inline int16_t SwapTyped(int16_t x) { return swap16((uint16_t)x); }
-
-inline uint32_t SwapTyped(uint32_t x) { return swap32(x); }
-inline int32_t SwapTyped(int32_t x) { return swap32((uint32_t)x); }
-
-inline uint64_t SwapTyped(uint64_t x) { return swap64(x); }
-inline int64_t SwapTyped(int64_t x) { return swap64((uint64_t)x); }
-
-inline Point SwapPoint(Point x) { return Point { SwapTyped(x.v), SwapTyped(x.h) }; }
-#endif
-
-inline uint16_t *SYN68K_TO_US_CHECK0_CHECKNEG1(syn68k_addr_t addr)
-{
-    if(addr == (syn68k_addr_t)-1)
-        return (uint16_t*) -1;
-    else
-        return SYN68K_TO_US_CHECK0(addr);
-}
-
-inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(const void* addr)
-{
-    if(addr == (void*)-1)
-        return (syn68k_addr_t) -1;
-    else
-        return US_TO_SYN68K_CHECK0(addr);
-}
-
-template<typename T, typename... Args>
-inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(T (*addr)(Args...))
-{
-    return US_TO_SYN68K_CHECK0_CHECKNEG1((const void*) addr);
-}
 
 
 template<typename T, typename = void>
@@ -539,8 +538,6 @@ struct GuestType<TT, std::void_t<typename TT::is_guest_struct>>
     using type = TT;
 };
 
-template<typename TT>
-using GUEST = typename GuestType<TT>::type;
 
 template<>
 struct GuestType<char>
@@ -563,44 +560,15 @@ struct GuestType<unsigned char>
 template<typename TT, int n>
 struct GuestType<TT[n]>
 {
-    using type = GUEST<TT>[n];
+    using type = typename GuestType<TT>::type[n];
 };
 
 template<typename TT>
 struct GuestType<TT[0]>
 {
-    using type = GUEST<TT>[0];
+    using type = typename GuestType<TT>::type[0];
 };
 
-
-template<typename TT>
-GUEST<TT> RM(TT p)
-{
-    return GUEST<TT>::fromHost(p);
-}
-
-template<typename TT>
-TT MR(GuestWrapper<TT> p)
-{
-    return p.get();
-}
-
-inline char RM(char c) { return c; }
-inline unsigned char RM(unsigned char c) { return c; }
-inline signed char RM(signed char c) { return c; }
-inline char MR(char c) { return c; }
-inline unsigned char MR(unsigned char c) { return c; }
-inline signed char MR(signed char c) { return c; }
-
-
-template<typename TO, typename FROM, typename = std::enable_if<sizeof(GUEST<TO>) == sizeof(GUEST<FROM>)>>
-GUEST<TO> guest_cast(GuestWrapper<FROM> p)
-{
-    //return GUEST<TO>((TO)(FROM)p);
-    GUEST<TO> result;
-    result.raw(p.raw());
-    return result;
-}
 
 
 template<typename Ret, typename... Args, typename CallConv>
@@ -644,6 +612,40 @@ public:
     }
     Ret operator()(Args... args); // definition in rsys/functions.impl.h to reduce dependencies
 };
+
+}
+
+template<typename TT>
+using GUEST = typename guestvalues::GuestType<TT>::type;
+
+template<typename TT>
+GUEST<TT> RM(TT p)
+{
+    return GUEST<TT>::fromHost(p);
+}
+
+template<typename TT>
+TT MR(guestvalues::GuestWrapper<TT> p)
+{
+    return p.get();
+}
+
+inline char RM(char c) { return c; }
+inline unsigned char RM(unsigned char c) { return c; }
+inline signed char RM(signed char c) { return c; }
+inline char MR(char c) { return c; }
+inline unsigned char MR(unsigned char c) { return c; }
+inline signed char MR(signed char c) { return c; }
+
+
+template<typename TO, typename FROM, typename = std::enable_if<sizeof(GUEST<TO>) == sizeof(GUEST<FROM>)>>
+GUEST<TO> guest_cast(guestvalues::GuestWrapper<FROM> p)
+{
+    //return GUEST<TO>((TO)(FROM)p);
+    GUEST<TO> result;
+    result.raw(p.raw());
+    return result;
+}
 
 
 }

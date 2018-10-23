@@ -13,6 +13,12 @@
 
 namespace Executor
 {
+typedef int16_t INTEGER;
+typedef int32_t LONGINT;
+typedef uint32_t ULONGINT;
+typedef int8_t BOOLEAN;
+
+typedef int16_t CharParameter; /* very important not to use this as char */
 
 typedef int8_t SignedByte;
 typedef uint8_t Byte;

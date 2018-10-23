@@ -33,7 +33,7 @@ namespace
 
 uint32_t builtinlibs::handleSC(PowerCore& cpu)
 {
-    PPCCallback *cb = GuestTypeTraits<PPCCallback*>::reg_to_host(cpu.CIA - 8);
+    PPCCallback *cb = guestvalues::GuestTypeTraits<PPCCallback*>::reg_to_host(cpu.CIA - 8);
     int index = cb - callbacks;
     if(index >= 0 && index < nCallbacks)
     {

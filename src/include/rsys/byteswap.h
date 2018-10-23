@@ -45,7 +45,7 @@ inline GUEST<int16_t> CW(int16_t x) { return GUEST<int16_t>::fromHost(x); }
 inline GUEST<uint16_t> CW(unsigned int x) { return GUEST<uint16_t>::fromHost(x); }
 
 template<class TT, typename = typename std::enable_if<sizeof(TT) == 2, void>::type>
-TT CW(GuestWrapper<TT> x) { return x.get(); }
+TT CW(guestvalues::GuestWrapper<TT> x) { return x.get(); }
 
 template<class TT>
 inline GUEST<int32_t> CL(TT x) { return GUEST<int32_t>::fromHost(x); }
@@ -53,7 +53,7 @@ inline GUEST<uint32_t> CL(uint32_t x) { return GUEST<uint32_t>::fromHost(x); }
 inline GUEST<int32_t> CL(int32_t x) { return GUEST<int32_t>::fromHost(x); }
 
 template<class TT, typename = typename std::enable_if<sizeof(TT) == 4, void>::type>
-TT CL(GuestWrapper<TT> x) { return x.get(); }
+TT CL(guestvalues::GuestWrapper<TT> x) { return x.get(); }
 
 inline unsigned char Cx(unsigned char x) { return x; }
 inline signed char Cx(signed char x) { return x; }
@@ -66,7 +66,7 @@ inline GUEST<uint32_t> Cx(uint32_t x) { return CL(x); }
 inline GUEST<int32_t> Cx(int32_t x) { return CL(x); }
 
 template<class TT>
-TT Cx(GuestWrapper<TT> x) { return x.get(); }
+TT Cx(guestvalues::GuestWrapper<TT> x) { return x.get(); }
 
 template<class TT>
 TT Cx(TT x); // no definition. Make sure we get a linker error if an unexpected version of Cx is used.

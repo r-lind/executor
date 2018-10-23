@@ -391,7 +391,7 @@ class HLockGuard
 
 public:
     template<typename TT>
-    HLockGuard(GuestWrapper<TT *> *h)
+    HLockGuard(guestvalues::GuestWrapper<TT *> *h)
         : handle((Handle)h)
         , state(hlock_return_orig_state((Handle)h))
     {

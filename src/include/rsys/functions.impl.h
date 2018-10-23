@@ -479,13 +479,13 @@ namespace callfromPPC
     {
         static_assert(sizeof(GUEST<T>) <= 4, "parameter too large");
         if(gprIndex <= 10)
-            return GuestTypeTraits<T>::reg_to_host(cpu.r[gprIndex]);
+            return guestvalues::GuestTypeTraits<T>::reg_to_host(cpu.r[gprIndex]);
         else
         {
-            using GuestType = typename GuestTypeTraits<T>::GuestType;
+            using GuestType = typename guestvalues::GuestTypeTraits<T>::GuestType;
             auto p = reinterpret_cast<GuestType *>
                 (paramPtr + 4-sizeof(GuestType));
-            return GuestTypeTraits<T>::guest_to_host(*p);
+            return guestvalues::GuestTypeTraits<T>::guest_to_host(*p);
         }
     }
     template<typename T>
@@ -493,13 +493,13 @@ namespace callfromPPC
     {
         static_assert(sizeof(GUEST<T>) <= 4, "parameter too large");
         if(gprIndex <= 10)
-            cpu.r[gprIndex] = GuestTypeTraits<T>::host_to_reg(arg);
+            cpu.r[gprIndex] = guestvalues::GuestTypeTraits<T>::host_to_reg(arg);
         else
         {
-            using GuestType = typename GuestTypeTraits<T>::GuestType;
+            using GuestType = typename guestvalues::GuestTypeTraits<T>::GuestType;
             auto p = reinterpret_cast<GuestType *>
                 (paramPtr + 4-sizeof(GuestType));
-            *p = GuestTypeTraits<T>::host_to_guest(arg);
+            *p = guestvalues::GuestTypeTraits<T>::host_to_guest(arg);
         }
     }
     template<class Ret>
@@ -536,7 +536,7 @@ namespace callfromPPC
         static void invokeFromPPCHelper(PowerCore& cpu, const F& fptr, std::index_sequence<Is...>)
         {
             std::tuple<Args...> args;
-            ParameterPasser argGetter{cpu, GuestTypeTraits<uint8_t*>::reg_to_host(cpu.r[1]+24)};
+            ParameterPasser argGetter{cpu, guestvalues::GuestTypeTraits<uint8_t*>::reg_to_host(cpu.r[1]+24)};
 
             (void)((argGetter % ... % std::get<Is>(args)));
             InvokerRet<Ret (Args...)>::invokeRet(cpu, fptr, std::get<Is>(args)...);
@@ -563,7 +563,7 @@ Ret UPP<Ret(Args...), CallConv>::operator()(Args... args) const
 }
 
 template<typename Ret, typename... Args, typename CallConv>
-Ret GuestWrapperBase<UPP<Ret(Args...),CallConv>>::operator()(Args... args)
+Ret guestvalues::GuestWrapperBase<UPP<Ret(Args...),CallConv>>::operator()(Args... args)
 {
     return (this->get())(args...);
 }

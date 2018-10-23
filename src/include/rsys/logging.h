@@ -45,7 +45,7 @@ void logValue(const T& arg)
     std::clog << "?";
 }
 template<class T>
-void logValue(const GuestWrapper<T>& p)
+void logValue(const guestvalues::GuestWrapper<T>& p)
 {
     logValue(p.get());
 }
@@ -63,7 +63,7 @@ void logValue(T* p)
     }
 }
 template<class T>
-void logValue(GuestWrapper<T*> p)
+void logValue(guestvalues::GuestWrapper<T*> p)
 {
     std::clog << "0x" << std::hex << p.raw() << std::dec;
     if(validAddress(p.raw_host_order()))
