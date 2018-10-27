@@ -40,7 +40,7 @@ public:
 
     virtual void SetUp() override
     {
-        tempDir = fs::current_path() / fs::unique_path();
+        tempDir = fs::current_path() / fs::unique_path("temptest-%%%%-%%%%-%%%%-%%%%");
 
         Executor::InitMemory(thingOnStack);
         Executor::ROMlib_fileinit();
