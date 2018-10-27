@@ -970,7 +970,7 @@ int main(int argc, char *argv[])
 
     magic_file_to_delete_because_at_exit_is_flawed = hfv_name;
     atexit(cleanup);
-    if(freopen(hfv_name, "wb", stdout) == NULL)
+    if(freopen(hfv_name, "wb", stdout) == nullptr)
     {
         char errmsg[2048];
         sprintf(errmsg, "Could not open \"%s\"", hfv_name);

@@ -465,7 +465,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
 
     if(cfrg0 && ppc_launch_p && ROMlib_find_cfrg(cfrg0, FOURCC('p', 'w', 'p', 'c'), kApplicationCFrag,
                                                  (StringPtr) ""))
-        code0 = NULL;
+        code0 = nullptr;
     else if(!code0)
     {
         if(cfrg0)
@@ -486,7 +486,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
         int16_t size_flags;
 
         size_resource_h = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), 0);
-        if(size_resource_h == NULL)
+        if(size_resource_h == nullptr)
             size_resource_h = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), -1);
         if(size_resource_h)
         {
@@ -844,7 +844,7 @@ static void reset_low_globals(void)
     *(GUEST<LONGINT> *)SYN68K_TO_US(0x5C) = save5C;
 
     LM(nilhandle) = 0; /* so nil dereferences "work" */
-    LM(WindowList) = NULL;
+    LM(WindowList) = nullptr;
 
     LM(CrsrBusy) = 0;
     LM(TESysJust) = 0;
@@ -1120,7 +1120,7 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
         int n_filename_bytes;
 
 #if !defined(LETGCCWAIL)
-        ap = NULL;
+        ap = nullptr;
 #endif
         n_filenames = 1;
         if(lpbp->launchAppParameters)

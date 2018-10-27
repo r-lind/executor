@@ -18,7 +18,7 @@ using namespace Executor;
 /* return a pointer to the auxilary window record
    associated with `w' */
 
-AuxWinHandle Executor::default_aux_win = NULL;
+AuxWinHandle Executor::default_aux_win = nullptr;
 
 static const RGBColor BLACK_RGB = {
     CWC(0), CWC(0), CWC(0),
@@ -188,7 +188,7 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
 
    it's second argument is `AuxWinHandle *' (or `AuxWinHndl *' in
    Think C speak), and returns the aux window entry for the given
-   window; if NULL is passed, an handle to a `AuxWinRec' is placed in
+   window; if nullptr is passed, an handle to a `AuxWinRec' is placed in
    the aux_w_out argument which contains the default window color
    table
 

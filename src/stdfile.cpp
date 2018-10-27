@@ -179,7 +179,7 @@ static void drawminiicon(INTEGER icon)
     r.bottom = CW(CW(r.top) + 16);
     r.right = CW(CW(r.left) + 16);
     CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-             &bm.bounds, &r, srcCopy, NULL);
+             &bm.bounds, &r, srcCopy, nullptr);
     HUnlock(h);
 }
 
@@ -449,7 +449,7 @@ static void drawjobberattop(DialogPeek dp)
     {
 #if 1
         /* TODO: ask cliff about a better way to do this */
-        /* unused = */ getdiskname(&ejectable, NULL);
+        /* unused = */ getdiskname(&ejectable, nullptr);
         icon = ejectable ? MICONFLOPPY : MICONDISK;
 #else /* 0 */
         icon = MICONDISK;
@@ -794,7 +794,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
     GetPenState(&ps);
     PenNormal();
 
-    h = NULL;
+    h = nullptr;
     GetDialogItem((DialogPtr)dp, which, &i, &h, &r);
     /*    h = CL(h); we don't really use h */
     switch(which)
@@ -813,7 +813,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
             /*  case putDiskName:	getDiskName and putDiskName are the same */
             EraseRect(&r);
             width = CW(r.right) - CW(r.left);
-            diskname = getdiskname(&ejectable, NULL);
+            diskname = getdiskname(&ejectable, nullptr);
             GetDialogItem((DialogPtr)dp, putEject, &i, &tmpH, &r2);
             ejhand = MR(tmpH);
             if(ejectable)
@@ -1393,7 +1393,7 @@ static BOOLEAN trackdirs(DialogPeek dp)
             WRAPPER_SET_PIXMAP_X(wrapper, RM(save_bits));
 
             CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), wrapper,
-                     &therect, bounds, srcCopy, NULL);
+                     &therect, bounds, srcCopy, nullptr);
         }
 
         EraseRect(&therect);
@@ -1411,7 +1411,7 @@ static BOOLEAN trackdirs(DialogPeek dp)
 
             /* TODO: ask cliff about a better way to do this */
             /* unused = */
-            getdiskname(&ejectable, NULL);
+            getdiskname(&ejectable, nullptr);
             drawinboxwithicon(next->name, &fillinrect,
                               i ? MICONCFOLDER : ejectable ? MICONFLOPPY : MICONDISK);
             /*
@@ -1481,7 +1481,7 @@ static BOOLEAN trackdirs(DialogPeek dp)
 
         /* restore the rect and clean up after ourselves */
         CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-                 &PIXMAP_BOUNDS(save_bits), &therect, srcCopy, NULL);
+                 &PIXMAP_BOUNDS(save_bits), &therect, srcCopy, nullptr);
         DisposePixMap(save_bits);
     }
     if(sel != -1)
@@ -1845,7 +1845,7 @@ create_new_folder_button(DialogPtr dp)
 
     dial_test = GetResource(TICK("DLOG"), -6044);
     if(!dial_test)
-        retval = NULL;
+        retval = nullptr;
     else
     {
         GUEST<INTEGER> i;
@@ -1991,7 +1991,7 @@ do_new_folder(fltype *f)
         {
             /* TODO: consider a filter that limits the length
 	     of the string to 31 letters */
-            ModalDialog(NULL, &ihit);
+            ModalDialog(nullptr, &ihit);
             switch(CW(ihit))
             {
                 default:
@@ -2096,7 +2096,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
         }
         *SF_FTYPE_XP(&f) = CLC(0);
 
-        new_folder_button = NULL;
+        new_folder_button = nullptr;
         if(getorput == put)
         {
             str31assign(SF_NAME(&f), name);
@@ -2154,7 +2154,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
         {
             bool writable;
 
-            getdiskname(NULL, &writable);
+            getdiskname(nullptr, &writable);
             sav = true;
         }
         else
@@ -2369,7 +2369,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
 
                 GetDialogItemText(pnhand, file_name);
                 str31assign(SF_NAME(&f), file_name);
-                getdiskname(NULL, &writable);
+                getdiskname(nullptr, &writable);
                 if((SF_NAME(&f))[0] && writable && !sav)
                 {
                     HiliteControl((ControlHandle)sahand, 0);

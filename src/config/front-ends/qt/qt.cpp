@@ -569,7 +569,7 @@ void QtVideoDriver::setCursor(char *cursor_data,
 bool QtVideoDriver::setCursorVisible(bool show_p)
 {
     if(show_p)
-        setCursor(NULL, NULL, 0, 0);
+        setCursor(nullptr, nullptr, 0, 0);
     else
         window->setCursor(Qt::BlankCursor);
     return true;

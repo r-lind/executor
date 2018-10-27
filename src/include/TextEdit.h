@@ -411,8 +411,8 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 
 #define TE_STYLE_SIZE_FOR_N_RUNS(n_runs)         \
     (sizeof(TEStyleRec)                          \
-     - sizeof TE_STYLE_RUNS((TEStyleHandle)NULL) \
-     + (n_runs + 1) * sizeof *TE_STYLE_RUNS((TEStyleHandle)NULL))
+     - sizeof TE_STYLE_RUNS((TEStyleHandle)nullptr) \
+     + (n_runs + 1) * sizeof *TE_STYLE_RUNS((TEStyleHandle)nullptr))
 
 #define TE_STYLE_N_RUNS_X(te_style) (HxX((te_style), nRuns))
 #define TE_STYLE_N_STYLES_X(te_style) (HxX((te_style), nStyles))

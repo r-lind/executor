@@ -223,7 +223,7 @@ OSErr Executor::C_AESend(AppleEvent *evt, AppleEvent *reply,
                     HLockGuard guard(desc_data);
                     err = PostHighLevelEvent(&evt_rec,
                                              /* #### i dunno */
-                                             NULL, -1,
+                                             nullptr, -1,
                                              STARH(desc_data), desc_data_size,
                                              -1);
                 }
@@ -447,7 +447,7 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
                         Boolean wasChanged;
 
                         ah = (AliasHandle)MR(d2.dataHandle);
-                        retval = ResolveAlias(NULL, ah, &p->fsspec[l - 1],
+                        retval = ResolveAlias(nullptr, ah, &p->fsspec[l - 1],
                                               &wasChanged);
                     }
                 }

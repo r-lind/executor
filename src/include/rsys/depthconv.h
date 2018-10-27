@@ -15,9 +15,9 @@ typedef void (*depthconv_func_t)(const void *table,
 /* Each of these functions fills in TABLE_SPACE with some private tables,
  * returns the size of those tables in *TABLE_SIZE, and returns a pointer
  * to a function to perform the desired translation.  If TABLE_SPACE is
- * NULL, it is ignored.  You can make one call to the function with a NULL
+ * nullptr, it is ignored.  You can make one call to the function with a nullptr
  * TABLE_SPACE, note the table size, allocate space for it, and then
- * call it again with the real table space.  If TABLE_SIZE is NULL,
+ * call it again with the real table space.  If TABLE_SIZE is nullptr,
  * it is also ignored.
  */
 extern depthconv_func_t

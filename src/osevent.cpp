@@ -426,7 +426,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
                                          target,
                                          /* dummy */ -1, /* dummy */ -1,
                                          aevt);
-                err = AECreateList(NULL, 0, false, list);
+                err = AECreateList(nullptr, 0, false, list);
 
                 for(i = 1; i <= count; i++)
                 {
@@ -443,10 +443,10 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
                 AEPutParamDesc(aevt, keyDirectObject, list);
 
                 AESend(aevt,
-                       /* dummy */ NULL,
+                       /* dummy */ nullptr,
                        kAENoReply,
                        /* dummy */ -1, /* dummy */ -1,
-                       NULL, NULL);
+                       nullptr, nullptr);
             }
             else
             {
@@ -455,9 +455,9 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
                                          /* dummy */ -1, /* dummy */ -1,
                                          aevt);
 
-                AESend(aevt, /* dummy */ NULL,
+                AESend(aevt, /* dummy */ nullptr,
                        kAENoReply, /* dummy */ -1,
-                       /* dummy */ -1, NULL, NULL);
+                       /* dummy */ -1, nullptr, nullptr);
             }
 
             send_application_open_aevt_p = false;
@@ -615,6 +615,6 @@ Executor::maybe_wait_for_keyup(void)
      choose the default button in a dialog.  Losing the key-up
      can cause all sorts of trouble. */
     while(lastdown != -1)
-        handle_sdl_events(0, NULL);
+        handle_sdl_events(0, nullptr);
 #endif
 }

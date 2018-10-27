@@ -53,7 +53,7 @@ void Executor::gd_allocate_main_device(void)
 {
     GDHandle graphics_device;
 
-    if(vdriver->framebuffer() == NULL)
+    if(vdriver->framebuffer() == nullptr)
         gui_fatal("vdriver not initialized, unable to allocate `LM(MainDevice)'");
 
     TheZoneGuard guard(LM(SysZone));
@@ -116,7 +116,7 @@ GDHandle Executor::C_NewGDevice(INTEGER ref_num, LONGINT mode)
 
     this2 = (GDHandle)NewHandle((Size)sizeof(GDevice));
 
-    if(this2 == NULL)
+    if(this2 == nullptr)
         return this2;
 
     /* initialize fields; for some of these, i'm not sure what
@@ -219,7 +219,7 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
             temp_color_table = GetCTable(color_p
                                              ? bpp
                                              : (bpp + 32));
-            if(temp_color_table == NULL)
+            if(temp_color_table == nullptr)
                 gui_fatal("unable to get color table `%d'",
                           color_p ? bpp : (bpp + 32));
             ROMlib_copy_ctab(temp_color_table, gd_color_table);
@@ -304,7 +304,7 @@ GDHandle Executor::C_GetMaxDevice(Rect *globalRect)
      currently we have only a single device, so that has
      the max pixel depth for any given region (tho we would
      probably see if it intersects the main screen and return
-     NULL otherwise */
+     nullptr otherwise */
     return MR(LM(MainDevice));
 }
 
@@ -432,7 +432,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
         return cDepthErr;
     }
 
-    if(vdriver->framebuffer() == NULL)
+    if(vdriver->framebuffer() == nullptr)
         gui_fatal("vdriver not initialized, unable to change bpp");
 
 #if SIZEOF_CHAR_P > 4

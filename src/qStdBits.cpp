@@ -554,7 +554,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
             break;
     }
 
-    ROMlib_fg_bk(&fg_color, &bk_color, NULL, NULL, dst_rgb_spec,
+    ROMlib_fg_bk(&fg_color, &bk_color, nullptr, nullptr, dst_rgb_spec,
                  active_screen_addr_p(dst), dst_depth <= 8);
 
     if(dst_depth == 1)
@@ -650,7 +650,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         /* don't initialize the color table of new_src; we assume that
 	 it has the same color space as the current graphics device */
 
-        convert_pixmap(src, new_src, widened_src_rect, NULL);
+        convert_pixmap(src, new_src, widened_src_rect, nullptr);
 
         src = new_src;
         /* `convert_pixmap ()' jukes the coordinates of the

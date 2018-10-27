@@ -60,11 +60,11 @@ bool SDLVideoDriver::init()
 #endif
 
     /* Try for fullscreen on platforms that support it */
-    if(getenv("SDL_FULLSCREEN") != NULL || ROMlib_fullscreen_p)
+    if(getenv("SDL_FULLSCREEN") != nullptr || ROMlib_fullscreen_p)
         video_flags |= SDL_FULLSCREEN;
 
     /* Allow unsafe fullscreen video memory access */
-    if(getenv("SDL_HWSURFACE") != NULL || ROMlib_hwsurface_p)
+    if(getenv("SDL_HWSURFACE") != nullptr || ROMlib_hwsurface_p)
         video_flags |= SDL_HWSURFACE;
 
     return (true);
@@ -131,7 +131,7 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 
     /* Set the video mode */
     screen = SDL_SetVideoMode(width, height, bpp, video_flags);
-    if(screen == NULL)
+    if(screen == nullptr)
         return (false);
 
     /* Fill the vdriver globals */

@@ -249,7 +249,7 @@ STUB(Frac2X)
                                                              \
     uw = EM_D1 << 8;                                         \
     uw |= cpu_state.regs[2].uw.n;                            \
-    EM_D0 = (KeyTranslate(NULL, uw, (LONGINT *)0) >> 16) & 0xFF; \
+    EM_D0 = (KeyTranslate(nullptr, uw, (LONGINT *)0) >> 16) & 0xFF; \
     RTS();
 
 STUB(Key1Trans);
@@ -516,8 +516,8 @@ STUB(bad_trap_unimplemented)
             }
             strcat(buf, "].");
             system_error(buf, 0,
-                         "Restart", NULL, NULL,
-                         NULL, NULL, NULL);
+                         "Restart", nullptr, nullptr,
+                         nullptr, nullptr, nullptr);
             break;
     }
 
@@ -590,8 +590,8 @@ STUB(Unimplemented)
                     "encountered unknown, unimplemented trap `%X'.",
                     mostrecenttrap);
             system_error(buf, 0,
-                         "Restart", NULL, NULL,
-                         NULL, NULL, NULL);
+                         "Restart", nullptr, nullptr,
+                         nullptr, nullptr, nullptr);
             break;
     }
 

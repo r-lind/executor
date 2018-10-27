@@ -533,7 +533,7 @@ text_box_miniarrow_update(struct text_box *box,
     Rect dst_rect, *miniarrow_rect;
     BitMap miniarrow_bitmap;
     int center_x, center_y;
-    char *bits = NULL;
+    char *bits = nullptr;
 
     switch(_hilite)
     {
@@ -562,7 +562,7 @@ text_box_miniarrow_update(struct text_box *box,
             center_x - 13 / 2 + 13, center_y - 22 / 2 + 22);
 
     CopyBits(&miniarrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-             &miniarrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
+             &miniarrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
 }
 
 static void
@@ -580,7 +580,7 @@ text_box_update(struct text_box *box, bool update_text_p)
         {
             Rect dummy_rect;
 
-            te_box = NULL;
+            te_box = nullptr;
 
             TEDeactivate(te);
 
@@ -1174,7 +1174,7 @@ color_wheel_target_update(bool short_cut_p)
                -CW(color_wheel_bounds->top));
 
     CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-             &src_rect, &dst_rect, srcCopy, NULL);
+             &src_rect, &dst_rect, srcCopy, nullptr);
 
     PenSize(1, 1);
 
@@ -1206,7 +1206,7 @@ static void
 color_wheel_update(void)
 {
     CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-             &color_wheel_pixmap.bounds, color_wheel_bounds, srcCopy, NULL);
+             &color_wheel_pixmap.bounds, color_wheel_bounds, srcCopy, nullptr);
 
     MoveTo(470 - StringWidth(label_0_degs),
            color_wheel_center_y - font_height / 2 + font_ascent);
@@ -1341,9 +1341,9 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
     compute_bounds(where);
     color_wheel_init();
 
-    color_picker_window = _NewCWindow(NULL, color_picker_window_bounds,
+    color_picker_window = _NewCWindow(nullptr, color_picker_window_bounds,
                                       /* no title */
-                                      NULL,
+                                      nullptr,
                                       /* visible */
                                       true,
                                       dBoxProc,
@@ -1363,7 +1363,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
      
      of course, even the mac doesn't try it on 4bpp or b/w devices */
 
-    palette = NewPalette(16, NULL, pmAnimated | pmExplicit, -1);
+    palette = NewPalette(16, nullptr, pmAnimated | pmExplicit, -1);
     NSetPalette(color_picker_window, palette, pmAllUpdates);
 
     SetEntryUsage(palette, 0, pmCourteous, -1);
@@ -1414,7 +1414,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
             retval = event_loop();
 
             TEDispose(te);
-            te_box = NULL;
+            te_box = nullptr;
         }
     }
 

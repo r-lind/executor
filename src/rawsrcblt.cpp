@@ -15,7 +15,7 @@ static int srcblt_src_row_stride;
 static int srcblt_dst_row_stride;
 
 /* Dummy table, not actually dereferenced. */
-const void *srcblt_nop_table[1] = { NULL };
+const void *srcblt_nop_table[1] = { nullptr };
 
 /* This macro is used in `rawsrcstubs.c' */
 #define NEXT_ROW (src = (const uint32_t *)&src_row_base[s[1].offset], \

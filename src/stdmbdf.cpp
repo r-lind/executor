@@ -385,7 +385,7 @@ save(int16_t offset, Rect *rect)
         int width;
 
         save_pmh = NewPixMap();
-        if(save_pmh == NULL)
+        if(save_pmh == nullptr)
             goto failure;
 
         mep->mbMenuDir = CWC(MBRIGHTDIR);
@@ -433,14 +433,14 @@ save(int16_t offset, Rect *rect)
             WRAPPER_SET_PIXMAP_X(wrapper, RM(save_pmh));
 
             CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), wrapper,
-                     &save_rect, &save_rect, srcCopy, NULL);
+                     &save_rect, &save_rect, srcCopy, nullptr);
         }
 
         mep->mbBitsSave = RM((Handle)save_pmh);
 
         goto done;
     failure:
-        mep->mbBitsSave = NULL;
+        mep->mbBitsSave = nullptr;
     done:;
     }
 
@@ -484,7 +484,7 @@ restore(void)
 
     save_pmh = (PixMapHandle)MR(mep->mbBitsSave);
 
-    if(save_pmh == NULL)
+    if(save_pmh == nullptr)
     {
         RgnHandle rh;
 
@@ -500,14 +500,14 @@ restore(void)
 
             WRAPPER_SET_PIXMAP_X(wrapper, RM(save_pmh));
             CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-                     &save_rect, &save_rect, srcCopy, NULL);
+                     &save_rect, &save_rect, srcCopy, nullptr);
         }
 
         DisposePtr(PIXMAP_BASEADDR(save_pmh));
         DisposePixMap(save_pmh);
     }
 
-    mep->mbBitsSave = NULL;
+    mep->mbBitsSave = nullptr;
     HxX(MBSAVELOC, lastMBSave)
         = CW(Hx(MBSAVELOC, lastMBSave) - sizeof(mbdfentry));
 }

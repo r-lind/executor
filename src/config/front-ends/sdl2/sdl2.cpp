@@ -128,10 +128,10 @@ void SDL2VideoDriver::setColors(int first_color, int num_colors, const ColorSpec
 void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
                                         bool cursor_p)
 {
-    /*SDL_UpdateTexture(sdlTexture, NULL, vdriver_fbuf, vdriver_row_bytes);
-    SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
+    /*SDL_UpdateTexture(sdlTexture, nullptr, vdriver_fbuf, vdriver_row_bytes);
+    SDL_RenderCopy(sdlRenderer, sdlTexture, nullptr, nullptr);
     SDL_RenderPresent(sdlRenderer);*/
-    SDL_BlitSurface(sdlSurface, NULL, SDL_GetWindowSurface(sdlWindow), NULL);
+    SDL_BlitSurface(sdlSurface, nullptr, SDL_GetWindowSurface(sdlWindow), nullptr);
     SDL_UpdateWindowSurface(sdlWindow);
 }
 
@@ -148,7 +148,7 @@ static bool ConfirmQuit()
         "Do you want to quit Executor?", /* .message */
         SDL_arraysize(buttons), /* .numbuttons */
         buttons, /* .buttons */
-        NULL /* .colorScheme */
+        nullptr /* .colorScheme */
     };
     int buttonid;
     SDL_ShowMessageBox(&messageboxdata, &buttonid);
@@ -292,7 +292,7 @@ void SDL2VideoDriver::setCursor(char *cursor_data,
     new_cursor = SDL_CreateCursor((unsigned char *)cursor_data,
                                   (unsigned char *)cursor_mask,
                                   16, 16, hotspot_x, hotspot_y);
-    if(new_cursor != NULL)
+    if(new_cursor != nullptr)
     {
         SDL_SetCursor(new_cursor);
         SDL_FreeCursor(old_cursor);

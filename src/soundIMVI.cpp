@@ -117,7 +117,7 @@ static struct
 
 void Executor::clear_pending_sounds(void)
 {
-    call_back_info.headp = NULL;
+    call_back_info.headp = nullptr;
     call_back_info.busy = false;
     if(sound_driver->HasSoundClearPending())
         SOUND_CLEAR_PENDING();
@@ -208,7 +208,7 @@ OSErr Executor::C_SndPlayDoubleBuffer(SndChannelPtr chanp,
 
         case soundon:
             if(!paramp)
-                warning_sound_log("paramp = NULL");
+                warning_sound_log("paramp = nullptr");
             else
                 warning_sound_log("nc %d sz %d c %d p %d",
                                   CW(paramp->dbhNumChannels),

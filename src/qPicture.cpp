@@ -104,7 +104,7 @@ PicHandle Executor::C_OpenPicture(Rect *pf)
 {
     PicHandle retval;
 
-    retval = ROMlib_OpenPicture_helper(pf, NULL);
+    retval = ROMlib_OpenPicture_helper(pf, nullptr);
     return retval;
 }
 

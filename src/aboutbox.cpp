@@ -72,18 +72,18 @@ static struct
     ControlHandle ctl;
 } about_box_buttons[] = {
     { LICENSE_BUTTON_NAME, "License." /* generated on the fly from licensetext.c */,
-      NULL },
+      nullptr },
   /*  { "Maker",
       "ARDI\r"
       "World Wide Web: <http://www.ardi.com>\r"
       "FTP: <ftp://ftp.ardi.com/pub>\r",
-      NULL },*/
+      nullptr },*/
 
     { 
-      NULL },
+      nullptr },
     { TIPS_BUTTON_NAME,
-      "Don't delete tips.txt.  If you do, that will be your only tip.\r", NULL },
-    { DONE_BUTTON_NAME, "Internal error!", NULL }
+      "Don't delete tips.txt.  If you do, that will be your only tip.\r", nullptr },
+    { DONE_BUTTON_NAME, "Internal error!", nullptr }
 };
 #endif
 
@@ -341,7 +341,7 @@ create_about_box()
             (vdriver->height() + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
 
     /* Create the window. */
-    about_box = (WindowPtr)NewCWindow(NULL, &about_box_bounds,
+    about_box = (WindowPtr)NewCWindow(nullptr, &about_box_bounds,
                                       (StringPtr) "\016About Executor",
                                       false, dBoxProc, (CWindowPtr)-1,
                                       true, /* go away flag */
@@ -367,7 +367,7 @@ create_about_box()
                                               0, 1, pushButProc, b);
     }
 
-    about_scrollbar = NewControl(about_box, &scroll_bar_bounds, NULL, true,
+    about_scrollbar = NewControl(about_box, &scroll_bar_bounds, nullptr, true,
                                  0, 0, 100, scrollBarProc, -1);
     about_te = TENew(&te_bounds, &te_bounds);
     TESetAlignment(teFlushLeft, about_te);
@@ -378,8 +378,8 @@ static void
 dispose_about_box(void)
 {
     C_DisposeWindow(about_box);
-    about_box = NULL;
-    about_scrollbar = NULL;
+    about_box = nullptr;
+    about_scrollbar = nullptr;
 }
 
 /* Sets the text currently being displayed. */
@@ -647,7 +647,7 @@ void Executor::do_about_box(void)
         busy_p = true; /* Only allow one about box at a time. */
 
         if(scroll_bar_callback == nullptr)
-            scroll_bar_callback = (ControlActionUPP)SYN68K_TO_US(callback_install(scroll_stub, NULL));
+            scroll_bar_callback = (ControlActionUPP)SYN68K_TO_US(callback_install(scroll_stub, nullptr));
 
         {
             TheZoneGuard guard(LM(SysZone));
@@ -662,7 +662,7 @@ void Executor::do_about_box(void)
             }
 
             TEDispose(about_te);
-            about_te = NULL;
+            about_te = nullptr;
             dispose_about_box();
         }
 

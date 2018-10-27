@@ -594,7 +594,7 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
 
 void SDLVideoDriver::pumpEvents()
 {
-    handle_sdl_events(/* dummy */ -1, /* dummy */ NULL);
+    handle_sdl_events(/* dummy */ -1, /* dummy */ nullptr);
 }
 
 /* This function runs in a separate thread (usually) */
@@ -630,9 +630,9 @@ void sdl_events_init(void)
     syn68k_addr_t event_callback;
 
     /* hook into syn68k synchronous interrupts */
-    mouse_callback = callback_install(handle_sdl_mouse, NULL);
+    mouse_callback = callback_install(handle_sdl_mouse, nullptr);
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4) = CL(mouse_callback);
-    event_callback = callback_install(handle_sdl_events, NULL);
+    event_callback = callback_install(handle_sdl_events, nullptr);
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = CL(event_callback);
 
     /* then set up a filter that triggers the event interrupt */

@@ -64,7 +64,7 @@ hlock_return_orig_state(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return 0;
@@ -101,7 +101,7 @@ HGetState(Handle h)
      frame.  it got axed */
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return nilHandleErr;
@@ -124,7 +124,7 @@ void HSetState(Handle h, SignedByte flags)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return;
@@ -148,7 +148,7 @@ void HLock(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return;
@@ -172,7 +172,7 @@ void HUnlock(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return;
@@ -196,7 +196,7 @@ void HPurge(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return;
@@ -220,7 +220,7 @@ void HNoPurge(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return;
@@ -244,7 +244,7 @@ void HSetRBit(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return;
@@ -268,7 +268,7 @@ void HClrRBit(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         return;
@@ -387,7 +387,7 @@ void ROMlib_InitZones()
         /* Allocate memory for LM(SysZone), LM(ApplZone), and stack, contiguously. */
         memory = (char *)malloc(total_allocated_memory);
 
-        if(memory == NULL)
+        if(memory == nullptr)
         {
             print_mem_full_message();
             exit(-1);
@@ -546,7 +546,7 @@ void MoreMasters(void)
     handles = (GUEST<Ptr> *)NewPtr(ZONE_MORE_MAST(current_zone)
                                    * sizeof(uint32_t));
 
-    if(handles == NULL)
+    if(handles == nullptr)
     {
         SET_MEM_ERR(memFullErr);
         return;
@@ -666,7 +666,7 @@ _NewEmptyHandle_flags(bool sys_p)
         if(h)
         {
             ZONE_HFST_FREE_X(current_zone) = *h;
-            *h = NULL;
+            *h = nullptr;
             SET_MEM_ERR(noErr);
             break;
         }
@@ -702,7 +702,7 @@ _NewHandle_flags(Size size, bool sys_p, bool clear_p)
     current_zone = MR(LM(TheZone));
 
     newh = NewEmptyHandle();
-    if(newh == NULL)
+    if(newh == nullptr)
     {
         SET_MEM_ERR(memFullErr);
         goto done;
@@ -712,7 +712,7 @@ _NewHandle_flags(Size size, bool sys_p, bool clear_p)
     if(ROMlib_relalloc(size, &block) != noErr)
     {
         DisposeHandle(newh);
-        newh = NULL;
+        newh = nullptr;
         SET_MEM_ERR(memFullErr);
         goto done;
     }
@@ -808,7 +808,7 @@ Size GetHandleSize(Handle h)
     MM_SLAM("entry");
 
     block = HANDLE_TO_BLOCK(h);
-    if(block == NULL)
+    if(block == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
         retval = 0;
@@ -897,10 +897,10 @@ void SetHandleSize(Handle h, Size newsize)
             /* Now try and find the space elsewhere */
             if(ROMlib_relalloc(newsize, &newblock))
             {
-                LM(GZRootHnd) = NULL;
+                LM(GZRootHnd) = nullptr;
                 goto bad;
             }
-            LM(GZRootHnd) = NULL;
+            LM(GZRootHnd) = nullptr;
             ROMlib_moveblock(block, newblock, newsize);
         }
     }
@@ -934,10 +934,10 @@ THz HandleZone(Handle h)
 
     MM_SLAM("entry");
 
-    if(h == NULL)
+    if(h == nullptr)
     {
         SET_MEM_ERR(nilHandleErr);
-        return NULL;
+        return nullptr;
     }
 
     applzone_p = false;
@@ -950,7 +950,7 @@ THz HandleZone(Handle h)
         if(p && !PTR_IN_ZONE_P(p, LM(ApplZone)))
         {
             SET_MEM_ERR(memAZErr);
-            return NULL;
+            return nullptr;
         }
         applzone_p = true;
     }
@@ -962,7 +962,7 @@ THz HandleZone(Handle h)
         if(p && !PTR_IN_ZONE_P(p, LM(SysZone)))
         {
             SET_MEM_ERR(memAZErr);
-            return NULL;
+            return nullptr;
         }
         syszone_p = true;
     }
@@ -978,14 +978,14 @@ THz HandleZone(Handle h)
     else if(!VALID_ADDRESS(h))
     {
         SET_MEM_ERR(memAZErr);
-        return NULL;
+        return nullptr;
     }
 
     block = HANDLE_TO_BLOCK(h);
     if(block && USE(block) == FREE)
     {
         SET_MEM_ERR(memWZErr);
-        return NULL;
+        return nullptr;
     }
 
     if(block)
@@ -1055,7 +1055,7 @@ void ReallocateHandle(Handle h, Size size)
 
     MM_SLAM("entry");
 
-    if(h == NULL)
+    if(h == nullptr)
         warning_unexpected("called with NULL_STRING handle");
 
     oldb = HANDLE_TO_BLOCK(h);
@@ -1163,7 +1163,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
         LM(TheZone) = save_zone;
         SET_MEM_ERR(memFullErr);
         MM_SLAM("exit");
-        return NULL;
+        return nullptr;
     }
 
 #if 1 && !defined(NDEBUG)
@@ -1247,7 +1247,7 @@ void SetPtrSize(Ptr p, Size newsize)
 
     MM_SLAM("entry");
 
-    if(p == NULL)
+    if(p == nullptr)
         warning_unexpected("attempt to set NULL_STRING pointer size");
 
     newsize += HDRSIZE;
@@ -1342,7 +1342,7 @@ THz PtrZone(Ptr p)
 
     MM_SLAM("entry");
 
-    if(p == NULL)
+    if(p == nullptr)
         warning_unexpected("attempt to set NULL_STRING pointer size");
 
     block = POINTER_TO_BLOCK(p);
@@ -1351,7 +1351,7 @@ THz PtrZone(Ptr p)
     {
         SET_MEM_ERR(memWZErr);
         /* don't count on this value (IMII-38) */
-        return NULL;
+        return nullptr;
     }
 
     zone = BLOCK_LOCATION_ZONE(block);
@@ -1359,7 +1359,7 @@ THz PtrZone(Ptr p)
     if(!legit_zone_p(zone))
     {
         SET_MEM_ERR(memWZErr); /* not sure what this should be */
-        return NULL;
+        return nullptr;
     }
 
     SET_MEM_ERR(noErr);
@@ -1928,7 +1928,7 @@ void EmptyHandle(Handle h)
     MM_SLAM("entry");
 
     b = HANDLE_TO_BLOCK(h);
-    if(b == NULL)
+    if(b == nullptr)
     {
         SET_MEM_ERR(noErr);
         return;
@@ -1971,7 +1971,7 @@ void EmptyHandle(Handle h)
     }
 
     ROMlib_freeblock(b);
-    SETMASTER(h, NULL);
+    SETMASTER(h, nullptr);
 
     LM(TheZone) = save_zone;
     MM_SLAM("exit");

@@ -14,7 +14,7 @@ char *sdl_ReallocHandle(Executor::Handle mem, int len)
 {
     ReallocateHandle(mem, len);
     if(LM(MemErr) != CWC(noErr))
-        return NULL;
+        return nullptr;
     else
         return (char *)STARH(mem);
 }

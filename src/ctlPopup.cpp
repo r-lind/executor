@@ -42,7 +42,7 @@ init(ControlHandle ctl)
     int flags;
 
     data = (popup_data_handle)NewHandle(sizeof(popup_data_t));
-    /* ### check for NULL return */
+    /* ### check for nullptr return */
 
     mid = CTL_MIN(ctl);
     mh = GetMenu(mid);
@@ -156,7 +156,7 @@ draw(ControlHandle ctl, draw_state_t draw_state,
 
     item_info = ROMlib_mitemtop(POPUP_MENU(data), CTL_VALUE(ctl), &item_title);
 
-    if(item_info == NULL)
+    if(item_info == nullptr)
     {
         item_title = (StringPtr) "";
 
@@ -408,7 +408,7 @@ draw(ControlHandle ctl, draw_state_t draw_state,
         dst_rect.right = CW(right - 22
                             + /* arrows are `11' wide */ 11);
         CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-                 &arrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
+                 &arrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
     }
 }
 
@@ -448,7 +448,7 @@ int32_t Executor::C_cdef1008(int16_t var, ControlHandle ctl, int16_t message,
     {
         case drawCntl:
             draw(ctl, draw_state, window_font, window_size, window_font_p,
-                 false, false, NULL, NULL);
+                 false, false, nullptr, nullptr);
             break;
 
         case testCntl:
@@ -517,7 +517,7 @@ int32_t Executor::C_cdef1008(int16_t var, ControlHandle ctl, int16_t message,
             if(value)
                 CTL_VALUE_X(ctl) = CW(value);
             draw(ctl, draw_state, window_font, window_size, window_font_p,
-                 false, false, NULL, NULL);
+                 false, false, nullptr, nullptr);
 
             break;
         }

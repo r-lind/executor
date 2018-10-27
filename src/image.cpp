@@ -114,7 +114,7 @@ void Executor::image_copy(pixel_image_t *image, int color_p /* visual */,
 #endif
 
     CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-             &x_bits_bounds, dst_rect, mode, NULL);
+             &x_bits_bounds, dst_rect, mode, nullptr);
 }
 
 void Executor::image_validate_x_bits(pixel_image_t *image, int color_p /* visual */)
@@ -147,7 +147,7 @@ void Executor::image_validate_x_bits(pixel_image_t *image, int color_p /* visual
 
         HLockGuard guard1(bits), guard2(x_bits);
         convert_pixmap(STARH(bits), STARH(x_bits),
-                       &PIXMAP_BOUNDS(bits), NULL);
+                       &PIXMAP_BOUNDS(bits), nullptr);
 
         IMAGE_X_BITS_VALID(image, color_p) = bits_ctab_seed_x;
     }

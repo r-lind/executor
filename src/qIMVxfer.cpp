@@ -411,9 +411,9 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     if(rgb_spec)
     {
         /* initalize to some sane values to shut gcc up */
-        src1_ctab = src2_ctab = NULL;
+        src1_ctab = src2_ctab = nullptr;
         itab_res = itab_res_mask = 0;
-        itab_array = NULL;
+        itab_array = nullptr;
     }
     else
     {

@@ -23,25 +23,25 @@ static HighLevelEventMsgPtr current_hle_msg;
 
 void Executor::hle_init(void)
 {
-    hle_q = NULL;
-    current_hle_msg = NULL;
+    hle_q = nullptr;
+    current_hle_msg = nullptr;
 }
 
 void Executor::hle_reinit(void)
 {
-    hle_q = NULL;
-    current_hle_msg = NULL;
+    hle_q = nullptr;
+    current_hle_msg = nullptr;
 }
 
 void Executor::hle_reset(void)
 {
-    if(current_hle_msg == NULL)
+    if(current_hle_msg == nullptr)
         return;
 
     DisposePtr(MR(guest_cast<Ptr>(current_hle_msg->theMsgEvent.when)));
     DisposePtr((Ptr)current_hle_msg);
 
-    current_hle_msg = NULL;
+    current_hle_msg = nullptr;
 }
 
 bool Executor::hle_get_event(EventRecord *evt, bool remflag)
@@ -50,7 +50,7 @@ bool Executor::hle_get_event(EventRecord *evt, bool remflag)
     {
         hle_q_elt_t *t;
 
-        if(current_hle_msg != NULL)
+        if(current_hle_msg != nullptr)
         {
             warning_unexpected("current_hle_msg != NULL_STRING");
             hle_reset();
@@ -79,7 +79,7 @@ OSErr Executor::C_AcceptHighLevelEvent(TargetID *sender_id_return,
 {
     OSErr retval = noErr;
 
-    if(current_hle_msg == NULL)
+    if(current_hle_msg == nullptr)
         return noOutstandingHLE;
 
     /* #### *sender_id_return = ...; */
@@ -164,15 +164,15 @@ OSErr Executor::C_PostHighLevelEvent(EventRecord *evt, Ptr receiver_id,
         goto done;
     }
 
-    if(hle_q == NULL)
+    if(hle_q == nullptr)
         hle_q = elt;
     else
     {
-        for(t = hle_q; t->next != NULL; t = t->next)
+        for(t = hle_q; t->next != nullptr; t = t->next)
             ;
         t->next = elt;
     }
-    elt->next = NULL;
+    elt->next = nullptr;
     elt->hle_msg = hle_msg;
     retval = noErr;
 

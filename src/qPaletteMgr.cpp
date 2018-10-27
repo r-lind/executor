@@ -89,12 +89,12 @@ lookup_pm_resource_holders(void)
     {
         if(device_to_resholder[i] == MR(LM(TheGDevice)))
             return pm_resource_holders[i];
-        else if(device_to_resholder[i] == NULL)
+        else if(device_to_resholder[i] == nullptr)
             null_index = i;
     }
 
     /* new one */
-    if(pm_resource_holders == NULL)
+    if(pm_resource_holders == nullptr)
     {
         max_resource_holders = 4;
         pm_resource_holders
@@ -138,7 +138,7 @@ void delete_pm_resource_holder(GDHandle gd)
         /* no swap */
         if(device_to_resholder[i] == gd)
         {
-            device_to_resholder[i] = NULL;
+            device_to_resholder[i] = nullptr;
             free(pm_resource_holders[i]);
         }
     }
@@ -172,7 +172,7 @@ window_palette_alist_elt(WindowPtr w)
         if(elt->w == w)
             return elt;
 
-    return NULL;
+    return nullptr;
 }
 
 /* return the current `implicit' palette */
@@ -184,7 +184,7 @@ get_current_palette(void)
     elt = window_palette_alist_elt((WindowPtr)MR(qdGlobals().thePort));
     if(!elt)
         elt = window_palette_alist_elt(FrontWindow());
-    return elt ? elt->palette : NULL;
+    return elt ? elt->palette : nullptr;
 }
 
 int window_p(WindowPtr w)
@@ -281,7 +281,7 @@ void pm_deallocate_entry(ColorInfo *entry, int change_color_env_p)
         elt->value = CTAB_PENDING_BIT_X;
 
     CI_DEALLOCATE_ENTRY(entry);
-    holder->palette = NULL;
+    holder->palette = nullptr;
     holder->entry = -1;
 }
 
@@ -450,7 +450,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
             {                                                                       \
                 pm_resource_holder_t *holder;                                       \
                 ColorSpec *elt;                                                     \
-                ColorInfo *prev_entry = NULL;                                       \
+                ColorInfo *prev_entry = nullptr;                                       \
                                                                                     \
                 elt = &gd_ctab_table[steal_elt_i];                                  \
                 holder = &holders[steal_elt_i];                                     \
@@ -467,7 +467,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
                                           entry, i))                                \
                     continue;                                                       \
                                                                                     \
-                if(holder->palette == NULL)                                         \
+                if(holder->palette == nullptr)                                         \
                 {                                                                   \
                     /* to restore when we are done with it, what happens if         \
                    the ColorMgr frees up this slot in the meantime? */              \
@@ -498,7 +498,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
             ColorInfo *entry;                                               \
             int closest_elt_i = -1, closest_delta;                          \
             int elt_i;                                                      \
-            ColorSpec *closest_elt = NULL;                                  \
+            ColorSpec *closest_elt = nullptr;                                  \
                                                                             \
             entry = &palette_info[i];                                       \
             /* if this entry is inhibited on this device, go to the next */ \
@@ -530,7 +530,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
                 }                                                           \
             }                                                               \
                                                                             \
-            if(closest_elt == NULL)                                         \
+            if(closest_elt == nullptr)                                         \
             {                                                               \
                 /* can't allocate first or last entry */                    \
                 for(elt_i = 1; elt_i <= (gd_ctab_size - 1); elt_i++)        \
@@ -577,7 +577,7 @@ pm_do_updates_gd_changed(void)
     {
         if(t->w == (WindowPtr)-1)
         {
-            PaintOne((WindowPeek)NULL, MR(LM(GrayRgn)));
+            PaintOne((WindowPeek)nullptr, MR(LM(GrayRgn)));
         }
         else if(!window_p(t->w))
             continue;
@@ -597,7 +597,7 @@ pm_do_updates_gd_changed(void)
 
 #define gd_index_mask gd_ctab_size
 
-static WindowPtr cached_front_window = NULL;
+static WindowPtr cached_front_window = nullptr;
 
 void Executor::C_ActivatePalette(WindowPtr src_window)
 {
@@ -617,7 +617,7 @@ void Executor::C_ActivatePalette(WindowPtr src_window)
     int i;
 
     palette = GetPalette(src_window);
-    if(palette == NULL)
+    if(palette == nullptr)
         palette = GetPalette((WindowPtr)-1);
 
     cached_front_window = FrontWindow();
@@ -681,7 +681,7 @@ void Executor::C_ActivatePalette(WindowPtr src_window)
                 pm_resource_holder_t *holder;
                 holder = &holders[i];
 
-                gui_assert(holder->palette == NULL);
+                gui_assert(holder->palette == nullptr);
 
                 /* install the default values */
                 elt->value = holder->default_value;
@@ -716,7 +716,7 @@ void Executor::C_RestoreDeviceClut(GDHandle gd)
 
     warning_unimplemented("RestoreDeviceClut implementation may be shaky.");
 
-    if(gd == NULL)
+    if(gd == nullptr)
         gd = MR(LM(MainDevice));
 
     if(gd != MR(LM(MainDevice)) || !GD_CLUT_P(gd))
@@ -783,7 +783,7 @@ void Executor::C_InitPalettes()
 
     for(i = 0; i < 256; i++)
     {
-        pm_resource_holders[i].palette = NULL;
+        pm_resource_holders[i].palette = nullptr;
         pm_resource_holders[i].entry = -1;
 
         pm_resource_holders[i].default_value = 0;
@@ -792,7 +792,7 @@ void Executor::C_InitPalettes()
 
     default_palette = GetNewPalette(0);
 
-    if(default_palette == NULL)
+    if(default_palette == nullptr)
     {
         ColorInfo *entry;
 
@@ -830,10 +830,10 @@ void Executor::C_InitPalettes()
     elt->palette = default_palette;
     /* the default palette has a window id of -1 */
     elt->w = (WindowPtr)-1;
-    elt->next = NULL;
+    elt->next = nullptr;
 
     window_palette_alist = elt;
-    free_list = NULL;
+    free_list = nullptr;
 }
 
 PaletteHandle Executor::C_NewPalette(INTEGER entries, CTabHandle src_colors,
@@ -889,7 +889,7 @@ PaletteHandle Executor::C_GetNewPalette(INTEGER id)
 
     palette_res_h = (PaletteHandle)ROMlib_getrestid(TICK("pltt"), id);
     if(!palette_res_h)
-        return NULL;
+        return nullptr;
 
     palette_size
         = PALETTE_STORAGE_FOR_ENTRIES(PALETTE_ENTRIES(palette_res_h));
@@ -925,10 +925,10 @@ void Executor::pm_window_closed(WindowPtr w)
     int i;
 
     palette = GetPalette(w);
-    if(palette == NULL)
+    if(palette == nullptr)
         palette = GetPalette((WindowPtr)-1);
 
-    for(prev = NULL, t = window_palette_alist; t; t = t->next)
+    for(prev = nullptr, t = window_palette_alist; t; t = t->next)
     {
         if(t->w == w)
         {
@@ -971,7 +971,7 @@ void Executor::C_DisposePalette(PaletteHandle palette)
     /* remove the alist associations between windows and this palette */
     window_palette_alist_t t, prev;
 
-    for(prev = NULL, t = window_palette_alist; t;)
+    for(prev = nullptr, t = window_palette_alist; t;)
     {
         if(t->palette == palette)
         {
@@ -1060,7 +1060,7 @@ set_palette_common(WindowPtr dst_window, PaletteHandle src_palette,
      fields, and add it to the alist */
     window_palette_alist_t elt;
 
-    if(src_palette == NULL)
+    if(src_palette == nullptr)
         return;
 
     elt = window_palette_alist_elt(dst_window);
@@ -1074,7 +1074,7 @@ set_palette_common(WindowPtr dst_window, PaletteHandle src_palette,
             free_list = free_list->next;
         }
 
-        elt->palette = NULL;
+        elt->palette = nullptr;
 
         /* place the new element onto the window_palette_alist */
         elt->next = window_palette_alist;
@@ -1158,7 +1158,7 @@ PaletteHandle Executor::C_GetPalette(WindowPtr src_window)
     elt = window_palette_alist_elt(src_window);
     if(elt)
         return elt->palette;
-    return NULL;
+    return nullptr;
 }
 
 #define pm_xxx_color(index_macro_x, rgb_macro, rgb_fn, entry)                          \
@@ -1347,7 +1347,7 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
     int i;
 
     dst_window_palette_h = GetPalette(dst_window);
-    if(dst_window_palette_h == NULL)
+    if(dst_window_palette_h == nullptr)
         dst_window_palette_h = GetPalette((WindowPtr)-1);
 
     palette = STARH(dst_window_palette_h);
@@ -1543,7 +1543,7 @@ void Executor::C_CopyPalette(PaletteHandle src_palette,
     ColorInfo *dst_entry;
     int i;
 
-    if(src_palette == NULL || dst_palette == NULL)
+    if(src_palette == nullptr || dst_palette == nullptr)
         return;
 
     src_n_entries = PALETTE_ENTRIES(src_palette);

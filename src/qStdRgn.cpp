@@ -85,7 +85,7 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
             const rgb_spec_t *dst_rgb_spec;
 
             dst_rgb_spec = pixmap_rgb_spec(dst_pm);
-            ROMlib_fg_bk(NULL, NULL, &fg_rgb, &bk_rgb, dst_rgb_spec,
+            ROMlib_fg_bk(nullptr, nullptr, &fg_rgb, &bk_rgb, dst_rgb_spec,
                          active_screen_addr_p(dst_pm), bpp <= 8);
 
             AVERAGE_COLOR(&fg_rgb, &bk_rgb, 0x8000, &fg_rgb);
@@ -270,14 +270,14 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
             blt_fancy_pat_mode_to_pixmap(rh, mode,                            \
                                          pixpat_accessor((CGrafPtr)           \
                                                              the_port),       \
-                                         NULL, STARH(cport_pmap));            \
+                                         nullptr, STARH(cport_pmap));            \
         }                                                                     \
         else if(active_screen_addr_p(&the_port->portBits))                    \
         {                                                                     \
             PixMap copy_of_screen;                                            \
             copy_of_screen = *(STARH(GD_PMAP(MR(LM(TheGDevice)))));               \
             copy_of_screen.bounds = the_port->portBits.bounds;                \
-            blt_fancy_pat_mode_to_pixmap(rh, mode, NULL,                      \
+            blt_fancy_pat_mode_to_pixmap(rh, mode, nullptr,                      \
                                          pattern_accessor(the_port),          \
                                          &copy_of_screen);                    \
         }                                                                     \
@@ -314,7 +314,7 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     if(screen_dst_p)
     {
         dst_pixmap = *STARH(main_gd_pmap);
-        ROMlib_fg_bk(&fg_pixel, &bk_pixel, NULL, NULL,
+        ROMlib_fg_bk(&fg_pixel, &bk_pixel, nullptr, nullptr,
                      pixmap_rgb_spec(STARH(main_gd_pmap)),
                      true, false);
     }
@@ -326,7 +326,7 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
         dst_pixmap.rowBytes = dst->rowBytes | PIXMAP_DEFAULT_ROWBYTES_X;
         dst_pixmap.pmTable = RM(ROMlib_bw_ctab);
 
-        ROMlib_fg_bk(&fg_pixel, &bk_pixel, NULL, NULL, NULL, false, false);
+        ROMlib_fg_bk(&fg_pixel, &bk_pixel, nullptr, nullptr, nullptr, false, false);
     }
 
     dst_pixmap.bounds = dst->bounds;
@@ -378,9 +378,9 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
 
             dst_rgb_spec = pixmap_rgb_spec(dst);
             canonical_from_bogo_color(PORT_FG_COLOR(the_port), dst_rgb_spec,
-                                      &fg_color, NULL);
+                                      &fg_color, nullptr);
             canonical_from_bogo_color(PORT_BK_COLOR(the_port), dst_rgb_spec,
-                                      &bk_color, NULL);
+                                      &bk_color, nullptr);
 
             update_dirty_p = xdblt_pattern(rh, mode, -dst_left, -dst_top,
                                            src->pat1Data, dst, fg_color,
@@ -420,7 +420,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
                     if(raw)
                     {
                         DisposePtr(raw);
-                        HxX(xh, raw_pat_bits_mem) = NULL;
+                        HxX(xh, raw_pat_bits_mem) = nullptr;
                     }
                 }
                 else if(handle_size_wrong_p)
@@ -521,7 +521,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
     {
         uint32_t *p, *end, fg_pixel, bk_pixel, tiled_fg_pixel, tiled_bk_pixel;
 
-        ROMlib_fg_bk(&fg_pixel, &bk_pixel, NULL, NULL,
+        ROMlib_fg_bk(&fg_pixel, &bk_pixel, nullptr, nullptr,
                      pixmap_rgb_spec(pixmap),
                      active_screen_addr_p(pixmap), false);
 

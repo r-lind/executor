@@ -80,7 +80,7 @@ GetDControl(DialogPtr dp, INTEGER itemno)
     ControlHandle retval;
     GUEST<INTEGER> unused;
 
-    GetDialogItem(dp, itemno, &unused, &h, NULL);
+    GetDialogItem(dp, itemno, &unused, &h, nullptr);
     retval = (ControlHandle)MR(h);
     return retval;
 }
@@ -92,7 +92,7 @@ GetDIText(DialogPtr dp, INTEGER itemno)
     Handle retval;
     GUEST<INTEGER> unused;
 
-    GetDialogItem(dp, itemno, &unused, &h, NULL);
+    GetDialogItem(dp, itemno, &unused, &h, nullptr);
     retval = MR(h);
 
     return retval;
@@ -166,7 +166,7 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
                 else
                     orient = WIN_PRINT_LANDSCAPE;
                 get_info(&ROMlib_wp, ROMlib_paper_x, ROMlib_paper_y, orient,
-                         num_copies, NULL);
+                         num_copies, nullptr);
                 HxX(hPrint, prJob.iCopies) = CWC(1); /* Win32 driver handles
 						     the multiple copies
 						     for us */
@@ -204,9 +204,9 @@ add_orientation_icons_to_update_region(DialogPtr dp)
 
     gp = MR(qdGlobals().thePort);
     SetPort(dp);
-    GetDialogItem(dp, LAYOUT_PORTRAIT_NO, &unused, NULL, &r);
+    GetDialogItem(dp, LAYOUT_PORTRAIT_NO, &unused, nullptr, &r);
     InvalRect(&r);
-    GetDialogItem(dp, LAYOUT_LANDSCAPE_NO, &unused, NULL, &r);
+    GetDialogItem(dp, LAYOUT_LANDSCAPE_NO, &unused, nullptr, &r);
     InvalRect(&r);
     SetPort(gp);
 }
@@ -388,7 +388,7 @@ get_popup_bounding_box(Rect *rp, DialogPtr dp, INTEGER itemno)
 {
     GUEST<INTEGER> unused;
 
-    GetDialogItem(dp, itemno, &unused, NULL, rp);
+    GetDialogItem(dp, itemno, &unused, nullptr, rp);
     rp->left = CW(CW(rp->left) - 1);
     rp->bottom = CW(CW(rp->bottom) + 3);
 }
@@ -597,7 +597,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
                 ControlHandle ch;
 
                 ch = (ControlHandle)MR(h);
-                if(TrackControl(ch, localp, NULL))
+                if(TrackControl(ch, localp, nullptr))
                 {
                     *ith = CWC(OK);
                     retval = true;
@@ -636,8 +636,8 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
             buf = (char *)alloca(sizeof(EXISTS_MESSAGE) + strlen(filename) + strlen(filename) + 1);
             sprintf(buf, EXISTS_MESSAGE, filename, filename);
             if(system_error(buf, 0,
-                            "Change", "Overwrite", NULL,
-                            NULL, NULL, NULL)
+                            "Change", "Overwrite", nullptr,
+                            nullptr, nullptr, nullptr)
                == 0)
                 *ith = CWC(LAYOUT_CIRCLE_OK_NO); /* dummy return value */
         }
@@ -677,7 +677,7 @@ set_userItem(DialogPtr dp, INTEGER itemno, UserItemProcPtr funcp)
     Rect r;
     GUEST<INTEGER> unused;
 
-    GetDialogItem(dp, itemno, &unused, NULL, &r);
+    GetDialogItem(dp, itemno, &unused, nullptr, &r);
     SetDialogItem(dp, itemno, userItem, (Handle)(void*)funcp, &r);
 }
 
@@ -840,7 +840,7 @@ void Executor::C_ROMlib_circle_ok(DialogPtr dp, INTEGER which)
     Rect r;
     GUEST<INTEGER> unused;
 
-    GetDialogItem(dp, which, &unused, NULL, &r);
+    GetDialogItem(dp, which, &unused, nullptr, &r);
     PenNormal();
     PenSize(3, 3);
     InsetRect(&r, -4, -4);
@@ -855,7 +855,7 @@ void Executor::C_ROMlib_orientation(DialogPtr dp, INTEGER which)
     Rect r;
     GUEST<INTEGER> unused;
 
-    GetDialogItem(dp, which, &unused, NULL, &r);
+    GetDialogItem(dp, which, &unused, nullptr, &r);
     PenNormal();
     PenSize(1, 1);
     InsetRect(&r, 1, 1);
@@ -883,7 +883,7 @@ adjust_menu_common(TPPrDlg dlg, INTEGER item, heading_t heading, ini_key_t defke
         char *gs_dll;
         struct stat sbuf;
 
-        gs_dll = get_gs_dll(NULL);
+        gs_dll = get_gs_dll(nullptr);
         skip_all_but_a_few = stat(gs_dll, &sbuf) != 0;
         free(gs_dll);
     }

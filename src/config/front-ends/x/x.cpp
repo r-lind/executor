@@ -116,12 +116,12 @@ static unsigned char *x_fbuf;
 static int x_fbuf_bpp;
 static int x_fbuf_row_bytes;
 
-depthconv_func_t conversion_func = NULL;
+depthconv_func_t conversion_func = nullptr;
 static int (*x_put_image)(Display *x_dpy, Window x_window, GC copy_gc,
                           XImage *x_image, int src_x, int src_y, int dst_x,
                           int dst_y, unsigned int width,
                           unsigned int height)
-    = NULL;
+    = nullptr;
 
 /* max dimensions */
 static int max_width, max_height, max_bpp;
@@ -140,7 +140,7 @@ static Atom x_selection_atom;
 
 static rgb_spec_t x_rgb_spec;
 
-static char *selectiontext = NULL;
+static char *selectiontext = nullptr;
 static int selectionlength;
 
 /* true if `vdriver_set_colors ()' has been called, otherwise we can
@@ -290,9 +290,9 @@ void alloc_x_image(int bpp, int width, int height,
 {
     /* return value */
     /* assignments to shut up gcc */
-    XImage *x_image = NULL;
+    XImage *x_image = nullptr;
     int row_bytes = 0;
-    unsigned char *fbuf = NULL;
+    unsigned char *fbuf = nullptr;
     int resultant_bpp = 0;
 
     if(have_shm)
@@ -328,7 +328,7 @@ void alloc_x_image(int bpp, int width, int height,
                     /* do we need to delete the shmid here? */
                     free(shminfo);
                     XDestroyImage(x_image);
-                    fbuf = NULL;
+                    fbuf = nullptr;
                 }
                 else
                 {
@@ -340,14 +340,14 @@ void alloc_x_image(int bpp, int width, int height,
                         /* do we need to delete the shmid here? */
                         free(shminfo);
                         XDestroyImage(x_image);
-                        fbuf = NULL;
+                        fbuf = nullptr;
                         /* reset the shm_err flag */
                         shm_err = false;
                     }
                     else
                     {
                         shmctl(shminfo->shmid, IPC_RMID, 0);
-                        if(x_put_image == NULL)
+                        if(x_put_image == nullptr)
                             x_put_image = x_shm_put_image;
                         else if(x_put_image != x_shm_put_image)
                             gui_abort();
@@ -357,7 +357,7 @@ void alloc_x_image(int bpp, int width, int height,
         }
     }
 
-    if(fbuf == NULL)
+    if(fbuf == nullptr)
     {
         warning_unexpected("not using shared memory");
         row_bytes = ((width * bpp + 31) / 32) * 4;
@@ -365,7 +365,7 @@ void alloc_x_image(int bpp, int width, int height,
         x_image = XCreateImage(x_dpy, visual->visual, bpp, ZPixmap, 0,
                                (char *)fbuf, width, height, 8, row_bytes);
         resultant_bpp = x_image->bits_per_pixel;
-        if(x_put_image == NULL)
+        if(x_put_image == nullptr)
             x_put_image = x_normal_put_image;
         else if(x_put_image != x_normal_put_image)
             gui_abort();
@@ -786,7 +786,7 @@ key_table_t key_tables[] = {
     { 0, 0, NELEM(latin_one_table_data), latin_one_table_data },
     /* misc table */
     { 0xFF, 8, NELEM(misc_table_data), misc_table_data },
-    { 0, 0, 0, NULL },
+    { 0, 0, 0, nullptr },
 };
 
 /* convert x keysym to mac virtual `keywhat'; return true the
@@ -822,7 +822,7 @@ x_keysym_to_mac_keywhat(unsigned int keysym, int16_t button_state,
             if(table->high_byte == keysym_high_byte)
                 break;
         }
-        if(key_tables[i].data == NULL)
+        if(key_tables[i].data == nullptr)
             return false;
 
         if(keysym_low_byte < table->min
@@ -1149,7 +1149,7 @@ void x_event_handler(int signo)
 bool X11VideoDriver::parseCommandLine(int& argc, char *argv[])
 {
     x_dpy = XOpenDisplay("");
-    if(x_dpy == NULL)
+    if(x_dpy == nullptr)
     {
         fprintf(stderr, "%s: could not open x server `%s'.\n",
                 ROMlib_appname.c_str(), XDisplayName(""));
@@ -1222,7 +1222,7 @@ bool X11VideoDriver::init()
     vistemplate.c_class = PseudoColor;
     vistemplate.colormap_size = 256;
 
-    visual = NULL;
+    visual = nullptr;
 
     if(!truecolor_p)
     {
@@ -1237,7 +1237,7 @@ bool X11VideoDriver::init()
             x_fbuf_bpp = 8;
         }
 
-        if(visual == NULL)
+        if(visual == nullptr)
         {
             /* now try for 4bpp */
             vistemplate.depth = 4;
@@ -1255,7 +1255,7 @@ bool X11VideoDriver::init()
             }
         }
 
-        if(visual == NULL)
+        if(visual == nullptr)
         {
             /*  now try for 1bpp */
             vistemplate.depth = 1;
@@ -1273,7 +1273,7 @@ bool X11VideoDriver::init()
         }
     }
 
-    if(visual == NULL)
+    if(visual == nullptr)
     {
         vistemplate.screen = x_screen;
         vistemplate.c_class = TrueColor;
@@ -1328,7 +1328,7 @@ bool X11VideoDriver::init()
         }
     }
 
-    if(visual == NULL)
+    if(visual == nullptr)
     {
         fprintf(stderr, "%s: no acceptable visual found, exiting.\n",
                 ROMlib_appname.c_str());
@@ -1355,7 +1355,7 @@ bool X11VideoDriver::init()
     {
         syn68k_addr_t event_callback;
 
-        event_callback = callback_install(post_pending_x_events, NULL);
+        event_callback = callback_install(post_pending_x_events, nullptr);
         *(GUEST<ULONGINT> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = CL((ULONGINT)event_callback);
     }
 
@@ -1407,7 +1407,7 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
     if(!width
        || !height)
     {
-        geom = NULL;
+        geom = nullptr;
         get_string_resource("geometry", &geom);
         if(geom)
         {
@@ -1536,7 +1536,7 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
         XStringListToTextProperty(&program_name, 1, &name);
 
         XSetWMProperties(x_dpy, x_window,
-                         &name, &name, /* _argv, *_argc, */ NULL, 0,
+                         &name, &name, /* _argv, *_argc, */ nullptr, 0,
                          &size_hints, &wm_hints, &class_hint);
     }
 
@@ -1642,9 +1642,9 @@ void cursor_init(void)
     /* the following are used to create x cursors, they must
      be done before calling `create_x_cursor ()' */
     x_image_cursor_data = XCreateImage(x_dpy, XDefaultVisual(x_dpy, x_screen),
-                                       1, XYBitmap, 0, NULL, 16, 16, 8, 2);
+                                       1, XYBitmap, 0, nullptr, 16, 16, 8, 2);
     x_image_cursor_mask = XCreateImage(x_dpy, XDefaultVisual(x_dpy, x_screen),
-                                       1, XYBitmap, 0, NULL, 16, 16, 8, 2);
+                                       1, XYBitmap, 0, nullptr, 16, 16, 8, 2);
 
     x_image_cursor_data->byte_order = MSBFirst;
     x_image_cursor_mask->byte_order = MSBFirst;
@@ -1709,7 +1709,7 @@ static struct
 static uint32_t _cmap_mapping[256];
 
 /* mapping from mac color table index values to x color map index
-   values; or NULL if the mapping is the identity */
+   values; or nullptr if the mapping is the identity */
 static uint32_t *cmap_mapping;
 
 static void
@@ -1979,7 +1979,7 @@ void X11VideoDriver::setColors(int first_color, int num_colors,
                                 : &mac_32bpp_rgb_spec);
 
             conversion_func
-                = depthconv_make_rgb_to_rgb_table(depth_table_space, NULL,
+                = depthconv_make_rgb_to_rgb_table(depth_table_space, nullptr,
                                                   mac_rgb_spec, &x_rgb_spec);
         }
         else
@@ -1988,7 +1988,7 @@ void X11VideoDriver::setColors(int first_color, int num_colors,
 
             conversion_func
                 = depthconv_make_ind_to_rgb_table(depth_table_space, bpp(),
-                                                  NULL, colors, &x_rgb_spec);
+                                                  nullptr, colors, &x_rgb_spec);
             updateScreen(0, 0, height(), width(), false);
         }
     }
@@ -2030,7 +2030,7 @@ void X11VideoDriver::setColors(int first_color, int num_colors,
 
             conversion_func
                 = depthconv_make_raw_table(depth_table_space, bpp(),
-                                           x_fbuf_bpp, NULL, cmap_mapping);
+                                           x_fbuf_bpp, nullptr, cmap_mapping);
             updateScreen(0, 0, height(), width(), false);
         }
     }
@@ -2046,26 +2046,26 @@ void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
     int i;
 
     convert_p = (x_fbuf_bpp == bpp()
-                 && conversion_func == NULL);
+                 && conversion_func == nullptr);
 
     if(!convert_p)
     {
         /* we need to convert the mac screen to something the
 	 x screen can take */
         /* allocate the double buffer */
-        if(x_fbuf == NULL)
+        if(x_fbuf == nullptr)
         {
             alloc_x_image(x_fbuf_bpp, max_width, max_height,
                           &x_fbuf_row_bytes, &x_x_image, &x_fbuf, &x_fbuf_bpp);
             if(x_fbuf_bpp > 8)
             {
-                assert(conversion_func != NULL);
+                assert(conversion_func != nullptr);
             }
             else
             {
                 conversion_func
                     = depthconv_make_raw_table(depth_table_space, bpp(),
-                                               x_fbuf_bpp, NULL, cmap_mapping);
+                                               x_fbuf_bpp, nullptr, cmap_mapping);
             }
         }
     }
@@ -2096,7 +2096,7 @@ void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
 
 void X11VideoDriver::shutdown(void)
 {
-    if(x_dpy == NULL)
+    if(x_dpy == nullptr)
         return;
 
     /* no more sigio */
@@ -2107,7 +2107,7 @@ void X11VideoDriver::shutdown(void)
 
     XCloseDisplay(x_dpy);
 
-    x_dpy = NULL;
+    x_dpy = nullptr;
 }
 
 bool X11VideoDriver::isAcceptableMode(int width, int height, int bpp,
@@ -2196,7 +2196,7 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         memset(framebuffer_, 0xFF, rowBytes_ * height);
 
         /* invalidate the conversion function */
-        conversion_func = NULL;
+        conversion_func = nullptr;
     }
 
     if(isGrayscale_ != grayscale_p)
@@ -2204,19 +2204,19 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         isGrayscale_ = grayscale_p;
 
         /* invalidate the conversion function */
-        conversion_func = NULL;
+        conversion_func = nullptr;
     }
 
     /* Compute the rgb spec. */
-    rgbSpec_ = (conversion_func == NULL
+    rgbSpec_ = (conversion_func == nullptr
                             ? (visual->c_class == TrueColor
                                    ? &x_rgb_spec
-                                   : NULL)
+                                   : nullptr)
                             : (this->bpp() == 32
                                    ? &mac_32bpp_rgb_spec
                                    : (this->bpp() == 16
                                           ? &mac_16bpp_rgb_spec
-                                          : NULL)));
+                                          : nullptr)));
 
     return true;
 }
@@ -2276,7 +2276,7 @@ X11VideoDriver::accelFillRect(int top, int left, int bottom,
 void X11VideoDriver::pumpEvents()
 {
     if(x_event_pending_p())
-        post_pending_x_events(/* dummy */ -1, /* dummy */ NULL);
+        post_pending_x_events(/* dummy */ -1, /* dummy */ nullptr);
 
     LONGINT x, y;
     LONGINT newmods;

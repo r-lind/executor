@@ -138,7 +138,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
     OSErr retval;
 
     retval = noErr;
-    head = tail = NULL;
+    head = tail = nullptr;
 
     /* suck out the relevent pixmap bits */
     row_bytes = PIXMAP_ROWBYTES(pixmap);
@@ -226,7 +226,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
             t->next = head;
             head = t;
 
-            if(tail == NULL)
+            if(tail == nullptr)
                 tail = t;
         }
 
@@ -249,8 +249,8 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
                 if(t->count > t->prev->count)
                 {
                     tail = t->prev;
-                    tail->next = NULL;
-                    t->next = t->prev = NULL;
+                    tail->next = nullptr;
+                    t->next = t->prev = nullptr;
 
                     if(t->count > head->count)
                     {
@@ -278,7 +278,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
                                 break;
                             }
                         }
-                        if(current == NULL)
+                        if(current == nullptr)
                             gui_abort();
                     }
                 }
@@ -311,7 +311,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
                     table[i].rgb.green = TILE(t->bank_index >> 5);
                     table[i].rgb.blue = TILE(t->bank_index >> 0);
                 }
-                gui_assert(t == NULL && i == colors_requested);
+                gui_assert(t == nullptr && i == colors_requested);
             }
 
             /* `head' now points to a list, in sorted order, of the most
@@ -344,7 +344,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
 
         for(t = head, next = t->next;
             t;
-            t = next, next = t ? t->next : NULL)
+            t = next, next = t ? t->next : nullptr)
         {
             if(t)
                 DisposePtr((Ptr)t);

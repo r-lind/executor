@@ -1160,7 +1160,7 @@ static OSErr pullout(cacheentry *selfcachep, INTEGER selfindex,
                      cacheentry *parentcachep, INTEGER parentindex,
                      INTEGER *todeletep)
 {
-    cacheentry *leftcachep = NULL, *rightcachep = NULL;
+    cacheentry *leftcachep = nullptr, *rightcachep = nullptr;
     btnode *btp, *parentbtp, *leftbtp, *rightbtp;
     GUEST<INTEGER> *offsetp;
     INTEGER adjust;

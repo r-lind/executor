@@ -22,8 +22,8 @@ static OSErr PBFInfoHelper(changeop op, FileParam *pb, LONGINT dirid,
 {
     OSErr err, err1;
     HVCB *vcbp;
-    filerec *frp = NULL;
-    catkey *catkeyp = NULL;
+    filerec *frp = nullptr;
+    catkey *catkeyp = nullptr;
     btparam btparamrec;
     filekind kind;
 

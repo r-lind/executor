@@ -203,7 +203,7 @@ Executor::get_pair_link_n(heading_t heading, int n)
     pair_link_t *retval;
     heading_link_t *headingp;
 
-    retval = NULL;
+    retval = nullptr;
     headingp = find_heading(heading);
     if(headingp)
     {

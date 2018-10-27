@@ -192,7 +192,7 @@ static const uint8_t mix8[] = {
 };
 
 /* Return true if the buffer was used up.  I hate value-result parms,
-   but oh well.  A NULL orig_outbuf is OK; the resampled waveform
+   but oh well.  A nullptr orig_outbuf is OK; the resampled waveform
    will simply be lost. */
 
 static bool
@@ -314,7 +314,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
     if(sndh)
         resp = STARH(sndh);
     else
-        resp = NULL;
+        resp = nullptr;
 
     if(resp)
         format = CW(*(GUEST<INTEGER> *)resp);
@@ -341,7 +341,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
 
             warning_sound_log(" num_commands = %d", num_commands);
 
-            need_allocate = (chanp == NULL);
+            need_allocate = (chanp == nullptr);
 
             if(need_allocate)
             {
@@ -396,7 +396,7 @@ OSErr Executor::C_SndNewChannel(GUEST<SndChannelPtr> *chanpp, INTEGER synth,
     OSErr retval;
 
     warning_sound_log("chanp %p synth %d init 0x%x userroutine %p",
-                      chanpp ? STARH(chanpp) : NULL, synth, init, userroutinep);
+                      chanpp ? STARH(chanpp) : nullptr, synth, init, userroutinep);
 
     switch(ROMlib_PretendSound)
     {
@@ -409,7 +409,7 @@ OSErr Executor::C_SndNewChannel(GUEST<SndChannelPtr> *chanpp, INTEGER synth,
             break;
 
         case soundon:
-            if(STARH(chanpp) == NULL)
+            if(STARH(chanpp) == nullptr)
             {
                 *chanpp = RM((SndChannelPtr)NewPtr(sizeof(SndChannel)));
                 chanp = STARH(chanpp);
@@ -725,7 +725,7 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
     info = SOUND_GET_HUNGER_INFO();
 
     /* For each channel, grab some samples and mix them in */
-    for(chanp = MR(allchans); chanp != NULL; chanp = MR(chanp->nextChan))
+    for(chanp = MR(allchans); chanp != nullptr; chanp = MR(chanp->nextChan))
     {
         if(earlier_p(SND_CHAN_TIME(chanp), info.t2))
         {
@@ -784,7 +784,7 @@ OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
 
 #if 1
     if(!cmdp)
-        warning_sound_log("cmdp = NULL");
+        warning_sound_log("cmdp = nullptr");
     else
         warning_sound_log("cmd %d param1 0x%x param2 0x%x nowait %d", CW(cmdp->cmd),
                           CW(cmdp->param1), CL(cmdp->param2), CW(nowait));
@@ -797,7 +797,7 @@ OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
 
         hp = MR(guest_cast<SoundHeaderPtr>(cmdp->param2));
         if(!hp)
-            warning_sound_log("hp = NULL");
+            warning_sound_log("hp = nullptr");
         else
             warning_sound_log(" len %d rate 0x%x encode %d freq %d",
                               CL(hp->length), CL(hp->sampleRate), hp->encode,

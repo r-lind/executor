@@ -87,7 +87,7 @@ void Executor::C_GetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
     dst_rect = temp_pm.bounds;
 
     CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), (BitMap *)&temp_pm,
-             &src_rect, &dst_rect, srcCopy, NULL);
+             &src_rect, &dst_rect, srcCopy, nullptr);
 
     if(bpp > 8)
     {
@@ -213,7 +213,7 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
 
     if(!matchprocp)
     {
-        matchprocp = (ProcPtr)SYN68K_TO_US(callback_install(default_search_proc_stub, NULL));
+        matchprocp = (ProcPtr)SYN68K_TO_US(callback_install(default_search_proc_stub, nullptr));
         mr.matchData = 0;
     }
     else
@@ -251,7 +251,7 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
     memset(MR(temp_bitmap1.baseAddr), '\377', row_words * 2 * height);
     temp_bitmap1.bounds = temp_rect;
 
-    CopyBits(srcbp, &temp_bitmap1, srcrp, &temp_rect, srcCopy, NULL);
+    CopyBits(srcbp, &temp_bitmap1, srcrp, &temp_rect, srcCopy, nullptr);
 
     DelSearch(matchprocp);
     GD_REF_CON_X(gdev) = save_ref_con;
@@ -265,7 +265,7 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
              row_words * 2, row_words * 2,
              height, row_words, seedh, seedv);
 
-    CopyBits(&temp_bitmap2, dstbp, &temp_rect, dstrp, srcCopy, NULL);
+    CopyBits(&temp_bitmap2, dstbp, &temp_rect, dstrp, srcCopy, nullptr);
 
     PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = save_pic_handle;
     PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = save_graf_procs;
@@ -296,7 +296,7 @@ void Executor::C_CalcCMask(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
 
     if(!matchprocp)
     {
-        matchprocp = (ProcPtr)SYN68K_TO_US(callback_install(default_search_proc_stub, NULL));
+        matchprocp = (ProcPtr)SYN68K_TO_US(callback_install(default_search_proc_stub, nullptr));
         mr.matchData = CL(1);
     }
     else
@@ -332,7 +332,7 @@ void Executor::C_CalcCMask(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
     memset(MR(temp_bitmap1.baseAddr), '\377', row_words * 2 * height);
     temp_bitmap1.bounds = temp_rect;
 
-    CopyBits(srcbp, &temp_bitmap1, srcrp, &temp_rect, srcCopy, NULL);
+    CopyBits(srcbp, &temp_bitmap1, srcrp, &temp_rect, srcCopy, nullptr);
 
     DelSearch(matchprocp);
     GD_REF_CON_X(gdev) = save_ref_con;
@@ -346,7 +346,7 @@ void Executor::C_CalcCMask(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
              row_words * 2, row_words * 2,
              height, row_words);
 
-    CopyBits(&temp_bitmap2, dstbp, &temp_rect, dstrp, srcCopy, NULL);
+    CopyBits(&temp_bitmap2, dstbp, &temp_rect, dstrp, srcCopy, nullptr);
 
     PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = save_pic_handle;
     PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = save_graf_procs;

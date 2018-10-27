@@ -470,7 +470,7 @@ aggr_get_key_desc(Handle aggr_handle,
                                        out_desc);
                 }
                 if(err != noErr)
-                    return NULL;
+                    return nullptr;
                 return out_desc;
             }
 
@@ -484,7 +484,7 @@ aggr_get_key_desc(Handle aggr_handle,
                                        out_desc);
                 }
                 if(err != noErr)
-                    return NULL;
+                    return nullptr;
                 return out_desc;
             }
 
@@ -498,19 +498,19 @@ aggr_get_key_desc(Handle aggr_handle,
                                        out_desc);
                 }
                 if(err != noErr)
-                    return NULL;
+                    return nullptr;
                 return out_desc;
             }
         }
     }
 
     if(!find_key_index(aggr_handle, keyword, attr_p, &index))
-        return NULL;
+        return nullptr;
 
     err = aggr_desc_get_addr(aggr_handle, index, attr_p,
                              (char **)&inline_key_desc, &size, false, false);
     if(err != noErr)
-        return NULL;
+        return nullptr;
 
     {
         HLockGuard guard(aggr_handle);
@@ -519,7 +519,7 @@ aggr_get_key_desc(Handle aggr_handle,
                            out_desc);
     }
     if(err != noErr)
-        return NULL;
+        return nullptr;
 
     return out_desc;
 }
@@ -730,7 +730,7 @@ OSErr Executor::C_AECreateDesc(DescType type, Ptr data, Size data_size,
     Handle h;
 
     h = NewHandle(data_size);
-    if(h == NULL)
+    if(h == nullptr)
         AE_RETURN_ERROR(memFullErr);
 
     if(data)
@@ -738,7 +738,7 @@ OSErr Executor::C_AECreateDesc(DescType type, Ptr data, Size data_size,
     else
     {
         if(data_size != 0)
-            warning_unexpected("NULL data, data_size = %d", data_size);
+            warning_unexpected("nullptr data, data_size = %d", data_size);
         memset(STARH(h), 0, data_size);
     }
 
@@ -901,7 +901,7 @@ OSErr Executor::C_AESizeOfNthItem(AEDescList *list, int32_t index,
     if(!LIST_CLASS_P(list))
         AE_RETURN_ERROR(errAEWrongDataType);
 
-    if(!aggr_get_nth_desc(DESC_DATA(list), index, NULL, desc))
+    if(!aggr_get_nth_desc(DESC_DATA(list), index, nullptr, desc))
         AE_RETURN_ERROR(errAEIllegalIndex);
 
     *type_out = DESC_TYPE_X(desc);
@@ -922,7 +922,7 @@ OSErr Executor::C_AEGetParamDesc(AERecord *record, AEKeyword keyword,
 
     desc = aggr_get_key_desc(DESC_DATA(record), keyword, false,
                              (descriptor_t *)alloca(sizeof *desc));
-    if(desc == NULL)
+    if(desc == nullptr)
         AE_RETURN_ERROR(errAEDescNotFound);
 
     AE_RETURN_ERROR(AECoerceDesc(desc, desired_type, desc_out));
@@ -1061,7 +1061,7 @@ OSErr Executor::C_AEGetAttributeDesc(AppleEvent *evt, AEKeyword keyword,
 
     desc = aggr_get_key_desc(DESC_DATA(evt), keyword, true,
                              (descriptor_t *)alloca(sizeof *desc));
-    if(desc == NULL)
+    if(desc == nullptr)
         AE_RETURN_ERROR(errAEDescNotFound);
 
     AE_RETURN_ERROR(AECoerceDesc(desc, desired_type, desc_out));
@@ -1081,7 +1081,7 @@ OSErr Executor::C_AEGetAttributePtr(AppleEvent *evt, AEKeyword keyword,
 
     desc = aggr_get_key_desc(DESC_DATA(evt), keyword, true,
                              (descriptor_t *)alloca(sizeof *desc));
-    if(desc == NULL)
+    if(desc == nullptr)
         AE_RETURN_ERROR(errAEDescNotFound);
 
     err = AECoerceDesc(desc, desired_type, coerced_desc);
@@ -1116,7 +1116,7 @@ OSErr Executor::C_AESizeOfAttribute(AppleEvent *evt, AEKeyword keyword,
 
     desc = aggr_get_key_desc(DESC_DATA(evt), keyword, true,
                              (descriptor_t *)alloca(sizeof *desc));
-    if(desc == NULL)
+    if(desc == nullptr)
         AE_RETURN_ERROR(errAEDescNotFound);
 
     *type_out = DESC_TYPE_X(desc);

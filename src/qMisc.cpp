@@ -69,7 +69,7 @@ BOOLEAN Executor::C_GetPixel(INTEGER h, INTEGER v)
     dst_rect = temp_bm.bounds;
 
     CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), &temp_bm,
-             &src_rect, &dst_rect, srcCopy, NULL);
+             &src_rect, &dst_rect, srcCopy, nullptr);
 
     return (*temp_fbuf & 0x80) != 0;
 }

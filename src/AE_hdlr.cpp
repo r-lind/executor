@@ -96,7 +96,7 @@ hdlr_table_elt(AE_hdlr_table_h table,
     {
         elt = &elts[elt_index];
 
-        if((hdlr == NULL
+        if((hdlr == nullptr
             || hdlr->fn == elt->hdlr.fn)
            && elt->selector.sel0 == selector->sel0
            && elt->selector.sel1 == selector->sel1)
@@ -167,7 +167,7 @@ OSErr Executor::C__AE_hdlr_delete(AE_hdlr_table_h table, int32_t unknown_1,
 
     gui_assert(unknown_1 == 0);
 
-    err = hdlr_table_elt(table, selector, NULL, false, &elt);
+    err = hdlr_table_elt(table, selector, nullptr, false, &elt);
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
@@ -192,7 +192,7 @@ OSErr Executor::C__AE_hdlr_lookup(AE_hdlr_table_h table, int32_t unknown_1,
 
     gui_assert(unknown_1 == 0);
 
-    err = hdlr_table_elt(table, selector, NULL, false, &elt);
+    err = hdlr_table_elt(table, selector, nullptr, false, &elt);
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
@@ -281,7 +281,7 @@ OSErr Executor::C_AEGetEventHandler(AEEventClass event_class,
                      "You may try to continue, but in all likelihood Executor "
                      "will soon crash because of this incompatibility.",
                      0, "Exit", "Continue",
-                     NULL, C_ExitToShell, dummy, NULL);
+                     nullptr, C_ExitToShell, dummy, nullptr);
 #endif
 
     table = hdlr_table(system_handler_p, event);
@@ -289,7 +289,7 @@ OSErr Executor::C_AEGetEventHandler(AEEventClass event_class,
     selector.sel0 = CL(event_class);
     selector.sel1 = CL(event_id);
 
-    err = hdlr_table_elt(table, &selector, NULL, false, &elt);
+    err = hdlr_table_elt(table, &selector, nullptr, false, &elt);
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
@@ -333,7 +333,7 @@ OSErr Executor::C_AEInstallCoercionHandler(
     AE_hdlr_t hdlr;
     OSErr err;
 
-    if(hdlr_fn == NULL)
+    if(hdlr_fn == nullptr)
         AE_RETURN_ERROR(paramErr);
 
     table = hdlr_table(system_handler_p, coercion);
@@ -372,7 +372,7 @@ OSErr Executor::C_AEGetCoercionHandler(DescType from_type, DescType to_type,
     selector.sel0 = CL(from_type);
     selector.sel1 = CL(to_type);
 
-    err = hdlr_table_elt(table, &selector, NULL, false, &elt);
+    err = hdlr_table_elt(table, &selector, nullptr, false, &elt);
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
@@ -417,7 +417,7 @@ OSErr Executor::C_AEInstallSpecialHandler(
     AE_hdlr_t hdlr;
     OSErr err;
 
-    if(hdlr_fn == NULL)
+    if(hdlr_fn == nullptr)
         AE_RETURN_ERROR(paramErr);
 
     /* #### OSL internal */
@@ -460,7 +460,7 @@ OSErr Executor::C_AEGetSpecialHandler(AEKeyword function_class,
     selector.sel0 = CL(function_class);
     selector.sel1 = CL(k_special_sel1);
 
-    err = hdlr_table_elt(table, &selector, NULL, false, &elt);
+    err = hdlr_table_elt(table, &selector, nullptr, false, &elt);
     if(err != noErr)
         AE_RETURN_ERROR(err);
 

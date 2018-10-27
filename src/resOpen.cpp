@@ -134,8 +134,8 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
 
     *final_sizep = *dlenp;
     *offsetp = 0;
-    *dcmp_handlep = NULL;
-    *workspacep = NULL;
+    *dcmp_handlep = nullptr;
+    *workspacep = nullptr;
 
     GetFPos(rn, &master_save_pos);
     len = sizeof info;
@@ -221,8 +221,8 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
                              Handle retval)
 {
     int32_t dcmp_offset = 0;
-    Handle dcmp_handle = NULL;
-    Ptr dcmp_workspace = NULL;
+    Handle dcmp_handle = nullptr;
+    Ptr dcmp_workspace = nullptr;
     int32_t uncompressed_size = 0;
     Ptr xxx;
     OSErr err;
@@ -240,7 +240,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
                 compressed_p = false;
             else
             {
-                retval = NULL;
+                retval = nullptr;
                 done_p = true;
             }
         }
@@ -251,8 +251,8 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         if(!compressed_p)
         {
             dcmp_offset = 0;
-            dcmp_handle = NULL;
-            dcmp_workspace = NULL;
+            dcmp_handle = nullptr;
+            dcmp_workspace = nullptr;
             uncompressed_size = dlen;
         }
 
@@ -276,8 +276,8 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
             if(dcmp_workspace)
                 DisposePtr(dcmp_workspace);
             DisposeHandle(MR(rr->rhand));
-            rr->rhand = NULL;
-            retval = NULL;
+            rr->rhand = nullptr;
+            retval = nullptr;
         }
         else
         {
@@ -330,7 +330,7 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
         loc = Hx(map, rh.rdatoff) + B3TOLONG(rr->doff);
         ROMlib_setreserr(SetFPos(Hx(map, resfn), fsFromStart, loc));
         if(LM(ResErr) != CWC(noErr))
-            retval = NULL;
+            retval = nullptr;
         else
         {
             int32_t lc;
@@ -341,7 +341,7 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
             err = FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)&dlen_s);
             ROMlib_setreserr(err);
             if(LM(ResErr) != CWC(noErr))
-                retval = NULL;
+                retval = nullptr;
             else
             {
                 int32_t dlen = CL(dlen_s);

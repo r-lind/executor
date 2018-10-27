@@ -136,7 +136,7 @@ enum pixpat_pattern_types
 
 using namespace Executor;
 
-FILE *Executor::o_fp = NULL;
+FILE *Executor::o_fp = nullptr;
 
 static int indent = 0;
 
@@ -186,7 +186,7 @@ void Executor::dump_init(char *dst)
     if(dst)
     {
         o_fp = Ufopen(dst, "w");
-        if(o_fp == NULL)
+        if(o_fp == nullptr)
             exit(1);
     }
     else
@@ -309,7 +309,7 @@ void Executor::dump_bits16(GUEST<Bits16> data)
         x.bounds.bottom = CWC(16);
         x.bounds.right = CWC(16);
 
-        dump_bitmap_data(&x, 1, NULL);
+        dump_bitmap_data(&x, 1, nullptr);
     }
     else
         iprintf((o_fp, "[%s field omitted]\n", field_name.c_str()));
@@ -332,7 +332,7 @@ void Executor::dump_bitmap(BitMap *x, Rect *rect)
 
 void Executor::dump_bitmap_null_rect(BitMap *x)
 {
-    dump_bitmap(x, NULL);
+    dump_bitmap(x, nullptr);
 }
 
 void Executor::dump_grafport(GrafPtr x)
@@ -348,7 +348,7 @@ void Executor::dump_qdprocs(QDProcsPtr x)
 {
     iprintf((o_fp, "%s(QDProcsPtr *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    if(x != NULL)
+    if(x != nullptr)
     {
         iprintf((o_fp, "textProc    %p;\n", (ProcPtr)MR(x->textProc)));
         iprintf((o_fp, "lineProc    %p;\n", (ProcPtr)MR(x->lineProc)));
@@ -553,7 +553,7 @@ void dump_pixmap_ptr(PixMapPtr x, Rect *rect)
 
 void Executor::dump_pixmap_null_rect(PixMapHandle pixmap)
 {
-    dump_pixmap(pixmap, NULL);
+    dump_pixmap(pixmap, nullptr);
 }
 
 void Executor::dump_pixmap(PixMapHandle pixmap, Rect *rect)
@@ -596,7 +596,7 @@ void Executor::dump_cqdprocs(CQDProcsPtr x)
 {
     iprintf((o_fp, "%s(CQDProcsPtr *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    if(x != NULL)
+    if(x != nullptr)
     {
         iprintf((o_fp, "textProc     %p;\n", (ProcPtr)MR(x->textProc)));
         iprintf((o_fp, "lineProc     %p;\n", (ProcPtr)MR(x->lineProc)));
@@ -822,7 +822,7 @@ void Executor::dump_ccrsr(CCrsrHandle ccrsr)
         bm.bounds.right = CWC(16);
 
         field_name = "crsrXData";
-        dump_bitmap_data(&bm, depth, NULL);
+        dump_bitmap_data(&bm, depth, nullptr);
         field_name = "";
     }
     else

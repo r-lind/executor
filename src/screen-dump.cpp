@@ -161,7 +161,7 @@ dump_indirect_pm(PixMap *pm)
 
         CopyBits((BitMap *)pm, (BitMap *)tiff_pm,
                  &pm->bounds, &tiff_pm->bounds,
-                 srcCopy, NULL);
+                 srcCopy, nullptr);
     }
     else
     {

@@ -50,7 +50,7 @@ qPict2.cpp:316ff
 	    table[i].rgb.green = TILE (t->bank_index >> 5);
 	    table[i].rgb.blue  = TILE (t->bank_index >> 0);
 	  }
-	gui_assert (t == NULL && i == colors_requested);
+	gui_assert (t == nullptr && i == colors_requested);
       }
 WTF?
 my version:

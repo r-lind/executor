@@ -448,7 +448,7 @@ ctab_from_surface(SDL_Surface *surfp)
     ColorSpec *op;
     int i;
 
-    retval = NULL;
+    retval = nullptr;
 
     n_colors = SDL_n_colors(surfp);
     retval = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(n_colors - 1));
@@ -474,7 +474,7 @@ gworld_from_surface(SDL_Surface *surfp)
 {
     GWorldPtr retval;
 
-    retval = NULL;
+    retval = nullptr;
 
     if(surfp)
     {
@@ -482,7 +482,7 @@ gworld_from_surface(SDL_Surface *surfp)
         int surf_depth;
         CTabHandle ctab;
 
-        ctab = NULL;
+        ctab = nullptr;
 
         surf_depth = SDL_Surface_depth(surfp);
         switch(surf_depth)
@@ -518,7 +518,7 @@ gworld_from_surface(SDL_Surface *surfp)
                 GetGWorld(&save_port, &save_device);
                 save_port = MR(save_port);
                 save_device = MR(save_device);
-                err = NewGWorld(&retval, surf_depth, &r, ctab, NULL, keepLocal);
+                err = NewGWorld(&retval, surf_depth, &r, ctab, nullptr, keepLocal);
                 SetGWorld(save_port, save_device);
             }
             if(retval)
@@ -580,7 +580,7 @@ pict_from_gworld(GWorldPtr gp, int *lenp)
     PicHandle retval;
 
     if(!gp)
-        retval = NULL;
+        retval = nullptr;
     else
     {
         Rect pict_frame;
@@ -594,7 +594,7 @@ pict_from_gworld(GWorldPtr gp, int *lenp)
             ClipRect(&pict_frame);
             HLock((Handle)pm);
             CopyBits((BitMap *)STARH(pm), PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-                     &pict_frame, &pict_frame, srcCopy, NULL);
+                     &pict_frame, &pict_frame, srcCopy, nullptr);
             HUnlock((Handle)pm);
             ClosePicture();
         }
@@ -637,7 +637,7 @@ pict_from_lp(const void *lp)
     PicHandle retval;
 
     if(!lp)
-        retval = NULL;
+        retval = nullptr;
     else
     {
         int len;
@@ -655,7 +655,7 @@ pict_from_lp(const void *lp)
             {
                 warning_unexpected(NULL_STRING);
                 DisposeHandle((Handle)retval);
-                retval = NULL;
+                retval = nullptr;
             }
         }
     }
@@ -668,7 +668,7 @@ gworld_from_pict(PicHandle ph)
 {
     GWorldPtr retval;
 
-    retval = NULL;
+    retval = nullptr;
     if(ph)
     {
         CGrafPtr save_port;
@@ -680,13 +680,13 @@ gworld_from_pict(PicHandle ph)
         save_port = MR(save_port);
         save_device = MR(save_device);
         r = HxX(ph, picFrame);
-        err = NewGWorld(&retval, 32, &r, NULL, NULL, keepLocal);
+        err = NewGWorld(&retval, 32, &r, nullptr, nullptr, keepLocal);
         if(retval)
         {
             PixMapHandle pm;
 
             retval = MR(retval);
-            SetGWorld(retval, NULL);
+            SetGWorld(retval, nullptr);
             pm = GetGWorldPixMap(retval);
             LockPixels(pm);
             DrawPicture(ph, &r);
@@ -714,7 +714,7 @@ surface_from_gworld(GWorldPtr gp)
     SDL_Surface *retval;
 
     if(!gp)
-        retval = NULL;
+        retval = nullptr;
     else
     {
         int pixels_per_line;

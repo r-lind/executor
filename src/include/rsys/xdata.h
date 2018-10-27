@@ -26,7 +26,7 @@ typedef struct _xdata_t
     int height_minus_1; /* Number of rows in this pattern, minus 1.  */
     int byte_size; /* Total bytes taken by pattern.	     */
     GUEST<LONGINT> ctab_seed_x; /* Big endian color table seed.		     */
-    const rgb_spec_t *rgb_spec; /* Only non-NULL for log2_bpp >= 4.	     */
+    const rgb_spec_t *rgb_spec; /* Only non-nullptr for log2_bpp >= 4.	     */
 
     uint32_t magic_cookie;
 
@@ -44,7 +44,7 @@ typedef struct _xdata_t
 
     /* Exactly one of these two holds the actual bits for the pattern. */
     uint32_t pat_value; /* For short, narrow patterns.		     */
-    uint32_t *pat_bits; /* For tall and/or wide patterns (else NULL).*/
+    uint32_t *pat_bits; /* For tall and/or wide patterns (else nullptr).*/
 
     Ptr raw_pat_bits_mem; /* Might not == pat_bits; for DisposePtr.     */
 

@@ -297,7 +297,7 @@ port_to_handle(uint8_t port)
                 com_filename[sizeof COM_TEMPLATE - 2] += com_minus_1;
                 retval = com_hands[com_minus_1]
                     = CreateFile(com_filename, GENERIC_READ | GENERIC_WRITE,
-                                 0, NULL, OPEN_EXISTING, 0, NULL);
+                                 0, nullptr, OPEN_EXISTING, 0, nullptr);
             }
         }
     }
@@ -368,7 +368,7 @@ serial_bios_xfer(LONGINT fd, void *buf, size_t count, xferfuncp_t funcp)
     {
         DWORD nread;
 
-        if(funcp(h, buf, count, &nread, NULL))
+        if(funcp(h, buf, count, &nread, nullptr))
             retval = nread;
         else
             retval = 0;

@@ -20,7 +20,7 @@
 #error C++ required
 #endif
 
-//#define AUTOMATIC_CONVERSIONS
+#define AUTOMATIC_CONVERSIONS
 
 namespace Executor
 {
@@ -245,7 +245,6 @@ struct GuestWrapper : GuestWrapperOps<T>
     using HostType = typename Traits::HostType;
     using GuestType = typename Traits::GuestType;
 
-   // template<typename enable = std::enable_if_t<Traits::fitsInRegister>>
     uint32_t raw_host_order() const
     {
         static_assert(Traits::fitsInRegister);
@@ -255,7 +254,6 @@ struct GuestWrapper : GuestWrapperOps<T>
             return 0;
     }
 
-  //  template<typename enable = std::enable_if_t<Traits::fitsInRegister>>
     void raw_host_order(uint32_t x)
     {
         static_assert(Traits::fitsInRegister);
@@ -350,34 +348,45 @@ struct GuestWrapper : GuestWrapperOps<T>
         return this->raw() != b.raw();
     }
 
-#ifdef AUTOMATIC_CONVERSIONS
+//#ifdef AUTOMATIC_CONVERSIONS
+#if 0
     template<typename T2>
-    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool> 
-    operator==(GuestWrapper<T> a, T2 b)
+    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool> 
+    friend auto
+    operator==(GuestWrapper<T> a, T2 b) -> decltype(a.get() == b)
     {
         return a.get() == b;
     }
     template<typename T2> 
-    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
-    operator!=(GuestWrapper<T> a, T2 b)
+    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
+    friend auto
+    operator!=(GuestWrapper<T> a, T2 b) -> decltype(a.get() == b)
     {
         return a.get() != b;
     }
     template<typename T2>
-    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
-    operator==(T2 a, GuestWrapper<T> b)
+    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
+    friend auto
+    operator==(T2 a, GuestWrapper<T> b) -> decltype(a == b.get())
     {
         return a == b.get();
     }
     template<typename T2>
-    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
-     operator!=(T2 a, GuestWrapper<T> b)
+    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
+    friend auto
+    operator!=(T2 a, GuestWrapper<T> b) -> decltype(a == b.get())
     {
         return a != b.get();
     }
 #endif
 };
 
+template<class T1, class T2>
+auto operator==(GuestWrapper<T1> a, T2 b)
+    -> decltype(GuestTypeTraits<T1>::HostType() == GuestTypeTraits<T2>::HostType())
+{
+    return a.get() == b;
+}
 
 template<typename T>
 struct GuestWrapperOps<T*> : GuestWrapperGetSet<T*>

@@ -107,7 +107,7 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
 			       src_rect could be an alias to portRect,
 			       like it is in "SimuVent" */
             
-      bogo_port_pixmap = NULL;
+      bogo_port_pixmap = nullptr;
       
       /* save away MR(qdGlobals().thePort) fields */
       /* this saves the port bits (in the case of a GrafPort), and

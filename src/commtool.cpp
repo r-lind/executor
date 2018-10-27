@@ -97,7 +97,7 @@ serial_insert(const char *input, const char *output, const char *name)
             p->inputDriverName = RM(stringhandle_from_c_string(input));
             p->outputDriverName = RM(stringhandle_from_c_string(output));
             p->name = RM(stringhandle_from_c_string(name));
-            p->deviceIcon = NULL;
+            p->deviceIcon = nullptr;
             p->ratedSpeed = CLC(19200);
             p->maxSpeed = CLC(57600);
             p->reserved = CLC(0);

@@ -135,7 +135,7 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
     }
     else if(CB(dst->itmtype) & iconItem)
     {
-        Handle h = NULL;
+        Handle h = nullptr;
 
         if(/* CGrafPort_p (dp) */
            /* since copybits will do the right thing copying a color
@@ -281,7 +281,7 @@ CDialogPtr Executor::C_NewColorDialog(Ptr storage, Rect *bounds, StringPtr title
                                   LONGINT ref_con, Handle items) /* IMI-412 */
 {
     return (CDialogPtr)ROMlib_new_dialog_common((DialogPtr)storage,
-                                                /* color */ true, NULL, NULL,
+                                                /* color */ true, nullptr, nullptr,
                                                 bounds, title, visible_p, proc_id,
                                                 behind, go_away_flag, ref_con,
                                                 items);
@@ -293,7 +293,7 @@ DialogPtr Executor::C_NewDialog(Ptr storage, Rect *bounds, StringPtr title,
                                 LONGINT ref_con, Handle items) /* IMI-412 */
 {
     return ROMlib_new_dialog_common((DialogPtr)storage,
-                                    /* not color */ false, NULL, NULL,
+                                    /* not color */ false, nullptr, nullptr,
                                     bounds, title, visible_p, proc_id,
                                     behind, go_away_flag, ref_con, items);
 }
@@ -380,7 +380,7 @@ DialogPtr Executor::C_GetNewDialog(INTEGER id, Ptr dst,
     dialog_item_list_res_h = ROMlib_copy_handle(dialog_item_list_res_h);
 
     if(!dialog_res_h || !dialog_item_list_res_h)
-        return NULL;
+        return nullptr;
 
     dialog_ctab_res_h = ROMlib_getrestid(TICK("dctb"), id);
     item_ctab_res_h = ROMlib_getrestid(TICK("ictb"), id);
@@ -447,7 +447,7 @@ void Executor::C_DisposeDialog(DialogPtr dp) /* IMI-415 */
     teh = DIALOG_TEXTH(dp);
 
     /* accounted for elsewhere */
-    TE_HTEXT_X(teh) = NULL;
+    TE_HTEXT_X(teh) = nullptr;
     TEDispose(teh);
 
     DisposePtr((Ptr)dp);

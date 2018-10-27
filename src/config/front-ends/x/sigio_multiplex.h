@@ -16,7 +16,7 @@
     sigprocmask(SIG_BLOCK, &_mask, &_orig_mask);
 
 #define BLOCK_SIGIO_END \
-    sigprocmask(SIG_SETMASK, &_orig_mask, NULL);
+    sigprocmask(SIG_SETMASK, &_orig_mask, nullptr);
 
 class BlockSigIOGuard
 {

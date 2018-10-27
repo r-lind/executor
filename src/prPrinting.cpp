@@ -387,7 +387,7 @@ open_ps_file(bool *need_pclosep)
 {
     FILE *retval;
 
-    retval = NULL;
+    retval = nullptr;
     *need_pclosep = false;
 
 #if defined(LINUX)
@@ -431,14 +431,14 @@ open_ps_file(bool *need_pclosep)
             if(!ROMlib_spool_file)
             {
                 warning_unexpected(NULL_STRING);
-                retval = NULL;
+                retval = nullptr;
             }
             else
             {
                 retval = Ufopen(ROMlib_spool_file, "w");
 #if !defined(MSDOS) && !defined(CYGWIN32)
                 free(ROMlib_spool_file);
-                ROMlib_spool_file = NULL;
+                ROMlib_spool_file = nullptr;
 #endif
             }
         }
@@ -527,7 +527,7 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
             }
             else
             {
-                p = NULL;
+                p = nullptr;
                 len = 0;
             }
             fprintf(ROMlib_printfile, ROMlib_doc_begin,
@@ -607,7 +607,7 @@ void Executor::C_PrCloseDoc(TPPrPort port)
                            ROMlib_printer, WIN32_TOKEN);
         if(strcmp(ROMlib_printer, WIN32_TOKEN) == 0)
         {
-            print_file(ROMlib_wp, ROMlib_spool_file, NULL);
+            print_file(ROMlib_wp, ROMlib_spool_file, nullptr);
         }
 #endif
     }

@@ -330,7 +330,7 @@ Executor::OSErr MacBridge::SetSpeechPitch (Executor::SpeechChannel chan, Executo
     
     float ourFloatPitch = FixedToFloat(CL(pitch).get());
     
-    wasSuccess = [synth setObject:@(ourFloatPitch) forProperty:NSSpeechPitchModProperty error:NULL] ? Executor::noErr : -1;
+    wasSuccess = [synth setObject:@(ourFloatPitch) forProperty:NSSpeechPitchModProperty error:nullptr] ? Executor::noErr : -1;
   }
   
   return CW(wasSuccess).get();
@@ -346,7 +346,7 @@ Executor::OSErr MacBridge::GetSpeechPitch (Executor::SpeechChannel chan, Executo
     NSSpeechSynthesizer *synth = synthesizerMap[chan->data[0]];
     
     NSNumber *ourNum = [synth objectForProperty:NSSpeechPitchModProperty error:nil];
-    if (ourNum == NULL) {
+    if (ourNum == nullptr) {
       toRet = -1;
     } else {
       Executor::Fixed ourPitch = FloatToFixed(ourNum.floatValue);
@@ -392,7 +392,7 @@ Executor::OSErr MacBridge::GetVoiceDescription (
   if (CL(infoLength).get() != 362) {
     return Executor::paramErr;
   }
-  if (voice == NULL || info == NULL) {
+  if (voice == nullptr || info == nullptr) {
     return Executor::paramErr;
   }
   

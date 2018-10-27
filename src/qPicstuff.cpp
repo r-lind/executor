@@ -1168,7 +1168,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
 	       what happens on a Mac.  This hack should be more
 	       thoroughly investigated sometime. */
 
-            if(h == NULL)
+            if(h == nullptr)
             {
                 TheZoneGuard guard(LM(SysZone));
 
@@ -1198,7 +1198,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
         uint8_t *temp_scanline, *scanline, *ep;
 
         h = NewHandle(final_data_size);
-        if(h == NULL)
+        if(h == nullptr)
         {
             TheZoneGuard guard(LM(SysZone));
 
@@ -1226,7 +1226,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
             else
             {
                 inp = nextbytep;
-                temph = NULL;
+                temph = nullptr;
             }
             dp = RM((Ptr)temp_scanline);
             temp_pp = RM((Ptr)inp);
@@ -1573,7 +1573,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     if(CGrafPort_p(the_port))
         the_cport = theCPort;
     else
-        the_cport = NULL;
+        the_cport = nullptr;
 
     saveport = *the_port;
     saveportbounds = PORT_BOUNDS(the_port);
@@ -1841,7 +1841,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                         {
                             if(hand)
                                 DisposeHandle(hand);
-                            hand = NULL;
+                            hand = nullptr;
                         }
 
                         if(words[0] & 0x8000)
@@ -1973,7 +1973,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                     break;
                 case xxx1(PXP):
                     (*(void (*)(Handle))f)(hand);
-                    hand = NULL;
+                    hand = nullptr;
                     break;
                 case xxx1(RGN):
                 case xxx1(PLY):
@@ -2046,7 +2046,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     *the_port = saveport;
     PORT_BOUNDS(the_port) = saveportbounds;
     DisposeRgn(saveclip);
-    saveclip = NULL;
+    saveclip = nullptr;
     end_assoc();
     SetFractEnable(saveFractEnable);
     SetFScaleDisable(saveFScaleDisable);

@@ -18,8 +18,8 @@ gw_info_t *gw_info_head, *gw_info_free;
 
 void Executor::ROMlib_InitGWorlds(void)
 {
-    gw_info_head = NULL;
-    gw_info_free = NULL;
+    gw_info_head = nullptr;
+    gw_info_free = nullptr;
 }
 
 #define LOOKUP_GW_INFO_BY_EXPR(expr, value)   \
@@ -33,7 +33,7 @@ void Executor::ROMlib_InitGWorlds(void)
                 return t;                     \
             }                                 \
         }                                     \
-        return NULL;                          \
+        return nullptr;                          \
     }
 
 gw_info_t *
@@ -110,7 +110,7 @@ void delete_gw_info(gw_info_t *gw_info)
                 break;
             }
         }
-        if(t == NULL)
+        if(t == nullptr)
             gui_fatal("gw_info `%p' not in info chain", gw_info);
     }
 
@@ -134,7 +134,7 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
         GDHandle max_gd;
 
         max_gd = GetMaxDevice(bounds);
-        if(max_gd == NULL)
+        if(max_gd == nullptr)
             return paramErr;
         gw_gd = max_gd;
         depth = PIXMAP_PIXEL_SIZE(GD_PMAP(max_gd));
@@ -153,7 +153,7 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
     }
 
 #if defined(BASIC_QD_ONLY)
-    gui_assert(depth == 1 && gw_gd == NULL);
+    gui_assert(depth == 1 && gw_gd == nullptr);
 #endif /* BASIC_QD_ONLY */
 
     /* tests show that if we allocate the gdevice, then the gdevice's
@@ -209,7 +209,7 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
             PIXMAP_CMP_SIZE_X(gd_pixmap) = CW(depth);
         }
         PIXMAP_PIXEL_SIZE_X(gd_pixmap) = CW(depth);
-        if(ctab == NULL && depth <= 8)
+        if(ctab == nullptr && depth <= 8)
         {
             int ctab_max_elt = (1 << depth) - 1;
 
@@ -356,7 +356,7 @@ GWorldFlags Executor::C_UpdateGWorld(GUEST<GWorldPtr> *graphics_world,
     PixMapHandle gw_pmap;
     CTabHandle gw_pmap_ctab;
     GDHandle gw_gd;
-    GDHandle max_gd = NULL;
+    GDHandle max_gd = nullptr;
     QDErr err;
     GWorldFlags retval = 0;
 
@@ -467,7 +467,7 @@ GWorldFlags Executor::C_UpdateGWorld(GUEST<GWorldPtr> *graphics_world,
             CopyBits(PORT_BITS_FOR_COPY(gw),
                      PORT_BITS_FOR_COPY(gw_ret),
                      &src_rect, &dst_rect,
-                     srcCopy, NULL);
+                     srcCopy, nullptr);
         }
         if(gw_info->flags & pixelsLocked)
         {
@@ -630,11 +630,11 @@ Ptr Executor::C_GetPixBaseAddr(PixMapHandle pixels)
 {
     gw_info_t *gw_info = lookup_gw_info_by_gw_pixmap(pixels);
 
-    if(gw_info == NULL)
+    if(gw_info == nullptr)
     {
         gw_info = lookup_gw_info_by_gw_gd_pixmap(pixels);
 
-        if(gw_info == NULL
+        if(gw_info == nullptr
            /* don't dereference the screen baseaddr! */
            || gw_info->gw_gd == MR(LM(MainDevice)))
             return PIXMAP_BASEADDR(pixels);
@@ -662,7 +662,7 @@ QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,
     gd_pixmap = GD_PMAP(max_graphics_device);
 
     pixels = NewPixMap();
-    if(pixels == NULL)
+    if(pixels == nullptr)
         return cNoMemErr;
 
     bpp = PIXMAP_PIXEL_SIZE(gd_pixmap);
@@ -688,7 +688,7 @@ QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,
      the pixel data; not a pointer */
     p = RM((Ptr)NewPtr(rowbytes * height));
 
-    if(p == NULL)
+    if(p == nullptr)
     {
         DisposePixMap(pixels);
         return cNoMemErr;

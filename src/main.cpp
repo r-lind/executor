@@ -441,7 +441,7 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
 {
     static const char *trap_description[] = {
         /* I've only put the really interesting ones in. */
-        NULL, NULL, NULL, NULL,
+        nullptr, nullptr, nullptr, nullptr,
         "Illegal instruction",
         "Integer divide by zero",
         "CHK/CHK2",
@@ -450,8 +450,8 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
         "Trace",
         "A-line",
         "FPU",
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         "Format error"
     };
     int trap_num;
@@ -504,7 +504,7 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
     }
 
     if(trap_num < (int)NELEM(trap_description)
-       && trap_description[trap_num] != NULL)
+       && trap_description[trap_num] != nullptr)
         gui_fatal("Fatal error:  unhandled trap %d at pc %s (%s)",
                   trap_num, pc_str, trap_description[trap_num]);
     else
@@ -520,7 +520,7 @@ setup_trap_vectors(void)
     syn68k_addr_t timer_callback;
 
     /* Set up the trap vector for the timer interrupt. */
-    timer_callback = callback_install(catchalarm, NULL);
+    timer_callback = callback_install(catchalarm, nullptr);
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = CL(timer_callback);
 
     getPowerCore().handleInterrupt = &catchalarmPowerPC;
@@ -679,7 +679,7 @@ int main(int argc, char **argv)
         bad_arg_p = opt_parse(common_db, common_opts,
                               &argc, argv);
 
-    if(opt_val(common_db, "version", NULL))
+    if(opt_val(common_db, "version", nullptr))
     {
         fprintf(stdout, "%s\n", EXECUTOR_VERSION);
         exit(0);
@@ -689,7 +689,7 @@ int main(int argc, char **argv)
    * If they ask for help, it's not an error -- it should go to stdout
    */
 
-    if(opt_val(common_db, "help", NULL))
+    if(opt_val(common_db, "help", nullptr))
     {
         fprintf(stdout, "%s", opt_help_message());
         exit(0);
@@ -708,14 +708,14 @@ int main(int argc, char **argv)
     }
 
 #if defined(SDL)
-    if(opt_val(common_db, "fullscreen", NULL))
+    if(opt_val(common_db, "fullscreen", nullptr))
         ROMlib_fullscreen_p = true;
 
-    if(opt_val(common_db, "hwsurface", NULL))
+    if(opt_val(common_db, "hwsurface", nullptr))
         ROMlib_hwsurface_p = true;
 #endif
 
-    if(opt_val(common_db, "scancodes", NULL))
+    if(opt_val(common_db, "scancodes", nullptr))
         vdriver->setUseScancodes(true);
 
 #if defined(Sound_SDL_Sound)
@@ -725,10 +725,10 @@ int main(int argc, char **argv)
 
 #endif
 
-    if(opt_val(common_db, "ppc", NULL))
+    if(opt_val(common_db, "ppc", nullptr))
         ROMlib_set_ppc(true);
 
-    if(opt_val(common_db, "hfsplusro", NULL))
+    if(opt_val(common_db, "hfsplusro", nullptr))
         ROMlib_hfs_plus_support = true;
 
     if(opt_val(common_db, "size", &arg))
@@ -760,14 +760,14 @@ int main(int argc, char **argv)
         dcache_set_enabled(!nocache);
     }
 
-    use_native_code_p = !opt_val(common_db, "notnative", NULL);
+    use_native_code_p = !opt_val(common_db, "notnative", nullptr);
 
-    substitute_fonts_p = !opt_val(common_db, "cities", NULL);
+    substitute_fonts_p = !opt_val(common_db, "cities", nullptr);
 
 #if defined(CYGWIN32)
-    if(opt_val(common_db, "die", NULL))
+    if(opt_val(common_db, "die", nullptr))
         uninstall_exception_handler();
-    if(opt_val(common_db, "noautoevents", NULL))
+    if(opt_val(common_db, "noautoevents", nullptr))
         set_timer_driven_events(false);
 #endif
 
@@ -817,7 +817,7 @@ int main(int argc, char **argv)
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
 
-    if(opt_val(common_db, "keyboards", NULL))
+    if(opt_val(common_db, "keyboards", nullptr))
         graphics_p = false;
 
 
@@ -927,7 +927,7 @@ int main(int argc, char **argv)
         EM_A7 = save_a7;
     }
 
-    if(opt_val(common_db, "logtraps", NULL))
+    if(opt_val(common_db, "logtraps", nullptr))
         Executor::traps::init(true);
     else
         Executor::traps::init(false);
@@ -972,7 +972,7 @@ int main(int argc, char **argv)
     LM(TheMenu) = 0;
     LM(MBarHook) = 0;
     LM(MenuHook) = 0;
-    LM(MenuCInfo) = NULL;
+    LM(MenuCInfo) = nullptr;
     LM(HeapEnd) = 0;
     LM(ApplLimit) = 0;
     LM(SoundActive) = soundactiveoff;
@@ -1098,7 +1098,7 @@ int main(int argc, char **argv)
         else
             keyboard_set_failed = false;
 
-        if(keyboard_set_failed || opt_val(common_db, "keyboards", NULL))
+        if(keyboard_set_failed || opt_val(common_db, "keyboards", nullptr))
             display_keyboard_choices();
     }
 
@@ -1107,7 +1107,7 @@ int main(int argc, char **argv)
     InitFonts();
 
 #if !defined(NDEBUG)
-    dump_init(NULL);
+    dump_init(nullptr);
 #endif
 
     /* see qColorutil.c */

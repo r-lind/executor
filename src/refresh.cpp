@@ -292,12 +292,12 @@ found_rect:
 static void flush_shadow_screen()
 {
     int top_long, left_long, bottom_long, right_long;
-    static unsigned char *shadow_fbuf = NULL;
+    static unsigned char *shadow_fbuf = nullptr;
 
     /* Lazily allocate a shadow screen.  We won't be doing refresh that often,
    * so don't waste the memory unless we need it.  Note: memory never reclaimed
    */
-    if(shadow_fbuf == NULL)
+    if(shadow_fbuf == nullptr)
     {
         shadow_fbuf = (uint8_t *)malloc(vdriver->rowBytes() * vdriver->height());
         memcpy(shadow_fbuf, vdriver->framebuffer(),

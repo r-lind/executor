@@ -164,7 +164,7 @@ raw_bits_for_color_pattern(PixPatPtr pixpat, PixMap *target,
 
     HLockGuard guard2(data);
     src->baseAddr = *data;
-    convert_pixmap(src, &dst, bounds, NULL);
+    convert_pixmap(src, &dst, bounds, nullptr);
 }
 
 static void
@@ -210,7 +210,7 @@ raw_bits_for_rgb_pattern(PixPatPtr pixpat, PixMap *target,
         const rgb_spec_t *rgb_spec;
 
         rgb_spec = pixmap_rgb_spec(target);
-        gui_assert(rgb_spec != NULL);
+        gui_assert(rgb_spec != nullptr);
 
         actual_value = (*rgb_spec->rgbcolor_to_pixel)(rgb_spec, &desired_color,
                                                       true);

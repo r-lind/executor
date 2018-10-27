@@ -209,7 +209,7 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
                        (1 << ctab_id) * sizeof *ctab_table);
             }
             else
-                ctab = NULL;
+                ctab = nullptr;
             return ctab;
         }
     }

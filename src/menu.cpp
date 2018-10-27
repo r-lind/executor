@@ -1135,7 +1135,7 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                 whichmenuhit = 0;
                 if(where == NOTHITINMBAR)
                 {
-                    mh = NULL;
+                    mh = nullptr;
                     HiliteMenu(0);
                 }
                 else
@@ -1634,7 +1634,7 @@ void Executor::ROMlib_menucall(INTEGER mess, MenuHandle themenu, Rect *menrect, 
 
     if(defproc)
     {
-        if(*defproc == NULL)
+        if(*defproc == nullptr)
             LoadResource(defproc);
 
         mp = (menuprocp)STARH(defproc);
@@ -1661,7 +1661,7 @@ Executor::ROMlib_mbdfcall(INTEGER msg, INTEGER param1, LONGINT param2)
 
     defproc = MR(LM(MBDFHndl));
 
-    if(*defproc == NULL)
+    if(*defproc == nullptr)
         LoadResource(defproc);
 
     mp = (mbdfprocp)STARH(defproc);

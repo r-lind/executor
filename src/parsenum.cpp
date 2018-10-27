@@ -72,7 +72,7 @@ parse_base_number(const char *s, const char *digits, long long *vp,
         else
         {
             p = strchr(digits, n);
-            if(p == NULL)
+            if(p == nullptr)
                 return false;
             if(v > 0x7FFFFFFFFFFFFFFFLL / radix /* Check overflow. */
                || divisor > 0x7FFFFFFFFFFFFFFFLL / radix)

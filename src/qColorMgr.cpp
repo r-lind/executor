@@ -301,10 +301,10 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
                              CTabHandle target_ctab)
 {
     /* cached itable from the last transaction */
-    static ITabHandle cached_itab = NULL;
+    static ITabHandle cached_itab = nullptr;
 
     GDHandle gdev;
-    ITabHandle itab = NULL;
+    ITabHandle itab = nullptr;
     PixMapHandle gd_pmap;
     int i;
 
@@ -339,7 +339,7 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
             /* if we haven't allocated a cached itab; do so now.  make
 	     sure to do it out of the system zone, since we will keep
 	     this itab around forever */
-            if(cached_itab == NULL)
+            if(cached_itab == nullptr)
             {
                 TheZoneGuard guard(LM(SysZone));
 
@@ -629,14 +629,14 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
     if(resolution == 0)
         resolution = GD_RES_PREF(MR(LM(TheGDevice)));
 
-    /* We are supposed to override a color_table of NULL with the color
+    /* We are supposed to override a color_table of nullptr with the color
    * table of LM(TheGDevice) (IMV-142).  */
-    if(color_table == NULL)
+    if(color_table == nullptr)
         color_table = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
 
-    /* We are supposed to override an inverse_table of NULL with the
+    /* We are supposed to override an inverse_table of nullptr with the
    * inverse table of LM(TheGDevice) (IMV-142).  */
-    if(inverse_table == NULL)
+    if(inverse_table == nullptr)
     {
         inverse_table = GD_ITABLE(MR(LM(TheGDevice)));
         if(!inverse_table)
@@ -1008,12 +1008,12 @@ void Executor::C_DelSearch(ProcPtr searchProc)
 
     gdev = MR(LM(TheGDevice));
 
-    prev = NULL;
-    for(s = GD_SEARCH_PROC(gdev); s != NULL; s = HxP(s, nxtSrch))
+    prev = nullptr;
+    for(s = GD_SEARCH_PROC(gdev); s != nullptr; s = HxP(s, nxtSrch))
     {
         if(HxX(s, srchProc) == RM(searchProc))
         {
-            if(prev == NULL)
+            if(prev == nullptr)
                 GD_SEARCH_PROC_X(gdev) = HxX(s, nxtSrch);
             else
                 HxX(prev, nxtSrch) = HxX(s, nxtSrch);
@@ -1026,7 +1026,7 @@ void Executor::C_DelSearch(ProcPtr searchProc)
             prev = s;
     }
 
-    if(s == NULL)
+    if(s == nullptr)
         warning_unimplemented(NULL_STRING);
 }
 
@@ -1047,7 +1047,7 @@ void Executor::C_SaveEntries(CTabHandle src, CTabHandle result,
     int req_error_p = false;
     int i;
 
-    if(src == NULL)
+    if(src == nullptr)
         src = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
 
     src_ctab_size = CTAB_SIZE(src);
@@ -1088,7 +1088,7 @@ void Executor::C_RestoreEntries(CTabHandle src, CTabHandle dst,
     int req_error_p = false;
     int i;
 
-    if(dst == NULL)
+    if(dst == nullptr)
         dst = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
 
     dst_ctab_size = CTAB_SIZE(dst);

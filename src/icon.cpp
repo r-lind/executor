@@ -68,7 +68,7 @@ OSErr Executor::C_PlotIconMethod(const Rect *rect, IconAlignmentType align,
 
 void Executor::C_PlotIcon(const Rect *rect, Handle icon)
 {
-    if(icon == NULL)
+    if(icon == nullptr)
         return;
 
     if(!*icon)
@@ -92,7 +92,7 @@ void Executor::C_PlotIcon(const Rect *rect, Handle icon)
     }
     bm.bounds.right = bm.bounds.bottom;
     CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), &bm.bounds, rect,
-             srcCopy, NULL);
+             srcCopy, nullptr);
 }
 
 OSErr Executor::C_PlotIconHandle(const Rect *rect, IconAlignmentType align,
@@ -248,8 +248,8 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
     int new_size;
 
     cicon_res_handle = (CIconHandle)ROMlib_getrestid(TICK("cicn"), icon_id);
-    if(cicon_res_handle == NULL)
-        return NULL;
+    if(cicon_res_handle == nullptr)
+        return nullptr;
 
     cicon_res = STARH(cicon_res_handle);
     height = RECT_HEIGHT(&cicon_res->iconPMap.bounds);
@@ -384,7 +384,7 @@ OSErr Executor::C_GetIconSuite(GUEST<Handle> *icon_suite_return, short res_id,
             Handle icon;
 
             icon = GetResource(restype_for_icon[i], res_id);
-            if(icon != NULL)
+            if(icon != nullptr)
                 icons[i] = icon;
         }
     }
@@ -426,7 +426,7 @@ OSErr Executor::C_GetIconFromSuite(GUEST<Handle> *icon_data_return,
     icons = (Handle *)STARH(icon_suite);
     icon_data = icons[restype_to_index(type)];
 
-    if(icon_data == NULL)
+    if(icon_data == nullptr)
         ICON_RETURN_ERROR(paramErr);
 
     *icon_data_return = RM(icon_data);
@@ -449,7 +449,7 @@ find_best_icon(bool small_p, int bpp,
                        ? &icons[small_bw_icon]
                        : &icons[large_bw_icon]);
     icon_mask = *sized_icons;
-    if(icon_mask == NULL)
+    if(icon_mask == nullptr)
     {
         small_p = !small_p;
 
@@ -457,20 +457,20 @@ find_best_icon(bool small_p, int bpp,
                            ? &icons[small_bw_icon]
                            : &icons[large_bw_icon]);
         icon_mask = *sized_icons;
-        if(icon_mask == NULL)
+        if(icon_mask == nullptr)
             ICON_RETURN_ERROR(noMaskFoundErr);
     }
 
     best_icon = icon_for_log2_bpp[ROMlib_log2[bpp]];
 
 #if !defined(LETGCCWAIL)
-    icon_data = NULL;
+    icon_data = nullptr;
 #endif
 
     for(; best_icon > -1; best_icon--)
     {
         icon_data = sized_icons[best_icon];
-        if(icon_data != NULL)
+        if(icon_data != nullptr)
             break;
     }
 

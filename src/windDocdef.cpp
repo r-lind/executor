@@ -433,7 +433,7 @@ void draw_title(GrafPtr w,
     GrafPtr tp;
     int left, top, right, bottom;
     StringHandle th;
-    RgnHandle saveclip = NULL;
+    RgnHandle saveclip = nullptr;
     int title_width;
     int title_start;
     int left_bound;

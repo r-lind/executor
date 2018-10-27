@@ -34,7 +34,7 @@ void SDLVideoDriver::setCursor(char *cursor_data,
     new_cursor = SDL_CreateCursor((unsigned char *)cursor_data,
                                   (unsigned char *)cursor_mask,
                                   16, 16, hotspot_x, hotspot_y);
-    if(new_cursor != NULL)
+    if(new_cursor != nullptr)
     {
         SDL_SetCursor(new_cursor);
         SDL_FreeCursor(old_cursor);

@@ -102,7 +102,7 @@ bool Executor::parse_size_opt(string opt, string arg1)
     const char *arg = arg1.c_str();
 
     w = h = 0;
-    if(arg != NULL)
+    if(arg != nullptr)
     {
 #if defined(CYGWIN32)
         if(strcasecmp(arg, "maximum") == 0)

@@ -724,7 +724,7 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
                              uint32_t fg_color, uint32_t bk_color)
 {
     uint32_t v, mask, tile, *p, *end;
-    const rgb_spec_t *rgb_spec = NULL;
+    const rgb_spec_t *rgb_spec = nullptr;
     int log2_bpp;
     bool update_dirty_p;
 #if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)

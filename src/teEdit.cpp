@@ -295,7 +295,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
     TESAVE(teh);
 
 #if !defined(LETGCCWAIL)
-    te_style = NULL;
+    te_style = nullptr;
     newlh = 0;
 #endif /* LETGCCWAIL */
 
@@ -311,7 +311,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
     else
     {
         oldlh = newlh = TE_LINE_HEIGHT(teh);
-        lht = NULL;
+        lht = nullptr;
     }
 
 #if 1
@@ -569,7 +569,7 @@ void Executor::C_TEKey(CharParameter thec, TEHandle te)
             c = '\r';
         /* FALL THROUGH */
         default:
-            ROMlib_tedoitall(te, (Ptr)&c, 1, false, NULL);
+            ROMlib_tedoitall(te, (Ptr)&c, 1, false, nullptr);
             break;
     }
     ROMlib_recompute_caret(te);
@@ -670,7 +670,7 @@ void Executor::C_TECopy(TEHandle te)
 void Executor::C_TECut(TEHandle teh)
 {
     TECopy(teh);
-    ROMlib_tedoitall(teh, NULL, 0, false, NULL);
+    ROMlib_tedoitall(teh, nullptr, 0, false, nullptr);
 }
 
 void Executor::C_TEPaste(TEHandle teh)
@@ -683,15 +683,15 @@ void Executor::C_TEPaste(TEHandle teh)
 
     HLockGuard guard(MR(LM(TEScrpHandle)));
     ROMlib_tedoitall(teh, STARH(MR(LM(TEScrpHandle))), CW(LM(TEScrpLength)),
-                     false, NULL);
+                     false, nullptr);
 }
 
 void Executor::C_TEDelete(TEHandle teh)
 {
-    ROMlib_tedoitall(teh, NULL, 0, false, NULL);
+    ROMlib_tedoitall(teh, nullptr, 0, false, nullptr);
 }
 
 void Executor::C_TEInsert(Ptr p, LONGINT ln, TEHandle teh)
 {
-    ROMlib_tedoitall(teh, p, ln, true, NULL);
+    ROMlib_tedoitall(teh, p, ln, true, nullptr);
 }

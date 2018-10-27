@@ -23,7 +23,7 @@ UniversalProcPtr Executor::C_NewRoutineDescriptor(
     UniversalProcPtr retval;
 
     if(!proc)
-        retval = NULL;
+        retval = nullptr;
     else
     {
         RoutineDescriptor *p;
@@ -62,7 +62,7 @@ UniversalProcPtr Executor::C_NewFatRoutineDescriptor(
 {
     warning_unimplemented(NULL_STRING);
     *(long *)-1 = -1; /* abort */
-    return NULL;
+    return nullptr;
 }
 
 OSErr Executor::C_SaveMixedModeState(void *statep, uint32_t vers)

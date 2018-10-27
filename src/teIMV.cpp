@@ -535,7 +535,7 @@ StScrpHandle Executor::C_TEGetStyleScrapHandle(TEHandle te)
     end = TE_SEL_END(te);
     length = TE_LENGTH(te);
     if(!TE_STYLIZED_P(te))
-        return NULL;
+        return nullptr;
 
     if(end < start)
     {
@@ -717,7 +717,7 @@ void Executor::C_TEStylePaste(TEHandle te)
         DisposeHandle(hText);
 
         /* remove the selected text */
-        ROMlib_tedoitall(te, NULL, 0, false, NULL);
+        ROMlib_tedoitall(te, nullptr, 0, false, nullptr);
         return;
     }
 
@@ -726,7 +726,7 @@ void Executor::C_TEStylePaste(TEHandle te)
     if(retval < 0)
     {
         DisposeHandle((Handle)scrap);
-        scrap = NULL;
+        scrap = nullptr;
     }
 
     {
@@ -885,7 +885,7 @@ void Executor::C_TEReplaceStyle(int16_t mode, TextStyle *attrs_to_replace,
             TextStyle *new_attrs = (TextStyle *)alloca(sizeof *new_attrs);
 
             adjust_attrs(ST_ELT_TO_ATTR(style), replacement_attrs, new_attrs,
-                         NULL, mode);
+                         nullptr, mode);
 
             /* `get_style_index' may resize `style_table', so `style'
 	     is no longer valid */
@@ -995,7 +995,7 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
     }
     else
     {
-        StyleRun *run = NULL;
+        StyleRun *run = nullptr;
         GUEST<int16_t> font = CWC(0);
         Style face = 0;
         GUEST<int16_t> size = CWC(0);

@@ -29,7 +29,7 @@ get_size_resource()
     Handle size;
 
     size = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), 0);
-    if(size == NULL)
+    if(size == nullptr)
         size = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), -1);
     return (size_resource_handle)size;
 }
@@ -75,7 +75,7 @@ void Executor::process_create(bool desk_accessory_p,
     }
 
     /* ### we are seriously fucked */
-    if(info == NULL)
+    if(info == nullptr)
         gui_fatal("unable to allocate process info record");
 
     info->mode = ((size
@@ -116,7 +116,7 @@ get_process_info(ProcessSerialNumber *serial_number)
         if(PSN_EQ_P(*serial_number, t->serial_number))
             return t;
     }
-    return NULL;
+    return nullptr;
 }
 
 OSErr Executor::C_GetCurrentProcess(ProcessSerialNumber *serial_number)
@@ -141,9 +141,9 @@ OSErr Executor::C_GetNextProcess(ProcessSerialNumber *serial_number)
     }
 
     t = get_process_info(serial_number);
-    if(t == NULL)
+    if(t == nullptr)
         return paramErr;
-    else if(t->next == NULL)
+    else if(t->next == nullptr)
     {
         memset(serial_number, 0, sizeof *serial_number);
         return procNotFound;
@@ -162,7 +162,7 @@ OSErr Executor::C_GetProcessInformation(ProcessSerialNumber *serial_number,
     int32_t current_ticks;
 
     info = get_process_info(serial_number);
-    if(info == NULL
+    if(info == nullptr
        || PROCESS_INFO_LENGTH(process_info) != sizeof *process_info)
         return paramErr;
 
@@ -195,8 +195,8 @@ OSErr Executor::C_SameProcess(ProcessSerialNumber *serial_number0,
     info0 = get_process_info(serial_number0);
     info1 = get_process_info(serial_number1);
 
-    if(info0 == NULL
-       || info1 == NULL)
+    if(info0 == nullptr
+       || info1 == nullptr)
         return paramErr;
 
     *same_out = (info0 == info1);

@@ -211,9 +211,9 @@ int Executor::system_error(const char *_message, int _default_button,
      for this window will determine it's eventual size, at which point
      it will be resized and made visible */
 
-    msg_window = _NewCWindow(NULL, &dummy_rect,
+    msg_window = _NewCWindow(nullptr, &dummy_rect,
                              /* no title */
-                             NULL,
+                             nullptr,
                              /* invisible */
                              false,
                              dBoxProc,
@@ -251,7 +251,7 @@ int Executor::system_error(const char *_message, int _default_button,
 
         max_button_width = -1;
         for(i = 0; i < N_BUTTONS; i++)
-            if(buttons[i].text != NULL)
+            if(buttons[i].text != nullptr)
                 max_button_width = std::max<int>(max_button_width,
                                        /* ### `TextWidth ()' should be const */
                                        TextWidth((Ptr)buttons[i].text, 0,
@@ -300,7 +300,7 @@ int Executor::system_error(const char *_message, int _default_button,
         message_rect.right = CW(message_width + 10);
 
         for(i = 0; i < N_BUTTONS; i++)
-            if(buttons[i].text != NULL)
+            if(buttons[i].text != nullptr)
             {
                 Rect ctl_rect;
                 unsigned char buf[256];

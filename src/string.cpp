@@ -31,10 +31,10 @@ Executor::pstr_index_after(StringPtr p, char c, int i)
             p < ep && *p != c;
             p++)
             ;
-        return (p == ep) ? NULL : (char *)p;
+        return (p == ep) ? nullptr : (char *)p;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 static void strNassign(Str63 new1, const StringPtr old, int n)

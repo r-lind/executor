@@ -79,7 +79,7 @@ bool error_parse_option_string(const char *options)
 
         /* Find the end of this string. */
         id_end = strchr(p, ',');
-        if(id_end == NULL)
+        if(id_end == nullptr)
             id_end = options_end;
         opt_len = id_end - p;
 
@@ -208,7 +208,7 @@ void error_dump_ram_err_buf(const char *separator_message)
         /* Clear the RAM buffer and start over. */
         ram_err_buf_size = 0;
         ram_err_buf_max_size = 0;
-        ram_err_buf = NULL;
+        ram_err_buf = nullptr;
         free(ram_err_buf);
     }
 }
@@ -250,7 +250,7 @@ err_vprintf(const char *fmt, va_list ap)
         beenhere_p = true;
     }
 
-    if(fmt == NULL)
+    if(fmt == nullptr)
         fmt = "";
 
 #if !defined(SUPPORT_LOG_ERR_TO_RAM)
@@ -287,7 +287,7 @@ err_vprintf(const char *fmt, va_list ap)
 
             /* Try to allocate more room for the RAM buffer. */
             new_buf = realloc(ram_err_buf, ram_err_buf_max_size);
-            if(new_buf == NULL)
+            if(new_buf == nullptr)
             {
                 /* Out of memory!  Dump what we've got and start over. */
                 error_dump_ram_err_buf("\n *** Out of RAM, flushing log ***\n");
@@ -322,7 +322,7 @@ void _gui_fatal(const char *file, int line, const char *fn,
     va_list ap;
     char errbuf[10240];
 
-    if(fmt == NULL)
+    if(fmt == nullptr)
         fmt = "";
 
     va_start(ap, fmt);
@@ -344,8 +344,8 @@ void _gui_fatal(const char *file, int line, const char *fn,
                 notdir(file), line, fn, errbuf);
 
         system_error(buf, 0,
-                     "Restart", NULL, NULL,
-                     NULL, NULL, NULL);
+                     "Restart", nullptr, nullptr,
+                     nullptr, nullptr, nullptr);
     }
 
     /* also sent output to the debug stream */
@@ -365,7 +365,7 @@ void _warning(int error_type, const char *type, const char *file, int line,
 
     if(ERROR_ENABLED_P(error_type))
     {
-        if(fmt == NULL)
+        if(fmt == nullptr)
             fmt = "";
 
         err_printf("%s:%d; %s in `%s': ",
@@ -390,7 +390,7 @@ void _sound_warning(const char *file, int line,
     {
         const char *snd_state;
 
-        if(fmt == NULL)
+        if(fmt == nullptr)
             fmt = "";
 
         err_printf("%s:%d; sound log in `%s': ",
@@ -430,7 +430,7 @@ void _errno_fatal(const char *file, int line, const char *fn,
     va_list ap;
     int save_errno = errno;
 
-    if(fmt == NULL)
+    if(fmt == nullptr)
         fmt = "";
 
     vdriver->shutdown();
@@ -455,7 +455,7 @@ void _errno_warning(const char *file, int line, const char *fn,
     va_list ap;
     int save_errno = errno;
 
-    if(fmt == NULL)
+    if(fmt == nullptr)
         fmt = "";
 
     err_printf("%s:%d; warning in `%s': ",

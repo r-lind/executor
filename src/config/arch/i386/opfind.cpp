@@ -15,8 +15,8 @@ typedef struct
     unsigned short start;
     unsigned char size;
     unsigned char done;
-    const char *src_reg; /* e.g. "%ecx", or NULL when movl $1,4(%edi), etc. */
-    unsigned long value; /* This field is only valid if src_reg == NULL.    */
+    const char *src_reg; /* e.g. "%ecx", or nullptr when movl $1,4(%edi), etc. */
+    unsigned long value; /* This field is only valid if src_reg == nullptr.    */
 } move_t;
 
 typedef struct
@@ -96,8 +96,8 @@ pairing_goodness(const move_t *m1, const move_t *m2)
    * On the Pentium, instructions with an immediate value and
    * a constant displacement are not pairable!
    */
-    pairable1 = (m1->start == 0 || m1->src_reg != NULL);
-    pairable2 = (m2->start == 0 || m2->src_reg != NULL);
+    pairable1 = (m1->start == 0 || m1->src_reg != nullptr);
+    pairable2 = (m2->start == 0 || m2->src_reg != nullptr);
 
     /* If we are wasting a pairable instruction, this choice sucks. */
     if(pairable1 != pairable2)
@@ -154,7 +154,7 @@ popular_constant(const move_t *move, int num_moves,
     *valp = 0; /* default */
 
     for(i = 0; i < num_moves; i++)
-        if(move[i].src_reg == NULL)
+        if(move[i].src_reg == nullptr)
         {
             int count;
             unsigned long n = move[i].value;
@@ -164,7 +164,7 @@ popular_constant(const move_t *move, int num_moves,
 	 * vice versa.  We need to check all possibilities.
 	 */
             for(j = 0, count = 0; j < num_moves; j++)
-                if(move[j].src_reg == NULL
+                if(move[j].src_reg == nullptr
                    && ((n & size_mask[move[j].size]) == move[j].value
                        || (move[j].size == 1
                            && ((n >> 8) & 0xFF) == move[j].value)))
@@ -203,7 +203,7 @@ operand_will_be_stomped(const move_t *op, const move_t *move_list,
     for(i = 0; i < num_moves; i++)
     {
         const move_t *m = &move_list[i];
-        if(!m->done && m->src_reg == NULL
+        if(!m->done && m->src_reg == nullptr
            && m->start < op->start + op->size
            && m->start + m->size > op->start)
             return true;
@@ -245,12 +245,12 @@ schedule_move_list(move_t *move, int num_moves)
             int size;
 
             size = move[i].size;
-            if(move[i].src_reg == NULL)
+            if(move[i].src_reg == nullptr)
             {
                 if(move[i].value == (most_popular_constant & size_mask[size]))
                 {
                     static const char *reg_name[5]
-                        = { NULL, "%cl", "%cx", NULL, "%ecx" };
+                        = { nullptr, "%cl", "%cx", nullptr, "%ecx" };
                     move[i].src_reg = reg_name[size];
                 }
                 else if(size == 1
@@ -272,7 +272,7 @@ schedule_move_list(move_t *move, int num_moves)
         /* Find the move with the best Pentium pairing (greedy). */
         for(i = 1, best_score = -1, best_index = -1; i < num_moves; i++)
             if(!move[i].done
-               && (move[i].src_reg == NULL
+               && (move[i].src_reg == nullptr
                    || !operand_will_be_stomped(&move[i], move, num_moves)))
             {
                 int score = pairing_goodness(&new_move[moves_done - 1], &move[i]);
@@ -317,7 +317,7 @@ print_move_list(const move_t *move, int num_moves)
             sprintf(offset, "%d", move[i].start);
 
         /* Compute a string for the source operand. */
-        if(move[i].src_reg != NULL)
+        if(move[i].src_reg != nullptr)
             strcpy(src_operand, move[i].src_reg);
         else
             sprintf(src_operand, "$0x%lX", move[i].value);
@@ -422,8 +422,8 @@ compute_vary_mask(unsigned char *mask, int code_size)
     int i;
 
     memset(mask, 0, code_size);
-    for(a = &asm_code[asm_index]; a->start != NULL; a++)
-        for(b = a + 1; b->start != NULL; b++)
+    for(a = &asm_code[asm_index]; a->start != nullptr; a++)
+        for(b = a + 1; b->start != nullptr; b++)
         {
             for(i = 0; i < code_size; i++)
                 mask[i] |= a->start[i] ^ b->start[i];
@@ -438,7 +438,7 @@ compute_code_size(void)
 {
     int i, size;
 
-    for(size = 0, i = asm_index; asm_code[i].start != NULL; i++)
+    for(size = 0, i = asm_index; asm_code[i].start != nullptr; i++)
     {
         int new_size = asm_code[i].end - asm_code[i].start;
 

@@ -374,11 +374,11 @@ Handle Executor::C_Get1Resource(ResType typ, INTEGER id) /* IMIV-16 */
     resmaphand map;
     resref *rr;
 
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), NULL);
+    map = ROMlib_rntohandl(Cx(LM(CurMap)), nullptr);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
-        return NULL;
+        return nullptr;
     }
     ROMlib_setreserr(ROMlib_maptypidtop(map, typ, id, &rr));
     if(LM(ResErr) == CWC(noErr))
@@ -386,7 +386,7 @@ Handle Executor::C_Get1Resource(ResType typ, INTEGER id) /* IMIV-16 */
     else
     {
         warn_resource_not_found(typ, id);
-        retval = NULL;
+        retval = nullptr;
     }
     if(LM(ResErr) == CWC(resNotFound))
         /* IMIV */
@@ -419,7 +419,7 @@ Handle Executor::C_GetNamedResource(ResType typ, StringPtr nam)
 {
     Handle retval;
 
-    retval = NULL;
+    retval = nullptr;
     if(EqualString(nam, about_box_menu_name_pstr, true, true))
     {
         static Handle phoney_hand;

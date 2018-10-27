@@ -100,12 +100,12 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
                || item_ctab_res_h);
     if(color_p)
         dp = ((DialogPeek)
-                  NewColorDialog(NULL, &adjusted_rect,
+                  NewColorDialog(nullptr, &adjusted_rect,
                              (StringPtr) "", false, dBoxProc,
                              (WindowPtr)-1, false, 0L, MR(h)));
     else
         dp = ((DialogPeek)
-                  NewDialog(NULL, &adjusted_rect,
+                  NewDialog(nullptr, &adjusted_rect,
                             (StringPtr) "", false, dBoxProc,
                             (WindowPtr)-1, false, 0L, MR(h)));
 

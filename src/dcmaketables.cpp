@@ -20,15 +20,15 @@ namespace Executor
  * So how do you know how much table space to allocate?  Good
  * question.  Each of the table creation routines returns by reference
  * the table size it needs for the parameters you specified.  If you
- * pass in NULL for the allocated table space, the function will not
+ * pass in nullptr for the allocated table space, the function will not
  * actually create the table.  So you can say:
  *
  *   unsigned size;
  *   void *table;
  *
- *   depthconv_make_ind_to_ind_table (NULL, 1, 8, &size, cspec_array);
+ *   depthconv_make_ind_to_ind_table (nullptr, 1, 8, &size, cspec_array);
  *   table = malloc (size);
- *   depthconv_make_ind_to_ind_table (table, 1, 8, NULL, cspec_array);
+ *   depthconv_make_ind_to_ind_table (table, 1, 8, nullptr, cspec_array);
  *
  * You can also use the DEPTHCONV_MAX_TABLE_SIZE macro, which is
  * guaranteed to always be "big enough":
@@ -68,8 +68,8 @@ static const depthconv_func_t
         depthconv_2_1,
         depthconv_4_1,
         depthconv_8_1,
-        NULL, /* There is no generic 16->1 converter. */
-        NULL, /* There is no generic 32->1 converter. */
+        nullptr, /* There is no generic 16->1 converter. */
+        nullptr, /* There is no generic 32->1 converter. */
       };
 
 /* This is an array of the various alignments we require for different
@@ -307,16 +307,16 @@ depthconv_make_raw_table(void *table_space, unsigned in_bpp, unsigned out_bpp,
     /* Sanity check the incoming bpp's. */
     if(in_bpp > 32 || out_bpp > 32
        || (in_bpp > 8 && (out_bpp <= 8 || mapping)))
-        return NULL;
+        return nullptr;
 
     /* Compute the log2 of those bpp's and make sure they are legitimate. */
     log2_in_bpp = ROMlib_log2[in_bpp];
     log2_out_bpp = ROMlib_log2[out_bpp];
     if(log2_in_bpp < 0 || log2_out_bpp < 0)
-        return NULL;
+        return nullptr;
 
     /* Check for the no translation case. */
-    if(in_bpp == out_bpp && (mapping == NULL || nop_map_p(mapping, in_bpp)))
+    if(in_bpp == out_bpp && (mapping == nullptr || nop_map_p(mapping, in_bpp)))
     {
         if(table_size)
             *table_size = sizeof(uint32_t); /* To hold log2_in_bpp. */
@@ -338,8 +338,8 @@ depthconv_make_raw_table(void *table_space, unsigned in_bpp, unsigned out_bpp,
         void *dst;
         uint32_t map_space[256];
 
-        /* Create a NOP mapping if they specify a NULL mapping. */
-        if(mapping == NULL)
+        /* Create a NOP mapping if they specify a nullptr mapping. */
+        if(mapping == nullptr)
         {
             int i;
             for(i = (1 << in_bpp) - 1; i >= 0; i--)
@@ -357,7 +357,7 @@ depthconv_make_raw_table(void *table_space, unsigned in_bpp, unsigned out_bpp,
 }
 
 /* This creates a table to map indirect pixels to indirect pixels.
- * If MAPPING is NULL, assumes identity mapping (useful for straight
+ * If MAPPING is nullptr, assumes identity mapping (useful for straight
  * depth conversion).
  */
 depthconv_func_t
@@ -372,11 +372,11 @@ depthconv_make_ind_to_ind_table(void *table_space,
     {
         if(table_size)
             *table_size = 0;
-        return NULL;
+        return nullptr;
     }
 
     /* Translate the mapping table to a raw table if it will be used. */
-    raw_map = NULL;
+    raw_map = nullptr;
     if(table_space)
     {
         int i;
@@ -408,7 +408,7 @@ depthconv_make_ind_to_rgb_table(void *table_space, unsigned in_bpp,
     {
         if(table_size)
             *table_size = 0;
-        return NULL;
+        return nullptr;
     }
 
     /* Translate the mapping table to a raw table if it will be used. */
@@ -492,7 +492,7 @@ depthconv_make_rgb_to_ind_table(void *table_space, unsigned out_bpp,
     /* Shouldn't get here. */
     gui_abort();
 #if !defined(LETGCCWAIL)
-    return NULL;
+    return nullptr;
 #endif
 }
 
@@ -505,7 +505,7 @@ depthconv_make_rgb_to_rgb_table(void *table_space, uint32_t *table_size,
     /* If no conversion takes place, hand it off to the simpler converter. */
     if(src_rgb_spec == dst_rgb_spec)
         return depthconv_make_raw_table(table_space, src_rgb_spec->bpp,
-                                        dst_rgb_spec->bpp, table_size, NULL);
+                                        dst_rgb_spec->bpp, table_size, nullptr);
 
     /* Nope, the RGB specs differ.  Create appropriate info here. */
     if(table_size)

@@ -74,12 +74,12 @@ int STDCALL WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
 
     /* Get the class name from argv[0] */
     /* Basename... */
-    if((ptr = strrchr(argv[0], '\\')) == NULL)
+    if((ptr = strrchr(argv[0], '\\')) == nullptr)
         appname = argv[0];
     else
         appname = ptr + 1;
     /* minus extension... */
-    if((ptr = strrchr(appname, '.')) == NULL)
+    if((ptr = strrchr(appname, '.')) == nullptr)
         i = strlen(appname);
     else
         i = (ptr - appname);

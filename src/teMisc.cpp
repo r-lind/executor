@@ -69,9 +69,9 @@ void Executor::ROMlib_sledgehammer_te(TEHandle te)
         n_runs = TE_STYLE_N_RUNS(te_style);
         gui_assert(te_style_size
                    == ((int)sizeof(TEStyleRec)
-                       - (int)sizeof TE_STYLE_RUNS((TEStyleHandle)NULL)
+                       - (int)sizeof TE_STYLE_RUNS((TEStyleHandle)nullptr)
                        + ((n_runs + 1)
-                          * (int)sizeof *TE_STYLE_RUNS((TEStyleHandle)NULL))));
+                          * (int)sizeof *TE_STYLE_RUNS((TEStyleHandle)nullptr))));
         n_styles = TE_STYLE_N_STYLES(te_style);
         style_count_vec = (int16_t *)alloca(n_styles * sizeof *style_count_vec);
         memset(style_count_vec, 0, n_styles * sizeof *style_count_vec);
@@ -566,7 +566,7 @@ void Executor::C_TECalText(TEHandle te)
      has been frobbed and is in a wacky state */
     /* TE_SLAM (te); */
     TE_LENGTH_X(te) = CW(GetHandleSize(TE_HTEXT(te)));
-    ROMlib_caltext(te, 0, 32767, NULL, NULL);
+    ROMlib_caltext(te, 0, 32767, nullptr, nullptr);
     TE_SLAM(te);
 }
 

@@ -266,7 +266,7 @@ lookup_by_index (const pef_hash_t *hashp, int index,
   PEFExportedSymbol *retval;
 
   if (index >= hashp->n_symbols)
-    retval = NULL;
+    retval = nullptr;
   else
     {
       int name_offset;
@@ -306,7 +306,7 @@ lookup_by_name(const ConnectionID connp,
     // FIXME: #warning get rid of this eventually
 
     if(connp == (ConnectionID)0x12348765)
-        return NULL;
+        return nullptr;
 
 #endif
 
@@ -338,7 +338,7 @@ lookup_by_name(const ConnectionID connp,
         ++index)
         ;
     if(index >= past_index)
-        retval = NULL;
+        retval = nullptr;
     else
         retval = &symbol_table[index];
 

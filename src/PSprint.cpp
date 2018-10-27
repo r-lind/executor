@@ -1724,7 +1724,7 @@ short Executor::NeXTPrTxMeas(LONGINT n, Ptr p, GUEST<Point> *nump, GUEST<Point> 
     SETUPA5;
     num.h = num.v = den.h = den.v = CWC(0x100);
     retval = ROMlib_StdTxMeas(n,
-                              (Ptr)p, &num, &den, NULL);
+                              (Ptr)p, &num, &den, nullptr);
     RESTOREA5;
     return (float)retval * CW(num.h) / CW(den.h);
 }
@@ -2070,7 +2070,7 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
 
                     for(i = 0; i < n; ++i)
                         translated[i]
-                            = symbol_translate_char(translated[i], NULL);
+                            = symbol_translate_char(translated[i], nullptr);
                 }
 
 #if 0

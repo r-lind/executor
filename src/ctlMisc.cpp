@@ -190,7 +190,7 @@ int32_t Executor::ROMlib_ctlcall(ControlHandle c, int16_t i, int32_t l)
 
     defproc = CTL_DEFPROC(c);
 
-    if(*defproc == NULL)
+    if(*defproc == nullptr)
         LoadResource(defproc);
 
     cp = (ctlfuncp)STARH(defproc);

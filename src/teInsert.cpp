@@ -349,12 +349,12 @@ void te_draw(TEPtr tep,
     SignedByte hText_flags;
 
     /* these are only used if the TE record is stylized */
-    TEStyleHandle te_style = NULL;
+    TEStyleHandle te_style = nullptr;
     SignedByte te_style_flags = -1;
     StyleRun *runs, *current_run;
     int16_t n_runs;
 
-    STHandle style_table = NULL;
+    STHandle style_table = nullptr;
     SignedByte style_table_flags = -1;
     STElement *styles;
     int16_t n_styles;

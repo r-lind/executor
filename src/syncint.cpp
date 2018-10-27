@@ -113,7 +113,7 @@ int Executor::syncint_init(void)
     s.sa_handler = handle_itimer_tick;
     sigemptyset(&s.sa_mask);
     s.sa_flags = 0;
-    return (sigaction(SIGALRM, &s, NULL) == 0);
+    return (sigaction(SIGALRM, &s, nullptr) == 0);
 }
 
 /* Posting a delay of 0 will clear any pending interrupt. */
@@ -125,7 +125,7 @@ void Executor::syncint_post(std::chrono::microseconds usecs, bool fromLast)
     t.it_value.tv_usec = usecs.count() % 1000000;
     t.it_interval.tv_sec = 0;
     t.it_interval.tv_usec = 0;
-    setitimer(ITIMER_REAL, &t, NULL);
+    setitimer(ITIMER_REAL, &t, nullptr);
 }
 
 void Executor::syncint_wait_interrupt()

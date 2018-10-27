@@ -149,7 +149,7 @@ static void drawicon(INTEGER id, INTEGER offsetx, INTEGER offsety)
         old_loc = ip->loc;
         C_OffsetRect(&ip->loc, offsetx, offsety);
         CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-                 &bm.bounds, &ip->loc, srcCopy, NULL);
+                 &bm.bounds, &ip->loc, srcCopy, nullptr);
         ip->loc = old_loc;
     }
 }

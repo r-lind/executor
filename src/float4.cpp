@@ -933,7 +933,7 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
 #endif
 
         dot = strchr(digit_string, '.');
-        if(dot == NULL)
+        if(dot == nullptr)
             exponent = 0;
         else
         {

@@ -45,7 +45,7 @@ void Executor::mman_heap_death(const char *func, const char *where)
        * warning_unexpected out.
        */
         LM(TheZone) = LM(SysZone);
-        system_error(err_msg, 0, "Exit", NULL, NULL, NULL, NULL, NULL);
+        system_error(err_msg, 0, "Exit", nullptr, nullptr, nullptr, nullptr, nullptr);
     }
 
     /* Don't bother calling ExitToShell; things are too smashed. */
@@ -87,7 +87,7 @@ mm_slam_hook(void)
 
 void dump_zone(THz zone)
 {
-    ROMlib_sledgehammer_zone(zone, true, NULL, NULL, -1, NULL, NULL);
+    ROMlib_sledgehammer_zone(zone, true, nullptr, nullptr, -1, nullptr, nullptr);
 }
 
 #endif /* ERROR_SUPPORTED_P (ERROR_MEMORY_MANAGER_SLAM) */
@@ -109,7 +109,7 @@ addr_block(THz zone, char *addr)
            && addr <= (char *)t + PSIZE(t))
             return t;
     }
-    return NULL;
+    return nullptr;
 }
 
 static bool
@@ -138,7 +138,7 @@ addr_info(char *addr)
     zones[1] = MR(LM(SysZone));
     zones[2] = MR(LM(TheZone));
 
-    for(i = 0, addr_zone = NULL; i < (int)NELEM(zones); i++)
+    for(i = 0, addr_zone = nullptr; i < (int)NELEM(zones); i++)
     {
         if(addr_in_zone_p(zones[i], addr))
         {
@@ -146,7 +146,7 @@ addr_info(char *addr)
             break;
         }
     }
-    if(addr_zone == NULL)
+    if(addr_zone == nullptr)
     {
         fprintf(stderr, "cannot determine zone for addr `%p'\n",
                 addr);
@@ -163,7 +163,7 @@ addr_info(char *addr)
             ZONE_HEAP_DATA(addr_zone), ZONE_BK_LIM(addr_zone));
 
     block = addr_block(addr_zone, addr);
-    if(block == NULL)
+    if(block == nullptr)
     {
         fprintf(stderr, "cannot determine block for addr `%p'\n",
                 addr);
@@ -178,7 +178,7 @@ addr_info(char *addr)
         ptr = (char *)STARH(handle);
 
         ptr_block = addr_block(addr_zone, ptr);
-        if(ptr_block != NULL
+        if(ptr_block != nullptr
            && USE(ptr_block) == REL
            && (char *)BLOCK_DATA(ptr_block) == ptr
            && BLOCK_TO_HANDLE(addr_zone, ptr_block) == handle)
@@ -239,7 +239,7 @@ handle_addr_info:
     ptr_block = HANDLE_TO_BLOCK(handle);
 
     handle_block = addr_block(addr_zone, (char *)handle);
-    if(handle_block == NULL)
+    if(handle_block == nullptr)
     {
         fprintf(stderr,
                 "cannot determine master pointer block for handle `%p'\n",
@@ -321,7 +321,7 @@ void Executor::ROMlib_sledgehammer_zone(THz zone, bool print_p,
     if(infop)
         memset(infop, 0, sizeof *infop);
 
-    if(zone == NULL)
+    if(zone == nullptr)
         return;
 
     zone_start = ZONE_HEAP_DATA(zone);
@@ -448,15 +448,15 @@ void Executor::ROMlib_sledgehammer_zones(const char *fn, const char *file, int l
 {
     ROMlib_sledgehammer_zone(MR(LM(SysZone)), false,
                              fn, file, lineno, where,
-                             info_array ? &info_array[0] : NULL);
+                             info_array ? &info_array[0] : nullptr);
     ROMlib_sledgehammer_zone(MR(LM(ApplZone)), false,
                              fn, file, lineno, where,
-                             info_array ? &info_array[1] : NULL);
+                             info_array ? &info_array[1] : nullptr);
     if(LM(TheZone) != LM(SysZone)
        && LM(TheZone) != LM(ApplZone))
         ROMlib_sledgehammer_zone(MR(LM(TheZone)), false,
                                  fn, file, lineno, where,
-                                 info_array ? &info_array[2] : NULL);
+                                 info_array ? &info_array[2] : nullptr);
 }
 
 #endif

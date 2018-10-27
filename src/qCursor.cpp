@@ -150,7 +150,7 @@ void Executor::C_SetCursor(Cursor *cp)
 	 target_pixmap.pmTable = ...; */
 
         convert_pixmap(&data_pixmap, &target_pixmap,
-                       &ROMlib_cursor_rect, NULL);
+                       &ROMlib_cursor_rect, nullptr);
 
         HOST_SET_CURSOR(data_baseaddr, (unsigned short *)cp->mask,
                         CW(cp->hotSpot.h), CW(cp->hotSpot.v));
@@ -225,8 +225,8 @@ CCrsrHandle Executor::C_GetCCursor(INTEGER crsr_id)
     ccrsr_handle = (CCrsrHandle)NewHandle(sizeof(CCrsr));
 
     res_handle = (ccrsr_res_handle)ROMlib_getrestid(TICK("crsr"), crsr_id);
-    if(res_handle == NULL)
-        return NULL;
+    if(res_handle == nullptr)
+        return nullptr;
 
     HLockGuard guard1(ccrsr_handle), guard2(res_handle);
     ccrsr_res_ptr resource;
@@ -377,7 +377,7 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
                 HLockGuard guard3(ccrsr_xdata);
                 ccrsr_xmap.baseAddr = *ccrsr_xdata;
                 convert_pixmap(&src, &ccrsr_xmap,
-                               &ROMlib_cursor_rect, NULL);
+                               &ROMlib_cursor_rect, nullptr);
 
                 CCRSR_XVALID_X(ccrsr) = CW(vdriver->cursorDepth());
                 CCRSR_ID_X(ccrsr) = CTAB_SEED_X(PIXMAP_TABLE(gd_pmap));

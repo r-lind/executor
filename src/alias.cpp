@@ -216,7 +216,7 @@ get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
         "/tmp",
 #else
 #if defined(CYGWIN32)
-        NULL,
+        nullptr,
 #endif
         "c:/tmp",
         "c:/temp",
@@ -686,7 +686,7 @@ OSErr Executor::C_NewAliasMinimalFromFullPath(
     }
 
     if(retval != noErr)
-        *ahp = NULL;
+        *ahp = nullptr;
 
     return retval;
 }
@@ -742,6 +742,6 @@ OSErr Executor::C_NewAliasMinimal(FSSpecPtr fsp, GUEST<AliasHandle> *ahp)
     }
 
     if(retval != noErr)
-        *ahp = NULL;
+        *ahp = nullptr;
     return retval;
 }

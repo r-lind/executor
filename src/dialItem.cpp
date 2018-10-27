@@ -158,7 +158,7 @@ void Executor::ShortenDITL(DialogPtr dp, int16_t n_items)
     int first_item_to_dispose;
 
     item_h = DIALOG_ITEMS(dp);
-    if(item_h == NULL)
+    if(item_h == nullptr)
         return;
 
     item_h_size = GetHandleSize(item_h);

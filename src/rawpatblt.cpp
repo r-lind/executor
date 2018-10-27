@@ -21,7 +21,7 @@ namespace Executor
 using namespace Executor;
 
 /* Dummy table, not actually dereferenced. */
-const void *xdblt_nop_table[1] = { NULL };
+const void *xdblt_nop_table[1] = { nullptr };
 
 const void **xdblt_ones_stubs[5] = {
     xdblt_copy_short_narrow_ones_labels,

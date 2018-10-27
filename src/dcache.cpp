@@ -42,7 +42,7 @@ static dcache_entry_t dcache[DCACHE_NUM_ENTRIES];
 static uint32_t now = 1;
 
 /* Finds the valid dcache entry corresponding to the given fd and
- * offset, or NULL if none is found.
+ * offset, or nullptr if none is found.
  */
 static dcache_entry_t *
 dcache_entry_lookup(uint32_t fd, uint32_t offset)
@@ -52,7 +52,7 @@ dcache_entry_lookup(uint32_t fd, uint32_t offset)
     for(d = &dcache[0]; d < DCACHE_END; d++)
         if(d->fd == fd && d->offset == offset && DCACHE_ENTRY_VALID_P(d))
             goto done;
-    d = NULL; /* no match */
+    d = nullptr; /* no match */
 
 done:
     return d;
@@ -126,7 +126,7 @@ copy_buffer(uint8_t **bufpp, dcache_entry_t *d)
 {
     memcpy(*bufpp, d->data, sizeof d->data);
     *bufpp += DCACHE_BLOCK_SIZE;
-    d->dirty_callback = NULL;
+    d->dirty_callback = nullptr;
 }
 
 static void
@@ -204,7 +204,7 @@ dcache_flush_entry(dcache_entry_t *dp)
         retval = dirty_callback(dp->fd, bufp, offset, length) == length;
         if(bufp != dp->data)
             free(bufp);
-        dp->dirty_callback = NULL;
+        dp->dirty_callback = nullptr;
     }
     return retval;
 }
@@ -230,7 +230,7 @@ dcache_invalidate_entry(dcache_entry_t *dp, bool flush_p)
  *       fact that as an entire track is read in, each of the buffers in
  *       that track will be available.
  * 
- * If it's impossible to flush a cache entry, NULL is returned.
+ * If it's impossible to flush a cache entry, nullptr is returned.
  */
 
 static dcache_entry_t *
@@ -261,7 +261,7 @@ best_dcache_entry_to_replace(void)
     }
 
     if(!dcache_invalidate_entry(best, true))
-        best = NULL;
+        best = nullptr;
 
     return best;
 }
@@ -280,7 +280,7 @@ read_cylinder(uint32_t fd, uint32_t offset, read_callback_funcp_t read_callback)
     new_offset = offset / sizeof buf * sizeof buf;
     nread = read_callback(fd, buf, new_offset, sizeof buf);
     if(nread != sizeof buf)
-        retval = NULL;
+        retval = nullptr;
     else
     {
         for(bufp = buf;
@@ -292,7 +292,7 @@ read_cylinder(uint32_t fd, uint32_t offset, read_callback_funcp_t read_callback)
                 uint32_t n_written;
 
                 n_written = dcache_write(fd, bufp, new_offset,
-                                         DCACHE_BLOCK_SIZE, NULL);
+                                         DCACHE_BLOCK_SIZE, nullptr);
                 if(n_written != DCACHE_BLOCK_SIZE)
                     warning_unexpected(NULL_STRING);
             }
@@ -324,7 +324,7 @@ Executor::dcache_read(uint32_t fd, void *buf, uint32_t offset, uint32_t count,
             dcache_entry_t *d;
 
             d = dcache_entry_lookup(fd, offset);
-            if(d == NULL)
+            if(d == nullptr)
             {
                 if(!read_callback)
                     /*-->*/ break;
@@ -346,7 +346,7 @@ Executor::dcache_read(uint32_t fd, void *buf, uint32_t offset, uint32_t count,
                         {
                             d->fd = fd;
                             d->offset = offset;
-                            d->dirty_callback = NULL;
+                            d->dirty_callback = nullptr;
                         }
                     }
 #else
@@ -390,7 +390,7 @@ Executor::dcache_write(uint32_t fd, const void *buf, uint32_t offset, uint32_t c
             dcache_entry_t *d;
 
             d = dcache_entry_lookup(fd, offset + n); /* replace existing? */
-            if(d == NULL)
+            if(d == nullptr)
             {
                 d = best_dcache_entry_to_replace();
                 if(!d)

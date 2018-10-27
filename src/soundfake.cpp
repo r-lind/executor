@@ -40,7 +40,7 @@ struct hunger_info SoundFake::GetHungerInfo()
 {
     struct hunger_info info;
 
-    info.buf = NULL; /* no buffer at all */
+    info.buf = nullptr; /* no buffer at all */
     info.bufsize = NUM_FAKE_BUFS * FAKE_BUF_SIZE;
     info.t2 = t1 + FAKE_BUF_SIZE;
     info.t3 = info.t2 + FAKE_BUF_SIZE;
@@ -58,7 +58,7 @@ void SoundFake::sound_clear_pending()
 void SoundFake::NoteSoundInterrupt(void)
 {
     if(!no_more_sound_p && num_fake_buffers_enqueued < 2)
-        sound_callback(0, NULL);
+        sound_callback(0, nullptr);
 }
 
 /* Installs a time manager task to call back at the requested time. */

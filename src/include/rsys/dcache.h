@@ -11,10 +11,10 @@ typedef uint32_t (*read_callback_funcp_t)(uint32_t fd, void *buf,
 extern bool dcache_set_enabled(bool enabled_p);
 
 extern uint32_t dcache_read(uint32_t fd, void *buf, uint32_t offset, uint32_t count,
-                            read_callback_funcp_t read_callback = NULL);
+                            read_callback_funcp_t read_callback = nullptr);
 
 extern uint32_t dcache_write(uint32_t fd, const void *buf, uint32_t offset,
-                             uint32_t count, write_callback_funcp_t write_callback = NULL);
+                             uint32_t count, write_callback_funcp_t write_callback = nullptr);
 
 extern bool dcache_invalidate(uint32_t fd, bool flush_p = false);
 extern bool dcache_flush(uint32_t fd);

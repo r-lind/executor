@@ -137,7 +137,7 @@ void Executor::C_GetFNum(StringPtr fnam, GUEST<INTEGER> *fnum) /* IMI-223 */
             h = GetNamedResource(TICK("NFNT"), fnam);
     }
 
-    GetResInfo(h, fnum, &rest, NULL);
+    GetResInfo(h, fnum, &rest, nullptr);
     if(ResError())
         *fnum = 0;
     else if(shift)

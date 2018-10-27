@@ -91,7 +91,7 @@ static itmp htoip(Handle h, WindowPeek *wp_return, int16_t *nop_return,
             HSetState(items, flags);
         }
     }
-    return NULL;
+    return nullptr;
 }
 
 void Executor::C_GetDialogItem(DialogPtr dp, INTEGER itemno, GUEST<INTEGER> *itype,

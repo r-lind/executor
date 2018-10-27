@@ -159,7 +159,7 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
             mousedown_p = (CW(evt.what) == mouseDown);
 
             /* dummy initializations to keep gcc happy */
-            temp_wp = NULL;
+            temp_wp = nullptr;
             mousedown_where = inContent;
 
             if(mousedown_p)
@@ -233,7 +233,7 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
             mousedown_p = (CW(evt.what) == mouseDown);
 
             /* dummy initializations to keep gcc happy */
-            temp_wp = NULL;
+            temp_wp = nullptr;
             mousedown_where = inContent;
 
             if(mousedown_p)

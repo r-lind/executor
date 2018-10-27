@@ -59,7 +59,7 @@ void Executor::C_InitWindows()
     RgnHandle mrgn, corners;
 
     LM(AuxWinHead) = RM(default_aux_win);
-    LM(SaveVisRgn) = NULL;
+    LM(SaveVisRgn) = nullptr;
 
     {
         ThePortGuard guard(MR(qdGlobals().thePort));
@@ -69,7 +69,7 @@ void Executor::C_InitWindows()
         InitCPort(MR(LM(WMgrCPort)));
 
         ph = GetPattern(deskPatID);
-        if(ph == NULL)
+        if(ph == nullptr)
         {
             fprintf(stderr, "Can't open System file.\n"
                             "This is very bad.  You will have to reinstall %s"
@@ -122,11 +122,11 @@ void Executor::C_InitWindows()
         DisposeRgn(mrgn);
         DisposeRgn(corners);
         CopyRgn(MR(LM(GrayRgn)), PORT_CLIP_REGION(MR(wmgr_port)));
-        LM(WindowList) = NULL;
+        LM(WindowList) = nullptr;
         LM(SaveUpdate) = CWC(-1);
         LM(PaintWhite) = CWC(-1);
-        LM(DeskHook) = NULL;
-        LM(GhostWindow) = NULL;
+        LM(DeskHook) = nullptr;
+        LM(GhostWindow) = nullptr;
         PATASSIGN(LM(DragPattern), qdGlobals().gray);
     }
     ROMlib_rootless_update();
@@ -146,8 +146,8 @@ void Executor::C_InitWindows()
 The system file you have installed appears to be too old. \
 Executor may die without warning because of this mismatch",
                          0,
-                         "Continue", "Exit", NULL,
-                         NULL, exit_executor, NULL);
+                         "Continue", "Exit", nullptr,
+                         nullptr, exit_executor, nullptr);
         }
         issued_system_file_version_skew_warning_p = true;
     }
@@ -158,36 +158,36 @@ Executor may die without warning because of this mismatch",
             break;
         case launch_cfm_requiring:
             system_error("CFM-requiring applications are not currently supported.",
-                         0, "OK", NULL, NULL, NULL, NULL, NULL);
+                         0, "OK", nullptr, nullptr, nullptr, nullptr, nullptr);
             break;
         case launch_ppc_only:
 #if !defined(powerpc) && !defined(__ppc__)
             system_error("That application is PowerPC-only.  This version of "
                          "Executor doesn't run PowerPC applications.  "
                          "You need to find an M68k version of that application.",
-                         0, "OK", NULL, NULL, NULL, NULL, NULL);
+                         0, "OK", nullptr, nullptr, nullptr, nullptr, nullptr);
 #else
             system_error("That application is PowerPC-only.  To attempt to run "
                          "it, Executor must be started using the \"-ppc\" "
                          "command-line switch.",
-                         0, "OK", NULL, NULL, NULL, NULL, NULL);
+                         0, "OK", nullptr, nullptr, nullptr, nullptr, nullptr);
 #endif
             break;
         case launch_damaged:
             system_error("That application appears damaged (lacks CODE and cfrg).",
-                         0, "OK", NULL, NULL, NULL, NULL, NULL);
+                         0, "OK", nullptr, nullptr, nullptr, nullptr, nullptr);
             break;
 
         case launch_compressed_ge7:
             system_error("That application has a compressed CODE 0.  "
                          "It is probably unusable under Executor but "
                          "might work in System 6 mode",
-                         0, "OK", NULL, NULL, NULL, NULL, NULL);
+                         0, "OK", nullptr, nullptr, nullptr, nullptr, nullptr);
             break;
         case launch_compressed_lt7:
             system_error("That application has a compressed CODE 0.  "
                          "It will not run under this version of Executor.",
-                         0, "OK", NULL, NULL, NULL, NULL, NULL);
+                         0, "OK", nullptr, nullptr, nullptr, nullptr, nullptr);
             break;
 
         default:
@@ -210,8 +210,8 @@ Executor may die without warning because of this mismatch",
                      "It is quite possible that this program will not work "
                      "under Executor.",
                      0,
-                     "Continue", "Restart", NULL,
-                     NULL, C_ExitToShell, NULL);
+                     "Continue", "Restart", nullptr,
+                     nullptr, C_ExitToShell, nullptr);
     }
 
     if(size_info.size_resource_present_p
@@ -232,7 +232,7 @@ Executor may die without warning because of this mismatch",
 
         system_error(msg_buf, 0,
                      "Continue", "Browser", "Exit",
-                     NULL, C_ExitToShell, exit_executor);
+                     nullptr, C_ExitToShell, exit_executor);
     }
 }
 
@@ -494,8 +494,8 @@ CWindowPtr Executor::C_GetNewCWindow(INTEGER window_id, Ptr window_storage,
     PaletteHandle palette;
 
     win_res = (windrestypehand)ROMlib_getrestid(TICK("WIND"), window_id);
-    if(win_res == NULL)
-        return (CWindowPtr)NULL;
+    if(win_res == nullptr)
+        return (CWindowPtr)nullptr;
 
     new_cwin = NewCWindow(window_storage, &HxX(win_res, _wrect),
                           (StringPtr)((char *)&HxX(win_res, _wrect) + 18),
@@ -505,7 +505,7 @@ CWindowPtr Executor::C_GetNewCWindow(INTEGER window_id, Ptr window_storage,
                           CL(*(GUEST<LONGINT> *)((char *)&HxX(win_res, _wrect) + 14)));
 
     win_ctab_res = ROMlib_getrestid(TICK("wctb"), window_id);
-    if(win_ctab_res != NULL)
+    if(win_ctab_res != nullptr)
     {
         ThePortGuard guard(MR(qdGlobals().thePort));
         SetWinColor((WindowPtr)new_cwin, (CTabHandle)win_ctab_res);

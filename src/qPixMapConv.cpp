@@ -22,7 +22,7 @@ using namespace Executor;
 
 static uint32_t depth_table_space[DEPTHCONV_MAX_UINT32_TABLE_SIZE];
 
-static depthconv_func_t conversion_func = NULL;
+static depthconv_func_t conversion_func = nullptr;
 
 static int32_t cached_src_bpp = -1, cached_dst_bpp = -1;
 static GUEST<int32_t> cached_src_seed_x = CLC(-1), cached_dst_seed_x = CLC(-1);
@@ -295,7 +295,7 @@ Executor::pixmap_rgb_spec(const PixMap *pixmap)
             gui_fatal("unknown pixel size");
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 void Executor::pixmap_set_pixel_fields(PixMap *pixmap, int bpp)
@@ -413,7 +413,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                 {
                     conversion_func
                         = depthconv_make_ind_to_ind_table(depth_table_space,
-                                                          src_bpp, dst_bpp, NULL,
+                                                          src_bpp, dst_bpp, nullptr,
                                                           conv_table->ctTable);
                     /* Remember the specs for the table we just created. */
                     cached_src_seed_x = CLC(-1);
@@ -446,14 +446,14 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                     if(dst_bpp == 1 && BITMAP_P(dst))
                         target_table = ROMlib_bw_ctab;
                     else
-                        target_table = NULL;
+                        target_table = nullptr;
 
                     GetSubTable(mapping, DEFAULT_ITABLE_RESOLUTION,
                                 target_table);
 
                     conversion_func
                         = depthconv_make_ind_to_ind_table(depth_table_space,
-                                                          src_bpp, dst_bpp, NULL,
+                                                          src_bpp, dst_bpp, nullptr,
                                                           CTAB_TABLE(mapping));
 
                     /* free up the mapping table */
@@ -481,7 +481,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
             {
                 conversion_func
                     = depthconv_make_ind_to_rgb_table(depth_table_space, src_bpp,
-                                                      NULL, CTAB_TABLE(src_table),
+                                                      nullptr, CTAB_TABLE(src_table),
                                                       dst_rgb_spec);
             }
             break;
@@ -519,7 +519,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
             {
                 conversion_func
                     = depthconv_make_rgb_to_ind_table(depth_table_space, dst_bpp,
-                                                      NULL,
+                                                      nullptr,
                                                       target_table, target_itab,
                                                       src_rgb_spec);
             }
@@ -537,7 +537,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                || src_seed_x != cached_src_seed_x || dst_seed_x != cached_dst_seed_x)
             {
                 conversion_func
-                    = depthconv_make_rgb_to_rgb_table(depth_table_space, NULL,
+                    = depthconv_make_rgb_to_rgb_table(depth_table_space, nullptr,
                                                       src_rgb_spec, dst_rgb_spec);
             }
             break;

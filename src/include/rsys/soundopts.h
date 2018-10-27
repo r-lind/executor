@@ -91,7 +91,7 @@ struct hunger_info
     snd_time t2; /* Time of earliest sample which can be provided */
     snd_time t3; /* Time of latest sample which must be provided */
     snd_time t4; /* Time of latest sample which can be provided */
-    unsigned char *buf; /* NULL means there is no buffer; just "pretend" */
+    unsigned char *buf; /* nullptr means there is no buffer; just "pretend" */
     int bufsize; /* to fill it in; (!buf && bufsize) is possible! */
 };
 

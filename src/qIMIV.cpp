@@ -307,7 +307,7 @@ SeedFill_handle_direct_screen_access(uint8_t *srcp, uint8_t *dstp,
 
     create_scratch_bitmap_if_necessary(&srcp, src_row_words,
                                        height, word_width,
-                                       NULL);
+                                       nullptr);
     write_back_p = create_scratch_bitmap_if_necessary(&dstp, dst_row_words,
                                                       height, word_width,
                                                       &write_back_data);
@@ -320,7 +320,7 @@ SeedFill_handle_direct_screen_access(uint8_t *srcp, uint8_t *dstp,
         CopyBits((BitMap *)&write_back_data.src_pm,
                  (BitMap *)&write_back_data.dst_pm,
                  &write_back_data.src_rect, &write_back_data.dst_rect,
-                 srcCopy, NULL);
+                 srcCopy, nullptr);
 
         pixmap_free_copy(&write_back_data.src_pm);
     }
@@ -437,7 +437,7 @@ void Executor::C_CopyMask(BitMap *src_bogo_map, BitMap *mask_bogo_map,
     mask_bm.bounds = *mask_rect;
 
     CopyBits(mask_bogo_map, &mask_bm,
-             mask_rect, mask_rect, srcCopy, NULL);
+             mask_rect, mask_rect, srcCopy, nullptr);
 
     copy_mask_1(src_bogo_map, &mask_bm, dst_bogo_map,
                 src_rect, mask_rect, dst_rect);

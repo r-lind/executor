@@ -162,7 +162,7 @@ void dump_image(BitMap *bogo_bitmap, Rect *rect)
         new_pixmap.cmpCount = CWC(1);
         new_pixmap.cmpSize = CWC(8);
 
-        new_pixmap.pmTable = NULL;
+        new_pixmap.pmTable = nullptr;
 
         conv_table = (ColorTable *)alloca(CTAB_STORAGE_FOR_SIZE(1 << depth));
         for(i = 0; i < (1 << depth); i++)

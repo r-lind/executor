@@ -142,7 +142,7 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
         pm_front_window_maybe_changed_hook();
         ThePortGuard guard(MR(wmgr_port));
         AuxWinHandle aux_w;
-        RGBColor *content_color = NULL;
+        RGBColor *content_color = nullptr;
         CTabHandle w_ctab;
 
         /*

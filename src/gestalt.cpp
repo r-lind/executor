@@ -461,14 +461,14 @@ typedef struct
     GUEST<uint32_t> value;
 } gestalt_list_entry_t;
 
-static gestalt_list_entry_t *gestalt_listp = NULL;
+static gestalt_list_entry_t *gestalt_listp = nullptr;
 static size_t listp_size = 0;
 
 void
 Executor::ROMlib_clear_gestalt_list(void)
 {
     free(gestalt_listp);
-    gestalt_listp = NULL;
+    gestalt_listp = nullptr;
     listp_size = 0;
 }
 

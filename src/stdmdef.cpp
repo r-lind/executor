@@ -59,11 +59,11 @@ void Executor::cleanup_icon_info(icon_info_t *info)
 
 int Executor::get_icon_info(mextp item_info, icon_info_t *info, int need_icon_p)
 {
-    Handle h = NULL;
+    Handle h = nullptr;
 
     /* my default */
     info->width = info->height = 0;
-    info->icon = NULL;
+    info->icon = nullptr;
 
     if(item_info->micon)
     {
@@ -211,7 +211,7 @@ draw_right_arrow(Rect *menu_rect, MenuHandle mh, int item, int invert_p)
     dst_rect.right = CW(x + 6);
 
     CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-             &arrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
+             &arrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
 }
 
 static void
@@ -275,7 +275,7 @@ draw_arrow(Rect *menu_rect, MenuHandle mh, arrowtype arrdir)
     dst_rect.right = CW(CW(menu_rect->left) + checksize
                         + /* arrows are `11' wide */ 11);
     CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
-             &arrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
+             &arrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
 
     /* resent the fg/bk colors */
     RGBForeColor(&ROMlib_black_rgb_color);

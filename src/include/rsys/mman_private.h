@@ -83,7 +83,7 @@ extern uintptr_t ROMlib_memtop;
     (VALID_ADDRESS(handle) && VALID_ADDRESS(MR(*handle)) \
          ? (block_header_t *)((char *)STARH(handle)      \
                               - HDRSIZE)                 \
-         : NULL)
+         : nullptr)
 
 #define BLOCK_TO_HANDLE(zone, block) \
     ((Handle)((char *)(zone) + BLOCK_LOCATION_OFFSET(block)))
@@ -214,7 +214,7 @@ extern void ROMlib_sledgehammer_zones(const char *fn,
         if(ERROR_ENABLED_P(ERROR_MEMORY_MANAGER_SLAM))     \
             ROMlib_sledgehammer_zones(__PRETTY_FUNCTION__, \
                                       __FILE__, __LINE__,  \
-                                      where, NULL);        \
+                                      where, nullptr);        \
     } while(false)
 
 #define MM_SLAM_ZONE(zone, where)                         \
@@ -224,7 +224,7 @@ extern void ROMlib_sledgehammer_zones(const char *fn,
             ROMlib_sledgehammer_zone(zone, false,         \
                                      __PRETTY_FUNCTION__, \
                                      __FILE__, __LINE__,  \
-                                     where, NULL);        \
+                                     where, nullptr);        \
     } while(false)
 
 #else /* No ERROR_MEMORY_MANAGER_SLAM */

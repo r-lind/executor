@@ -131,7 +131,7 @@ void _safe_strncat(char *dst, const char *src, int len)
 
 void send_to_help_buf(const char *text, int len, int append_newline_p)
 {
-    if(help_buf == NULL)
+    if(help_buf == nullptr)
     {
         help_buf = (char *)malloc(2 * len);
         help_buf_len_max = 2 * len;
@@ -229,7 +229,7 @@ void _generate_help_message(void)
 char *
 Executor::opt_help_message(void)
 {
-    if(help_buf == NULL)
+    if(help_buf == nullptr)
         _generate_help_message();
     return help_buf;
 }
@@ -380,7 +380,7 @@ bool Executor::opt_val(opt_database_t &db, string opt, string *retval)
 }
 
 /* Parses an integer value and returns it in *retval.  If
- * parse_error_p is non-NULL, sets parse_error_p to true and prints an
+ * parse_error_p is non-nullptr, sets parse_error_p to true and prints an
  * error message in case of a parse error, else leaves it untouched.
  * Returns true if a value was found.
  */

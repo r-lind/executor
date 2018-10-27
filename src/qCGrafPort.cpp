@@ -113,7 +113,7 @@ void Executor::C_InitCPort(CGrafPtr p)
      rgbHiliteColor is set to the default value (where does this come from)
      and all other fields are zero'd */
 
-    /* A test case shows that grafVars is allocated only if it was NULL. */
+    /* A test case shows that grafVars is allocated only if it was nullptr. */
     if(CPORT_GRAFVARS_X(p) == CLC_NULL)
         CPORT_GRAFVARS_X(p) = RM(NewHandleClear(sizeof(GrafVars)));
 
@@ -315,12 +315,12 @@ PixMapHandle Executor::C_NewPixMap()
     PixMapHandle pixmap;
 
     pixmap = (PixMapHandle)NewHandle(sizeof(PixMap));
-    if(pixmap == NULL)
+    if(pixmap == nullptr)
     {
 #if defined(FLAG_ALLOCATION_FAILURES)
         gui_fatal("allocation failure");
 #endif
-        return NULL;
+        return nullptr;
     }
 
     HLock((Handle)pixmap); /* so we can use accessor macros even when we're
@@ -335,7 +335,7 @@ PixMapHandle Executor::C_NewPixMap()
     }
     else
     {
-        /* If LM(TheGDevice) is NULL, we fill in some useful default values.
+        /* If LM(TheGDevice) is nullptr, we fill in some useful default values.
        * This is a hack to make Executor bootstrap properly.
        */
         memset(STARH(pixmap), 0, sizeof(PixMap));
@@ -413,9 +413,9 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     Handle xdata;
 
     pixpat_res = (pixpat_res_handle)GetResource(TICK("ppat"), pixpat_id);
-    if(pixpat_res == NULL)
-        return (PixPatHandle)NULL;
-    if(*pixpat_res == NULL)
+    if(pixpat_res == nullptr)
+        return (PixPatHandle)nullptr;
+    if(*pixpat_res == nullptr)
         LoadResource((Handle)pixpat_res);
 
     pixpat = (PixPatHandle)NewHandle(sizeof(PixPat));
@@ -499,7 +499,7 @@ void Executor::C_DisposePixPat(PixPatHandle pixpat_h)
     if(pixpat_h)
     {
         /* ##### determine which of these checks are necessary, and which
-	 should be asserts that the handles are non-NULL */
+	 should be asserts that the handles are non-nullptr */
         if(PIXPAT_MAP_X(pixpat_h))
             DisposePixMap(PIXPAT_MAP(pixpat_h));
         if(PIXPAT_DATA_X(pixpat_h))

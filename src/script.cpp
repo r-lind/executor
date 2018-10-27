@@ -218,7 +218,7 @@ void Executor::C_MeasureJustified(Ptr text, int32_t length, Fixed slop,
     denomx.h = CW(denom.h);
 
     xStdTxMeas(length, (uint8_t *)text, &numerx, &denomx,
-               NULL, (GUEST<int16_t> *)charLocs);
+               nullptr, (GUEST<int16_t> *)charLocs);
 }
 
 Boolean Executor::C_ParseTable(CharByteTable table)
@@ -555,7 +555,7 @@ INTEGER Executor::C_ReplaceText(Handle base_text, Handle subst_text, Str15 key)
     p = (Ptr)STARH(subst_text);
     len = GetHandleSize(subst_text);
     offset = 0;
-    while(retval >= 0 && (l = Munger(base_text, offset, (Ptr)key + 1, key[0], NULL, 1)) >= 0)
+    while(retval >= 0 && (l = Munger(base_text, offset, (Ptr)key + 1, key[0], nullptr, 1)) >= 0)
     {
         offset = Munger(base_text,
                         l, (Ptr)key + 1, key[0], p, len);

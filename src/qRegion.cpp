@@ -1497,7 +1497,7 @@ BOOLEAN Executor::C_EqualRgn(RgnHandle r1, RgnHandle r2)
 
 BOOLEAN Executor::C_EmptyRgn(RgnHandle rh)
 {
-    // FIXME: #warning What does a mac do with a NULL HANDLE here?
+    // FIXME: #warning What does a mac do with a nullptr HANDLE here?
     BOOLEAN retval;
 
     retval = rh ? EmptyRect(&RGN_BBOX(rh)) : true;

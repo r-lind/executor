@@ -29,7 +29,7 @@ os_specific_really_quit(void)
     mess = alloca(sizeof FORMAT_STR + strlen(name));
     sprintf(mess, FORMAT_STR, name);
 
-    reply = MessageBox(NULL, mess, "Terminate?", MB_OKCANCEL);
+    reply = MessageBox(nullptr, mess, "Terminate?", MB_OKCANCEL);
 
     retval = reply == IDOK;
     return retval;

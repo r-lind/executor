@@ -53,14 +53,14 @@ Size Executor::C_TempMaxMem(GUEST<Size> *grow_s)
 Ptr Executor::C_TempTopMem()
 {
     warning_unimplemented(NULL_STRING);
-    return NULL;
+    return nullptr;
 }
 
 Handle Executor::C_TempNewHandle(Size logical_size, GUEST<OSErr> *result_code)
 {
 #if defined(TEMP_MEM_FAIL)
     *result_code = CWC(memFullErr);
-    return NULL;
+    return nullptr;
 #else
     {
         Handle retval;
