@@ -30,6 +30,8 @@ struct Point
 {
     int16_t v;
     int16_t h;
+
+    inline bool operator==(Point other) const { return v == other.v && h == other.h; }
 };
 
 #if defined(BIGENDIAN)
@@ -81,49 +83,32 @@ inline syn68k_addr_t US_TO_SYN68K_CHECK0_CHECKNEG1(T (*addr)(Args...))
 
 namespace guestvalues
 {
-
-// Define alignment.
-
-// Most things are two-byte aligned.
-template<typename T>
-struct Aligner
-{
-    uint16_t align;
-};
-
-// Except for chars
-template<>
-struct Aligner<char>
-{
-    uint8_t align;
-};
-template<>
-struct Aligner<unsigned char>
-{
-    uint8_t align;
-};
-template<>
-struct Aligner<signed char>
-{
-    uint8_t align;
-};
-
-
-
 template<typename T, typename = void>
 struct GuestTypeTraits;
 
 template<typename T>
-struct GuestTypeTraits<T, std::enable_if_t<std::is_integral_v<T>>>
+struct GuestTypeTraits<T, std::enable_if_t<std::is_integral_v<T> && sizeof(T) <= 4>>
 {
     using HostType = T;
     using GuestType = T;
+    static constexpr bool fitsInRegister = true;
 
     static GuestType host_to_guest(HostType x) { return SwapTyped(x); }
     static HostType guest_to_host(GuestType x) { return SwapTyped(x); }
 
-    static std::enable_if_t<sizeof(T) <= 4, uint32_t> host_to_reg(HostType x) { return (uint32_t)x; }
+    static uint32_t host_to_reg(HostType x) { return (uint32_t)x; }
     static HostType reg_to_host(std::enable_if_t<sizeof(T) <= 4, uint32_t> x) { return (HostType)x; }
+};
+
+template<typename T>
+struct GuestTypeTraits<T, std::enable_if_t<std::is_integral_v<T> && 4 < sizeof(T)>>
+{
+    using HostType = T;
+    using GuestType = T;
+    static constexpr bool fitsInRegister = false;
+
+    static GuestType host_to_guest(HostType x) { return SwapTyped(x); }
+    static HostType guest_to_host(GuestType x) { return SwapTyped(x); }
 };
 
 template<typename T>
@@ -131,6 +116,7 @@ struct GuestTypeTraits<T*>
 {
     using HostType = T*;
     using GuestType = uint32_t;
+    static constexpr bool fitsInRegister = true;
 
     static GuestType host_to_guest(HostType x) { return SwapTyped(US_TO_SYN68K_CHECK0_CHECKNEG1(x)); }
     static HostType guest_to_host(GuestType x) { return (HostType)SYN68K_TO_US_CHECK0_CHECKNEG1(SwapTyped(x)); }
@@ -139,11 +125,12 @@ struct GuestTypeTraits<T*>
     static HostType reg_to_host(uint32_t x) { return (HostType)SYN68K_TO_US_CHECK0_CHECKNEG1(x); }
 };
 
-template<typename T>
-struct GuestTypeTraits<UPP<T>>
+template<typename T, typename CallConv>
+struct GuestTypeTraits<UPP<T, CallConv>>
 {
-    using HostType = UPP<T>;
+    using HostType = UPP<T, CallConv>;
     using GuestType = uint32_t;
+    static constexpr bool fitsInRegister = true;
 
     static GuestType host_to_guest(HostType x) { return SwapTyped(US_TO_SYN68K_CHECK0_CHECKNEG1((void*)x)); }
     static HostType guest_to_host(GuestType x) { return (HostType)SYN68K_TO_US_CHECK0_CHECKNEG1(SwapTyped(x)); }
@@ -166,6 +153,7 @@ struct GuestTypeTraits<float>
 {
     using HostType = float;
     using GuestType = uint32_t;
+    static constexpr bool fitsInRegister = true;
 
     static GuestType host_to_guest(HostType x) { return SwapTyped(reinterpret_bits_cast<GuestType>(x)); }
     static HostType guest_to_host(GuestType x) { return reinterpret_bits_cast<HostType>(SwapTyped(x)); }
@@ -179,6 +167,7 @@ struct GuestTypeTraits<double>
 {
     using HostType = double;
     using GuestType = uint64_t;
+    static constexpr bool fitsInRegister = false;
 
     static GuestType host_to_guest(HostType x) { return SwapTyped(reinterpret_bits_cast<GuestType>(x)); }
     static HostType guest_to_host(GuestType x) { return reinterpret_bits_cast<HostType>(SwapTyped(x)); }
@@ -188,6 +177,7 @@ struct GuestTypeTraits<Point>
 {
     using HostType = Point;
     using GuestType = uint32_t;
+    static constexpr bool fitsInRegister = true;
 
     static GuestType host_to_guest(HostType x) { return reinterpret_bits_cast<uint32_t>(SwapPoint(x)); }
     static HostType guest_to_host(GuestType x) { return SwapPoint(reinterpret_bits_cast<Point>(x)); }
@@ -196,217 +186,138 @@ struct GuestTypeTraits<Point>
     static HostType reg_to_host(uint32_t x) { return Point{ int16_t(x >> 16), int16_t(x & 0xFFFF) }; }
 };
 
-template<size_t size>
-struct MakeRawType
+template<typename T>
+struct GuestWrapperStorage
 {
-    using type = std::enable_if_t<size <= 8, uint64_t>;
-};
+    using HostType = T;
+    using GuestType = typename GuestTypeTraits<T>::GuestType;
+    
+    static_assert(sizeof(GuestType) >= 2, "GuestWrapper<> should not be used for single-byte values");
 
-template<>
-struct MakeRawType<1>
-{
-    using type = uint8_t;
-};
-template<>
-struct MakeRawType<2>
-{
-    using type = uint16_t;
-};
-template<>
-struct MakeRawType<3>
-{
-    using type = uint32_t;
-};
-template<>
-struct MakeRawType<4>
-{
-    using type = uint32_t;
-};
-
-
-
-template<typename ActualType>
-union HiddenValue
-{
-    uint8_t data[sizeof(ActualType)];
-    Aligner<ActualType> align;
-public:
-    using RawType = typename MakeRawType<sizeof(ActualType)>::type;
-
-    HiddenValue() = default;
-    HiddenValue(const HiddenValue<ActualType> &y) = default;
-    HiddenValue<ActualType> &operator=(const HiddenValue<ActualType> &y) = default;
-
-    ActualType raw() const
+    union
     {
-        return *(const ActualType *)data;
+        uint8_t data[sizeof(GuestType)];
+        uint16_t align;
+    };
+
+    GuestType raw() const
+    {
+        GuestType tmp;
+        std::memcpy(&tmp, data, sizeof(GuestType));
+        return tmp;
     }
 
-    void raw(ActualType x)
+    void raw(GuestType x)
     {
-        *(ActualType *)data = x;
+        std::memcpy(data, &x, sizeof(GuestType));
     }
 };
 
-template<typename TT>
-struct GuestWrapper;
-
-template<typename TT>
-struct GuestWrapperBase
+template<typename T>
+struct GuestWrapperGetSet : GuestWrapperStorage<T>
 {
-    HiddenValue<TT> hidden;
+    using GuestWrapperStorage<T>::GuestWrapperStorage;
 
-    using WrappedType = TT;
-    using RawType = typename MakeRawType<sizeof(TT)>::type;
+    using Traits = GuestTypeTraits<T>;
+    using HostType = typename Traits::HostType;
 
-    WrappedType get() const
+    HostType get() const
     {
-        return SwapTyped(hidden.raw());
+        return Traits::guest_to_host(this->raw());
     }
 
-    void set(WrappedType x)
+    void set(HostType x)
     {
-        hidden.raw(SwapTyped(x));
+        this->raw(Traits::host_to_guest(x));
     }
+};
 
-    RawType raw() const
-    {
-        return hidden.raw();
-    }
+template<typename T, typename Enable = void>
+struct GuestWrapperOps : GuestWrapperGetSet<T>
+{
+    using GuestWrapperGetSet<T>::GuestWrapperGetSet;
+};
 
-    void raw(RawType x)
-    {
-        hidden.raw(x);
-    }
+template<typename T>
+struct GuestWrapper : GuestWrapperOps<T>
+{
+    using Traits = GuestTypeTraits<T>;
+    using HostType = typename Traits::HostType;
+    using GuestType = typename Traits::GuestType;
 
+   // template<typename enable = std::enable_if_t<Traits::fitsInRegister>>
     uint32_t raw_host_order() const
     {
-        return get();
+        static_assert(Traits::fitsInRegister);
+        if constexpr(Traits::fitsInRegister)
+            return Traits::host_to_reg(this->get());
+        else
+            return 0;
     }
+
+  //  template<typename enable = std::enable_if_t<Traits::fitsInRegister>>
     void raw_host_order(uint32_t x)
     {
-        return set(x);
+        static_assert(Traits::fitsInRegister);
+        if constexpr(Traits::fitsInRegister)
+            this->set(Traits::reg_to_host(x));
     }
 
-
-    void raw_and(RawType x)
-    {
-        hidden.raw(hidden.raw() & x);
-    }
-
-    void raw_or(RawType x)
-    {
-        hidden.raw(hidden.raw() | x);
-    }
-
-    void raw_and(GuestWrapper<TT> x)
-    {
-        hidden.raw(hidden.raw() & x.raw());
-    }
-
-    void raw_or(GuestWrapper<TT> x)
-    {
-        hidden.raw(hidden.raw() | x.raw());
-    }
-
-    GuestWrapper<TT> operator~() const;
-};
-
-template<typename TT>
-struct GuestWrapperBase<TT *>
-{
-private:
-    HiddenValue<uint32_t> p;
-
-public:
-    using WrappedType = TT *;
-    using RawType = uint32_t;
-
-    WrappedType get() const
-    {
-        uint32_t rawp = this->raw();
-        return (TT *)(SYN68K_TO_US_CHECK0_CHECKNEG1((uint32_t)swap32(rawp)));
-    }
-
-    void set(TT *ptr)
-    {
-        this->raw(swap32(US_TO_SYN68K_CHECK0_CHECKNEG1(ptr)));
-    }
-
-    RawType raw() const
-    {
-        return p.raw();
-    }
-
-    void raw(RawType x)
-    {
-        p.raw(x);
-    }
-
-    uint32_t raw_host_order() const
-    {
-        return swap32(this->raw());
-    }
-    void raw_host_order(uint32_t x)
-    {
-        this->raw(swap32(x));
-    }
-
-#ifdef AUTOMATIC_CONVERSIONS
-    std::enable_if_t<!std::is_void_v<TT>, TT>& operator*() const { return *this->get(); }
-    TT* operator->() const { return this->get(); }
-#endif
-};
-
-template<typename TT>
-struct GuestWrapper : GuestWrapperBase<TT>
-{
     GuestWrapper() = default;
-    GuestWrapper(const GuestWrapper<TT> &y) = default;
-    GuestWrapper<TT> &operator=(const GuestWrapper<TT> &y) = default;
+    GuestWrapper(const GuestWrapper<T>& y) = default;
+    GuestWrapper<T> &operator=(const GuestWrapper<T> &y) = default;
+    using GuestWrapperOps<T>::GuestWrapperOps;
 
-    template<typename T2, typename = typename std::enable_if<std::is_convertible<T2, TT>::value && sizeof(TT) == sizeof(T2)>::type>
+    template<typename T2, typename = typename std::enable_if_t<std::is_convertible_v<T2, T>>>
     GuestWrapper(const GuestWrapper<T2> &y)
     {
-        this->raw(y.raw());
+        if constexpr(sizeof(T) == sizeof(T2))
+            this->raw(y.raw());
+        else
+            this->set(y.get());
     }
 
-    template<typename T2, typename = typename std::enable_if<std::is_convertible<T2, TT>::value && sizeof(TT) == sizeof(T2)>::type>
-    GuestWrapper<TT> &operator=(const GuestWrapper<T2> &y)
+    template<typename T2, typename = typename std::enable_if_t<std::is_convertible_v<T2, T>>>
+    GuestWrapper<T> &operator=(const GuestWrapper<T2> &y)
     {
-        this->raw(y.raw());
+        if constexpr(sizeof(T) == sizeof(T2))
+            this->raw(y.raw());
+        else
+            this->set(y.get());
         return *this;
     }
+
 
 #ifdef AUTOMATIC_CONVERSIONS
-    GuestWrapper(const TT &y)
+    GuestWrapper(const T &y)
     {
         this->set(y);
     }
 
-    GuestWrapper<TT> &operator=(const TT &y)
+    GuestWrapper<T> &operator=(const T &y)
     {
         this->set(y);
         return *this;
     }
 
-    operator TT() const { return this->get(); }
+    operator T() const { return this->get(); }
 #else
+    //GuestWrapper(std::enable_if_t<std::is_convertible_v<std::nullptr_t, T>, std::nullptr_t>)
     GuestWrapper(std::nullptr_t)
     {
         this->raw(0);
     }
 #endif
 
-    static GuestWrapper<TT> fromRaw(typename GuestWrapper<TT>::RawType r)
+    static GuestWrapper<T> fromRaw(GuestType r)
     {
-        GuestWrapper<TT> w;
+        GuestWrapper<T> w;
         w.raw(r);
         return w;
     }
-    static GuestWrapper<TT> fromHost(typename GuestWrapper<TT>::WrappedType x)
+    static GuestWrapper<T> fromHost(HostType x)
     {
-        GuestWrapper<TT> w;
+        GuestWrapper<T> w;
         w.set(x);
         return w;
     }
@@ -416,121 +327,159 @@ struct GuestWrapper : GuestWrapperBase<TT>
         return this->raw() != 0;
     }
 
-    template<typename T2,
-             typename compatible = decltype(TT() | T2())>
-    //typename sizematch = typename std::enable_if<sizeof(TT) == sizeof(T2)>::type>
-    GuestWrapper<TT> &operator|=(GuestWrapper<T2> x)
+
+    template<typename T2, typename result = decltype(T() == T2()),
+        typename enable = std::enable_if_t<sizeof(T) == sizeof(T2)>>
+    bool operator==(GuestWrapper<T2> b) const
     {
-        this->raw_or(x.raw());
-        return *this;
+        return this->raw() == b.raw();
+    }
+    bool operator==(GuestWrapper<T> b) const
+    {
+        return this->raw() == b.raw();
     }
 
-    template<typename T2,
-             typename compatible = decltype(TT() & T2())>
-    //typename sizematch = typename std::enable_if<sizeof(TT) == sizeof(T2)>::type>
-    GuestWrapper<TT> &operator&=(GuestWrapper<T2> x)
+    template<typename T2, typename result = decltype(T() != T2()),
+        typename enable = std::enable_if_t<sizeof(T) != sizeof(T2)>>
+    bool operator!=(GuestWrapper<T2> b) const
     {
-        this->raw_and(x.raw());
-        return *this;
+        return this->raw() != b.raw();
     }
+    bool operator!=(GuestWrapper<T> b) const
+    {
+        return this->raw() != b.raw();
+    }
+
+#ifdef AUTOMATIC_CONVERSIONS
+    template<typename T2>
+    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool> 
+    operator==(GuestWrapper<T> a, T2 b)
+    {
+        return a.get() == b;
+    }
+    template<typename T2> 
+    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
+    operator!=(GuestWrapper<T> a, T2 b)
+    {
+        return a.get() != b;
+    }
+    template<typename T2>
+    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
+    operator==(T2 a, GuestWrapper<T> b)
+    {
+        return a == b.get();
+    }
+    template<typename T2>
+    friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
+     operator!=(T2 a, GuestWrapper<T> b)
+    {
+        return a != b.get();
+    }
+#endif
 };
 
-template<typename TT>
-inline GuestWrapper<TT> GuestWrapperBase<TT>::operator~() const
-{
-    return GuestWrapper<TT>::fromRaw(~this->raw());
-}
 
-template<typename T1, typename T2,
-         typename result = decltype(T1() == T2()),
-         typename enable = typename std::enable_if<sizeof(T1) == sizeof(T2)>::type>
-bool operator==(GuestWrapper<T1> a, GuestWrapper<T2> b)
+template<typename T>
+struct GuestWrapperOps<T*> : GuestWrapperGetSet<T*>
 {
-    return a.raw() == b.raw();
-}
-
-template<typename T1, typename T2,
-         typename result = decltype(T1() == T2()),
-         typename enable = typename std::enable_if<sizeof(T1) == sizeof(T2)>::type>
-bool operator!=(GuestWrapper<T1> a, GuestWrapper<T2> b)
-{
-    return a.raw() != b.raw();
-}
-
-template<typename T1, typename T2,
-         typename result = decltype(T1() & T2()),
-         typename enable = typename std::enable_if<sizeof(T1) == sizeof(T2)>::type>
-GuestWrapper<T1> operator&(GuestWrapper<T1> a, GuestWrapper<T2> b)
-{
-    return GuestWrapper<T1>::fromRaw(a.raw() & b.raw());
-}
-template<typename T1, typename T2,
-         typename result = decltype(T1() | T2()),
-         typename enable = typename std::enable_if<sizeof(T1) == sizeof(T2)>::type>
-GuestWrapper<T1> operator|(GuestWrapper<T1> a, GuestWrapper<T2> b)
-{
-    return GuestWrapper<T1>::fromRaw(a.raw() | b.raw());
-}
-
-template<typename TT>
-bool operator==(GuestWrapper<TT *> a, std::nullptr_t)
-{
-    return !a;
-}
-template<typename TT>
-bool operator!=(GuestWrapper<TT *> a, std::nullptr_t)
-{
-    return a;
-}
-
-#define GUEST_STRUCT    struct is_guest_struct {}
+#ifdef AUTOMATIC_CONVERSIONS
+    T& operator*() const { return *this->get(); }
+    T* operator->() const { return this->get(); }
+#endif
+};
 
 template<>
-struct GuestWrapper<Point>
+struct GuestWrapperOps<void*> : GuestWrapperGetSet<void*>
 {
-    GUEST_STRUCT;
-    GuestWrapper<int16_t> v;
-    GuestWrapper<int16_t> h;
+};
+template<>
+struct GuestWrapperOps<const void*> : GuestWrapperGetSet<const void*>
+{
+};
 
-    using WrappedType = Point;
-    using RawType = Point;
-
-    Point get() const
+template<typename Ret, typename... Args, typename CallConv>
+struct GuestWrapperOps<UPP<Ret(Args...), CallConv>> : GuestWrapperGetSet<UPP<Ret(Args...), CallConv>>
+{
+    Ret operator()(Args... args)
     {
-        return Point{ v.get(), h.get() };
-    }
-
-    void set(Point x)
-    {
-        v.set(x.v);
-        h.set(x.h);
-    }
-
-    Point raw() const
-    {
-        return Point{ (int16_t)v.raw(), (int16_t)h.raw() };
-    }
-
-    void raw(Point x)
-    {
-        v.raw(x.v);
-        h.raw(x.h);
-    }
-
-    static GuestWrapper<Point> fromHost(Point x)
-    {
-        GuestWrapper<Point> w;
-        w.set(x);
-        return w;
+        return (this->get())(args...);
     }
 };
+
+template<typename T>
+struct GuestWrapperOps<T, std::enable_if_t<std::is_integral_v<T>>> : GuestWrapperGetSet<T>
+{
+    GuestWrapper<T> operator~() const
+    {
+        return GuestWrapper<T>::fromRaw(~this->raw());
+    }
+};
+
+template<class T1, class T2>
+std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
+    GuestWrapper<T1>>
+operator&(GuestWrapper<T1> x, GuestWrapper<T2> y)
+{
+    return GuestWrapper<T1>::fromRaw(x.raw() & y.raw());
+}
+
+template<class T1, class T2>
+std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
+    GuestWrapper<T1>>
+operator|(GuestWrapper<T1> x, GuestWrapper<T2> y)
+{
+    return GuestWrapper<T1>::fromRaw(x.raw() | y.raw());
+}
+
+template<class T1, class T2>
+std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
+    GuestWrapper<T1>&>
+operator&=(GuestWrapper<T1>& x, GuestWrapper<T2> y)
+{
+    return x = x & y;
+}
+
+template<class T1, class T2>
+std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
+    GuestWrapper<T1>&>
+operator|=(GuestWrapper<T1>& x, GuestWrapper<T2> y)
+{
+    return x = x | y;
+}
+
+template<>
+struct GuestWrapperStorage<Point>
+{
+    struct is_guest_struct {};
+    GuestWrapper<int16_t> v, h;
+
+    using HostType = Point;
+    using GuestType = uint32_t;
+
+    GuestType raw() const
+    {
+        GuestType tmp;
+        std::memcpy(&tmp, &v, sizeof(GuestType));
+        return tmp;
+    }
+
+    void raw(GuestType x)
+    {
+        std::memcpy(&v, &x, sizeof(GuestType));
+    }
+
+    GuestWrapperStorage() = default;
+    GuestWrapperStorage(GuestWrapper<int16_t> v, GuestWrapper<int16_t> h)
+        : v(v), h(h) {}
+};
+
+#define GUEST_STRUCT    struct is_guest_struct {}
 
 template<typename TT, typename SFINAE = void>
 struct GuestType
 {
     using type = GuestWrapper<TT>;
 };
-
 
 template<typename TT>
 struct GuestType<TT, std::void_t<typename TT::is_guest_struct>>
@@ -543,6 +492,12 @@ template<>
 struct GuestType<char>
 {
     using type = char;
+};
+
+template<>
+struct GuestType<bool>
+{
+    using type = int8_t;
 };
 
 template<>
@@ -570,48 +525,6 @@ struct GuestType<TT[0]>
 };
 
 
-
-template<typename Ret, typename... Args, typename CallConv>
-struct GuestWrapperBase<UPP<Ret(Args...),CallConv>>
-{
-private:
-    HiddenValue<uint32_t> p;
-
-public:
-    using WrappedType = UPP<Ret(Args...),CallConv>;
-    using RawType = uint32_t;
-
-    WrappedType get() const
-    {
-        uint32_t rawp = this->raw();
-        return WrappedType(SYN68K_TO_US_CHECK0_CHECKNEG1((uint32_t)swap32(rawp)));
-    }
-
-    void set(WrappedType ptr)
-    {
-        this->raw(swap32(US_TO_SYN68K_CHECK0_CHECKNEG1(ptr.ptr)));
-    }
-
-    RawType raw() const
-    {
-        return p.raw();
-    }
-
-    void raw(RawType x)
-    {
-        p.raw(x);
-    }
-
-    uint32_t raw_host_order() const
-    {
-        return swap32(this->raw());
-    }
-    void raw_host_order(uint32_t x)
-    {
-        this->raw(swap32(x));
-    }
-    Ret operator()(Args... args); // definition in rsys/functions.impl.h to reduce dependencies
-};
 
 }
 

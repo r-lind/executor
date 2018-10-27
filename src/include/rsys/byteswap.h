@@ -34,26 +34,31 @@ inline TT CL_RAW(TT n)
 
 #endif
 
-template<class TT>
-inline GUEST<int16_t> CW(TT x)
+template<class TT, class To = 
+    std::enable_if_t<std::is_integral_v<TT>,
+        std::conditional_t<std::is_signed_v<TT>, int16_t, uint16_t>
+    >>
+inline GUEST<To> CW(TT x)
 {
-    return GUEST<int16_t>::fromHost(x);
+    return GUEST<To>::fromHost(x);
 }
-inline GUEST<uint16_t> CW(uint16_t x) { return GUEST<uint16_t>::fromHost(x); }
 inline GUEST<int16_t> CW(int16_t x) { return GUEST<int16_t>::fromHost(x); }
 
-inline GUEST<uint16_t> CW(unsigned int x) { return GUEST<uint16_t>::fromHost(x); }
+inline uint16_t CW(GUEST<uint16_t> x) { return x.get(); }
+inline int16_t CW(GUEST<int16_t> x) { return x.get(); }
 
-template<class TT, typename = typename std::enable_if<sizeof(TT) == 2, void>::type>
-TT CW(guestvalues::GuestWrapper<TT> x) { return x.get(); }
-
-template<class TT>
-inline GUEST<int32_t> CL(TT x) { return GUEST<int32_t>::fromHost(x); }
-inline GUEST<uint32_t> CL(uint32_t x) { return GUEST<uint32_t>::fromHost(x); }
+template<class TT, class To = 
+    std::enable_if_t<std::is_integral_v<TT>,// || std::is_enum_v<TT>,
+        std::conditional_t<std::is_signed_v<TT>, int32_t, uint32_t>
+    >>
+inline GUEST<To> CL(TT x)
+{
+    return GUEST<To>::fromHost(x);
+}
 inline GUEST<int32_t> CL(int32_t x) { return GUEST<int32_t>::fromHost(x); }
 
-template<class TT, typename = typename std::enable_if<sizeof(TT) == 4, void>::type>
-TT CL(guestvalues::GuestWrapper<TT> x) { return x.get(); }
+inline uint32_t CL(GUEST<uint32_t> x) { return x.get(); }
+inline int32_t CL(GUEST<int32_t> x) { return x.get(); }
 
 inline unsigned char Cx(unsigned char x) { return x; }
 inline signed char Cx(signed char x) { return x; }
