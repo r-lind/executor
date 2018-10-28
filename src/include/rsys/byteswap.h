@@ -101,8 +101,6 @@ inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
 
 #define PPR(n) MR(n)
 
-#define PTR_MINUSONE ((void *)-1)
-
 #if defined(BIGENDIAN)
 
 #define CW_RAW(rhs) (rhs)
@@ -149,45 +147,6 @@ inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
 #define HxP(handle, field) Hx(handle, field)
 #define HxZ(handle, field) HxX(handle, field)
 
-template<typename TT>
-TT ptr_from_longint(int32_t l)
-{
-    // FIXME: needless back-and-forth endian conversion
-    return MR(guest_cast<TT>(CL(l)));
-}
-
-template<typename TT>
-int32_t ptr_to_longint(TT p)
-{
-    // FIXME: needless back-and-forth endian conversion
-    return CL(guest_cast<int32_t>(RM(p)));
-}
-
-template<class T>
-class GuestRef
-{
-    T& native;
-    GUEST<T> guest;
-public:
-    GuestRef(T& x)
-        : native(x)
-    {
-        guest = RM(x);
-    }
-    GuestRef(const GuestRef<T>&) = delete;
-
-    operator GUEST<T>*() { return &guest; }
-    operator GUEST<T>&() { return guest; }
-
-    GUEST<T>* operator&() { return &guest; }
-
-    ~GuestRef()
-    {
-        native = MR(guest);
-    }
-};
-template<class T>
-GuestRef<T> guestref(T& x) { return GuestRef<T>(x); }
 
 }
 

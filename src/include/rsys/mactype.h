@@ -708,6 +708,47 @@ GUEST<TO> guest_cast(FROM in)
     result.raw_host_order(p.raw_host_order());
     return result;
 }
+
+template<typename TT>
+TT ptr_from_longint(int32_t l)
+{
+    GUEST<TT> g;
+    g.raw_host_order(l);
+    return g;
+}
+
+template<typename TT>
+int32_t ptr_to_longint(TT p)
+{
+    return GUEST<TT>(p).raw_host_order();
+}
+
+template<class T>
+class GuestRef
+{
+    T& native;
+    GUEST<T> guest;
+public:
+    GuestRef(T& x)
+        : native(x)
+    {
+        guest = RM(x);
+    }
+    GuestRef(const GuestRef<T>&) = delete;
+
+    operator GUEST<T>*() { return &guest; }
+    operator GUEST<T>&() { return guest; }
+
+    GUEST<T>* operator&() { return &guest; }
+
+    ~GuestRef()
+    {
+        native = MR(guest);
+    }
+};
+template<class T>
+GuestRef<T> guestref(T& x) { return GuestRef<T>(x); }
+
 }
 
 #endif /* _MACTYPE_H_ */
