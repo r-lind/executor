@@ -21,15 +21,15 @@ using namespace Executor;
 
 void Executor::C_TEInit()
 {
-    LM(TEScrpHandle) = RM(NewHandle(0));
-    LM(TEScrpLength) = CWC(0);
-    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext);
+    LM(TEScrpHandle) = NewHandle(0);
+    LM(TEScrpLength) = 0;
+    LM(TEDoText) = (ProcPtr)&ROMlib_dotext;
 }
 
 /* This code just does "moveql #1,d0 ; rts".  We use it because
  * DNA strider chains to the old clikLoop handler.
  */
-static GUEST<uint16_t> default_clik_loop[2] = { CWC(0x7001), CWC(0x4E75) };
+static GUEST<uint16_t> default_clik_loop[2] = { 0x7001, 0x4E75 };
 
 TEHandle Executor::C_TENew(Rect *dst, Rect *view)
 {
@@ -45,7 +45,7 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
                + 4 * sizeof *TE_LINE_STARTS(teh));
     teh = (TEHandle)NewHandle(te_size);
 
-    hText = RM(NewHandle(0));
+    hText = NewHandle(0);
     GetFontInfo(&finfo);
     /* zero the te record */
     memset(STARH(teh), 0, te_size);
@@ -54,27 +54,27 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
     HASSIGN_15(teh,
                destRect, *dst,
                viewRect, *view,
-               lineHeight, CW(CW(finfo.ascent)
-                              + CW(finfo.descent)
-                              + CW(finfo.leading)),
+               lineHeight, finfo.ascent
+                              + finfo.descent
+                              + finfo.leading,
                fontAscent, finfo.ascent,
-               active, CWC(false),
-               caretState, CWC(caret_invis),
-               just, CWC(teFlushDefault),
-               crOnly, CWC(1),
-               clikLoop, RM((ProcPtr)&default_clik_loop[0]),
+               active, false,
+               caretState, caret_invis,
+               just, teFlushDefault,
+               crOnly, 1,
+               clikLoop, (ProcPtr)&default_clik_loop[0],
                inPort, qdGlobals().thePort,
-               txFont, PORT_TX_FONT_X(MR(qdGlobals().thePort)),
-               txFace, PORT_TX_FACE(MR(qdGlobals().thePort)),
-               txMode, PORT_TX_MODE_X(MR(qdGlobals().thePort)),
-               txSize, PORT_TX_SIZE_X(MR(qdGlobals().thePort)),
+               txFont, PORT_TX_FONT_X(qdGlobals().thePort),
+               txFace, PORT_TX_FACE(qdGlobals().thePort),
+               txMode, PORT_TX_MODE_X(qdGlobals().thePort),
+               txSize, PORT_TX_SIZE_X(qdGlobals().thePort),
                hText, hText);
 
     tehlinestarts = HxX(teh, lineStarts);
     tehlinestarts[0] = 0;
     tehlinestarts[1] = 0; /* this one is only for mix & match w/mac */
 
-    temptehiddenh = RM((tehiddenh)NewHandle(sizeof(tehidden)));
+    temptehiddenh = (tehiddenh)NewHandle(sizeof(tehidden));
     /* don't merge with line above */
     TEHIDDENHX(teh) = temptehiddenh;
     memset(STARH(TEHIDDENH(teh)), 0, sizeof(tehidden));

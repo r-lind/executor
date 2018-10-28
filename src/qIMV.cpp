@@ -24,19 +24,19 @@ void Executor::C_CharExtra(Fixed Extra) /* IMV-77 */
 
 void Executor::C_SetStdCProcs(CQDProcs *cProcs) /* IMV-77 */
 {
-    cProcs->textProc = RM(&StdText);
-    cProcs->lineProc = RM(&StdLine);
-    cProcs->rectProc = RM(&StdRect);
-    cProcs->rRectProc = RM(&StdRRect);
-    cProcs->ovalProc = RM(&StdOval);
-    cProcs->arcProc = RM(&StdArc);
-    cProcs->polyProc = RM(&StdPoly);
-    cProcs->rgnProc = RM(&StdRgn);
-    cProcs->bitsProc = RM(&StdBits);
-    cProcs->commentProc = RM(&StdComment);
-    cProcs->txMeasProc = RM(&StdTxMeas);
-    cProcs->getPicProc = RM(&StdGetPic);
-    cProcs->putPicProc = RM(&StdPutPic);
+    cProcs->textProc = &StdText;
+    cProcs->lineProc = &StdLine;
+    cProcs->rectProc = &StdRect;
+    cProcs->rRectProc = &StdRRect;
+    cProcs->ovalProc = &StdOval;
+    cProcs->arcProc = &StdArc;
+    cProcs->polyProc = &StdPoly;
+    cProcs->rgnProc = &StdRgn;
+    cProcs->bitsProc = &StdBits;
+    cProcs->commentProc = &StdComment;
+    cProcs->txMeasProc = &StdTxMeas;
+    cProcs->getPicProc = &StdGetPic;
+    cProcs->putPicProc = &StdPutPic;
     cProcs->opcodeProc = nullptr /* ??? */;
     cProcs->newProc1Proc = nullptr /* ??? */;
     cProcs->newProc2Proc = nullptr /* ??? */;
@@ -51,18 +51,18 @@ void Executor::C_GetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
     PixMap temp_pm;
     uint8_t temp_fbuf[4];
     Rect src_rect, dst_rect;
-    GrafPtr port = MR(qdGlobals().thePort);
+    GrafPtr port = qdGlobals().thePort;
     CTabHandle ctab;
     ColorSpec *cspec;
     int pixval;
     int bpp;
 
-    temp_pm.baseAddr = RM((Ptr)temp_fbuf);
-    temp_pm.bounds.top = CWC(0);
-    temp_pm.bounds.bottom = CWC(1);
-    temp_pm.bounds.left = CWC(0);
-    temp_pm.bounds.right = CWC(1);
-    temp_pm.rowBytes = CWC(4 | PIXMAP_DEFAULT_ROWBYTES);
+    temp_pm.baseAddr = (Ptr)temp_fbuf;
+    temp_pm.bounds.top = 0;
+    temp_pm.bounds.bottom = 1;
+    temp_pm.bounds.left = 0;
+    temp_pm.bounds.right = 1;
+    temp_pm.rowBytes = 4 | PIXMAP_DEFAULT_ROWBYTES;
 
     if(CGrafPort_p(port))
     {
@@ -76,17 +76,17 @@ void Executor::C_GetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
         bpp = 1;
         ctab = validate_relative_bw_ctab();
     }
-    temp_pm.pmTable = RM(ctab);
+    temp_pm.pmTable = ctab;
     pixmap_set_pixel_fields(&temp_pm, bpp);
 
-    src_rect.top = CW(v);
-    src_rect.bottom = CW(v + 1);
-    src_rect.left = CW(h);
-    src_rect.right = CW(h + 1);
+    src_rect.top = v;
+    src_rect.bottom = v + 1;
+    src_rect.left = h;
+    src_rect.right = h + 1;
 
     dst_rect = temp_pm.bounds;
 
-    CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), (BitMap *)&temp_pm,
+    CopyBits(PORT_BITS_FOR_COPY(qdGlobals().thePort), (BitMap *)&temp_pm,
              &src_rect, &dst_rect, srcCopy, nullptr);
 
     if(bpp > 8)
@@ -109,7 +109,7 @@ void Executor::C_GetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
 
             /* non-device color tables aren't guaranteed to be sorted, so we
 	     need to hunt for an entry with the specified value */
-            swapped_pixval = CW(pixval);
+            swapped_pixval = pixval;
             for(i = CTAB_SIZE(ctab); i >= 0; i--)
                 if(cspec[i].value == swapped_pixval)
                     break;
@@ -118,7 +118,7 @@ void Executor::C_GetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
             else
             {
                 warning_unexpected("Failed to find match in GetCPixel.");
-                pixelp->red = pixelp->green = pixelp->blue = CWC(0);
+                pixelp->red = pixelp->green = pixelp->blue = 0;
             }
         }
     }
@@ -134,12 +134,12 @@ void Executor::C_SetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
     RGBColor save_fg_rgb;
     GUEST<int32_t> save_fg;
 
-    temp_rect.top = CW(v);
-    temp_rect.bottom = CW(v + 1);
-    temp_rect.left = CW(h);
-    temp_rect.right = CW(h + 1);
+    temp_rect.top = v;
+    temp_rect.bottom = v + 1;
+    temp_rect.left = h;
+    temp_rect.right = h + 1;
 
-    port = MR(qdGlobals().thePort);
+    port = qdGlobals().thePort;
     cgrafport_p = CGrafPort_p(port);
 
     save_fg = PORT_FG_COLOR_X(port);
@@ -161,14 +161,14 @@ default_search_proc(RGBColor *rgb, GUEST<int32_t> *pixel)
 {
     MatchRec *mr;
 
-    mr = ptr_from_longint<MatchRec *>(GD_REF_CON(MR(LM(TheGDevice))));
+    mr = ptr_from_longint<MatchRec *>(GD_REF_CON(LM(TheGDevice)));
 
     if(mr->red == rgb->red
        && mr->green == rgb->green
        && mr->blue == rgb->blue)
         *pixel = mr->matchData;
     else
-        *pixel = CL(!CL(mr->matchData));
+        *pixel = !mr->matchData;
     return true;
 }
 
@@ -209,7 +209,7 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
     TEMP_ALLOC_DECL(temp_bitmap1_bits);
     TEMP_ALLOC_DECL(temp_bitmap2_bits);
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
 
     if(!matchprocp)
     {
@@ -218,7 +218,7 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
     }
     else
     {
-        mr.matchData = CL(matchdata);
+        mr.matchData = matchdata;
     }
 
     GetCPixel(seedh, seedv, &pixel);
@@ -227,28 +227,28 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
     mr.green = pixel.green;
     mr.blue = pixel.blue;
     save_ref_con = GD_REF_CON_X(gdev);
-    GD_REF_CON_X(gdev) = guest_cast<int32_t>(RM(&mr));
+    GD_REF_CON_X(gdev) = guest_cast<int32_t>(&mr);
 
-    save_pic_handle = PORT_PIC_SAVE_X(MR(qdGlobals().thePort));
-    save_graf_procs = PORT_GRAF_PROCS_X(MR(qdGlobals().thePort));
+    save_pic_handle = PORT_PIC_SAVE_X(qdGlobals().thePort);
+    save_graf_procs = PORT_GRAF_PROCS_X(qdGlobals().thePort);
 
-    PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
-    PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = nullptr;
+    PORT_PIC_SAVE_X(qdGlobals().thePort) = nullptr;
+    PORT_GRAF_PROCS_X(qdGlobals().thePort) = nullptr;
     GD_SEARCH_PROC_X(gdev) = nullptr;
     AddSearch(matchprocp);
 
     width = RECT_WIDTH(srcrp);
     height = RECT_HEIGHT(srcrp);
 
-    temp_rect.top = temp_rect.left = CWC(0);
-    temp_rect.right = CW(width);
-    temp_rect.bottom = CW(height);
+    temp_rect.top = temp_rect.left = 0;
+    temp_rect.right = width;
+    temp_rect.bottom = height;
 
     row_words = (width + 15) / 16;
-    temp_bitmap1.rowBytes = CW(row_words * 2);
+    temp_bitmap1.rowBytes = row_words * 2;
     TEMP_ALLOC_ALLOCATE(t, temp_bitmap1_bits, row_words * 2 * height);
-    temp_bitmap1.baseAddr = RM((Ptr)t);
-    memset(MR(temp_bitmap1.baseAddr), '\377', row_words * 2 * height);
+    temp_bitmap1.baseAddr = (Ptr)t;
+    memset(temp_bitmap1.baseAddr, '\377', row_words * 2 * height);
     temp_bitmap1.bounds = temp_rect;
 
     CopyBits(srcbp, &temp_bitmap1, srcrp, &temp_rect, srcCopy, nullptr);
@@ -258,17 +258,17 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
 
     temp_bitmap2 = temp_bitmap1;
     TEMP_ALLOC_ALLOCATE(t, temp_bitmap2_bits, row_words * 2 * height);
-    temp_bitmap2.baseAddr = RM((Ptr)t);
+    temp_bitmap2.baseAddr = (Ptr)t;
 
-    SeedFill(MR(temp_bitmap1.baseAddr),
-             MR(temp_bitmap2.baseAddr),
+    SeedFill(temp_bitmap1.baseAddr,
+             temp_bitmap2.baseAddr,
              row_words * 2, row_words * 2,
              height, row_words, seedh, seedv);
 
     CopyBits(&temp_bitmap2, dstbp, &temp_rect, dstrp, srcCopy, nullptr);
 
-    PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = save_pic_handle;
-    PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = save_graf_procs;
+    PORT_PIC_SAVE_X(qdGlobals().thePort) = save_pic_handle;
+    PORT_GRAF_PROCS_X(qdGlobals().thePort) = save_graf_procs;
 
     TEMP_ALLOC_FREE(temp_bitmap1_bits);
     TEMP_ALLOC_FREE(temp_bitmap2_bits);
@@ -292,44 +292,44 @@ void Executor::C_CalcCMask(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
     TEMP_ALLOC_DECL(temp_bitmap1_bits);
     TEMP_ALLOC_DECL(temp_bitmap2_bits);
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
 
     if(!matchprocp)
     {
         matchprocp = (ProcPtr)SYN68K_TO_US(callback_install(default_search_proc_stub, nullptr));
-        mr.matchData = CL(1);
+        mr.matchData = 1;
     }
     else
     {
-        mr.matchData = CL(matchdata);
+        mr.matchData = matchdata;
     }
 
     mr.red = seedrgbp->red;
     mr.green = seedrgbp->green;
     mr.blue = seedrgbp->blue;
     save_ref_con = GD_REF_CON_X(gdev);
-    GD_REF_CON_X(gdev) = guest_cast<int32_t>(RM(&mr));
+    GD_REF_CON_X(gdev) = guest_cast<int32_t>(&mr);
 
-    save_pic_handle = PORT_PIC_SAVE_X(MR(qdGlobals().thePort));
-    save_graf_procs = PORT_GRAF_PROCS_X(MR(qdGlobals().thePort));
+    save_pic_handle = PORT_PIC_SAVE_X(qdGlobals().thePort);
+    save_graf_procs = PORT_GRAF_PROCS_X(qdGlobals().thePort);
 
-    PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
-    PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = nullptr;
+    PORT_PIC_SAVE_X(qdGlobals().thePort) = nullptr;
+    PORT_GRAF_PROCS_X(qdGlobals().thePort) = nullptr;
     GD_SEARCH_PROC_X(gdev) = nullptr;
     AddSearch(matchprocp);
 
     width = RECT_WIDTH(srcrp);
     height = RECT_HEIGHT(srcrp);
 
-    temp_rect.top = temp_rect.left = CWC(0);
-    temp_rect.right = CW(width);
-    temp_rect.bottom = CW(height);
+    temp_rect.top = temp_rect.left = 0;
+    temp_rect.right = width;
+    temp_rect.bottom = height;
 
     row_words = (width + 15) / 16;
-    temp_bitmap1.rowBytes = CW(row_words * 2);
+    temp_bitmap1.rowBytes = row_words * 2;
     TEMP_ALLOC_ALLOCATE(t, temp_bitmap1_bits, row_words * 2 * height);
-    temp_bitmap1.baseAddr = RM((Ptr)t);
-    memset(MR(temp_bitmap1.baseAddr), '\377', row_words * 2 * height);
+    temp_bitmap1.baseAddr = (Ptr)t;
+    memset(temp_bitmap1.baseAddr, '\377', row_words * 2 * height);
     temp_bitmap1.bounds = temp_rect;
 
     CopyBits(srcbp, &temp_bitmap1, srcrp, &temp_rect, srcCopy, nullptr);
@@ -339,17 +339,17 @@ void Executor::C_CalcCMask(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
 
     temp_bitmap2 = temp_bitmap1;
     TEMP_ALLOC_ALLOCATE(t, temp_bitmap2_bits, row_words * 2 * height);
-    temp_bitmap2.baseAddr = RM((Ptr)t);
+    temp_bitmap2.baseAddr = (Ptr)t;
 
-    CalcMask(MR(temp_bitmap1.baseAddr),
-             MR(temp_bitmap2.baseAddr),
+    CalcMask(temp_bitmap1.baseAddr,
+             temp_bitmap2.baseAddr,
              row_words * 2, row_words * 2,
              height, row_words);
 
     CopyBits(&temp_bitmap2, dstbp, &temp_rect, dstrp, srcCopy, nullptr);
 
-    PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = save_pic_handle;
-    PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = save_graf_procs;
+    PORT_PIC_SAVE_X(qdGlobals().thePort) = save_pic_handle;
+    PORT_GRAF_PROCS_X(qdGlobals().thePort) = save_graf_procs;
 
     TEMP_ALLOC_FREE(temp_bitmap1_bits);
     TEMP_ALLOC_FREE(temp_bitmap2_bits);

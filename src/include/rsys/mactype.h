@@ -647,26 +647,6 @@ struct GuestType<TT[0]>
 template<typename TT>
 using GUEST = typename guestvalues::GuestType<TT>::type;
 
-/*
-template<typename TT>
-GUEST<TT> RM(TT p)
-{
-    return GUEST<TT>::fromHost(p);
-}
-
-template<typename TT>
-TT MR(guestvalues::GuestWrapper<TT> p)
-{
-    return p.get();
-}
-
-inline char RM(char c) { return c; }
-inline unsigned char RM(unsigned char c) { return c; }
-inline signed char RM(signed char c) { return c; }
-inline char MR(char c) { return c; }
-inline unsigned char MR(unsigned char c) { return c; }
-inline signed char MR(signed char c) { return c; }
-*/
 
 template<typename T>
 GUEST<T> toGuest(T x)
@@ -680,11 +660,6 @@ T toHost(guestvalues::GuestWrapper<T> x)
     return x;
 }
 
-
-template<typename T>
-T RM(T x) { return x; }
-template<typename T>
-T MR(T x) { return x; }
 
 template<typename TO, typename FROM, 
     typename = typename guestvalues::GuestTypeTraits<FROM>::HostType,
@@ -732,7 +707,7 @@ public:
     GuestRef(T& x)
         : native(x)
     {
-        guest = RM(x);
+        guest = x;
     }
     GuestRef(const GuestRef<T>&) = delete;
 
@@ -743,7 +718,7 @@ public:
 
     ~GuestRef()
     {
-        native = MR(guest);
+        native = guest;
     }
 };
 template<class T>

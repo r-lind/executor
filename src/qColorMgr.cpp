@@ -56,9 +56,9 @@ itable_hash(RGBColor *rgbp, int resolution)
     int retval;
     uint16_t red, green, blue;
 
-    red = CW(rgbp->red) >> (16 - resolution);
-    green = CW(rgbp->green) >> (16 - resolution);
-    blue = CW(rgbp->blue) >> (16 - resolution);
+    red = rgbp->red >> (16 - resolution);
+    green = rgbp->green >> (16 - resolution);
+    blue = rgbp->blue >> (16 - resolution);
 
     switch(resolution)
     {
@@ -107,7 +107,7 @@ rgb_diff(RGBColor *rgb1p, RGBColor *rgb2p)
    * 0x8100, so counting on it going to a particular value seems risky.
    */
 
-    retval = (std::abs((CW(rgb1p->red) & 0xff00) - (CW(rgb2p->red) & 0xff00)) + std::abs((CW(rgb1p->green) & 0xff00) - (CW(rgb2p->green) & 0xff00)) + std::abs((CW(rgb1p->blue) & 0xff00) - (CW(rgb2p->blue) & 0xff00)));
+    retval = (std::abs((rgb1p->red & 0xff00) - (rgb2p->red & 0xff00)) + std::abs((rgb1p->green & 0xff00) - (rgb2p->green & 0xff00)) + std::abs((rgb1p->blue & 0xff00) - (rgb2p->blue & 0xff00)));
 
     return retval;
 }
@@ -115,9 +115,9 @@ rgb_diff(RGBColor *rgb1p, RGBColor *rgb2p)
 
 /* FIXME: may have to round instead of cleave off the low bits */
 #define RGB_TO_ITAB_INDEX(rgb, resolution)                           \
-    (((CW((rgb)->red) >> (16 - (resolution))) << (2 * (resolution))) \
-     | ((CW((rgb)->green) >> (16 - (resolution))) << (resolution))   \
-     | ((CW((rgb)->blue) >> (16 - (resolution)))))
+    ((((rgb)->red >> (16 - (resolution))) << (2 * (resolution))) \
+     | (((rgb)->green >> (16 - (resolution))) << (resolution))   \
+     | (((rgb)->blue >> (16 - (resolution)))))
 
 static uint32_t
 ROMlib_search_proc(RGBColor *rgb)
@@ -126,7 +126,7 @@ ROMlib_search_proc(RGBColor *rgb)
     int pixel_size;
     uint32_t retval;
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
     pixel_size = PIXMAP_PIXEL_SIZE(GD_PMAP(gd));
     if(pixel_size > 8)
     {
@@ -136,9 +136,9 @@ ROMlib_search_proc(RGBColor *rgb)
                                     : &mac_32bpp_rgb_spec;
         retval = (*rgb_spec->rgbcolor_to_pixel)(rgb_spec, rgb, true);
         if(pixel_size == 16)
-            retval = CW(GUEST<uint16_t>::fromRaw(retval));
+            retval = GUEST<uint16_t>::fromRaw(retval);
         else if(pixel_size == 32)
-            retval = CL(GUEST<uint32_t>::fromRaw(retval));
+            retval = GUEST<uint32_t>::fromRaw(retval);
         else
             gui_fatal("unknown pixel size `%d'", pixel_size);
     }
@@ -208,13 +208,13 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
 
     /* rebuild the inverse table for the current graphics device
      if the color table is newer than the inverse table */
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
     gd_ctab = PIXMAP_TABLE(GD_PMAP(gdev));
     gd_itab = GD_ITABLE(gdev);
     if(CTAB_SEED_X(gd_ctab) != ITAB_SEED_X(gd_itab))
         MakeITable(gd_ctab, gd_itab, GD_RES_PREF(gdev));
 
-    for(t = GD_SEARCH_PROC(MR(LM(TheGDevice))), success_p = false;
+    for(t = GD_SEARCH_PROC(LM(TheGDevice)), success_p = false;
         t && !success_p;)
     {
         BOOLEAN(*search_fn)
@@ -246,12 +246,12 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
     if(!success_p)
         return ROMlib_search_proc(rgb);
     else
-        return CL(position); /* They filled this in in big endian order. */
+        return position; /* They filled this in in big endian order. */
 }
 
 void Executor::C_Index2Color(LONGINT index, RGBColor *rgb)
 {
-    CTabHandle ctab = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
+    CTabHandle ctab = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
     *rgb = CTAB_TABLE(ctab)[index].rgb;
 }
 
@@ -277,7 +277,7 @@ BOOLEAN Executor::C_RealColor(RGBColor *rgb)
 
     /* rebuild the inverse table for the current graphics device
      if the color table is newer than the inverse table */
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
     table = PIXMAP_TABLE(GD_PMAP(gdev));
     inverse_table = GD_ITABLE(gdev);
     if(CTAB_SEED_X(table) != ITAB_SEED_X(inverse_table))
@@ -290,7 +290,7 @@ BOOLEAN Executor::C_RealColor(RGBColor *rgb)
     closest = &(CTAB_TABLE(table)[index].rgb);
 
     /* high `resolution' bits */
-    mask = CW(((1 << resolution) - 1) << (16 - resolution));
+    mask = ((1 << resolution) - 1) << (16 - resolution);
 
     return !(((rgb->red.raw() ^ closest->red.raw()) & mask)
              || ((rgb->green.raw() ^ closest->green.raw()) & mask)
@@ -308,7 +308,7 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
     PixMapHandle gd_pmap;
     int i;
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
     gd_pmap = GD_PMAP(gdev);
 
     if(!target_ctab)
@@ -361,8 +361,8 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
     /* ColorSpec *target_ctab_table = CTAB_TABLE (target_ctab); */
     /* int gd_ctab_p = CTAB_FLAGS_X (target_ctab) & CTAB_GDEVICE_BIT_X; */
 
-    PIXMAP_TABLE_X(gd_pmap) = RM(target_ctab);
-    GD_ITABLE_X(gdev) = RM(itab);
+    PIXMAP_TABLE_X(gd_pmap) = target_ctab;
+    GD_ITABLE_X(gdev) = itab;
 
     for(i = CTAB_SIZE(in_ctab); i >= 0; i--)
     {
@@ -376,12 +376,12 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
 	      color table */
         /*	   
 	   if (gd_ctab_p)
-	     color->value = CW (ctab_index);
+	     color->value = ctab_index;
 	   else
 	     color->value = target_ctab_table[ctab_index].value;
 	   color->rgb   = target_ctab_table[ctab_index].rgb;
 */
-        color->value = CW(ctab_index);
+        color->value = ctab_index;
     }
 
     PIXMAP_TABLE_X(gd_pmap) = gdev_ctab_save;
@@ -401,15 +401,15 @@ int Executor::average_color(GDHandle gd,
     gd_pmap = GD_PMAP(gd);
     gd_pixel_size = PIXMAP_PIXEL_SIZE(gd_pmap);
 
-    in_between.red = CW(((CW(c1->red) * ratio)
-                         + (CW(c2->red) * (65535 - ratio)))
-                        / 65535);
-    in_between.green = CW(((CW(c1->green) * ratio)
-                           + (CW(c2->green) * (65535 - ratio)))
-                          / 65535);
-    in_between.blue = CW(((CW(c1->blue) * ratio)
-                          + (CW(c2->blue) * (65535 - ratio)))
-                         / 65535);
+    in_between.red = ((c1->red * ratio)
+                         + (c2->red * (65535 - ratio)))
+                        / 65535;
+    in_between.green = ((c1->green * ratio)
+                           + (c2->green * (65535 - ratio)))
+                          / 65535;
+    in_between.blue = ((c1->blue * ratio)
+                          + (c2->blue * (65535 - ratio)))
+                         / 65535;
     if(gd_pixel_size <= 8)
     {
         CTabHandle gd_ctab;
@@ -627,22 +627,22 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
     /* We are supposed to override a resolution of zero with the
    * resolution of LM(TheGDevice) (IMV-142).  */
     if(resolution == 0)
-        resolution = GD_RES_PREF(MR(LM(TheGDevice)));
+        resolution = GD_RES_PREF(LM(TheGDevice));
 
     /* We are supposed to override a color_table of nullptr with the color
    * table of LM(TheGDevice) (IMV-142).  */
     if(color_table == nullptr)
-        color_table = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
+        color_table = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
 
     /* We are supposed to override an inverse_table of nullptr with the
    * inverse table of LM(TheGDevice) (IMV-142).  */
     if(inverse_table == nullptr)
     {
-        inverse_table = GD_ITABLE(MR(LM(TheGDevice)));
+        inverse_table = GD_ITABLE(LM(TheGDevice));
         if(!inverse_table)
         {
             inverse_table = (ITabHandle)NewHandle(0);
-            GD_ITABLE_X(MR(LM(TheGDevice))) = RM(inverse_table);
+            GD_ITABLE_X(LM(TheGDevice)) = inverse_table;
         }
     }
 
@@ -672,7 +672,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
 #endif
         SetHandleSize((Handle)inverse_table, new_size);
     }
-    ITAB_RES_X(inverse_table) = CW(resolution);
+    ITAB_RES_X(inverse_table) = resolution;
 
     itab_table = ITAB_TABLE(inverse_table);
 
@@ -714,12 +714,12 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
         if(CTAB_FLAGS_X(color_table) & CTAB_GDEVICE_BIT_X)
             new_value = i;
         else
-            new_value = CW(color->value);
+            new_value = color->value;
 
         /* Save away the color for this index, in native endian byte order. */
-        color_for_index[new_value].rgb.red = CW(color->rgb.red);
-        color_for_index[new_value].rgb.green = CW(color->rgb.green);
-        color_for_index[new_value].rgb.blue = CW(color->rgb.blue);
+        color_for_index[new_value].rgb.red = color->rgb.red;
+        color_for_index[new_value].rgb.green = color->rgb.green;
+        color_for_index[new_value].rgb.blue = color->rgb.blue;
 
         current_red = color_for_index[new_value].rgb.red;
         current_blue = color_for_index[new_value].rgb.blue;
@@ -830,7 +830,7 @@ void Executor::C_ProtectEntry(INTEGER index, BOOLEAN protect)
     GDHandle gdev;
     ColorSpec *entry;
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
     entry = &CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(gdev)))[index];
     if(protect)
     {
@@ -841,7 +841,7 @@ void Executor::C_ProtectEntry(INTEGER index, BOOLEAN protect)
         /* mark this entry as protected; and set the
 	 low byte of the value field with the current
          device id */
-        entry->value = CTAB_PROTECTED_BIT_X | (GD_ID_X(gdev) & CWC(0xFF));
+        entry->value = CTAB_PROTECTED_BIT_X | (GD_ID_X(gdev) & 0xFF);
     }
     else
     {
@@ -859,7 +859,7 @@ void Executor::C_ReserveEntry(INTEGER index, BOOLEAN reserve)
     ColorSpec *entry;
     GUEST<INTEGER> old_value;
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
     ctab = PIXMAP_TABLE(GD_PMAP(gdev));
     entry = &CTAB_TABLE(ctab)[index];
 
@@ -875,7 +875,7 @@ void Executor::C_ReserveEntry(INTEGER index, BOOLEAN reserve)
         /* mark this entry as reserved; and set the
 	 low byte of the value field with the current
 	 device id */
-        entry->value = CTAB_RESERVED_BIT_X | (GD_ID_X(gdev) & CWC(0xFF));
+        entry->value = CTAB_RESERVED_BIT_X | (GD_ID_X(gdev) & 0xFF);
     }
     else
     {
@@ -888,7 +888,7 @@ void Executor::C_ReserveEntry(INTEGER index, BOOLEAN reserve)
 
     /* Only change the seed when necessary. */
     if(old_value != entry->value)
-        CTAB_SEED_X(ctab) = CL(GetCTSeed());
+        CTAB_SEED_X(ctab) = GetCTSeed();
 }
 
 void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
@@ -903,9 +903,9 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
     /* for calling `vdriver->setColors ()' */
     int first_color, num_colors;
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
 
-    if(GD_TYPE_X(gd) != CWC(clutType))
+    if(GD_TYPE_X(gd) != clutType)
         /* #### return error code? */
         return;
 
@@ -936,7 +936,7 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
 
         for(i = 0; i <= count; i++)
         {
-            int index = CW(atable[i].value);
+            int index = atable[i].value;
 
             if(index < min)
                 min = index;
@@ -966,8 +966,8 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
 
     if(ctab_changed_p)
     {
-        CTAB_SEED_X(ctab) = CL(GetCTSeed());
-        if(gd == MR(LM(MainDevice)))
+        CTAB_SEED_X(ctab) = GetCTSeed();
+        if(gd == LM(MainDevice))
         {
             if(num_colors > 0)
             {
@@ -984,13 +984,13 @@ void Executor::C_AddSearch(ProcPtr searchProc)
     GDHandle gdev;
     SProcHndl search_list_elt;
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
 
     search_list_elt = (SProcHndl)NewHandle(sizeof(SProcRec));
-    HxX(search_list_elt, srchProc) = RM(searchProc);
+    HxX(search_list_elt, srchProc) = searchProc;
     HxX(search_list_elt, nxtSrch) = GD_SEARCH_PROC_X(gdev);
 
-    GD_SEARCH_PROC_X(gdev) = RM(search_list_elt);
+    GD_SEARCH_PROC_X(gdev) = search_list_elt;
 
     /* Invalidate all color conversion tables. */
     ROMlib_invalidate_conversion_tables();
@@ -1006,12 +1006,12 @@ void Executor::C_DelSearch(ProcPtr searchProc)
     GDHandle gdev;
     SProcHndl s, prev;
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
 
     prev = nullptr;
     for(s = GD_SEARCH_PROC(gdev); s != nullptr; s = HxP(s, nxtSrch))
     {
-        if(HxX(s, srchProc) == RM(searchProc))
+        if(HxX(s, srchProc) == searchProc)
         {
             if(prev == nullptr)
                 GD_SEARCH_PROC_X(gdev) = HxX(s, nxtSrch);
@@ -1037,7 +1037,7 @@ void Executor::C_DelComp(ProcPtr compProc)
 
 void Executor::C_SetClientID(INTEGER id)
 {
-    GD_ID_X(MR(LM(TheGDevice))) = CW(id);
+    GD_ID_X(LM(TheGDevice)) = id;
 }
 
 void Executor::C_SaveEntries(CTabHandle src, CTabHandle result,
@@ -1048,21 +1048,21 @@ void Executor::C_SaveEntries(CTabHandle src, CTabHandle result,
     int i;
 
     if(src == nullptr)
-        src = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
+        src = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
 
     src_ctab_size = CTAB_SIZE(src);
-    req_size = CW(selection->reqLSize);
+    req_size = selection->reqLSize;
 
     SetHandleSize((Handle)result,
                   CTAB_STORAGE_FOR_SIZE(req_size));
-    CTAB_SIZE_X(result) = CW(req_size);
+    CTAB_SIZE_X(result) = req_size;
     /* #### should this set the color table seed? */
-    CTAB_SEED_X(result) = CL(GetCTSeed());
-    CTAB_FLAGS_X(result) = CW(0);
+    CTAB_SEED_X(result) = GetCTSeed();
+    CTAB_FLAGS_X(result) = 0;
 
     for(i = 0; i <= req_size; i++)
     {
-        int req_index = CW(selection->reqLData[i]);
+        int req_index = selection->reqLData[i];
 
         if(req_index >= 0
            && req_index <= src_ctab_size)
@@ -1070,7 +1070,7 @@ void Executor::C_SaveEntries(CTabHandle src, CTabHandle result,
             [i] = CTAB_TABLE(src)[req_index];
         else
         {
-            selection->reqLData[i] = CWC(colReqErr);
+            selection->reqLData[i] = colReqErr;
             req_error_p = true;
         }
     }
@@ -1089,14 +1089,14 @@ void Executor::C_RestoreEntries(CTabHandle src, CTabHandle dst,
     int i;
 
     if(dst == nullptr)
-        dst = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
+        dst = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
 
     dst_ctab_size = CTAB_SIZE(dst);
-    req_size = CW(selection->reqLSize);
+    req_size = selection->reqLSize;
 
     for(i = 0; i < req_size; i++)
     {
-        int req_index = CW(selection->reqLData[i]);
+        int req_index = selection->reqLData[i];
 
         if(req_index >= 0
            && req_index <= dst_ctab_size)
@@ -1104,7 +1104,7 @@ void Executor::C_RestoreEntries(CTabHandle src, CTabHandle dst,
             [req_index] = CTAB_TABLE(src)[i];
         else
         {
-            selection->reqLData[i] = CWC(colReqErr);
+            selection->reqLData[i] = colReqErr;
             req_error_p = true;
         }
     }

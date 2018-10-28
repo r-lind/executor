@@ -14,7 +14,7 @@ void Volume::PBGetVInfo(ParmBlkPtr pb)
     // TODO: derived class should keep fields up to date
     
     if(pb->volumeParam.ioNamePtr)
-        str255assign(MR(pb->volumeParam.ioNamePtr), vcb.vcbVN);
+        str255assign(pb->volumeParam.ioNamePtr, vcb.vcbVN);
     pb->volumeParam.ioVRefNum = vcb.vcbVRefNum;
     pb->volumeParam.ioVCrDate = vcb.vcbCrDate;
     pb->volumeParam.ioVLsBkUp = vcb.vcbVolBkUp;
@@ -46,10 +46,10 @@ void Volume::PBHGetVInfo(HParmBlkPtr pb)
 
 #if 0
         // copied from ufs - system folder?
-    if(ISWDNUM(Cx(LM(BootDrive))))
+    if(ISWDNUM(LM(BootDrive)))
     {
-        wdp = WDNUMTOWDP(Cx(LM(BootDrive)));
-        if(MR(wdp->vcbp) == vcbp)
+        wdp = WDNUMTOWDP(LM(BootDrive));
+        if(wdp->vcbp == vcbp)
             pb->volumeParam.ioVFndrInfo[1] = wdp->dirid;
     }
 #endif

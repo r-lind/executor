@@ -49,14 +49,14 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
     OSErr retval;
 
     /* our current buffer is empty */
-    evt_data_size = CLC(0);
+    evt_data_size = 0;
     err = AcceptHighLevelEvent(&dummy_target_id,
                                &dummy_refcon,
                                nullptr, &evt_data_size);
     if(err != bufferIsSmall)
         AE_RETURN_ERROR(errAEEventNotHandled);
 
-    evt_data = NewHandle(CL(evt_data_size));
+    evt_data = NewHandle(evt_data_size);
     if(MemError() != noErr)
         AE_RETURN_ERROR(MemError());
 
@@ -73,8 +73,8 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
         AE_RETURN_ERROR(errAEEventNotHandled);
     }
 
-    DESC_TYPE_X(evt) = CLC(typeAppleEvent);
-    DESC_DATA_X(evt) = RM(evt_data);
+    DESC_TYPE_X(evt) = typeAppleEvent;
+    DESC_DATA_X(evt) = evt_data;
 
     err = AEGetAttributePtr(evt, keyEventClassAttr,
                             typeType, &dummy_type,
@@ -85,7 +85,7 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
         AEDisposeDesc(evt);
         AE_RETURN_ERROR(err);
     }
-    AEEventClass event_class = CL(event_class_s);
+    AEEventClass event_class = event_class_s;
 
     err = AEGetAttributePtr(evt, keyEventIDAttr,
                             typeType, &dummy_type,
@@ -95,7 +95,7 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
         AEDisposeDesc(evt);
         AE_RETURN_ERROR(err);
     }
-    AEEventID event_id = CL(event_id_s);
+    AEEventID event_id = event_id_s;
 
     err = AEGetEventHandler(event_class, event_id, &hdlr_s, &refcon_s, false);
     if(err != noErr)
@@ -107,8 +107,8 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
             AE_RETURN_ERROR(err);
         }
     }
-    hdlr = MR(hdlr_s);
-    int32_t refcon = CL(refcon_s);
+    hdlr = hdlr_s;
+    int32_t refcon = refcon_s;
 
     {
         AppleEvent *reply = (AppleEvent *)alloca(sizeof *reply);
@@ -159,8 +159,8 @@ OSErr Executor::C_AESend(AppleEvent *evt, AppleEvent *reply,
         /* ### not sure what error we should return here */
         AE_RETURN_ERROR(errAEEventNotHandled);
 
-    DescType target_type = CL(target_type_s);
-    Size target_size = CL(target_size_s);
+    DescType target_type = target_type_s;
+    Size target_size = target_size_s;
 
     if(err != noErr)
         AE_RETURN_ERROR(err);
@@ -213,7 +213,7 @@ OSErr Executor::C_AESend(AppleEvent *evt, AppleEvent *reply,
                 desc_data = DESC_DATA(evt);
                 desc_data_size = GetHandleSize(desc_data);
 
-                evt_rec.what = CWC(kHighLevelEvent);
+                evt_rec.what = kHighLevelEvent;
                 evt_rec.message = event_class;
 
                 *(uint32_t *)&bogo_event_id = event_id;
@@ -369,8 +369,8 @@ OSErr Executor::C_AECoercePtr(DescType data_type, Ptr data, Size data_size,
     }
 
     /* swap things to a normal state */
-    CoerceDescProcPtr coercion_hdlr = MR(coercion_hdlr_s);
-    int32_t refcon = CL(refcon_s);
+    CoerceDescProcPtr coercion_hdlr = coercion_hdlr_s;
+    int32_t refcon = refcon_s;
 
     if(is_desc_hdlr_p)
     {
@@ -420,7 +420,7 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
         GUEST<LONGINT> n_s;
 
         retval = AECountItems(&d, &n_s);
-        n = CL(n_s);
+        n = n_s;
         if(retval == noErr)
         {
             Handle h;
@@ -433,8 +433,8 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
             {
                 LONGINT l;
 
-                p->magic = CLC(APP_PARAMS_MAGIC);
-                p->n_fsspec = CW(n);
+                p->magic = APP_PARAMS_MAGIC;
+                p->n_fsspec = n;
                 for(l = 1; retval == noErr && l <= n; ++l)
                 {
                     AEDesc d2;
@@ -446,7 +446,7 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
                         AliasHandle ah;
                         Boolean wasChanged;
 
-                        ah = (AliasHandle)MR(d2.dataHandle);
+                        ah = (AliasHandle)d2.dataHandle;
                         retval = ResolveAlias(nullptr, ah, &p->fsspec[l - 1],
                                               &wasChanged);
                     }
@@ -455,8 +455,8 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
                     DisposeHandle(h);
                 else
                 {
-                    desc_out->descriptorType = CLC(TICK("appa"));
-                    desc_out->dataHandle = RM(h);
+                    desc_out->descriptorType = TICK("appa");
+                    desc_out->dataHandle = h;
                 }
             }
         }
@@ -505,8 +505,8 @@ OSErr Executor::C_AECoerceDesc(AEDesc *desc, DescType result_type,
     }
 
     /* swap things to a normal state */
-    coercion_hdlr = MR(coercion_hdlr_s);
-    refcon = CL(refcon_s);
+    coercion_hdlr = coercion_hdlr_s;
+    refcon = refcon_s;
 
     if(is_desc_hdlr_p)
     {
@@ -533,7 +533,7 @@ OSErr Executor::C_AECoerceDesc(AEDesc *desc, DescType result_type,
     AE_RETURN_ERROR(noErr);
 
 fail:
-    desc_out->descriptorType = CLC(typeNull);
+    desc_out->descriptorType = typeNull;
     desc_out->dataHandle = nullptr;
     AE_RETURN_ERROR(errAECoercionFail);
 }
@@ -542,7 +542,7 @@ OSErr Executor::C_AEManagerInfo(GUEST<LONGINT> *resultp)
 {
     OSErr retval;
 
-    *resultp = CL(0);
+    *resultp = 0;
     retval = noErr;
 
     return retval;

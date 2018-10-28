@@ -26,13 +26,13 @@ void Executor::C_ParamText(StringPtr p0, StringPtr p1, StringPtr p2,
                            StringPtr p3) /* IMI-421 */
 {
     if(p0)
-        PtrToXHand((Ptr)p0, MR(LM(DAStrings)[0]), (LONGINT)U(p0[0]) + 1);
+        PtrToXHand((Ptr)p0, LM(DAStrings)[0], (LONGINT)U(p0[0]) + 1);
     if(p1)
-        PtrToXHand((Ptr)p1, MR(LM(DAStrings)[1]), (LONGINT)U(p1[0]) + 1);
+        PtrToXHand((Ptr)p1, LM(DAStrings)[1], (LONGINT)U(p1[0]) + 1);
     if(p2)
-        PtrToXHand((Ptr)p2, MR(LM(DAStrings)[2]), (LONGINT)U(p2[0]) + 1);
+        PtrToXHand((Ptr)p2, LM(DAStrings)[2], (LONGINT)U(p2[0]) + 1);
     if(p3)
-        PtrToXHand((Ptr)p3, MR(LM(DAStrings)[3]), (LONGINT)U(p3[0]) + 1);
+        PtrToXHand((Ptr)p3, LM(DAStrings)[3], (LONGINT)U(p3[0]) + 1);
 }
 
 itmp Executor::ROMlib_dpnotoip(DialogPeek dp, INTEGER itemno,
@@ -45,7 +45,7 @@ itmp Executor::ROMlib_dpnotoip(DialogPeek dp, INTEGER itemno,
     items = DIALOG_ITEMS(dp);
     *flags = hlock_return_orig_state(items);
     intp = (GUEST<INTEGER> *)STARH(items);
-    if(itemno <= 0 || itemno > CW(*intp) + 1)
+    if(itemno <= 0 || itemno > *intp + 1)
         retval = 0;
     else
     {
@@ -64,9 +64,9 @@ static itmp htoip(Handle h, WindowPeek *wp_return, int16_t *nop_return,
     INTEGER i, nop;
     itmp retval;
 
-    for(wp = MR(LM(WindowList)); wp; wp = WINDOW_NEXT_WINDOW(wp))
+    for(wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
-        if(WINDOW_KIND_X(wp) == CWC(dialogKind)
+        if(WINDOW_KIND_X(wp) == dialogKind
            || WINDOW_KIND(wp) < 0)
         {
             Handle items;
@@ -77,9 +77,9 @@ static itmp htoip(Handle h, WindowPeek *wp_return, int16_t *nop_return,
 
             ip = (GUEST<INTEGER> *)STARH(items);
             retval = (itmp)(ip + 1);
-            for(i = CW(*ip) + 1, nop = 1; i--; BUMPIP(retval))
+            for(i = *ip + 1, nop = 1; i--; BUMPIP(retval))
             {
-                if(MR(retval->itmhand) == h)
+                if(retval->itmhand == h)
                 {
                     *wp_return = wp;
                     *nop_return = nop;
@@ -103,7 +103,7 @@ void Executor::C_GetDialogItem(DialogPtr dp, INTEGER itemno, GUEST<INTEGER> *ity
     if(ip)
     {
         if(itype)
-            *itype = CW((INTEGER)ip->itmtype);
+            *itype = (INTEGER)ip->itmtype;
 #if 0
 	else
 	  {
@@ -111,7 +111,7 @@ void Executor::C_GetDialogItem(DialogPtr dp, INTEGER itemno, GUEST<INTEGER> *ity
 	    /* of course this is very rude, but that's what the Mac did
 	       when we tested it.  Perhaps they've fixed that now and we
 	       too should fix it.  ARGH! */
-	   *(INTEGER *) (US_TO_SYN68K(itype)) = CW((INTEGER) ip->itmtype);
+	   *(INTEGER *) (US_TO_SYN68K(itype)) = (INTEGER) ip->itmtype;
           }
           // but why should we duplicate this kind of bug?
 #endif
@@ -120,7 +120,7 @@ void Executor::C_GetDialogItem(DialogPtr dp, INTEGER itemno, GUEST<INTEGER> *ity
         if(r) /* test on Mac shows r will not be written if 0 */
             *r = ip->itmr;
     }
-    HSetState(MR(((DialogPeek)dp)->items), flags);
+    HSetState(((DialogPeek)dp)->items, flags);
 }
 
 static void
@@ -132,7 +132,7 @@ settexth(DialogPeek dp, itmp ip, int item_no)
     TEPtr tep;
     int16_t length;
 
-    current_port = MR(qdGlobals().thePort);
+    current_port = qdGlobals().thePort;
 
     te = DIALOG_TEXTH(dp);
     tep = STARH(te);
@@ -146,9 +146,9 @@ settexth(DialogPeek dp, itmp ip, int item_no)
 
     item_text_h = ITEM_H(ip);
     length = GetHandleSize(item_text_h);
-    TEP_LENGTH_X(tep) = CW(length);
+    TEP_LENGTH_X(tep) = length;
     /* this is not a leak, always a duplicate */
-    TEP_HTEXT_X(tep) = RM(item_text_h);
+    TEP_HTEXT_X(tep) = item_text_h;
 
     /* set up the text styles */
     {
@@ -170,11 +170,11 @@ settexth(DialogPeek dp, itmp ip, int item_no)
         if(get_item_style_info((DialogPtr)dp, item_no, &flags, &style_info))
         {
             if(flags & TEdoFont)
-                te_style_font = CW(style_info.font);
+                te_style_font = style_info.font;
             if(flags & TEdoFace)
-                te_style_face = CB(style_info.face);
+                te_style_face = style_info.face;
             if(flags & TEdoSize)
-                te_style_size = CW(style_info.size);
+                te_style_size = style_info.size;
 
             if(flags & TEdoColor)
                 te_style_color = style_info.foreground;
@@ -198,15 +198,15 @@ settexth(DialogPeek dp, itmp ip, int item_no)
 
             te_style = TE_GET_STYLE(te);
             HASSIGN_2(te_style,
-                      nRuns, CWC(1),
-                      nStyles, CWC(1));
+                      nRuns, 1,
+                      nStyles, 1);
 
             SetHandleSize((Handle)te_style,
                           TE_STYLE_SIZE_FOR_N_RUNS(1));
-            HxX(te_style, runs[0].startChar) = CWC(0);
-            HxX(te_style, runs[0].styleIndex) = CWC(0);
-            HxX(te_style, runs[1].startChar) = CW(length + 1);
-            HxX(te_style, runs[1].styleIndex) = CWC(-1);
+            HxX(te_style, runs[0].startChar) = 0;
+            HxX(te_style, runs[0].styleIndex) = 0;
+            HxX(te_style, runs[1].startChar) = length + 1;
+            HxX(te_style, runs[1].styleIndex) = -1;
             style_table = TE_STYLE_STYLE_TABLE(te_style);
             SetHandleSize((Handle)style_table,
                           STYLE_TABLE_SIZE_FOR_N_STYLES(1));
@@ -215,9 +215,9 @@ settexth(DialogPeek dp, itmp ip, int item_no)
             tx_size_save_x = PORT_TX_SIZE_X(current_port);
             tx_face_save = PORT_TX_FACE(current_port);
 
-            PORT_TX_FONT_X(current_port) = CW(te_style_font);
-            PORT_TX_SIZE_X(current_port) = CW(te_style_size);
-            PORT_TX_FACE(current_port) = CB(te_style_face);
+            PORT_TX_FONT_X(current_port) = te_style_font;
+            PORT_TX_SIZE_X(current_port) = te_style_size;
+            PORT_TX_FACE(current_port) = te_style_face;
 
             GetFontInfo(&finfo);
 
@@ -226,32 +226,32 @@ settexth(DialogPeek dp, itmp ip, int item_no)
             PORT_TX_FACE(current_port) = tx_face_save;
 
             HASSIGN_7(style_table,
-                      stCount, CWC(1),
-                      stFont, CW(te_style_font),
+                      stCount, 1,
+                      stFont, te_style_font,
                       stFace, te_style_face,
-                      stSize, CW(te_style_size),
+                      stSize, te_style_size,
                       stColor, te_style_color,
-                      stHeight, CW(CW(finfo.ascent)
-                                   + CW(finfo.descent)
-                                   + CW(finfo.leading)),
+                      stHeight, finfo.ascent
+                                   + finfo.descent
+                                   + finfo.leading,
                       stAscent, finfo.ascent);
         }
         else
         {
-            TEP_TX_FONT_X(tep) = CW(te_style_font);
-            TEP_TX_SIZE_X(tep) = CW(te_style_size);
-            TEP_TX_FACE(tep) = CB(te_style_face);
+            TEP_TX_FONT_X(tep) = te_style_font;
+            TEP_TX_SIZE_X(tep) = te_style_size;
+            TEP_TX_FACE(tep) = te_style_face;
         }
     }
 
-    TEP_SEL_START_X(tep) = TEP_SEL_END_X(tep) = CWC(0);
+    TEP_SEL_START_X(tep) = TEP_SEL_END_X(tep) = 0;
 
     TECalText(te);
     if(WINDOW_VISIBLE_X(dp))
         TEActivate(te);
 
-    DIALOG_EDIT_FIELD_X(dp) = CW(item_no - 1);
-    DIALOG_EDIT_OPEN_X(dp) = CW(!(ITEM_TYPE(ip) & itemDisable));
+    DIALOG_EDIT_FIELD_X(dp) = item_no - 1;
+    DIALOG_EDIT_OPEN_X(dp) = !(ITEM_TYPE(ip) & itemDisable);
 }
 
 void Executor::C_SetDialogItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
@@ -263,8 +263,8 @@ void Executor::C_SetDialogItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
 
     if(ip)
     {
-        ip->itmtype = CB(itype);
-        ip->itmhand = RM(item);
+        ip->itmtype = itype;
+        ip->itmhand = item;
         ip->itmr = *r;
         if(itemno - 1 == DIALOG_EDIT_FIELD(dp)
            && (itype & editText)
@@ -277,7 +277,7 @@ void Executor::C_SetDialogItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
                 warning_unexpected(NULL_STRING);
         }
     }
-    HSetState(MR(((DialogPeek)dp)->items), flags);
+    HSetState(((DialogPeek)dp)->items, flags);
 }
 
 void Executor::C_GetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
@@ -315,7 +315,7 @@ void Executor::C_SetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
 
         /* test on Mac shows that if the size can't be set, the copy
 	 isn't done, but the rest is */
-        if(LM(MemErr) == CWC(noErr))
+        if(LM(MemErr) == noErr)
             BlockMoveData((Ptr)&text[1], STARH(item), hs);
         ip = htoip(item, &wp, &no, &flags);
         if(ip)
@@ -328,7 +328,7 @@ void Executor::C_SetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
 
                 text_h = DIALOG_TEXTH(wp);
 
-                TE_CARET_STATE_X(text_h) = CWC(255);
+                TE_CARET_STATE_X(text_h) = 255;
                 TESetText((Ptr)&text[1], text[0],
                           text_h);
             }
@@ -354,9 +354,9 @@ void Executor::ROMlib_dpntoteh(DialogPeek dp, INTEGER no) /* INTERNAL */
     if(no == 0)
     {
         /* special case ... find next */
-        intp = (GUEST<INTEGER> *)STARH(MR(dp->items));
-        num = Cx(*intp) + 1;
-        ip = ROMlib_dpnotoip(dp, no = Cx(dp->editField) + 1, &flags);
+        intp = (GUEST<INTEGER> *)STARH(dp->items);
+        num = *intp + 1;
+        ip = ROMlib_dpnotoip(dp, no = dp->editField + 1, &flags);
         do
         {
             if(ip)
@@ -368,17 +368,17 @@ void Executor::ROMlib_dpntoteh(DialogPeek dp, INTEGER no) /* INTERNAL */
                 ip = (itmp)(intp + 1);
                 no = 1;
             }
-        } while(!(CB(ip->itmtype) & editText));
+        } while(!(ip->itmtype & editText));
     }
     else
         ip = ROMlib_dpnotoip(dp, no, &flags);
-    if(ip && (Cx(dp->editField) != no - 1))
+    if(ip && (dp->editField != no - 1))
     {
-        if(Cx(dp->editField) != -1)
-            TEDeactivate(MR(dp->textH));
+        if(dp->editField != -1)
+            TEDeactivate(dp->textH);
         settexth(dp, ip, no);
     }
-    HSetState(MR(((DialogPeek)dp)->items), flags);
+    HSetState(((DialogPeek)dp)->items, flags);
 }
 
 void Executor::C_SelectDialogItemText(DialogPtr dp, INTEGER itemno, INTEGER start,
@@ -390,7 +390,7 @@ void Executor::C_SelectDialogItemText(DialogPtr dp, INTEGER itemno, INTEGER star
 
 INTEGER Executor::GetAlertStage() /* IMI-422 */
 {
-    return Cx(LM(ACount));
+    return LM(ACount);
 }
 
 void Executor::ResetAlertStage() /* IMI-423 */
@@ -405,25 +405,25 @@ void Executor::C_HideDialogItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
     SignedByte flags;
 
     ip = ROMlib_dpnotoip((DialogPeek)dp, item, &flags);
-    if(ip && CW(ip->itmr.left) < 8192)
+    if(ip && ip->itmr.left < 8192)
     {
         r = ip->itmr;
-        ip->itmr.left = CW(CW(ip->itmr.left) + 16384);
-        ip->itmr.right = CW(CW(ip->itmr.right) + 16384);
-        if(CB(ip->itmtype) & editText)
+        ip->itmr.left = ip->itmr.left + 16384;
+        ip->itmr.right = ip->itmr.right + 16384;
+        if(ip->itmtype & editText)
         {
             InsetRect(&r, -3, -3);
             if(item - 1 == DIALOG_EDIT_FIELD(dp))
             {
                 TEDeactivate(DIALOG_TEXTH(dp));
-                DIALOG_EDIT_FIELD_X(dp) = CWC(-1);
+                DIALOG_EDIT_FIELD_X(dp) = -1;
             }
         }
-        else if(CB(ip->itmtype) & ctrlItem)
+        else if(ip->itmtype & ctrlItem)
         {
             ControlHandle ctl;
 
-            ctl = (ControlHandle)MR(ip->itmhand);
+            ctl = (ControlHandle)ip->itmhand;
             CTL_VIS(ctl) = 0;
 
             if(item == DIALOG_ADEF_ITEM(dp))
@@ -444,22 +444,22 @@ void Executor::C_ShowDialogItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
     SignedByte flags;
 
     ip = ROMlib_dpnotoip((DialogPeek)dp, item, &flags);
-    if(ip && CW(ip->itmr.left) > 8192)
+    if(ip && ip->itmr.left > 8192)
     {
-        ip->itmr.left = CW(CW(ip->itmr.left) - 16384);
-        ip->itmr.right = CW(CW(ip->itmr.right) - 16384);
+        ip->itmr.left = ip->itmr.left - 16384;
+        ip->itmr.right = ip->itmr.right - 16384;
         r = ip->itmr;
-        if(CB(ip->itmtype) & editText)
+        if(ip->itmtype & editText)
         {
             InsetRect(&r, -3, -3);
             if(item - 1 == DIALOG_EDIT_FIELD(dp))
                 TEActivate(DIALOG_TEXTH(dp));
         }
-        else if(CB(ip->itmtype) & ctrlItem)
+        else if(ip->itmtype & ctrlItem)
         {
             ControlHandle ctl;
 
-            ctl = (ControlHandle)MR(ip->itmhand);
+            ctl = (ControlHandle)ip->itmhand;
             CTL_VIS(ctl) = 255;
 
             if(item == DIALOG_ADEF_ITEM(dp))
@@ -469,11 +469,11 @@ void Executor::C_ShowDialogItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
         ThePortGuard guard(dp);
         InvalRect(&r);
     }
-    if(CB(ip->itmtype) & ctrlItem)
+    if(ip->itmtype & ctrlItem)
     {
         ControlHandle ctl;
 
-        ctl = (ControlHandle)MR(ip->itmhand);
+        ctl = (ControlHandle)ip->itmhand;
         ShowControl(ctl);
     }
     HSetState(DIALOG_ITEMS(dp), flags);

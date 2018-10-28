@@ -481,7 +481,7 @@ struct QDGlobals
 
 inline QDGlobals& qdGlobals()
 {
-    Ptr thePortPtr = MR(*(GUEST<Ptr> *)SYN68K_TO_US(EM_A5));
+    Ptr thePortPtr = *(GUEST<Ptr> *)SYN68K_TO_US(EM_A5);
     return *(QDGlobals*)(thePortPtr - offsetof(QDGlobals, thePort));
 }
 

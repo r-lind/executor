@@ -187,7 +187,7 @@ LOWMEM_ACCESSOR(CurActivate);
 LOWMEM_ACCESSOR(CurDeactive);
 LOWMEM_ACCESSOR(GrayRgn);
 
-inline RgnHandle GetGrayRgn() { return MR(LM(GrayRgn)); }
+inline RgnHandle GetGrayRgn() { return LM(GrayRgn); }
 NOTRAP_FUNCTION2(GetGrayRgn);
 
 extern void C_SetWTitle(WindowPtr w, StringPtr t);

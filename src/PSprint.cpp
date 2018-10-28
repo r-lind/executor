@@ -542,8 +542,8 @@ graymatch(unsigned char patp[8], INTEGER pnMode,
         { 1.0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } },
     };
 
-    gray_fore = mac_old_color_to_ps_gray(CL(thePortp->fgColor));
-    gray_back = mac_old_color_to_ps_gray(CL(thePortp->bkColor));
+    gray_fore = mac_old_color_to_ps_gray(thePortp->fgColor);
+    gray_back = mac_old_color_to_ps_gray(thePortp->bkColor);
 
     pl = (uint32_t *)patp;
     pat_is_black = ((gray_fore == 0 && gray_back == 0) || (gray_fore == 0 && pl[0] == -1 && pl[1] == -1) || (gray_back == 0 && pl[0] == 0 && pl[1] == 0));
@@ -556,8 +556,8 @@ graymatch(unsigned char patp[8], INTEGER pnMode,
     long fg, bk;
     const char *fgs, *bks;
 
-    fg = CL (thePortp->fgColor);
-    bk = CL (thePortp->bkColor);
+    fg = thePortp->fgColor;
+    bk = thePortp->bkColor;
     if (fg == whiteColor)
       fgs = "white";
     else if (fg == blackColor)
@@ -627,7 +627,7 @@ static void doimage(LONGINT verb, Rect *rp, GrafPtr thePortp)
     short pnMode;
     TEMP_ALLOC_DECL(temp_alloc_space);
 
-    pnMode = CW(thePortp->pnMode);
+    pnMode = thePortp->pnMode;
     switch(verb)
     {
         default:
@@ -657,28 +657,28 @@ static void doimage(LONGINT verb, Rect *rp, GrafPtr thePortp)
     }
     else
     {
-        PSmoveto(CW(rp->left), CW(rp->bottom));
-        PSlineto(CW(rp->left), CW(rp->top));
-        PSlineto(CW(rp->right), CW(rp->top));
-        PSlineto(CW(rp->right), CW(rp->bottom));
+        PSmoveto(rp->left, rp->bottom);
+        PSlineto(rp->left, rp->top);
+        PSlineto(rp->right, rp->top);
+        PSlineto(rp->right, rp->bottom);
         PSclosepath();
-        PSmoveto(CW(rp->left) - 1, CW(rp->bottom) + 1);
-        PSlineto(CW(rp->right) + 1, CW(rp->bottom) + 1);
-        PSlineto(CW(rp->right) + 1, CW(rp->top) - 1);
-        PSlineto(CW(rp->left) - 1, CW(rp->top) - 1);
+        PSmoveto(rp->left - 1, rp->bottom + 1);
+        PSlineto(rp->right + 1, rp->bottom + 1);
+        PSlineto(rp->right + 1, rp->top - 1);
+        PSlineto(rp->left - 1, rp->top - 1);
         PSclip();
-        rowbytes = ((CW(rp->right) - CW(rp->left)) * 72 + 72 * 8 - 1) / 72 / 8;
-        numrows = ((CW(rp->bottom) - CW(rp->top)) * 72 + 71) / 72;
+        rowbytes = ((rp->right - rp->left) * 72 + 72 * 8 - 1) / 72 / 8;
+        numrows = ((rp->bottom - rp->top) * 72 + 71) / 72;
         if(rowbytes > 0 && numrows > 0)
         {
             numbytesneeded = rowbytes * numrows;
             TEMP_ALLOC_ALLOCATE(bytes, temp_alloc_space, numbytesneeded);
-            toshift = (CW(rp->left) - CW(thePortp->portBits.bounds.left)) & 7;
+            toshift = (rp->left - thePortp->portBits.bounds.left) & 7;
             for(i = 0; i < 8; ++i)
                 pat[i] = (patp[i] << toshift) | (patp[i] >> (8 - toshift));
             p = bytes;
-            for(i = CW(rp->top) - CW(thePortp->portBits.bounds.top);
-                i < CW(rp->top) + numrows - CW(thePortp->portBits.bounds.top);
+            for(i = rp->top - thePortp->portBits.bounds.top;
+                i < rp->top + numrows - thePortp->portBits.bounds.top;
                 ++i)
             {
                 c = pat[i & 7];
@@ -687,7 +687,7 @@ static void doimage(LONGINT verb, Rect *rp, GrafPtr thePortp)
                 for(j = rowbytes; --j >= 0;)
                     *p++ = c;
             }
-            PStranslate(CW(rp->left), CW(rp->top));
+            PStranslate(rp->left, rp->top);
 #if !defined(DONTSENDBIGARRAYS)
             PSsendchararray((char *)bytes, numbytesneeded);
 #endif /* DONTSENDBIGARRAYS */
@@ -743,8 +743,8 @@ void Executor::ROMlib_rotatebegin(LONGINT flippage, LONGINT angle)
     PSrotate(angle);
     PStranslate(-save_xoffset, -save_yoffset);
     ROMlib_suppressclip = true;
-    printport.pnLoc.h = CWC(-32768); /* force reload */
-    printport.txFont = CWC(-32768); /* force reload */
+    printport.pnLoc.h = -32768; /* force reload */
+    printport.txFont = -32768; /* force reload */
 }
 
 void Executor::ROMlib_rotatecenter(double yoffset, double xoffset)
@@ -781,9 +781,9 @@ static void NeXTClip(Rect *rp)
      as far as i can tell, the `grestore' `gsave' sequence just got
      you back to the intial (unbounded) clip path */
     DPSPrintf(DPSGetCurrentContext(), "initclip\n");
-    if((rp->left != CWC(-32767) && rp->left != CWC(-32768)) || (rp->top != CWC(-32767) && rp->top != CWC(-32768)) || rp->right != CWC(32767) || rp->bottom != CWC(32767))
-        PSrectclip(CW(rp->left), CW(rp->top),
-                   CW(rp->right) - CW(rp->left), CW(rp->bottom) - CW(rp->top));
+    if((rp->left != -32767 && rp->left != -32768) || (rp->top != -32767 && rp->top != -32768) || rp->right != 32767 || rp->bottom != 32767)
+        PSrectclip(rp->left, rp->top,
+                   rp->right - rp->left, rp->bottom - rp->top);
 }
 
 static int myEqualRect(Rect *r1, Rect *r2)
@@ -801,22 +801,22 @@ static void commonupdate(GrafPtr thePortp)
 
     if(thePortp->portBits.bounds.top != printport.portBits.bounds.top || thePortp->portBits.bounds.left != printport.portBits.bounds.left)
     {
-        dx = CW(printport.portBits.bounds.left) - CW(thePortp->portBits.bounds.left);
-        dy = CW(printport.portBits.bounds.top) - CW(thePortp->portBits.bounds.top);
+        dx = printport.portBits.bounds.left - thePortp->portBits.bounds.left;
+        dy = printport.portBits.bounds.top - thePortp->portBits.bounds.top;
         PStranslate(dx, dy);
         printport.portBits.bounds = thePortp->portBits.bounds;
     }
-    if(!ROMlib_suppressclip && (reloadclip || !myEqualRect(&MR(*MR(thePortp->clipRgn))->rgnBBox, &MR(*MR(printport.clipRgn))->rgnBBox)))
+    if(!ROMlib_suppressclip && (reloadclip || !myEqualRect(&(*thePortp->clipRgn)->rgnBBox, &(*printport.clipRgn)->rgnBBox)))
     {
-        NeXTClip(&MR(*MR(thePortp->clipRgn))->rgnBBox);
-        MR(*MR(printport.clipRgn))->rgnBBox = MR(*MR(thePortp->clipRgn))->rgnBBox;
-        printport.pnLoc.h = CWC(-32768); /* force reload */
-        printport.txFont = CWC(-32768); /* force reload */
+        NeXTClip(&(*thePortp->clipRgn)->rgnBBox);
+        (*printport.clipRgn)->rgnBBox = (*thePortp->clipRgn)->rgnBBox;
+        printport.pnLoc.h = -32768; /* force reload */
+        printport.txFont = -32768; /* force reload */
     }
 
     if(thePortp->pnLoc.h != printport.pnLoc.h || thePortp->pnLoc.v != printport.pnLoc.v)
     {
-        PSmoveto(CW(thePortp->pnLoc.h), CW(thePortp->pnLoc.v));
+        PSmoveto(thePortp->pnLoc.h, thePortp->pnLoc.v);
         printport.pnLoc = thePortp->pnLoc;
     }
 
@@ -1189,11 +1189,11 @@ void NeXTSetText(StringPtr fname, LONGINT txFace, LONGINT txSize,
 static void
 SmartGetFontName(GrafPtr thePortp, StringPtr fname)
 {
-    C_GetFontName(CW(thePortp->txFont), fname);
+    C_GetFontName(thePortp->txFont, fname);
     if(!fname[0])
-        C_GetFontName(CW(LM(ApFontID)), fname);
+        C_GetFontName(LM(ApFontID), fname);
     if(!fname[0])
-        C_GetFontName(CW(LM(SysFontFam)), fname);
+        C_GetFontName(LM(SysFontFam), fname);
 }
 
 /*
@@ -1212,8 +1212,8 @@ static void txupdate(GrafPtr thePortp)
     if(thePortp->txFont != printport.txFont || thePortp->txFace != printport.txFace || thePortp->txSize != printport.txSize || thePortp->spExtra != printport.spExtra)
     {
         SmartGetFontName(thePortp, fname);
-        NeXTSetText(fname, thePortp->txFace, CW(thePortp->txSize),
-                    CL(thePortp->spExtra));
+        NeXTSetText(fname, thePortp->txFace, thePortp->txSize,
+                    thePortp->spExtra);
         printport.txFont = thePortp->txFont;
         printport.txFace = thePortp->txFace;
         printport.txSize = thePortp->txSize;
@@ -1227,7 +1227,7 @@ void pnupdate(GrafPtr thePortp)
 #if 0
     if (thePortp->pnSize.h != printport.pnSize.h ||
 	thePortp->pnSize.v != printport.pnSize.v) {
-	NeXTSetWidth(CW(thePortp->pnSize));
+	NeXTSetWidth(thePortp->pnSize);
 	printport.pnSize = thePortp->pnSize;
     }
 #endif
@@ -1255,10 +1255,10 @@ void Executor::NeXTPrArc(LONGINT verb, Rect *rp, LONGINT starta, LONGINT arca,
             froma = -90 + starta + arca;
             toa = -90 + starta;
         }
-        midx = ((float)CW(rp->left) + CW(rp->right)) / 2;
-        midy = ((float)CW(rp->top) + CW(rp->bottom)) / 2;
-        xdiam = CW(rp->right) - CW(rp->left);
-        ydiam = CW(rp->bottom) - CW(rp->top);
+        midx = ((float)rp->left + rp->right) / 2;
+        midy = ((float)rp->top + rp->bottom) / 2;
+        xdiam = rp->right - rp->left;
+        ydiam = rp->bottom - rp->top;
         PStranslate(midx, (midy));
         PSnewpath();
         PSscale(1, ydiam / xdiam);
@@ -1266,8 +1266,8 @@ void Executor::NeXTPrArc(LONGINT verb, Rect *rp, LONGINT starta, LONGINT arca,
 
         if(verb == frameVerb)
         {
-            psh = CW(thePortp->pnSize.h);
-            psv = CW(thePortp->pnSize.v);
+            psh = thePortp->pnSize.h;
+            psv = thePortp->pnSize.v;
             if(ydiam > (2 * psv) && xdiam > (2 * psh))
             {
                 PSscale(1, xdiam / ydiam * (ydiam - 2 * psv) / (xdiam - 2 * psh));
@@ -1339,10 +1339,10 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
     direct_color_p = false;
     indexed_color_p = false;
     commonupdate(thePortp);
-    srcwidth = CW(srcrp->right) - CW(srcrp->left);
-    srcheight = CW(srcrp->bottom) - CW(srcrp->top);
-    dstwidth = CW(dstrp->right) - CW(dstrp->left);
-    dstheight = CW(dstrp->bottom) - CW(dstrp->top);
+    srcwidth = srcrp->right - srcrp->left;
+    srcheight = srcrp->bottom - srcrp->top;
+    dstwidth = dstrp->right - dstrp->left;
+    dstheight = dstrp->bottom - dstrp->top;
     if(srcwidth && srcheight && dstwidth && dstheight) /* put in for output */
     { /* from Tex-Edit 2.5 */
         /* see the comment at the grestore below */
@@ -1351,10 +1351,10 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
         scalex = dstwidth / srcwidth;
         scaley = dstheight / srcheight;
 
-        if(CW(srcbmp->rowBytes) & 0x8000)
+        if(srcbmp->rowBytes & 0x8000)
         {
             srcpmp = (PixMap *)srcbmp;
-            pixelsize = CW(srcpmp->pixelSize);
+            pixelsize = srcpmp->pixelSize;
             if(pixelsize != 1 && mode != srcCopy)
                 /*-->*/ goto DONE;
             direct_color_p = pixelsize > 8;
@@ -1366,11 +1366,11 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
             srcpmp = 0;
             pixelsize = 1;
         }
-        rowbytes = CW(srcbmp->rowBytes) & ROWMASK;
+        rowbytes = srcbmp->rowBytes & ROWMASK;
 
-        PStranslate(CW(dstrp->left), CW(dstrp->top));
-        baseaddr = (unsigned char *)MR(srcbmp->baseAddr)
-            + (CW(srcrp->top) - CW(srcbmp->bounds.top)) * (LONGINT)rowbytes;
+        PStranslate(dstrp->left, dstrp->top);
+        baseaddr = (unsigned char *)srcbmp->baseAddr
+            + (srcrp->top - srcbmp->bounds.top) * (LONGINT)rowbytes;
 
         /* NOTE: now that we don't send big arrays, I believe that doing
 	 the transformation below is a memory waste... Shouldn't we
@@ -1393,7 +1393,7 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
         matrix[1] = 0;
         matrix[2] = 0;
         matrix[3] = 1 / scaley;
-        matrix[4] = CW(srcrp->left) - CW(srcbmp->bounds.left);
+        matrix[4] = srcrp->left - srcbmp->bounds.left;
         matrix[5] = 0;
 
         numbytes = ((int)srcwidth * pixelsize + 7) / 8;
@@ -1440,7 +1440,7 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
             GUEST<PixMapPtr> pxp;
             bool has_warned_p;
 
-            pxp = RM((Executor::PixMapPtr)srcpmp);
+            pxp = (Executor::PixMapPtr)srcpmp;
             DPSPrintf(DPSGetCurrentContext(),
                       "[/Indexed /DeviceRGB %d <\n", (1 << pixelsize) - 1);
 
@@ -1459,15 +1459,15 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
                 unsigned char g;
                 unsigned char b;
 
-                if(CW(ctab[i].value) != i && !has_warned_p)
+                if(ctab[i].value != i && !has_warned_p)
                 {
                     warning_unexpected("value = %d, i = %d",
-                                       CW(ctab[i].value), i);
+                                       ctab[i].value, i);
                     has_warned_p = true;
                 }
-                r = CW(ctab[i].rgb.red) >> 8;
-                g = CW(ctab[i].rgb.green) >> 8;
-                b = CW(ctab[i].rgb.blue) >> 8;
+                r = ctab[i].rgb.red >> 8;
+                g = ctab[i].rgb.green >> 8;
+                b = ctab[i].rgb.blue >> 8;
                 DPSPrintf(DPSGetCurrentContext(),
                           "%02x%02x%02x%c", r, g, b, (i % 8) == 7 ? '\n' : ' ');
             }
@@ -1513,10 +1513,10 @@ void Executor::NeXTPrLine(Point to, GrafPtr thePortp)
     Rect r;
 
     pnupdate(thePortp);
-    if(CW(thePortp->pnSize.h) || CW(thePortp->pnSize.v))
+    if(thePortp->pnSize.h || thePortp->pnSize.v)
     {
-        fromh = CW(thePortp->pnLoc.h);
-        fromv = CW(thePortp->pnLoc.v);
+        fromh = thePortp->pnLoc.h;
+        fromv = thePortp->pnLoc.v;
         toh = to.h;
         tov = to.v;
 
@@ -1529,17 +1529,17 @@ void Executor::NeXTPrLine(Point to, GrafPtr thePortp)
             fromv = tov;
             tov = temp;
         }
-        psh = CW(thePortp->pnSize.h);
-        psv = CW(thePortp->pnSize.v);
-        r.right = CW(toh + psh);
-        r.left = CW(fromh);
+        psh = thePortp->pnSize.h;
+        psv = thePortp->pnSize.v;
+        r.right = toh + psh;
+        r.left = fromh;
         PSgsave();
         PSnewpath();
         PSmoveto(fromh, fromv);
         if(fromv < tov)
         {
-            r.top = CW(fromv);
-            r.bottom = CW(tov + psv);
+            r.top = fromv;
+            r.bottom = tov + psv;
             PSlineto(fromh + psh, fromv);
             PSlineto(toh + psh, tov);
             PSlineto(toh + psh, tov + psv);
@@ -1548,8 +1548,8 @@ void Executor::NeXTPrLine(Point to, GrafPtr thePortp)
         }
         else
         {
-            r.top = CW(tov);
-            r.bottom = CW(fromv + psv);
+            r.top = tov;
+            r.bottom = fromv + psv;
             PSlineto(toh, tov);
             PSlineto(toh + psh, tov);
             PSlineto(toh + psh, tov + psv);
@@ -1587,12 +1587,12 @@ void Executor::NeXTPrPoly(LONGINT verb, PolyHandle ph, GrafPtr thePortp)
     Point pt;
 
     pnupdate(thePortp);
-    pp = MR(*ph)->polyPoints;
-    ep = (GUEST<Point> *)((char *)MR(*ph) + CW((MR(*ph))->polySize));
-    firstp.h = CW(pp[0].h);
-    firstp.v = CW(pp[0].v);
+    pp = (*ph)->polyPoints;
+    ep = (GUEST<Point> *)((char *)*ph + (*ph)->polySize);
+    firstp.h = pp[0].h;
+    firstp.v = pp[0].v;
     thePortp->pnLoc = pp[0];
-    if(CW(ep[-1].h) == firstp.h && CW(ep[-1].v) == firstp.v)
+    if(ep[-1].h == firstp.h && ep[-1].v == firstp.v)
         ep--;
     if(ep > pp)
     {
@@ -1601,8 +1601,8 @@ void Executor::NeXTPrPoly(LONGINT verb, PolyHandle ph, GrafPtr thePortp)
             PSmoveto(firstp.h, firstp.v);
             for(++pp; pp < ep; pp++)
             {
-                pt.h = CW(pp[0].h);
-                pt.v = CW(pp[0].v);
+                pt.h = pp[0].h;
+                pt.v = pp[0].v;
                 NeXTPrLine(pt, thePortp);
                 thePortp->pnLoc = pp[0];
             }
@@ -1615,12 +1615,12 @@ void Executor::NeXTPrPoly(LONGINT verb, PolyHandle ph, GrafPtr thePortp)
             PSmoveto(firstp.h, firstp.v);
             for(++pp; pp < ep; pp++)
             {
-                PSlineto(CW(pp->h), CW(pp->v));
+                PSlineto(pp->h, pp->v);
             }
             PSlineto(firstp.h, firstp.v);
             PSclosepath();
             PSclip();
-            doimage(verb, &(MR(*ph))->polyBBox, thePortp);
+            doimage(verb, &(*ph)->polyBBox, thePortp);
 
             PSgrestore();
         }
@@ -1639,16 +1639,16 @@ void Executor::NeXTPrRRect(LONGINT verb, Rect *rp, LONGINT width, LONGINT height
     {
         pnupdate(thePortp);
         sfactor = (float)height / width;
-        midy = ((float)CW(rp->top) + CW(rp->bottom)) / 2;
+        midy = ((float)rp->top + rp->bottom) / 2;
 
         PSgsave();
         PSnewpath();
         PSscale(1, sfactor);
-        PSmoveto(CW(rp->left), midy / sfactor);
-        rl = CW(rp->left);
-        rr = CW(rp->right);
-        rt = CW(rp->top) / sfactor;
-        rb = CW(rp->bottom) / sfactor;
+        PSmoveto(rp->left, midy / sfactor);
+        rl = rp->left;
+        rr = rp->right;
+        rt = rp->top / sfactor;
+        rb = rp->bottom / sfactor;
         PSarct(rl, rb, rr, rb, (float)width / 2);
         PSarct(rr, rb, rr, rt, (float)width / 2);
         PSarct(rr, rt, rl, rt, (float)width / 2);
@@ -1656,13 +1656,13 @@ void Executor::NeXTPrRRect(LONGINT verb, Rect *rp, LONGINT width, LONGINT height
         PSclosepath();
         if(verb == frameVerb)
         {
-            psh = CW(thePortp->pnSize.h);
-            psv = CW(thePortp->pnSize.v);
+            psh = thePortp->pnSize.h;
+            psv = thePortp->pnSize.v;
             sfactor2 = ((float)height - 2 * psv) / (width - 2 * psh) / sfactor;
-            rl = CW(rp->left) + psh;
-            rr = CW(rp->right) - psh;
-            rt = CW(rp->top) + psv / sfactor2;
-            rb = CW(rp->bottom) - psv / sfactor2;
+            rl = rp->left + psh;
+            rr = rp->right - psh;
+            rt = rp->top + psv / sfactor2;
+            rb = rp->bottom - psv / sfactor2;
 
             PSscale(1, sfactor2);
             PSmoveto(rl, midy / sfactor);
@@ -1688,19 +1688,19 @@ void Executor::NeXTPrRect(LONGINT verb, Rect *rp, GrafPtr thePortp)
     pnupdate(thePortp);
     PSgsave();
     PSnewpath();
-    PSmoveto(CW(rp->left), CW(rp->top));
-    PSlineto(CW(rp->left), CW(rp->bottom));
-    PSlineto(CW(rp->right), CW(rp->bottom));
-    PSlineto(CW(rp->right), CW(rp->top));
+    PSmoveto(rp->left, rp->top);
+    PSlineto(rp->left, rp->bottom);
+    PSlineto(rp->right, rp->bottom);
+    PSlineto(rp->right, rp->top);
     PSclosepath();
     if(verb == frameVerb)
     {
-        psh = CW(thePortp->pnSize.h);
-        psv = CW(thePortp->pnSize.v);
-        PSmoveto(CW(rp->left) + psh, CW(rp->top) + psv);
-        PSlineto(CW(rp->right) - psh, CW(rp->top) + psv);
-        PSlineto(CW(rp->right) - psh, CW(rp->bottom) - psv);
-        PSlineto(CW(rp->left) + psh, CW(rp->bottom) - psv);
+        psh = thePortp->pnSize.h;
+        psv = thePortp->pnSize.v;
+        PSmoveto(rp->left + psh, rp->top + psv);
+        PSlineto(rp->right - psh, rp->top + psv);
+        PSlineto(rp->right - psh, rp->bottom - psv);
+        PSlineto(rp->left + psh, rp->bottom - psv);
         PSclosepath();
     }
     PSclip();
@@ -1722,11 +1722,11 @@ short Executor::NeXTPrTxMeas(LONGINT n, Ptr p, GUEST<Point> *nump, GUEST<Point> 
     short retval;
 
     SETUPA5;
-    num.h = num.v = den.h = den.v = CWC(0x100);
+    num.h = num.v = den.h = den.v = 0x100;
     retval = ROMlib_StdTxMeas(n,
                               (Ptr)p, &num, &den, nullptr);
     RESTOREA5;
-    return (float)retval * CW(num.h) / CW(den.h);
+    return (float)retval * num.h / den.h;
 }
 
 static int numspacesin(const char *str)
@@ -1768,9 +1768,9 @@ static void dopsunderline(GrafPtr thePortp, short total,
         substitute_font_if_needed(&font, 0, &need_to_free);
         PSgsave();
         PSnewpath();
-        PSsendfloat(CW(thePortp->pnLoc.h));
-        PSsendfloat(CW(thePortp->pnLoc.v));
-        PSsendfloat(CW(thePortp->txSize));
+        PSsendfloat(thePortp->pnLoc.h);
+        PSsendfloat(thePortp->pnLoc.v);
+        PSsendfloat(thePortp->txSize);
         PSsendchararray(font, strlen(font));
         if(need_to_free)
             free(font);
@@ -2004,7 +2004,7 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
     int n_leading_spaces;
     int run_start, run_stop;
 
-    if(thePortp->txFont != CWC(symbol))
+    if(thePortp->txFont != symbol)
     {
         find_run_of_symbol_chars(n, textbufp, &run_start, &run_stop);
         if(run_start >= 0)
@@ -2014,7 +2014,7 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
             if(run_start > 0)
                 NeXTPrText(run_start, textbufp, num, den, thePortp);
             save_font = thePortp->txFont;
-            thePortp->txFont = CWC(symbol);
+            thePortp->txFont = symbol;
             NeXTPrText(run_stop - run_start, textbufp + run_start, num, den,
                        thePortp);
             thePortp->txFont = save_font;
@@ -2046,8 +2046,8 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
             {
                 PSgsave();
                 DPSPrintf(DPSGetCurrentContext(), "initclip\n");
-                PStranslate(CW(thePortp->pnLoc.h) + rotation.center_x,
-                            CW(thePortp->pnLoc.v) + rotation.center_y);
+                PStranslate(thePortp->pnLoc.h + rotation.center_x,
+                            thePortp->pnLoc.v + rotation.center_y);
                 PSrotate(rotation.angle);
                 PSmoveto(-rotation.center_x, -rotation.center_y);
             }
@@ -2064,7 +2064,7 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
             translated[n] = 0;
             if(n)
             {
-                if(thePortp->txFont == CWC(symbol))
+                if(thePortp->txFont == symbol)
                 {
                     int i;
 
@@ -2076,7 +2076,7 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
 #if 0
 		PSxshow(translated, fwidths, n);
 #else
-                if(substitute_fonts_p && (thePortp->txFont == CWC(geneva)))
+                if(substitute_fonts_p && (thePortp->txFont == geneva))
                     doshow(translated, n);
                 else if((i = numspacesin(translated)))
                     dowidthshow(translated, n, i, total);
@@ -2086,9 +2086,9 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
                 if(thePortp->txFace & underline)
                     dopsunderline(thePortp, total,
                                   substitute_fonts_p
-                                      && (thePortp->txFont == CWC(geneva)),
+                                      && (thePortp->txFont == geneva),
                                   translated, n);
-                thePortp->pnLoc.h = CW(CW(thePortp->pnLoc.h) + total);
+                thePortp->pnLoc.h = thePortp->pnLoc.h + total;
                 printport.pnLoc.h = thePortp->pnLoc.h;
             }
             if(rotation.rotated_p)

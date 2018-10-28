@@ -25,11 +25,11 @@ namespace Executor
 #define MI_ENABLE_FLAGS_X(mi) (HxX(mi, enableFlags))
 #define MI_DATA(mi) (HxX(mi, menuData))
 
-#define MI_ID(mi) (CW(MI_ID_X(mi)))
-#define MI_WIDTH(mi) (CW(MI_WIDTH_X(mi)))
-#define MI_HEIGHT(mi) (CW(MI_HEIGHT_X(mi)))
-#define MI_PROC(mi) (MR(MI_PROC_X(mi)))
-#define MI_ENABLE_FLAGS(mi) (CL(MI_ENABLE_FLAGS_X(mi)))
+#define MI_ID(mi) (MI_ID_X(mi))
+#define MI_WIDTH(mi) (MI_WIDTH_X(mi))
+#define MI_HEIGHT(mi) (MI_HEIGHT_X(mi))
+#define MI_PROC(mi) (MI_PROC_X(mi))
+#define MI_ENABLE_FLAGS(mi) (MI_ENABLE_FLAGS_X(mi))
 
 #define MI_TITLE(mi) (HxX(mi, menuTitle))
 
@@ -110,11 +110,11 @@ typedef struct menu_elt
                                + sizeof(INTEGER) /* lastHMenu */)) \
          .p)
 
-#define ML_LAST_MENU_OFFSET(ml) (CW(ML_LAST_MENU_OFFSET_X(ml)))
-#define ML_LAST_RIGHT(ml) (CW(ML_LAST_RIGHT_X(ml)))
-#define ML_RES_ID(ml) (CW(ML_RES_ID_X(ml)))
-#define ML_LAST_HMENU_OFFSET(ml) (CW(ML_LAST_HMENU_OFFSET_X(ml)))
-#define ML_MENU_TITLE_SAVE(ml) (CW(ML_MENU_TITLE_SAVE_X(ml)))
+#define ML_LAST_MENU_OFFSET(ml) (ML_LAST_MENU_OFFSET_X(ml))
+#define ML_LAST_RIGHT(ml) (ML_LAST_RIGHT_X(ml))
+#define ML_RES_ID(ml) (ML_RES_ID_X(ml))
+#define ML_LAST_HMENU_OFFSET(ml) (ML_LAST_HMENU_OFFSET_X(ml))
+#define ML_MENU_TITLE_SAVE(ml) (ML_MENU_TITLE_SAVE_X(ml))
 
 struct menu_list
 {
@@ -153,10 +153,10 @@ typedef GUEST<menulistp> *mlhandle;
 #define MCENTRY_ITEM_X(entry) ((entry)->mctItem)
 #define MCENTRY_RESERVED_X(entry) ((entry)->mctReserved)
 
-#define MCENTRY_ID(entry) (CW(MCENTRY_ID_X(entry)))
-#define MCENTRY_ITEM(entry) (CW(MCENTRY_ITEM_X(entry)))
+#define MCENTRY_ID(entry) (MCENTRY_ID_X(entry))
+#define MCENTRY_ITEM(entry) (MCENTRY_ITEM_X(entry))
 
-#define MENULIST ((mlhandle)MR(LM(MenuList)))
+#define MENULIST ((mlhandle)LM(MenuList))
 
 #define MENULEFT 10
 
@@ -208,7 +208,7 @@ extern GUEST<Handle> MBDFHndl_H;
 #define LM(MBDFHndl) (MBDFHndl_H.p)
 #endif
 
-#define MBSAVELOC ((mbdfheaderhand)MR(LM(MBSaveLoc)))
+#define MBSAVELOC ((mbdfheaderhand)LM(MBSaveLoc))
 
 #define SLOP 13
 
@@ -226,10 +226,10 @@ extern LONGINT ROMlib_mbdfcall(INTEGER msg, INTEGER param1, LONGINT param2);
 
 #define MBDFDECL() INTEGER mbdfstate
 
-#define MBDFBEGIN() (mbdfstate = HGetState(MR(LM(MBDFHndl))), HSetState(MR(LM(MBDFHndl)), \
+#define MBDFBEGIN() (mbdfstate = HGetState(LM(MBDFHndl)), HSetState(LM(MBDFHndl), \
                                                                     mbdfstate | LOCKBIT))
 
-#define MBDFEND() HSetState(MR(LM(MBDFHndl)), mbdfstate)
+#define MBDFEND() HSetState(LM(MBDFHndl), mbdfstate)
 
 #define NOTHITINMBAR 0
 #define NOTHIT (-1)

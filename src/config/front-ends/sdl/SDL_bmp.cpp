@@ -98,7 +98,7 @@ Author of Simple DirectMedia Layer -
 
 #if SDL_MAJOR_VERSION > 0 || SDL_MINOR_VERSION >= 9
 
-#define READLE_DECL(width)                            \
+#define READLE_DEwidth                            \
     static Uint##width                                \
         ctm_ReadLE##width(FILE *fp)                   \
     {                                                 \
@@ -111,10 +111,10 @@ Author of Simple DirectMedia Layer -
         return retval;                                \
     }
 
-READLE_DECL(16)
-READLE_DECL(32)
+READLE_DE16
+READLE_DE32
 
-#define WRITELE_DECL(width)                                     \
+#define WRITELE_DEwidth                                     \
     static int                                                  \
         ctm_WriteLE##width(FILE *fp, Uint##width value)         \
     {                                                           \
@@ -130,8 +130,8 @@ READLE_DECL(32)
         return retval;                                          \
     }
 
-WRITELE_DECL(16)
-WRITELE_DECL(32)
+WRITELE_DE16
+WRITELE_DE32
 
 #define SDL_ReadLE16 ctm_ReadLE16
 #define SDL_ReadLE32 ctm_ReadLE32

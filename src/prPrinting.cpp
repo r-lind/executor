@@ -67,7 +67,7 @@ void Executor::C_donotPrArc(GrafVerb verb, Rect *r, INTEGER starta,
 void Executor::C_PrArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrArc(verb, r, starta, arca, MR(qdGlobals().thePort));
+        NeXTPrArc(verb, r, starta, arca, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dstrp,
@@ -80,7 +80,7 @@ void Executor::C_PrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dst
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrBits(srcbmp, srcrp, dstrp,
-                   mode, mask, MR(qdGlobals().thePort));
+                   mode, mask, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrLine(Point p)
@@ -95,7 +95,7 @@ void Executor::C_PrLine(Point p)
 
         cp.h = p.h;
         cp.v = p.v;
-        NeXTPrLine(cp, MR(qdGlobals().thePort));
+        NeXTPrLine(cp, qdGlobals().thePort);
     }
 }
 
@@ -106,7 +106,7 @@ void Executor::C_donotPrOval(GrafVerb v, Rect *rp)
 void Executor::C_PrOval(GrafVerb v, Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrOval(v, rp, MR(qdGlobals().thePort));
+        NeXTPrOval(v, rp, qdGlobals().thePort);
 }
 
 void Executor::C_textasPS(INTEGER n, Ptr textbufp, Point num, Point den)
@@ -133,7 +133,7 @@ void Executor::C_PrGetPic(Ptr dp, INTEGER bc)
 {
     gui_abort();
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrGetPic(dp, bc, MR(qdGlobals().thePort));
+        NeXTPrGetPic(dp, bc, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrPutPic(Ptr sp, INTEGER bc)
@@ -143,7 +143,7 @@ void Executor::C_donotPrPutPic(Ptr sp, INTEGER bc)
 void Executor::C_PrPutPic(Ptr sp, INTEGER bc)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrPutPic(sp, bc, MR(qdGlobals().thePort));
+        NeXTPrPutPic(sp, bc, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrPoly(GrafVerb verb, PolyHandle ph)
@@ -153,7 +153,7 @@ void Executor::C_donotPrPoly(GrafVerb verb, PolyHandle ph)
 void Executor::C_PrPoly(GrafVerb verb, PolyHandle ph)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrPoly(verb, ph, MR(qdGlobals().thePort));
+        NeXTPrPoly(verb, ph, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrRRect(GrafVerb verb, Rect *r, INTEGER width,
@@ -164,7 +164,7 @@ void Executor::C_donotPrRRect(GrafVerb verb, Rect *r, INTEGER width,
 void Executor::C_PrRRect(GrafVerb verb, Rect *r, INTEGER width, INTEGER height)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrRRect(verb, r, width, height, MR(qdGlobals().thePort));
+        NeXTPrRRect(verb, r, width, height, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrRect(GrafVerb v, Rect *rp)
@@ -174,7 +174,7 @@ void Executor::C_donotPrRect(GrafVerb v, Rect *rp)
 void Executor::C_PrRect(GrafVerb v, Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrRect(v, rp, MR(qdGlobals().thePort));
+        NeXTPrRect(v, rp, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrRgn(GrafVerb verb, RgnHandle rgn)
@@ -184,7 +184,7 @@ void Executor::C_donotPrRgn(GrafVerb verb, RgnHandle rgn)
 void Executor::C_PrRgn(GrafVerb verb, RgnHandle rgn)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
-        NeXTPrRgn(verb, rgn, MR(qdGlobals().thePort));
+        NeXTPrRgn(verb, rgn, qdGlobals().thePort);
 }
 
 INTEGER Executor::C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
@@ -192,7 +192,7 @@ INTEGER Executor::C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
 {
     StdTxMeas(n, p, nump, denp, finfop);
     return NeXTPrTxMeas(n, p, nump, denp,
-                        finfop, MR(qdGlobals().thePort));
+                        finfop, qdGlobals().thePort);
 }
 
 void Executor::C_donotPrText(INTEGER n, Ptr textbufp, Point num, Point den)
@@ -203,7 +203,7 @@ void Executor::C_PrText(INTEGER n, Ptr textbufp, Point num, Point den)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
     {
-        NeXTPrText(n, textbufp, num, den, MR(qdGlobals().thePort));
+        NeXTPrText(n, textbufp, num, den, qdGlobals().thePort);
     }
 }
 
@@ -234,16 +234,16 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                 break;
             case rotatebegin:
                 ip = (GUEST<INTEGER> *)STARH(hand);
-                flippage = CW(ip[0]);
-                angle = CW(ip[1]);
+                flippage = ip[0];
+                angle = ip[1];
                 ROMlib_rotatebegin(flippage, angle);
                 break;
             case rotatecenter:
                 fp = (GUEST<Fixed> *)STARH(hand);
-                yoffset = CL(fp[0]);
-                xoffset = CL(fp[1]);
-                ROMlib_rotatecenter(Cx(MR(qdGlobals().thePort)->pnLoc.v) + (double)yoffset / (1L << 16),
-                                    Cx(MR(qdGlobals().thePort)->pnLoc.h) + (double)xoffset / (1L << 16));
+                yoffset = fp[0];
+                xoffset = fp[1];
+                ROMlib_rotatecenter(qdGlobals().thePort->pnLoc.v + (double)yoffset / (1L << 16),
+                                    qdGlobals().thePort->pnLoc.h + (double)xoffset / (1L << 16));
                 break;
             case rotateend:
                 ROMlib_rotateend();
@@ -259,7 +259,7 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                         ROMlib_gsave();
                         need_restore = true;
                     }
-                    MR(qdGlobals().thePort)->grafProcs = RM(&sendpsprocs);
+                    qdGlobals().thePort->grafProcs = &sendpsprocs;
                 }
                 break;
             case postscriptend:
@@ -270,13 +270,13 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                         ROMlib_grestore();
                         need_restore = false;
                     }
-                    MR(qdGlobals().thePort)->grafProcs = RM(&prprocs);
+                    qdGlobals().thePort->grafProcs = &prprocs;
                 }
                 break;
             case postscripttextis:
                 if(ROMlib_passpostscript)
-                    (PORT_GRAF_PROCS(MR(qdGlobals().thePort)))->textProc
-                        = RM(&textasPS);
+                    (PORT_GRAF_PROCS(qdGlobals().thePort))->textProc
+                        = &textasPS;
                 break;
             case postscripthandle:
                 if(pageno >= pagewanted && pageno <= lastpagewanted && ROMlib_passpostscript)
@@ -312,51 +312,51 @@ ourinit(TPPrPort port, BOOLEAN preserve_font)
     }
     else
         InitPort((GrafPtr)&printport);
-    printport.txFont = CWC(-32768); /* force reload */
-    printport.pnLoc.h = CWC(-32768);
-    printport.pnLoc.v = CWC(-32768);
+    printport.txFont = -32768; /* force reload */
+    printport.pnLoc.h = -32768;
+    printport.pnLoc.v = -32768;
     OpenPort(&port->gPort);
-    sendpsprocs.textProc = RM(&donotPrText);
-    sendpsprocs.lineProc = RM(&donotPrLine);
-    sendpsprocs.rectProc = RM(&donotPrRect);
-    sendpsprocs.rRectProc = RM(&donotPrRRect);
-    sendpsprocs.ovalProc = RM(&donotPrOval);
-    sendpsprocs.arcProc = RM(&donotPrArc);
-    sendpsprocs.polyProc = RM(&donotPrPoly);
-    sendpsprocs.rgnProc = RM(&donotPrRgn);
-    sendpsprocs.bitsProc = RM(&donotPrBits);
-    sendpsprocs.commentProc = RM(&PrComment);
-    sendpsprocs.txMeasProc = RM(&PrTxMeas);
+    sendpsprocs.textProc = &donotPrText;
+    sendpsprocs.lineProc = &donotPrLine;
+    sendpsprocs.rectProc = &donotPrRect;
+    sendpsprocs.rRectProc = &donotPrRRect;
+    sendpsprocs.ovalProc = &donotPrOval;
+    sendpsprocs.arcProc = &donotPrArc;
+    sendpsprocs.polyProc = &donotPrPoly;
+    sendpsprocs.rgnProc = &donotPrRgn;
+    sendpsprocs.bitsProc = &donotPrBits;
+    sendpsprocs.commentProc = &PrComment;
+    sendpsprocs.txMeasProc = &PrTxMeas;
 #if 0
-  sendpsprocs.getPicProc = RM(&donotPrGetPic);
-  sendpsprocs.putPicProc = RM(&donotPrPutPic);
+  sendpsprocs.getPicProc = &donotPrGetPic;
+  sendpsprocs.putPicProc = &donotPrPutPic;
 #else
-    sendpsprocs.getPicProc = RM(&StdGetPic);
-    sendpsprocs.putPicProc = RM(&StdPutPic);
+    sendpsprocs.getPicProc = &StdGetPic;
+    sendpsprocs.putPicProc = &StdPutPic;
 #endif
-    prprocs.textProc = RM(&PrText);
-    prprocs.lineProc = RM(&PrLine);
-    prprocs.rectProc = RM(&PrRect);
-    prprocs.rRectProc = RM(&PrRRect);
-    prprocs.ovalProc = RM(&PrOval);
-    prprocs.arcProc = RM(&PrArc);
-    prprocs.polyProc = RM(&PrPoly);
-    prprocs.rgnProc = RM(&PrRgn);
-    prprocs.bitsProc = RM(&PrBits);
-    prprocs.commentProc = RM(&PrComment);
-    prprocs.txMeasProc = RM(&PrTxMeas);
+    prprocs.textProc = &PrText;
+    prprocs.lineProc = &PrLine;
+    prprocs.rectProc = &PrRect;
+    prprocs.rRectProc = &PrRRect;
+    prprocs.ovalProc = &PrOval;
+    prprocs.arcProc = &PrArc;
+    prprocs.polyProc = &PrPoly;
+    prprocs.rgnProc = &PrRgn;
+    prprocs.bitsProc = &PrBits;
+    prprocs.commentProc = &PrComment;
+    prprocs.txMeasProc = &PrTxMeas;
 #if 0
-  prprocs.getPicProc = RM(&PrGetPic);
-  prprocs.putPicProc = RM(&PrPutPic);
+  prprocs.getPicProc = &PrGetPic;
+  prprocs.putPicProc = &PrPutPic;
 #else
-    prprocs.getPicProc = RM(&StdGetPic);
-    prprocs.putPicProc = RM(&StdPutPic);
+    prprocs.getPicProc = &StdGetPic;
+    prprocs.putPicProc = &StdPutPic;
 #endif
     port->saveprocs = prprocs;
 #if 1
-    port->gPort.device = CWC(1);
+    port->gPort.device = 1;
 #endif
-    port->gPort.grafProcs = RM(&port->saveprocs);
+    port->gPort.grafProcs = &port->saveprocs;
 
     SetRect(&port->gPort.portBits.bounds,
             -1 * ROMlib_resolution_x / 2,
@@ -365,7 +365,7 @@ ourinit(TPPrPort port, BOOLEAN preserve_font)
             ROMlib_paper_y - (ROMlib_resolution_y / 2));
     SetRect(&port->gPort.portRect, 0, 0,
             ROMlib_paper_x - 72, ROMlib_paper_y - 72);
-    HxX(MR(port->gPort.visRgn), rgnBBox) = port->gPort.portRect;
+    HxX(port->gPort.visRgn, rgnBBox) = port->gPort.portRect;
 
     if(preserve_font)
         port->gPort.txFont = saved_font;
@@ -487,12 +487,12 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
     call_job_dialog_if_needed(hPrint);
     if(port)
     {
-        port->fOurPtr = CB(false);
+        port->fOurPtr = false;
     }
     else
     {
         port = (TPPrPort)NewPtr((Size)sizeof(TPrPort));
-        port->fOurPtr = CB(true);
+        port->fOurPtr = true;
     }
     ourinit(port, false);
 

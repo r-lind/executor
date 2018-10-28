@@ -168,9 +168,9 @@ void SDLVideoDriver::setColors(int first_color, int num_colors, const ColorSpec 
     sdl_cmap = (SDL_Color *)alloca(num_colors * sizeof(SDL_Color));
     for(i = 0; i < num_colors; ++i)
     {
-        sdl_cmap[i].r = (CW(colors[i].rgb.red) >> 8);
-        sdl_cmap[i].g = (CW(colors[i].rgb.green) >> 8);
-        sdl_cmap[i].b = (CW(colors[i].rgb.blue) >> 8);
+        sdl_cmap[i].r = (colors[i].rgb.red >> 8);
+        sdl_cmap[i].g = (colors[i].rgb.green >> 8);
+        sdl_cmap[i].b = (colors[i].rgb.blue >> 8);
     }
     SDL_SetColors(screen, sdl_cmap, first_color, num_colors);
 }

@@ -97,7 +97,7 @@ Executor::ROMlib_set_keyboard(const char *keyboardname)
     {
         GUEST<INTEGER> tmpid;
         GetResInfo(new_h, &tmpid, 0, 0);
-        kchr_id = CW(tmpid);
+        kchr_id = tmpid;
         LoadResource(new_h);
         if(kchr_ptr)
         {
@@ -182,8 +182,8 @@ void Executor::ROMlib_eventinit() /* INTERNAL */
         evs[0].qLink = 0; /* end of the line */
         beenhere = 1;
         for(p = evs + 1, ep = evs + NEVENT; p != ep; p++)
-            p->qLink = RM((QElemPtr)(p - 1));
-        LM(SysEvtMask) = CWC(~(1L << keyUp)); /* EVERYTHING except keyUp */
+            p->qLink = (QElemPtr)(p - 1);
+        LM(SysEvtMask) = ~(1L << keyUp); /* EVERYTHING except keyUp */
     }
 }
 
@@ -196,7 +196,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
 static void dropevent(EvQEl *qp)
 {
     Dequeue((QElemPtr)qp, &LM(EventQueue));
-    qp->qLink = RM((QElemPtr)freeelem);
+    qp->qLink = (QElemPtr)freeelem;
     freeelem = qp;
     nevent--;
 }
@@ -208,10 +208,10 @@ Executor::geteventelem(void)
 
     if(nevent == NEVENT)
     {
-        dropevent((EvQEl *)MR(LM(EventQueue).qHead));
+        dropevent((EvQEl *)LM(EventQueue).qHead);
         retval = freeelem;
     }
-    freeelem = (EvQEl *)MR(freeelem->qLink);
+    freeelem = (EvQEl *)freeelem->qLink;
     nevent++;
     return retval;
 }
@@ -301,7 +301,7 @@ OSErr Executor::PPostEvent(INTEGER evcode, LONGINT evmsg,
             return noErr;
         }
         lastdown = evmsg;
-        autoticks = tmpticks + Cx(LM(KeyThresh));
+        autoticks = tmpticks + LM(KeyThresh);
 
         if((evmsg & 0xff) == '2' && /* cmd-shift-2 */
            key_down(MKV_CLOVER) && (key_down(MKV_LEFTSHIFT) || key_down(MKV_RIGHTSHIFT)))
@@ -309,17 +309,17 @@ OSErr Executor::PPostEvent(INTEGER evcode, LONGINT evmsg,
             dofloppymount();
     }
 
-    if(!((1 << evcode) & Cx(LM(SysEvtMask))))
+    if(!((1 << evcode) & LM(SysEvtMask)))
         /*-->*/ return evtNotEnb;
     qp = geteventelem();
-    qp->evtQWhat = CW(evcode);
-    qp->evtQMessage = CL(evmsg);
-    qp->evtQWhen = CL(tmpticks);
+    qp->evtQWhat = evcode;
+    qp->evtQMessage = evmsg;
+    qp->evtQWhen = tmpticks;
     qp->evtQWhere = ROMlib_curs;
-    qp->evtQModifiers = CW(ROMlib_mods);
+    qp->evtQModifiers = ROMlib_mods;
     Enqueue((QElemPtr)qp, &LM(EventQueue));
     if(qelp)
-        *qelp = RM(qp);
+        *qelp = qp;
     return noErr;
 }
 
@@ -355,8 +355,8 @@ OSErr Executor::ROMlib_PPostEvent(INTEGER evcode, LONGINT evmsg,
                                      GUEST<EvQElPtr> *qelp, LONGINT when,
                                      Point where, INTEGER butmods)
 {
-    LM(MouseLocation2).h = ROMlib_curs.h = CW(where.h);
-    LM(MouseLocation2).v = ROMlib_curs.v = CW(where.v);
+    LM(MouseLocation2).h = ROMlib_curs.h = where.h;
+    LM(MouseLocation2).v = ROMlib_curs.v = where.v;
     ROMlib_mods = butmods;
 
     return _PPostEvent(evcode, evmsg, qelp);
@@ -372,10 +372,10 @@ void Executor::FlushEvents(INTEGER evmask, INTEGER stopmask) /* II-69 */
     EvQEl *qp, *next;
     int x;
 
-    for(qp = (EvQEl *)MR(LM(EventQueue).qHead);
-        qp && !((x = 1 << Cx(qp->evtQWhat)) & stopmask); qp = next)
+    for(qp = (EvQEl *)LM(EventQueue).qHead;
+        qp && !((x = 1 << qp->evtQWhat) & stopmask); qp = next)
     {
-        next = (EvQEl *)MR(qp->qLink); /* save before dropping event */
+        next = (EvQEl *)qp->qLink; /* save before dropping event */
         if(x & evmask)
             dropevent(qp);
     }
@@ -416,7 +416,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
                                (Ptr)&psn, sizeof psn, target);
 
             CountAppFiles(&dummy, &count_s);
-            count = CW(count_s);
+            count = count_s;
 
             if(count)
             {
@@ -435,7 +435,7 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
 
                     GetAppFiles(i, &file);
 
-                    FSMakeFSSpec(CW(file.vRefNum), 0, file.fName, &spec);
+                    FSMakeFSSpec(file.vRefNum, 0, file.fName, &spec);
 
                     AEPutPtr(list, i, typeFSS, (Ptr)&spec, sizeof spec);
                 }
@@ -464,14 +464,14 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
         }
     }
 
-    eventp->message = CLC(0);
+    eventp->message = 0;
     ROMlib_memnomove_p = false; /* this is an icky hack needed for Excel */
     ticks = TickCount();
 
     vdriver->pumpEvents();
 
-    for(qp = (EvQEl *)MR(LM(EventQueue).qHead); qp && !((1 << Cx(qp->evtQWhat)) & evmask);
-        qp = (EvQEl *)MR(qp->qLink))
+    for(qp = (EvQEl *)LM(EventQueue).qHead; qp && !((1 << qp->evtQWhat) & evmask);
+        qp = (EvQEl *)qp->qLink)
         ;
     if(qp)
     {
@@ -484,21 +484,21 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
     }
     else
     {
-        eventp->when = CL(TickCount());
+        eventp->when = TickCount();
 
         LM(MouseLocation2) = eventp->where = ROMlib_curs;
 
-        eventp->modifiers = CW(ROMlib_mods);
+        eventp->modifiers = ROMlib_mods;
         if((evmask & autoKeyMask) && lastdown != -1 && ticks > autoticks)
         {
-            autoticks = ticks + Cx(LM(KeyRepThresh));
-            eventp->what = CWC(autoKey);
-            eventp->message = CL(lastdown);
+            autoticks = ticks + LM(KeyRepThresh);
+            eventp->what = autoKey;
+            eventp->message = lastdown;
             retval = true;
         }
         else
         {
-            eventp->what = CWC(nullEvent);
+            eventp->what = nullEvent;
             retval = false;
         }
     }
@@ -535,7 +535,7 @@ BOOLEAN Executor::OSEventAvail(INTEGER evmask, EventRecord *eventp)
 
 void Executor::SetEventMask(INTEGER evmask)
 {
-    LM(SysEvtMask) = CW(evmask);
+    LM(SysEvtMask) = evmask;
 }
 
 QHdrPtr Executor::GetEvQHdr()

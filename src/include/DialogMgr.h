@@ -68,11 +68,11 @@ typedef WindowPtr DialogPtr;
 #define DIALOG_EDIT_OPEN_X(dialog) (((DialogPeek)(dialog))->editOpen)
 #define DIALOG_ADEF_ITEM_X(dialog) (((DialogPeek)(dialog))->aDefItem)
 
-#define DIALOG_ITEMS(dialog) (MR(DIALOG_ITEMS_X(dialog)))
-#define DIALOG_TEXTH(dialog) (MR(DIALOG_TEXTH_X(dialog)))
-#define DIALOG_EDIT_FIELD(dialog) (CW(DIALOG_EDIT_FIELD_X(dialog)))
-#define DIALOG_EDIT_OPEN(dialog) (CW(DIALOG_EDIT_OPEN_X(dialog)))
-#define DIALOG_ADEF_ITEM(dialog) (CW(DIALOG_ADEF_ITEM_X(dialog)))
+#define DIALOG_ITEMS(dialog) (DIALOG_ITEMS_X(dialog))
+#define DIALOG_TEXTH(dialog) (DIALOG_TEXTH_X(dialog))
+#define DIALOG_EDIT_FIELD(dialog) (DIALOG_EDIT_FIELD_X(dialog))
+#define DIALOG_EDIT_OPEN(dialog) (DIALOG_EDIT_OPEN_X(dialog))
+#define DIALOG_ADEF_ITEM(dialog) (DIALOG_ADEF_ITEM_X(dialog))
 
 struct DialogTemplate
 {

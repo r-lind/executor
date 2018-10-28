@@ -117,16 +117,16 @@ typedef ProcessInfoRec *ProcessInfoPtr;
 #define PROCESS_INFO_LAUNCH_DATE_X(info) ((info)->processLaunchDate)
 #define PROCESS_INFO_ACTIVE_TIME_X(info) ((info)->processActiveTime)
 
-#define PROCESS_INFO_LENGTH(info) (CL(PROCESS_INFO_LENGTH_X(info)))
-#define PROCESS_INFO_NAME(info) (CL(PROCESS_INFO_NAME_X(info)))
-#define PROCESS_INFO_TYPE(info) (CL(PROCESS_INFO_TYPE_X(info)))
-#define PROCESS_INFO_SIGNATURE(info) (CL(PROCESS_INFO_SIGNATURE_X(info)))
-#define PROCESS_INFO_MODE(info) (CL(PROCESS_INFO_MODE_X(info)))
-#define PROCESS_INFO_LOCATION(info) (CL(PROCESS_INFO_LOCATION_X(info)))
-#define PROCESS_INFO_SIZE(info) (CL(PROCESS_INFO_SIZE_X(info)))
-#define PROCESS_INFO_FREE_MEM(info) (CL(PROCESS_INFO_FREE_MEM_X(info)))
-#define PROCESS_INFO_LAUNCH_DATE(info) (CL(PROCESS_INFO_LAUNCH_DATE_X(info)))
-#define PROCESS_INFO_ACTIVE_TIME(info) (CL(PROCESS_INFO_ACTIVE_TIME_X(info)))
+#define PROCESS_INFO_LENGTH(info) (PROCESS_INFO_LENGTH_X(info))
+#define PROCESS_INFO_NAME(info) (PROCESS_INFO_NAME_X(info))
+#define PROCESS_INFO_TYPE(info) (PROCESS_INFO_TYPE_X(info))
+#define PROCESS_INFO_SIGNATURE(info) (PROCESS_INFO_SIGNATURE_X(info))
+#define PROCESS_INFO_MODE(info) (PROCESS_INFO_MODE_X(info))
+#define PROCESS_INFO_LOCATION(info) (PROCESS_INFO_LOCATION_X(info))
+#define PROCESS_INFO_SIZE(info) (PROCESS_INFO_SIZE_X(info))
+#define PROCESS_INFO_FREE_MEM(info) (PROCESS_INFO_FREE_MEM_X(info))
+#define PROCESS_INFO_LAUNCH_DATE(info) (PROCESS_INFO_LAUNCH_DATE_X(info))
+#define PROCESS_INFO_ACTIVE_TIME(info) (PROCESS_INFO_ACTIVE_TIME_X(info))
 
 /* flags for the `processMode' field of the `ProcessInformationRec'
    record */

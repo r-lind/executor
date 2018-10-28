@@ -42,18 +42,18 @@ extern AuxCtlHandle default_aux_ctl;
 #define CTL_ACTION_X(ctl) (HxX(ctl, contrlAction))
 #define CTL_REF_CON_X(ctl) (HxX(ctl, contrlRfCon))
 
-#define CTL_NEXT_CONTROL(ctl) (MR(CTL_NEXT_CONTROL_X(ctl)))
-#define CTL_OWNER(ctl) (MR(CTL_OWNER_X(ctl)))
+#define CTL_NEXT_CONTROL(ctl) (CTL_NEXT_CONTROL_X(ctl))
+#define CTL_OWNER(ctl) (CTL_OWNER_X(ctl))
 #define CTL_VIS(ctl) (CTL_VIS_X(ctl))
 #define CTL_HILITE(ctl) ((uint8_t)CTL_HILITE_X(ctl))
-#define CTL_VALUE(ctl) (CW(CTL_VALUE_X(ctl)))
-#define CTL_MIN(ctl) (CW(CTL_MIN_X(ctl)))
-#define CTL_MAX(ctl) (CW(CTL_MAX_X(ctl)))
-#define CTL_DEFPROC(ctl) (MR(CTL_DEFPROC_X(ctl)))
-#define CTL_DATA(ctl) ((RgnHandle)PPR(CTL_DATA_X(ctl)))
-#define CTL_ACTION(ctl) (MR(CTL_ACTION_X(ctl)))
-#define CTL_ACTION_AS_LONG(ctl) (CL(guest_cast<LONGINT>(CTL_ACTION_X(ctl))))
-#define CTL_REF_CON(ctl) (CL(CTL_REF_CON_X(ctl)))
+#define CTL_VALUE(ctl) (CTL_VALUE_X(ctl))
+#define CTL_MIN(ctl) (CTL_MIN_X(ctl))
+#define CTL_MAX(ctl) (CTL_MAX_X(ctl))
+#define CTL_DEFPROC(ctl) (CTL_DEFPROC_X(ctl))
+#define CTL_DATA(ctl) ((RgnHandle)CTL_DATA_X(ctl))
+#define CTL_ACTION(ctl) (CTL_ACTION_X(ctl))
+#define CTL_ACTION_AS_LONG(ctl) (guest_cast<LONGINT>(CTL_ACTION_X(ctl)))
+#define CTL_REF_CON(ctl) (CTL_REF_CON_X(ctl))
 
 extern CTabHandle default_ctl_ctab;
 extern GUEST<AuxCtlHandle> *lookup_aux_ctl(ControlHandle ctl);
@@ -94,8 +94,8 @@ public:
 #define POPUP_MENU_X(popup) (HxX(popup, menu))
 #define POPUP_MENU_ID_X(popup) (HxX(popup, menu_id))
 
-#define POPUP_MENU_ID(popup) (CW(POPUP_MENU_ID_X(popup)))
-#define POPUP_MENU(popup) (MR(POPUP_MENU_X(popup)))
+#define POPUP_MENU_ID(popup) (POPUP_MENU_ID_X(popup))
+#define POPUP_MENU(popup) (POPUP_MENU_X(popup))
 
 #define POPUP_TITLE_WIDTH(popup) (HxX(popup, title_width))
 #define POPUP_FLAGS(popup) (HxX(popup, flags))

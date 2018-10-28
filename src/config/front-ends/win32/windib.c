@@ -229,9 +229,9 @@ void vdriver_set_colors(int first_color, int num_colors, const ColorSpec *colors
     /* Set the palette */
     for(i = 0; i < num_colors; ++i)
     {
-        entries[i].peRed = (CW(colors[i].rgb.red) >> 8);
-        entries[i].peGreen = (CW(colors[i].rgb.green) >> 8);
-        entries[i].peBlue = (CW(colors[i].rgb.blue) >> 8);
+        entries[i].peRed = (colors[i].rgb.red >> 8);
+        entries[i].peGreen = (colors[i].rgb.green >> 8);
+        entries[i].peBlue = (colors[i].rgb.blue >> 8);
         entries[i].peFlags = 0;
     }
 

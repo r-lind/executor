@@ -117,7 +117,7 @@ void Executor::RAMSDClose(SPortSel port) /* IMII-250 */
 
 OSErr Executor::SerReset(INTEGER rn, INTEGER config) /* IMII-250 */
 {
-    GUEST<INTEGER> config_s = CW(config);
+    GUEST<INTEGER> config_s = config;
 
     return Control(rn, SERSET, (Ptr)&config_s);
 }
@@ -128,8 +128,8 @@ OSErr Executor::SerSetBuf(INTEGER rn, Ptr p, INTEGER len) /* IMII-251 */
 {
     sersetbuf_t temp;
 
-    temp.p = RM(p);
-    temp.i = CW(len);
+    temp.p = p;
+    temp.i = len;
 
     return Control(rn, SERSETBUF, (Ptr)&temp);
 }
@@ -225,7 +225,7 @@ static DCtlPtr otherdctl(ParmBlkPtr pbp)
     DCtlHandle h;
 
     h = 0;
-    switch(CW(pbp->cntrlParam.ioCRefNum))
+    switch(pbp->cntrlParam.ioCRefNum)
     {
         case AINREFNUM:
             h = GetDCtlEntry(AOUTREFNUM);
@@ -255,7 +255,7 @@ static const char *specialname(ParmBlkPtr pbp)
     const char *retval;
     retval = 0;
 
-    switch(CW(pbp->cntrlParam.ioCRefNum))
+    switch(pbp->cntrlParam.ioCRefNum)
     {
         case AINREFNUM:
         case AOUTREFNUM:
@@ -281,11 +281,10 @@ void callcomp(ParmBlkPtr pbp, ProcPtr comp, OSErr err)
     CALL_EMULATOR((syn68k_addr_t)(uintptr_t)comp);
 }
 
-// FIXME: #warning autc04: used to be (CW((pbp)->ioParam.ioTrap) & asyncTrpBit
 #define DOCOMPLETION(pbp, err)                                                   \
-    (pbp)->ioParam.ioResult = CW(err);                                           \
-    if((CW((pbp)->ioParam.ioTrap) & asyncTrpBit) && (pbp)->ioParam.ioCompletion) \
-        callcomp(pbp, MR((pbp)->ioParam.ioCompletion), err);                     \
+    (pbp)->ioParam.ioResult = err;                                           \
+    if(((pbp)->ioParam.ioTrap & asyncTrpBit) && (pbp)->ioParam.ioCompletion) \
+        callcomp(pbp, (pbp)->ioParam.ioCompletion, err);                     \
     return err
 
 
@@ -302,15 +301,15 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 #endif
 
     err = noErr;
-    if(!(dcp->dCtlFlags & CWC(OPENBIT)))
+    if(!(dcp->dCtlFlags & OPENBIT))
     {
         h = (hiddenh)NewHandle(sizeof(hidden));
-        dcp->dCtlStorage = RM((Handle)h);
+        dcp->dCtlStorage = (Handle)h;
         otherp = otherdctl(pbp);
-        if(otherp && (otherp->dCtlFlags & CWC(OPENBIT)))
+        if(otherp && (otherp->dCtlFlags & OPENBIT))
         {
-            *STARH(h) = *STARH((hiddenh)MR(otherp->dCtlStorage));
-            dcp->dCtlFlags |= CWC(OPENBIT);
+            *STARH(h) = *STARH((hiddenh)otherp->dCtlStorage);
+            dcp->dCtlFlags |= OPENBIT;
         }
         else
         {
@@ -336,11 +335,11 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                         err = ROMlib_maperrno();
 #endif
 #else
-                HxX(h, fd) = (CW(pbp->cntrlParam.ioCRefNum) == AINREFNUM || CW(pbp->cntrlParam.ioCRefNum) == AOUTREFNUM) ? 0 : 1;
+                HxX(h, fd) = (pbp->cntrlParam.ioCRefNum == AINREFNUM || pbp->cntrlParam.ioCRefNum == AOUTREFNUM) ? 0 : 1;
 #endif
-                    dcp->dCtlFlags |= CWC(OPENBIT);
-                    SerReset(CW(pbp->cntrlParam.ioCRefNum),
-                             (CW(pbp->cntrlParam.ioCRefNum) == AINREFNUM || CW(pbp->cntrlParam.ioCRefNum) == AOUTREFNUM) ? CW(LM(SPPortA)) : CW(LM(SPPortB)));
+                    dcp->dCtlFlags |= OPENBIT;
+                    SerReset(pbp->cntrlParam.ioCRefNum,
+                             (pbp->cntrlParam.ioCRefNum == AINREFNUM || pbp->cntrlParam.ioCRefNum == AOUTREFNUM) ? LM(SPPortA) : LM(SPPortB));
 #if defined(LINUX) || defined(MACOSX)
                 }
 #endif
@@ -360,44 +359,44 @@ OSErr Executor::C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     char *buf;
     size_t req_count;
 
-    buf = (char *)MR(pbp->ioParam.ioBuffer);
-    req_count = CL(pbp->ioParam.ioReqCount);
+    buf = (char *)pbp->ioParam.ioBuffer;
+    req_count = pbp->ioParam.ioReqCount;
 
     err = noErr;
-    if(!(dcp->dCtlFlags & CWC(OPENBIT)))
+    if(!(dcp->dCtlFlags & OPENBIT))
         err = notOpenErr;
     else
     {
 #if defined(SERIALDEBUG)
-        warning_trace_info("serial prime code %d", (LONGINT)(CW(pbp->ioParam.ioTrap) & 0xFF));
+        warning_trace_info("serial prime code %d", (LONGINT)(pbp->ioParam.ioTrap & 0xFF));
 #endif
-        h = (hiddenh)MR(dcp->dCtlStorage);
-        switch(CW(pbp->ioParam.ioTrap) & 0xFF)
+        h = (hiddenh)dcp->dCtlStorage;
+        switch(pbp->ioParam.ioTrap & 0xFF)
         {
             case aRdCmd:
-                if(CW(pbp->cntrlParam.ioCRefNum) != AINREFNUM && CW(pbp->cntrlParam.ioCRefNum) != BINREFNUM)
+                if(pbp->cntrlParam.ioCRefNum != AINREFNUM && pbp->cntrlParam.ioCRefNum != BINREFNUM)
                     err = readErr;
                 else
                 {
 /* this may have to be changed since we aren't looking for
 		   parity and framing errors */
 #if defined(LINUX) || defined(MACOSX)
-                    pbp->ioParam.ioActCount = CL(read(HxX(h, fd), buf, req_count));
+                    pbp->ioParam.ioActCount = read(HxX(h, fd), buf, req_count);
 #elif defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
-                    pbp->ioParam.ioActCount = CL(serial_bios_read(HxX(h, fd), buf,
-                                                                  req_count));
+                    pbp->ioParam.ioActCount = serial_bios_read(HxX(h, fd), buf,
+                                                                  req_count);
 #else
 // FIXME: #warning not sure what to do here
 #endif
 #if defined(SERIALDEBUG)
                     warning_trace_info("serial prime read %d bytes, first is 0x%0x",
-                                       (LONGINT)CL(pbp->ioParam.ioActCount),
+                                       (LONGINT)pbp->ioParam.ioActCount,
                                        (LONGINT)(unsigned char)buf[0]);
 #endif
                 }
                 break;
             case aWrCmd:
-                if(CW(pbp->cntrlParam.ioCRefNum) != AOUTREFNUM && CW(pbp->cntrlParam.ioCRefNum) != BOUTREFNUM)
+                if(pbp->cntrlParam.ioCRefNum != AOUTREFNUM && pbp->cntrlParam.ioCRefNum != BOUTREFNUM)
                     err = writErr;
                 else
                 {
@@ -407,11 +406,11 @@ OSErr Executor::C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                                        (LONGINT)(unsigned char)buf[0]);
 #endif
 #if defined(LINUX) || defined(MACOSX)
-                    pbp->ioParam.ioActCount = CL(write(HxX(h, fd),
-                                                       buf, req_count));
+                    pbp->ioParam.ioActCount = write(HxX(h, fd),
+                                                       buf, req_count);
 #elif defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
-                    pbp->ioParam.ioActCount = CL(serial_bios_write(HxX(h, fd),
-                                                                   buf, req_count));
+                    pbp->ioParam.ioActCount = serial_bios_write(HxX(h, fd),
+                                                                   buf, req_count);
 #else
 // FIXME: #warning not sure what to do here
 #endif
@@ -808,23 +807,23 @@ OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     hiddenh h;
     char c;
 
-    if(!(dcp->dCtlFlags & CWC(OPENBIT)))
+    if(!(dcp->dCtlFlags & OPENBIT))
         err = notOpenErr;
     else
     {
 #if defined(SERIALDEBUG)
         warning_trace_info("serial control code = %d, param0 = 0x%x",
-                           (LONGINT)CW(pbp->cntrlParam.csCode),
-                           (LONGINT)(unsigned short)CW(pbp->cntrlParam.csParam[0]));
+                           (LONGINT)pbp->cntrlParam.csCode,
+                           (LONGINT)(unsigned short)pbp->cntrlParam.csParam[0]);
 #endif
-        h = (hiddenh)MR(dcp->dCtlStorage);
-        switch(CW(pbp->cntrlParam.csCode))
+        h = (hiddenh)dcp->dCtlStorage;
+        switch(pbp->cntrlParam.csCode)
         {
             case SERKILLIO:
                 err = noErr; /* All I/O done synchronously */
                 break;
             case SERSET:
-                err = serset(HxX(h, fd), CW(pbp->cntrlParam.csParam[0]));
+                err = serset(HxX(h, fd), pbp->cntrlParam.csParam[0]);
                 break;
             case SERSETBUF:
                 err = noErr; /* ignored */
@@ -840,7 +839,7 @@ OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 err = ctlbrk(HxX(h, fd), SER_STOP);
                 break;
             case SERBAUDRATE:
-                err = setbaud(HxX(h, fd), CW(pbp->cntrlParam.csParam[0]));
+                err = setbaud(HxX(h, fd), pbp->cntrlParam.csParam[0]);
                 break;
             case SERMISC:
 #if defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
@@ -909,15 +908,15 @@ OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL *
     hiddenh h;
     LONGINT n;
 
-    if(!(dcp->dCtlFlags & CWC(OPENBIT)))
+    if(!(dcp->dCtlFlags & OPENBIT))
         err = notOpenErr;
     else
     {
 #if defined(SERIALDEBUG)
-        warning_trace_info("serial status csCode = %d", (LONGINT)CW(pbp->cntrlParam.csCode));
+        warning_trace_info("serial status csCode = %d", (LONGINT)pbp->cntrlParam.csCode);
 #endif
-        h = (hiddenh)MR(dcp->dCtlStorage);
-        switch(CW(pbp->cntrlParam.csCode))
+        h = (hiddenh)dcp->dCtlStorage;
+        switch(pbp->cntrlParam.csCode)
         {
             case SERGETBUF:
 #if defined(LINUX) || defined(MACOSX)
@@ -931,7 +930,7 @@ OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL *
 #if defined(SERIALDEBUG)
                     warning_trace_info("serial status getbuf = %d", (LONGINT)n);
 #endif
-                    *(GUEST<LONGINT> *)pbp->cntrlParam.csParam = CL(n);
+                    *(GUEST<LONGINT> *)pbp->cntrlParam.csParam = n;
                     err = noErr;
                 }
                 break;
@@ -984,11 +983,11 @@ OSErr Executor::C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     OSErr err;
     hiddenh h;
 
-    if(dcp->dCtlFlags & CWC(OPENBIT))
+    if(dcp->dCtlFlags & OPENBIT)
     {
-        h = (hiddenh)MR(dcp->dCtlStorage);
+        h = (hiddenh)dcp->dCtlStorage;
         restorecloseanddispose(h);
-        dcp->dCtlFlags &= CWC(~OPENBIT);
+        dcp->dCtlFlags &= ~OPENBIT;
         err = noErr;
     }
     else

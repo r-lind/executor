@@ -63,7 +63,7 @@
 
 #endif /* defined(LITTLEENDIAN) */
 #else
-#define TICKX(str) CLC(TICK(str))
+#define TICKX(str) TICK(str)
 #endif
 
 #endif /* !_MACROS_H_ */

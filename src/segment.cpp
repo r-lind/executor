@@ -262,13 +262,13 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
         cinfo.hFileInfo.ioDirID = 0;
     }
     
-    cinfo.hFileInfo.ioFDirIndex = CWC(0);
-    cinfo.hFileInfo.ioNamePtr = RM(path);
+    cinfo.hFileInfo.ioFDirIndex = 0;
+    cinfo.hFileInfo.ioNamePtr = path;
     if((retval = (PBGetCatInfo(&cinfo, false) == noErr)))
     {
         ap->fType = cinfo.hFileInfo.ioFlFndrInfo.fdType;
         ap->versNum = 0;
-        wpb.ioNamePtr = RM(path);
+        wpb.ioNamePtr = path;
         wpb.ioVRefNum = cinfo.hFileInfo.ioVRefNum;
         wpb.ioWDProcID = TICKX("unix");
         wpb.ioWDDirID = cinfo.hFileInfo.ioFlParID;
@@ -348,14 +348,14 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv)
     if(argv_to_appfile(fullpathname, &app))
     {
 #if 0
-	LM(CurApRefNum) = CW(OpenRFPerm(app.fName, CW(app.vRefNum), fsCurPerm));
+	LM(CurApRefNum) = OpenRFPerm(app.fName, app.vRefNum, fsCurPerm);
 #endif
         LM(CurApName)[0] = std::min<uint8_t>(app.fName[0], sizeof(LM(CurApName)) - 1);
         BlockMoveData((Ptr)app.fName + 1, (Ptr)LM(CurApName) + 1, (Size)LM(CurApName)[0]);
     }
     else
     {
-        LM(CurApRefNum) = CWC(-1);
+        LM(CurApRefNum) = -1;
         LM(CurApName)[0] = 0;
     }
     saveZone = LM(TheZone);
@@ -364,9 +364,9 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv)
         NewHandle((Size)sizeof(finderinfo) - sizeof(AppFile));
     LM(TheZone) = saveZone;
 
-    LM(AppParmHandle) = RM((Handle)fh);
+    LM(AppParmHandle) = (Handle)fh;
     HxX(fh, count) = 0;
-    HxX(fh, message) = ROMlib_print ? CWC(appPrint) : CWC(appOpen);
+    HxX(fh, message) = ROMlib_print ? appPrint : appOpen;
     if(fullpathname && fullpathname != argv[0])
         DisposePtr((Ptr)fullpathname);
     while(--argc > 0)
@@ -376,7 +376,7 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv)
         {
             ROMlib_exit = true;
             newcount = Hx(fh, count) + 1;
-            HxX(fh, count) = CW(newcount);
+            HxX(fh, count) = newcount;
             SetHandleSize((Handle)fh,
                             (char *)&HxX(fh, files)[newcount] - (char *)STARH(fh));
             HxX(fh, files)[Hx(fh, count) - 1] = app;
@@ -390,9 +390,9 @@ void Executor::CountAppFiles(GUEST<INTEGER> *messagep,
     if(LM(AppParmHandle))
     {
         if(messagep)
-            *messagep = STARH((finderinfohand)MR(LM(AppParmHandle)))->message;
+            *messagep = STARH((finderinfohand)LM(AppParmHandle))->message;
         if(countp)
-            *countp = STARH((finderinfohand)MR(LM(AppParmHandle)))->count;
+            *countp = STARH((finderinfohand)LM(AppParmHandle))->count;
     }
     else
         *countp = 0;
@@ -400,15 +400,15 @@ void Executor::CountAppFiles(GUEST<INTEGER> *messagep,
 
 void Executor::GetAppFiles(INTEGER index, AppFile *filep) /* IMII-58 */
 {
-    *filep = STARH((finderinfohand)MR(LM(AppParmHandle)))->files[index - 1];
+    *filep = STARH((finderinfohand)LM(AppParmHandle))->files[index - 1];
 }
 
 void Executor::ClrAppFiles(INTEGER index) /* IMII-58 */
 {
-    if(STARH((finderinfohand)MR(LM(AppParmHandle)))->files[index - 1].fType)
+    if(STARH((finderinfohand)LM(AppParmHandle))->files[index - 1].fType)
     {
-        STARH((finderinfohand)MR(LM(AppParmHandle)))->files[index - 1].fType = 0;
-        STARH((finderinfohand)MR(LM(AppParmHandle)))->count = CW(CW(STARH((finderinfohand)MR(LM(AppParmHandle)))->count) - 1);
+        STARH((finderinfohand)LM(AppParmHandle))->files[index - 1].fType = 0;
+        STARH((finderinfohand)LM(AppParmHandle))->count = STARH((finderinfohand)LM(AppParmHandle))->count - 1;
     }
 }
 
@@ -428,7 +428,7 @@ static BOOLEAN valid_browser(void)
     OSErr err;
     FInfo finfo;
 
-    err = GetFInfo(LM(FinderName), CW(LM(BootDrive)), &finfo);
+    err = GetFInfo(LM(FinderName), LM(BootDrive), &finfo);
     return !ROMlib_nobrowser && err == noErr && finfo.fdType == TICKX("APPL");
 }
 
@@ -438,12 +438,12 @@ static void launch_browser(void)
    * if nothing was specified there, set the depth to the maximum
    * supported bits per pixel.
    */
-    SetDepth(MR(LM(MainDevice)),
+    SetDepth(LM(MainDevice),
              (flag_bpp
                   ? std::min(flag_bpp, vdriver->maxBpp())
                   : vdriver->maxBpp()),
              0, 0);
-    Launch(LM(FinderName), CW(LM(BootDrive)));
+    Launch(LM(FinderName), LM(BootDrive));
 }
 
 void Executor::C_ExitToShell()
@@ -454,7 +454,7 @@ void Executor::C_ExitToShell()
 #if 1
 
     Point pt;
-    static GUEST<SFTypeList> applonly = { CLC(FOURCC('A', 'P', 'P', 'L')) };
+    static GUEST<SFTypeList> applonly = { FOURCC('A', 'P', 'P', 'L') };
     SFReply reply;
     struct
     {
@@ -484,7 +484,7 @@ void Executor::C_ExitToShell()
     {
         /* remove global datastructures associated with each window
            remaining in the application's window list */
-        for(t_w = MR(LM(WindowList)); t_w; t_w = WINDOW_NEXT_WINDOW(t_w))
+        for(t_w = LM(WindowList); t_w; t_w = WINDOW_NEXT_WINDOW(t_w))
             pm_window_closed((WindowPtr)t_w);
     }
     LM(WindowList) = 0;
@@ -504,16 +504,16 @@ void Executor::C_ExitToShell()
         if(LM(QDExist) == EXIST_NO)
         {
             EM_A5 = US_TO_SYN68K(&a5space.tmpA5);
-            LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+            LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
             InitGraf((Ptr)&a5space.qdthePort);
         }
         InitFonts();
         FlushEvents(everyEvent, 0);
         if(LM(WWExist) == EXIST_NO)
             InitWindows();
-        if(LM(TEScrpHandle) == guest_cast<Handle>(CLC(-1)) || LM(TEScrpHandle) == nullptr)
+        if(LM(TEScrpHandle) == guest_cast<Handle>(-1) || LM(TEScrpHandle) == nullptr)
             TEInit();
-        if(LM(DlgFont) == CWC(0) || LM(DlgFont) == CWC(-1))
+        if(LM(DlgFont) == 0 || LM(DlgFont) == -1)
             InitDialogs((ProcPtr)0);
         InitCursor();
 
@@ -539,7 +539,7 @@ void Executor::C_ExitToShell()
                 LM(CurApName)[0] = std::min<uint8_t>(reply.fName[0], 31);
                 BlockMoveData((Ptr)reply.fName + 1, (Ptr)LM(CurApName) + 1,
                               (Size)LM(CurApName)[0]);
-                Launch(LM(CurApName), CW(reply.vRefNum));
+                Launch(LM(CurApName), reply.vRefNum);
             }
         }
     }
@@ -567,7 +567,7 @@ void Executor::C_ExitToShell()
 #define MOVESPINSTR 0x3F3C
 #define LOADSEGTRAP 0xA9F0
 
-void Executor::C_LoadSeg(INTEGER volatile segno)
+void Executor::C_LoadSeg(INTEGER segno)
 {
     Handle newcode;
     unsigned short offbytes;
@@ -577,7 +577,7 @@ void Executor::C_LoadSeg(INTEGER volatile segno)
     LM(ResLoad) = -1; /* CricketDraw III's behaviour suggested this */
     newcode = GetResource(TICK("CODE"), segno);
     HLock(newcode);
-    taboff = CW(((GUEST<INTEGER> *)STARH(newcode))[0]);
+    taboff = ((GUEST<INTEGER> *)STARH(newcode))[0];
     if((uint16_t)taboff == 0xA89F) /* magic compressed resource signature */
     {
         /* We are totally dead here.  We almost certainly can't use
@@ -588,17 +588,17 @@ void Executor::C_LoadSeg(INTEGER volatile segno)
         ROMlib_launch_failure = (system_version >= 0x700 ? launch_compressed_ge7 : launch_compressed_lt7);
         C_ExitToShell();
     }
-    savenentries = nentries = CW(((GUEST<INTEGER> *)STARH(newcode))[1]);
+    savenentries = nentries = ((GUEST<INTEGER> *)STARH(newcode))[1];
 
-    saveptr = ptr = (GUEST<int16_t> *)((char *)SYN68K_TO_US(EM_A5) + taboff + Cx(LM(CurJTOffset)));
+    saveptr = ptr = (GUEST<int16_t> *)((char *)SYN68K_TO_US(EM_A5) + taboff + LM(CurJTOffset));
     while(--nentries >= 0)
     {
-        if(ptr[1] != CWC(JMPLINSTR))
+        if(ptr[1] != JMPLINSTR)
         {
-            offbytes = CW(*ptr);
-            *ptr++ = CW(segno);
-            *ptr++ = CWC(JMPLINSTR);
-            *(GUEST<LONGINT> *)ptr = CL(US_TO_SYN68K(STARH(newcode)) + offbytes + 4);
+            offbytes = *ptr;
+            *ptr++ = segno;
+            *ptr++ = JMPLINSTR;
+            *(GUEST<LONGINT> *)ptr = US_TO_SYN68K(STARH(newcode)) + offbytes + 4;
             ptr += 2;
         }
         else
@@ -608,7 +608,7 @@ void Executor::C_LoadSeg(INTEGER volatile segno)
                           true);
 }
 
-#define SEGNOOFP(p) (CW(((GUEST<INTEGER> *)p)[-1]))
+#define SEGNOOFP(p) (((GUEST<INTEGER> *)p)[-1])
 
 static void unpatch(Ptr segstart, Ptr p)
 {
@@ -617,11 +617,11 @@ static void unpatch(Ptr segstart, Ptr p)
 
     ip = (GUEST<INTEGER> *)p;
 
-    firstpc = MR(*(GUEST<Ptr> *)(p + 2));
+    firstpc = *(GUEST<Ptr> *)(p + 2);
     ip[1] = ip[-1]; /* the segment number */
-    ip[-1] = CW(firstpc - segstart - 4);
-    ip[0] = CWC(MOVESPINSTR);
-    ip[2] = CWC(LOADSEGTRAP);
+    ip[-1] = firstpc - segstart - 4;
+    ip[0] = MOVESPINSTR;
+    ip[2] = LOADSEGTRAP;
 }
 
 void Executor::C_UnloadSeg(Ptr addr)
@@ -632,7 +632,7 @@ void Executor::C_UnloadSeg(Ptr addr)
     Handle h;
     INTEGER segno;
 
-    if(*(GUEST<INTEGER> *)addr == CWC(JMPLINSTR))
+    if(*(GUEST<INTEGER> *)addr == JMPLINSTR)
     {
         segno = SEGNOOFP(addr);
         h = GetResource(TICK("CODE"), segno);

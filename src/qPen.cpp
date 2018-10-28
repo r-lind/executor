@@ -17,19 +17,19 @@ using namespace Executor;
 void Executor::C_HidePen()
 {
     if(qdGlobals().thePort)
-        PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = CW(PORT_PEN_VIS(MR(qdGlobals().thePort)) - 1);
+        PORT_PEN_VIS_X(qdGlobals().thePort) = PORT_PEN_VIS(qdGlobals().thePort) - 1;
 }
 
 void Executor::C_ShowPen()
 {
     if(qdGlobals().thePort)
-        PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = CW(PORT_PEN_VIS(MR(qdGlobals().thePort)) + 1);
+        PORT_PEN_VIS_X(qdGlobals().thePort) = PORT_PEN_VIS(qdGlobals().thePort) + 1;
 }
 
 void Executor::C_GetPen(GUEST<Point> *ptp)
 {
     if(qdGlobals().thePort)
-        *ptp = PORT_PEN_LOC(MR(qdGlobals().thePort));
+        *ptp = PORT_PEN_LOC(qdGlobals().thePort);
 }
 
 void Executor::C_GetPenState(PenState *ps)
@@ -37,32 +37,32 @@ void Executor::C_GetPenState(PenState *ps)
     if(!qdGlobals().thePort)
         return;
 
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
         PixPatHandle pen_pixpat;
 
-        ps->pnLoc = PORT_PEN_LOC(MR(qdGlobals().thePort));
-        ps->pnSize = PORT_PEN_SIZE(MR(qdGlobals().thePort));
-        ps->pnMode = PORT_PEN_MODE_X(MR(qdGlobals().thePort));
+        ps->pnLoc = PORT_PEN_LOC(qdGlobals().thePort);
+        ps->pnSize = PORT_PEN_SIZE(qdGlobals().thePort);
+        ps->pnMode = PORT_PEN_MODE_X(qdGlobals().thePort);
 
         pen_pixpat = CPORT_PEN_PIXPAT(theCPort);
         /*
  * NOTE: it's not clear what the Mac does here.  Cotton has been
  *	 wrong about this stuff before.
  */
-        if(PIXPAT_TYPE_X(pen_pixpat) == CWC(pixpat_type_orig))
+        if(PIXPAT_TYPE_X(pen_pixpat) == pixpat_type_orig)
             /* #warning GetPenState not necessarily implemented correctly... */
             PATASSIGN(ps->pnPat, PIXPAT_1DATA(pen_pixpat));
         else
         {
             /* high bit indicates there is a pixpat (not a pattern)
 	     stored in the pnPat field */
-            ps->pnMode |= CWC(0x8000);
+            ps->pnMode |= 0x8000;
             *(PixPatHandle *)&ps->pnPat[0] = pen_pixpat;
         }
     }
     else
-        *ps = *(PenState *)&PORT_PEN_LOC(MR(qdGlobals().thePort));
+        *ps = *(PenState *)&PORT_PEN_LOC(qdGlobals().thePort);
 }
 
 void Executor::C_SetPenState(PenState *ps)
@@ -70,17 +70,17 @@ void Executor::C_SetPenState(PenState *ps)
     if(!qdGlobals().thePort)
         return;
 
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = ps->pnLoc;
-    PORT_PEN_SIZE(MR(qdGlobals().thePort)) = ps->pnSize;
+    PORT_PEN_LOC(qdGlobals().thePort) = ps->pnLoc;
+    PORT_PEN_SIZE(qdGlobals().thePort) = ps->pnSize;
 
-    if(ps->pnMode & CWC(0x8000))
+    if(ps->pnMode & 0x8000)
     {
-        PORT_PEN_MODE_X(MR(qdGlobals().thePort)) = ps->pnMode & CWC(~0x8000);
+        PORT_PEN_MODE_X(qdGlobals().thePort) = ps->pnMode & ~0x8000;
         PenPixPat(*(PixPatHandle *)&ps->pnPat[0]);
     }
     else
     {
-        PORT_PEN_MODE_X(MR(qdGlobals().thePort)) = ps->pnMode;
+        PORT_PEN_MODE_X(qdGlobals().thePort) = ps->pnMode;
         PenPat(ps->pnPat);
     }
 }
@@ -89,7 +89,7 @@ void Executor::draw_state_save(draw_state_t *draw_state)
 {
     GrafPtr current_port;
 
-    current_port = MR(qdGlobals().thePort);
+    current_port = qdGlobals().thePort;
 
     GetPenState(&draw_state->pen_state);
     if(CGrafPort_p(current_port))
@@ -110,7 +110,7 @@ void Executor::draw_state_restore(draw_state_t *draw_state)
 {
     GrafPtr current_port;
 
-    current_port = MR(qdGlobals().thePort);
+    current_port = qdGlobals().thePort;
 
     SetPenState(&draw_state->pen_state);
     if(CGrafPort_p(current_port))
@@ -131,33 +131,33 @@ void Executor::C_PenSize(INTEGER w, INTEGER h)
 {
     if(qdGlobals().thePort)
     {
-        PORT_PEN_SIZE(MR(qdGlobals().thePort)).h = CW(w);
-        PORT_PEN_SIZE(MR(qdGlobals().thePort)).v = CW(h);
+        PORT_PEN_SIZE(qdGlobals().thePort).h = w;
+        PORT_PEN_SIZE(qdGlobals().thePort).v = h;
     }
 }
 
 void Executor::C_PenMode(INTEGER m)
 {
     if(qdGlobals().thePort)
-        PORT_PEN_MODE_X(MR(qdGlobals().thePort)) = CW(m);
+        PORT_PEN_MODE_X(qdGlobals().thePort) = m;
 }
 
 void Executor::C_PenPat(Pattern pp)
 {
     if(qdGlobals().thePort)
     {
-        if(CGrafPort_p(MR(qdGlobals().thePort)))
+        if(CGrafPort_p(qdGlobals().thePort))
         {
             PixPatHandle old_pen;
 
             old_pen = CPORT_PEN_PIXPAT(theCPort);
-            if(PIXPAT_TYPE_X(old_pen) == CWC(pixpat_type_orig))
+            if(PIXPAT_TYPE_X(old_pen) == pixpat_type_orig)
                 PATASSIGN(PIXPAT_1DATA(old_pen), pp);
             else
             {
                 PixPatHandle new_pen = NewPixPat();
 
-                PIXPAT_TYPE_X(new_pen) = CWC(0);
+                PIXPAT_TYPE_X(new_pen) = 0;
                 PATASSIGN(PIXPAT_1DATA(new_pen), pp);
 
                 PenPixPat(new_pen);
@@ -165,7 +165,7 @@ void Executor::C_PenPat(Pattern pp)
             /* #warning PenPat not currently implemented correctly... */
         }
         else
-            PATASSIGN(PORT_PEN_PAT(MR(qdGlobals().thePort)), pp);
+            PATASSIGN(PORT_PEN_PAT(qdGlobals().thePort), pp);
     }
 }
 
@@ -183,8 +183,8 @@ void Executor::C_MoveTo(INTEGER h, INTEGER v)
 {
     if(qdGlobals().thePort)
     {
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(h);
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(v);
+        PORT_PEN_LOC(qdGlobals().thePort).h = h;
+        PORT_PEN_LOC(qdGlobals().thePort).v = v;
     }
 }
 
@@ -192,8 +192,8 @@ void Executor::C_Move(INTEGER dh, INTEGER dv)
 {
     if(qdGlobals().thePort)
     {
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h) + (dh));
-        MR(qdGlobals().thePort)->pnLoc.v = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v) + (dv));
+        PORT_PEN_LOC(qdGlobals().thePort).h = PORT_PEN_LOC(qdGlobals().thePort).h + (dh);
+        qdGlobals().thePort->pnLoc.v = PORT_PEN_LOC(qdGlobals().thePort).v + (dv);
     }
 }
 
@@ -206,8 +206,8 @@ void Executor::C_LineTo(INTEGER h, INTEGER v)
         p.h = h;
         p.v = v;
         CALLLINE(p);
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(p.h);
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(p.v);
+        PORT_PEN_LOC(qdGlobals().thePort).h = p.h;
+        PORT_PEN_LOC(qdGlobals().thePort).v = p.v;
     }
 }
 
@@ -217,10 +217,10 @@ void Executor::C_Line(INTEGER dh, INTEGER dv)
 
     if(qdGlobals().thePort)
     {
-        p.h = CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h) + dh;
-        p.v = CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v) + dv;
+        p.h = PORT_PEN_LOC(qdGlobals().thePort).h + dh;
+        p.v = PORT_PEN_LOC(qdGlobals().thePort).v + dv;
         CALLLINE(p);
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(p.h);
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(p.v);
+        PORT_PEN_LOC(qdGlobals().thePort).h = p.h;
+        PORT_PEN_LOC(qdGlobals().thePort).v = p.v;
     }
 }

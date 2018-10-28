@@ -25,18 +25,18 @@ int16_t alert_extra_icon_id = -32768;
 
 static icon_item_template_t icon_item_template = {
     /* item count - 1 */
-    CWC(0),
+    0,
     CLC_NULL,
     {
-        CWC(10),
-        CWC(20),
-        CWC(42),
-        CWC(52),
+        10,
+        20,
+        42,
+        52,
     },
-    CBC((1 << 7) | (iconItem)),
-    CBC(2),
+    (1 << 7) | (iconItem),
+    2,
 
-    /* to be filled in later */ CWC((short)-1),
+    /* to be filled in later */ (short)-1,
 };
 
 INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
@@ -48,9 +48,9 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
     Handle alert_ctab_res_h;
     Handle item_ctab_res_h;
 
-    if(id != Cx(LM(ANumber)))
+    if(id != LM(ANumber))
     {
-        LM(ANumber) = CW(id);
+        LM(ANumber) = id;
         LM(ACount) = 0;
     }
     ah = (alth)GetResource(TICK("ALRT"), id);
@@ -61,10 +61,10 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
     }
 
     LoadResource((Handle)ah);
-    n = (Hx(ah, altstag) >> (4 * CW(LM(ACount)))) & 0xF;
-    LM(ACount) = CW(CW(LM(ACount)) + 1);
-    if(CW(LM(ACount)) > 3)
-        LM(ACount) = CWC(3);
+    n = (Hx(ah, altstag) >> (4 * LM(ACount))) & 0xF;
+    LM(ACount) = LM(ACount) + 1;
+    if(LM(ACount) > 3)
+        LM(ACount) = 3;
     BEEP(n & 3);
     if(!(n & 4))
         return -1;
@@ -75,10 +75,10 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
     LoadResource(ih);
     alert_ctab_res_h = ROMlib_getrestid(TICK("actb"), Hx(ah, altiid));
     item_ctab_res_h = ROMlib_getrestid(TICK("ictb"), Hx(ah, altiid));
-    GUEST<Handle> h = RM(ih);
+    GUEST<Handle> h = ih;
     HandToHand(&h);
 
-    TheGDeviceGuard guard(MR(LM(MainDevice)));
+    TheGDeviceGuard guard(LM(MainDevice));
 
     Rect adjusted_rect;
     bool color_p;
@@ -102,12 +102,12 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
         dp = ((DialogPeek)
                   NewColorDialog(nullptr, &adjusted_rect,
                              (StringPtr) "", false, dBoxProc,
-                             (WindowPtr)-1, false, 0L, MR(h)));
+                             (WindowPtr)-1, false, 0L, h));
     else
         dp = ((DialogPeek)
                   NewDialog(nullptr, &adjusted_rect,
                             (StringPtr) "", false, dBoxProc,
-                            (WindowPtr)-1, false, 0L, MR(h)));
+                            (WindowPtr)-1, false, 0L, h));
 
     if(color_p)
     {
@@ -121,10 +121,10 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
         {
             AuxWinHandle aux_win_h;
 
-            aux_win_h = MR(*lookup_aux_win(DIALOG_WINDOW(dp)));
+            aux_win_h = *lookup_aux_win(DIALOG_WINDOW(dp));
             gui_assert(aux_win_h);
 
-            HxX(aux_win_h, dialogCItem) = RM(item_ctab_res_h);
+            HxX(aux_win_h, dialogCItem) = item_ctab_res_h;
         }
     }
 
@@ -133,7 +133,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
         Handle icon_item_h;
 
         icon_item_h = NewHandle(sizeof icon_item_template);
-        icon_item_template.res_id = CW(alert_extra_icon_id);
+        icon_item_template.res_id = alert_extra_icon_id;
         memcpy(STARH(icon_item_h), &icon_item_template,
                sizeof icon_item_template);
 
@@ -162,13 +162,13 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
             else
                 FrameRect(&r);
         }
-        dp->aDefItem = CW(defbut);
+        dp->aDefItem = defbut;
         ModalDialog(fp, &hit);
     }
     HSetState(DIALOG_ITEMS(dp), flags);
     DisposeDialog((DialogPtr)dp);
 
-    return CW(hit);
+    return hit;
 }
 
 INTEGER Executor::C_StopAlert(INTEGER id, ModalFilterProcPtr fp) /* IMI-419 */
@@ -214,21 +214,21 @@ static void lockditl(INTEGER id, BOOLEAN flag)
 
     if((ih = lockres(TICK("DITL"), id, flag)))
     {
-        nitem = CW(*MR(*(GUEST<GUEST<INTEGER> *> *)ih));
+        nitem = **(GUEST<GUEST<INTEGER> *> *)ih;
         ip = (itmp)((INTEGER *)STARH(ih) + 1);
         while(nitem-- >= 0)
         {
-            if((CB(ip->itmtype) & RESCTL) == RESCTL)
+            if((ip->itmtype & RESCTL) == RESCTL)
             {
-                h = lockres(TICK("CNTL"), CW(*(GUEST<INTEGER> *)(&(ip->itmlen) + 1)),
+                h = lockres(TICK("CNTL"), *(GUEST<INTEGER> *)(&(ip->itmlen) + 1),
                             flag);
-                procid = CW(*MR(*(GUEST<GUEST<INTEGER> *> *)h)) + 8;
+                procid = **(GUEST<GUEST<INTEGER> *> *)h + 8;
                 lockres(TICK("CDEF"), procid >> 4, flag);
             }
-            else if(CB(ip->itmtype) & iconItem)
-                lockres(TICK("ICON"), CW(*(GUEST<INTEGER> *)(&(ip->itmlen) + 1)), flag);
-            else if(CB(ip->itmtype) & picItem)
-                lockres(TICK("PICT"), CW(*(GUEST<INTEGER> *)(&(ip->itmlen) + 1)), flag);
+            else if(ip->itmtype & iconItem)
+                lockres(TICK("ICON"), *(GUEST<INTEGER> *)(&(ip->itmlen) + 1), flag);
+            else if(ip->itmtype & picItem)
+                lockres(TICK("PICT"), *(GUEST<INTEGER> *)(&(ip->itmlen) + 1), flag);
             BUMPIP(ip);
         }
     }

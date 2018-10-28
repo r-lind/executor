@@ -14,44 +14,44 @@ using namespace Executor;
 void Executor::C_SetRect(Rect *r, INTEGER left, INTEGER top, INTEGER right,
                          INTEGER bottom)
 {
-    r->top = CW(top);
-    r->left = CW(left);
-    r->bottom = CW(bottom);
-    r->right = CW(right);
+    r->top = top;
+    r->left = left;
+    r->bottom = bottom;
+    r->right = right;
 }
 
 void Executor::C_OffsetRect(Rect *r, INTEGER dh, INTEGER dv)
 {
-    r->top    = CW( CW(r->top)    + dv );
-    r->bottom = CW( CW(r->bottom) + dv );
-    r->left   = CW( CW(r->left)   + dh );
-    r->right  = CW( CW(r->right)  + dh );
+    r->top    =  r->top    + dv ;
+    r->bottom =  r->bottom + dv ;
+    r->left   =  r->left   + dh ;
+    r->right  =  r->right  + dh ;
 }
 
 void Executor::C_InsetRect(Rect *r, INTEGER dh, INTEGER dv)
 {
-    r->top    = CW( CW(r->top)    + dv );
-    r->bottom = CW( CW(r->bottom) - dv );
-    r->left   = CW( CW(r->left)   + dh );
-    r->right  = CW( CW(r->right)  - dh );
+    r->top    =  r->top    + dv ;
+    r->bottom =  r->bottom - dv ;
+    r->left   =  r->left   + dh ;
+    r->right  =  r->right  - dh ;
 
 #if defined(INCOMPATIBLEBUTSANE)
-    if(CW(r->top) >= CW(r->bottom) || CW(r->left) >= CW(r->right))
+    if(r->top >= r->bottom || r->left >= r->right)
         RECT_ZERO(r);
 #endif /* INCOMPATIBLEBUTSANE */
 }
 
 BOOLEAN Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
 {
-    if(CW(s1->top) < CW(s2->bottom)
-       && CW(s2->top) < CW(s1->bottom)
-       && CW(s1->left) < CW(s2->right)
-       && CW(s2->left) < CW(s1->right))
+    if(s1->top < s2->bottom
+       && s2->top < s1->bottom
+       && s1->left < s2->right
+       && s2->left < s1->right)
     {
-        dest->top = CW(std::max(CW(s1->top), CW(s2->top)));
-        dest->left = CW(std::max(CW(s1->left), CW(s2->left)));
-        dest->bottom = CW(std::min(CW(s1->bottom), CW(s2->bottom)));
-        dest->right = CW(std::min(CW(s1->right), CW(s2->right)));
+        dest->top = std::max(s1->top, s2->top);
+        dest->left = std::max(s1->left, s2->left);
+        dest->bottom = std::min(s1->bottom, s2->bottom);
+        dest->right = std::min(s1->right, s2->right);
         return !EmptyRect(dest);
     }
     else
@@ -63,7 +63,7 @@ BOOLEAN Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
 
 BOOLEAN Executor::C_EmptyRect(Rect *r)
 {
-    return (CW(r->top) >= CW(r->bottom) || CW(r->left) >= CW(r->right));
+    return (r->top >= r->bottom || r->left >= r->right);
 }
 
 void Executor::C_UnionRect(Rect *s1, Rect *s2, Rect *dest)
@@ -74,10 +74,10 @@ void Executor::C_UnionRect(Rect *s1, Rect *s2, Rect *dest)
         *dest = *s1;
     else
     {
-        dest->top = CW(std::min(CW(s1->top), CW(s2->top)));
-        dest->left = CW(std::min(CW(s1->left), CW(s2->left)));
-        dest->bottom = CW(std::max(CW(s1->bottom), CW(s2->bottom)));
-        dest->right = CW(std::max(CW(s1->right), CW(s2->right)));
+        dest->top = std::min(s1->top, s2->top);
+        dest->left = std::min(s1->left, s2->left);
+        dest->bottom = std::max(s1->bottom, s2->bottom);
+        dest->right = std::max(s1->right, s2->right);
     }
 }
 
@@ -85,19 +85,19 @@ BOOLEAN Executor::C_PtInRect(Point p, Rect *r)
 {
     BOOLEAN retval;
 
-    retval = (p.h >= CW(r->left)
-              && p.h < CW(r->right)
-              && p.v >= CW(r->top)
-              && p.v < CW(r->bottom));
+    retval = (p.h >= r->left
+              && p.h < r->right
+              && p.v >= r->top
+              && p.v < r->bottom);
     return retval;
 }
 
 void Executor::C_Pt2Rect(Point p1, Point p2, Rect *dest)
 {
-    dest->top = CW(std::min(p1.v, p2.v));
-    dest->left = CW(std::min(p1.h, p2.h));
-    dest->bottom = CW(std::max(p1.v, p2.v));
-    dest->right = CW(std::max(p1.h, p2.h));
+    dest->top = std::min(p1.v, p2.v);
+    dest->left = std::min(p1.h, p2.h);
+    dest->bottom = std::max(p1.v, p2.v);
+    dest->right = std::max(p1.h, p2.h);
 }
 
 void Executor::C_PtToAngle(Rect *rp, Point p, GUEST<INTEGER> *angle)
@@ -111,8 +111,8 @@ void Executor::C_PtToAngle(Rect *rp, Point p, GUEST<INTEGER> *angle)
    * just call atan2()?
    */
 
-    dx = p.h - (CW(rp->left) + CW(rp->right)) / 2;
-    dy = p.v - (CW(rp->top) + CW(rp->bottom)) / 2;
+    dx = p.h - (rp->left + rp->right) / 2;
+    dy = p.v - (rp->top + rp->bottom) / 2;
 
     if(dx != 0)
     {
@@ -131,7 +131,7 @@ void Executor::C_PtToAngle(Rect *rp, Point p, GUEST<INTEGER> *angle)
             a = 180;
     }
 
-    *angle = CW(a);
+    *angle = a;
 }
 
 BOOLEAN Executor::C_EqualRect(const Rect *r1, const Rect *r2)

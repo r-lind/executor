@@ -12,20 +12,20 @@ using namespace Executor;
 
 void Executor::C_AddPt(Point src, GUEST<Point> *dst)
 {
-    dst->h = CW(CW(dst->h) + (src.h));
-    dst->v = CW(CW(dst->v) + (src.v));
+    dst->h = dst->h + (src.h);
+    dst->v = dst->v + (src.v);
 }
 
 void Executor::C_SubPt(Point src, GUEST<Point> *dst)
 {
-    dst->h = CW(CW(dst->h) - (src.h));
-    dst->v = CW(CW(dst->v) - (src.v));
+    dst->h = dst->h - (src.h);
+    dst->v = dst->v - (src.v);
 }
 
 void Executor::C_SetPt(GUEST<Point> *pt, INTEGER h, INTEGER v)
 {
-    pt->h = CW(h);
-    pt->v = CW(v);
+    pt->h = h;
+    pt->v = v;
 }
 
 BOOLEAN Executor::C_EqualPt(Point p1, Point p2)
@@ -37,8 +37,8 @@ void Executor::C_LocalToGlobal(GUEST<Point> *pt)
 {
     if(qdGlobals().thePort)
     {
-        pt->h = CW(CW(pt->h) - (CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left)));
-        pt->v = CW(CW(pt->v) - (CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top)));
+        pt->h = pt->h - (PORT_BOUNDS(qdGlobals().thePort).left);
+        pt->v = pt->v - (PORT_BOUNDS(qdGlobals().thePort).top);
     }
 }
 
@@ -46,7 +46,7 @@ void Executor::C_GlobalToLocal(GUEST<Point> *pt)
 {
     if(qdGlobals().thePort)
     {
-        pt->h = CW(CW(pt->h) + (Cx(PORT_BOUNDS(MR(qdGlobals().thePort)).left)));
-        pt->v = CW(CW(pt->v) + (Cx(PORT_BOUNDS(MR(qdGlobals().thePort)).top)));
+        pt->h = pt->h + (PORT_BOUNDS(qdGlobals().thePort).left);
+        pt->v = pt->v + (PORT_BOUNDS(qdGlobals().thePort).top);
     }
 }

@@ -117,14 +117,14 @@ hide_cursor_if_necessary(RgnHandle rh, const PixMap *dst, bool *old_vis)
     int top, left;
     RgnPtr rp;
 
-    top = CW(dst->bounds.top);
-    left = CW(dst->bounds.left);
+    top = dst->bounds.top;
+    left = dst->bounds.left;
     rp = STARH(rh);
 
-    *old_vis = vdriver->hideCursorIfIntersects(CW(rp->rgnBBox.top) - top,
-                                              CW(rp->rgnBBox.left) - left,
-                                              CW(rp->rgnBBox.bottom) - top,
-                                              CW(rp->rgnBBox.right) - left);
+    *old_vis = vdriver->hideCursorIfIntersects(rp->rgnBBox.top - top,
+                                              rp->rgnBBox.left - left,
+                                              rp->rgnBBox.bottom - top,
+                                              rp->rgnBBox.right - left);
 
     return true;
 }
@@ -151,16 +151,16 @@ setup_dst_bitmap(int log2_bpp, PixMap *dst_pixmap)
 #endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
     {
         row_bytes = BITMAP_ROWBYTES(dst_pixmap);
-        dst = (char *)MR(dst_pixmap->baseAddr);
+        dst = (char *)dst_pixmap->baseAddr;
     }
 
-    dst -= row_bytes * CW(dst_pixmap->bounds.top);
+    dst -= row_bytes * dst_pixmap->bounds.top;
     xdblt_dst_row_bytes = row_bytes;
     byte_slop = (uintptr_t)dst & 3;
     xdblt_dst_baseaddr = (uint32_t *)(dst - byte_slop);
 
     xdblt_x_offset = ((byte_slop << 3)
-                      - (CW(dst_pixmap->bounds.left) << log2_bpp));
+                      - (dst_pixmap->bounds.left << log2_bpp));
 
     return xdblt_x_offset << 3;
 }
@@ -217,16 +217,16 @@ bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
     {
         int top, left;
 
-        top = CW(dst->bounds.top);
-        left = CW(dst->bounds.left);
+        top = dst->bounds.top;
+        left = dst->bounds.left;
 
-        accel_result = vdriver->accelFillRect(CW(r->rgnBBox.top) - top, CW(r->rgnBBox.left) - left,
-                                              CW(r->rgnBBox.bottom) - top, CW(r->rgnBBox.right) - left,
+        accel_result = vdriver->accelFillRect(r->rgnBBox.top - top, r->rgnBBox.left - left,
+                                              r->rgnBBox.bottom - top, r->rgnBBox.right - left,
                                               xdblt_pattern_value & ROMlib_pixel_size_mask[x->log2_bpp]);
 
         if(accel_result != VDRIVER_ACCEL_NO_UPDATE)
-            note_executor_changed_screen(CW(r->rgnBBox.top) - top,
-                                         CW(r->rgnBBox.bottom) - top);
+            note_executor_changed_screen(r->rgnBBox.top - top,
+                                         r->rgnBBox.bottom - top);
     }
     else
         accel_result = VDRIVER_ACCEL_NO_UPDATE;
@@ -640,16 +640,16 @@ do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
     {
         int top, left;
 
-        top = CW(dst->bounds.top);
-        left = CW(dst->bounds.left);
+        top = dst->bounds.top;
+        left = dst->bounds.left;
 
-        accel_result = vdriver->accelFillRect(CW(r->rgnBBox.top) - top, CW(r->rgnBBox.left) - left,
-                                              CW(r->rgnBBox.bottom) - top, CW(r->rgnBBox.right) - left,
+        accel_result = vdriver->accelFillRect(r->rgnBBox.top - top, r->rgnBBox.left - left,
+                                              r->rgnBBox.bottom - top, r->rgnBBox.right - left,
                                               xdblt_pattern_value & ROMlib_pixel_size_mask[log2_bpp]);
 
         if(accel_result != VDRIVER_ACCEL_NO_UPDATE)
-            note_executor_changed_screen(CW(r->rgnBBox.top) - top,
-                                         CW(r->rgnBBox.bottom) - top);
+            note_executor_changed_screen(r->rgnBBox.top - top,
+                                         r->rgnBBox.bottom - top);
     }
     else
         accel_result = VDRIVER_ACCEL_NO_UPDATE;
@@ -734,7 +734,7 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
     rgb_spec = pixmap_rgb_spec(dst);
 
     /* Tile fg and bk colors out to 32bpp. */
-    log2_bpp = ROMlib_log2[CW(dst->pixelSize)];
+    log2_bpp = ROMlib_log2[dst->pixelSize];
     mask = ROMlib_pixel_size_mask[log2_bpp];
     tile = ROMlib_pixel_tile_scale[log2_bpp];
     fg_color = (fg_color & mask) * tile;

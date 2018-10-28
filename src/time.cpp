@@ -108,22 +108,22 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
         diff = msecs - last_interrupt_msecs;
         last_interrupt_msecs = msecs;
 
-        for(qp = (TMTask *)MR(ROMlib_timehead.qHead);
+        for(qp = (TMTask *)ROMlib_timehead.qHead;
             qp;
-            qp = (TMTask *)MR(qp->qLink))
+            qp = (TMTask *)qp->qLink)
         {
-            tm_count = CL(qp->tmCount);
+            tm_count = qp->tmCount;
 
             if(tm_count > 0)
             {
                 tm_count -= diff;
-                qp->tmCount = CL(tm_count);
+                qp->tmCount = tm_count;
                 if(tm_count <= 0)
                 {
                     ProcPtr tm_addr;
                     ROMlib_hook(time_number);
 
-                    tm_addr = MR(qp->tmAddr);
+                    tm_addr = qp->tmAddr;
                     if(tm_addr == (ProcPtr)&ROMlib_wakeup)
                         ROMlib_wakeup();
                     else if(tm_addr == (ProcPtr)&ROMlib_vcatch)
@@ -148,11 +148,11 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
 
         /* Find the next imminent timer event in the queue. */
         min = REALLONGTIME;
-        for(qp = (TMTask *)MR(ROMlib_timehead.qHead);
+        for(qp = (TMTask *)ROMlib_timehead.qHead;
             qp;
-            qp = (TMTask *)MR(qp->qLink))
+            qp = (TMTask *)qp->qLink)
         {
-            tm_count = CL(qp->tmCount);
+            tm_count = qp->tmCount;
             if(tm_count > 0 && tm_count < min)
                 min = tm_count;
         }
@@ -252,7 +252,7 @@ static void ROMlib_PrimeTime(QElemPtr taskp, LONGINT count)
    * way the extra time subtracted off during the catchalarm will
    * exactly match the extra time we added here.
    */
-    ((TMTask *)taskp)->tmCount = CL(count + now_msecs - last_interrupt_msecs);
+    ((TMTask *)taskp)->tmCount = count + now_msecs - last_interrupt_msecs;
 
     if(count < msecs_until_next || msecs_until_next <= 0)
     {
@@ -264,7 +264,7 @@ static void ROMlib_PrimeTime(QElemPtr taskp, LONGINT count)
 
 void Executor::InsTime(QElemPtr taskp)
 {
-    ((TMTask *)taskp)->tmCount = CLC(-1);
+    ((TMTask *)taskp)->tmCount = -1;
     Enqueue(taskp, &ROMlib_timehead);
 }
 

@@ -73,15 +73,15 @@ struct ModifierStub
     int current_db;
 };
 
-#define SND_CHAN_FIRSTMOD(c) ((ModifierStubPtr)MR(c->firstMod))
+#define SND_CHAN_FIRSTMOD(c) ((ModifierStubPtr)c->firstMod)
 #define SND_CHAN_CURRENT_START(c) (SND_CHAN_FIRSTMOD(c)->current_start)
 #define SND_CHAN_TIME(c) (SND_CHAN_FIRSTMOD(c)->time)
 #define SND_CHAN_PREV_SAMP(c) (SND_CHAN_FIRSTMOD(c)->prev_samp)
 #define SND_CHAN_CURRENT_DB(c) (SND_CHAN_FIRSTMOD(c)->current_db)
 #define SND_CHAN_DBHP(c) (SND_CHAN_FIRSTMOD(c)->dbhp)
 
-#define SND_CHAN_CMDINPROG_P(c) (SND_CHAN_FLAGS_X(c) & CWC(CHAN_CMDINPROG_FLAG))
-#define SND_CHAN_DBINPROG_P(c) (SND_CHAN_FLAGS_X(c) & CWC(CHAN_DBINPROG_FLAG))
+#define SND_CHAN_CMDINPROG_P(c) (SND_CHAN_FLAGS_X(c) & CHAN_CMDINPROG_FLAG)
+#define SND_CHAN_DBINPROG_P(c) (SND_CHAN_FLAGS_X(c) & CHAN_DBINPROG_FLAG)
 
 extern int ROMlib_SND_RATE;
 #define SND_RATE ROMlib_SND_RATE

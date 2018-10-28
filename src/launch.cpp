@@ -197,7 +197,7 @@ static void ParseConfigFile(std::string appname, OSType type)
             ROMlib_pretend_script = false;
 
         if(ROMlib_desired_bpp)
-            SetDepth(MR(LM(MainDevice)), ROMlib_desired_bpp, 0, 0);
+            SetDepth(LM(MainDevice), ROMlib_desired_bpp, 0, 0);
         fclose(configfile);
     }
 
@@ -223,7 +223,7 @@ static void beginexecutingat(LONGINT startpc)
     EM_A2 = EM_D3;
     EM_A3 = 0;
     EM_A4 = 0;
-    EM_A5 = CL(guest_cast<LONGINT>(LM(CurrentA5))); /* was smashed when we
+    EM_A5 = guest_cast<LONGINT>(LM(CurrentA5)); /* was smashed when we
 					   initialized above */
     EM_A6 = 0x1EF;
 
@@ -263,8 +263,8 @@ Executor::ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type, Str255 name)
 
     cfrgp = (cfrg_resource_t *)STARH(cfrg);
     cfirp = (cfir_t *)((char *)cfrgp + sizeof *cfrgp);
-    desired_arch_x = CL(arch);
-    type_x = CB(type);
+    desired_arch_x = arch;
+    type_x = type;
     for(n_descripts = CFRG_N_DESCRIPTS(cfrgp);
         n_descripts > 0 && !cfrg_match(cfirp, desired_arch_x, type_x, name);
         --n_descripts, cfirp = (cfir_t *)((char *)cfirp + CFIR_LENGTH(cfirp)))
@@ -320,9 +320,9 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             fprintf(stderr, "Memory leak from segmented fragment\n");
         }
         {
-            void *mainAddr1 = (void*) MR(mainAddr);
-            uint32_t new_toc = CL( ((GUEST<uint32_t>*)mainAddr1)[1] );
-            uint32_t new_pc = CL( ((GUEST<uint32_t>*)mainAddr1)[0] );
+            void *mainAddr1 = (void*) mainAddr;
+            uint32_t new_toc = ((GUEST<uint32_t>*)mainAddr1)[1];
+            uint32_t new_pc = ((GUEST<uint32_t>*)mainAddr1)[0];
 
             printf("ppc start: r2 = %08x, %08x\n", new_toc, new_pc);
 
@@ -377,26 +377,26 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
                   (Size)LM(CurApName)[0]);
     std::string appNameUTF8 = toUnicodeFilename(LM(CurApName)).string();
 #if 0
-    Munger(MR(LM(AppParmHandle)), 2L*sizeof(INTEGER), (Ptr) 0,
+    Munger(LM(AppParmHandle), 2L*sizeof(INTEGER), (Ptr) 0,
 				  (LONGINT) sizeof(AppFile), (Ptr) "", 0L);
 #endif
-    if(!lpbp || lpbp->launchBlockID != CWC(extendedBlock))
+    if(!lpbp || lpbp->launchBlockID != extendedBlock)
     {
         CInfoPBRec hpb;
 
-        hpb.hFileInfo.ioNamePtr = RM(&fName[0]);
-        hpb.hFileInfo.ioVRefNum = CW(vRefNum);
-        hpb.hFileInfo.ioFDirIndex = CWC(0);
+        hpb.hFileInfo.ioNamePtr = &fName[0];
+        hpb.hFileInfo.ioVRefNum = vRefNum;
+        hpb.hFileInfo.ioFDirIndex = 0;
         hpb.hFileInfo.ioDirID = 0;
         PBGetCatInfo(&hpb, false);
-        wdpb.ioVRefNum = CW(vRefNum);
+        wdpb.ioVRefNum = vRefNum;
         wdpb.ioWDDirID = hpb.hFileInfo.ioFlParID;
     }
     else
     {
         FSSpecPtr fsp;
 
-        fsp = MR(lpbp->launchAppSpec);
+        fsp = lpbp->launchAppSpec;
         wdpb.ioVRefNum = fsp->vRefNum;
         wdpb.ioWDDirID = fsp->parID;
     }
@@ -404,7 +404,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     wdpb.ioWDProcID = TICKX("Xctr");
     wdpb.ioNamePtr = 0;
     PBOpenWD(&wdpb, false);
-    ROMlib_exevrefnum = CW(wdpb.ioVRefNum);
+    ROMlib_exevrefnum = wdpb.ioVRefNum;
     ROMlib_exefname = LM(CurApName);
 #if 0
 /* I'm skeptical that this is correct */
@@ -412,25 +412,25 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
 	CloseResFile(LM(CurMap));
 #endif
     SetVol((StringPtr)0, ROMlib_exevrefnum);
-    LM(CurApRefNum) = CW(OpenResFile(ROMlib_exefname));
+    LM(CurApRefNum) = OpenResFile(ROMlib_exefname);
 
     err = GetFInfo(ROMlib_exefname, ROMlib_exevrefnum, &finfo);
 
-    process_create(false, CL(finfo.fdType), CL(finfo.fdCreator));
+    process_create(false, finfo.fdType, finfo.fdCreator);
 
-    ROMlib_creator = CL(finfo.fdCreator);
+    ROMlib_creator = finfo.fdCreator;
 
 #define LEMMINGSHACK
 #if defined(LEMMINGSHACK)
     {
-        if(finfo.fdCreator == CL(TICK("Psyg"))
-           || finfo.fdCreator == CL(TICK("Psod")))
+        if(finfo.fdCreator == TICK("Psyg")
+           || finfo.fdCreator == TICK("Psod"))
             ROMlib_flushoften = true;
     }
 #endif /* defined(LEMMINGSHACK) */
 
 #if defined(ULTIMA_III_HACK)
-    ROMlib_ultima_iii_hack = (finfo.fdCreator == CL(TICK("Ult3")));
+    ROMlib_ultima_iii_hack = (finfo.fdCreator == TICK("Ult3"));
 #endif
 
     h = GetResource(FOURCC('v', 'e', 'r', 's'), 2);
@@ -450,7 +450,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     ROMlib_directdiskaccess = false;
     ROMlib_clear_gestalt_list();
     ParseConfigFile("ExecutorDefault", 0);
-    ParseConfigFile(appNameUTF8, err == noErr ? CL(finfo.fdCreator).raw() : 0);
+    ParseConfigFile(appNameUTF8, err == noErr ? finfo.fdCreator.raw() : 0);
     ROMlib_clockonoff(!ROMlib_noclock);
     if((ROMlib_ScreenSize.first != INITIALPAIRVALUE
         || ROMlib_MacSize.first != INITIALPAIRVALUE))
@@ -493,9 +493,9 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
             SIZEResource *size_resource;
 
             size_resource = (SIZEResource *)STARH(size_resource_h);
-            size_info.size_flags = CW(size_resource->size_flags);
-            size_info.preferred_size = CL(size_resource->preferred_size);
-            size_info.minimum_size = CL(size_resource->minimum_size);
+            size_info.size_flags = size_resource->size_flags;
+            size_info.preferred_size = size_resource->preferred_size;
+            size_info.minimum_size = size_resource->minimum_size;
             size_info.size_resource_present_p = true;
         }
         else
@@ -520,7 +520,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
         lp = 0; /* just to shut GCC up */
         jumplen = jumpoff = 0; /* just to shut GCC up */
         EM_A5 = US_TO_SYN68K(&tmpa5);
-        LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+        LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
         InitGraf((Ptr)quickbytes + grafSize - 4);
     }
     else
@@ -528,10 +528,10 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
         HLock(code0);
 
         lp = (GUEST<LONGINT> *)STARH(code0);
-        abovea5 = CL(*lp++);
-        belowa5 = CL(*lp++);
-        jumplen = CL(*lp++);
-        jumpoff = CL(*lp++);
+        abovea5 = *lp++;
+        belowa5 = *lp++;
+        jumplen = *lp++;
+        jumpoff = *lp++;
 
         /*
 	 * NOTE: The stack initialization code that was here has been moved
@@ -540,16 +540,16 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
         /* #warning Stack is getting reinitialized even when Chain is called ... */
 
         EM_A7 -= abovea5 + belowa5;
-        LM(CurStackBase) = guest_cast<Ptr>(CL(EM_A7));
+        LM(CurStackBase) = guest_cast<Ptr>(EM_A7);
 
-        LM(CurrentA5) = RM(MR(LM(CurStackBase)) + belowa5); /* set LM(CurrentA5) */
-        LM(BufPtr) = RM(MR(LM(CurrentA5)) + abovea5);
-        LM(CurJTOffset) = CW(jumpoff);
-        EM_A5 = CL(guest_cast<LONGINT>(LM(CurrentA5)));
+        LM(CurrentA5) = LM(CurStackBase) + belowa5; /* set LM(CurrentA5) */
+        LM(BufPtr) = LM(CurrentA5) + abovea5;
+        LM(CurJTOffset) = jumpoff;
+        EM_A5 = guest_cast<LONGINT>(LM(CurrentA5));
     }
 
     GetDateTime(&LM(Time));
-    LM(ROMBase) = RM((Ptr)ROMlib_phoneyrom);
+    LM(ROMBase) = (Ptr)ROMlib_phoneyrom;
     LM(dodusesit) = LM(ROMBase);
     LM(QDExist) = LM(WWExist) = EXIST_NO;
     LM(TheZone) = LM(ApplZone);
@@ -564,7 +564,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
  */
     if(code0)
     {
-        memcpy(MR(LM(CurrentA5)) + jumpoff, lp, jumplen); /* copy in the
+        memcpy(LM(CurrentA5) + jumpoff, lp, jumplen); /* copy in the
 							 jump table */
         ROMlib_destroy_blocks(0, ~0, false);
     }
@@ -584,7 +584,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     ROMlib_uaf = 0;
 
     if(code0)
-        beginexecutingat(CL(guest_cast<LONGINT>(LM(CurrentA5))) + CW(LM(CurJTOffset)) + 2);
+        beginexecutingat(guest_cast<LONGINT>(LM(CurrentA5)) + LM(CurJTOffset) + 2);
     else
     {
         FSSpec fs;
@@ -871,21 +871,21 @@ static void reset_low_globals(void)
     LM(PortBUse) = 2; /* configured for Serial driver */
 
     memcpy(LM(KeyMap), saveKeyMap, sizeof_KeyMap);
-    LM(OneOne) = CLC(0x00010001);
+    LM(OneOne) = 0x00010001;
     LM(DragHook) = 0;
     LM(MBDFHndl) = 0;
     LM(MenuList) = 0;
     LM(MBSaveLoc) = 0;
     LM(SysFontFam) = 0;
 
-    LM(SysVersion) = CW(system_version);
-    LM(FSFCBLen) = CWC(94);
+    LM(SysVersion) = system_version;
+    LM(FSFCBLen) = 94;
 
 
-    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
+    LM(TEDoText) = (ProcPtr)&ROMlib_dotext; /* where should this go ? */
 
     LM(WWExist) = LM(QDExist) = EXIST_NO; /* TODO:  LOOK HERE! */
-    LM(SCSIFlags) = CWC(0xEC00); /* scsi+clock+xparam+mmu+adb
+    LM(SCSIFlags) = 0xEC00; /* scsi+clock+xparam+mmu+adb
 				 (no fpu,aux or pwrmgr) */
 
     LM(MMUType) = 5;
@@ -905,24 +905,24 @@ static void reset_low_globals(void)
     LM(PrintErr) = 0;
     LM(mouseoffset) = 0;
     LM(heapcheck) = 0;
-    LM(DefltStack) = CLC(0x2000); /* nobody really cares about these two */
-    LM(MinStack) = CLC(0x400); /* values ... */
+    LM(DefltStack) = 0x2000; /* nobody really cares about these two */
+    LM(MinStack) = 0x400; /* values ... */
     LM(IAZNotify) = 0;
     LM(CurPitch) = 0;
-    LM(JSwapFont) = RM((ProcPtr)&FMSwapFont);
-    LM(JInitCrsr) = RM((ProcPtr)&InitCursor);
+    LM(JSwapFont) = (ProcPtr)&FMSwapFont;
+    LM(JInitCrsr) = (ProcPtr)&InitCursor;
 
-    LM(JHideCursor) = RM((ProcPtr)&HideCursor);
-    LM(JShowCursor) = RM((ProcPtr)&ShowCursor);
-    LM(JShieldCursor) = RM((ProcPtr)&ShieldCursor);
-    LM(JSetCrsr) = RM((ProcPtr)&SetCursor);
-    LM(JCrsrObscure) = RM((ProcPtr)&ObscureCursor);
+    LM(JHideCursor) = (ProcPtr)&HideCursor;
+    LM(JShowCursor) = (ProcPtr)&ShowCursor;
+    LM(JShieldCursor) = (ProcPtr)&ShieldCursor;
+    LM(JSetCrsr) = (ProcPtr)&SetCursor;
+    LM(JCrsrObscure) = (ProcPtr)&ObscureCursor;
 
-    LM(JUnknown574) = RM ((ProcPtr)&unknown574);
+    LM(JUnknown574) = (ProcPtr)&unknown574;
 
-    LM(Key1Trans) = RM((Ptr)&stub_Key1Trans);
-    LM(Key2Trans) = RM((Ptr)&stub_Key2Trans);
-    LM(JFLUSH) = RM(&FlushCodeCache);
+    LM(Key1Trans) = (Ptr)&stub_Key1Trans;
+    LM(Key2Trans) = (Ptr)&stub_Key2Trans;
+    LM(JFLUSH) = &FlushCodeCache;
     LM(JResUnknown1) = LM(JFLUSH); /* I don't know what these are supposed to */
     LM(JResUnknown2) = LM(JFLUSH); /* do, but they're not called enough for
 				   us to worry about the cache flushing
@@ -934,16 +934,16 @@ static void reset_low_globals(void)
     LM(TheZone) = LM(ApplZone);
 
 
-    LM(HiliteMode) = CB(0xFF); /* I think this is correct */
-    LM(ROM85) = CWC(0x3FFF); /* We be color now */
+    LM(HiliteMode) = 0xFF; /* I think this is correct */
+    LM(ROM85) = 0x3FFF; /* We be color now */
     LM(MMU32Bit) = 0x01;
     LM(loadtrap) = 0;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x1008) = CLC(0x4); /* Quark XPress 3.0 references 0x1008
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x1008) = 0x4; /* Quark XPress 3.0 references 0x1008
 					explicitly.  It takes the value
 					found there, subtracts four from
 					it and dereferences that value.
 					Yahoo */
-    *(GUEST<int16_t> *)SYN68K_TO_US(4) = CWC(0x4e75); /* RTS, so when we dynamically recompile
+    *(GUEST<int16_t> *)SYN68K_TO_US(4) = 0x4e75; /* RTS, so when we dynamically recompile
 				    code starting at 0 we won't get far */
 
     /* Micro-cap dereferences location one of the LM(AppPacks) locations */
@@ -954,9 +954,9 @@ static void reset_low_globals(void)
         for(i = 0; i < (int)NELEM(LM(AppPacks)); ++i)
             LM(AppPacks)[i] = 0;
     }
-    LM(SysEvtMask) = CWC(~(1L << keyUp)); /* EVERYTHING except keyUp */
+    LM(SysEvtMask) = ~(1L << keyUp); /* EVERYTHING except keyUp */
     LM(SdVolume) = 7; /* for Beebop 2 */
-    LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+    LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
 
         /*
  * TODO:  how does this relate to Launch?
@@ -1013,14 +1013,14 @@ void Executor::empty_timer_queues(void)
 
     dequeue_refresh_task();
     clear_pending_sounds();
-    for(vp = (VBLTaskPtr)MR(LM(VBLQueue).qHead); vp; vp = nextvp)
+    for(vp = (VBLTaskPtr)LM(VBLQueue).qHead; vp; vp = nextvp)
     {
-        nextvp = (VBLTaskPtr)MR(vp->qLink);
+        nextvp = (VBLTaskPtr)vp->qLink;
         VRemove(vp);
     }
-    for(tp = (TMTask *)MR(ROMlib_timehead.qHead); tp; tp = nexttp)
+    for(tp = (TMTask *)ROMlib_timehead.qHead; tp; tp = nexttp)
     {
-        nexttp = (TMTask *)MR(tp->qLink);
+        nexttp = (TMTask *)tp->qLink;
         RmvTime((QElemPtr)tp);
     }
 }
@@ -1034,7 +1034,7 @@ static void reinitialize_things(void)
     int i;
 
     ROMlib_shutdown_font_manager();
-    SetZone(MR(LM(SysZone)));
+    SetZone(LM(SysZone));
     /* NOTE: we really shouldn't be closing desk accessories at all, but
        since we don't properly handle them when they're left open, it is
        better to close them down than not.  */
@@ -1046,7 +1046,7 @@ static void reinitialize_things(void)
     ROMlib_clock = 0; /* CLOCKOFF */
 
     special_fn = 0;
-    for(map = (resmaphand)MR(LM(TopMapHndl)); map; map = nextmap)
+    for(map = (resmaphand)LM(TopMapHndl); map; map = nextmap)
     {
         nextmap = (resmaphand)HxP(map, nextmap);
         if(HxX(map, resfn) == LM(SysMap))
@@ -1063,23 +1063,23 @@ static void reinitialize_things(void)
         }
     }
 
-    length = CW(*(GUEST<int16_t> *)MR(LM(FCBSPtr)));
-    fcbp = (filecontrolblock *)((short *)MR(LM(FCBSPtr)) + 1);
-    efcbp = (filecontrolblock *)((char *)MR(LM(FCBSPtr)) + length);
+    length = *(GUEST<int16_t> *)LM(FCBSPtr);
+    fcbp = (filecontrolblock *)((short *)LM(FCBSPtr) + 1);
+    efcbp = (filecontrolblock *)((char *)LM(FCBSPtr) + length);
     for(; fcbp < efcbp;
-        fcbp = (filecontrolblock *)((char *)fcbp + CW(LM(FSFCBLen))))
+        fcbp = (filecontrolblock *)((char *)fcbp + LM(FSFCBLen)))
     {
         INTEGER rn;
 
-        rn = (char *)fcbp - (char *)MR(LM(FCBSPtr));
+        rn = (char *)fcbp - (char *)LM(FCBSPtr);
         if(fcbp->fcbCName[0]
            /* && rn != Param_ram_rn */
-           && rn != CW(LM(SysMap))
+           && rn != LM(SysMap)
            && rn != special_fn)
-            FSClose((char *)fcbp - (char *)MR(LM(FCBSPtr)));
+            FSClose((char *)fcbp - (char *)LM(FCBSPtr));
     }
 
-    LM(CurMap) = STARH((resmaphand)MR(LM(TopMapHndl)))->resfn;
+    LM(CurMap) = STARH((resmaphand)LM(TopMapHndl))->resfn;
 
     ROMlib_destroy_blocks(0, ~0, false);
 }
@@ -1096,10 +1096,10 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
     BOOLEAN extended_p;
 
     retval = noErr;
-    if(lpbp && lpbp->launchBlockID == CWC(extendedBlock))
+    if(lpbp && lpbp->launchBlockID == extendedBlock)
     {
         lpb = *lpbp;
-        str255assign(fName, (MR(lpbp->launchAppSpec))->name);
+        str255assign(fName, (lpbp->launchAppSpec)->name);
         extended_p = true;
     }
     else
@@ -1111,7 +1111,7 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
     }
 
 #if 0
-    if(extended_p && (lpbp->launchControlFlags & CWC(launchContinue)))
+    if(extended_p && (lpbp->launchControlFlags & launchContinue))
     {
         int n_filenames;
         char **filenames;
@@ -1125,14 +1125,14 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
         n_filenames = 1;
         if(lpbp->launchAppParameters)
         {
-            ap = MR(lpbp->launchAppParameters);
-            n_filenames += CW(ap->n_fsspec);
+            ap = lpbp->launchAppParameters;
+            n_filenames += ap->n_fsspec;
         }
         n_filename_bytes = n_filenames * sizeof *filenames;
         filenames = (char **)alloca(n_filename_bytes);
         memset(filenames, 0, n_filename_bytes);
         retval = ROMlib_filename_from_fsspec(&filenames[0],
-                                             MR(lpbp->launchAppSpec));
+                                             lpbp->launchAppSpec);
         for(i = 1; retval == noErr && i < n_filenames; ++i)
             retval = ROMlib_filename_from_fsspec(&filenames[1],
                                                  &ap->fsspec[i - 1]);
@@ -1165,7 +1165,7 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
         AE_reinit();
         print_reinit();
 
-        gd_set_bpp(MR(LM(MainDevice)), !vdriver->isGrayscale(), vdriver->isFixedCLUT(),
+        gd_set_bpp(LM(MainDevice), !vdriver->isGrayscale(), vdriver->isFixedCLUT(),
                    vdriver->bpp());
         ROMlib_init_stdfile();
 #if ERROR_SUPPORTED_P(ERROR_UNEXPECTED)
@@ -1207,8 +1207,8 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
                    && lp != (uintptr_t)SYN68K_TO_US(0x828)
                    && lp != (uintptr_t)SYN68K_TO_US(0x82a)
                    && lp != (uintptr_t)SYN68K_TO_US(0x16c))
-                    if(MR(*(GUEST<void *> *)lp) >= MR(LM(ApplZone))
-                       && MR(*(GUEST<void *> *)lp) < MR(MR(LM(ApplZone))->bkLim))
+                    if(*(GUEST<void *> *)lp >= LM(ApplZone)
+                       && *(GUEST<void *> *)lp < LM(ApplZone)->bkLim)
                         warning_unexpected("Low global at 0x%x may point into "
                                            "LM(ApplZone) and probably shouldn't.",
                                            (unsigned int)US_TO_SYN68K(lp));
@@ -1229,9 +1229,9 @@ void Executor::Launch(StringPtr fName_arg, INTEGER vRefNum_arg)
   LaunchParamBlockRec pbr;
 
   memset (&pbr, 0, sizeof pbr);
-  pbr.launchBlockID = CWC (extendedBlock);
-  pbr.launchEPBLength = CLC (extendedBlockLen);
-  pbr.launchControlFlags = CWC (launchNoFileFlags|launchInhibitDaemon);
+  pbr.launchBlockID = extendedBlock;
+  pbr.launchEPBLength = extendedBlockLen;
+  pbr.launchControlFlags = launchNoFileFlags|launchInhibitDaemon;
   FSMakeFSSpec (vRefNum_arg, 0, fName_arg, &pbr.launchAppSpec);
   pbr.launchAppSpec.vRefNum = vRefNum_arg);
   NewLaunch (&pbr);

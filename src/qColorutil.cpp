@@ -48,7 +48,7 @@ Executor::validate_fg_bk_ctab(void)
     ColorSpec *ctab_table, *gd_ctab_table;
     RGBColor old_fg, old_bk, *fg, *bk;
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
     gd_pmap = GD_PMAP(gd);
     pixel_size = PIXMAP_PIXEL_SIZE(gd_pmap);
     gd_ctab_table = CTAB_TABLE(PIXMAP_TABLE(gd_pmap));
@@ -60,7 +60,7 @@ Executor::validate_fg_bk_ctab(void)
     old_fg = *fg;
     old_bk = *bk;
 
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
         if(pixel_size > 8)
         {
@@ -68,26 +68,26 @@ Executor::validate_fg_bk_ctab(void)
 
             rgb_spec = pixel_size == 16 ? &mac_16bpp_rgb_spec
                                         : &mac_32bpp_rgb_spec;
-            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_FG_COLOR(MR(qdGlobals().thePort)), fg));
-            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_BK_COLOR(MR(qdGlobals().thePort)), bk));
+            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_FG_COLOR(qdGlobals().thePort), fg));
+            ((rgb_spec->pixel_to_rgbcolor)(rgb_spec, PORT_BK_COLOR(qdGlobals().thePort), bk));
         }
         else
         {
-            *fg = gd_ctab_table[PORT_FG_COLOR(MR(qdGlobals().thePort))].rgb;
-            *bk = gd_ctab_table[PORT_BK_COLOR(MR(qdGlobals().thePort))].rgb;
+            *fg = gd_ctab_table[PORT_FG_COLOR(qdGlobals().thePort)].rgb;
+            *bk = gd_ctab_table[PORT_BK_COLOR(qdGlobals().thePort)].rgb;
         }
     }
     else
     {
         /* determine rgb values of the current bk/fg
 	 via `LM(QDColors)' */
-        *fg = *ROMlib_qd_color_to_rgb(PORT_FG_COLOR(MR(qdGlobals().thePort)));
-        *bk = *ROMlib_qd_color_to_rgb(PORT_BK_COLOR(MR(qdGlobals().thePort)));
+        *fg = *ROMlib_qd_color_to_rgb(PORT_FG_COLOR(qdGlobals().thePort));
+        *bk = *ROMlib_qd_color_to_rgb(PORT_BK_COLOR(qdGlobals().thePort));
     }
 
     if(memcmp(&old_fg, fg, sizeof old_fg)
        || memcmp(&old_bk, bk, sizeof old_bk))
-        CTAB_SEED_X(ROMlib_fg_bk_ctab) = CL(GetCTSeed());
+        CTAB_SEED_X(ROMlib_fg_bk_ctab) = GetCTSeed();
 
     return ROMlib_fg_bk_ctab;
 }
@@ -101,7 +101,7 @@ Executor::validate_relative_bw_ctab(void)
     RGBColor old_entry0, old_entry1, *entry0, *entry1;
     int pixel_size;
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
     gd_pmap = GD_PMAP(gd);
     pixel_size = PIXMAP_PIXEL_SIZE(gd_pmap);
 
@@ -131,7 +131,7 @@ Executor::validate_relative_bw_ctab(void)
 
     if(memcmp(&old_entry0, entry0, sizeof old_entry0)
        || memcmp(&old_entry1, entry1, sizeof old_entry1))
-        CTAB_SEED_X(ROMlib_relative_bw_ctab) = CL(GetCTSeed());
+        CTAB_SEED_X(ROMlib_relative_bw_ctab) = GetCTSeed();
 
     return ROMlib_relative_bw_ctab;
 }
@@ -155,14 +155,14 @@ void Executor::ROMlib_color_init(void)
     TheZoneGuard guard(LM(SysZone));
     /* allocate and initialize ROMlib_bw_ctab */
     ROMlib_bw_ctab = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(1));
-    CTAB_SIZE_X(ROMlib_bw_ctab) = CWC(1);
-    CTAB_SEED_X(ROMlib_bw_ctab) = CL(GetCTSeed());
-    CTAB_FLAGS_X(ROMlib_bw_ctab) = CWC(0);
+    CTAB_SIZE_X(ROMlib_bw_ctab) = 1;
+    CTAB_SEED_X(ROMlib_bw_ctab) = GetCTSeed();
+    CTAB_FLAGS_X(ROMlib_bw_ctab) = 0;
 
     bw_ctab_table = CTAB_TABLE(ROMlib_bw_ctab);
-    bw_ctab_table[0].value = CWC(0);
+    bw_ctab_table[0].value = 0;
     bw_ctab_table[0].rgb = ROMlib_white_rgb_color;
-    bw_ctab_table[1].value = CWC(1);
+    bw_ctab_table[1].value = 1;
     bw_ctab_table[1].rgb = ROMlib_black_rgb_color;
 
     /* allocate and initialize ROMlib_fg_bk_ctab */
@@ -177,13 +177,13 @@ void Executor::ROMlib_color_init(void)
 
     ROMlib_dont_depthconv_ctab
         = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(0));
-    CTAB_SIZE_X(ROMlib_dont_depthconv_ctab) = CWC(0);
-    CTAB_SEED_X(ROMlib_dont_depthconv_ctab) = CLC(0);
-    CTAB_FLAGS_X(ROMlib_dont_depthconv_ctab) = CWC(0);
+    CTAB_SIZE_X(ROMlib_dont_depthconv_ctab) = 0;
+    CTAB_SEED_X(ROMlib_dont_depthconv_ctab) = 0;
+    CTAB_FLAGS_X(ROMlib_dont_depthconv_ctab) = 0;
 
     no_stdbits_color_conversion_color_table
         = (CTabHandle)NewHandle(sizeof(ColorTable));
-    CTAB_SEED_X(no_stdbits_color_conversion_color_table) = CLC(0);
+    CTAB_SEED_X(no_stdbits_color_conversion_color_table) = 0;
 }
 
 Handle

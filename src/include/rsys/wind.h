@@ -109,24 +109,24 @@ extern RGBColor *validate_colors_for_window(GrafPtr w);
 #define WINDOW_REF_CON_X(wp) (((WindowPeek)(wp))->refCon)
 
 /* native byte order */
-#define WINDOW_KIND(wp) (Cx(WINDOW_KIND_X(wp)))
-#define WINDOW_VISIBLE(wp) (Cx(WINDOW_VISIBLE_X(wp)))
+#define WINDOW_KIND(wp) (WINDOW_KIND_X(wp))
+#define WINDOW_VISIBLE(wp) (WINDOW_VISIBLE_X(wp))
 /* does this mean the window has focus? */
-#define WINDOW_HILITED(wp) (Cx(WINDOW_HILITED_X(wp)))
-#define WINDOW_GO_AWAY_FLAG(wp) (Cx(WINDOW_GO_AWAY_FLAG_X(wp)))
-#define WINDOW_SPARE_FLAG(wp) (Cx(WINDOW_SPARE_FLAG_X(wp)))
+#define WINDOW_HILITED(wp) (WINDOW_HILITED_X(wp))
+#define WINDOW_GO_AWAY_FLAG(wp) (WINDOW_GO_AWAY_FLAG_X(wp))
+#define WINDOW_SPARE_FLAG(wp) (WINDOW_SPARE_FLAG_X(wp))
 
-#define WINDOW_STRUCT_REGION(wp) (MR(WINDOW_STRUCT_REGION_X(wp)))
-#define WINDOW_CONT_REGION(wp) (MR(WINDOW_CONT_REGION_X(wp)))
-#define WINDOW_UPDATE_REGION(wp) (MR(WINDOW_UPDATE_REGION_X(wp)))
-#define WINDOW_DEF_PROC(wp) (MR(WINDOW_DEF_PROC_X(wp)))
-#define WINDOW_DATA(wp) (MR(WINDOW_DATA_X(wp)))
-#define WINDOW_TITLE(wp) (MR(WINDOW_TITLE_X(wp)))
-#define WINDOW_TITLE_WIDTH(wp) (Cx(WINDOW_TITLE_WIDTH_X(wp)))
-#define WINDOW_CONTROL_LIST(wp) (MR(WINDOW_CONTROL_LIST_X(wp)))
-#define WINDOW_NEXT_WINDOW(wp) (MR(WINDOW_NEXT_WINDOW_X(wp)))
-#define WINDOW_PIC(wp) (MR(WINDOW_PIC_X(wp)))
-#define WINDOW_REF_CON(wp) (Cx(WINDOW_REF_CON_X(wp)))
+#define WINDOW_STRUCT_REGION(wp) (WINDOW_STRUCT_REGION_X(wp))
+#define WINDOW_CONT_REGION(wp) (WINDOW_CONT_REGION_X(wp))
+#define WINDOW_UPDATE_REGION(wp) (WINDOW_UPDATE_REGION_X(wp))
+#define WINDOW_DEF_PROC(wp) (WINDOW_DEF_PROC_X(wp))
+#define WINDOW_DATA(wp) (WINDOW_DATA_X(wp))
+#define WINDOW_TITLE(wp) (WINDOW_TITLE_X(wp))
+#define WINDOW_TITLE_WIDTH(wp) (WINDOW_TITLE_WIDTH_X(wp))
+#define WINDOW_CONTROL_LIST(wp) (WINDOW_CONTROL_LIST_X(wp))
+#define WINDOW_NEXT_WINDOW(wp) (WINDOW_NEXT_WINDOW_X(wp))
+#define WINDOW_PIC(wp) (WINDOW_PIC_X(wp))
+#define WINDOW_REF_CON(wp) (WINDOW_REF_CON_X(wp))
 }
 
 #endif /* !_WIND_H_ */

@@ -27,8 +27,8 @@ static INTEGER findwall(Rect *r, INTEGER h, INTEGER v);
 
 static void getpoint(INTEGER angle, Rect *r, Point *ptp)
 {
-    INTEGER left = CW(r->left), top = CW(r->top),
-            right = CW(r->right), bottom = CW(r->bottom);
+    INTEGER left = r->left, top = r->top,
+            right = r->right, bottom = r->bottom;
     INTEGER radh = (right - left) / 2,
             radv = (bottom - top) / 2;
     INTEGER centh = left + radh,
@@ -82,11 +82,11 @@ static void getpoint(INTEGER angle, Rect *r, Point *ptp)
 
 static INTEGER findwall(Rect *r, INTEGER h, INTEGER v)
 {
-    if(v == CW(r->top)) /* the order of tests is important */
+    if(v == r->top) /* the order of tests is important */
         return (RTop); /* don't change them if you don't see */
-    else if(h == CW(r->right)) /* why */
+    else if(h == r->right) /* why */
         return (RRight);
-    else if(v == CW(r->bottom))
+    else if(v == r->bottom)
         return (RBottom);
     else
         return (RLeft);
@@ -94,8 +94,8 @@ static INTEGER findwall(Rect *r, INTEGER h, INTEGER v)
 
 void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
 {
-    INTEGER left = CW(r->left), top = CW(r->top),
-            right = CW(r->right), bottom = CW(r->bottom);
+    INTEGER left = r->left, top = r->top,
+            right = r->right, bottom = r->bottom;
     INTEGER ewall;
     Point spt, ept;
     INTEGER h, v;
@@ -117,23 +117,23 @@ void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
         /*-->*/ return;
     }
 
-    if(MR(qdGlobals().thePort)->picSave)
+    if(qdGlobals().thePort->picSave)
     {
         ROMlib_drawingverbrectpicupdate(verb, r);
         PICOP(OP_frameArc + (int)verb);
         PICWRITE(r, sizeof(*r));
-        swappedstarta = CW(starta);
+        swappedstarta = starta;
         PICWRITE(&swappedstarta, sizeof(swappedstarta));
-        swappedarca = CW(arca);
+        swappedarca = arca;
         PICWRITE(&swappedarca, sizeof(swappedarca));
     }
 
-    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
+    if(PORT_PEN_VIS(qdGlobals().thePort) < 0)
         /*-->*/ return;
-    saveloc = PORT_PEN_LOC(MR(qdGlobals().thePort));
+    saveloc = PORT_PEN_LOC(qdGlobals().thePort);
     PAUSERECORDING;
-    tmpvis = PORT_PEN_VIS_X(MR(qdGlobals().thePort));
-    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = CWC(0);
+    tmpvis = PORT_PEN_VIS_X(qdGlobals().thePort);
+    PORT_PEN_VIS_X(qdGlobals().thePort) = 0;
     OpenRgn();
     enda = starta + arca;
     if(arca < 0)
@@ -197,13 +197,13 @@ void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
     LineTo(left + (right - left) / 2, top + (bottom - top) / 2);
     rh = NewRgn();
     CloseRgn(rh);
-    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = tmpvis;
-    saveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort));
-    SectRgn(MR(saveclip), rh, rh);
-    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(rh);
+    PORT_PEN_VIS_X(qdGlobals().thePort) = tmpvis;
+    saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
+    SectRgn(saveclip, rh, rh);
+    PORT_CLIP_REGION_X(qdGlobals().thePort) = rh;
     StdOval(verb, r);
-    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclip;
+    PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
     DisposeRgn(rh);
     RESUMERECORDING;
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = saveloc;
+    PORT_PEN_LOC(qdGlobals().thePort) = saveloc;
 }

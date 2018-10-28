@@ -87,12 +87,12 @@ Executor::GetIndADB(ADBDataBlock *adbp, INTEGER index)
         retval = -1;
     else
     {
-        adbp->devType = CB(0); /* should check on Mac to see what mouse is */
-        adbp->origADBAddr = CB(SPOOFED_MOUSE_ADDR);
+        adbp->devType = 0; /* should check on Mac to see what mouse is */
+        adbp->origADBAddr = SPOOFED_MOUSE_ADDR;
         if(!adb_service_procp)
-            adb_service_procp = RM((ProcPtr)&adb_service_stub);
+            adb_service_procp = (ProcPtr)&adb_service_stub;
         adbp->dbServiceRtPtr = adb_service_procp;
-        adbp->dbDataAreaAddr = RM(adb_data_ptr);
+        adbp->dbDataAreaAddr = adb_data_ptr;
         retval = SPOOFED_MOUSE_ADDR;
     }
     return retval;
@@ -122,7 +122,7 @@ Executor::SetADBInfo(ADBSetInfoBlock *adbp, INTEGER address)
     else
     {
         adb_service_procp = adbp->siServiceRtPtr;
-        adb_data_ptr = MR(adbp->siDataAreaAddr);
+        adb_data_ptr = adbp->siDataAreaAddr;
         retval = noErr;
     }
     return retval;
@@ -131,7 +131,7 @@ Executor::SetADBInfo(ADBSetInfoBlock *adbp, INTEGER address)
 static bool
 adb_vector_is_not_our_own(void)
 {
-    return adb_service_procp && adb_service_procp != RM((ProcPtr)&adb_service_stub);
+    return adb_service_procp && adb_service_procp != (ProcPtr)&adb_service_stub;
 }
 
 static void
@@ -143,7 +143,7 @@ call_patched_adb_vector(char *message)
     save_a0 = EM_A0;
     EM_D0 = SPOOFED_MOUSE_ADDR << 4; /* based on Apeiron's code */
     EM_A0 = US_TO_SYN68K(message);
-    CALL_EMULATOR((syn68k_addr_t)CL(guest_cast<uint32_t>(adb_service_procp)));
+    CALL_EMULATOR((syn68k_addr_t)guest_cast<uint32_t>(adb_service_procp));
     EM_D0 = save_d0;
     EM_A0 = save_a0;
 }
@@ -194,8 +194,8 @@ Executor::adb_apeiron_hack(int /*bool*/ deltas_p, ...)
     bool button_is_down;
     char message[3];
 
-    x = CW(LM(MouseLocation).h);
-    y = CW(LM(MouseLocation).v);
+    x = LM(MouseLocation).h;
+    y = LM(MouseLocation).v;
     button_is_down = !(ROMlib_mods & btnState);
 
     /* begin code for PegLeg */

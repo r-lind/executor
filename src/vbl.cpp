@@ -46,7 +46,7 @@ int Executor::ROMlib_clock = CLOCKOFF;
  *       a m68k RTS instruction, just to be safe.
  */
 
-VBLTask vblshim = { nullptr, CWC(vType), guest_cast<ProcPtr>(CLC(0xAEDCBA98)), CWC(0), CWC(0) };
+VBLTask vblshim = { nullptr, vType, guest_cast<ProcPtr>(0xAEDCBA98), 0, 0 };
 
 static TMTask vbltm;
 
@@ -74,7 +74,7 @@ void Executor::C_ROMlib_vcatch()
     EM_A7 = (EM_A7 - 32) & ~3; /* Might as well long-align it. */
 
     /* Save the old LM(Ticks) value & compute new value. */
-    old_ticks = CL(LM(Ticks));
+    old_ticks = LM(Ticks);
     new_ticks = C_TickCount();
     ticks_elapsed = new_ticks - old_ticks;
 
@@ -87,11 +87,11 @@ void Executor::C_ROMlib_vcatch()
 
     PrimeTime((QElemPtr)&vbltm, msecs_to_next_tick);
 
-    for(vp = (VBLTaskPtr)MR(LM(VBLQueue).qHead); vp; vp = next)
+    for(vp = (VBLTaskPtr)LM(VBLQueue).qHead; vp; vp = next)
     {
         INTEGER old_vbl_count, new_vbl_count;
 
-        next = (VBLTaskPtr)MR(vp->qLink);
+        next = (VBLTaskPtr)vp->qLink;
 
         /* Blow off the Prince of Persia shim. */
         if(vp == &vblshim)
@@ -99,15 +99,15 @@ void Executor::C_ROMlib_vcatch()
 
         /* Account for possible missed ticks by possibly subtracting
        * off more than one tick from the VBL count. */
-        old_vbl_count = CW(vp->vblCount);
+        old_vbl_count = vp->vblCount;
         new_vbl_count = old_vbl_count - ticks_elapsed;
         if(old_vbl_count > 0 && new_vbl_count < 0)
             new_vbl_count = 0; /* Only compensate for zero crossings. */
 
-        vp->vblCount = CW(new_vbl_count);
+        vp->vblCount = new_vbl_count;
         if(new_vbl_count == 0)
         {
-            LM(VBLQueue).qFlags |= CWC(VBUSY);
+            LM(VBLQueue).qFlags |= VBUSY;
             ROMlib_hook(vbl_number);
 
             /* No need to save/restore syn68k regs here; we do that
@@ -115,12 +115,12 @@ void Executor::C_ROMlib_vcatch()
 	   */
 
             EM_A0 = US_TO_SYN68K_CHECK0(vp);
-            EM_A1 = CL(guest_cast<LONGINT>(vp->vblAddr));
+            EM_A1 = guest_cast<LONGINT>(vp->vblAddr);
 
             CALL_EMULATOR((syn68k_addr_t)EM_A1);
 
-            LM(VBLQueue).qFlags &= CWC(~VBUSY);
-            if(vp->vblCount == CWC(0))
+            LM(VBLQueue).qFlags &= ~VBUSY;
+            if(vp->vblCount == 0)
                 Dequeue((QElemPtr)vp, &LM(VBLQueue));
         }
     }
@@ -136,7 +136,7 @@ void Executor::C_ROMlib_vcatch()
 static void
 startclock(void)
 {
-    vbltm.tmAddr = RM((ProcPtr)&ROMlib_vcatch);
+    vbltm.tmAddr = (ProcPtr)&ROMlib_vcatch;
     InsTime((QElemPtr)&vbltm);
     PrimeTime((QElemPtr)&vbltm, 17);
     /* don't adjust ROMlib_clock; it could be temporary */
@@ -173,14 +173,14 @@ OSErr Executor::SlotVInstall(VBLTaskPtr vtaskp, INTEGER slot)
 
 OSErr Executor::VInstall(VBLTaskPtr vtaskp)
 {
-    static GUEST<uint16_t> m68k_rts = CWC(0x4E75); /* RTS */
+    static GUEST<uint16_t> m68k_rts = 0x4E75; /* RTS */
 
-    vtaskp->vblCount = CW(CW(vtaskp->vblCount) + CW(vtaskp->vblPhase));
-    if(vtaskp->qType == CWC((INTEGER)vType))
+    vtaskp->vblCount = vtaskp->vblCount + vtaskp->vblPhase;
+    if(vtaskp->qType == (INTEGER)vType)
     {
         if(!LM(VBLQueue).qHead)
         {
-            vblshim.vblAddr = RM((ProcPtr)&m68k_rts); /* legal 68k code. */
+            vblshim.vblAddr = (ProcPtr)&m68k_rts; /* legal 68k code. */
             Enqueue((QElemPtr)&vblshim, &LM(VBLQueue));
         }
         Enqueue((QElemPtr)vtaskp, &LM(VBLQueue));
@@ -202,11 +202,11 @@ OSErr Executor::SlotVRemove(VBLTaskPtr vtaskp, INTEGER slot)
 
 OSErr Executor::VRemove(VBLTaskPtr vtaskp)
 {
-    if(vtaskp->qType == CWC((INTEGER)vType))
+    if(vtaskp->qType == (INTEGER)vType)
     {
         Dequeue((QElemPtr)vtaskp, &LM(VBLQueue));
-        if((VBLTaskPtr)MR(LM(VBLQueue).qHead) == &vblshim
-           && (VBLTaskPtr)MR(LM(VBLQueue).qTail) == &vblshim)
+        if((VBLTaskPtr)LM(VBLQueue).qHead == &vblshim
+           && (VBLTaskPtr)LM(VBLQueue).qTail == &vblshim)
         {
             Dequeue((QElemPtr)&vblshim, &LM(VBLQueue));
             if(ROMlib_clock == CLOCKTEMPON)

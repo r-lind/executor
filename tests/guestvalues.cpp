@@ -6,7 +6,7 @@ using namespace Executor;
 
 TEST(guestvalues, andUL)
 {
-    EXPECT_EQ(10, CW(CW(10UL) & CWC(0x7FFF)));
+    EXPECT_EQ(10, GUEST<unsigned long>(10UL) & 0x7FFF);
 }
 
 TEST(guestvalues, assignToInt16)

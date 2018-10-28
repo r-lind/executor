@@ -26,13 +26,13 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
 
     if((ip = ROMlib_getoffp(cell, list)))
     {
-        off0 = CW(ip[0]) & 0x7FFF;
-        off1 = CW(ip[1]) & 0x7FFF;
-        setit = (CW(ip[0]) & 0x8000) && Hx(list, lActive);
-        saveport = MR(qdGlobals().thePort);
+        off0 = ip[0] & 0x7FFF;
+        off1 = ip[1] & 0x7FFF;
+        setit = (ip[0] & 0x8000) && Hx(list, lActive);
+        saveport = qdGlobals().thePort;
         SetPort(HxP(list, port));
-        saveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort));
-        PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(NewRgn());
+        saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
+        PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
 
         C_LRect(&r, cell, list);
         ClipRect(&r);
@@ -40,8 +40,8 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
         LISTCALL(lDrawMsg, setit, &r, cell, off0, off1 - off0, list);
         LISTEND(list);
 
-        DisposeRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)));
-        PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclip;
+        DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
+        PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
         SetPort(saveport);
     }
 }
@@ -107,8 +107,8 @@ void Executor::C_LScroll(INTEGER ncol, INTEGER nrow,
             ncol = tmpi;
     }
 
-    HxX(list, visible.top) = CW(Hx(list, visible.top) + nrow);
-    HxX(list, visible.left) = CW(Hx(list, visible.left) + ncol);
+    HxX(list, visible.top) = Hx(list, visible.top) + nrow;
+    HxX(list, visible.left) = Hx(list, visible.left) + ncol;
 
     p.h = Hx(list, cellSize.h);
     p.v = Hx(list, cellSize.v);
@@ -160,26 +160,26 @@ void Executor::C_LUpdate(RgnHandle rgn, ListHandle list) /* IMIV-275 */
     csize.h = Hx(list, cellSize.h);
     csize.v = Hx(list, cellSize.v);
     C_LRect(&r, c, list);
-    top = CW(r.top);
-    left = CW(r.left);
+    top = r.top;
+    left = r.left;
     bottom = top + (Hx(list, visible.bottom) - Hx(list, visible.top)) * csize.v;
     right = left + (Hx(list, visible.right) - Hx(list, visible.left)) * csize.h;
-    while(CW(r.top) < bottom)
+    while(r.top < bottom)
     {
-        while(CW(r.left) < right)
+        while(r.left < right)
         {
             if(RectInRgn(&r, rgn))
                 C_LDraw(c, list);
-            r.left = CW(CW(r.left) + (csize.h));
-            r.right = CW(CW(r.right) + (csize.h));
+            r.left = r.left + (csize.h);
+            r.right = r.right + (csize.h);
             c.h++;
         }
         c.h = cleft;
         c.v++;
-        r.top = CW(CW(r.top) + (csize.v));
-        r.bottom = CW(CW(r.bottom) + (csize.v));
-        r.left = CW(left);
-        r.right = CW(left + csize.h);
+        r.top = r.top + (csize.v);
+        r.bottom = r.bottom + (csize.v);
+        r.left = left;
+        r.right = left + csize.h;
     }
     if((ch = HxP(list, hScroll)))
     {
@@ -230,17 +230,17 @@ void Executor::C_LActivate(BOOLEAN act, ListHandle list) /* IMIV-276 */
             for(c.h = Hx(list, visible.left); c.h < Hx(list, visible.right);
                 c.h++)
             {
-                if((ip = ROMlib_getoffp(c, list)) && (CW(*ip) & 0x8000))
+                if((ip = ROMlib_getoffp(c, list)) && (*ip & 0x8000))
                 {
-                    off0 = CW(ip[0]) & 0x7FFF;
-                    off1 = CW(ip[1]) & 0x7FFF;
-                    saveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort));
-                    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(NewRgn());
+                    off0 = ip[0] & 0x7FFF;
+                    off1 = ip[1] & 0x7FFF;
+                    saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
+                    PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
                     C_LRect(&r, c, list);
                     ClipRect(&r);
                     LISTCALL(lHiliteMsg, sel, &r, c, off0, off1 - off0, list);
-                    DisposeRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)));
-                    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclip;
+                    DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
+                    PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
                 }
             }
         }
@@ -259,11 +259,11 @@ void Executor::ROMlib_listcall(INTEGER mess, BOOLEAN sel, Rect *rp, Cell cell, I
     {
         listprocp lp;
 
-        lp = MR(*(GUEST<listprocp> *)listdefhand);
+        lp = *(GUEST<listprocp> *)listdefhand;
         if(!lp)
         {
             LoadResource(HxP(lhand, listDefProc));
-            lp = MR(*(GUEST<listprocp> *)HxP(lhand, listDefProc));
+            lp = *(GUEST<listprocp> *)HxP(lhand, listDefProc);
         }
         if(lp == &ldef0)
             ldef0(mess, sel, rp, cell, off, len, lhand);

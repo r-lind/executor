@@ -21,59 +21,59 @@ using namespace Executor;
 AuxWinHandle Executor::default_aux_win = nullptr;
 
 static const RGBColor BLACK_RGB = {
-    CWC(0), CWC(0), CWC(0),
+    0, 0, 0,
 };
 static const RGBColor WHITE_RGB = {
-    CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF),
+    (unsigned short)0xFFFF, (unsigned short)0xFFFF, (unsigned short)0xFFFF,
 };
 
 /* bw window colortable */
 const ColorSpec default_bw_win_ctab[] = {
-    { CWC(wContentColor), WHITE_RGB },
-    { CWC(wFrameColor), BLACK_RGB },
-    { CWC(wTextColor), BLACK_RGB },
-    { CWC(wHiliteColor), BLACK_RGB },
-    { CWC(wTitleBarColor), WHITE_RGB },
-    { CWC(wHiliteColorLight), WHITE_RGB },
-    { CWC(wHiliteColorDark), BLACK_RGB },
-    { CWC(wTitleBarLight), WHITE_RGB },
-    { CWC(wTitleBarDark), BLACK_RGB },
-    { CWC(wDialogLight), BLACK_RGB },
-    { CWC(wDialogDark), BLACK_RGB },
-    { CWC(wTingeLight), BLACK_RGB },
-    { CWC(wTingeDark), BLACK_RGB },
+    { wContentColor, WHITE_RGB },
+    { wFrameColor, BLACK_RGB },
+    { wTextColor, BLACK_RGB },
+    { wHiliteColor, BLACK_RGB },
+    { wTitleBarColor, WHITE_RGB },
+    { wHiliteColorLight, WHITE_RGB },
+    { wHiliteColorDark, BLACK_RGB },
+    { wTitleBarLight, WHITE_RGB },
+    { wTitleBarDark, BLACK_RGB },
+    { wDialogLight, BLACK_RGB },
+    { wDialogDark, BLACK_RGB },
+    { wTingeLight, BLACK_RGB },
+    { wTingeDark, BLACK_RGB },
 };
 
-static const RGBColor LT_BLUISH_RGB = { CWC((unsigned short)0xCCCC), CWC((unsigned short)0xCCCC), CWC((unsigned short)0xFFFF) };
-static const RGBColor DK_BLUISH_RGB = { CWC((unsigned short)0x3333), CWC((unsigned short)0x3333), CWC((unsigned short)0x6666) };
+static const RGBColor LT_BLUISH_RGB = { (unsigned short)0xCCCC, (unsigned short)0xCCCC, (unsigned short)0xFFFF };
+static const RGBColor DK_BLUISH_RGB = { (unsigned short)0x3333, (unsigned short)0x3333, (unsigned short)0x6666 };
 /* the default `bluish' window color table */
 const ColorSpec Executor::default_color_win_ctab[] = {
-    { CWC(wContentColor), WHITE_RGB },
-    { CWC(wFrameColor), BLACK_RGB },
-    { CWC(wTextColor), BLACK_RGB },
-    { CWC(wHiliteColor), BLACK_RGB },
-    { CWC(wTitleBarColor), WHITE_RGB },
-    { CWC(wHiliteColorLight), WHITE_RGB },
-    { CWC(wHiliteColorDark), BLACK_RGB },
-    { CWC(wTitleBarLight), WHITE_RGB },
-    { CWC(wTitleBarDark), BLACK_RGB },
-    { CWC(wDialogLight), LT_BLUISH_RGB },
-    { CWC(wDialogDark), BLACK_RGB },
-    { CWC(wTingeLight), LT_BLUISH_RGB },
-    { CWC(wTingeDark), DK_BLUISH_RGB },
+    { wContentColor, WHITE_RGB },
+    { wFrameColor, BLACK_RGB },
+    { wTextColor, BLACK_RGB },
+    { wHiliteColor, BLACK_RGB },
+    { wTitleBarColor, WHITE_RGB },
+    { wHiliteColorLight, WHITE_RGB },
+    { wHiliteColorDark, BLACK_RGB },
+    { wTitleBarLight, WHITE_RGB },
+    { wTitleBarDark, BLACK_RGB },
+    { wDialogLight, LT_BLUISH_RGB },
+    { wDialogDark, BLACK_RGB },
+    { wTingeLight, LT_BLUISH_RGB },
+    { wTingeDark, DK_BLUISH_RGB },
 };
 #undef DK_BLUISH_RGB
 #undef LT_BLUISH_RGB
 
-static const RGBColor GRAY_RGB = { CWC((unsigned short)0x8888), CWC((unsigned short)0x8888), CWC((unsigned short)0x8888) };
+static const RGBColor GRAY_RGB = { (unsigned short)0x8888, (unsigned short)0x8888, (unsigned short)0x8888 };
 /* stolen from the default colortable excel
    tries to install */
 const ColorSpec default_system6_color_win_ctab[] = {
-    { CWC(wContentColor), WHITE_RGB },
-    { CWC(wFrameColor), BLACK_RGB },
-    { CWC(wTextColor), BLACK_RGB },
-    { CWC(wHiliteColor), BLACK_RGB },
-    { CWC(wTitleBarColor), WHITE_RGB },
+    { wContentColor, WHITE_RGB },
+    { wFrameColor, BLACK_RGB },
+    { wTextColor, BLACK_RGB },
+    { wHiliteColor, BLACK_RGB },
+    { wTitleBarColor, WHITE_RGB },
 };
 #undef GRAY_RGB
 #undef WHITE_RGB
@@ -88,7 +88,7 @@ void Executor::wind_color_init(void)
     HxX(default_aux_win, awNext) = 0;
     HxX(default_aux_win, awOwner) = 0;
     HxX(default_aux_win, awCTable)
-        = RM((CTabHandle)GetResource(TICK("wctb"), 0));
+        = (CTabHandle)GetResource(TICK("wctb"), 0);
     HxX(default_aux_win, dialogCItem) = 0;
     HxX(default_aux_win, awFlags) = 0;
     HxX(default_aux_win, awReserved) = 0;
@@ -101,8 +101,8 @@ Executor::lookup_aux_win(WindowPtr w)
     GUEST<AuxWinHandle> *t;
 
     for(t = &LM(AuxWinHead);
-        *t && HxP(MR(*t), awOwner) != w;
-        t = &HxX(MR(*t), awNext))
+        *t && HxP(*t, awOwner) != w;
+        t = &HxX(*t, awNext))
         ;
     return t;
 }
@@ -113,7 +113,7 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
     {
         AuxWinHandle aux_w;
 
-        aux_w = MR(*lookup_aux_win(w));
+        aux_w = *lookup_aux_win(w);
 
         if(!aux_w)
         {
@@ -121,18 +121,18 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
 
             t_aux_w = LM(AuxWinHead);
             aux_w = (AuxWinHandle)NewHandle(sizeof(AuxWinRec));
-            LM(AuxWinHead) = RM(aux_w);
+            LM(AuxWinHead) = aux_w;
             HxX(aux_w, awNext) = t_aux_w;
-            HxX(aux_w, awOwner) = RM((WindowPtr)w);
+            HxX(aux_w, awOwner) = (WindowPtr)w;
             /* FIXME: copy? */
-            HxX(aux_w, awCTable) = RM(new_w_ctab);
+            HxX(aux_w, awCTable) = new_w_ctab;
             HxX(aux_w, dialogCItem) = 0;
-            HxX(aux_w, awFlags) = /* CL (proc_id & 0x0F) */ 0;
+            HxX(aux_w, awFlags) = /* (proc_id & 0x0F) */ 0;
             HxX(aux_w, awReserved) = 0;
             HxX(aux_w, awRefCon) = 0;
         }
         else
-            HxX(aux_w, awCTable) = RM(new_w_ctab);
+            HxX(aux_w, awCTable) = new_w_ctab;
 
         if(CGrafPort_p(w))
         {
@@ -146,7 +146,7 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
 
             /* pick the best color and store it into window's port's
 	     bkColor field */
-            PORT_BK_COLOR_X(w) = CL(Color2Index(color));
+            PORT_BK_COLOR_X(w) = Color2Index(color);
 
             if(WINDOW_VISIBLE_X(w))
             {
@@ -156,8 +156,8 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
 
                 CopyRgn(WINDOW_CONT_REGION(w), t);
                 OffsetRgn(t,
-                          CW(PORT_BOUNDS(w).left),
-                          CW(PORT_BOUNDS(w).top));
+                          PORT_BOUNDS(w).left,
+                          PORT_BOUNDS(w).top);
                 EraseRgn(t);
                 DisposeRgn(t);
             }
@@ -169,7 +169,7 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
 	     window
 	     FIXME: i'm not sure to what extent this should be the
 	     case, at the bare minimum at least here */
-            SetPort(MR(wmgr_port));
+            SetPort(wmgr_port);
 
             SetClip(WINDOW_STRUCT_REGION(w));
             ClipAbove((WindowPeek)w);
@@ -199,7 +199,7 @@ BOOLEAN Executor::C_GetAuxWin(WindowPtr w, GUEST<AuxWinHandle> *aux_win_out)
     if(!w)
     {
         /* return default window color table */
-        *aux_win_out = RM(default_aux_win);
+        *aux_win_out = default_aux_win;
         return true;
     }
     else
@@ -216,7 +216,7 @@ BOOLEAN Executor::C_GetAuxWin(WindowPtr w, GUEST<AuxWinHandle> *aux_win_out)
         else
         {
             /* return default window color table */
-            *aux_win_out = RM(default_aux_win);
+            *aux_win_out = default_aux_win;
             return false;
         }
     }

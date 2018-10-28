@@ -16,20 +16,20 @@ using namespace Executor;
 #define FillCxxx(CALLxxx)                                            \
     do                                                               \
     {                                                                \
-        if(CGrafPort_p(MR(qdGlobals().thePort)))                                     \
+        if(CGrafPort_p(qdGlobals().thePort))                                     \
         {                                                            \
             GUEST<PixPatHandle> orig_fill_pixpat_x;                  \
                                                                      \
             PenMode(patCopy);                                        \
-            orig_fill_pixpat_x = CPORT_FILL_PIXPAT_X(MR(qdGlobals().thePort));       \
+            orig_fill_pixpat_x = CPORT_FILL_PIXPAT_X(qdGlobals().thePort);       \
             /* ROMlib_fill_pixpat (pixpat); */                       \
-            CPORT_FILL_PIXPAT_X(MR(qdGlobals().thePort)) = RM(pixpat);               \
+            CPORT_FILL_PIXPAT_X(qdGlobals().thePort) = pixpat;               \
             CALLxxx;                                                 \
-            CPORT_FILL_PIXPAT_X(MR(qdGlobals().thePort)) = orig_fill_pixpat_x;       \
+            CPORT_FILL_PIXPAT_X(qdGlobals().thePort) = orig_fill_pixpat_x;       \
         }                                                            \
         else                                                         \
         {                                                            \
-            PATASSIGN(PORT_FILL_PAT(MR(qdGlobals().thePort)), PIXPAT_1DATA(pixpat)); \
+            PATASSIGN(PORT_FILL_PAT(qdGlobals().thePort), PIXPAT_1DATA(pixpat)); \
             CALLxxx;                                                 \
         }                                                            \
     } while(false)

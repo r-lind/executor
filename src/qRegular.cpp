@@ -37,7 +37,7 @@ void Executor::C_InvertRect(Rect *r)
 
 void Executor::C_FillRect(Rect *r, Pattern pat)
 {
-    if(!EmptyRgn(PORT_VIS_REGION(MR(qdGlobals().thePort))))
+    if(!EmptyRgn(PORT_VIS_REGION(qdGlobals().thePort)))
     {
         ROMlib_fill_pat(pat);
         CALLRECT(fill, r);

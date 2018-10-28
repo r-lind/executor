@@ -56,8 +56,8 @@ void builtinlibs::addPPCEntrypoint(const char *library, const char *function, st
 {
     assert(nCallbacks < NELEM(callbacks));
     PPCCallback& callback = callbacks[nCallbacks++];
-    callback.sc = CL(0x44000002);
-    callback.codePtr = RM(&callback.sc);
+    callback.sc = 0x44000002;
+    callback.codePtr = &callback.sc;
     callback.implementation = code;
     callback.name = function;
 
@@ -68,8 +68,8 @@ Ptr builtinlibs::makeUndefinedSymbolStub(const char *name)
 {
     assert(nCallbacks < NELEM(callbacks));
     PPCCallback& callback = callbacks[nCallbacks++];
-    callback.sc = CL(0x44000002);
-    callback.codePtr = RM(&callback.sc);
+    callback.sc = 0x44000002;
+    callback.codePtr = &callback.sc;
     callback.implementation = nullptr;
     callback.name = name;
     return (Ptr) &callback;
@@ -84,8 +84,8 @@ ConnectionID builtinlibs::getBuiltinLib(Str255 libname)
     else
     {
         ConnectionID cid = ROMlib_new_connection(1);
-        cid->lihp = RM(ROMlib_build_pef_hash(it->second.data(), it->second.size()));
-        cid->ref_count = CL(1);
+        cid->lihp = ROMlib_build_pef_hash(it->second.data(), it->second.size());
+        cid->ref_count = 1;
         return cid;
     }
 }

@@ -129,17 +129,17 @@ STUB(Launch)
     StringPtr strp;
 
     lpbp = (LaunchParamBlockRec *)SYN68K_TO_US(EM_A0);
-    if(lpbp->launchBlockID == CWC(extendedBlock))
+    if(lpbp->launchBlockID == extendedBlock)
         strp = 0;
     else
-        strp = MR(*(GUEST<StringPtr> *)lpbp);
+        strp = *(GUEST<StringPtr> *)lpbp;
     EM_D0 = NewLaunch(strp, 0, lpbp);
     RTS();
 }
 
 STUB(Chain)
 {
-    Chain(MR(*(GUEST<StringPtr> *)SYN68K_TO_US(EM_A0)), 0);
+    Chain(*(GUEST<StringPtr> *)SYN68K_TO_US(EM_A0), 0);
     RTS();
 }
 
@@ -199,7 +199,7 @@ STUB(ADBOp)
     p = (adbop_t *)SYN68K_TO_US(EM_A0);
 
     cpu_state.regs[0].sw.n
-        = ADBOp(MR(p->data), MR(p->proc), MR(p->buffer), EM_D0);
+        = ADBOp(p->data, p->proc, p->buffer, EM_D0);
     RTS();
 }
 
@@ -278,20 +278,20 @@ STUB(CommToolboxDispatch)
 
     arg_block = (comm_toolbox_dispatch_args_t *)SYN68K_TO_US(EM_A0);
 
-    selector = CW(arg_block->selector);
+    selector = arg_block->selector;
     switch(selector)
     {
         case 0x0402:
-            AppendDITL(MR(arg_block->args.append_args.dp),
-                       MR(arg_block->args.append_args.new_items_h),
-                       CW(arg_block->args.append_args.method));
+            AppendDITL(arg_block->args.append_args.dp,
+                       arg_block->args.append_args.new_items_h,
+                       arg_block->args.append_args.method);
             break;
         case 0x0403:
-            EM_D0 = CountDITL(MR(arg_block->args.count_args.dp));
+            EM_D0 = CountDITL(arg_block->args.count_args.dp);
             break;
         case 0x0404:
-            ShortenDITL(MR(arg_block->args.shorten_args.dp),
-                        CW(arg_block->args.shorten_args.n_items));
+            ShortenDITL(arg_block->args.shorten_args.dp,
+                        arg_block->args.shorten_args.n_items);
             break;
         case 1286:
             EM_D0 = CRMGetCRMVersion();
@@ -300,13 +300,13 @@ STUB(CommToolboxDispatch)
             EM_D0 = US_TO_SYN68K_CHECK0(CRMGetHeader());
             break;
         case 1283:
-            CRMInstall(MR(arg_block->args.crm_args.qp));
+            CRMInstall(arg_block->args.crm_args.qp);
             break;
         case 1284:
-            EM_D0 = CRMRemove(MR(arg_block->args.crm_args.qp));
+            EM_D0 = CRMRemove(arg_block->args.crm_args.qp);
             break;
         case 1285:
-            EM_D0 = US_TO_SYN68K_CHECK0(CRMSearch(MR(arg_block->args.crm_args.qp)));
+            EM_D0 = US_TO_SYN68K_CHECK0(CRMSearch(arg_block->args.crm_args.qp));
             break;
         case 1281:
             EM_D0 = InitCRM();
@@ -622,9 +622,9 @@ STUB(InitZone)
     initzonehiddenargs_t *ip;
 
     ip = (initzonehiddenargs_t *)SYN68K_TO_US(EM_A0);
-    InitZone(MR(ip->pGrowZone), CW(ip->cMoreMasters),
-             (Ptr)MR(ip->limitPtr), (THz)MR(ip->startPtr));
-    EM_D0 = CW(LM(MemErr));
+    InitZone(ip->pGrowZone, ip->cMoreMasters,
+             (Ptr)ip->limitPtr, (THz)ip->startPtr);
+    EM_D0 = LM(MemErr);
     RTS();
 }
 

@@ -1131,8 +1131,8 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                 sendsuspendevent();
                 break;
             case MotionNotify:
-                LM(MouseLocation).h = CW(evt.xmotion.x);
-                LM(MouseLocation).v = CW(evt.xmotion.y);
+                LM(MouseLocation).h = evt.xmotion.x;
+                LM(MouseLocation).v = evt.xmotion.y;
                 adb_apeiron_hack(false);
                 break;
         }
@@ -1356,7 +1356,7 @@ bool X11VideoDriver::init()
         syn68k_addr_t event_callback;
 
         event_callback = callback_install(post_pending_x_events, nullptr);
-        *(GUEST<ULONGINT> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = CL((ULONGINT)event_callback);
+        *(GUEST<ULONGINT> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = (ULONGINT)event_callback;
     }
 
     /* set up the async x even handler */
@@ -1688,9 +1688,9 @@ void cursor_init(void)
 static inline int
 cs_cs_dist(const ColorSpec *c0, const ColorSpec *c1)
 {
-    return RGB_DIST((CW(c0->rgb.red) - CW(c1->rgb.red)) >> 1,
-                    (CW(c0->rgb.green) - CW(c1->rgb.green)) >> 1,
-                    (CW(c0->rgb.blue) - CW(c1->rgb.blue)) >> 1);
+    return RGB_DIST((c0->rgb.red - c1->rgb.red) >> 1,
+                    (c0->rgb.green - c1->rgb.green) >> 1,
+                    (c0->rgb.blue - c1->rgb.blue) >> 1);
 }
 
 #define CS_X_DIST(r, g, b, x) RGB_DIST((r) - (x).red,   \
@@ -1720,9 +1720,9 @@ compute_new_mapping(int index, const ColorSpec *c)
     unsigned min_dist = MAX_CDIST;
     int shifted_c_red, shifted_c_blue, shifted_c_green;
 
-    shifted_c_red = CW(c->rgb.red) >> 1;
-    shifted_c_green = CW(c->rgb.green) >> 1;
-    shifted_c_blue = CW(c->rgb.blue) >> 1;
+    shifted_c_red = c->rgb.red >> 1;
+    shifted_c_green = c->rgb.green >> 1;
+    shifted_c_blue = c->rgb.blue >> 1;
 
     for(i = (1 << x_fbuf_bpp) - 1; i >= 0; i--)
     {
@@ -1837,9 +1837,9 @@ void init_x_cmap(void)
       c = &orig_colors[alloc_order[i]];
       fprintf (stderr, "%d, %d: (%d %d %d)\n",
 	       i, alloc_order[i],
-	       CW (c->rgb.red),
-	       CW (c->rgb.green),
-	       CW (c->rgb.blue));
+	       c->rgb.red,
+	       c->rgb.green,
+	       c->rgb.blue);
     }
 #endif
 
@@ -1852,9 +1852,9 @@ void init_x_cmap(void)
 
         c = &orig_colors[pixel];
 
-        x_color.red = CW(c->rgb.red);
-        x_color.green = CW(c->rgb.green);
-        x_color.blue = CW(c->rgb.blue);
+        x_color.red = c->rgb.red;
+        x_color.green = c->rgb.green;
+        x_color.blue = c->rgb.blue;
 
         x_color.flags = DoRed | DoGreen | DoBlue;
 
@@ -1906,9 +1906,9 @@ void init_x_cmap(void)
                 int shifted_c_red, shifted_c_green, shifted_c_blue;
                 int j;
 
-                shifted_c_red = CW(c->rgb.red) >> 1;
-                shifted_c_green = CW(c->rgb.green) >> 1;
-                shifted_c_blue = CW(c->rgb.blue) >> 1;
+                shifted_c_red = c->rgb.red >> 1;
+                shifted_c_green = c->rgb.green >> 1;
+                shifted_c_blue = c->rgb.blue >> 1;
 
                 /* find the closest color in the colortable */
                 for(j = 0; j < n_colors; j++)
@@ -2009,9 +2009,9 @@ void X11VideoDriver::setColors(int first_color, int num_colors,
             {
                 x_colors[i].pixel = first_color + i;
 
-                x_colors[i].red = CW(colors[i].rgb.red);
-                x_colors[i].green = CW(colors[i].rgb.green);
-                x_colors[i].blue = CW(colors[i].rgb.blue);
+                x_colors[i].red = colors[i].rgb.red;
+                x_colors[i].green = colors[i].rgb.green;
+                x_colors[i].blue = colors[i].rgb.blue;
 
                 x_colors[i].flags = DoRed | DoGreen | DoBlue;
             }
@@ -2282,8 +2282,8 @@ void X11VideoDriver::pumpEvents()
     LONGINT newmods;
 
     querypointerX(&x, &y, &newmods);
-    LM(MouseLocation).h = CW(x);
-    LM(MouseLocation).v = CW(y);
+    LM(MouseLocation).h = x;
+    LM(MouseLocation).v = y;
 
 }
 
@@ -2360,10 +2360,10 @@ int X11VideoDriver::getScrap(OSType type, Handle h)
                 if(rettype == XA_STRING && actfmt == 8)
                 {
                     SetHandleSize((Handle)h, nitems);
-                    if(LM(MemErr) == CWC(noErr))
+                    if(LM(MemErr) == noErr)
                     {
-                        memcpy(MR(*h), propreturn, nitems);
-                        for(ul = nitems, p = MR(*h); ul > 0; ul--)
+                        memcpy(*h, propreturn, nitems);
+                        for(ul = nitems, p = *h; ul > 0; ul--)
                             if(*p++ == '\n')
                                 p[-1] = '\r';
                         retval = nitems;

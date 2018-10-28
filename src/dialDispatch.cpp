@@ -13,7 +13,7 @@ using namespace Executor;
 
 OSErr Executor::C_GetStdFilterProc(GUEST<ProcPtr> *proc)
 {
-    *proc = RM((ProcPtr)&ROMlib_myfilt);
+    *proc = (ProcPtr)&ROMlib_myfilt;
     warning_unimplemented("no specs"); /* i.e. no documentation on how this
 					 routine is *supposed* to work, so
 					 we may be blowing off something
@@ -27,7 +27,7 @@ OSErr Executor::C_SetDialogDefaultItem(DialogPtr dialog, int16_t new_item)
 
     dp = (DialogPeek)dialog;
 
-    dp->aDefItem = CW(new_item);
+    dp->aDefItem = new_item;
     warning_unimplemented("no specs");
     return noErr;
 }

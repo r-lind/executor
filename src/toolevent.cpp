@@ -91,26 +91,26 @@ static void ROMlib_togglealarm()
     };
 
     /* rectangle of alarm on the screen */
-    static Rect screen_alarm_rect = { CWC(2), CWC(16), CWC(18), CWC(32) };
+    static Rect screen_alarm_rect = { 2, 16, 18, 32 };
 
     BitMap src_alarm_bitmap = {
         /* the baseAddr field of the src_alarm bitmap will either be
 	   the hard coded alarm, or the resource 'sicn' */
         nullptr,
-        CWC(2),
-        { CWC(0), CWC(0), CWC(16), CWC(16) }
+        2,
+        { 0, 0, 16, 16 }
     };
 
     static INTEGER alarm_bits[16];
     BitMap save_alarm_bitmap = {
-        RM((Ptr)&alarm_bits[0]),
-        CWC(2),
-        { CWC(0), CWC(0), CWC(16), CWC(16) }
+        (Ptr)&alarm_bits[0],
+        2,
+        { 0, 0, 16, 16 }
     };
 
     if(ROMlib_alarmonmbar)
     {
-        CopyBits(&save_alarm_bitmap, (BitMap *)STARH(GD_PMAP(MR(LM(TheGDevice)))),
+        CopyBits(&save_alarm_bitmap, (BitMap *)STARH(GD_PMAP(LM(TheGDevice))),
                  &save_alarm_bitmap.bounds, &screen_alarm_rect,
                  srcCopy, nullptr);
         ROMlib_alarmonmbar = false;
@@ -130,15 +130,15 @@ static void ROMlib_togglealarm()
                 src_alarm_bitmap.baseAddr = *alarmh;
             else
                 /* once again, we need to move the (Ptr) cast
-		 inside the CL () because it confuses gcc */
-                src_alarm_bitmap.baseAddr = RM((Ptr)hard_coded_alarm);
+		 inside the () because it confuses gcc */
+                src_alarm_bitmap.baseAddr = (Ptr)hard_coded_alarm;
 
             /* save the screen to save_alarm_bitmap */
-            CopyBits((BitMap *)STARH(GD_PMAP(MR(LM(TheGDevice)))), &save_alarm_bitmap,
+            CopyBits((BitMap *)STARH(GD_PMAP(LM(TheGDevice))), &save_alarm_bitmap,
                      &screen_alarm_rect, &save_alarm_bitmap.bounds,
                      srcCopy, nullptr);
             /* and copy the new alarm to the screen */
-            CopyBits(&src_alarm_bitmap, (BitMap *)STARH(GD_PMAP(MR(LM(TheGDevice)))),
+            CopyBits(&src_alarm_bitmap, (BitMap *)STARH(GD_PMAP(LM(TheGDevice))),
                      &src_alarm_bitmap.bounds, &screen_alarm_rect,
                      srcCopy, nullptr);
             ROMlib_alarmonmbar = true;
@@ -164,8 +164,8 @@ LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, LONGINT *state)
     virt = code & VIRT_MASK;
 
     table_num_index = (code >> MODIFIER_SHIFT) & MODIFIER_MASK;
-    table_num = CB((KCHR_MODIFIER_TABLE_X(p))[table_num_index]);
-    ascii = (unsigned char)CB(KCHR_TABLE_X(p)[table_num][virt]);
+    table_num = (KCHR_MODIFIER_TABLE_X(p))[table_num_index];
+    ascii = (unsigned char)(KCHR_TABLE_X(p)[table_num][virt]);
 
     if(*state == 0)
     {
@@ -200,13 +200,13 @@ LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, LONGINT *state)
         n_recs = COMPLETER_N_RECS(completep);
         for(i = 0;
             (i < n_recs
-             && (CB((COMPLETER_COMPLETER_RECS_X(completep))[i].to_look_for)
+             && ((COMPLETER_COMPLETER_RECS_X(completep))[i].to_look_for
                  != ascii));
             ++i)
             ;
         if(i < n_recs)
             ascii = (unsigned char)
-                CB((COMPLETER_COMPLETER_RECS_X(completep)[i]).replacement);
+                (COMPLETER_COMPLETER_RECS_X(completep)[i]).replacement;
         else
             ascii = (ascii << 16) | (unsigned short)DEAD_KEY_NO_MATCH(deadp);
     }
@@ -253,15 +253,15 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
 
     hle_reset();
 
-    evt->message = CLC(0);
+    evt->message = 0;
     TRACE(2);
     if(LM(SPVolCtl) & 0x80)
     {
         TRACE(3);
         GetDateTime(&now_s);
-        now = CL(now_s);
+        now = now_s;
         TRACE(4);
-        if(now >= (ULONGINT)Cx(LM(SPAlarm)))
+        if(now >= (ULONGINT)LM(SPAlarm))
         {
             TRACE(5);
             if(now & 1)
@@ -298,7 +298,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
             TRACE(12);
             GetOSEvent(0, evt);
             TRACE(13);
-            evt->what = CW(activateEvt);
+            evt->what = activateEvt;
             evt->message = guest_cast<LONGINT>(LM(CurDeactive));
             if(remflag)
                 LM(CurDeactive) = nullptr;
@@ -310,9 +310,9 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
             TRACE(14);
             GetOSEvent(0, evt);
             TRACE(15);
-            evt->what = CW(activateEvt);
+            evt->what = activateEvt;
             evt->message = guest_cast<LONGINT>(LM(CurActivate));
-            evt->modifiers |= CW(activeFlag);
+            evt->modifiers |= activeFlag;
             if(remflag)
                 LM(CurActivate) = nullptr;
             retval = true;
@@ -338,10 +338,10 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
 #ifdef MACOSX
         fkeyModifiers = optionKey | cmdKey;
 #endif
-        if(retval && Cx(evt->what) == keyDown && LM(ScrDmpEnb) && (Cx(evt->modifiers) & fkeyModifiers) == fkeyModifiers)
+        if(retval && evt->what == keyDown && LM(ScrDmpEnb) && (evt->modifiers & fkeyModifiers) == fkeyModifiers)
         {
             TRACE(18);
-            switch((Cx(evt->message) & keyCodeMask) >> 8)
+            switch((evt->message & keyCodeMask) >> 8)
             {
                 case 0x12: /* command shift 1: About Box / Help */
                     retval = false;
@@ -384,7 +384,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
 #endif
             }
             if(!retval)
-                evt->what = CW(nullEvent);
+                evt->what = nullEvent;
             /*-->*/ goto done;
         }
     }
@@ -412,7 +412,7 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
             if(evt->message)
             {
                 TRACE(27);
-                evt->what = CW(diskEvt);
+                evt->what = diskEvt;
                 retval = true;
             }
         }
@@ -442,7 +442,7 @@ done:
     if(SystemEvent(evt))
     {
         TRACE(32);
-        evt->what = CWC(nullEvent);
+        evt->what = nullEvent;
         retval = false;
     }
     TRACE(33);
@@ -455,9 +455,9 @@ done:
             if(w)
             {
                 if(shouldBeSuspended)
-                    LM(CurDeactive) = RM(w);
+                    LM(CurDeactive) = w;
                 else
-                    LM(CurActivate) = RM(w);
+                    LM(CurActivate) = w;
                 C_HiliteWindow(w, !shouldBeSuspended);
                 isSuspended = shouldBeSuspended;
             }
@@ -502,13 +502,13 @@ BOOLEAN Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
             static INTEGER saved_h, saved_v;
 
             /* TODO: see what PtInRgn does with 0 as a RgnHandle */
-            p.h = CW(evp->where.h);
-            p.v = CW(evp->where.v);
+            p.h = evp->where.h;
+            p.v = evp->where.v;
             if(mousergn && !EmptyRgn(mousergn) && !PtInRgn(p, mousergn)
                && (p.h != saved_h || p.v != saved_v))
             {
-                evp->what = CWC(osEvt);
-                evp->message = CLC(mouseMovedMessage << 24);
+                evp->what = osEvt;
+                evp->message = mouseMovedMessage << 24;
                 retval = true;
             }
             else if(sleep > 0)
@@ -544,7 +544,7 @@ BOOLEAN Executor::C_Button()
     BOOLEAN retval;
 
     GetOSEvent(0, &evt);
-    retval = (evt.modifiers & CWC(btnState)) ? false : true;
+    retval = (evt.modifiers & btnState) ? false : true;
     return retval;
 }
 
@@ -591,23 +591,23 @@ LONGINT Executor::C_TickCount()
    */
 
     if(ROMlib_clock)
-        LM(Ticks) = CL(ticks);
+        LM(Ticks) = ticks;
 
     new_time = (UNIXTIMETOMACTIME(ROMlib_start_time.tv_sec)
                 + (long)((ROMlib_start_time.tv_usec / (1000000.0 / 60) + ticks) / 60));
 
-    LM(Time) = CL(new_time);
+    LM(Time) = new_time;
     return ticks;
 }
 
 LONGINT Executor::GetDblTime()
 {
-    return (Cx(LM(DoubleTime)));
+    return (LM(DoubleTime));
 }
 
 LONGINT Executor::GetCaretTime()
 {
-    return (Cx(LM(CaretTime)));
+    return (LM(CaretTime));
 }
 
 /*
@@ -645,8 +645,8 @@ Executor::sendsuspendevent(void)
         && (!(ROMlib_options & ROMLIB_NOSUSPEND_BIT) /* ||
 	  !(size_info.size_flags & SZcanBackground) */))
     {
-        p.h = CW(LM(MouseLocation).h);
-        p.v = CW(LM(MouseLocation).v);
+        p.h = LM(MouseLocation).h;
+        p.v = LM(MouseLocation).v;
         ROMlib_PPostEvent(osEvt, SUSPENDRESUMEBITS | SUSPEND | CONVERTCLIPBOARD,
                           (GUEST<EvQElPtr> *)0, TickCount(), p, ROMlib_mods);
     }
@@ -669,8 +669,8 @@ Executor::sendresumeevent(bool cvtclip)
         what = SUSPENDRESUMEBITS | RESUME;
         if(cvtclip)
             what |= CONVERTCLIPBOARD;
-        p.h = CW(LM(MouseLocation).h);
-        p.v = CW(LM(MouseLocation).v);
+        p.h = LM(MouseLocation).h;
+        p.v = LM(MouseLocation).v;
         ROMlib_PPostEvent(osEvt, what, (GUEST<EvQElPtr> *)0, TickCount(),
                           p, ROMlib_mods);
     }
@@ -681,8 +681,8 @@ sendcopy(void)
 {
     Point p;
 
-    p.h = CW(LM(MouseLocation).h);
-    p.v = CW(LM(MouseLocation).v);
+    p.h = LM(MouseLocation).h;
+    p.v = LM(MouseLocation).v;
     ROMlib_PPostEvent(keyDown, 0x0863, /* 0x63 == 'c' */
                       (GUEST<EvQElPtr> *)0, TickCount(), p, cmdKey | btnState);
     ROMlib_PPostEvent(keyUp, 0x0863,
@@ -694,8 +694,8 @@ sendpaste(void)
 {
     Point p;
 
-    p.h = CW(LM(MouseLocation).h);
-    p.v = CW(LM(MouseLocation).v);
+    p.h = LM(MouseLocation).h;
+    p.v = LM(MouseLocation).v;
     ROMlib_PPostEvent(keyDown, 0x0976, /* 0x76 == 'v' */
                       (GUEST<EvQElPtr> *)0, TickCount(), p, cmdKey | btnState);
     ROMlib_PPostEvent(keyUp, 0x0976,
@@ -715,8 +715,8 @@ post_helper(INTEGER code, uint8_t raw, uint8_t mapped, INTEGER mods)
 {
     Point p;
 
-    p.h = CW(LM(MouseLocation).h);
-    p.v = CW(LM(MouseLocation).v);
+    p.h = LM(MouseLocation).h;
+    p.v = LM(MouseLocation).v;
 
     ROMlib_PPostEvent(code, (raw << 8) | mapped, (GUEST<EvQElPtr> *)0,
                       TickCount(), p, btnState | mods);

@@ -155,7 +155,7 @@ typedef struct TTxtPicRec
 #define TEXTPIC_LINE(h) (HxX(h, tLine))
 #define TEXTPIC_COMMENT(h) (HxX(h, tCmnt))
 #define TEXTPIC_ANGLE_FIXED_X(h) (HxX(h, tAngleFixed))
-#define TEXTPIC_ANGLE_FIXED(h) (CL(TEXTPIC_ANGLE_FIXED_X(h)))
+#define TEXTPIC_ANGLE_FIXED(h) (TEXTPIC_ANGLE_FIXED_X(h))
 
 typedef GUEST<TTxtPicPtr> *TTxtPicHdl;
 
@@ -183,9 +183,9 @@ typedef struct TCenterRec
 } * TCenterRecPtr;
 
 #define TEXTCENTER_Y_X(h) (HxX(h, y))
-#define TEXTCENTER_Y(h) (CL(TEXTCENTER_Y_X(h)))
+#define TEXTCENTER_Y(h) (TEXTCENTER_Y_X(h))
 #define TEXTCENTER_X_X(h) (HxX(h, x))
-#define TEXTCENTER_X(h) (CL(TEXTCENTER_X_X(h)))
+#define TEXTCENTER_X(h) (TEXTCENTER_X_X(h))
 
 typedef GUEST<TCenterRecPtr> *TCenterRecHdl;
 

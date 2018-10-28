@@ -31,10 +31,10 @@ struct cfrg_resource_t
 };
 
 #define CFRG_VERSION_X(cfrg) ((cfgr)->version)
-#define CFRG_VERSION(cfrg) (CL(CFRG_VERSION_X(cfgr)))
+#define CFRG_VERSION(cfrg) (CFRG_VERSION_X(cfgr))
 
 #define CFRG_N_DESCRIPTS_X(cfrg) ((cfrg)->n_descripts)
-#define CFRG_N_DESCRIPTS(cfrg) (CL(CFRG_N_DESCRIPTS_X(cfrg)))
+#define CFRG_N_DESCRIPTS(cfrg) (CFRG_N_DESCRIPTS_X(cfrg))
 
 struct cfir_t
 {
@@ -56,22 +56,22 @@ struct cfir_t
 };
 
 #define CFIR_ISA_X(cfir) ((cfir)->isa)
-#define CFIR_ISA(cfir) (CL(CFIR_ISA_X(cfir)))
+#define CFIR_ISA(cfir) (CFIR_ISA_X(cfir))
 
 #define CFIR_TYPE_X(cfir) ((cfir)->fragment_type)
-#define CFIR_TYPE(cfir) (CB(CFIR_TYPE_X(cfir)))
+#define CFIR_TYPE(cfir) (CFIR_TYPE_X(cfir))
 
 #define CFIR_LOCATION_X(cfir) ((cfir)->fragment_location)
 #define CFIR_LOCATION(cfir) CFIR_LOCATION_X(cfir)
 
 #define CFIR_LENGTH_X(cfir) ((cfir)->cfir_length)
-#define CFIR_LENGTH(cfir) (CW(CFIR_LENGTH_X(cfir)))
+#define CFIR_LENGTH(cfir) (CFIR_LENGTH_X(cfir))
 
 #define CFIR_OFFSET_TO_FRAGMENT_X(cfir) ((cfir)->offset_to_fragment)
-#define CFIR_OFFSET_TO_FRAGMENT(cfir) (CL(CFIR_OFFSET_TO_FRAGMENT_X(cfir)))
+#define CFIR_OFFSET_TO_FRAGMENT(cfir) (CFIR_OFFSET_TO_FRAGMENT_X(cfir))
 
 #define CFIR_FRAGMENT_LENGTH_X(cfir) ((cfir)->fragment_length)
-#define CFIR_FRAGMENT_LENGTH(cfir) (CL(CFIR_FRAGMENT_LENGTH_X(cfir)))
+#define CFIR_FRAGMENT_LENGTH(cfir) (CFIR_FRAGMENT_LENGTH_X(cfir))
 
 #define CFIR_NAME(cfir) ((cfir)->name)
 
@@ -218,13 +218,13 @@ struct lib_t
 };
 
 #define LIB_CID_X(l) ((l)->cid)
-#define LIB_CID(l) (MR(LIB_CID_X(l)))
+#define LIB_CID(l) (LIB_CID_X(l))
 
 #define LIB_N_SYMBOLS_X(l) ((l)->n_symbols)
-#define LIB_N_SYMBOLS(l) (CL(LIB_N_SYMBOLS_X(l)))
+#define LIB_N_SYMBOLS(l) (LIB_N_SYMBOLS_X(l))
 
 #define LIB_FIRST_SYMBOL_X(l) ((l)->first_symbol)
-#define LIB_FIRST_SYMBOL(l) (CL(LIB_FIRST_SYMBOL_X(l)))
+#define LIB_FIRST_SYMBOL(l) (LIB_FIRST_SYMBOL_X(l))
 
 struct CFragClosure_t
 {
@@ -234,7 +234,7 @@ struct CFragClosure_t
 };
 
 #define N_LIBS_X(c) ((c)->n_libs)
-#define N_LIBS(c) (CL(N_LIBS_X(c)))
+#define N_LIBS(c) (N_LIBS_X(c))
 
 typedef CFragClosure_t *CFragClosureID;
 

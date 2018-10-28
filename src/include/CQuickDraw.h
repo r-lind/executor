@@ -112,7 +112,7 @@ typedef struct Palette
     GUEST<ColorInfo[1]> pmInfo;
 } * PalettePtr;
 
-#define CI_USAGE_TYPE_BITS_X (CWC(0xF))
+#define CI_USAGE_TYPE_BITS_X (0xF)
 enum
 {
     CI_USAGE_TYPE_BITS = (0xF),

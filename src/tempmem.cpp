@@ -59,7 +59,7 @@ Ptr Executor::C_TempTopMem()
 Handle Executor::C_TempNewHandle(Size logical_size, GUEST<OSErr> *result_code)
 {
 #if defined(TEMP_MEM_FAIL)
-    *result_code = CWC(memFullErr);
+    *result_code = memFullErr;
     return nullptr;
 #else
     {

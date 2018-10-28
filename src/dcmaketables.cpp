@@ -459,8 +459,8 @@ depthconv_make_rgb_to_ind_table(void *table_space, unsigned out_bpp,
         d->src_rgb_spec = src_rgb_spec;
 
         /* Save away some other info for later. */
-        d->swapped_ctab = RM(mapping);
-        d->swapped_itab = RM(itab);
+        d->swapped_ctab = mapping;
+        d->swapped_itab = itab;
     }
 
     /* Return the function that does the actual transfer. */

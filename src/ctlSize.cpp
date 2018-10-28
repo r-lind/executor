@@ -20,20 +20,20 @@ void Executor::C_MoveControl(ControlHandle c, INTEGER h, INTEGER v) /* IMI-325 *
     if(Hx(c, contrlVis))
     {
         HideControl(c);
-        HxX(c, contrlRect.right) = CW(Hx(c, contrlRect.right)
-                                      + h - Hx(c, contrlRect.left));
-        HxX(c, contrlRect.bottom) = CW(Hx(c, contrlRect.bottom)
-                                       + v - Hx(c, contrlRect.top));
-        HxX(c, contrlRect.left) = CW(h);
-        HxX(c, contrlRect.top) = CW(v);
+        HxX(c, contrlRect.right) = Hx(c, contrlRect.right)
+                                      + h - Hx(c, contrlRect.left);
+        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.bottom)
+                                       + v - Hx(c, contrlRect.top);
+        HxX(c, contrlRect.left) = h;
+        HxX(c, contrlRect.top) = v;
         ShowControl(c);
     }
     else
     {
-        HxX(c, contrlRect.right) = CW(Hx(c, contrlRect.right) + h - Hx(c, contrlRect.left));
-        HxX(c, contrlRect.bottom) = CW(Hx(c, contrlRect.bottom) + v - Hx(c, contrlRect.top));
-        HxX(c, contrlRect.left) = CW(h);
-        HxX(c, contrlRect.top) = CW(v);
+        HxX(c, contrlRect.right) = Hx(c, contrlRect.right) + h - Hx(c, contrlRect.left);
+        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.bottom) + v - Hx(c, contrlRect.top);
+        HxX(c, contrlRect.left) = h;
+        HxX(c, contrlRect.top) = v;
     }
 }
 
@@ -64,13 +64,13 @@ void Executor::C_SizeControl(ControlHandle c, INTEGER width,
     if(Hx(c, contrlVis))
     {
         HideControl(c);
-        HxX(c, contrlRect.right) = CW(Hx(c, contrlRect.left) + width);
-        HxX(c, contrlRect.bottom) = CW(Hx(c, contrlRect.top) + height);
+        HxX(c, contrlRect.right) = Hx(c, contrlRect.left) + width;
+        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.top) + height;
         ShowControl(c);
     }
     else
     {
-        HxX(c, contrlRect.right) = CW(Hx(c, contrlRect.left) + width);
-        HxX(c, contrlRect.bottom) = CW(Hx(c, contrlRect.top) + height);
+        HxX(c, contrlRect.right) = Hx(c, contrlRect.left) + width;
+        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.top) + height;
     }
 }

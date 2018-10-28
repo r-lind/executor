@@ -37,7 +37,7 @@ using namespace Executor;
         GUEST<ControlHandle> bogo_c;               \
                                                    \
         retval = FindControl(arg0, arg1, &bogo_c); \
-        *(arg2) = MR(bogo_c);                      \
+        *(arg2) = bogo_c;                      \
                                                    \
         retval;                                    \
     })
@@ -81,7 +81,7 @@ event_loop(void)
                      &evt);
         where = evt.where.get();
 
-        switch(CW(evt.what))
+        switch(evt.what)
         {
             case mouseDown:
             {
@@ -143,7 +143,7 @@ event_loop(void)
             {
                 char ch;
 
-                ch = CL(evt.message) & 0xFF;
+                ch = evt.message & 0xFF;
                 if(ch == '\r' || ch == NUMPAD_ENTER)
                 {
                     int i;
@@ -240,9 +240,9 @@ int Executor::system_error(const char *_message, int _default_button,
                                         0, strlen(message));
 
         GetFontInfo(&font_info);
-        text_height = (CW(font_info.ascent)
-                       + CW(font_info.descent)
-                       + CW(font_info.leading));
+        text_height = (font_info.ascent
+                       + font_info.descent
+                       + font_info.leading);
 
         line_count
             /* must be at least one line of text, otherwise we'll get hit
@@ -280,24 +280,24 @@ int Executor::system_error(const char *_message, int _default_button,
             int top;
             int left;
 
-            gd_rect = &GD_RECT(MR(LM(MainDevice)));
+            gd_rect = &GD_RECT(LM(MainDevice));
             gd_width = RECT_WIDTH(gd_rect);
             gd_height = RECT_HEIGHT(gd_rect);
 
             /* centered horizontally, with a third of the space above the
 	    window, and two-thirds below */
-            top = CW(gd_rect->top) + (gd_height - height) / 3;
-            left = CW(gd_rect->left) + (gd_width - width) / 2;
+            top = gd_rect->top + (gd_height - height) / 3;
+            left = gd_rect->left + (gd_width - width) / 2;
 
             MoveWindow(msg_window, left, top, true);
         }
 
         ShowWindow(msg_window);
 
-        message_rect.top = CWC(10);
-        message_rect.left = CWC(10);
-        message_rect.bottom = CW(message_height + 10);
-        message_rect.right = CW(message_width + 10);
+        message_rect.top = 10;
+        message_rect.left = 10;
+        message_rect.bottom = message_height + 10;
+        message_rect.right = message_width + 10;
 
         for(i = 0; i < N_BUTTONS; i++)
             if(buttons[i].text != nullptr)
@@ -305,12 +305,12 @@ int Executor::system_error(const char *_message, int _default_button,
                 Rect ctl_rect;
                 unsigned char buf[256];
 
-                ctl_rect.top = CW(height - 10 - 20);
-                ctl_rect.bottom = CW(height - 10);
+                ctl_rect.top = height - 10 - 20;
+                ctl_rect.bottom = height - 10;
 
-                ctl_rect.right = CW(width - 10 - i * (max_button_width + 13));
-                ctl_rect.left = CW(width - 10 - i * (max_button_width + 13)
-                                   - max_button_width);
+                ctl_rect.right = width - 10 - i * (max_button_width + 13);
+                ctl_rect.left = width - 10 - i * (max_button_width + 13)
+                                   - max_button_width;
 
                 *buf = (unsigned char)strlen(buttons[i].text);
                 strcpy((char *)&buf[1], buttons[i].text);

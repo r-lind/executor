@@ -68,10 +68,10 @@ void Executor::gd_allocate_main_device(void)
                                  mode_from_bpp(vdriver->bpp()));
 
     /* we are the main device, since there are currently no others */
-    LM(TheGDevice) = LM(MainDevice) = RM(graphics_device);
+    LM(TheGDevice) = LM(MainDevice) = graphics_device;
 
     /* set gd flags reflective of the main device */
-    GD_FLAGS_X(graphics_device) |= CWC((1 << mainScreen) | (1 << screenDevice) | (1 << screenActive)
+    GD_FLAGS_X(graphics_device) |= (1 << mainScreen) | (1 << screenDevice) | (1 << screenActive)
                                            /* PacMan Deluxe avoids
 						 GDevices with noDriver
 						 set.  Looking around
@@ -81,24 +81,24 @@ void Executor::gd_allocate_main_device(void)
 						 gDevices.  It's not clear
 						 whether or not we should
 						 be setting this bit.
-					    | (1 << noDriver) */);
+					    | (1 << noDriver) */;
 
     gd_set_bpp(graphics_device, !vdriver->isGrayscale(), vdriver->isFixedCLUT(),
                vdriver->bpp());
 
     gd_pixmap = GD_PMAP(graphics_device);
-    PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver->rowBytes()));
-    PIXMAP_BASEADDR_X(gd_pixmap) = RM((Ptr)vdriver->framebuffer());
+    PIXMAP_SET_ROWBYTES_X(gd_pixmap, vdriver->rowBytes());
+    PIXMAP_BASEADDR_X(gd_pixmap) = (Ptr)vdriver->framebuffer();
 
     gd_rect = &GD_RECT(graphics_device);
-    gd_rect->top = gd_rect->left = CWC(0);
-    gd_rect->bottom = CW(vdriver->height());
-    gd_rect->right = CW(vdriver->width());
+    gd_rect->top = gd_rect->left = 0;
+    gd_rect->bottom = vdriver->height();
+    gd_rect->right = vdriver->width();
     PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
 
     /* add ourselves to the device list */
     GD_NEXT_GD_X(graphics_device) = LM(DeviceList);
-    LM(DeviceList) = RM(graphics_device);
+    LM(DeviceList) = graphics_device;
 
     /* Assure that we're using the correct colors. */
     if(vdriver->bpp() <= 8)
@@ -121,46 +121,46 @@ GDHandle Executor::C_NewGDevice(INTEGER ref_num, LONGINT mode)
 
     /* initialize fields; for some of these, i'm not sure what
 	  the value should be */
-    GD_ID_X(this2) = CWC(0); /* ??? */
+    GD_ID_X(this2) = 0; /* ??? */
 
     /* CLUT graphics device by default */
-    GD_TYPE_X(this2) = CWC(clutType);
+    GD_TYPE_X(this2) = clutType;
 
     /* how do i allocate a new inverse color table? */
-    h = RM(NewHandle(0));
+    h = NewHandle(0);
     GD_ITABLE_X(this2) = guest_cast<ITabHandle>(h);
-    GD_RES_PREF_X(this2) = CWC(DEFAULT_ITABLE_RESOLUTION);
+    GD_RES_PREF_X(this2) = DEFAULT_ITABLE_RESOLUTION;
 
     GD_SEARCH_PROC_X(this2) = nullptr;
     GD_COMP_PROC_X(this2) = nullptr;
 
-    GD_FLAGS_X(this2) = CWC(0);
+    GD_FLAGS_X(this2) = 0;
     /* mode_from_bpp (1)  indicates b/w hardware */
     if(mode != mode_from_bpp(1))
-        GD_FLAGS_X(this2) |= CWC(1 << gdDevType);
+        GD_FLAGS_X(this2) |= 1 << gdDevType;
 
-    pmh = RM(NewPixMap());
+    pmh = NewPixMap();
     GD_PMAP_X(this2) = pmh;
     CTAB_FLAGS_X(PIXMAP_TABLE(GD_PMAP(this2))) |= CTAB_GDEVICE_BIT_X;
 
-    GD_REF_CON_X(this2) = CLC(0); /* ??? */
-    GD_REF_NUM_X(this2) = CW(ref_num); /* ??? */
-    GD_MODE_X(this2) = CL(mode); /* ??? */
+    GD_REF_CON_X(this2) = 0; /* ??? */
+    GD_REF_NUM_X(this2) = ref_num; /* ??? */
+    GD_MODE_X(this2) = mode; /* ??? */
 
     GD_NEXT_GD_X(this2) = nullptr;
 
-    GD_RECT(this2).top = CWC(0);
-    GD_RECT(this2).left = CWC(0);
-    GD_RECT(this2).bottom = CWC(0);
-    GD_RECT(this2).right = CWC(0);
+    GD_RECT(this2).top = 0;
+    GD_RECT(this2).left = 0;
+    GD_RECT(this2).bottom = 0;
+    GD_RECT(this2).right = 0;
 
     /* handle to cursor's expanded data/mask? */
-    GD_CCBYTES_X(this2) = CWC(0);
-    GD_CCDEPTH_X(this2) = CWC(0);
+    GD_CCBYTES_X(this2) = 0;
+    GD_CCDEPTH_X(this2) = 0;
     GD_CCXDATA_X(this2) = nullptr;
     GD_CCXMASK_X(this2) = nullptr;
 
-    GD_RESERVED_X(this2) = CLC(0);
+    GD_RESERVED_X(this2) = 0;
 
     /* if mode is -1, this2 is a user created gdevice,
 	  and InitGDevice () should not be called (IMV-122) */
@@ -173,17 +173,17 @@ GDHandle Executor::C_NewGDevice(INTEGER ref_num, LONGINT mode)
 void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
 {
     PixMapHandle gd_pixmap;
-    bool main_device_p = (gd == MR(LM(MainDevice)));
+    bool main_device_p = (gd == LM(MainDevice));
 
     /* set the color bit, all other flag bits should be the same */
     if(color_p)
-        GD_FLAGS_X(gd) |= CWC(1 << gdDevType);
+        GD_FLAGS_X(gd) |= 1 << gdDevType;
     else
-        GD_FLAGS_X(gd) &= CWC(~(1 << gdDevType));
+        GD_FLAGS_X(gd) &= ~(1 << gdDevType);
 
     GD_TYPE_X(gd) = (bpp > 8
-                         ? CWC(directType)
-                         : (fixed_p ? CWC(fixedType) : CWC(clutType)));
+                         ? directType
+                         : (fixed_p ? fixedType : clutType));
 
     gd_pixmap = GD_PMAP(gd);
     pixmap_set_pixel_fields(STARH(gd_pixmap), bpp);
@@ -205,11 +205,11 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
                 gd_color_table = PIXMAP_TABLE(gd_pixmap);
                 SetHandleSize((Handle)gd_color_table,
                               CTAB_STORAGE_FOR_SIZE((1 << bpp) - 1));
-                CTAB_SIZE_X(gd_color_table) = CW((1 << bpp) - 1);
+                CTAB_SIZE_X(gd_color_table) = (1 << bpp) - 1;
                 vdriver->getColors(0, 1 << bpp,
                                    CTAB_TABLE(gd_color_table));
 
-                CTAB_SEED_X(gd_color_table) = CL(GetCTSeed());
+                CTAB_SEED_X(gd_color_table) = GetCTSeed();
             }
         }
         else
@@ -247,16 +247,16 @@ void Executor::C_SetDeviceAttribute(GDHandle gdh, INTEGER attribute,
                                     BOOLEAN value)
 {
     if(value)
-        GD_FLAGS_X(gdh) |= CW(1 << attribute);
+        GD_FLAGS_X(gdh) |= 1 << attribute;
     else
-        GD_FLAGS_X(gdh) &= CW(~(1 << attribute));
+        GD_FLAGS_X(gdh) &= ~(1 << attribute);
 }
 
 void Executor::C_SetGDevice(GDHandle gdh)
 {
-    if(LM(TheGDevice) != RM(gdh))
+    if(LM(TheGDevice) != gdh)
     {
-        LM(TheGDevice) = RM(gdh);
+        LM(TheGDevice) = gdh;
         ROMlib_invalidate_conversion_tables();
     }
 }
@@ -272,28 +272,28 @@ void Executor::C_DisposeGDevice(GDHandle gdh)
 
 GDHandle Executor::C_GetGDevice()
 {
-    return MR(LM(TheGDevice));
+    return LM(TheGDevice);
 }
 
 GDHandle Executor::C_GetDeviceList()
 {
-    return MR(LM(DeviceList));
+    return LM(DeviceList);
 }
 
 GDHandle Executor::C_GetMainDevice()
 {
     GDHandle retval;
 
-    retval = MR(LM(MainDevice));
+    retval = LM(MainDevice);
 
     /* Unfortunately, Realmz winds up dereferencing non-existent
      memory unless noDriver is set, but PacMan Deluxe will have
      trouble if that bit is set. */
 
     if(ROMlib_creator == TICK("RLMZ"))
-        GD_FLAGS_X(retval) |= CWC(1 << noDriver);
+        GD_FLAGS_X(retval) |= 1 << noDriver;
     else
-        GD_FLAGS_X(retval) &= ~CWC(1 << noDriver);
+        GD_FLAGS_X(retval) &= ~(1 << noDriver);
 
     return retval;
 }
@@ -305,7 +305,7 @@ GDHandle Executor::C_GetMaxDevice(Rect *globalRect)
      the max pixel depth for any given region (tho we would
      probably see if it intersects the main screen and return
      nullptr otherwise */
-    return MR(LM(MainDevice));
+    return LM(MainDevice);
 }
 
 GDHandle Executor::C_GetNextDevice(GDHandle cur_device)
@@ -321,16 +321,16 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
     GUEST<RgnHandle> save_vis_rgn_x;
     RgnHandle sect_rgn, gd_rect_rgn;
 
-    save_vis_rgn_x = PORT_VIS_REGION_X(MR(qdGlobals().thePort));
+    save_vis_rgn_x = PORT_VIS_REGION_X(qdGlobals().thePort);
 
     sect_rgn = NewRgn();
     gd_rect_rgn = NewRgn();
 
     /* Loop over all GDevices, looking for active screens. */
-    for(gd = MR(LM(DeviceList)); gd; gd = GD_NEXT_GD(gd))
-        if((GD_FLAGS_X(gd) & CWC((1 << screenDevice)
+    for(gd = LM(DeviceList); gd; gd = GD_NEXT_GD(gd))
+        if((GD_FLAGS_X(gd) & ((1 << screenDevice)
                                  | (1 << screenActive)))
-           == CWC((1 << screenDevice) | (1 << screenActive)))
+           == ((1 << screenDevice) | (1 << screenActive)))
         {
             /* NOTE: I'm blowing off some flags that come into play when
 	 * you have multiple screens.  I don't think anything terribly
@@ -342,21 +342,21 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
             {
                 Rect gd_rect, *port_bounds;
 
-                /* Map the GDevice rect into MR(qdGlobals().thePort) local coordinates. */
+                /* Map the GDevice rect into qdGlobals().thePort local coordinates. */
                 gd_rect = GD_RECT(gd);
-                port_bounds = &(PORT_BOUNDS(MR(qdGlobals().thePort)));
+                port_bounds = &(PORT_BOUNDS(qdGlobals().thePort));
                 OffsetRect(&gd_rect,
-                           CW(port_bounds->left),
-                           CW(port_bounds->top));
+                           port_bounds->left,
+                           port_bounds->top);
 
                 /* Intersect GDevice rect with the specified region. */
                 RectRgn(gd_rect_rgn, &gd_rect);
                 SectRgn(gd_rect_rgn, rgn, sect_rgn);
 
-                SectRgn(sect_rgn, PORT_VIS_REGION(MR(qdGlobals().thePort)), sect_rgn);
+                SectRgn(sect_rgn, PORT_VIS_REGION(qdGlobals().thePort), sect_rgn);
 
-                /* Save it away in MR(qdGlobals().thePort). */
-                PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = RM(sect_rgn);
+                /* Save it away in qdGlobals().thePort. */
+                PORT_VIS_REGION_X(qdGlobals().thePort) = sect_rgn;
             }
 
             if((flags & allDevices) || !EmptyRgn(sect_rgn))
@@ -366,7 +366,7 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
             }
         }
 
-    PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = save_vis_rgn_x;
+    PORT_VIS_REGION_X(qdGlobals().thePort) = save_vis_rgn_x;
 
     DisposeRgn(gd_rect_rgn);
     DisposeRgn(sect_rgn);
@@ -383,8 +383,8 @@ BOOLEAN Executor::C_TestDeviceAttribute(GDHandle gdh, INTEGER attribute)
 // FIXME: #warning ScreenRes is duplicate with toolutil.cpp
 void Executor::C_ScreenRes(GUEST<INTEGER> *h_res, GUEST<INTEGER> *v_res)
 {
-    *h_res = CW(PIXMAP_HRES(GD_PMAP(MR(LM(MainDevice)))) >> 16);
-    *v_res = CW(PIXMAP_VRES(GD_PMAP(MR(LM(MainDevice)))) >> 16);
+    *h_res = PIXMAP_HRES(GD_PMAP(LM(MainDevice))) >> 16;
+    *v_res = PIXMAP_VRES(GD_PMAP(LM(MainDevice))) >> 16;
 }
 
 INTEGER Executor::C_HasDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
@@ -393,7 +393,7 @@ INTEGER Executor::C_HasDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     flags &= ~1;
     which_flags &= ~1;
 
-    if(gdh != MR(LM(MainDevice))
+    if(gdh != LM(MainDevice)
        || bpp == 0)
         return false;
 
@@ -409,7 +409,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     PixMapHandle gd_pixmap;
     WindowPeek tw;
 
-    if(gdh != MR(LM(MainDevice)))
+    if(gdh != LM(MainDevice))
     {
         warning_unexpected("Setting the depth of a device not the screen; "
                            "this violates bogus assumptions in SetDepth.");
@@ -444,8 +444,8 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     gd_set_bpp(gdh, !vdriver->isGrayscale(), vdriver->isFixedCLUT(), bpp);
 
-    PIXMAP_SET_ROWBYTES_X(gd_pixmap, CW(vdriver->rowBytes()));
-    qdGlobals().screenBits.rowBytes = CW(vdriver->rowBytes());
+    PIXMAP_SET_ROWBYTES_X(gd_pixmap, vdriver->rowBytes());
+    qdGlobals().screenBits.rowBytes = vdriver->rowBytes();
 
     cursor_reset_current_cursor();
 
@@ -459,7 +459,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     if(LM(WWExist) == EXIST_YES)
     {
-        for(tw = MR(LM(WindowList)); tw; tw = WINDOW_NEXT_WINDOW(tw))
+        for(tw = LM(WindowList); tw; tw = WINDOW_NEXT_WINDOW(tw))
         {
             GrafPtr gp;
 
@@ -468,7 +468,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
             if(CGrafPort_p(gp))
             {
                 PixMapHandle window_pixmap = CPORT_PIXMAP(gp);
-                pixmap_set_pixel_fields(MR(*window_pixmap), bpp);
+                pixmap_set_pixel_fields(*window_pixmap, bpp);
                 PIXMAP_SET_ROWBYTES_X(window_pixmap,
                                       PIXMAP_ROWBYTES_X(gd_pixmap));
 
@@ -488,9 +488,9 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
         /* do the same for the LM(WMgrCPort) */
         {
-            PixMapHandle wmgr_cport_pixmap = CPORT_PIXMAP(MR(LM(WMgrCPort)));
+            PixMapHandle wmgr_cport_pixmap = CPORT_PIXMAP(LM(WMgrCPort));
 
-            pixmap_set_pixel_fields(MR(*wmgr_cport_pixmap), bpp);
+            pixmap_set_pixel_fields(*wmgr_cport_pixmap, bpp);
                 
             PIXMAP_SET_ROWBYTES_X(wmgr_cport_pixmap,
                                   PIXMAP_ROWBYTES_X(gd_pixmap));
@@ -499,13 +499,13 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
                              PIXMAP_TABLE(wmgr_cport_pixmap));
         }
 
-        ThePortGuard guard(MR(wmgr_port));
+        ThePortGuard guard(wmgr_port);
         RGBForeColor(&ROMlib_black_rgb_color);
         RGBBackColor(&ROMlib_white_rgb_color);
     }
 
     /* Redraw the screen if that's what changed. */
-    if(gdh == MR(LM(MainDevice)))
+    if(gdh == LM(MainDevice))
         redraw_screen();
 
     return noErr;
@@ -537,16 +537,16 @@ void Executor::ROMlib_InitGDevices()
     if(vdriver->isGrayscale())
     {
         /* Choose a nice light gray hilite color. */
-        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).blue = CWC((unsigned short)0xAAAA);
+        LM(HiliteRGB).red = (unsigned short)0xAAAA;
+        LM(HiliteRGB).green = (unsigned short)0xAAAA;
+        LM(HiliteRGB).blue = (unsigned short)0xAAAA;
     }
     else
     {
         /* how about a nice yellow hilite color? no, it's ugly. */
-        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).blue = CWC((unsigned short)0xFFFF);
+        LM(HiliteRGB).red = (unsigned short)0xAAAA;
+        LM(HiliteRGB).green = (unsigned short)0xAAAA;
+        LM(HiliteRGB).blue = (unsigned short)0xFFFF;
     }
 
 

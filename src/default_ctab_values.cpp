@@ -8,7 +8,7 @@
 
 using namespace Executor;
 
-#define COLORWC(cwc) CWC((unsigned short)cwc)
+#define COLORWC(cwc) ((unsigned short)cwc)
 
 ColorSpec Executor::ctab_1bpp_values[] = {
     { COLORWC(0), { COLORWC(65535), COLORWC(65535), COLORWC(65535) } },

@@ -135,13 +135,13 @@ start_playing(SndChannelPtr chanp, SndDoubleBufferHeaderPtr paramp,
     SndDoubleBackProcPtr pp;
     static bool task_inserted = false;
 
-    pp = MR(paramp->dbhDoubleBack);
+    pp = paramp->dbhDoubleBack;
     if(pp)
     {
         SndDoubleBufferPtr dbp;
 
-        dbp = MR(paramp->dbhBufferPtr[which_buf]);
-        if(!(dbp->dbFlags & CLC(dbLastBuffer)))
+        dbp = paramp->dbhBufferPtr[which_buf];
+        if(!(dbp->dbFlags & dbLastBuffer))
         {
             LONGINT duration_in_mills;
 
@@ -154,13 +154,13 @@ start_playing(SndChannelPtr chanp, SndDoubleBufferHeaderPtr paramp,
             if(!task_inserted)
             {
                 call_back_info.task.tmAddr
-                    = RM((ProcPtr)&sound_timer_handler);
+                    = (ProcPtr)&sound_timer_handler;
                 InsTime((QElemPtr)&call_back_info.task);
                 task_inserted = true;
             }
             duration_in_mills = (((long long)1000 * (1 << 16)
-                                  * CL(dbp->dbNumFrames))
-                                 / CL(paramp->dbhSampleRate));
+                                  * dbp->dbNumFrames)
+                                 / paramp->dbhSampleRate);
             PrimeTime((QElemPtr)&call_back_info.task, duration_in_mills);
         }
         else
@@ -181,12 +181,12 @@ void Executor::C_sound_timer_handler()
     if(call_back_info.headp)
     {
         current_buffer = call_back_info.current_buffer;
-        pp = MR(call_back_info.headp->dbhDoubleBack);
-        dbp = MR(call_back_info.headp->dbhBufferPtr[current_buffer]);
+        pp = call_back_info.headp->dbhDoubleBack;
+        dbp = call_back_info.headp->dbhBufferPtr[current_buffer];
         call_back_info.busy = false;
         start_playing(call_back_info.chanp, call_back_info.headp,
                       current_buffer ^ 1);
-        dbp->dbFlags &= CLC(~dbBufferReady);
+        dbp->dbFlags &= ~dbBufferReady;
         pp(call_back_info.chanp, dbp);
     }
 }
@@ -211,10 +211,10 @@ OSErr Executor::C_SndPlayDoubleBuffer(SndChannelPtr chanp,
                 warning_sound_log("paramp = nullptr");
             else
                 warning_sound_log("nc %d sz %d c %d p %d",
-                                  CW(paramp->dbhNumChannels),
-                                  CW(paramp->dbhSampleSize),
-                                  CW(paramp->dbhCompressionID),
-                                  CW(paramp->dbhPacketSize));
+                                  paramp->dbhNumChannels,
+                                  paramp->dbhSampleSize,
+                                  paramp->dbhCompressionID,
+                                  paramp->dbhPacketSize);
             SND_CHAN_DBHP(chanp) = paramp;
             SND_CHAN_CURRENT_DB(chanp) = 0;
             /*
@@ -222,7 +222,7 @@ OSErr Executor::C_SndPlayDoubleBuffer(SndChannelPtr chanp,
       */
             SND_CHAN_TIME(chanp) = 0;
             SND_CHAN_CURRENT_START(chanp) = 0;
-            SND_CHAN_FLAGS_X(chanp) |= CWC(CHAN_DBINPROG_FLAG);
+            SND_CHAN_FLAGS_X(chanp) |= CHAN_DBINPROG_FLAG;
             SOUND_GO();
             retval = noErr;
             break;
@@ -459,7 +459,7 @@ OSErr Executor::C_GetSysBeepVolume(GUEST<LONGINT> *levelp)
     OSErr retval;
 
     warning_sound_log(NULL_STRING);
-    *levelp = CLC(half_volume);
+    *levelp = half_volume;
     retval = noErr;
     return retval;
 }
@@ -478,7 +478,7 @@ OSErr Executor::C_GetDefaultOutputVolume(GUEST<LONGINT> *levelp)
     OSErr retval;
 
     warning_sound_log(NULL_STRING);
-    *levelp = CLC(half_volume);
+    *levelp = half_volume;
     retval = noErr;
     return retval;
 }
@@ -506,7 +506,7 @@ OSErr Executor::C_GetSoundHeaderOffset(Handle sndHandle, GUEST<LONGINT> *offset)
     retval = badFormat;
     for(i = 0; i < num_commands; ++i)
     {
-        if(cmds[i].cmd == CWC(bufferCmd | 0x8000) || cmds[i].cmd == CWC(soundCmd | 0x8000))
+        if(cmds[i].cmd == (bufferCmd | 0x8000) || cmds[i].cmd == (soundCmd | 0x8000))
         {
             *offset = cmds[i].param2;
             retval = noErr;

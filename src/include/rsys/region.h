@@ -4,8 +4,8 @@
 /* region.h
  */
 
-#define RGN_SIZE_MASK_X (CWC(0x7FFF))
-#define RGN_SPECIAL_FLAG_X (CWC(0x8000))
+#define RGN_SIZE_MASK_X (0x7FFF)
+#define RGN_SPECIAL_FLAG_X (0x8000)
 
 #define RGNP_SIZE_X(rgnp) ((rgnp)->rgnSize & RGN_SIZE_MASK_X)
 #define RGNP_SPECIAL_P(rgnp) \
@@ -14,10 +14,10 @@
     (RGNP_SIZE_X(rgnp) == RGN_SMALL_SIZE_X)
 
 #define RGNP_SET_SIZE_AND_SPECIAL(rgnp, size, special_p)     \
-    ((void)((rgnp)->rgnSize = ((CW(size) & RGN_SIZE_MASK_X) \
+    ((void)((rgnp)->rgnSize = ((size & RGN_SIZE_MASK_X) \
                                | ((special_p)                \
                                       ? RGN_SPECIAL_FLAG_X   \
-                                      : CWC(0)))))
+                                      : 0))))
 
 #define RGNP_SET_SMALL(rgnp) \
     RGNP_SET_SIZE_AND_SPECIAL(rgnp, RGN_SMALL_SIZE, false)
@@ -29,7 +29,7 @@
                                                                 \
         __orig_size_x = __rgnp->rgnSize;                        \
         __rngp->rgnSize = ((__orig_size_x & RGN_SPECIAL_FLAG_X) \
-                           | (CW(size) & RGN_SIZE_MASK_X));    \
+                           | (size & RGN_SIZE_MASK_X));    \
     } while(false)
 #define RGNP_SET_SPECIAL(rgnp, special_p)                 \
     do {                                                  \
@@ -45,7 +45,7 @@
 
 #define RGNP_DATA(rgnp) ((INTEGER *)(rgnp) + 5)
 
-#define RGNP_SIZE(rgnp) (CW(RGNP_SIZE_X(rgnp)))
+#define RGNP_SIZE(rgnp) (RGNP_SIZE_X(rgnp))
 
 #define RGN_SIZE_X(rgn) (RGNP_SIZE_X(STARH(rgn)))
 #define RGN_SPECIAL_P(rgn) (RGNP_SPECIAL_P(STARH(rgn)))
@@ -63,7 +63,7 @@
 
 #define RGN_BBOX(rgn) (RGNP_BBOX(STARH(rgn)))
 
-#define RGN_SIZE(rgn) (CW(RGN_SIZE_X(rgn)))
+#define RGN_SIZE(rgn) (RGN_SIZE_X(rgn))
 
 #define RGN_DATA(rgn) (RGNP_DATA(STARH(rgn)))
 

@@ -57,13 +57,13 @@ void validate_colors_for_control(ControlHandle ctl)
 	int j;
 	
 	for (j = 0; j < def_ctl_ctab_size; j ++)
-	  if (CW (def_ctl_ctab_table[j].value) == i)
+	  if (def_ctl_ctab_table[j].value == i)
 	    ctl_ctab_colors[i] = def_ctl_ctab_table[j].rgb;
       }
   }
 #endif
 
-    t_aux_c = MR(*lookup_aux_ctl(ctl));
+    t_aux_c = *lookup_aux_ctl(ctl);
     if(t_aux_c && HxX(t_aux_c, acCTable))
     {
         CTabHandle c_ctab;
@@ -79,18 +79,18 @@ void validate_colors_for_control(ControlHandle ctl)
             ColorSpec *c_ctab_entry;
 
             c_ctab_entry = &c_ctab_table[i];
-            if(CW(c_ctab_entry->value) >= n_ctl_colors)
+            if(c_ctab_entry->value >= n_ctl_colors)
             {
 /* don't make so much noise; our own default control
                  color table will set off this warning */
 #if 0
 	      warning_unexpected
 		("control color table with index `%d' > %d or < 0; ignored",
-		 CW (c_ctab_entry->value), n_ctl_colors);
+		 c_ctab_entry->value, n_ctl_colors);
 #endif
                 continue;
             }
-            ctl_ctab_colors[CW(c_ctab_entry->value)] = c_ctab_entry->rgb;
+            ctl_ctab_colors[c_ctab_entry->value] = c_ctab_entry->rgb;
         }
     }
 
@@ -115,7 +115,7 @@ void validate_colors_for_control(ControlHandle ctl)
     }
     else
     {
-        if(!CGrafPort_p(MR(qdGlobals().thePort))
+        if(!CGrafPort_p(qdGlobals().thePort)
            || !AVERAGE_COLOR(&ctl_ctab_colors[cFrameColor],
                              &ctl_ctab_colors[cBodyColor], 0x8000,
                              &current_control_colors[frame_color]))
@@ -168,7 +168,7 @@ drawlabel(StringPtr str, Rect *rp, justenum just)
 
     RGBForeColor(&current_control_colors[text_color]);
 
-    text_mode_save = PORT_TX_MODE(MR(qdGlobals().thePort));
+    text_mode_save = PORT_TX_MODE(qdGlobals().thePort);
     TextMode(text_mode);
 
     GetFontInfo(&fi);
@@ -187,7 +187,7 @@ drawlabel(StringPtr str, Rect *rp, justenum just)
     temp->bytec = i - temp->firstb;
     if(just == justmiddle)
     {
-        mid = (CW(rp->left) + CW(rp->right)) / 2;
+        mid = (rp->left + rp->right) / 2;
         for(i = 0; i < nlines; i++)
             infop[i].left
                 = mid - TextWidth((Ptr)str, infop[i].firstb, infop[i].bytec) / 2;
@@ -195,10 +195,10 @@ drawlabel(StringPtr str, Rect *rp, justenum just)
     else
     {
         for(i = 0; i < nlines; i++)
-            infop[i].left = CW(rp->left);
+            infop[i].left = rp->left;
     }
-    incr = CW(fi.ascent) + CW(fi.descent) + CW(fi.leading);
-    top = (CW(rp->top) + CW(rp->bottom)) / 2 - (nlines * incr - CW(fi.leading) + 1) / 2 + CW(fi.ascent);
+    incr = fi.ascent + fi.descent + fi.leading;
+    top = (rp->top + rp->bottom) / 2 - (nlines * incr - fi.leading + 1) / 2 + fi.ascent;
     for(i = 0; i < nlines; i++, top += incr)
     {
         MoveTo(infop[i].left, top);
@@ -241,12 +241,12 @@ draw_push(ControlHandle c, int16_t part)
     Rect r;
 
     r = CTL_RECT(c);
-    h = CW(r.right) - CW(r.left);
-    v = (CW(r.bottom) - CW(r.top)) / 2;
+    h = r.right - r.left;
+    v = (r.bottom - r.top) / 2;
     if(h > v)
         h = v;
     save = PORT_CLIP_REGION_X(CTL_OWNER(c));
-    PORT_CLIP_REGION_X(CTL_OWNER(c)) = RM(NewRgn());
+    PORT_CLIP_REGION_X(CTL_OWNER(c)) = NewRgn();
     OpenRgn();
     FrameRoundRect(&r, h, v);
     CloseRgn(PORT_CLIP_REGION(CTL_OWNER(c)));
@@ -282,10 +282,10 @@ add_title(ControlHandle c)
 
     control_owner = CTL_OWNER(c);
     save = PORT_CLIP_REGION_X(control_owner);
-    PORT_CLIP_REGION_X(control_owner) = RM(NewRgn());
+    PORT_CLIP_REGION_X(control_owner) = NewRgn();
     r = CTL_RECT(c);
     RectRgn(PORT_CLIP_REGION(control_owner), &r);
-    r.left = CW(CW(r.left) + 16);
+    r.left = r.left + 16;
     drawlabel(CTL_TITLE(c), &r, justleft);
     DisposeRgn(PORT_CLIP_REGION(control_owner));
     PORT_CLIP_REGION_X(control_owner) = save;
@@ -299,14 +299,14 @@ draw_check(ControlHandle c, int16_t part)
     if(!part)
     {
         r = CTL_RECT(c);
-        r.right = CW(CW(r.right) - 2);
+        r.right = r.right - 2;
         EraseRect(&r);
         add_title(c);
     }
-    r.left = CW(CW(CTL_RECT(c).left) + 2);
-    r.top = CW((CW(CTL_RECT(c).top) + CW(CTL_RECT(c).bottom)) / 2 - 6);
-    r.bottom = CW(CW(r.top) + 12);
-    r.right = CW(CW(r.left) + 12);
+    r.left = CTL_RECT(c).left + 2;
+    r.top = (CTL_RECT(c).top + CTL_RECT(c).bottom) / 2 - 6;
+    r.bottom = r.top + 12;
+    r.right = r.left + 12;
     EraseRect(&r);
 
     RGBForeColor(&current_control_colors[frame_color]);
@@ -317,10 +317,10 @@ draw_check(ControlHandle c, int16_t part)
     if(CTL_VALUE(c))
     {
         PenSize(1, 1);
-        MoveTo(CW(r.left) + 1, CW(r.top) + 1);
-        LineTo(CW(r.right) - 2, CW(r.bottom) - 2);
-        MoveTo(CW(r.right) - 2, CW(r.top) + 1);
-        LineTo(CW(r.left) + 1, CW(r.bottom) - 2);
+        MoveTo(r.left + 1, r.top + 1);
+        LineTo(r.right - 2, r.bottom - 2);
+        MoveTo(r.right - 2, r.top + 1);
+        LineTo(r.left + 1, r.bottom - 2);
     }
 }
 
@@ -332,14 +332,14 @@ draw_radio(ControlHandle c, int16_t part)
     if(!part)
     {
         r = CTL_RECT(c);
-        r.right = CW(CW(r.right) - 2);
+        r.right = r.right - 2;
         EraseRect(&r);
         add_title(c);
     }
-    r.left = CW(CW(CTL_RECT(c).left) + 2);
-    r.top = CW((CW(CTL_RECT(c).top) + CW(CTL_RECT(c).bottom)) / 2 - 6);
-    r.bottom = CW(CW(r.top) + 12);
-    r.right = CW(CW(r.left) + 12);
+    r.left = CTL_RECT(c).left + 2;
+    r.top = (CTL_RECT(c).top + CTL_RECT(c).bottom) / 2 - 6;
+    r.bottom = r.top + 12;
+    r.right = r.left + 12;
 
     EraseRect(&r);
     if(CTL_HILITE(c) == inCheckBox)
@@ -374,7 +374,7 @@ LONGINT Executor::C_cdef0(INTEGER var, ControlHandle c, INTEGER mess,
     switch(mess)
     {
         case drawCntl:
-            if(Hx(c, contrlVis) && SectRect(&HxX(PORT_VIS_REGION(MR(qdGlobals().thePort)), rgnBBox),
+            if(Hx(c, contrlVis) && SectRect(&HxX(PORT_VIS_REGION(qdGlobals().thePort), rgnBBox),
                                             &HxX(c, contrlRect), &r))
             {
                 PenNormal();

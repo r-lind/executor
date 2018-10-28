@@ -216,22 +216,22 @@ static void txratio(Point num, Point den)
 
 static void line(Point op, Point np)
 {
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(op.h);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(op.v);
+    PORT_PEN_LOC(qdGlobals().thePort).h = op.h;
+    PORT_PEN_LOC(qdGlobals().thePort).v = op.v;
     CALLLINE(np);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(np.h);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(np.v);
+    PORT_PEN_LOC(qdGlobals().thePort).h = np.h;
+    PORT_PEN_LOC(qdGlobals().thePort).v = np.v;
 }
 
 static void shrtline(Point op, SignedByte dh, SignedByte dv)
 {
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(op.h);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(op.v);
+    PORT_PEN_LOC(qdGlobals().thePort).h = op.h;
+    PORT_PEN_LOC(qdGlobals().thePort).v = op.v;
     op.h += dh;
     op.v += dv;
     CALLLINE(op);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(op.h);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(op.v);
+    PORT_PEN_LOC(qdGlobals().thePort).h = op.h;
+    PORT_PEN_LOC(qdGlobals().thePort).v = op.v;
 }
 
 static void setnumerdenom(Point *nump, Point *denp)
@@ -289,14 +289,14 @@ static void longtext(Point pt, StringPtr s, GUEST<Point> *pp)
     GUEST<Point> save;
     Point numer, denom;
 
-    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
-    pp->h = CW(pt.h);
-    pp->v = CW(pt.v);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(pt.h);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)).v = CW(pt.v);
+    save = PORT_PEN_LOC(qdGlobals().thePort);
+    pp->h = pt.h;
+    pp->v = pt.v;
+    PORT_PEN_LOC(qdGlobals().thePort).h = pt.h;
+    PORT_PEN_LOC(qdGlobals().thePort).v = pt.v;
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
+    PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 
 static void dhtext(unsigned char dh, StringPtr s, GUEST<Point> *pp)
@@ -304,12 +304,12 @@ static void dhtext(unsigned char dh, StringPtr s, GUEST<Point> *pp)
     GUEST<Point> save;
     Point numer, denom;
 
-    pp->h = CW(CW(pp->h) + (dh));
-    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = *pp;
+    pp->h = pp->h + (dh);
+    save = PORT_PEN_LOC(qdGlobals().thePort);
+    PORT_PEN_LOC(qdGlobals().thePort) = *pp;
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
+    PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 
 static void dvtext(unsigned char dv, StringPtr s, GUEST<Point> *pp)
@@ -317,12 +317,12 @@ static void dvtext(unsigned char dv, StringPtr s, GUEST<Point> *pp)
     GUEST<Point> save;
     Point numer, denom;
 
-    pp->v = CW(CW(pp->v) + (dv));
-    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = *pp;
+    pp->v = pp->v + (dv);
+    save = PORT_PEN_LOC(qdGlobals().thePort);
+    PORT_PEN_LOC(qdGlobals().thePort) = *pp;
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
+    PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 
 static void dhdvtext(Byte dh, Byte dv, StringPtr s, GUEST<Point> *pp)
@@ -330,13 +330,13 @@ static void dhdvtext(Byte dh, Byte dv, StringPtr s, GUEST<Point> *pp)
     GUEST<Point> save;
     Point numer, denom;
 
-    pp->h = CW(CW(pp->h) + (dh));
-    pp->v = CW(CW(pp->v) + (dv));
-    save = PORT_PEN_LOC(MR(qdGlobals().thePort));
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = *pp;
+    pp->h = pp->h + (dh);
+    pp->v = pp->v + (dv);
+    save = PORT_PEN_LOC(qdGlobals().thePort);
+    PORT_PEN_LOC(qdGlobals().thePort) = *pp;
     setnumerdenom(&numer, &denom);
     CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
-    PORT_PEN_LOC(MR(qdGlobals().thePort)) = save;
+    PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 
 static void fillrct(Rect *r)
@@ -375,8 +375,8 @@ static void origin(INTEGER dh, INTEGER dv)
 {
     OffsetRect(&srcpicframe, dh, dv);
 
-    txtpoint.h = CW(CW(txtpoint.h) - dh);
-    txtpoint.v = CW(CW(txtpoint.v) - dv);
+    txtpoint.h = txtpoint.h - dh;
+    txtpoint.v = txtpoint.v - dv;
 }
 
 static void pnlochfrac(INTEGER f)
@@ -404,9 +404,9 @@ static void hilitemode()
 
 static void fillpixpat(PixPatHandle ph)
 {
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
-        GUEST<Handle> tmp = RM((Handle)ph);
+        GUEST<Handle> tmp = (Handle)ph;
         HandToHand(&tmp);
 
         CPORT_FILL_PIXPAT_X(theCPort) = guest_cast<PixPatHandle>(tmp);
@@ -417,10 +417,10 @@ static void pnsize(INTEGER pv, INTEGER ph)
 {
     GUEST<Point> p;
 
-    p.h = CW(ph);
-    p.v = CW(pv);
+    p.h = ph;
+    p.v = pv;
     ScalePt(&p, &srcpicframe, &dstpicframe);
-    PenSize(CW(p.h), CW(p.v));
+    PenSize(p.h, p.v);
 }
 
 static void textface(Byte f)
@@ -552,7 +552,7 @@ static void W_TextFont(INTEGER f)
         GUEST<INTEGER> new_f;
         GetFNum(sp, &new_f);
         if(new_f)
-            f = CW(new_f);
+            f = new_f;
     }
     TextFont(f);
 }
@@ -779,7 +779,7 @@ fontname(INTEGER hsize, Handle hand)
     StringPtr sp;
 
     p = (char *)STARH(hand);
-    i = CW(*(GUEST<INTEGER> *)p);
+    i = *(GUEST<INTEGER> *)p;
     sp = (StringPtr)p + 2;
     add_assoc(i, sp);
 }
@@ -1021,7 +1021,7 @@ static INTEGER eatINTEGER()
     GUEST<INTEGER> retval;
 
     retval = eatINTEGERX();
-    return CW(retval);
+    return retval;
 }
 
 static GUEST<LONGINT> eatLONGINTX()
@@ -1041,7 +1041,7 @@ static LONGINT eatLONGINT()
     GUEST<LONGINT> retval;
 
     retval = eatLONGINTX();
-    return CL(retval);
+    return retval;
 }
 
 static void eatString(Str255 str)
@@ -1084,7 +1084,7 @@ static void eatRegion(RgnHandle rh, Size hs)
     else
         BlockMoveData((Ptr)nextbytep, (Ptr)STARH(rh) + sizeof(INTEGER),
                       hs - sizeof(INTEGER));
-    HxX(rh, rgnSize) = CW(hs);
+    HxX(rh, rgnSize) = hs;
     nextbytep += hs - sizeof(INTEGER);
 }
 
@@ -1101,7 +1101,7 @@ static void eatPixMap(PixMapPtr pixp, INTEGER rowb)
     /* TODO:  byte swapping stuff, testing */
 
     /* x(pixp->baseAddr)   = 0; will be set later */
-    pixp->rowBytes = rowb ? CW(rowb) : eatINTEGER();
+    pixp->rowBytes = rowb ? rowb : eatINTEGER();
     eatRect(&pixp->bounds);
     pixp->pmVersion = eatINTEGERX();
     pixp->packType = eatINTEGERX();
@@ -1114,7 +1114,7 @@ static void eatPixMap(PixMapPtr pixp, INTEGER rowb)
     pixp->cmpSize = eatINTEGERX();
     pixp->planeBytes = eatLONGINTX();
     (void)eatLONGINTX(); /* IMV-104 */
-    pixp->pmTable = RM((CTabHandle)NewHandle(sizeof(ColorTable)));
+    pixp->pmTable = (CTabHandle)NewHandle(sizeof(ColorTable));
     /* will be filled in later */
     pixp->pmReserved = eatLONGINTX();
 }
@@ -1122,7 +1122,7 @@ static void eatPixMap(PixMapPtr pixp, INTEGER rowb)
 static void eatBitMap(BitMap *bp, INTEGER rowb)
 {
     bp->baseAddr = 0;
-    bp->rowBytes = rowb ? CW(rowb) : eatINTEGER();
+    bp->rowBytes = rowb ? rowb : eatINTEGER();
     eatRect(&bp->bounds);
 }
 
@@ -1144,19 +1144,19 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
     /* comp bytes is the number of bytes take up by each of r, g, b
        per scanline */
     comp_bytes = rowb / 4;
-    insert_pad_byte_p = (pixmap->pixelSize == CWC(32)
-                         && pixmap->cmpCount != CWC(4));
+    insert_pad_byte_p = (pixmap->pixelSize == 32
+                         && pixmap->cmpCount != 4);
 
     final_data_size = rowb * height;
 
-    if(pixmap->packType == CWC(2))
+    if(pixmap->packType == 2)
         pic_data_size = 3 * comp_bytes * height;
     else
         pic_data_size = final_data_size;
-    if(rowb < 8 || pixmap->packType == CWC(2))
+    if(rowb < 8 || pixmap->packType == 2)
     {
         if(procp
-           || pixmap->packType == CWC(2))
+           || pixmap->packType == 2)
         {
             h = NewHandle(final_data_size);
             /* The practice of trying again in LM(SysZone) comes from the
@@ -1178,7 +1178,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
 
             if(procp)
                 procp(STARH(h), pic_data_size);
-            else if(pixmap->packType == CWC(2))
+            else if(pixmap->packType == 2)
                 memcpy(STARH(h), nextbytep, pic_data_size);
 
             pixmap->baseAddr = *h;
@@ -1186,7 +1186,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
         }
         else
         {
-            pixmap->baseAddr = RM((Ptr)nextbytep);
+            pixmap->baseAddr = (Ptr)nextbytep;
             *freep = false;
         }
         nextbytep += pic_data_size;
@@ -1228,18 +1228,18 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
                 inp = nextbytep;
                 temph = nullptr;
             }
-            dp = RM((Ptr)temp_scanline);
-            temp_pp = RM((Ptr)inp);
+            dp = (Ptr)temp_scanline;
+            temp_pp = (Ptr)inp;
 
-            if(pixmap->pixelSize == CWC(16)
-               && pixmap->packType == CWC(3))
+            if(pixmap->pixelSize == 16
+               && pixmap->packType == 3)
                 unpack_int16_t_bits(&temp_pp, &dp, rowb);
             else
                 UnpackBits(&temp_pp, &dp,
                            insert_pad_byte_p ? comp_bytes * 3 : rowb);
-            inp = (unsigned char *)MR(temp_pp);
+            inp = (unsigned char *)temp_pp;
 
-            if(pixmap->pixelSize == CWC(32))
+            if(pixmap->pixelSize == 32)
             {
                 for(i = 0; i < comp_bytes; i++)
                 {
@@ -1269,7 +1269,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
         *freep = true;
     }
 
-    if(pixmap->packType == CWC(2))
+    if(pixmap->packType == 2)
     {
         uint8_t *start, *src, *dst;
 
@@ -1287,7 +1287,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
         }
     }
 
-    pixmap->packType = CWC(0);
+    pixmap->packType = 0;
 
     return final_data_size;
 }
@@ -1304,8 +1304,8 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
     INTEGER length;
     Handle temph;
 
-    rowb = CW(bp->rowBytes) & ROWMASK;
-    datasize = (LONGINT)rowb * (CW(bp->bounds.bottom) - CW(bp->bounds.top));
+    rowb = bp->rowBytes & ROWMASK;
+    datasize = (LONGINT)rowb * (bp->bounds.bottom - bp->bounds.top);
     if(!packed)
     {
         if(procp)
@@ -1325,7 +1325,7 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
             bp->baseAddr = *h;
         }
         else
-            bp->baseAddr = RM((Ptr)nextbytep);
+            bp->baseAddr = (Ptr)nextbytep;
         nextbytep += datasize;
     }
     else
@@ -1342,7 +1342,7 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
         }
         HLock(h);
         bp->baseAddr = *h; /* can't use STARH */
-        for(dp = MR(bp->baseAddr), ep = dp + datasize; dp < ep;)
+        for(dp = bp->baseAddr, ep = dp + datasize; dp < ep;)
         {
             length = rowb > 250 ? eatINTEGER() : eatByte();
             if(procp)
@@ -1359,11 +1359,11 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
                 temph = 0;
 #endif
             }
-            temp_dp = RM(dp);
-            temp_pp = RM((Ptr)inp);
+            temp_dp = dp;
+            temp_pp = (Ptr)inp;
             UnpackBits(&temp_pp, &temp_dp, rowb);
-            inp = (Byte *)MR(temp_pp);
-            dp = MR(temp_dp);
+            inp = (Byte *)temp_pp;
+            dp = temp_dp;
             if(!procp)
                 nextbytep = inp;
             else
@@ -1388,13 +1388,13 @@ static void eatColorTable(PixMapPtr pixmap)
     ColorSpec *cspecp, *cspecep;
     CTabHandle ch;
 
-    ch = MR(pixmap->pmTable);
+    ch = pixmap->pmTable;
     cp = STARH(ch);
     /* cp->ctSeed = */ eatLONGINTX();
-    cp->ctSeed = CL(GetCTSeed());
+    cp->ctSeed = GetCTSeed();
     cp->ctFlags = eatINTEGERX();
     cp->ctSize = eatINTEGERX();
-    SetHandleSize((Handle)ch, (Size)sizeof(ColorTable) - sizeof(cp->ctTable) + (Cx(cp->ctSize) + 1) * 4 * sizeof(INTEGER));
+    SetHandleSize((Handle)ch, (Size)sizeof(ColorTable) - sizeof(cp->ctTable) + (cp->ctSize + 1) * 4 * sizeof(INTEGER));
     for(cspecp = HxX(ch, ctTable), cspecep = cspecp + Hx(ch, ctSize) + 1;
         cspecp != cspecep; cspecp++)
     {
@@ -1423,7 +1423,7 @@ static void eatPixPat(PixPatHandle pixpat)
 
     HLockGuard guard(pixpat);
     PIXPAT_TYPE_X(pixpat) = eatINTEGERX();
-    if(PIXPAT_TYPE_X(pixpat) == CWC(RGBPat))
+    if(PIXPAT_TYPE_X(pixpat) == RGBPat)
     {
         eatPattern(PIXPAT_1DATA(pixpat));
         eatRGBColor(&rgb);
@@ -1431,8 +1431,8 @@ static void eatPixPat(PixPatHandle pixpat)
             PixMapHandle patmap;
 
             patmap = (PixMapHandle)NewHandleClear(sizeof(PixMap));
-            PIXMAP_TABLE_X(patmap) = RM((CTabHandle)NewHandle(0));
-            PIXPAT_MAP_X(pixpat) = RM(patmap);
+            PIXMAP_TABLE_X(patmap) = (CTabHandle)NewHandle(0);
+            PIXPAT_MAP_X(pixpat) = patmap;
         }
         MakeRGBPat(pixpat, &rgb);
     }
@@ -1443,7 +1443,7 @@ static void eatPixPat(PixPatHandle pixpat)
 
         eatPattern(PIXPAT_1DATA(pixpat));
         patmap = (PixMapHandle)NewHandle(sizeof(PixMap));
-        PIXPAT_MAP_X(pixpat) = RM(patmap);
+        PIXPAT_MAP_X(pixpat) = patmap;
         HLockGuard guard(patmap);
         PixMapPtr patmap_ptr = STARH(patmap);
 
@@ -1455,15 +1455,15 @@ static void eatPixPat(PixPatHandle pixpat)
 					  the call to PtrToXHand below will
 					  fail, with a nilHandleErr as per
 					  IM Memory 2-62 */
-        PIXPAT_DATA_X(pixpat) = RM(temph);
+        PIXPAT_DATA_X(pixpat) = temph;
         PtrToXHand(BITMAP_BASEADDR(patmap_ptr), temph, datasize);
         if(free)
             DisposeHandle(RecoverHandle(BITMAP_BASEADDR(patmap_ptr)));
 
         HASSIGN_3(pixpat,
                   patXMap, nullptr,
-                  patXData, RM(NewHandleClear(sizeof(xdata_t))),
-                  patXValid, CWC(-1));
+                  patXData, NewHandleClear(sizeof(xdata_t)),
+                  patXValid, -1);
     }
 }
 
@@ -1556,8 +1556,8 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
 #endif /* LETGCCWAIL */
 
 #if 0
-    if (!pic || (CW (destrp->top) == CW (destrp->bottom)
-		 && CW (destrp->left) == CW (destrp->right)))
+    if (!pic || (destrp->top == destrp->bottom
+		 && destrp->left == destrp->right))
       return;
 #else
     if(!pic || !*pic || EmptyRect(destrp) || EmptyRect(&HxX(pic, picFrame)))
@@ -1569,7 +1569,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     saveFractEnable = LM(FractEnable);
     saveFScaleDisable = LM(FScaleDisable);
     begin_assoc();
-    the_port = MR(qdGlobals().thePort);
+    the_port = qdGlobals().thePort;
     if(CGrafPort_p(the_port))
         the_cport = theCPort;
     else
@@ -1577,11 +1577,11 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
 
     saveport = *the_port;
     saveportbounds = PORT_BOUNDS(the_port);
-    PORT_CLIP_REGION_X(the_port) = RM(NewRgn());
+    PORT_CLIP_REGION_X(the_port) = NewRgn();
 
     SetRectRgn(PORT_CLIP_REGION(the_port), -32768, -32768, 32767, 32767);
 
-    PORT_VIS_REGION_X(the_port) = RM(NewRgn());
+    PORT_VIS_REGION_X(the_port) = NewRgn();
     CopyRgn(PORT_VIS_REGION(&saveport),
             PORT_VIS_REGION(the_port));
 
@@ -1593,9 +1593,9 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
         junk_pen_pixpat = NewPixPat();
         junk_bk_pixpat = NewPixPat();
         junk_fill_pixpat = NewPixPat();
-        CPORT_PEN_PIXPAT_X(the_cport) = RM(junk_pen_pixpat);
-        CPORT_BK_PIXPAT_X(the_cport) = RM(junk_bk_pixpat);
-        CPORT_FILL_PIXPAT_X(the_cport) = RM(junk_fill_pixpat);
+        CPORT_PEN_PIXPAT_X(the_cport) = junk_pen_pixpat;
+        CPORT_BK_PIXPAT_X(the_cport) = junk_bk_pixpat;
+        CPORT_FILL_PIXPAT_X(the_cport) = junk_fill_pixpat;
     }
     else
     {
@@ -1617,25 +1617,25 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
 
     PORT_PEN_LOC(the_port).h = destrp->left; /* This is a guess, based on */
     PORT_PEN_LOC(the_port).v = destrp->top; /* Word's EPS handling */
-    PORT_PEN_SIZE(the_port).h = PORT_PEN_SIZE(the_port).v = CWC(1);
-    PORT_PEN_MODE_X(the_port) = CWC(patCopy);
-    PORT_TX_FONT_X(the_port) = CWC(0);
+    PORT_PEN_SIZE(the_port).h = PORT_PEN_SIZE(the_port).v = 1;
+    PORT_PEN_MODE_X(the_port) = patCopy;
+    PORT_TX_FONT_X(the_port) = 0;
     PORT_TX_FACE_X(the_port) = 0;
-    PORT_TX_SIZE_X(the_port) = CWC(0);
-    PORT_SP_EXTRA_X(the_port) = CLC(0);
+    PORT_TX_SIZE_X(the_port) = 0;
+    PORT_SP_EXTRA_X(the_port) = 0;
 
 #if 0
     /* this will fail if we are actually drawing to a
        color graph port; we'll get spew colors instead of
        b/w, so let ForeColor or BackColor do the work */
-    the_port->fgColor = CL(blackColor);
-    the_port->bkColor = CL(whiteColor);
+    the_port->fgColor = blackColor;
+    the_port->bkColor = whiteColor;
 #else
     ForeColor(blackColor);
     BackColor(whiteColor);
 #endif
-    PORT_COLR_BIT_X(the_port) = CWC(0);
-    PORT_PAT_STRETCH_X(the_port) = CWC(0);
+    PORT_COLR_BIT_X(the_port) = 0;
+    PORT_PAT_STRETCH_X(the_port) = 0;
 
     /*
      * NOTE:  I used to start pics out with srcXor because of a PICT
@@ -1647,10 +1647,10 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     state = HGetState((Handle)pic);
     HLock((Handle)pic);
 
-    grafprocp = MR(the_port->grafProcs);
+    grafprocp = the_port->grafProcs;
     if(grafprocp)
     {
-        procp = MR(grafprocp->getPicProc);
+        procp = grafprocp->getPicProc;
         if(procp == &StdGetPic)
             procp = 0;
     }
@@ -1671,8 +1671,8 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     reduce(&picnumh, &picdenh);
     reduce(&picnumv, &picdenv);
 
-    txtpoint.h = CW(CW(dstpicframe.left) - CW(srcpicframe.left));
-    txtpoint.v = CW(CW(dstpicframe.top) - CW(srcpicframe.top));
+    txtpoint.h = dstpicframe.left - srcpicframe.left;
+    txtpoint.v = dstpicframe.top - srcpicframe.top;
 
     scaleh = FixRatio(RECT_WIDTH(&dstpicframe), RECT_WIDTH(&srcpicframe));
     scalev = FixRatio(RECT_HEIGHT(&dstpicframe), RECT_HEIGHT(&srcpicframe));
@@ -1860,7 +1860,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                         if(packed)
                             DisposeHandle(RecoverHandle(BITMAP_BASEADDR(bmp)));
                         if(words[0] & 0x8000)
-                            DisposeHandle((Handle)MR(pm.pmTable));
+                            DisposeHandle((Handle)pm.pmTable);
                         else if(!packed && procp)
                             DisposeHandle(RecoverHandle(BITMAP_BASEADDR(bmp)));
                         break;

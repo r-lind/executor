@@ -22,32 +22,32 @@ void Executor::C_OpenCPort(CGrafPtr port)
     PixPatHandle temp_pixpat;
 
     /* set up port version before using any other macros */
-    port->portVersion = CWC((3 << 14) | /* color quickdraw version */ 0);
+    port->portVersion = (3 << 14) | /* color quickdraw version */ 0;
 
     /* allocate storage for new CGrafPtr members, including portPixMap,
      pnPixPat, fillPixPat, bkPixPat, and grafVar */
-    CPORT_PIXMAP_X(port) = RM(NewPixMap());
+    CPORT_PIXMAP_X(port) = NewPixMap();
 
     /* Free up the empty color table, since we're not going to use it. */
     DisposeHandle((Handle)PIXMAP_TABLE(CPORT_PIXMAP(port)));
 
     temp_pixpat = NewPixPat();
-    PIXPAT_TYPE_X(temp_pixpat) = CWC(pixpat_type_orig);
-    CPORT_PEN_PIXPAT_X(port) = RM(temp_pixpat);
+    PIXPAT_TYPE_X(temp_pixpat) = pixpat_type_orig;
+    CPORT_PEN_PIXPAT_X(port) = temp_pixpat;
 
     temp_pixpat = NewPixPat();
-    PIXPAT_TYPE_X(temp_pixpat) = CWC(pixpat_type_orig);
-    CPORT_FILL_PIXPAT_X(port) = RM(temp_pixpat);
+    PIXPAT_TYPE_X(temp_pixpat) = pixpat_type_orig;
+    CPORT_FILL_PIXPAT_X(port) = temp_pixpat;
 
     temp_pixpat = NewPixPat();
-    PIXPAT_TYPE_X(temp_pixpat) = CWC(pixpat_type_orig);
-    CPORT_BK_PIXPAT_X(port) = RM(temp_pixpat);
+    PIXPAT_TYPE_X(temp_pixpat) = pixpat_type_orig;
+    CPORT_BK_PIXPAT_X(port) = temp_pixpat;
 
-    CPORT_GRAFVARS_X(port) = RM(NewHandleClear(sizeof(GrafVars)));
+    CPORT_GRAFVARS_X(port) = NewHandleClear(sizeof(GrafVars));
 
     /* allocate storage for members also present in GrafPort */
-    PORT_VIS_REGION_X(port) = RM(NewRgn());
-    PORT_CLIP_REGION_X(port) = RM(NewRgn());
+    PORT_VIS_REGION_X(port) = NewRgn();
+    PORT_CLIP_REGION_X(port) = NewRgn();
 
     InitCPort(port);
 }
@@ -69,31 +69,31 @@ void Executor::C_InitCPort(CGrafPtr p)
         return;
 
     /* set the port early so we can call convenience functions
-     that operate on MR(qdGlobals().thePort) */
+     that operate on qdGlobals().thePort */
     SetPort((GrafPtr)p);
 
     CPORT_VERSION_X(p) = CPORT_FLAG_BITS_X;
-    // | CWC (/* color quickdraw version */ 0));
+    // | /* color quickdraw version */ 0);
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
     *STARH(CPORT_PIXMAP(p)) = *STARH(GD_PMAP(gd));
 
-    PORT_DEVICE_X(p) = CWC(0);
+    PORT_DEVICE_X(p) = 0;
     PORT_RECT(p) = GD_RECT(gd);
-    PORT_PEN_LOC(p).h = PORT_PEN_LOC(p).v = CWC(0);
-    PORT_PEN_SIZE(p).h = PORT_PEN_SIZE(p).v = CWC(1);
-    PORT_PEN_MODE_X(p) = CWC(patCopy);
-    PORT_PEN_VIS_X(p) = CWC(0);
-    PORT_TX_FONT_X(p) = CWC(0);
+    PORT_PEN_LOC(p).h = PORT_PEN_LOC(p).v = 0;
+    PORT_PEN_SIZE(p).h = PORT_PEN_SIZE(p).v = 1;
+    PORT_PEN_MODE_X(p) = patCopy;
+    PORT_PEN_VIS_X(p) = 0;
+    PORT_TX_FONT_X(p) = 0;
     PORT_TX_FACE_X(p) = 0;
     *((char *)&p->txFace + 1) = 0; /* Excel & tests show we need to do this. */
-    PORT_TX_MODE_X(p) = CWC(srcOr);
-    PORT_TX_SIZE_X(p) = CWC(0);
-    PORT_SP_EXTRA_X(p) = CLC(0);
+    PORT_TX_MODE_X(p) = srcOr;
+    PORT_TX_SIZE_X(p) = 0;
+    PORT_SP_EXTRA_X(p) = 0;
     RGBForeColor(&ROMlib_black_rgb_color);
     RGBBackColor(&ROMlib_white_rgb_color);
-    PORT_COLR_BIT_X(p) = CWC(0);
-    PORT_PAT_STRETCH_X(p) = CWC(0);
+    PORT_COLR_BIT_X(p) = 0;
+    PORT_PAT_STRETCH_X(p) = 0;
     PORT_PIC_SAVE_X(p) = CLC_NULL;
     PORT_REGION_SAVE_X(p) = CLC_NULL;
     PORT_POLY_SAVE_X(p) = CLC_NULL;
@@ -107,7 +107,7 @@ void Executor::C_InitCPort(CGrafPtr p)
 
     /* initialize default values for newly allocated
      CGrafPtr */
-    PORT_DEVICE_X(p) = CWC(0);
+    PORT_DEVICE_X(p) = 0;
 
     /* rgbOpColor of GrafVars field is set to black,
      rgbHiliteColor is set to the default value (where does this come from)
@@ -115,17 +115,17 @@ void Executor::C_InitCPort(CGrafPtr p)
 
     /* A test case shows that grafVars is allocated only if it was nullptr. */
     if(CPORT_GRAFVARS_X(p) == CLC_NULL)
-        CPORT_GRAFVARS_X(p) = RM(NewHandleClear(sizeof(GrafVars)));
+        CPORT_GRAFVARS_X(p) = NewHandleClear(sizeof(GrafVars));
 
     /* #warning "p->grafVars not initialized" */
 
     CPORT_OP_COLOR(p) = ROMlib_black_rgb_color;
     CPORT_HILITE_COLOR(p) = LM(HiliteRGB);
 
-    CPORT_CH_EXTRA_X(p) = CWC(0);
+    CPORT_CH_EXTRA_X(p) = 0;
     /* represents the low word of a Fixed number
      whose value is 0.5 */
-    CPORT_PENLOC_HFRAC_X(p) = CWC(0x8000);
+    CPORT_PENLOC_HFRAC_X(p) = 0x8000;
 
     rh = PORT_VIS_REGION(p);
     SetEmptyRgn(rh);
@@ -138,7 +138,7 @@ void Executor::C_InitCPort(CGrafPtr p)
 
 void Executor::C_SetPortPix(PixMapHandle pixmap)
 {
-    CPORT_PIXMAP_X(theCPort) = RM(pixmap);
+    CPORT_PIXMAP_X(theCPort) = pixmap;
 }
 
 static const LONGINT high_bits_to_colors[2][2][2] = {
@@ -158,12 +158,12 @@ static const LONGINT high_bits_to_colors[2][2][2] = {
 
 void Executor::C_RGBForeColor(RGBColor *color)
 {
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
         CPORT_RGB_FG_COLOR(theCPort) = *color;
 
         /* pick the best color and store it into `theCPort->fgColor' */
-        PORT_FG_COLOR_X(theCPort) = CL(Color2Index(color));
+        PORT_FG_COLOR_X(theCPort) = Color2Index(color);
     }
     else
     {
@@ -172,9 +172,9 @@ void Executor::C_RGBForeColor(RGBColor *color)
 
         basic_qd_color
             = high_bits_to_colors
-                [CW(color->red) >> 15]
-                [CW(color->green) >> 15]
-                [CW(color->blue) >> 15];
+                [color->red >> 15]
+                [color->green >> 15]
+                [color->blue >> 15];
 
         ForeColor(basic_qd_color);
     }
@@ -187,18 +187,18 @@ void Executor::C_RGBBackColor(RGBColor *color)
     if(ROMlib_evil_illustrator_7_hack)
     {
         color = (RGBColor *)alloca(sizeof(RGBColor));
-        color->red = CWC(65535);
-        color->green = CWC(65535);
-        color->blue = CWC(65535);
+        color->red = 65535;
+        color->green = 65535;
+        color->blue = 65535;
     }
 #endif
 
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
         CPORT_RGB_BK_COLOR(theCPort) = *color;
 
         /* pick the best color and store it into `theCPort->bkColor' */
-        PORT_BK_COLOR_X(theCPort) = CL(Color2Index(color));
+        PORT_BK_COLOR_X(theCPort) = Color2Index(color);
     }
     else
     {
@@ -207,9 +207,9 @@ void Executor::C_RGBBackColor(RGBColor *color)
 
         basic_qd_color
             = high_bits_to_colors
-                [CW(color->red) >> 15]
-                [CW(color->green) >> 15]
-                [CW(color->blue) >> 15];
+                [color->red >> 15]
+                [color->green >> 15]
+                [color->blue >> 15];
 
         BackColor(basic_qd_color);
     }
@@ -217,23 +217,23 @@ void Executor::C_RGBBackColor(RGBColor *color)
 
 void Executor::C_GetForeColor(RGBColor *color)
 {
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
         *color = CPORT_RGB_FG_COLOR(theCPort);
     else
-        *color = *(ROMlib_qd_color_to_rgb(PORT_FG_COLOR(MR(qdGlobals().thePort))));
+        *color = *(ROMlib_qd_color_to_rgb(PORT_FG_COLOR(qdGlobals().thePort)));
 }
 
 void Executor::C_GetBackColor(RGBColor *color)
 {
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
         *color = CPORT_RGB_BK_COLOR(theCPort);
     else
-        *color = *(ROMlib_qd_color_to_rgb(PORT_BK_COLOR(MR(qdGlobals().thePort))));
+        *color = *(ROMlib_qd_color_to_rgb(PORT_BK_COLOR(qdGlobals().thePort)));
 }
 
 void Executor::C_PenPixPat(PixPatHandle new_pen)
 {
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
         PixPatHandle old_pen;
 
@@ -241,18 +241,18 @@ void Executor::C_PenPixPat(PixPatHandle new_pen)
         if(old_pen == new_pen)
             return;
 
-        if(old_pen && (PIXPAT_TYPE_X(old_pen) == CWC(pixpat_type_orig)))
+        if(old_pen && (PIXPAT_TYPE_X(old_pen) == pixpat_type_orig))
             DisposePixPat(old_pen);
 
-        CPORT_PEN_PIXPAT_X(theCPort) = RM(new_pen);
+        CPORT_PEN_PIXPAT_X(theCPort) = new_pen;
     }
     else
-        PATASSIGN(PORT_PEN_PAT(MR(qdGlobals().thePort)), PIXPAT_1DATA(new_pen));
+        PATASSIGN(PORT_PEN_PAT(qdGlobals().thePort), PIXPAT_1DATA(new_pen));
 }
 
 void Executor::C_BackPixPat(PixPatHandle new_bk)
 {
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
         PixPatHandle old_bk;
 
@@ -260,18 +260,18 @@ void Executor::C_BackPixPat(PixPatHandle new_bk)
         if(old_bk == new_bk)
             return;
 
-        if(old_bk && PIXPAT_TYPE_X(old_bk) == CWC(pixpat_type_orig))
+        if(old_bk && PIXPAT_TYPE_X(old_bk) == pixpat_type_orig)
             DisposePixPat(old_bk);
 
-        CPORT_BK_PIXPAT_X(theCPort) = RM(new_bk);
+        CPORT_BK_PIXPAT_X(theCPort) = new_bk;
     }
     else
-        PATASSIGN(PORT_BK_PAT(MR(qdGlobals().thePort)), PIXPAT_1DATA(new_bk));
+        PATASSIGN(PORT_BK_PAT(qdGlobals().thePort), PIXPAT_1DATA(new_bk));
 }
 
 void Executor::ROMlib_fill_pixpat(PixPatHandle new_fill)
 {
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
     {
         PixPatHandle old_fill;
 
@@ -280,21 +280,21 @@ void Executor::ROMlib_fill_pixpat(PixPatHandle new_fill)
             return;
 
 #if 0
-      if (PIXPAT_TYPE_X (old_fill) == CWC (pixpat_type_orig))
+      if (PIXPAT_TYPE_X (old_fill) == pixpat_type_orig)
 	DisposePixPat (old_fill);
 #endif
 
-        CPORT_FILL_PIXPAT_X(theCPort) = RM(new_fill);
+        CPORT_FILL_PIXPAT_X(theCPort) = new_fill;
     }
     else
-        PATASSIGN(PORT_BK_PAT(MR(qdGlobals().thePort)), PIXPAT_1DATA(new_fill));
+        PATASSIGN(PORT_BK_PAT(qdGlobals().thePort), PIXPAT_1DATA(new_fill));
 }
 
 /* where is FillPixPat */
 
 void Executor::C_OpColor(RGBColor *color)
 {
-    if(!CGrafPort_p(MR(qdGlobals().thePort)))
+    if(!CGrafPort_p(qdGlobals().thePort))
         return;
 
     HxX(CPORT_GRAFVARS(theCPort), rgbOpColor) = *color;
@@ -302,7 +302,7 @@ void Executor::C_OpColor(RGBColor *color)
 
 void Executor::C_HiliteColor(RGBColor *color)
 {
-    if(!CGrafPort_p(MR(qdGlobals().thePort)))
+    if(!CGrafPort_p(qdGlobals().thePort))
         return;
 
     HxX(CPORT_GRAFVARS(theCPort), rgbHiliteColor) = *color;
@@ -331,7 +331,7 @@ PixMapHandle Executor::C_NewPixMap()
    */
     if(LM(TheGDevice))
     {
-        *STARH(pixmap) = *STARH(GD_PMAP(MR(LM(TheGDevice))));
+        *STARH(pixmap) = *STARH(GD_PMAP(LM(TheGDevice)));
     }
     else
     {
@@ -340,14 +340,14 @@ PixMapHandle Executor::C_NewPixMap()
        */
         memset(STARH(pixmap), 0, sizeof(PixMap));
         HxX(pixmap, rowBytes) = PIXMAP_DEFAULT_ROWBYTES_X;
-        PIXMAP_HRES_X(pixmap) = PIXMAP_VRES_X(pixmap) = CLC(72 << 16);
-        PIXMAP_PIXEL_TYPE_X(pixmap) = CWC(chunky_pixel_type);
-        PIXMAP_CMP_COUNT_X(pixmap) = CWC(1);
+        PIXMAP_HRES_X(pixmap) = PIXMAP_VRES_X(pixmap) = 72 << 16;
+        PIXMAP_PIXEL_TYPE_X(pixmap) = chunky_pixel_type;
+        PIXMAP_CMP_COUNT_X(pixmap) = 1;
     }
 
     /* The ColorTable is set to an empty ColorTable (IMV-70). */
     PIXMAP_TABLE_X(pixmap)
-        = RM((CTabHandle)NewHandleClear(sizeof(ColorTable)));
+        = (CTabHandle)NewHandleClear(sizeof(ColorTable));
 
     HUnlock((Handle)pixmap);
     return pixmap;
@@ -372,7 +372,7 @@ void Executor::C_CopyPixMap(PixMapHandle src, PixMapHandle dst)
     /* #warning "determine actual CopyPixMap behavior" */
     *(STARH(dst)) = *(STARH(src));
 
-    PIXMAP_TABLE_X(dst) = RM(dst_ctab);
+    PIXMAP_TABLE_X(dst) = dst_ctab;
     ROMlib_copy_ctab(PIXMAP_TABLE(src), dst_ctab);
 }
 
@@ -388,12 +388,12 @@ PixPatHandle Executor::C_NewPixPat()
     xdata = NewHandleClear(sizeof(xdata_t));
 
     HASSIGN_6(pixpat,
-              patMap, RM(NewPixMap()),
-              patData, RM(NewHandle(0)),
-              patType, CWC(pixpat_type_color),
+              patMap, NewPixMap(),
+              patData, NewHandle(0),
+              patType, pixpat_type_color,
               patXMap, CLC_NULL,
-              patXData, RM(xdata),
-              patXValid, CWC(-1));
+              patXData, xdata,
+              patXValid, -1);
 
     return pixpat;
 }
@@ -436,19 +436,19 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
         {
             warning_unexpected("unknown pixpat type `%d'",
                                PIXPAT_TYPE(pixpat));
-            PIXPAT_TYPE_X(pixpat) = CWC(pixpat_color_pattern);
+            PIXPAT_TYPE_X(pixpat) = pixpat_color_pattern;
         }
     }
 
     gui_assert(ptr_to_longint(PIXPAT_MAP_X(pixpat)) == sizeof(PixPat));
 
-    PIXPAT_MAP_X(pixpat) = RM(patmap);
+    PIXPAT_MAP_X(pixpat) = patmap;
 
-    PIXPAT_XVALID_X(pixpat) = CWC(-1);
+    PIXPAT_XVALID_X(pixpat) = -1;
 
     xdata = NewHandle(sizeof(xdata_t));
     memset(STARH(xdata), 0, sizeof(xdata_t));
-    PIXPAT_XDATA_X(pixpat) = RM(xdata);
+    PIXPAT_XDATA_X(pixpat) = xdata;
     PIXPAT_XMAP_X(pixpat) = CLC_NULL;
 
     pixpat_data_offset = PIXPAT_DATA_AS_OFFSET(pixpat);
@@ -456,7 +456,7 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
                         - pixpat_data_offset);
 
     HLock((Handle)pixpat);
-    PIXPAT_DATA_X(pixpat) = RM(NewHandle(pixpat_data_size));
+    PIXPAT_DATA_X(pixpat) = NewHandle(pixpat_data_size);
     HUnlock((Handle)pixpat);
 
     BlockMoveData((Ptr)((char *)STARH(pixpat_res) + pixpat_data_offset),
@@ -469,20 +469,20 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     ctab_ptr = (CTabPtr)((char *)STARH(pixpat_res)
                          + (int)PIXMAP_TABLE_AS_OFFSET(patmap));
     ctab_size = (sizeof(ColorTable)
-                 + (sizeof(ColorSpec) * CW(ctab_ptr->ctSize)));
+                 + (sizeof(ColorSpec) * ctab_ptr->ctSize));
 
     /* SetHandleSize ((Handle) PIXMAP_TABLE (patmap), ctab_size); */
 
     HLock((Handle)patmap);
-    PIXMAP_TABLE_X(patmap) = RM((CTabHandle)NewHandle(ctab_size));
+    PIXMAP_TABLE_X(patmap) = (CTabHandle)NewHandle(ctab_size);
     HUnlock((Handle)patmap);
 
     BlockMoveData((Ptr)ctab_ptr,
                   (Ptr)STARH(PIXMAP_TABLE(patmap)),
                   ctab_size);
 
-    /* ctab_ptr->ctSeed = CL (GetCTSeed ()); */
-    CTAB_SEED_X(PIXMAP_TABLE(patmap)) = CL(GetCTSeed());
+    /* ctab_ptr->ctSeed = GetCTSeed (); */
+    CTAB_SEED_X(PIXMAP_TABLE(patmap)) = GetCTSeed();
 
 #if 0
   gui_assert (GetHandleSize (pixpat_res)
@@ -522,7 +522,7 @@ void Executor::C_CopyPixPat(PixPatHandle src, PixPatHandle dst)
     data_size = GetHandleSize(PIXPAT_DATA(src));
     SetHandleSize(PIXPAT_DATA(dst), data_size);
     memcpy(STARH(PIXPAT_DATA(dst)), STARH(PIXPAT_DATA(src)), data_size);
-    PIXPAT_XVALID_X(dst) = CWC(-1);
+    PIXPAT_XVALID_X(dst) = -1;
     PATASSIGN(PIXPAT_1DATA(dst), PIXPAT_1DATA(src));
 }
 
@@ -530,21 +530,21 @@ void Executor::C_MakeRGBPat(PixPatHandle pixpat, RGBColor *color)
 {
     PixMapHandle patmap;
 
-    PIXPAT_TYPE_X(pixpat) = CWC(pixpat_rgb_pattern);
-    PIXPAT_XVALID_X(pixpat) = CWC(-1);
+    PIXPAT_TYPE_X(pixpat) = pixpat_rgb_pattern;
+    PIXPAT_XVALID_X(pixpat) = -1;
 
     /* ##### resolve the meaning of the actual PixPat fields */
 
     patmap = PIXPAT_MAP(pixpat);
-    PIXMAP_SET_ROWBYTES_X(patmap, CWC(2));
+    PIXMAP_SET_ROWBYTES_X(patmap, 2);
     PIXMAP_BOUNDS(patmap) = ROMlib_pattern_bounds;
     /* create a table with 5 entries, the last of which
      will be the desired rgb color */
     SetHandleSize((Handle)PIXMAP_TABLE(patmap),
                   (Size)(sizeof(ColorTable) + (4 * sizeof(ColorSpec))));
 
-    CTAB_SEED_X(PIXMAP_TABLE(patmap)) = CL(GetCTSeed());
-    CTAB_SIZE_X(PIXMAP_TABLE(patmap)) = CWC(5);
+    CTAB_SEED_X(PIXMAP_TABLE(patmap)) = GetCTSeed();
+    CTAB_SIZE_X(PIXMAP_TABLE(patmap)) = 5;
     CTAB_TABLE(PIXMAP_TABLE(patmap))
     [4].rgb
         = *color;

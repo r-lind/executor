@@ -81,7 +81,7 @@ GetDControl(DialogPtr dp, INTEGER itemno)
     GUEST<INTEGER> unused;
 
     GetDialogItem(dp, itemno, &unused, &h, nullptr);
-    retval = (ControlHandle)MR(h);
+    retval = (ControlHandle)h;
     return retval;
 }
 
@@ -93,7 +93,7 @@ GetDIText(DialogPtr dp, INTEGER itemno)
     GUEST<INTEGER> unused;
 
     GetDialogItem(dp, itemno, &unused, &h, nullptr);
-    retval = MR(h);
+    retval = h;
 
     return retval;
 }
@@ -113,7 +113,7 @@ GetDILong(DialogPtr dp, INTEGER item, LONGINT _default)
     {
         GUEST<LONGINT> tmp;
         StringToNum(str, &tmp);
-        retval = CL(tmp);
+        retval = tmp;
     }
     return retval;
 }
@@ -132,12 +132,12 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
             THPrint hPrint;
             INTEGER num_copies;
 
-            hPrint = MR(((TPPrDlg)dp)->hPrintUsr);
+            hPrint = ((TPPrDlg)dp)->hPrintUsr;
             ch = GetDControl(dp, PRINT_ALL_RADIO_NO);
             if(GetControlValue(ch))
             {
-                HxX(hPrint, prJob.iFstPage) = CWC(1);
-                HxX(hPrint, prJob.iLstPage) = CWC(9999);
+                HxX(hPrint, prJob.iFstPage) = 1;
+                HxX(hPrint, prJob.iLstPage) = 9999;
             }
             else
             {
@@ -145,13 +145,13 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
 
                 first = GetDILong(dp, PRINT_FIRST_BOX_NO, 1);
                 last = GetDILong(dp, PRINT_LAST_BOX_NO, 9999);
-                HxX(hPrint, prJob.iFstPage) = CW(first);
-                HxX(hPrint, prJob.iLstPage) = CW(last);
+                HxX(hPrint, prJob.iFstPage) = first;
+                HxX(hPrint, prJob.iLstPage) = last;
             }
             {
 
                 num_copies = GetDILong(dp, PRINT_COPIES_BOX_NO, 1);
-                HxX(hPrint, prJob.iCopies) = CW(num_copies);
+                HxX(hPrint, prJob.iCopies) = num_copies;
             }
 #if defined(CYGWIN32)
             // FIXME: #warning TODO use better x and y coords
@@ -167,7 +167,7 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
                     orient = WIN_PRINT_LANDSCAPE;
                 get_info(&ROMlib_wp, ROMlib_paper_x, ROMlib_paper_y, orient,
                          num_copies, nullptr);
-                HxX(hPrint, prJob.iCopies) = CWC(1); /* Win32 driver handles
+                HxX(hPrint, prJob.iCopies) = 1; /* Win32 driver handles
 						     the multiple copies
 						     for us */
             }
@@ -202,7 +202,7 @@ add_orientation_icons_to_update_region(DialogPtr dp)
     Rect r;
     GUEST<INTEGER> unused;
 
-    gp = MR(qdGlobals().thePort);
+    gp = qdGlobals().thePort;
     SetPort(dp);
     GetDialogItem(dp, LAYOUT_PORTRAIT_NO, &unused, nullptr, &r);
     InvalRect(&r);
@@ -338,7 +338,7 @@ update_ROMlib_printer_vars(TPPrDlg dp)
 
     ROMlib_port = find_item_key((DialogPtr)dp, LAYOUT_PORT_MENU_NO);
 
-    ROMlib_set_default_resolution(MR(dp->hPrintUsr), 72, 72);
+    ROMlib_set_default_resolution(dp->hPrintUsr, 72, 72);
 
     if(ROMlib_printer == "PostScript File")
     {
@@ -389,8 +389,8 @@ get_popup_bounding_box(Rect *rp, DialogPtr dp, INTEGER itemno)
     GUEST<INTEGER> unused;
 
     GetDialogItem(dp, itemno, &unused, nullptr, rp);
-    rp->left = CW(CW(rp->left) - 1);
-    rp->bottom = CW(CW(rp->bottom) + 3);
+    rp->left = rp->left - 1;
+    rp->bottom = rp->bottom + 3;
 }
 #endif
 
@@ -413,7 +413,7 @@ update_port(DialogPtr dp)
     GrafPtr gp;
     char *keyp;
 
-    gp = MR(qdGlobals().thePort);
+    gp = qdGlobals().thePort;
     SetPort(dp);
 
     keyp = strdup(find_item_key(dp, LAYOUT_PRINTER_TYPE_NO).c_str());
@@ -561,17 +561,17 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
 
     retval = false;
     /* Check for user hitting <Enter> or clicking on "OK" button */
-    switch(CW(evt->what))
+    switch(evt->what)
     {
         case keyDown:
         {
             char c;
 
-            c = CL(evt->message) & 0xFF;
+            c = evt->message & 0xFF;
             if(c == '\r' || c == NUMPAD_ENTER)
             {
                 maybe_wait_for_keyup();
-                *ith = CWC(OK);
+                *ith = OK;
                 retval = true;
             }
         }
@@ -586,7 +586,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
             GUEST<INTEGER> unused;
 
             glocalp = evt->where;
-            gp = MR(qdGlobals().thePort);
+            gp = qdGlobals().thePort;
             SetPort(dlg);
             GlobalToLocal(&glocalp);
             localp = glocalp.get();
@@ -596,10 +596,10 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
             {
                 ControlHandle ch;
 
-                ch = (ControlHandle)MR(h);
+                ch = (ControlHandle)h;
                 if(TrackControl(ch, localp, nullptr))
                 {
-                    *ith = CWC(OK);
+                    *ith = OK;
                     retval = true;
                 }
             }
@@ -610,7 +610,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
     }
 
     keyp = strdup(find_item_key(dlg, LAYOUT_PRINTER_TYPE_NO).c_str());
-    if(retval && *ith == CWC(OK) && (strcmp(keyp, "PostScript File") == 0))
+    if(retval && *ith == OK && (strcmp(keyp, "PostScript File") == 0))
     {
         struct stat sbuf;
         Handle h;
@@ -639,7 +639,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
                             "Change", "Overwrite", nullptr,
                             nullptr, nullptr, nullptr)
                == 0)
-                *ith = CWC(LAYOUT_CIRCLE_OK_NO); /* dummy return value */
+                *ith = LAYOUT_CIRCLE_OK_NO; /* dummy return value */
         }
     }
 
@@ -652,15 +652,15 @@ BOOLEAN Executor::C_ROMlib_numsonlyfilterproc(
 {
     char c;
 
-    if(Cx(evt->what) == keyDown)
+    if(evt->what == keyDown)
     {
-        c = Cx(evt->message) & 0xFF;
+        c = evt->message & 0xFF;
         switch(c)
         {
             case '\r':
             case NUMPAD_ENTER:
                 maybe_wait_for_keyup();
-                *ith = CW(OK);
+                *ith = OK;
                 return true;
                 break;
             default:
@@ -818,11 +818,11 @@ TPPrDlg Executor::C_PrJobInit(THPrint hPrint)
 
             adjust_print_name((DialogPtr)retval);
 
-            retval->pFltrProc = RM(&ROMlib_numsonlyfilterproc);
+            retval->pFltrProc = &ROMlib_numsonlyfilterproc;
             /* TODO: Get this from the right place */
-            retval->pItemProc = RM(&ROMlib_myjobproc);
+            retval->pItemProc = &ROMlib_myjobproc;
             /* TODO: Get this from the right place */
-            retval->hPrintUsr = RM(hPrint);
+            retval->hPrintUsr = hPrint;
         }
         else
         {
@@ -902,7 +902,7 @@ adjust_menu_common(TPPrDlg dlg, INTEGER item, heading_t heading, ini_key_t defke
                 GrafPtr gp;
                 INTEGER max_wid;
 
-                gp = MR(qdGlobals().thePort);
+                gp = qdGlobals().thePort;
                 SetPort((GrafPtr)dlg);
                 default_index = -1;
                 max_wid = 0;
@@ -933,10 +933,10 @@ adjust_menu_common(TPPrDlg dlg, INTEGER item, heading_t heading, ini_key_t defke
                     GUEST<INTEGER> unused;
 
                     GetDialogItem((DialogPtr)dlg, item, &unused, &h, &r);
-                    r.right = CW(CW(r.left) + max_wid + 38);
-                    SetDialogItem((DialogPtr)dlg, item, ctrlItem, MR(h), &r);
-                    SizeControl(ch, CW(r.right) - CW(r.left),
-                                CW(r.bottom) - CW(r.top));
+                    r.right = r.left + max_wid + 38;
+                    SetDialogItem((DialogPtr)dlg, item, ctrlItem, h, &r);
+                    SizeControl(ch, r.right - r.left,
+                                r.bottom - r.top);
                 }
                 SetControlMaximum(ch, i);
                 if(default_index > -1)
@@ -1081,15 +1081,15 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
                 GetDialogItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
                          &item_type, &hh, &r);
 
-                h = MR(hh);
+                h = hh;
                 GetDialogItemText(h, str);
                 orig = StringWidth(str);
                 new1 = StringWidth(new_type_label);
                 HUnlock(h);
 
-                r.left = CW(CW(r.left) + orig - new1);
+                r.left = r.left + orig - new1;
                 SetDialogItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
-                         CW(item_type), h, &r);
+                         item_type, h, &r);
                 SetDialogItemText(GetDIText((DialogPtr)retval, LAYOUT_PRINTER_NAME_NO),
                          new_printer_name);
                 SetDialogItemText(GetDIText((DialogPtr)retval,
@@ -1103,9 +1103,9 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
             set_default_orientation(retval); /* must be called after paper
 					       menu is adjusted */
 
-            retval->pFltrProc = RM(&ROMlib_stlfilterproc);
-            retval->pItemProc = RM(&ROMlib_mystlproc);
-            retval->hPrintUsr = RM(hPrint);
+            retval->pFltrProc = &ROMlib_stlfilterproc;
+            retval->pItemProc = &ROMlib_mystlproc;
+            retval->hPrintUsr = hPrint;
         }
         else
         {
@@ -1132,7 +1132,7 @@ BOOLEAN Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
 
     if((prrecptr = CALLPRINITPROC(hPrint, (prinitprocp) initfptr)))
     {
-        if(!SUNPATH_HACK || (((pritemprocp)MR(prrecptr->pItemProc)
+        if(!SUNPATH_HACK || (((pritemprocp)prrecptr->pItemProc
                               != (pritemprocp)&ROMlib_myjobproc)
                              || ROMlib_printer != std::string(WIN32_TOKEN)))
         {
@@ -1141,21 +1141,21 @@ BOOLEAN Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
         }
         do
         {
-            if(SUNPATH_HACK && (((pritemprocp)MR(prrecptr->pItemProc)
+            if(SUNPATH_HACK && (((pritemprocp)prrecptr->pItemProc
                                  == (pritemprocp)&ROMlib_myjobproc)
                                 && ROMlib_printer == std::string(WIN32_TOKEN)))
                 item = 1;
             else
             {
-                ModalDialog(MR(prrecptr->pFltrProc), &item_swapped);
-                item = CW(item_swapped);
+                ModalDialog(prrecptr->pFltrProc, &item_swapped);
+                item = item_swapped;
             }
-            CALLPRITEMPROC(prrecptr, item, MR(prrecptr->pItemProc));
+            CALLPRITEMPROC(prrecptr, item, prrecptr->pItemProc);
 
 #if defined(CYGWIN32)
             /* Don't allow them to continue Win32 stuff if we can't
 	       initialize the Win32 subsystem */
-            if(((pritemprocp)MR(prrecptr->pItemProc)
+            if(((pritemprocp)prrecptr->pItemProc
                 == (pritemprocp)&ROMlib_myjobproc)
                && item == 1
                && strcmp(ROMlib_printer, WIN32_TOKEN) == 0
@@ -1189,29 +1189,29 @@ void Executor::C_PrGeneral(Ptr pData) /* IMV-410 */
 
     tgp = (TGnlData *)pData;
 
-    ((TGnlData *)pData)->iError = CWC(OpNotImpl);
-    switch(CW(tgp->iOpCode))
+    ((TGnlData *)pData)->iError = OpNotImpl;
+    switch(tgp->iOpCode)
     {
         case GetRslData:
         {
             TGetRslBlk *resolp;
 
             resolp = (TGetRslBlk *)pData;
-            resolp->iError = CWC(noErr);
-            resolp->iRgType = CWC(1);
-            resolp->xRslRg.iMin = CWC(0);
-            resolp->xRslRg.iMax = CWC(0);
-            resolp->yRslRg.iMin = CWC(0);
-            resolp->yRslRg.iMax = CWC(0);
-            resolp->rgRslRec[0].iXRsl = CWC(72);
-            resolp->rgRslRec[0].iYRsl = CWC(72);
+            resolp->iError = noErr;
+            resolp->iRgType = 1;
+            resolp->xRslRg.iMin = 0;
+            resolp->xRslRg.iMax = 0;
+            resolp->yRslRg.iMin = 0;
+            resolp->yRslRg.iMax = 0;
+            resolp->rgRslRec[0].iXRsl = 72;
+            resolp->rgRslRec[0].iYRsl = 72;
             if(ROMlib_optional_res_x <= 0 || ROMlib_optional_res_y <= 0)
-                resolp->iRslRecCnt = CWC(1);
+                resolp->iRslRecCnt = 1;
             else
             {
-                resolp->iRslRecCnt = CWC(2);
-                resolp->rgRslRec[1].iXRsl = CW(ROMlib_optional_res_x);
-                resolp->rgRslRec[1].iYRsl = CW(ROMlib_optional_res_y);
+                resolp->iRslRecCnt = 2;
+                resolp->rgRslRec[1].iXRsl = ROMlib_optional_res_x;
+                resolp->rgRslRec[1].iYRsl = ROMlib_optional_res_y;
             }
         }
         break;
@@ -1220,14 +1220,14 @@ void Executor::C_PrGeneral(Ptr pData) /* IMV-410 */
             TSetRslBlk *resolp;
 
             resolp = (TSetRslBlk *)pData;
-            if(!((resolp->iXRsl == CWC(72) && resolp->iYRsl == CWC(72)) || (resolp->iXRsl == CW(ROMlib_optional_res_x) && resolp->iYRsl == CW(ROMlib_optional_res_y))))
-                resolp->iError = CWC(NoSuchRsl);
+            if(!((resolp->iXRsl == 72 && resolp->iYRsl == 72) || (resolp->iXRsl == ROMlib_optional_res_x && resolp->iYRsl == ROMlib_optional_res_y)))
+                resolp->iError = NoSuchRsl;
             else
             {
-                resolp->iError = CWC(noErr);
-                ROMlib_set_default_resolution(MR(resolp->hPrint),
-                                              CW(resolp->iYRsl),
-                                              CW(resolp->iXRsl));
+                resolp->iError = noErr;
+                ROMlib_set_default_resolution(resolp->hPrint,
+                                              resolp->iYRsl,
+                                              resolp->iXRsl);
             }
         }
         break;

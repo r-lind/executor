@@ -20,8 +20,8 @@ sort_table(CTabPtr old, CTabPtr new1, unsigned max_color)
     int i;
 
     memset(&new1->ctTable, 0, (max_color + 1) * sizeof(ColorSpec));
-    for(i = CW(old->ctSize); i >= 0; i--)
-        new1->ctTable[CW(old->ctTable[i].value) & max_color].rgb = old->ctTable[i].rgb;
+    for(i = old->ctSize; i >= 0; i--)
+        new1->ctTable[old->ctTable[i].value & max_color].rgb = old->ctTable[i].rgb;
 
     return new1;
 }
@@ -108,7 +108,7 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
     bool copy1_p, copy2_p;
     write_back_data_t write_back1, write_back2;
 
-    bits_per_pixel = CW(src1->pixelSize);
+    bits_per_pixel = src1->pixelSize;
     rgb_spec = pixmap_rgb_spec(src1);
 
     /* For bits_per_pixel == 1, you are just supposed to use the original
@@ -148,7 +148,7 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
     src1_rowbytes = BITMAP_ROWBYTES(src1);
     src2_rowbytes = BITMAP_ROWBYTES(src2);
     dst_rowbytes = (width * bits_per_pixel + 31) / 32 * 4;
-    dst->rowBytes = CW(dst_rowbytes);
+    dst->rowBytes = dst_rowbytes;
 
     /* We want to run x from 0 to width; adding these offsets gives us
    * the real x for the source bitmaps.
@@ -156,24 +156,24 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
     if(tile_src1_p)
         src1_deltax = pat_x_offset;
     else
-        src1_deltax = CW(r1->left) - CW(src1->bounds.left);
-    src2_deltax = CW(r2->left) - CW(src2->bounds.left);
+        src1_deltax = r1->left - src1->bounds.left;
+    src2_deltax = r2->left - src2->bounds.left;
 
     /* Compute a pointer to the base of the first row of each bitmap. */
     if(tile_src1_p)
     {
-        src1_row_base = (unsigned char *)(MR(src1->baseAddr)
+        src1_row_base = (unsigned char *)(src1->baseAddr
                                           + (src1_rowbytes * (pat_y_offset & (s1_height - 1))));
     }
     else
     {
-        src1_row_base = (unsigned char *)(MR(src1->baseAddr)
-                                          + ((CW(r1->top) - CW(src1->bounds.top)) * src1_rowbytes));
+        src1_row_base = (unsigned char *)(src1->baseAddr
+                                          + ((r1->top - src1->bounds.top) * src1_rowbytes));
     }
 
-    src2_row_base = (unsigned char *)(MR(src2->baseAddr)
-                                      + (CW(r2->top) - CW(src2->bounds.top)) * src2_rowbytes);
-    dst_row_base = (unsigned char *)MR(dst->baseAddr);
+    src2_row_base = (unsigned char *)(src2->baseAddr
+                                      + (r2->top - src2->bounds.top) * src2_rowbytes);
+    dst_row_base = (unsigned char *)dst->baseAddr;
 
 #define RGB_TO_INDIRECT_PIXEL(rgb, pixel) \
     ((void)((pixel) = Color2Index(rgb)))
@@ -200,11 +200,11 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
                 ? RGB_TO_DIRECT_PIXEL(bpp, rgb, pixel) \
                 : RGB_TO_INDIRECT_PIXEL(rgb, pixel)))
 
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
-        bk_color = PORT_BK_COLOR(MR(qdGlobals().thePort));
+    if(CGrafPort_p(qdGlobals().thePort))
+        bk_color = PORT_BK_COLOR(qdGlobals().thePort);
     else
     {
-        if(active_screen_addr_p(&PORT_BITS(MR(qdGlobals().thePort))))
+        if(active_screen_addr_p(&PORT_BITS(qdGlobals().thePort)))
         {
             int i;
 
@@ -212,7 +212,7 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
             bk_color = 0;
 
             for(i = 0; i < 8; i++)
-                if(PORT_BK_COLOR(MR(qdGlobals().thePort)) == ROMlib_QDColors[i].value)
+                if(PORT_BK_COLOR(qdGlobals().thePort) == ROMlib_QDColors[i].value)
                 {
                     RGB_TO_PIXEL(bits_per_pixel,
                                  &ROMlib_QDColors[i].rgb, bk_color);
@@ -222,13 +222,13 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
         else
         {
             /* FIXME: this might not be right */
-            bk_color = (PORT_BK_COLOR(MR(qdGlobals().thePort)) == whiteColor
+            bk_color = (PORT_BK_COLOR(qdGlobals().thePort) == whiteColor
                             ? 0
                             : ((1 << bits_per_pixel) - 1));
         }
     }
 
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
         hilite_rgb = &CPORT_HILITE_COLOR(theCPort);
     else
         hilite_rgb = &LM(HiliteRGB);
@@ -259,7 +259,7 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
 
 #define NONPAT_NEXT1 src1_row_base += src1_rowbytes
 #define PAT_NEXT1                                        \
-    src1_row_base = (unsigned char *)(MR(src1->baseAddr) \
+    src1_row_base = (unsigned char *)(src1->baseAddr \
                                       + (src1_rowbytes * ((y + pat_y_offset) & (s1_height - 1))))
 
 #define SHIFT_COUNT(x, bpp) (8 - (bpp) - (bpp) * ((x) & (7 / (bpp))))
@@ -372,7 +372,7 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     bool copy1_p, copy2_p;
     write_back_data_t write_back1, write_back2;
 
-    bits_per_pixel = CW(src1->pixelSize);
+    bits_per_pixel = src1->pixelSize;
     rgb_spec = pixmap_rgb_spec(src1);
 
     /* For bits_per_pixel == 1, you are just supposed to use the original
@@ -464,7 +464,7 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     src1_rowbytes = BITMAP_ROWBYTES(src1);
     src2_rowbytes = BITMAP_ROWBYTES(src2);
     dst_rowbytes = (width * bits_per_pixel + 31) / 32 * 4;
-    dst->rowBytes = CW(dst_rowbytes);
+    dst->rowBytes = dst_rowbytes;
 
     /* We want to run x from 0 to width; adding these offsets gives us
    * the real x for the source bitmaps.
@@ -472,29 +472,29 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     if(tile_src1_p)
         src1_deltax = pat_x_offset;
     else
-        src1_deltax = CW(r1->left) - CW(src1->bounds.left);
-    src2_deltax = CW(r2->left) - CW(src2->bounds.left);
+        src1_deltax = r1->left - src1->bounds.left;
+    src2_deltax = r2->left - src2->bounds.left;
 
     /* Compute a pointer to the base of the first row of each bitmap. */
     if(tile_src1_p)
     {
-        src1_row_base = (unsigned char *)(MR(src1->baseAddr)
+        src1_row_base = (unsigned char *)(src1->baseAddr
                                           + (src1_rowbytes * (pat_y_offset & (s1_height - 1))));
     }
     else
     {
-        src1_row_base = (unsigned char *)(MR(src1->baseAddr)
-                                          + ((CW(r1->top) - CW(src1->bounds.top))
+        src1_row_base = (unsigned char *)(src1->baseAddr
+                                          + ((r1->top - src1->bounds.top)
                                              * src1_rowbytes));
     }
-    src2_row_base = (unsigned char *)(MR(src2->baseAddr)
-                                      + (CW(r2->top) - CW(src2->bounds.top)) * src2_rowbytes);
-    dst_row_base = (unsigned char *)MR(dst->baseAddr);
+    src2_row_base = (unsigned char *)(src2->baseAddr
+                                      + (r2->top - src2->bounds.top) * src2_rowbytes);
+    dst_row_base = (unsigned char *)dst->baseAddr;
 
     /* Fetch the "op color" fields, in case they are needed. */
-    op_red = CW(op_color->red);
-    op_green = CW(op_color->green);
-    op_blue = CW(op_color->blue);
+    op_red = op_color->red;
+    op_green = op_color->green;
+    op_blue = op_color->blue;
 
 #define CONVERT_BITS(read1, read2, write, next1, transform, bpp) \
     {                                                            \
@@ -536,9 +536,9 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     ((void)({                                       \
         const RGBColor *color;                      \
         color = &ctab->ctTable[pixel].rgb;          \
-        (r) = CW(color->red);                       \
-        (g) = CW(color->green);                     \
-        (b) = CW(color->blue);                      \
+        (r) = color->red;                       \
+        (g) = color->green;                     \
+        (b) = color->blue;                      \
     }))
 #define DIRECT_PIXEL_TO_RGB(bpp, pixel, red_out, green_out, blue_out, \
                             dummy_ctab)                               \
@@ -546,9 +546,9 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
         RGBColor color;                                               \
                                                                       \
         (*rgb_spec->pixel_to_rgbcolor)(rgb_spec, (pixel), &color);    \
-        (red_out) = CW(color.red);                                    \
-        (green_out) = CW(color.green);                                \
-        (blue_out) = CW(color.blue);                                  \
+        (red_out) = color.red;                                    \
+        (green_out) = color.green;                                \
+        (blue_out) = color.blue;                                  \
     }))
 #define PIXEL_TO_RGB(bpp, pixel, red, green, blue, ctab)                  \
     ((void)((bpp) == 32 || (bpp) == 16                                    \
@@ -575,7 +575,7 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
 
 #define NONPAT_NEXT1 src1_row_base += src1_rowbytes
 #define PAT_NEXT1                                        \
-    src1_row_base = (unsigned char *)(MR(src1->baseAddr) \
+    src1_row_base = (unsigned char *)(src1->baseAddr \
                                       + (src1_rowbytes * ((y + pat_y_offset) & (s1_height - 1))))
 
 #define SHIFT_COUNT(x, bpp) (8 - (bpp) - (bpp) * ((x) & (7 / (bpp))))

@@ -25,7 +25,7 @@ static uint32_t depth_table_space[DEPTHCONV_MAX_UINT32_TABLE_SIZE];
 static depthconv_func_t conversion_func = nullptr;
 
 static int32_t cached_src_bpp = -1, cached_dst_bpp = -1;
-static GUEST<int32_t> cached_src_seed_x = CLC(-1), cached_dst_seed_x = CLC(-1);
+static GUEST<int32_t> cached_src_seed_x = -1, cached_dst_seed_x = -1;
 
 static ITabHandle target_itab;
 
@@ -34,7 +34,7 @@ rgb_spec_t Executor::mac_16bpp_rgb_spec, Executor::mac_32bpp_rgb_spec;
 void Executor::pixmap_black_white(const PixMap *pixmap,
                                   uint32_t *black_return, uint32_t *white_return)
 {
-    if(pixmap->pixelType == CWC(RGBDirect))
+    if(pixmap->pixelType == RGBDirect)
     {
         const rgb_spec_t *rgb_spec;
 
@@ -46,7 +46,7 @@ void Executor::pixmap_black_white(const PixMap *pixmap,
     {
         int bpp;
 
-        bpp = CW(pixmap->pixelSize);
+        bpp = pixmap->pixelSize;
 
         *black_return = (1 << bpp) - 1;
         *white_return = 0;
@@ -60,14 +60,14 @@ void Executor::gd_black_white(GDHandle gdh,
     PixMapPtr gd_pmap;
 
     gd = STARH(gdh);
-    gd_pmap = STARH(MR(gd->gdPMap));
+    gd_pmap = STARH(gd->gdPMap);
 
     pixmap_black_white(gd_pmap, black_return, white_return);
 }
 
 void Executor::pixmap_free_copy(PixMap *pm)
 {
-    DisposePtr(MR(pm->baseAddr));
+    DisposePtr(pm->baseAddr);
 }
 
 void Executor::pixmap_copy(const PixMap *src_pm, const Rect *src_rect,
@@ -88,11 +88,10 @@ void Executor::pixmap_copy(const PixMap *src_pm, const Rect *src_rect,
       pixmaps */
     *return_pm = *src_pm;
 
-    row_bytes = ((width * CW(src_pm->pixelSize) + 31) / 32) * 4;
+    row_bytes = ((width * src_pm->pixelSize + 31) / 32) * 4;
 
-    return_pm->baseAddr = RM(NewPtr(height * row_bytes));
-    return_pm->rowBytes = CW(row_bytes
-                             | PIXMAP_DEFAULT_ROW_BYTES);
+    return_pm->baseAddr = NewPtr(height * row_bytes);
+    return_pm->rowBytes = row_bytes | PIXMAP_DEFAULT_ROW_BYTES;
     return_pm->bounds = *return_rect;
 
     {
@@ -107,7 +106,7 @@ void Executor::pixmap_copy(const PixMap *src_pm, const Rect *src_rect,
         pixmap_black_white(src_pm, &black_pixel, &white_pixel);
 
         ROMlib_blt_rgn_update_dirty_rect(rgn, srcCopy,
-                                         false, CW(src_pm->pixelSize),
+                                         false, src_pm->pixelSize,
                                          src_pm, return_pm,
                                          src_rect, return_rect,
                                          black_pixel, white_pixel);
@@ -207,7 +206,7 @@ void Executor::ROMlib_fg_bk(uint32_t *fg_pixel_out, uint32_t *bk_pixel_out,
     uint32_t fg_pixel, bk_pixel;
     RGBColor fg_rgb, bk_rgb;
 
-    current_port = MR(qdGlobals().thePort);
+    current_port = qdGlobals().thePort;
     if(CGrafPort_p(current_port))
     {
         if(indirect_p)
@@ -280,16 +279,16 @@ void Executor::ROMlib_fg_bk(uint32_t *fg_pixel_out, uint32_t *bk_pixel_out,
 const rgb_spec_t *
 Executor::pixmap_rgb_spec(const PixMap *pixmap)
 {
-    if(pixmap->pixelType == CWC(RGBDirect)
-       || pixmap->pixelType == CWC(vdriver_rgb_pixel_type))
+    if(pixmap->pixelType == RGBDirect
+       || pixmap->pixelType == vdriver_rgb_pixel_type)
     {
         if(vdriver->rgbSpec()
            && (active_screen_addr_p(pixmap)
-               || pixmap->pixelType == CWC(vdriver_rgb_pixel_type)))
+               || pixmap->pixelType == vdriver_rgb_pixel_type))
             return vdriver->rgbSpec();
-        else if(pixmap->pixelSize == CWC(16))
+        else if(pixmap->pixelSize == 16)
             return &mac_16bpp_rgb_spec;
-        else if(pixmap->pixelSize == CWC(32))
+        else if(pixmap->pixelSize == 32)
             return &mac_32bpp_rgb_spec;
         else
             gui_fatal("unknown pixel size");
@@ -300,27 +299,27 @@ Executor::pixmap_rgb_spec(const PixMap *pixmap)
 
 void Executor::pixmap_set_pixel_fields(PixMap *pixmap, int bpp)
 {
-    pixmap->packType = CWC(0);
-    pixmap->packSize = CLC(0);
+    pixmap->packType = 0;
+    pixmap->packSize = 0;
 
     if(bpp <= 8)
     {
-        pixmap->pixelType = CWC(Indirect);
-        pixmap->cmpSize = pixmap->pixelSize = CW(bpp);
-        pixmap->cmpCount = CWC(1);
+        pixmap->pixelType = Indirect;
+        pixmap->cmpSize = pixmap->pixelSize = bpp;
+        pixmap->cmpCount = 1;
     }
     else
     {
-        pixmap->pixelType = CWC(RGBDirect);
-        pixmap->pixelSize = CW(bpp);
-        pixmap->cmpCount = CWC(3);
+        pixmap->pixelType = RGBDirect;
+        pixmap->pixelSize = bpp;
+        pixmap->cmpCount = 3;
         switch(bpp)
         {
             case 16:
-                pixmap->cmpSize = CWC(5);
+                pixmap->cmpSize = 5;
                 break;
             case 32:
-                pixmap->cmpSize = CWC(8);
+                pixmap->cmpSize = 8;
                 break;
         }
     }
@@ -338,7 +337,7 @@ sort_color_table(CTabHandle dsth, const CTabHandle srch)
     /* Claris Home Page has some PICTs with color tables that are too large,
      so we make sure we don't try to copy too much. */
 
-    src_ct_size = std::min(CW(src->ctSize), CW(dst->ctSize));
+    src_ct_size = std::min(src->ctSize, dst->ctSize);
 
     if(src->ctFlags & CTAB_GDEVICE_BIT_X)
     {
@@ -354,10 +353,10 @@ sort_color_table(CTabHandle dsth, const CTabHandle srch)
 
         src_table = src->ctTable;
         dst_table = dst->ctTable;
-        max_ctab_elt = CW(dst->ctSize);
+        max_ctab_elt = dst->ctSize;
         dst->ctSeed = src->ctSeed;
         for(i = src_ct_size; i >= 0; i--)
-            dst_table[CW(src_table[i].value) & max_ctab_elt].rgb
+            dst_table[src_table[i].value & max_ctab_elt].rgb
                 = src_table[i].rgb;
     }
 }
@@ -381,8 +380,8 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
     TEMP_ALLOC_DECL(temp_scratch_pm_bits);
 
     /* Grab some useful information about the PixMaps. */
-    src_bpp = CW(src->pixelSize);
-    dst_bpp = CW(dst->pixelSize);
+    src_bpp = src->pixelSize;
+    dst_bpp = dst->pixelSize;
 
     width = RECT_WIDTH(rect);
     height = RECT_HEIGHT(rect);
@@ -393,7 +392,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                && (src_bpp & (src_bpp - 1)) == 0
                && (dst_bpp & (dst_bpp - 1)) == 0);
 
-    the_gd = MR(LM(TheGDevice));
+    the_gd = LM(TheGDevice);
 
 #define BPP_PIXEL_TYPE(bpp) ((bpp) > 8 ? RGBDirect : Indirect)
 #define MUNGE(a, b) ((a) + (b)*0x100)
@@ -402,7 +401,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
     {
         case MUNGE(Indirect, Indirect):
         {
-            src_seed_x = CTAB_SEED_X(MR(src->pmTable)); /* big endian */
+            src_seed_x = CTAB_SEED_X(src->pmTable); /* big endian */
             dst_seed_x = CTAB_SEED_X(PIXMAP_TABLE(GD_PMAP(the_gd)));
 
             if(src_bpp != cached_src_bpp || dst_bpp != cached_dst_bpp
@@ -416,8 +415,8 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                                                           src_bpp, dst_bpp, nullptr,
                                                           conv_table->ctTable);
                     /* Remember the specs for the table we just created. */
-                    cached_src_seed_x = CLC(-1);
-                    cached_dst_seed_x = CLC(-1);
+                    cached_src_seed_x = -1;
+                    cached_dst_seed_x = -1;
                 }
                 else
                 {
@@ -425,13 +424,13 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                     CTabHandle mapping;
                     int max_mapping_elt, max_src_elt;
 
-                    src_table = MR(src->pmTable);
+                    src_table = src->pmTable;
                     max_src_elt = CTAB_SIZE(src_table);
                     max_mapping_elt = (1 << src_bpp) - 1;
                     mapping
                         = (CTabHandle)(NewHandle(CTAB_STORAGE_FOR_SIZE(max_mapping_elt)));
-                    CTAB_SIZE_X(mapping) = CW(max_mapping_elt);
-                    CTAB_FLAGS_X(mapping) = CWC(0);
+                    CTAB_SIZE_X(mapping) = max_mapping_elt;
+                    CTAB_FLAGS_X(mapping) = 0;
                     /* the source color table may not specify all  possible
  		   colors, so set unspecified colors to some sane value
  		   
@@ -470,7 +469,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
         {
             CTabHandle src_table;
 
-            src_table = MR(src->pmTable);
+            src_table = src->pmTable;
             src_seed_x = CTAB_SEED_X(src_table);
 
             dst_rgb_spec = pixmap_rgb_spec(dst);
@@ -504,7 +503,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                 TheZoneGuard guard(LM(SysZone));
 
                 target_itab = (ITabHandle)NewHandle(sizeof(ITab));
-                ITAB_SEED_X(target_itab) = CLC(-1);
+                ITAB_SEED_X(target_itab) = -1;
             }
             // FIXME: #warning ctm added questionable caching here
             if(target_table != cached_target_table || ITAB_SEED_X(target_itab) != CTAB_SEED_X(target_table))
@@ -565,12 +564,12 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
 
     /* using BITMAP_... on a PixMap * is slimy */
     src_row_bytes = BITMAP_ROWBYTES(src);
-    src_base = (uint8_t *)(MR(src->baseAddr)
-                         + (CW(rect->top) - CW(src->bounds.top)) * src_row_bytes
-                         + (CW(rect->left) - CW(src->bounds.left)) * src_bpp / 8);
+    src_base = (uint8_t *)(src->baseAddr
+                         + (rect->top - src->bounds.top) * src_row_bytes
+                         + (rect->left - src->bounds.left) * src_bpp / 8);
 
     dst_row_bytes = BITMAP_ROWBYTES(dst);
-    dst_base = (uint8_t *)MR(dst->baseAddr);
+    dst_base = (uint8_t *)dst->baseAddr;
 
     (*conversion_func)(depth_table_space,
                        src_base, src_row_bytes, dst_base, dst_row_bytes,

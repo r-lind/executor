@@ -134,9 +134,9 @@ addr_info(char *addr)
     int i;
 
     /* get the zone for `addr' */
-    zones[0] = MR(LM(ApplZone));
-    zones[1] = MR(LM(SysZone));
-    zones[2] = MR(LM(TheZone));
+    zones[0] = LM(ApplZone);
+    zones[1] = LM(SysZone);
+    zones[2] = LM(TheZone);
 
     for(i = 0, addr_zone = nullptr; i < (int)NELEM(zones); i++)
     {
@@ -293,8 +293,8 @@ handle_addr_info:
             return;
 
         /* blah */
-        id = CW(id_s);
-        type = CL(type_s);
+        id = id_s;
+        type = type_s;
 
         res_name[res_name[0] + 1] = '\0';
 
@@ -381,7 +381,7 @@ void Executor::ROMlib_sledgehammer_zone(THz zone, bool print_p,
                     state = HANDLE_STATE(handle, block);
                     fprintf(stderr, "REL  %p; H:%p P:%p S:%08lx %c%c%c\n",
                             block,
-                            handle, MR(*handle),
+                            handle, *handle,
                             (unsigned long)LSIZE(block),
                             state & LOCKBIT ? 'L' : ' ',
                             state & PURGEBIT ? 'P' : ' ',
@@ -446,15 +446,15 @@ void Executor::ROMlib_sledgehammer_zone(THz zone, bool print_p,
 void Executor::ROMlib_sledgehammer_zones(const char *fn, const char *file, int lineno,
                                          const char *where, zone_info_t *info_array)
 {
-    ROMlib_sledgehammer_zone(MR(LM(SysZone)), false,
+    ROMlib_sledgehammer_zone(LM(SysZone), false,
                              fn, file, lineno, where,
                              info_array ? &info_array[0] : nullptr);
-    ROMlib_sledgehammer_zone(MR(LM(ApplZone)), false,
+    ROMlib_sledgehammer_zone(LM(ApplZone), false,
                              fn, file, lineno, where,
                              info_array ? &info_array[1] : nullptr);
     if(LM(TheZone) != LM(SysZone)
        && LM(TheZone) != LM(ApplZone))
-        ROMlib_sledgehammer_zone(MR(LM(TheZone)), false,
+        ROMlib_sledgehammer_zone(LM(TheZone), false,
                                  fn, file, lineno, where,
                                  info_array ? &info_array[2] : nullptr);
 }
@@ -512,7 +512,7 @@ void Executor::ROMlib_setupblock(block_header_t *block,
     uint32_t physical_size;
     unsigned size_correction;
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     asize = size;
     if(asize < MIN_BLOCK_SIZE)
@@ -549,7 +549,7 @@ void Executor::ROMlib_setupblock(block_header_t *block,
     }
 
     if((char *)ZONE_ALLOC_PTR(current_zone) < (char *)block + oldsize)
-        ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)newfree);
+        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)newfree;
 
 #if 0
   mm_set_block_fields (block,
@@ -588,11 +588,11 @@ void Executor::ROMlib_setupblock(block_header_t *block,
 #endif
 
     if(olduse == FREE)
-        ZONE_ZCB_FREE_X(current_zone) = CL(ZONE_ZCB_FREE(current_zone)
-                                           - PSIZE(block));
+        ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+                                           - PSIZE(block);
     else
-        ZONE_ZCB_FREE_X(current_zone) = CL(ZONE_ZCB_FREE(current_zone)
-                                           + oldsize - asize);
+        ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+                                           + oldsize - asize;
 }
 
 void Executor::ROMlib_coalesce(block_header_t *block)
@@ -601,7 +601,7 @@ void Executor::ROMlib_coalesce(block_header_t *block)
     int32_t total_free;
     THz current_zone;
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     total_free = 0;
     for(t_block = block;
@@ -617,7 +617,7 @@ void Executor::ROMlib_coalesce(block_header_t *block)
 
     if(ZONE_ALLOC_PTR(current_zone) >= block
        && (char *)ZONE_ALLOC_PTR(current_zone) <= (char *)block + total_free)
-        ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)block);
+        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)block;
 }
 
 /* Mark a block free.  If relocatable, the master must have already
@@ -626,9 +626,9 @@ void Executor::ROMlib_freeblock(block_header_t *block)
 {
     THz current_zone;
 
-    current_zone = MR(LM(TheZone));
-    ZONE_ZCB_FREE_X(current_zone) = CL(ZONE_ZCB_FREE(current_zone)
-                                       + PSIZE(block));
+    current_zone = LM(TheZone);
+    ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+                                       + PSIZE(block);
 
     mm_set_block_fields_offset(block, FREE_BLOCK_STATE, FREE, 0, PSIZE(block),
                                0);
@@ -644,7 +644,7 @@ void Executor::ROMlib_moveblock(block_header_t *oldl, block_header_t *newl,
     Handle master;
     THz current_zone;
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     master = BLOCK_TO_HANDLE(current_zone, oldl);
 
@@ -664,7 +664,7 @@ bool Executor::ROMlib_pushblock(block_header_t *block, block_header_t *after)
     block_header_t *t_block;
     THz current_zone;
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
     for(t_block = after;
         t_block != ZONE_BK_LIM(current_zone) && t_block != block;
         t_block = BLOCK_NEXT(t_block))
@@ -698,7 +698,7 @@ bool Executor::ROMlib_makespace(block_header_t **block_out, uint32_t size)
 
     gui_assert(size > 0);
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
     total_size = 0;
     old_block = block = *block_out;
     bk_lim = ZONE_BK_LIM(current_zone);
@@ -749,7 +749,7 @@ bool Executor::ROMlib_makespace(block_header_t **block_out, uint32_t size)
 
     if(ZONE_ALLOC_PTR(current_zone) > block
        && ZONE_ALLOC_PTR(current_zone) <= b)
-        ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)block);
+        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)block;
 
     /* Finally, coalesce the space into one big free block */
     gui_assert(USE(block) == FREE);
@@ -766,8 +766,8 @@ bool Executor::ROMlib_locked(block_header_t *block)
 
     gui_assert(USE(block) == REL);
 
-    h = BLOCK_TO_HANDLE(MR(LM(TheZone)), block);
-    return (HANDLE_STATE(h, block) & LOCKBIT) || (h == MR(LM(GZRootHnd)));
+    h = BLOCK_TO_HANDLE(LM(TheZone), block);
+    return (HANDLE_STATE(h, block) & LOCKBIT) || (h == LM(GZRootHnd));
 }
 
 /* Find the total amount of free space starting at block.  Compress them
@@ -778,7 +778,7 @@ int32_t Executor::ROMlib_amtfree(block_header_t *block)
     block_header_t *b;
     THz current_zone;
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     for(total = 0, b = block;
         USE(b) == FREE && b != ZONE_BK_LIM(current_zone);
@@ -794,7 +794,7 @@ int32_t Executor::ROMlib_amtfree(block_header_t *block)
         SETPSIZE(block, total);
         if(ZONE_ALLOC_PTR(current_zone) > block
            && ZONE_ALLOC_PTR(current_zone) <= b)
-            ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)block);
+            ZONE_ALLOC_PTR_X(current_zone) = (Ptr)block;
     }
     return total;
 }
@@ -805,7 +805,7 @@ void Executor::checkallocptr(void)
     block_header_t *b;
     THz current_zone;
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     if(ZONE_ALLOC_PTR_X(current_zone) == nullptr)
         return;
@@ -833,7 +833,7 @@ OSErr Executor::ROMlib_relalloc(Size size, block_header_t **newblk)
     int32_t biggest_block, old_biggest_block;
     THz current_zone;
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     /* If we get a negative size, we don't want to loop forever thinking
    * the request is easily satisfied.  This works around that problem.
@@ -899,7 +899,7 @@ retry:
 
     /* Try a purge */
     PurgeMem(size);
-    if(LM(MemErr) == CWC(noErr))
+    if(LM(MemErr) == noErr)
         goto retry;
     /* After a purge, we might be able to compact unlocked relocatable
      blocks and gain enough space, so redo the compact. */
@@ -939,7 +939,7 @@ retry:
  */
 
 #if defined(SCAREY_NEW_OLD_CODE)
-        if((uint32_t)MR(LM(ApplLimit)) - (uint32_t)HEAPEND >= newsize)
+        if((uint32_t)LM(ApplLimit) - (uint32_t)HEAPEND >= newsize)
         {
             /* Do the extension */
             /* The new block */
@@ -948,7 +948,7 @@ retry:
             *newblk = b;
 
             /* The new trailer */
-            ZONE_BK_LIM_X(current_zone) = RM((block_header_t *)((uint32_t)ZONE_BK_LIM(current_zone) + newsize));
+            ZONE_BK_LIM_X(current_zone) = (block_header_t *)((uint32_t)ZONE_BK_LIM(current_zone) + newsize);
             b = ZONE_BK_LIM(current_zone);
             SETZERO(b);
             SETUSE(b, FREE);
@@ -956,8 +956,8 @@ retry:
             SETSIZEC(b, 0);
             SET_BLOCK_STATE(b, FREE_BLOCK_STATE);
 
-            ZONE_ZCB_FREE_X(current_zone) = CL(ZONE_ZCB_FREE(current_zone)
-                                               + newsize);
+            ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+                                               + newsize;
             LM(HeapEnd) = (Ptr)ZONE_BK_LIM(current_zone);
             return noErr;
         }

@@ -279,7 +279,7 @@ typedef enum { regular = 1,
  * TODO: do the ioCompletion routine when necessary
  */
 
-#define PBRETURN(pb, x) return (((ParmBlkPtr)(pb))->ioParam.ioResult = CW(x), (x))
+#define PBRETURN(pb, x) return (((ParmBlkPtr)(pb))->ioParam.ioResult = x, (x))
 
 typedef struct _cacheentry *cacheentry_ptr;
 
@@ -389,8 +389,8 @@ extern INTEGER LM(SCSIFlags);
                                  : false;                                              \
     })
 
-#define WDNUMTOWDP(v) ((wdentry *)(MR(LM(WDCBsPtr)) + (INTEGER)((v) ^ WDMAGIC)))
-#define WDPTOWDNUM(p) (((char *)(p) - (char *)MR(LM(WDCBsPtr))) ^ WDMAGIC)
+#define WDNUMTOWDP(v) ((wdentry *)(LM(WDCBsPtr) + (INTEGER)((v) ^ WDMAGIC)))
+#define WDPTOWDNUM(p) (((char *)(p) - (char *)LM(WDCBsPtr)) ^ WDMAGIC)
 
 typedef enum { seteof,
                allocany,
@@ -413,9 +413,9 @@ enum
 };
 
 #if !defined(MAC)
-#define CurTime (GetDateTime(&LM(Time)), Cx(LM(Time)))
+#define CurTime (GetDateTime(&LM(Time)), LM(Time))
 #else
-#define CurTime Cx(LM(Time))
+#define CurTime LM(Time)
 #endif
 
 #define EJECTALERTID (-4061)

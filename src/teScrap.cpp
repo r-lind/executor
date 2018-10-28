@@ -19,14 +19,14 @@ OSErr Executor::TEFromScrap()
     GUEST<int32_t> l;
     int32_t m;
 
-    m = GetScrap(MR(LM(TEScrpHandle)), TICK("TEXT"), &l);
+    m = GetScrap(LM(TEScrpHandle), TICK("TEXT"), &l);
     if(m < 0)
     {
-        EmptyHandle(MR(LM(TEScrpHandle)));
-        LM(TEScrpLength) = CWC(0);
+        EmptyHandle(LM(TEScrpHandle));
+        LM(TEScrpLength) = 0;
     }
     else
-        LM(TEScrpLength) = CW(m);
+        LM(TEScrpLength) = m;
     return m < 0 ? m : noErr;
 }
 
@@ -34,24 +34,24 @@ OSErr Executor::TEToScrap()
 {
     int32_t m;
 
-    HLockGuard guard(MR(LM(TEScrpHandle)));
+    HLockGuard guard(LM(TEScrpHandle));
 
-    m = PutScrap(CW(LM(TEScrpLength)), TICK("TEXT"),
-                 STARH(MR(LM(TEScrpHandle))));
+    m = PutScrap(LM(TEScrpLength), TICK("TEXT"),
+                 STARH(LM(TEScrpHandle)));
     return m < 0 ? m : 0;
 }
 
 Handle Executor::TEScrapHandle()
 {
-    return MR(LM(TEScrpHandle));
+    return LM(TEScrpHandle);
 }
 
 int32_t Executor::TEGetScrapLength()
 {
-    return CW(LM(TEScrpLength));
+    return LM(TEScrpLength);
 }
 
 void Executor::TESetScrapLength(int32_t ln)
 {
-    LM(TEScrpLength) = CW(ln);
+    LM(TEScrpLength) = ln;
 }

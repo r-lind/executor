@@ -331,7 +331,7 @@ static void regionify1(INTEGER *ip1, INTEGER *ip2, RgnPtr rp)
         }
     }
     *op++ = CWC_RAW(32767);
-    rp->rgnSize = CW(-32768 + (op - (INTEGER *)rp) * sizeof(INTEGER));
+    rp->rgnSize = -32768 + (op - (INTEGER *)rp) * sizeof(INTEGER);
 }
 
 #define SWAP std::swap
@@ -353,17 +353,17 @@ void Executor::C_StdLine(Point p)
     PAUSEDECL;
 
     r32767 = 32767;
-    x1 = CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h);
-    y1 = CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v);
+    x1 = PORT_PEN_LOC(qdGlobals().thePort).h;
+    y1 = PORT_PEN_LOC(qdGlobals().thePort).v;
     x2 = p.h;
     y2 = p.v;
 
-    px = CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).h);
-    py = CW(PORT_PEN_SIZE(MR(qdGlobals().thePort)).v);
+    px = PORT_PEN_SIZE(qdGlobals().thePort).h;
+    py = PORT_PEN_SIZE(qdGlobals().thePort).v;
 
-    if(PORT_POLY_SAVE_X(MR(qdGlobals().thePort)) && (x1 != x2 || y1 != y2))
+    if(PORT_POLY_SAVE_X(qdGlobals().thePort) && (x1 != x2 || y1 != y2))
     {
-        ph = (PolyHandle)PORT_POLY_SAVE(MR(qdGlobals().thePort));
+        ph = (PolyHandle)PORT_POLY_SAVE(qdGlobals().thePort);
         psize = GetHandleSize((Handle)ph);
         if(psize == SMALLPOLY)
         {
@@ -371,25 +371,25 @@ void Executor::C_StdLine(Point p)
             oip = (INTEGER *)((char *)STARH(ph) + psize);
             *oip++ = CW_RAW(y1);
             *oip++ = CW_RAW(x1);
-            HxX(ph, polySize) = CW(Hx(ph, polySize) + 2 * sizeof(Point));
+            HxX(ph, polySize) = Hx(ph, polySize) + 2 * sizeof(Point);
         }
         else
         {
             SetHandleSize((Handle)ph, psize + sizeof(Point));
             oip = (INTEGER *)((char *)STARH(ph) + psize);
-            HxX(ph, polySize) = CW(Hx(ph, polySize) + sizeof(Point));
+            HxX(ph, polySize) = Hx(ph, polySize) + sizeof(Point);
         }
         *oip++ = CW_RAW(y2);
         *oip++ = CW_RAW(x2);
     }
 
-    if(MR(qdGlobals().thePort)->picSave)
+    if(qdGlobals().thePort->picSave)
     {
         ROMlib_drawingpicupdate();
         PICOP(OP_Line);
-        PICWRITE(&PORT_PEN_LOC(MR(qdGlobals().thePort)), sizeof(PORT_PEN_LOC(MR(qdGlobals().thePort))));
-        swappedp.h = CW(p.h);
-        swappedp.v = CW(p.v);
+        PICWRITE(&PORT_PEN_LOC(qdGlobals().thePort), sizeof(PORT_PEN_LOC(qdGlobals().thePort)));
+        swappedp.h = p.h;
+        swappedp.v = p.v;
         PICWRITE(&swappedp, sizeof(swappedp));
     }
 
@@ -408,32 +408,32 @@ void Executor::C_StdLine(Point p)
             SWAP(x1, x2);
         if(y2 < y1)
             SWAP(y1, y2);
-        if(PORT_PEN_VIS(MR(qdGlobals().thePort)) >= 0)
+        if(PORT_PEN_VIS(qdGlobals().thePort) >= 0)
         {
             SetRect(&r, x1, y1, x2 + px, y2 + py);
             PAUSERECORDING;
             StdRect(paint, &r);
             RESUMERECORDING;
         }
-        if(PORT_REGION_SAVE_X(MR(qdGlobals().thePort)) && y1 == y2 && x1 != x2)
+        if(PORT_REGION_SAVE_X(qdGlobals().thePort) && y1 == y2 && x1 != x2)
         {
             RgnPtr tmpRP;
             tmpRP = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + 5 * sizeof(INTEGER));
-            tmpRP->rgnBBox.top = CW(y1);
-            tmpRP->rgnBBox.left = CW(x1);
-            tmpRP->rgnBBox.bottom = CW(y2);
-            tmpRP->rgnBBox.right = CW(x1);
-            tmpRP->rgnSize = CWC(RGN_SMALL_SIZE + 5 * sizeof(INTEGER));
+            tmpRP->rgnBBox.top = y1;
+            tmpRP->rgnBBox.left = x1;
+            tmpRP->rgnBBox.bottom = y2;
+            tmpRP->rgnBBox.right = x1;
+            tmpRP->rgnSize = RGN_SMALL_SIZE + 5 * sizeof(INTEGER);
             oip = (INTEGER *)((char *)tmpRP + RGN_SMALL_SIZE);
             *oip++ = CW_RAW(y1);
             *oip++ = CW_RAW(x1);
             *oip++ = CW_RAW(x2);
             *oip++ = RGN_STOP_X;
             *oip++ = RGN_STOP_X;
-            rp = RM(tmpRP);
+            rp = tmpRP;
             XorRgn(&rp,
-                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
-                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
+                   (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort),
+                   (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort));
         }
         ALLOCAEND
         /*-->*/ return;
@@ -447,15 +447,15 @@ void Executor::C_StdLine(Point p)
     dy = y2 - y1;
     dx = std::abs(x2 - x1);
 
-    if(PORT_REGION_SAVE_X(MR(qdGlobals().thePort)))
+    if(PORT_REGION_SAVE_X(qdGlobals().thePort))
     {
         /* size allocated below is overkill */
         RgnPtr tmpRP;
         tmpRP = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + (dy + 1) * sizeof(INTEGER) * 6 + sizeof(INTEGER));
-        tmpRP->rgnBBox.top = CW(y1);
-        tmpRP->rgnBBox.left = CW(std::min(x1, x2));
-        tmpRP->rgnBBox.bottom = CW(y2);
-        tmpRP->rgnBBox.right = CW(std::max(x1, x2));
+        tmpRP->rgnBBox.top = y1;
+        tmpRP->rgnBBox.left = std::min(x1, x2);
+        tmpRP->rgnBBox.bottom = y2;
+        tmpRP->rgnBBox.right = std::max(x1, x2);
 
         if(dy >= dx)
             if(x2 > x1)
@@ -467,14 +467,14 @@ void Executor::C_StdLine(Point p)
         else
             op = scrdxdyx1x2(y1, x1 + 1, dy, dx, (INTEGER *)tmpRP + 5);
         *op++ = RGN_STOP_X;
-        tmpRP->rgnSize = CW((char *)op - (char *)tmpRP);
-        rp = RM(tmpRP);
+        tmpRP->rgnSize = (char *)op - (char *)tmpRP;
+        rp = tmpRP;
         XorRgn(&rp,
-               (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
-               (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
+               (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort),
+               (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort));
     }
 
-    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
+    if(PORT_PEN_VIS(qdGlobals().thePort) < 0)
     {
         ALLOCAEND
         /*-->*/ return;
@@ -482,11 +482,11 @@ void Executor::C_StdLine(Point p)
 
     RgnPtr tmpRP;
     tmpRP = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + (dy + py + 1) * sizeof(LONGINT) * 4 + 3 * 2 * sizeof(LONGINT));
-    /* Cx(rp->rgnSize) gets filled in later */
-    tmpRP->rgnBBox.top = CW(y1);
-    tmpRP->rgnBBox.left = CW(std::min(x1, x2));
-    tmpRP->rgnBBox.bottom = CW(y2 + py);
-    tmpRP->rgnBBox.right = CW(std::max(x1, x2) + px);
+    /* rp->rgnSize gets filled in later */
+    tmpRP->rgnBBox.top = y1;
+    tmpRP->rgnBBox.left = std::min(x1, x2);
+    tmpRP->rgnBBox.bottom = y2 + py;
+    tmpRP->rgnBBox.right = std::max(x1, x2) + px;
     op = destpoints = (INTEGER *)ALLOCA(MAXNPOINTS(dy) * sizeof(INTEGER));
     op2 = destpoints2 = (INTEGER *)ALLOCA(MAXNPOINTS(dy) * sizeof(INTEGER));
 
@@ -562,29 +562,29 @@ void Executor::C_StdLine(Point p)
     regionify1(destpoints, destpoints2, tmpRP);
 
     rh = NewRgn();
-    SectRect(&PORT_BOUNDS(MR(qdGlobals().thePort)), &PORT_RECT(MR(qdGlobals().thePort)), &r);
+    SectRect(&PORT_BOUNDS(qdGlobals().thePort), &PORT_RECT(qdGlobals().thePort), &r);
     RectRgn(rh, &r);
-    SectRgn(rh, PORT_VIS_REGION(MR(qdGlobals().thePort)), rh);
-    SectRgn(rh, PORT_CLIP_REGION(MR(qdGlobals().thePort)), rh);
-    rp = RM(tmpRP);
+    SectRgn(rh, PORT_VIS_REGION(qdGlobals().thePort), rh);
+    SectRgn(rh, PORT_CLIP_REGION(qdGlobals().thePort), rh);
+    rp = tmpRP;
     SectRgn(&rp, rh, rh);
 
-    if(GWorld_p(MR(qdGlobals().thePort)))
-        LockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
+    if(GWorld_p(qdGlobals().thePort))
+        LockPixels(CPORT_PIXMAP(qdGlobals().thePort));
 
     {
         INTEGER adjusted_mode;
 
-        adjusted_mode = PORT_PEN_MODE(MR(qdGlobals().thePort));
+        adjusted_mode = PORT_PEN_MODE(qdGlobals().thePort);
         if(adjusted_mode < blend)
             adjusted_mode = adjusted_mode % 0x40 | 8;
         ROMlib_blt_pn(rh, adjusted_mode);
     }
-    /* ROMlib_bltrgn (rh, MR(qdGlobals().thePort)->pnPat, Cx(MR(qdGlobals().thePort)->pnMode) % 0x40 | 8,
+    /* ROMlib_bltrgn (rh, qdGlobals().thePort->pnPat, qdGlobals().thePort->pnMode % 0x40 | 8,
    (Rect *) 0, (Rect *) 0); */
 
-    if(GWorld_p(MR(qdGlobals().thePort)))
-        UnlockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
+    if(GWorld_p(qdGlobals().thePort))
+        UnlockPixels(CPORT_PIXMAP(qdGlobals().thePort));
 
     DisposeRgn(rh);
     ALLOCAEND

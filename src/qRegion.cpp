@@ -97,7 +97,7 @@ void Executor::C_OpenRgn()
     /* sentinel */
     (RGN_DATA(rh))[0] = RGN_STOP_X;
 
-    PORT_REGION_SAVE_X(MR(qdGlobals().thePort)) = RM((Handle)rh);
+    PORT_REGION_SAVE_X(qdGlobals().thePort) = (Handle)rh;
     HidePen();
 }
 
@@ -109,7 +109,7 @@ rgn_is_rect_p(const RgnHandle rgnh)
 
     ip = RGNP_DATA(rgnp);
     return (!RGNP_SPECIAL_P(rgnp)
-            && RGNP_SIZE_X(rgnp) == CWC(RGN_SMALL_SIZE + 9 * sizeof *ip)
+            && RGNP_SIZE_X(rgnp) == RGN_SMALL_SIZE + 9 * sizeof *ip
             && ip[1] == ip[5]
             && ip[2] == ip[6]);
 }
@@ -172,16 +172,16 @@ void Executor::ROMlib_sizergn(RgnHandle rh, bool special_p) /* INTERNAL */
             SetHandleSize((Handle)rh, RGN_SMALL_SIZE);
             RGN_SET_SMALL(rh);
             HASSIGN_1(rh,
-                      rgnBBox.top, CWC(0));
+                      rgnBBox.top, 0);
             left = right = y = 0;
         }
         else
             SetHandleSize((Handle)rh, rs);
 
         HASSIGN_3(rh,
-                  rgnBBox.left, CW(left),
-                  rgnBBox.bottom, CW(y),
-                  rgnBBox.right, CW(right));
+                  rgnBBox.left, left,
+                  rgnBBox.bottom, y,
+                  rgnBBox.right, right);
     }
 }
 
@@ -198,15 +198,15 @@ void Executor::C_CopyRgn(RgnHandle s, RgnHandle d)
 
 void Executor::C_CloseRgn(RgnHandle rh)
 {
-    RgnHandle rgn_save = (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort));
+    RgnHandle rgn_save = (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort);
 
-    if(RGN_SIZE_X(rgn_save) == CWC(RGN_SMALL_SIZE + sizeof(INTEGER))
+    if(RGN_SIZE_X(rgn_save) == RGN_SMALL_SIZE + sizeof(INTEGER)
        || rgn_is_rect_p(rgn_save))
         RGN_SET_SMALL(rgn_save);
 
-    ROMlib_installhandle(PORT_REGION_SAVE(MR(qdGlobals().thePort)), (Handle)rh);
+    ROMlib_installhandle(PORT_REGION_SAVE(qdGlobals().thePort), (Handle)rh);
     SetHandleSize((Handle)rh, RGN_SIZE(rh));
-    PORT_REGION_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
+    PORT_REGION_SAVE_X(qdGlobals().thePort) = nullptr;
     ShowPen();
 }
 
@@ -696,13 +696,13 @@ static void sectbinop(RgnHandle srcrgn1, RgnHandle srcrgn2, RgnHandle dstrgn)
         rp = &RGN_BBOX(srcrgn1);
         r1[0] = rp->top;
         r1[1] = rp->left;
-        r1[2] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CWC(RGN_STOP - 1));
-        r1[3] = CWC(RGN_STOP);
-        r1[4] = rp->bottom != CWC(RGN_STOP) ? rp->bottom : GUEST<INTEGER>(CWC(RGN_STOP - 1));
+        r1[2] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r1[3] = RGN_STOP;
+        r1[4] = rp->bottom != RGN_STOP ? rp->bottom : GUEST<INTEGER>(RGN_STOP - 1);
         r1[5] = rp->left;
-        r1[6] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CWC(RGN_STOP - 1));
-        r1[7] = CWC(RGN_STOP);
-        r1[8] = CWC(RGN_STOP);
+        r1[6] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r1[7] = RGN_STOP;
+        r1[8] = RGN_STOP;
         ipr1 = (INTEGER *)r1;
     }
     else
@@ -712,13 +712,13 @@ static void sectbinop(RgnHandle srcrgn1, RgnHandle srcrgn2, RgnHandle dstrgn)
         rp = &RGN_BBOX(srcrgn2);
         r2[0] = rp->top;
         r2[1] = rp->left;
-        r2[2] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CWC(RGN_STOP - 1));
-        r2[3] = CWC(RGN_STOP);
-        r2[4] = rp->bottom != CWC(RGN_STOP) ? rp->bottom : GUEST<INTEGER>(CWC(RGN_STOP - 1));
+        r2[2] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r2[3] = RGN_STOP;
+        r2[4] = rp->bottom != RGN_STOP ? rp->bottom : GUEST<INTEGER>(RGN_STOP - 1);
         r2[5] = rp->left;
-        r2[6] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CWC(RGN_STOP - 1));
-        r2[7] = CWC(RGN_STOP);
-        r2[8] = CWC(RGN_STOP);
+        r2[6] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r2[7] = RGN_STOP;
+        r2[8] = RGN_STOP;
         ipr2 = (INTEGER *)r2;
     }
     else
@@ -877,13 +877,13 @@ static void binop(optype op, RgnHandle srcrgn1, RgnHandle srcrgn2,
         rp = &(RGN_BBOX(srcrgn1));
         r1[0] = rp->top;
         r1[1] = rp->left;
-        r1[2] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CW(RGN_STOP - 1));
-        r1[3] = CWC(RGN_STOP);
-        r1[4] = rp->bottom != CWC(RGN_STOP) ? rp->bottom : GUEST<INTEGER>(CW(RGN_STOP - 1));
+        r1[2] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r1[3] = RGN_STOP;
+        r1[4] = rp->bottom != RGN_STOP ? rp->bottom : GUEST<INTEGER>(RGN_STOP - 1);
         r1[5] = rp->left;
-        r1[6] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CW(RGN_STOP - 1));
-        r1[7] = CWC(RGN_STOP);
-        r1[8] = CWC(RGN_STOP);
+        r1[6] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r1[7] = RGN_STOP;
+        r1[8] = RGN_STOP;
         ipr1 = (INTEGER *)r1;
     }
     else
@@ -893,13 +893,13 @@ static void binop(optype op, RgnHandle srcrgn1, RgnHandle srcrgn2,
         rp = &(RGN_BBOX(srcrgn2));
         r2[0] = rp->top;
         r2[1] = rp->left;
-        r2[2] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CW(RGN_STOP - 1));
-        r2[3] = CWC(RGN_STOP);
-        r2[4] = rp->bottom != CWC(RGN_STOP) ? rp->bottom : GUEST<INTEGER>(CW(RGN_STOP - 1));
+        r2[2] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r2[3] = RGN_STOP;
+        r2[4] = rp->bottom != RGN_STOP ? rp->bottom : GUEST<INTEGER>(RGN_STOP - 1);
         r2[5] = rp->left;
-        r2[6] = rp->right != CWC(RGN_STOP) ? rp->right : GUEST<INTEGER>(CW(RGN_STOP - 1));
-        r2[7] = CWC(RGN_STOP);
-        r2[8] = CWC(RGN_STOP);
+        r2[6] = rp->right != RGN_STOP ? rp->right : GUEST<INTEGER>(RGN_STOP - 1);
+        r2[7] = RGN_STOP;
+        r2[8] = RGN_STOP;
         ipr2 = (INTEGER *)r2;
     }
     else
@@ -946,7 +946,7 @@ static void binop(optype op, RgnHandle srcrgn1, RgnHandle srcrgn2,
     }
     *tptr++ = RGN_STOP_X;
     gui_assert(sizeof(INTEGER) * (tptr - temppoints) <= 2 * (Hx(srcrgn1, rgnSize) + Hx(srcrgn2, rgnSize) + 18 * sizeof(INTEGER)));
-    HxX(dstrgn, rgnSize) = CW(RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints));
+    HxX(dstrgn, rgnSize) = RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints);
     /* TODO fix rgnBBox here */
     ReallocateHandle((Handle)dstrgn,
                   RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints));
@@ -1185,7 +1185,7 @@ static void ptorh(INTEGER *p, RgnHandle rh)
                 oy = y;
             }
             *op++ = CW_RAW(*p++);
-            ++p; /* if Cx((*ip)++ != oy) error! */
+            ++p; /* if (*ip)++ != oy error! */
             *op++ = CW_RAW(*p++);
         }
     }
@@ -1207,7 +1207,7 @@ void Executor::C_InsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv)
 #define INSANEBUTNECESSARY
 #if defined(INSANEBUTNECESSARY)
         rp = &RGN_BBOX(rh);
-        if(CW(rp->top) >= CW(rp->bottom) || CW(rp->left) >= CW(rp->right))
+        if(rp->top >= rp->bottom || rp->left >= rp->right)
             RECT_ZERO(rp);
 #endif /* INSANEBUTNECESSARY */
     }
@@ -1236,10 +1236,10 @@ justone(const Rect *rp, RgnHandle rgn, RgnHandle dest)
 {
     const Rect *rp2 = &RGN_BBOX(rgn);
 
-    if(CW(rp->left) <= CW(rp2->left)
-       && CW(rp->top) <= CW(rp2->top)
-       && CW(rp->right) >= CW(rp2->right)
-       && CW(rp->bottom) >= CW(rp2->bottom))
+    if(rp->left <= rp2->left
+       && rp->top <= rp2->top
+       && rp->right >= rp2->right
+       && rp->bottom >= rp2->bottom)
     {
         CopyRgn(rgn, dest);
         return true;
@@ -1328,9 +1328,9 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     {
         temp = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + 9 * sizeof(INTEGER));
 #if 0
-	BlockMoveData(CL(*(Ptr *) s1), (Ptr) temp, RGN_SMALL_SIZE);
+	BlockMoveData(*(Ptr *) s1, (Ptr) temp, RGN_SMALL_SIZE);
 #else
-        memcpy((Ptr)temp, MR(*s1), RGN_SMALL_SIZE);
+        memcpy((Ptr)temp, *s1, RGN_SMALL_SIZE);
 #endif
         op = (INTEGER *)((char *)temp + RGN_SMALL_SIZE);
         *op++ = HxX(s1, rgnBBox.top).raw();
@@ -1343,7 +1343,7 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
         *op++ = RGN_STOP_X;
         *op++ = RGN_STOP_X;
         ASSERT_SAFE(temp);
-        temp2 = RM(temp);
+        temp2 = temp;
         s1 = &temp2;
     }
 
@@ -1351,7 +1351,7 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     {
         temp = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + 9 * sizeof(INTEGER));
 #if 0
-	BlockMoveData(CL(*(Ptr *) s2), (Ptr) temp, RGN_SMALL_SIZE);
+	BlockMoveData(*(Ptr *) s2, (Ptr) temp, RGN_SMALL_SIZE);
 #else
         memcpy((Ptr)temp, STARH(s2), RGN_SMALL_SIZE);
 #endif
@@ -1366,7 +1366,7 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
         *op++ = RGN_STOP_X;
         *op++ = RGN_STOP_X;
         ASSERT_SAFE(temp);
-        temp3 = RM(temp);
+        temp3 = temp;
         s2 = &temp3;
     }
 
@@ -1457,10 +1457,10 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     *op++ = RGN_STOP_X;
     HASSIGN_5(dest,
               rgnBBox.top, *(GUEST<INTEGER> *)RGN_DATA(dest),
-              rgnBBox.left, CW(left),
-              rgnBBox.bottom, CW(bottom),
-              rgnBBox.right, CW(right),
-              rgnSize, CW((char *)op - (char *)STARH(dest)));
+              rgnBBox.left, left,
+              rgnBBox.bottom, bottom,
+              rgnBBox.right, right,
+              rgnSize, (char *)op - (char *)STARH(dest));
     if(rgn_is_rect_p(dest))
         RGN_SET_SMALL(dest);
     if(finalrestingplace)

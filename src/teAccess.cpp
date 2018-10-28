@@ -25,11 +25,11 @@ void Executor::C_TESetText(Ptr p, LONGINT length, TEHandle teh)
 #if 0
   HASSIGN_3
     (teh,
-     selStart, CW (length),
-     selEnd, CW (length),
-     teLength, CW (length));
+     selStart, length,
+     selEnd, length,
+     teLength, length);
 #else
-    HxX(teh, teLength) = CW(length);
+    HxX(teh, teLength) = length;
 #endif
     /* ### adjust recal* fields? */
     if(TE_STYLIZED_P(teh))
@@ -40,28 +40,28 @@ void Executor::C_TESetText(Ptr p, LONGINT length, TEHandle teh)
 
         te_style = TE_GET_STYLE(teh);
         HASSIGN_2(te_style,
-                  nRuns, CWC(1),
-                  nStyles, CWC(1));
+                  nRuns, 1,
+                  nStyles, 1);
 
         SetHandleSize((Handle)te_style,
                       TE_STYLE_SIZE_FOR_N_RUNS(1));
-        HxX(te_style, runs[0].startChar) = CWC(0);
-        HxX(te_style, runs[0].styleIndex) = CWC(0);
-        HxX(te_style, runs[1].startChar) = CW(length + 1);
-        HxX(te_style, runs[1].styleIndex) = CWC(-1);
+        HxX(te_style, runs[0].startChar) = 0;
+        HxX(te_style, runs[0].styleIndex) = 0;
+        HxX(te_style, runs[1].startChar) = length + 1;
+        HxX(te_style, runs[1].styleIndex) = -1;
         style_table = TE_STYLE_STYLE_TABLE(te_style);
         SetHandleSize((Handle)style_table,
                       STYLE_TABLE_SIZE_FOR_N_STYLES(1));
         GetFontInfo(&finfo);
         HASSIGN_7(style_table,
-                  stCount, CWC(1),
-                  stFont, PORT_TX_FONT_X(MR(qdGlobals().thePort)),
-                  stFace, PORT_TX_FACE(MR(qdGlobals().thePort)),
-                  stSize, PORT_TX_SIZE_X(MR(qdGlobals().thePort)),
+                  stCount, 1,
+                  stFont, PORT_TX_FONT_X(qdGlobals().thePort),
+                  stFace, PORT_TX_FACE(qdGlobals().thePort),
+                  stSize, PORT_TX_SIZE_X(qdGlobals().thePort),
                   stColor, ROMlib_black_rgb_color,
-                  stHeight, CW(CW(finfo.ascent)
-                               + CW(finfo.descent)
-                               + CW(finfo.leading)),
+                  stHeight, finfo.ascent
+                               + finfo.descent
+                               + finfo.leading,
                   stAscent, finfo.ascent);
     }
     TECalText(teh);

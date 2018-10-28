@@ -110,9 +110,9 @@ ItemInfo PlainFileItem::getInfo()
     info.file.info = {
         TICKX("TEXT"),
         TICKX("ttxt"),
-        CWC(0), // fdFlags
-        { CWC(0), CWC(0) }, // fdLocation
-        CWC(0) // fdFldr
+        0, // fdFlags
+        { 0, 0 }, // fdLocation
+        0 // fdFldr
     };
     return info;
 }

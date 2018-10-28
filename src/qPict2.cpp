@@ -60,9 +60,9 @@ OSErr Executor::C_GetPictInfo(PicHandle pic_h, PictInfo *pict_info,
     ((void)({                                              \
         const RGBColor *color;                             \
         color = &CTAB_TABLE(color_table)[pixel].rgb;       \
-        (r) = CW(color->red);                              \
-        (g) = CW(color->green);                            \
-        (b) = CW(color->blue);                             \
+        (r) = color->red;                              \
+        (g) = color->green;                            \
+        (b) = color->blue;                             \
     }))
 #define DIRECT_PIXEL_TO_RGB(bpp, pixel, red_out, green_out, blue_out, \
                             dummy_color_table)                        \
@@ -70,9 +70,9 @@ OSErr Executor::C_GetPictInfo(PicHandle pic_h, PictInfo *pict_info,
         RGBColor color;                                               \
                                                                       \
         (*rgb_spec->pixel_to_rgbcolor)(rgb_spec, (pixel), &color);    \
-        (red_out) = CW(color.red);                                    \
-        (green_out) = CW(color.green);                                \
-        (blue_out) = CW(color.blue);                                  \
+        (red_out) = color.red;                                    \
+        (green_out) = color.green;                                \
+        (blue_out) = color.blue;                                  \
     }))
 #define PIXEL_TO_RGB(bpp, pixel, red, green, blue, color_table)                  \
     ((void)((bpp) == 32 || (bpp) == 16                                           \
@@ -292,9 +292,9 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
             color_table
                 = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(colors_requested));
 
-            CTAB_SEED_X(color_table) = CL(GetCTSeed());
-            CTAB_FLAGS_X(color_table) = CW(0);
-            CTAB_SIZE_X(color_table) = CW(colors_requested);
+            CTAB_SEED_X(color_table) = GetCTSeed();
+            CTAB_FLAGS_X(color_table) = 0;
+            CTAB_SIZE_X(color_table) = colors_requested;
 
             table = CTAB_TABLE(color_table);
 
@@ -303,9 +303,9 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
 
                 for(i = 0, t = head; i < colors_requested && t; i++, t = t->next)
                 {
-                    table[i].value = CW(i);
+                    table[i].value = i;
 
-#define TILE(x) CW(((uint32_t)(x & 0x1F) * 0x8421UL) >> 4)
+#define TILE(x) (((uint32_t)(x & 0x1F) * 0x8421UL) >> 4)
 
                     table[i].rgb.red = TILE(t->bank_index >> 10);
                     table[i].rgb.green = TILE(t->bank_index >> 5);
@@ -318,7 +318,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
 	 popular colors in the pixmap */
             memset(pict_info, '\000', sizeof *pict_info);
 
-            pict_info->uniqueColors = CL(unique_colors);
+            pict_info->uniqueColors = unique_colors;
 
             if(verb & returnPalette)
             {
@@ -327,11 +327,11 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
                 palette = NewPalette(colors_requested, color_table,
                                      /* #### verify correct default values */
                                      pmTolerant, 0);
-                pict_info->thePalette = RM(palette);
+                pict_info->thePalette = palette;
             }
 
             if(verb & returnColorTable)
-                pict_info->theColorTable = RM(color_table);
+                pict_info->theColorTable = color_table;
             else
                 DisposeHandle((Handle)color_table);
         }

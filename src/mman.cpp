@@ -52,7 +52,7 @@ uintptr_t ROMlib_memtop;
     do                     \
     {                      \
         GEN_MEM_ERR(err);  \
-        LM(MemErr) = CW(err); \
+        LM(MemErr) = err; \
     } while(false)
 
 SignedByte
@@ -324,11 +324,11 @@ void InitApplZone(void)
 #define INIT_APPLZONE_SIZE \
     (ROMlib_applzone_size + APPLZONE_SLOP)
 
-    LM(HeapEnd) = RM((Ptr)(char *)MR(LM(ApplZone))
+    LM(HeapEnd) = (Ptr)(char *)LM(ApplZone)
                  + INIT_APPLZONE_SIZE
-                 - (MIN_BLOCK_SIZE + APPLZONE_SLOP));
+                 - (MIN_BLOCK_SIZE + APPLZONE_SLOP);
 
-    InitZone(0, 64, (Ptr)HEAPEND, (Zone *)MR(LM(ApplZone)));
+    InitZone(0, 64, (Ptr)HEAPEND, (Zone *)LM(ApplZone));
     MM_SLAM("exit");
     SET_MEM_ERR(noErr);
 }
@@ -415,23 +415,21 @@ void ROMlib_InitZones()
             init_syszone_size -= low_global_room;
         }
 
-        LM(MemTop) = RM(mem_top);
+        LM(MemTop) = mem_top;
 
-        LM(SysZone) = RM((THz)memory);
+        LM(SysZone) = (THz)memory;
         ROMlib_syszone = (uintptr_t)memory;
         ROMlib_memtop = (uintptr_t)(memory + total_allocated_memory);
-        InitZone(0, 32, (Ptr)((uintptr_t)MR(LM(SysZone)) + init_syszone_size),
-                 (Zone *)MR(LM(SysZone)));
+        InitZone(0, 32, (Ptr)((uintptr_t)LM(SysZone) + init_syszone_size),
+                 (Zone *)LM(SysZone));
         beenhere = true;
     }
 
-    LM(ApplZone) = RM((THz)((Ptr)MR(LM(SysZone)) + INIT_SYSZONE_SIZE));
+    LM(ApplZone) = (THz)((Ptr)LM(SysZone) + INIT_SYSZONE_SIZE);
 
     Executor::InitApplZone();
 
-    LM(ApplLimit) = RM(((Ptr)MR(LM(ApplZone))
-                    + INIT_APPLZONE_SIZE));
-
+    LM(ApplLimit) = ((Ptr)LM(ApplZone) + INIT_APPLZONE_SIZE);
 
     // Why do we waste 32KB on the stack?
     // It probably seemed necessary for compatibility with *something*.
@@ -439,7 +437,7 @@ void ROMlib_InitZones()
 #define MANDELSLOP (32L * 1024)
     EM_A7 = US_TO_SYN68K(stack_end - 16 - MANDELSLOP);
 
-    LM(MemErr) = CWC(noErr);
+    LM(MemErr) = noErr;
 
 #if ERROR_SUPPORTED_P(ERROR_MEMORY_MANAGER_SLAM)
     error_set_enabled(ERROR_MEMORY_MANAGER_SLAM, old_debug_enabled_p);
@@ -503,18 +501,18 @@ void SetApplBase(Ptr newbase)
 {
     int32_t totend;
 
-    if((char *)newbase < (char *)ZONE_BK_LIM(MR(LM(SysZone))) + MIN_BLOCK_SIZE)
+    if((char *)newbase < (char *)ZONE_BK_LIM(LM(SysZone)) + MIN_BLOCK_SIZE)
     {
         SET_MEM_ERR(noErr);
         return;
     }
 
     /* Find out how big this makes the last bit of the system zone */
-    totend = (char *)newbase - (char *)ZONE_BK_LIM(MR(LM(SysZone)));
+    totend = (char *)newbase - (char *)ZONE_BK_LIM(LM(SysZone));
 
     if(totend >= 24) /* Make two blocks */
     {
-        block_header_t *newfree = ZONE_BK_LIM(MR(LM(SysZone)));
+        block_header_t *newfree = ZONE_BK_LIM(LM(SysZone));
         block_header_t *newlast = POINTER_TO_BLOCK(newbase);
 
         mm_set_block_fields_offset(newfree,
@@ -527,7 +525,7 @@ void SetApplBase(Ptr newbase)
     }
     /* Otherwise, blow it off.  There isn't room for another block at the end,
      so we just let the old bkLim stand. */
-    LM(ApplZone) = RM((THz)newbase);
+    LM(ApplZone) = (THz)newbase;
 
     InitApplZone();
     SET_MEM_ERR(noErr);
@@ -541,7 +539,7 @@ void MoreMasters(void)
 
     MM_SLAM("entry");
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     handles = (GUEST<Ptr> *)NewPtr(ZONE_MORE_MAST(current_zone)
                                    * sizeof(uint32_t));
@@ -554,10 +552,10 @@ void MoreMasters(void)
 
     handles[0] = ZONE_HFST_FREE_X(current_zone);
     ZONE_HFST_FREE_X(current_zone)
-        = RM((Ptr)&handles[ZONE_MORE_MAST(current_zone) - 1]);
+        = (Ptr)&handles[ZONE_MORE_MAST(current_zone) - 1];
 
     for(i = ZONE_MORE_MAST(current_zone) - 1; i > 0; i--)
-        handles[i] = RM((Ptr)&handles[i - 1]);
+        handles[i] = (Ptr)&handles[i - 1];
 
     MM_SLAM("exit");
     SET_MEM_ERR(noErr);
@@ -567,7 +565,7 @@ void MoreMasters(void)
 #if !defined(NDEBUG)
 void print_free(void)
 {
-    printf("%d %d\n", CL(MR(LM(ApplZone))->zcbFree), CL(MR(LM(SysZone))->zcbFree));
+    printf("%d %d\n", LM(ApplZone)->zcbFree, LM(SysZone)->zcbFree);
 }
 #endif
 
@@ -585,17 +583,17 @@ void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
     last_block = (block_header_t *)((char *)limitPtr - MIN_BLOCK_SIZE);
     first_block = ZONE_HEAP_DATA(zone);
 
-    zone->bkLim = RM((Ptr)last_block);
+    zone->bkLim = (Ptr)last_block;
     zone->purgePtr = CLC_NULL;
     zone->hFstFree = CLC_NULL;
-    zone->zcbFree = CL(limitPtr - (Ptr)zone - 64);
-    zone->gzProc = RM(pGrowZone);
-    zone->moreMast = CW(cMoreMasters);
-    zone->flags = CWC(0);
-    zone->minCBFree = CLC(0);
+    zone->zcbFree = limitPtr - (Ptr)zone - 64;
+    zone->gzProc = pGrowZone;
+    zone->moreMast = cMoreMasters;
+    zone->flags = 0;
+    zone->minCBFree = 0;
     zone->purgeProc = CLC_NULL;
     zone->cntRel = zone->cntNRel = zone->cntEmpty = zone->cntHandles
-        = CWC(0);
+        = 0;
 
     /* hypercard checks byte `30' (the high byte of the `maxNRel' field)
      of the Zone structure to determine if it can set the alloc
@@ -605,15 +603,15 @@ void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
      #### testing on the mac to see what the `max*' fields actually
      mean in a 32bit zone is required, but this is a good a guess as
      anything */
-    zone->maxRel = zone->maxNRel = CWC(-1);
+    zone->maxRel = zone->maxNRel = -1;
 
 #if 0
-  zone->sparePtr = CLC ((Ptr) 0x83d2);	/* From experimentation */
+  zone->sparePtr = (Ptr) 0x83d2;	/* From experimentation */
 #else
     zone->sparePtr = nullptr; /* Better safe than sorry */
 #endif
 
-    zone->allocPtr = RM((Ptr)first_block);
+    zone->allocPtr = (Ptr)first_block;
 
     mm_set_block_fields_offset(first_block,
                                FREE_BLOCK_STATE, FREE, 0,
@@ -623,7 +621,7 @@ void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
                                FREE_BLOCK_STATE, FREE, 0,
                                MIN_BLOCK_SIZE, 0);
 
-    LM(TheZone) = RM(zone);
+    LM(TheZone) = zone;
     MoreMasters();
 
     MM_SLAM_ZONE(zone, "exit");
@@ -635,13 +633,13 @@ THz GetZone(void)
     MM_SLAM("entry");
 
     SET_MEM_ERR(noErr);
-    return MR(LM(TheZone));
+    return LM(TheZone);
 }
 
 void SetZone(THz hz)
 {
     MM_SLAM("entry");
-    LM(TheZone) = RM(hz);
+    LM(TheZone) = hz;
     SET_MEM_ERR(noErr);
 }
 
@@ -658,7 +656,7 @@ _NewEmptyHandle_flags(bool sys_p)
     if(sys_p)
         LM(TheZone) = LM(SysZone);
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     for(;;)
     {
@@ -699,7 +697,7 @@ _NewHandle_flags(Size size, bool sys_p, bool clear_p)
     save_zone = LM(TheZone);
     if(sys_p)
         LM(TheZone) = LM(SysZone);
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     newh = NewEmptyHandle();
     if(newh == nullptr)
@@ -741,7 +739,7 @@ void DisposeHandle(Handle h)
 {
     MM_SLAM("entry");
 
-    if(TTS_HACK && h == (MR(*(GUEST<Handle> *)SYN68K_TO_US(256))))
+    if(TTS_HACK && h == (*(GUEST<Handle> *)SYN68K_TO_US(256)))
         h = 0;
 
     if(h)
@@ -757,11 +755,11 @@ void DisposeHandle(Handle h)
             SET_MEM_ERR(memAZErr);
             return;
         }
-        LM(TheZone) = RM(current_zone);
+        LM(TheZone) = current_zone;
 
         block = HANDLE_TO_BLOCK(h);
 
-        if(*h && BLOCK_TO_HANDLE(MR(LM(TheZone)), block) != h)
+        if(*h && BLOCK_TO_HANDLE(LM(TheZone), block) != h)
         {
             LM(TheZone) = save_zone;
             SET_MEM_ERR(memAZErr);
@@ -791,7 +789,7 @@ void DisposeHandle(Handle h)
         }
 
         *h = ZONE_HFST_FREE_X(current_zone);
-        ZONE_HFST_FREE_X(current_zone) = RM((Ptr)h);
+        ZONE_HFST_FREE_X(current_zone) = (Ptr)h;
 
         LM(TheZone) = save_zone;
     }
@@ -836,7 +834,7 @@ void SetHandleSize(Handle h, Size newsize)
     bool save_memnomove_p;
     unsigned int state;
 
-    if(h == MR(LM(TEScrpHandle)))
+    if(h == LM(TEScrpHandle))
         vdriver->weOwnScrap();
 
     MM_SLAM("entry");
@@ -858,7 +856,7 @@ void SetHandleSize(Handle h, Size newsize)
 
     save_zone = LM(TheZone);
     current_zone = HandleZone(h);
-    LM(TheZone) = RM(current_zone);
+    LM(TheZone) = current_zone;
     state = HANDLE_STATE(h, block);
 
     oldpsize = PSIZE(block);
@@ -880,7 +878,7 @@ void SetHandleSize(Handle h, Size newsize)
             ROMlib_memnomove_p = save_memnomove_p;
             ZONE_ZCB_FREE_X(current_zone)
 
-                = CL(ZONE_ZCB_FREE(current_zone) - PSIZE(nextblock));
+                = ZONE_ZCB_FREE(current_zone) - PSIZE(nextblock);
 
             SETPSIZE(block, oldpsize + PSIZE(nextblock));
             SETSIZEC(block, 0);
@@ -893,7 +891,7 @@ void SetHandleSize(Handle h, Size newsize)
             if(ROMlib_locked(block))
                 goto bad;
 
-            LM(GZRootHnd) = RM(h);
+            LM(GZRootHnd) = h;
             /* Now try and find the space elsewhere */
             if(ROMlib_relalloc(newsize, &newblock))
             {
@@ -918,12 +916,12 @@ bad:
 }
 
 #define HANDLE_IN_ZONE_P(handle, z)          \
-    ((uintptr_t)(handle) >= (uintptr_t)MR(z) \
-     && (uintptr_t)(handle) < (uintptr_t)ZONE_BK_LIM(MR(z)))
+    ((uintptr_t)(handle) >= (uintptr_t)z \
+     && (uintptr_t)(handle) < (uintptr_t)ZONE_BK_LIM(z))
 
 #define PTR_IN_ZONE_P(ptr, z)             \
-    ((uintptr_t)(ptr) >= (uintptr_t)MR(z) \
-     && (uintptr_t)(ptr) <= (uintptr_t)ZONE_BK_LIM(MR(z)))
+    ((uintptr_t)(ptr) >= (uintptr_t)z \
+     && (uintptr_t)(ptr) <= (uintptr_t)ZONE_BK_LIM(z))
 
 THz HandleZone(Handle h)
 {
@@ -991,11 +989,11 @@ THz HandleZone(Handle h)
     if(block)
         zone = (THz)((Ptr)h - (int32_t)BLOCK_LOCATION_OFFSET(block));
     else if(applzone_p)
-        zone = MR(LM(ApplZone));
+        zone = LM(ApplZone);
     else if(syszone_p)
-        zone = MR(LM(SysZone));
+        zone = LM(SysZone);
     else
-        zone = MR(LM(TheZone));
+        zone = LM(TheZone);
 
     SET_MEM_ERR(noErr);
     return zone;
@@ -1015,15 +1013,15 @@ _RecoverHandle_flags(Ptr p, bool sys_p)
 
     if(sys_p)
     {
-        zones[0] = MR(LM(SysZone));
-        zones[1] = MR(LM(TheZone));
+        zones[0] = LM(SysZone);
+        zones[1] = LM(TheZone);
     }
     else
     {
-        zones[0] = MR(LM(TheZone));
-        zones[1] = MR(LM(SysZone));
+        zones[0] = LM(TheZone);
+        zones[1] = LM(SysZone);
     }
-    zones[2] = MR(LM(ApplZone));
+    zones[2] = LM(ApplZone);
 
     for(i = 0; i < 3; i++)
     {
@@ -1062,7 +1060,7 @@ void ReallocateHandle(Handle h, Size size)
 
     save_zone = LM(TheZone);
     current_zone = HandleZone(h);
-    LM(TheZone) = RM(current_zone);
+    LM(TheZone) = current_zone;
 
     size += HDRSIZE;
 
@@ -1101,7 +1099,7 @@ void ReallocateHandle(Handle h, Size size)
             {
                 SETPSIZE(oldb, newsize);
                 ZONE_ZCB_FREE_X(current_zone)
-                    = CL(ZONE_ZCB_FREE(current_zone) - PSIZE(newb));
+                    = ZONE_ZCB_FREE(current_zone) - PSIZE(newb);
                 ROMlib_setupblock(oldb, size, REL, h, state);
                 goto done;
             }
@@ -1144,7 +1142,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
     if(sys_p)
         LM(TheZone) = LM(SysZone);
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     size += HDRSIZE;
 
@@ -1208,7 +1206,7 @@ void DisposePtr(Ptr p)
         zone = PtrZone(p);
         if(zone)
         {
-            TheZoneGuard guard(RM(zone));
+            TheZoneGuard guard(zone);
 
             ROMlib_freeblock(block);
         }
@@ -1271,7 +1269,7 @@ void SetPtrSize(Ptr p, Size newsize)
     }
     else
     {
-        LM(TheZone) = RM(current_zone);
+        LM(TheZone) = current_zone;
 
         oldpsize = PSIZE(block);
         if(newsize <= oldpsize)
@@ -1287,7 +1285,7 @@ void SetPtrSize(Ptr p, Size newsize)
             {
                 // FIXME: #warning original code was endian-inconsistent
                 ZONE_ZCB_FREE_X(current_zone)
-                    = CL(ZONE_ZCB_FREE(current_zone) - PSIZE(nextblock));
+                    = ZONE_ZCB_FREE(current_zone) - PSIZE(nextblock);
 
                 SETPSIZE(block, oldpsize + PSIZE(nextblock));
                 SETSIZEC(block, 0);
@@ -1373,9 +1371,9 @@ int32_t _FreeMem_flags(bool sys_p)
     MM_SLAM("entry");
 
     if(sys_p)
-        freespace = ZONE_ZCB_FREE(MR(LM(SysZone)));
+        freespace = ZONE_ZCB_FREE(LM(SysZone));
     else
-        freespace = ZONE_ZCB_FREE(MR(LM(TheZone)));
+        freespace = ZONE_ZCB_FREE(LM(TheZone));
 
     SET_MEM_ERR(noErr);
     return freespace;
@@ -1405,7 +1403,7 @@ Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
     if(sys_p)
         LM(TheZone) = LM(SysZone);
 
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     /* Purge everyone */
     for(b = ZONE_HEAP_DATA(current_zone);
@@ -1456,7 +1454,7 @@ Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
                 if(ZONE_ALLOC_PTR(current_zone) > startb
                    && ((char *)ZONE_ALLOC_PTR(current_zone)
                        < (char *)startb + sizesofar))
-                    ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)startb);
+                    ZONE_ALLOC_PTR_X(current_zone) = (Ptr)startb;
                 if(sizesofar > biggestfree)
                     biggestfree = sizesofar;
                 state = SEARCHING;
@@ -1469,20 +1467,20 @@ Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
         if(ZONE_ALLOC_PTR(current_zone) > startb
            && ((char *)ZONE_ALLOC_PTR(current_zone)
                < (char *)startb + sizesofar))
-            ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)startb);
+            ZONE_ALLOC_PTR_X(current_zone) = (Ptr)startb;
 
         if(sizesofar > biggestfree)
             biggestfree = sizesofar;
     }
 
     if(LM(TheZone) == LM(ApplZone))
-        grow = (Ptr)MR(LM(ApplLimit)) - (Ptr)HEAPEND;
+        grow = (Ptr)LM(ApplLimit) - (Ptr)HEAPEND;
     else
         grow = 0;
 
     LM(TheZone) = save_zone;
 
-    *growp = CL(grow);
+    *growp = grow;
     SET_MEM_ERR(noErr);
     MM_SLAM("exit");
     return biggestfree;
@@ -1501,7 +1499,7 @@ Size _CompactMem_flags(Size sizeneeded, bool sys_p)
     save_zone = LM(TheZone);
     if(sys_p)
         LM(TheZone) = LM(SysZone);
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     /* We've seen HyperCard load allocPtr with -8 before ... yahoo.
      Specifically, HC 2.1 would do this after you use the Chart making
@@ -1557,7 +1555,7 @@ repeat:
                 {
                     amtfree = src_target_diff;
                     if(!ZONE_ALLOC_PTR_X(current_zone))
-                        ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)target);
+                        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)target;
                 }
             }
             src = target = BLOCK_NEXT(src);
@@ -1578,7 +1576,7 @@ repeat:
         {
             amtfree = src_target_diff;
             if(!ZONE_ALLOC_PTR_X(current_zone))
-                ZONE_ALLOC_PTR_X(current_zone) = RM((Ptr)target);
+                ZONE_ALLOC_PTR_X(current_zone) = (Ptr)target;
         }
     }
 
@@ -1614,7 +1612,7 @@ void _ResrvMem_flags(Size needed, bool sys_p)
     save_zone = LM(TheZone);
     if(sys_p)
         LM(TheZone) = LM(SysZone);
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
     already_maxed_p = false;
 
 again:
@@ -1636,7 +1634,7 @@ again:
 
     GUEST<Size> free_s;
     avail = MaxMem(&free_s);
-    Size free = CL(free_s);
+    Size free = free_s;
     if(avail >= needed && !already_maxed_p)
     {
         already_maxed_p = true;
@@ -1670,7 +1668,7 @@ void _PurgeMem_flags(Size sizeneeded, bool sys_p)
     save_zone = LM(TheZone);
     if(sys_p)
         LM(TheZone) = LM(SysZone);
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     max_free = 0;
     for(b = ZONE_HEAP_DATA(current_zone);
@@ -1726,7 +1724,7 @@ BlockMove_and_possibly_flush_cache(Ptr src, Ptr dst, Size cnt,
 
     /* don't use `SET_MEM_ERR' since that will do a heap slam and we
      will lose */
-    LM(MemErr) = CWC(noErr);
+    LM(MemErr) = noErr;
 }
 
 void C_BlockMove(Ptr src, Ptr dst, Size cnt)
@@ -1801,7 +1799,7 @@ int32_t _MaxBlock_flags(bool sys_p)
     save_zone = LM(TheZone);
     if(sys_p)
         LM(TheZone) = LM(SysZone);
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     max_free = total_free = 0;
 
@@ -1842,7 +1840,7 @@ void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys
     save_zone = LM(TheZone);
     if(sys_p)
         LM(TheZone) = LM(SysZone);
-    current_zone = MR(LM(TheZone));
+    current_zone = LM(TheZone);
 
     total_free = this_contig = max_contig = 0;
     for(b = ZONE_HEAP_DATA(current_zone);
@@ -1873,8 +1871,8 @@ void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys
     LM(TheZone) = save_zone;
 
     SET_MEM_ERR(noErr);
-    *total_out = CL(total_free - HDRSIZE);
-    *contig_out = CL(std::max(this_contig, max_contig) - HDRSIZE);
+    *total_out = total_free - HDRSIZE;
+    *contig_out = std::max(this_contig, max_contig) - HDRSIZE;
     MM_SLAM("exit");
 }
 
@@ -1905,8 +1903,8 @@ void SetApplLimit(Ptr new_limit)
 
     MM_SLAM("entry");
 
-    LM(ApplLimit) = RM(new_limit);
-    LM(HeapEnd) = RM(new_limit - MIN_BLOCK_SIZE);
+    LM(ApplLimit) = new_limit;
+    LM(HeapEnd) = new_limit - MIN_BLOCK_SIZE;
 
     SET_MEM_ERR(noErr);
 }
@@ -1915,7 +1913,7 @@ void SetGrowZone(GrowZoneProcPtr newgz)
 {
     MM_SLAM("entry");
 
-    ZONE_GZ_PROC_X(MR(LM(TheZone))) = RM(newgz);
+    ZONE_GZ_PROC_X(LM(TheZone)) = newgz;
     SET_MEM_ERR(noErr);
 }
 
@@ -1936,7 +1934,7 @@ void EmptyHandle(Handle h)
 
     save_zone = LM(TheZone);
     current_zone = HandleZone(h);
-    LM(TheZone) = RM(current_zone);
+    LM(TheZone) = current_zone;
 
     if(ROMlib_locked(b))
     {
@@ -1985,17 +1983,17 @@ void ROMlib_installhandle(Handle sh, Handle dh)
 
     MM_SLAM("entry");
     save_zone = LM(TheZone);
-    LM(TheZone) = RM(HandleZone(dh));
+    LM(TheZone) = HandleZone(dh);
 
     if(true
        || ROMlib_locked(HANDLE_TO_BLOCK(dh))
-       || HandleZone(sh) != MR(LM(TheZone)))
+       || HandleZone(sh) != LM(TheZone))
     {
         Size size;
 
         size = GetHandleSize(sh);
         SetHandleSize(dh, size);
-        if(LM(MemErr) == CWC(noErr))
+        if(LM(MemErr) == noErr)
             BlockMove(STARH(sh), STARH(dh), size);
         DisposeHandle(sh);
     }
@@ -2005,9 +2003,9 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         block_header_t *sb = HANDLE_TO_BLOCK(sh);
         ROMlib_freeblock(db);
         SETMASTER(dh, STARH(sh));
-        BLOCK_LOCATION_OFFSET_X(sb) = CL((Ptr)dh - (Ptr)MR(LM(TheZone)));
-        *sh = guest_cast<Ptr>(ZONE_HFST_FREE_X(MR(LM(TheZone))));
-        ZONE_HFST_FREE_X(MR(LM(TheZone))) = RM((Ptr)sh);
+        BLOCK_LOCATION_OFFSET_X(sb) = (Ptr)dh - (Ptr)LM(TheZone);
+        *sh = guest_cast<Ptr>(ZONE_HFST_FREE_X(LM(TheZone)));
+        ZONE_HFST_FREE_X(LM(TheZone)) = (Ptr)sh;
     }
     LM(TheZone) = save_zone;
     MM_SLAM("exit");
@@ -2017,36 +2015,36 @@ OSErr C_MemError(void)
 {
     MM_SLAM("entry");
 
-    return CW(LM(MemErr));
+    return LM(MemErr);
 }
 
 THz C_SystemZone(void)
 {
     MM_SLAM("entry");
 
-    return MR(LM(SysZone));
+    return LM(SysZone);
 }
 
 THz C_ApplicationZone(void)
 {
     MM_SLAM("entry");
 
-    return MR(LM(ApplZone));
+    return LM(ApplZone);
 }
 
 Ptr C_GetApplLimit()
 {
-    return MR(LM(ApplLimit));
+    return LM(ApplLimit);
 }
 
 Ptr C_TopMem()
 {
-    return MR(LM(MemTop));
+    return LM(MemTop);
 }
 
 Handle C_GZSaveHnd()
 {
-    return MR(LM(GZRootHnd));
+    return LM(GZRootHnd);
 }
 
 /* Like NewHandle, but fills in the newly allocated memory by copying
@@ -2060,7 +2058,7 @@ _NewHandle_copy_ptr_flags(Size size, const void *data_to_copy,
     Handle h;
 
     h = _NewHandle_flags(size, sys_p, false);
-    if(LM(MemErr) == CWC(noErr))
+    if(LM(MemErr) == noErr)
         memcpy(STARH(h), data_to_copy, size);
     return h;
 }
@@ -2077,7 +2075,7 @@ _NewHandle_copy_handle_flags(Size size, Handle data_to_copy, bool sys_p)
     if(GetHandleSize(data_to_copy) < size)
         warning_unexpected("Not enough bytes to copy!");
     h = _NewHandle_flags(size, sys_p, false);
-    if(LM(MemErr) == CWC(noErr))
+    if(LM(MemErr) == noErr)
         memcpy(STARH(h), STARH(data_to_copy), size);
     return h;
 }
@@ -2092,7 +2090,7 @@ Ptr _NewPtr_copy_ptr_flags(Size size, const void *data_to_copy,
     Ptr p;
 
     p = _NewPtr_flags(size, sys_p, false);
-    if(LM(MemErr) == CWC(noErr))
+    if(LM(MemErr) == noErr)
         memcpy(p, data_to_copy, size);
     return p;
 }
@@ -2108,7 +2106,7 @@ Ptr _NewPtr_copy_handle_flags(Size size, Handle data_to_copy, bool sys_p)
     if(GetHandleSize(data_to_copy) < size)
         warning_unexpected("Not enough bytes to copy!");
     p = _NewPtr_flags(size, sys_p, false);
-    if(LM(MemErr) == CWC(noErr))
+    if(LM(MemErr) == noErr)
         memcpy(p, STARH(data_to_copy), size);
     return p;
 }

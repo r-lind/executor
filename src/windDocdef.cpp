@@ -32,12 +32,12 @@ BOOLEAN ROMlib_window_zoomed(WindowPeek wp)
     const Rect *portrp, *staterp, *boundsrp;
 
     portrp = &PORT_RECT(wp);
-    staterp = &MR(*(GUEST<WStateData *> *)WINDOW_DATA(wp))->stdState;
+    staterp = &(*(GUEST<WStateData *> *)WINDOW_DATA(wp))->stdState;
     boundsrp = &PORT_BOUNDS(wp);
 
     retval = (WINDOW_SPARE_FLAG_X(wp)
-              && CW(portrp->top) - CW(boundsrp->top) == CW(staterp->top)
-              && CW(portrp->left) - CW(boundsrp->left) == CW(staterp->left)
+              && portrp->top - boundsrp->top == staterp->top
+              && portrp->left - boundsrp->left == staterp->left
               && RECT_WIDTH(portrp) == RECT_WIDTH(staterp)
               && RECT_HEIGHT(portrp) == RECT_HEIGHT(staterp));
     return retval;
@@ -92,18 +92,18 @@ Executor::validate_colors_for_window(GrafPtr w)
 /* just make the unused color something noticable */
 #define UNUSED                      \
     {                               \
-        CWC((unsigned short)0xFFFF) \
-        , CWC(0), CWC(0)            \
+        (unsigned short)0xFFFF \
+        , 0, 0            \
     }
 #define WHITE                                                      \
     {                                                              \
-        CWC((unsigned short)0xFFFF)                                \
-        , CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF) \
+        (unsigned short)0xFFFF                                \
+        , (unsigned short)0xFFFF, (unsigned short)0xFFFF \
     }
 #define BLACK            \
     {                    \
-        CWC(0)           \
-        , CWC(0), CWC(0) \
+        0           \
+        , 0, 0 \
     }
     static RGBColor bw_window_colors[19] = {
         WHITE, /* content */
@@ -138,7 +138,7 @@ Executor::validate_colors_for_window(GrafPtr w)
     for(i = 0; i <= 12; i++)
         color_window_colors[i] = default_color_win_ctab[i].rgb;
 
-    t_aux_w = MR(*lookup_aux_win(w));
+    t_aux_w = *lookup_aux_win(w);
     if(t_aux_w && HxX(t_aux_w, awCTable))
     {
         CTabHandle w_ctab;
@@ -166,7 +166,7 @@ Executor::validate_colors_for_window(GrafPtr w)
         {
             /* same content color */
             for(i = 0; i <= w_ctab_size; i++)
-                if(w_ctab_table[i].value == CW(wContentColor))
+                if(w_ctab_table[i].value == wContentColor)
                     color_window_colors[wContentColor]
                         = w_ctab_table[i].rgb;
         }
@@ -178,7 +178,7 @@ Executor::validate_colors_for_window(GrafPtr w)
                 int w_ctab_entry_index;
 
                 w_ctab_entry = &w_ctab_table[i];
-                w_ctab_entry_index = CW(w_ctab_entry->value);
+                w_ctab_entry_index = w_ctab_entry->value;
                 if(w_ctab_entry_index < 0 || w_ctab_entry_index > 12)
                 {
 #if !defined(CYGWIN32) /* just gets in the way of debugging under windows */
@@ -307,10 +307,10 @@ void toggle_box_active(enum box_flag which_box, Point origin)
     pixel_image_t *box;
 
     /* compute the destination rectangle */
-    dst_rect.top = CW(origin.v);
-    dst_rect.left = CW(origin.h);
-    dst_rect.bottom = CW(origin.v + 13);
-    dst_rect.right = CW(origin.h + 13);
+    dst_rect.top = origin.v;
+    dst_rect.left = origin.h;
+    dst_rect.bottom = origin.v + 13;
+    dst_rect.right = origin.h + 13;
 
     /* set box */
     if(rounded_window_p)
@@ -326,9 +326,9 @@ void toggle_box_active(enum box_flag which_box, Point origin)
     if(rounded_window_p)
     {
         /* invert the set bits of the box */
-        PORT_FG_COLOR_X(MR(qdGlobals().thePort))
-            = CL((1 << PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(MR(qdGlobals().thePort)))) - 1);
-        PORT_FG_COLOR_X(MR(qdGlobals().thePort)) = CLC(0);
+        PORT_FG_COLOR_X(qdGlobals().thePort)
+            = (1 << PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(qdGlobals().thePort))) - 1;
+        PORT_FG_COLOR_X(qdGlobals().thePort) = 0;
     }
     else
     {
@@ -348,17 +348,17 @@ void toggle_box_active(enum box_flag which_box, Point origin)
 	 that one out.  it works for the common case (white on block
 	 rounded window).  the mac function takes into account both
 	 `title' and `title_bar' in some unknown fasion */
-        if((((int)CW(title_bar->red)
-             + (int)CW(title_bar->green)
-             + (int)CW(title_bar->blue))
+        if((((int)title_bar->red
+             + (int)title_bar->green
+             + (int)title_bar->blue)
             / 3)
            > 0x8000)
             target_color = &ROMlib_black_rgb_color;
         else
             target_color = &ROMlib_white_rgb_color;
 
-        PORT_FG_COLOR_X(MR(qdGlobals().thePort))
-            = CL(Color2Index(target_color) ^ Color2Index(frame));
+        PORT_FG_COLOR_X(qdGlobals().thePort)
+            = Color2Index(target_color) ^ Color2Index(frame);
     }
 
     image_copy(rounded_window_p ? ractive : active,
@@ -369,8 +369,8 @@ void toggle_zoom_box(GrafPtr w)
 {
     Point origin;
 
-    origin.h = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left) - 21;
-    origin.v = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top) - 16;
+    origin.h = PORT_RECT(w).right - PORT_BOUNDS(w).left - 21;
+    origin.v = PORT_RECT(w).top - PORT_BOUNDS(w).top - 16;
 
     toggle_box_active(zoom_box_flag, origin);
 }
@@ -379,8 +379,8 @@ void toggle_go_away_box(GrafPtr w)
 {
     Point origin;
 
-    origin.h = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left) + 8;
-    origin.v = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top) - 16;
+    origin.h = PORT_RECT(w).left - PORT_BOUNDS(w).left + 8;
+    origin.v = PORT_RECT(w).top - PORT_BOUNDS(w).top - 16;
 
     toggle_box_active(go_away_box_flag, origin);
 }
@@ -438,10 +438,10 @@ void draw_title(GrafPtr w,
     int title_start;
     int left_bound;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     /* #warning "clean up this port mess in draw_title ()" */
     GUEST<GrafPtr> tmpPort;
@@ -458,7 +458,7 @@ void draw_title(GrafPtr w,
     {
         title_start = left + (right - left - title_width) / 2 - 6;
         saveclip = PORT_CLIP_REGION(tp);
-        PORT_CLIP_REGION_X(tp) = RM(NewRgn());
+        PORT_CLIP_REGION_X(tp) = NewRgn();
         if(title_start >= left_bound)
             CopyRgn(saveclip, PORT_CLIP_REGION(tp));
         else
@@ -492,7 +492,7 @@ void draw_title(GrafPtr w,
         th = WINDOW_TITLE(w);
         {
             HLockGuard guard(th);
-            PORT_TX_MODE_X(MR(qdGlobals().thePort)) = CWC(srcCopy);
+            PORT_TX_MODE_X(qdGlobals().thePort) = srcCopy;
             MoveTo(title_start + 6, top - 5);
             DrawString(STARH(th));
         }
@@ -500,7 +500,7 @@ void draw_title(GrafPtr w,
         if(saveclip)
         {
             DisposeRgn(PORT_CLIP_REGION(tp));
-            PORT_CLIP_REGION_X(tp) = RM(saveclip);
+            PORT_CLIP_REGION_X(tp) = saveclip;
         }
     }
 }
@@ -554,10 +554,10 @@ void draw_frame(GrafPtr w, int draw_zoom_p, bool goaway_override)
     int left, top, right, bottom;
     Rect r;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     PenSize(1, 1);
     /* draw with the current foreground color */
@@ -574,7 +574,7 @@ void draw_frame(GrafPtr w, int draw_zoom_p, bool goaway_override)
 
     /* draw the frame; these are drawn in the frame_outline_color */
     RGBForeColor(frame_outline);
-    r.bottom = CW(bottom + 1);
+    r.bottom = bottom + 1;
     FrameRect(&r);
     MoveTo(left, top - 1);
     LineTo(right, top - 1);
@@ -611,10 +611,10 @@ void draw_grow_lines(Rect *bounds)
     int left, top, right, bottom;
     Rect r;
 
-    left = CW(bounds->left);
-    top = CW(bounds->top);
-    right = CW(bounds->right);
-    bottom = CW(bounds->bottom);
+    left = bounds->left;
+    top = bounds->top;
+    right = bounds->right;
+    bottom = bounds->bottom;
 
     PenSize(1, 1);
     SetRect(&r, left - 1, top - 19, right + 1, bottom + 1);
@@ -636,10 +636,10 @@ void draw_dialog_box(GrafPtr w)
     Rect r;
     RGBColor middle_color;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     PenSize(1, 1);
     PenMode(patCopy);
@@ -652,9 +652,9 @@ void draw_dialog_box(GrafPtr w)
     /* draw the center rectangle */
     if(color_p)
     {
-        middle_color.red = CWC(0xBBBB);
-        middle_color.green = CWC(0xBBBB);
-        middle_color.blue = CWC(0xBBBB);
+        middle_color.red = 0xBBBB;
+        middle_color.green = 0xBBBB;
+        middle_color.blue = 0xBBBB;
     }
     else
         middle_color = ROMlib_white_rgb_color;
@@ -718,10 +718,10 @@ void draw_plain_dialog_box(GrafPtr w)
     int left, top, right, bottom;
     Rect r;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     PenSize(1, 1);
     PenMode(patCopy);
@@ -735,10 +735,10 @@ void draw_alt_dialog_box(GrafPtr w)
     int left, top, right, bottom;
     Rect r;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     PenSize(1, 1);
     PenMode(patCopy);
@@ -760,10 +760,10 @@ void draw_grow_icon(GrafPtr w)
 {
     int left, top, right, bottom;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     PenPat(qdGlobals().black);
     PenSize(1, 1);
@@ -782,10 +782,10 @@ void draw_grow_icon(GrafPtr w)
     {
         Rect rect;
 
-        rect.top = CW(bottom - 14);
-        rect.left = CW(right - 14);
-        rect.bottom = CW(bottom);
-        rect.right = CW(right);
+        rect.top = bottom - 14;
+        rect.left = right - 14;
+        rect.bottom = bottom;
+        rect.right = right;
 
         image_copy(grow, color_p, &rect, srcCopy);
     }
@@ -796,10 +796,10 @@ void erase_grow_icon(GrafPtr w)
     int left, top, right, bottom;
     Rect r;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     PenPat(qdGlobals().black);
     PenSize(1, 1);
@@ -819,10 +819,10 @@ hit_doc(WindowPeek w, LONGINT parm, int growable_p,
     Point p;
     int left, top, right, bottom;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     p.v = HiWord(parm);
     p.h = LoWord(parm);
@@ -882,43 +882,43 @@ void calc_doc(GrafPtr w)
     RgnHandle rh;
     int left, top, right, bottom;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     SetRectRgn(WINDOW_CONT_REGION(w), left, top, right, bottom);
 
     rh = WINDOW_STRUCT_REGION(w);
     ReallocateHandle((Handle)rh, (Size)44);
-    HxX(rh, rgnBBox.left) = CW(left - 1);
-    HxX(rh, rgnBBox.top) = CW(top - 19);
-    HxX(rh, rgnBBox.right) = CW(right + 2);
-    HxX(rh, rgnBBox.bottom) = CW(bottom + 2);
-    HxX(rh, rgnSize) = CWC(44);
+    HxX(rh, rgnBBox.left) = left - 1;
+    HxX(rh, rgnBBox.top) = top - 19;
+    HxX(rh, rgnBBox.right) = right + 2;
+    HxX(rh, rgnBBox.bottom) = bottom + 2;
+    HxX(rh, rgnSize) = 44;
     auto ip = (GUEST<INTEGER> *)STARH(rh) + 5;
 
-    *ip++ = CW(top - 19);
-    *ip++ = CW(left - 1);
-    *ip++ = CW(right + 1);
-    *ip++ = CWC(32767);
+    *ip++ = top - 19;
+    *ip++ = left - 1;
+    *ip++ = right + 1;
+    *ip++ = 32767;
 
-    *ip++ = CW(top - 18);
-    *ip++ = CW(right + 1);
-    *ip++ = CW(right + 2);
-    *ip++ = CWC(32767);
+    *ip++ = top - 18;
+    *ip++ = right + 1;
+    *ip++ = right + 2;
+    *ip++ = 32767;
 
-    *ip++ = CW(bottom + 1);
-    *ip++ = CW(left - 1);
-    *ip++ = CW(left);
-    *ip++ = CWC(32767);
+    *ip++ = bottom + 1;
+    *ip++ = left - 1;
+    *ip++ = left;
+    *ip++ = 32767;
 
-    *ip++ = CW(bottom + 2);
-    *ip++ = CW(left);
-    *ip++ = CW(right + 2);
-    *ip++ = CWC(32767);
+    *ip++ = bottom + 2;
+    *ip++ = left;
+    *ip++ = right + 2;
+    *ip++ = 32767;
 
-    *ip++ = CWC(32767);
+    *ip++ = 32767;
 }
 
 void calc_alt_dialog_box(GrafPtr w)
@@ -927,54 +927,54 @@ void calc_alt_dialog_box(GrafPtr w)
 
     int left, top, right, bottom;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     SetRectRgn(WINDOW_CONT_REGION(w), left, top, right, bottom);
 
     rh = WINDOW_STRUCT_REGION(w);
 
     ReallocateHandle((Handle)rh, (Size)44);
-    HxX(rh, rgnBBox.left) = CW(left - 1);
-    HxX(rh, rgnBBox.top) = CW(top - 1);
-    HxX(rh, rgnBBox.right) = CW(right + 3);
-    HxX(rh, rgnBBox.bottom) = CW(bottom + 3);
-    HxX(rh, rgnSize) = CWC(44);
+    HxX(rh, rgnBBox.left) = left - 1;
+    HxX(rh, rgnBBox.top) = top - 1;
+    HxX(rh, rgnBBox.right) = right + 3;
+    HxX(rh, rgnBBox.bottom) = bottom + 3;
+    HxX(rh, rgnSize) = 44;
     auto ip = (GUEST<INTEGER> *)STARH(rh) + 5;
 
-    *ip++ = CW(top - 1);
-    *ip++ = CW(left - 1);
-    *ip++ = CW(right + 1);
-    *ip++ = CWC(32767);
+    *ip++ = top - 1;
+    *ip++ = left - 1;
+    *ip++ = right + 1;
+    *ip++ = 32767;
 
-    *ip++ = CW(top + 1);
-    *ip++ = CW(right + 1);
-    *ip++ = CW(right + 3);
-    *ip++ = CWC(32767);
+    *ip++ = top + 1;
+    *ip++ = right + 1;
+    *ip++ = right + 3;
+    *ip++ = 32767;
 
-    *ip++ = CW(bottom + 1);
-    *ip++ = CW(left - 1);
-    *ip++ = CW(left + 1);
-    *ip++ = CWC(32767);
+    *ip++ = bottom + 1;
+    *ip++ = left - 1;
+    *ip++ = left + 1;
+    *ip++ = 32767;
 
-    *ip++ = CW(bottom + 3);
-    *ip++ = CW(left + 1);
-    *ip++ = CW(right + 3);
-    *ip++ = CWC(32767);
+    *ip++ = bottom + 3;
+    *ip++ = left + 1;
+    *ip++ = right + 3;
+    *ip++ = 32767;
 
-    *ip++ = CWC(32767);
+    *ip++ = 32767;
 }
 
 void calc_dialog_box(GrafPtr w, INTEGER n)
 {
     int left, top, right, bottom;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     SetRectRgn(WINDOW_CONT_REGION(w), left, top, right, bottom);
     SetRectRgn(WINDOW_STRUCT_REGION(w),
@@ -1094,17 +1094,17 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
             {
                 WStateData *wsp;
 
-                WINDOW_DATA_X(w) = RM(NewHandle((Size)sizeof(WStateData)));
-                wsp = MR(*(GUEST<WStateData *> *)WINDOW_DATA(w));
+                WINDOW_DATA_X(w) = NewHandle((Size)sizeof(WStateData));
+                wsp = *(GUEST<WStateData *> *)WINDOW_DATA(w);
 
-                wsp->stdState = GD_BOUNDS(MR(LM(TheGDevice)));
+                wsp->stdState = GD_BOUNDS(LM(TheGDevice));
                 InsetRect(&wsp->stdState, 3, 3);
-                wsp->stdState.top = CW(CW(wsp->stdState.top) + 38);
+                wsp->stdState.top = wsp->stdState.top + 38;
                 wsp->userState = PORT_RECT(w);
 
                 /* local to global */
-                OffsetRect(&wsp->userState, -CW(PORT_BOUNDS(w).left),
-                           -CW(PORT_BOUNDS(w).top));
+                OffsetRect(&wsp->userState, -PORT_BOUNDS(w).left,
+                           -PORT_BOUNDS(w).top);
 
                 WINDOW_SPARE_FLAG_X(w) = true;
             }
@@ -1133,12 +1133,12 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
                     temp_rgn);
 
             OffsetRgn(temp_rgn,
-                      -CW(PORT_BOUNDS(w).left),
-                      -CW(PORT_BOUNDS(w).top));
+                      -PORT_BOUNDS(w).left,
+                      -PORT_BOUNDS(w).top);
 
-            CopyRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), save_clip);
-            SectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), temp_rgn,
-                    PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+            CopyRgn(PORT_CLIP_REGION(qdGlobals().thePort), save_clip);
+            SectRgn(PORT_CLIP_REGION(qdGlobals().thePort), temp_rgn,
+                    PORT_CLIP_REGION(qdGlobals().thePort));
 
             if(varcode == documentProc)
             {
@@ -1148,7 +1148,7 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
                     erase_grow_icon((GrafPtr)w);
             }
 
-            CopyRgn(save_clip, PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+            CopyRgn(save_clip, PORT_CLIP_REGION(qdGlobals().thePort));
 
             DisposeRgn(temp_rgn);
             DisposeRgn(save_clip);
@@ -1192,10 +1192,10 @@ void draw_rounded_doc(GrafPtr w)
     int draw_go_away_p;
     Rect r;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     SetRect(&r, left - 1, top - 19, right + 1, top);
     FillRect(&r, qdGlobals().white);
@@ -1224,10 +1224,10 @@ hit_rounded_doc(GrafPtr w, LONGINT param)
     Point p;
     int left, top, right, bottom;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     p.v = HiWord(param);
     p.h = LoWord(param);
@@ -1269,10 +1269,10 @@ void calc_rounded_doc(GrafPtr w, INTEGER curve_code)
     RgnHandle rh;
     Rect r;
 
-    left = CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left);
-    top = CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top);
-    right = CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left);
-    bottom = CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top);
+    left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     SetRectRgn(WINDOW_CONT_REGION(w), left, top, right, bottom);
 
@@ -1281,10 +1281,10 @@ void calc_rounded_doc(GrafPtr w, INTEGER curve_code)
     else
         curve = 16;
 
-    r.left = CW(left - 1);
-    r.top = CW(top - 19);
-    r.right = CW(right + 1);
-    r.bottom = CW(bottom + 1);
+    r.left = left - 1;
+    r.top = top - 19;
+    r.right = right + 1;
+    r.bottom = bottom + 1;
     OpenRgn();
     FrameRoundRect(&r, curve, curve);
     CloseRgn(WINDOW_STRUCT_REGION(w));

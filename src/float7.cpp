@@ -26,8 +26,8 @@ void Executor::C_ROMlib_Fdec2str(DecForm *volatile sp2, Decimal *volatile sp,
     char backwardsexp[MAXEXPSIZE];
 
     warning_floating_point(NULL_STRING);
-    digits = CW(sp2->digits);
-    style = CW(sp2->style);
+    digits = sp2->digits;
+    style = sp2->style;
 
     switch(style & DECIMALTYPEMASK)
     {
@@ -53,7 +53,7 @@ void Executor::C_ROMlib_Fdec2str(DecForm *volatile sp2, Decimal *volatile sp,
                 i = 1;
             }
             dp[i + 2] = 'e';
-            exponent = CW(sp->exp) + sp->sig[0] - 1;
+            exponent = sp->exp + sp->sig[0] - 1;
             if(exponent < 0)
             {
                 dp[i + 3] = '-';
@@ -88,9 +88,9 @@ void Executor::C_ROMlib_Fdec2str(DecForm *volatile sp2, Decimal *volatile sp,
             }
             else
             {
-                beforedecimal = sp->sig[0] + CW(sp->exp);
+                beforedecimal = sp->sig[0] + sp->exp;
             }
-            afterdecimal = (-CW(sp->exp) > digits) ? -CW(sp->exp) : digits;
+            afterdecimal = (-sp->exp > digits) ? -sp->exp : digits;
             if(sp->sgn)
             {
                 dp[1] = '-';
@@ -207,7 +207,7 @@ void Executor::C_ROMlib_Fxstr2dec(Decstr volatile sp2, INTEGER *volatile sp,
         /*-->*/ goto abortlookahead; /* should I use a break or return instead? */
     }
     *sp = CW_RAW(index); /* The base is legit.  Check exponent. */
-    dp2->exp = CWC(0);
+    dp2->exp = 0;
     if(LOWER(sp2[index]) == 'e')
     {
         index++;
@@ -229,25 +229,25 @@ void Executor::C_ROMlib_Fxstr2dec(Decstr volatile sp2, INTEGER *volatile sp,
         }
         while(isdigit(sp2[index]) && (index <= lastchar))
         {
-            INTEGER newexp = CW(dp2->exp);
+            INTEGER newexp = dp2->exp;
             newexp *= 10;
             newexp += sp2[index] - '0';
-            dp2->exp = CW(newexp);
+            dp2->exp = newexp;
             index++;
         }
         if(expsgn)
-            dp2->exp = CW(-1 * CW(dp2->exp));
+            dp2->exp = -1 * dp2->exp;
     }
     *sp = CW_RAW(index);
 abortlookahead:
-    dp2->exp = CW(CW(dp2->exp) + implicitexp - dp2->sig[0]);
-    *dp = CB(!sp2[index] || (index > lastchar));
+    dp2->exp = dp2->exp + implicitexp - dp2->sig[0];
+    *dp = !sp2[index] || (index > lastchar);
     while(dp2->sig[0] > 1 && dp2->sig[1] == '0') /* gunch leading */
         memmove(dp2->sig + 1, dp2->sig + 2, --dp2->sig[0]); /* zeros */
 
     warning_floating_point("xstr2dec returning %s%.*s * 10**%d",
                            dp2->sgn ? "-" : "",
-                           dp2->sig[0], dp2->sig + 1, CW(dp2->exp));
+                           dp2->sig[0], dp2->sig + 1, dp2->exp);
 }
 
 void Executor::C_ROMlib_Fcstr2dec(Decstr volatile sp2, INTEGER *volatile sp,

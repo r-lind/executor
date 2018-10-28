@@ -92,7 +92,7 @@ ROMlib_set_system_version(uint32_t version)
         };
 
         system_version = version;
-        LM(SysVersion) = CW(version);
+        LM(SysVersion) = version;
 
         major = version >> 8;
         minor = (version >> 4) & MINOR_MASK;

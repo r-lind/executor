@@ -22,21 +22,21 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
 
 #define MOREINSANECOMPATIBILITY
 #if defined(MOREINSANECOMPATIBILITY)
-    if(v == frame && PORT_REGION_SAVE_X(MR(qdGlobals().thePort)))
+    if(v == frame && PORT_REGION_SAVE_X(qdGlobals().thePort))
     {
-        if(CW(rp->left) > CW(rp->right))
+        if(rp->left > rp->right)
         {
             patcheduprect = *rp;
             patcheduprect.left = rp->right;
             patcheduprect.right = rp->left;
-            if(CW(rp->top) > CW(rp->bottom))
+            if(rp->top > rp->bottom)
             {
                 patcheduprect.top = rp->bottom;
                 patcheduprect.bottom = rp->top;
             }
             rp = &patcheduprect;
         }
-        else if(CW(rp->top) > CW(rp->bottom))
+        else if(rp->top > rp->bottom)
         {
             patcheduprect = *rp;
             patcheduprect.top = rp->bottom;
@@ -48,8 +48,8 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
             rh = NewRgn();
             RectRgn(rh, rp);
             XorRgn(rh,
-                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
-                   (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
+                   (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort),
+                   (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort));
             DisposeRgn(rh);
             /*-->*/ return;
         }
@@ -59,7 +59,7 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
     if(EmptyRect(rp))
         /*-->*/ return;
 
-    if(MR(qdGlobals().thePort)->picSave)
+    if(qdGlobals().thePort->picSave)
     {
         ROMlib_drawingverbrectpicupdate(v, rp);
         PICOP(OP_frameRect + (int)v);
@@ -72,17 +72,17 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
     switch(v)
     {
         case frame:
-            if(PORT_REGION_SAVE_X(MR(qdGlobals().thePort)))
+            if(PORT_REGION_SAVE_X(qdGlobals().thePort))
                 XorRgn(rh,
-                       (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)),
-                       (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort)));
-            if(PORT_PEN_VIS(MR(qdGlobals().thePort)) >= 0)
+                       (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort),
+                       (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort));
+            if(PORT_PEN_VIS(qdGlobals().thePort) >= 0)
             {
                 rh2 = NewRgn();
                 RectRgn(rh2, rp);
                 InsetRgn(rh2,
-                         Cx(PORT_PEN_SIZE(MR(qdGlobals().thePort)).h),
-                         Cx(PORT_PEN_SIZE(MR(qdGlobals().thePort)).v));
+                         PORT_PEN_SIZE(qdGlobals().thePort).h,
+                         PORT_PEN_SIZE(qdGlobals().thePort).v);
                 XorRgn(rh, rh2, rh);
                 StdRgn(paint, rh);
                 DisposeRgn(rh2);

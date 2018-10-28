@@ -23,14 +23,14 @@ static OSErr freeallblocks(HVCB *vcbp, filerec *frp)
         retval = tmfoErr;
     else
     {
-        fcbp->fcbVPtr = RM(vcbp);
+        fcbp->fcbVPtr = vcbp;
         fcbp->fcbFlNum = frp->filFlNum;
         fcbp->fcbPLen = frp->filPyLen;
         memmove((char *)fcbp->fcbExtRec, (char *)frp->filExtRec,
                 (LONGINT)sizeof(frp->filExtRec));
         fcbp->fcbMdRByt = WRITEBIT;
         pbr.ioParam.ioMisc = 0;
-        pbr.ioParam.ioRefNum = CW((char *)fcbp - (char *)MR(LM(FCBSPtr)));
+        pbr.ioParam.ioRefNum = (char *)fcbp - (char *)LM(FCBSPtr);
         retval = ROMlib_allochelper((IOParam *)&pbr, false, seteof, false);
         if(retval == noErr)
         {
@@ -68,10 +68,10 @@ static OSErr createhelper(IOParam *pb, BOOLEAN async, createop op,
                 if(curkind == directory)
                 {
                     drp = (directoryrec *)DATAPFROMKEY(btparamrec.foundp);
-                    err = ROMlib_dirbusy(CL(drp->dirDirID), vcbp);
+                    err = ROMlib_dirbusy(drp->dirDirID, vcbp);
                     if(err == noErr)
                     {
-                        if(drp->dirVal != CWC(0))
+                        if(drp->dirVal != 0)
                             err = fBsyErr;
                         else
                             err = ROMlib_writevcbp(vcbp);
@@ -82,7 +82,7 @@ static OSErr createhelper(IOParam *pb, BOOLEAN async, createop op,
                 else
                 {
                     frp = (filerec *)DATAPFROMKEY(btparamrec.foundp);
-                    if(ROMlib_alreadyopen(vcbp, CL(frp->filFlNum),
+                    if(ROMlib_alreadyopen(vcbp, frp->filFlNum,
                                           (SignedByte *)0, 0, eitherbusy)
                        != noErr)
                         err = fBsyErr;
@@ -136,13 +136,13 @@ OSErr Executor::hfsPBCreate(ParmBlkPtr pb, BOOLEAN async)
 
 OSErr Executor::hfsPBHCreate(HParmBlkPtr pb, BOOLEAN async)
 {
-    return createhelper((IOParam *)pb, async, create, CL(pb->fileParam.ioDirID),
+    return createhelper((IOParam *)pb, async, create, pb->fileParam.ioDirID,
                         regular);
 }
 
 OSErr Executor::hfsPBDirCreate(HParmBlkPtr pb, BOOLEAN async)
 {
-    return createhelper((IOParam *)pb, async, create, CL(pb->fileParam.ioDirID),
+    return createhelper((IOParam *)pb, async, create, pb->fileParam.ioDirID,
                         directory);
 }
 
@@ -154,6 +154,6 @@ OSErr Executor::hfsPBDelete(ParmBlkPtr pb, BOOLEAN async)
 
 OSErr Executor::hfsPBHDelete(HParmBlkPtr pb, BOOLEAN async)
 {
-    return createhelper((IOParam *)pb, async, delete1, CL(pb->fileParam.ioDirID),
+    return createhelper((IOParam *)pb, async, delete1, pb->fileParam.ioDirID,
                         (filekind)(regular | directory));
 }

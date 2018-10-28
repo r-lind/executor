@@ -320,16 +320,16 @@ create_about_box()
     load_pages();
 
     static Rect scroll_bar_bounds = {
-        CWC(TE_TOP),
-        CWC(TE_RIGHT - SCROLL_BAR_WIDTH),
-        CWC(TE_BOTTOM),
-        CWC(TE_RIGHT)
+        TE_TOP,
+        TE_RIGHT - SCROLL_BAR_WIDTH,
+        TE_BOTTOM,
+        TE_RIGHT
     };
     static Rect te_bounds = {
-        CWC(TE_TOP + 1),
-        CWC(TE_LEFT + TE_MARGIN),
-        CWC(TE_BOTTOM - 1),
-        CWC(TE_RIGHT - TE_MARGIN - SCROLL_BAR_WIDTH)
+        TE_TOP + 1,
+        TE_LEFT + TE_MARGIN,
+        TE_BOTTOM - 1,
+        TE_RIGHT - TE_MARGIN - SCROLL_BAR_WIDTH
     };
     Rect about_box_bounds;
     int b;
@@ -354,13 +354,13 @@ create_about_box()
         Rect r;
 
         /* Set up the rectangle enclosing each button. */
-        r.top = CWC(ABOUT_BOX_HEIGHT - 30);
-        r.bottom = CWC(ABOUT_BOX_HEIGHT - 30 + BUTTON_HEIGHT);
-        r.left = CW((b * ABOUT_BOX_WIDTH / about_box_buttons.size())
+        r.top = ABOUT_BOX_HEIGHT - 30;
+        r.bottom = ABOUT_BOX_HEIGHT - 30 + BUTTON_HEIGHT;
+        r.left = (b * ABOUT_BOX_WIDTH / about_box_buttons.size())
                     + (ABOUT_BOX_WIDTH / about_box_buttons.size()
                        - BUTTON_WIDTH)
-                        / 2);
-        r.right = CW(CW(r.left) + BUTTON_WIDTH);
+                        / 2;
+        r.right = r.left + BUTTON_WIDTH;
 
         str255_from_c_string(str, about_box_buttons[b].name.c_str());
         about_box_buttons[b].ctl = NewControl(about_box, &r, str, true, 0,
@@ -462,7 +462,7 @@ draw_status_info(bool executor_p)
 #define MB (1024 * 1024U)
     gestalt_success_p = (C_GestaltTablesOnly(gestaltLogicalRAMSize, &total_ram_x)
                          == noErr);
-    total_ram = CL(total_ram_x);
+    total_ram = total_ram_x;
     if(gestalt_success_p)
         sprintf(total_ram_string, "%s%u.%02u MB", ram_tag,
                 total_ram / MB, (total_ram % MB) * 100 / MB);
@@ -489,10 +489,10 @@ static void
 event_loop(bool executor_p)
 {
     static Rect frame_rect = {
-        CWC(TE_TOP),
-        CWC(TE_LEFT),
-        CWC(TE_BOTTOM),
-        CWC(TE_RIGHT - SCROLL_BAR_WIDTH + 1)
+        TE_TOP,
+        TE_LEFT,
+        TE_BOTTOM,
+        TE_RIGHT - SCROLL_BAR_WIDTH + 1
     };
     EventRecord evt;
     bool done_p;
@@ -522,7 +522,7 @@ event_loop(bool executor_p)
 
         TEIdle(about_te);
 
-        switch(CW(evt.what))
+        switch(evt.what)
         {
             case updateEvt:
                 BeginUpdate(about_box);
@@ -554,7 +554,7 @@ event_loop(bool executor_p)
             {
                 char ch;
 
-                ch = CL(evt.message) & 0xFF;
+                ch = evt.message & 0xFF;
                 switch(ch)
                 {
                     case '\r':
@@ -580,7 +580,7 @@ event_loop(bool executor_p)
 
                 GUEST<ControlHandle> bogo_c;
                 control_p = FindControl(local_pt, about_box, &bogo_c);
-                c = MR(bogo_c);
+                c = bogo_c;
                 if(!control_p)
                     SysBeep(1);
                 else

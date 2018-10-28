@@ -21,20 +21,6 @@ hfsVolume.cpp:645
 function getnmfls: local variable key is filled but never used
 (endianness also shaky)
 
-hfsWorkingDir.cpp:172
-	    pb->ioWDDirID   = CL((vcbp == MR(DefVCBPtr)) ? DefDirID : 2);
-should probably be
-	    pb->ioWDDirID   = (vcbp == MR(DefVCBPtr)) ? DefDirID : CLC(2);
-
-qGDevice.cpp:197:
-  GD_TYPE_X (gd) = (bpp > 8
- 		    ? directType
- 		    : (fixed_p ? CWC (fixedType) : CWC (clutType)));
-should be
-  GD_TYPE_X (gd) = (bpp > 8
- 		    ? CWC(directType)
- 		    : (fixed_p ? CWC (fixedType) : CWC (clutType)));
-
 
 qPict2.cpp:316ff
       {
@@ -42,7 +28,7 @@ qPict2.cpp:316ff
 	
 	for (i = 0, t = head; i < colors_requested && t; i ++, t = t->next)
 	  {
-	    table[i].value     = CW (i);
+	    table[i].value     = i;
 	    
 #define TILE(x) (((uint32_t) (x) * 0x8421UL) >> 4)
 	  
@@ -59,7 +45,7 @@ my version:
 teIMV.cpp:491:
   LH_HEIGHT_X (lh) = font_height;
 should be
-  LH_HEIGHT_X (lh) = CW(font_height);
+  LH_HEIGHT_X (lh) = font_height;
 
 osutil.cpp:772
 #if !defined (BIGENDIAN)
@@ -68,14 +54,14 @@ osutil.cpp:772
 	sp.misc     = SPMisc2 << 8;
 #endif
 my version:
-        sp.misc = CW(SPMisc2), this matches InitUtil
+        sp.misc = SPMisc2, this matches InitUtil
 
 script.cpp:800
-      *widthRemainingp = pixelWidth - (CW(locs[textLen]) << 16);
+      *widthRemainingp = pixelWidth - (locs[textLen] << 16);
 missing CL:
-      *widthRemainingp = CL( pixelWidth - (CW(locs[textLen]) << 16) );
+      *widthRemainingp =  pixelWidth - (locs[textLen] << 16) ;
 
 
 alias.cpp:633
-      headp->length = CW(n_bytes_needed);
+      headp->length = n_bytes_needed;
 (CW was missing)

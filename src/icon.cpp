@@ -34,7 +34,7 @@ using namespace Executor;
                                                                    \
         _err_ = GetIconSuite(&_icon_suite_, (res_id), (selector)); \
                                                                    \
-        *(icon_suite) = MR(_icon_suite_);                          \
+        *(icon_suite) = _icon_suite_;                          \
                                                                    \
         _err_;                                                     \
     })
@@ -78,20 +78,20 @@ void Executor::C_PlotIcon(const Rect *rect, Handle icon)
     BitMap bm;
 
     bm.baseAddr = *icon;
-    bm.rowBytes = CWC(4);
-    bm.bounds.left = bm.bounds.top = CWC(0);
+    bm.rowBytes = 4;
+    bm.bounds.left = bm.bounds.top = 0;
     if(GetHandleSize(icon) == 2 * 16)
     {
-        bm.rowBytes = CWC(2);
-        bm.bounds.bottom = CWC(16);
+        bm.rowBytes = 2;
+        bm.bounds.bottom = 16;
     }
     else
     {
-        bm.rowBytes = CWC(4);
-        bm.bounds.bottom = CWC(32);
+        bm.rowBytes = 4;
+        bm.bounds.bottom = 32;
     }
     bm.bounds.right = bm.bounds.bottom;
-    CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), &bm.bounds, rect,
+    CopyBits(&bm, PORT_BITS_FOR_COPY(qdGlobals().thePort), &bm.bounds, rect,
              srcCopy, nullptr);
 }
 
@@ -120,7 +120,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
     if(!icon)
         return;
 
-    current_port = MR(qdGlobals().thePort);
+    current_port = qdGlobals().thePort;
 
     cgrafport_p = CGrafPort_p(current_port);
     if(cgrafport_p)
@@ -143,9 +143,9 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
     icon_bm = &CICON_BMAP(icon);
 
     mask_bm = &CICON_MASK(icon);
-    BITMAP_BASEADDR_X(mask_bm) = RM((Ptr)CICON_MASK_DATA(icon));
+    BITMAP_BASEADDR_X(mask_bm) = (Ptr)CICON_MASK_DATA(icon);
 
-    gd_pixmap = GD_PMAP(MR(LM(MainDevice)));
+    gd_pixmap = GD_PMAP(LM(MainDevice));
 
     if((PORT_BASEADDR_X(current_port) == PIXMAP_BASEADDR_X(gd_pixmap)
         && PIXMAP_PIXEL_SIZE(gd_pixmap) > 2)
@@ -185,7 +185,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         bm_baseaddr = (Ptr)((char *)CICON_MASK_DATA(icon)
                             + mask_data_size);
 
-        BITMAP_BASEADDR_X(icon_bm) = RM(bm_baseaddr);
+        BITMAP_BASEADDR_X(icon_bm) = bm_baseaddr;
         CopyMask(icon_bm,
                  mask_bm,
                  PORT_BITS_FOR_COPY(current_port),
@@ -253,8 +253,8 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
 
     cicon_res = STARH(cicon_res_handle);
     height = RECT_HEIGHT(&cicon_res->iconPMap.bounds);
-    mask_data_size = CW(cicon_res->iconMask.rowBytes) * height;
-    bmap_data_size = CW(cicon_res->iconBMap.rowBytes) * height;
+    mask_data_size = cicon_res->iconMask.rowBytes * height;
+    bmap_data_size = cicon_res->iconBMap.rowBytes * height;
     new_size = sizeof(CIcon) - sizeof(INTEGER) + mask_data_size + bmap_data_size;
 
     cicon_handle = (CIconHandle)NewHandle(new_size);
@@ -280,11 +280,11 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
 
     pmap_ctab_offset = bmap_data_offset + bmap_data_size;
     tmp_ctab = (CTabPtr)((char *)&cicon_res->iconMaskData + pmap_ctab_offset);
-    pmap_ctab_size = sizeof(ColorTable) + (CW(tmp_ctab->ctSize)
+    pmap_ctab_size = sizeof(ColorTable) + (tmp_ctab->ctSize
                                            * sizeof(ColorSpec));
 
     pmap_data_offset = pmap_ctab_offset + pmap_ctab_size;
-    pmap_data_size = (CW(cicon->iconPMap.rowBytes)
+    pmap_data_size = (cicon->iconPMap.rowBytes
                       & ROWBYTES_VALUE_BITS)
         * height;
 
@@ -300,13 +300,13 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_ctab_offset,
                       (Ptr)STARH(color_table),
                       pmap_ctab_size);
-        CTAB_SEED_X(color_table) = CL(GetCTSeed());
-        cicon->iconPMap.pmTable = RM(color_table);
+        CTAB_SEED_X(color_table) = GetCTSeed();
+        cicon->iconPMap.pmTable = color_table;
 
         cicon->iconPMap.baseAddr = CLC_NULL;
-        cicon->iconData = RM(NewHandle(pmap_data_size));
+        cicon->iconData = NewHandle(pmap_data_size);
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_data_offset,
-                      (Ptr)STARH(MR(cicon->iconData)),
+                      (Ptr)STARH(cicon->iconData),
                       pmap_data_size);
     }
 
@@ -316,7 +316,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
 void Executor::C_DisposeCIcon(CIconHandle icon)
 {
     DisposeHandle(CICON_DATA(icon));
-    DisposeHandle((Handle)MR(CICON_PMAP(icon).pmTable));
+    DisposeHandle((Handle)CICON_PMAP(icon).pmTable);
     DisposeHandle((Handle)icon);
 }
 
@@ -370,7 +370,7 @@ OSErr Executor::C_GetIconSuite(GUEST<Handle> *icon_suite_return, short res_id,
     int i;
 
     icon_suite = NewHandleClear(sizeof(cotton_suite_layout_t));
-    if(LM(MemErr) != CWC(noErr))
+    if(LM(MemErr) != noErr)
         ICON_RETURN_ERROR(memFullErr);
 
     HLockGuard guard(icon_suite);
@@ -389,7 +389,7 @@ OSErr Executor::C_GetIconSuite(GUEST<Handle> *icon_suite_return, short res_id,
         }
     }
 
-    *icon_suite_return = RM(icon_suite);
+    *icon_suite_return = icon_suite;
 
     ICON_RETURN_ERROR(noErr);
 }
@@ -399,10 +399,10 @@ OSErr Executor::C_NewIconSuite(GUEST<Handle> *icon_suite_return)
     Handle icon_suite;
 
     icon_suite = NewHandleClear(sizeof(cotton_suite_layout_t));
-    if(LM(MemErr) != CWC(noErr))
+    if(LM(MemErr) != noErr)
         ICON_RETURN_ERROR(memFullErr);
 
-    *icon_suite_return = RM(icon_suite);
+    *icon_suite_return = icon_suite;
 
     ICON_RETURN_ERROR(noErr);
 }
@@ -429,7 +429,7 @@ OSErr Executor::C_GetIconFromSuite(GUEST<Handle> *icon_data_return,
     if(icon_data == nullptr)
         ICON_RETURN_ERROR(paramErr);
 
-    *icon_data_return = RM(icon_data);
+    *icon_data_return = icon_data;
     ICON_RETURN_ERROR(noErr);
 }
 
@@ -500,7 +500,7 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
     if(transform != ttNone)
         warning_unimplemented("unhandled icon transform `%d'", transform);
 
-    current_port = MR(qdGlobals().thePort);
+    current_port = qdGlobals().thePort;
     little_rect_p = (RECT_WIDTH(rect) < 32
                      && RECT_HEIGHT(rect) < 32);
     port_bpp = (CGrafPort_p(current_port)
@@ -529,19 +529,19 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
     memset(&icon_rect, '\000', sizeof icon_rect);
 
     icon_size = (little_icon_p ? 16 : 32);
-    icon_rect.bottom = icon_rect.right = CW(icon_size);
+    icon_rect.bottom = icon_rect.right = icon_size;
 
     icon_pm.baseAddr = *icon_data;
-    icon_pm.rowBytes = CW((icon_size * icon_bpp / 8)
-                          | PIXMAP_DEFAULT_ROW_BYTES);
+    icon_pm.rowBytes = (icon_size * icon_bpp / 8)
+                          | PIXMAP_DEFAULT_ROW_BYTES;
     icon_pm.bounds = icon_rect;
-    icon_pm.pixelSize = icon_pm.cmpSize = CW(icon_bpp);
-    icon_pm.cmpCount = CWC(1);
-    icon_pm.pmTable = RM(color_table);
+    icon_pm.pixelSize = icon_pm.cmpSize = icon_bpp;
+    icon_pm.cmpCount = 1;
+    icon_pm.pmTable = color_table;
 
-    mask_bm.baseAddr = RM((Ptr)(char *)STARH(icon_mask)
-                          + icon_size * icon_size / 8);
-    mask_bm.rowBytes = CW(icon_size / 8);
+    mask_bm.baseAddr = (Ptr)(char *)STARH(icon_mask)
+                          + icon_size * icon_size / 8;
+    mask_bm.rowBytes = icon_size / 8;
     mask_bm.bounds = icon_rect;
 
     CopyMask((BitMap *)&icon_pm, &mask_bm,
@@ -568,7 +568,7 @@ short Executor::C_GetSuiteLabel(Handle suite)
     cotton_suite_layout_t *suitep;
 
     suitep = (cotton_suite_layout_t *)STARH(suite);
-    retval = CW(suitep->label);
+    retval = suitep->label;
     return retval;
 }
 
@@ -578,7 +578,7 @@ OSErr Executor::C_SetSuiteLabel(Handle suite, short label)
     cotton_suite_layout_t *suitep;
 
     suitep = (cotton_suite_layout_t *)STARH(suite);
-    suitep->label = CW(label);
+    suitep->label = label;
     retval = noErr;
 
     return retval;
@@ -593,43 +593,43 @@ typedef struct
 static label_info_t labels[7] = {
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\011Essential",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\03Hot",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\013In Progress",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\04Cool",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\010Personal",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\011Project 1",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\011Project 2",
     },

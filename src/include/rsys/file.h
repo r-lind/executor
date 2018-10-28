@@ -115,7 +115,7 @@ typedef struct
     GUEST<fcbrec[NFCB]> fc;
 } fcbhidden;
 
-#define ROMlib_fcblocks (((fcbhidden *)MR(LM(FCBSPtr)))->fc)
+#define ROMlib_fcblocks (((fcbhidden *)LM(FCBSPtr))->fc)
 
 typedef struct
 {
@@ -194,7 +194,7 @@ typedef enum { NoIndex,
 #define FAKEASYNC(pb, a, err)                                          \
     do                                                                 \
     {                                                                  \
-        ((ParmBlkPtr)(pb))->ioParam.ioResult = CW(err);                \
+        ((ParmBlkPtr)(pb))->ioParam.ioResult = err;                \
         if(err != noErr)                                               \
             warning_trap_failure("%d", err);                           \
         BADRETURNHOOK(err);                                            \
@@ -202,7 +202,7 @@ typedef enum { NoIndex,
         {                                                              \
             ProcPtr compp;                                             \
                                                                        \
-            if((compp = MR(((ParmBlkPtr)(pb))->ioParam.ioCompletion))) \
+            if((compp = ((ParmBlkPtr)(pb))->ioParam.ioCompletion)) \
             {                                                          \
                 CALLCOMPLETION(pb, compp, err);                        \
             }                                                          \
@@ -277,7 +277,7 @@ typedef struct
 
 #define HARDLOCKED (1 << 7)
 #define SOFTLOCKED (1 << 15)
-#define volumenotlocked(vp) (Cx(((VCB *)vp)->vcbAtrb) & SOFTLOCKED ? vLckdErr : (Cx(((VCB *)vp)->vcbAtrb) & HARDLOCKED ? wPrErr : noErr))
+#define volumenotlocked(vp) (((VCB *)vp)->vcbAtrb & SOFTLOCKED ? vLckdErr : (((VCB *)vp)->vcbAtrb & HARDLOCKED ? wPrErr : noErr))
 
 #if !defined(L_INCR)
 #define L_INCR 1
@@ -298,7 +298,7 @@ typedef struct
  */
 
 #define UPDATE_IONAMEPTR_P(pb) \
-    ((pb).ioNamePtr && ((pb).ioFDirIndex != CWC(0) || !MR((pb).ioNamePtr)[0]))
+    ((pb).ioNamePtr && ((pb).ioFDirIndex != 0 || !(pb).ioNamePtr[0]))
 
 extern StringPtr ROMlib_exefname;
 

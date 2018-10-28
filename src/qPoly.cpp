@@ -20,8 +20,8 @@ PolyHandle Executor::C_OpenPoly()
     PolyHandle ph;
 
     ph = (PolyHandle)NewHandle((Size)SMALLPOLY);
-    HxX(ph, polySize) = CWC(SMALLPOLY);
-    PORT_POLY_SAVE_X(MR(qdGlobals().thePort)) = RM((Handle)ph);
+    HxX(ph, polySize) = SMALLPOLY;
+    PORT_POLY_SAVE_X(qdGlobals().thePort) = (Handle)ph;
     HidePen();
     return (ph);
 }
@@ -33,27 +33,27 @@ void Executor::C_ClosePoly()
     INTEGER i;
     PolyHandle ph;
 
-    ph = (PolyHandle)PORT_POLY_SAVE(MR(qdGlobals().thePort));
+    ph = (PolyHandle)PORT_POLY_SAVE(qdGlobals().thePort);
     for(ip = (GUEST<INTEGER> *)((char *)STARH(ph) + SMALLPOLY),
     ep = (GUEST<INTEGER> *)((char *)STARH(ph) + Hx(ph, polySize));
         ip != ep;)
     {
-        if((i = CW(*ip)) <= top)
+        if((i = *ip) <= top)
             top = i;
         ++ip;
         if(i >= bottom)
             bottom = i;
-        if((i = CW(*ip)) <= left)
+        if((i = *ip) <= left)
             left = i;
         ++ip;
         if(i >= right)
             right = i;
     }
-    HxX(ph, polyBBox.top) = CW(top);
-    HxX(ph, polyBBox.left) = CW(left);
-    HxX(ph, polyBBox.bottom) = CW(bottom);
-    HxX(ph, polyBBox.right) = CW(right);
-    PORT_POLY_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
+    HxX(ph, polyBBox.top) = top;
+    HxX(ph, polyBBox.left) = left;
+    HxX(ph, polyBBox.bottom) = bottom;
+    HxX(ph, polyBBox.right) = right;
+    PORT_POLY_SAVE_X(qdGlobals().thePort) = nullptr;
     ShowPen();
 }
 
@@ -69,16 +69,16 @@ void Executor::C_OffsetPoly(PolyHandle poly, INTEGER dh,
 
     if(dh || dv)
     {
-        HxX(poly, polyBBox.top) = CW(Hx(poly, polyBBox.top) + dv);
-        HxX(poly, polyBBox.bottom) = CW(Hx(poly, polyBBox.bottom) + dv);
-        HxX(poly, polyBBox.left) = CW(Hx(poly, polyBBox.left) + dh);
-        HxX(poly, polyBBox.right) = CW(Hx(poly, polyBBox.right) + dh);
+        HxX(poly, polyBBox.top) = Hx(poly, polyBBox.top) + dv;
+        HxX(poly, polyBBox.bottom) = Hx(poly, polyBBox.bottom) + dv;
+        HxX(poly, polyBBox.left) = Hx(poly, polyBBox.left) + dh;
+        HxX(poly, polyBBox.right) = Hx(poly, polyBBox.right) + dh;
         pp = HxX(poly, polyPoints);
         ep = (GUEST<Point> *)(((char *)STARH(poly)) + Hx(poly, polySize));
         while(pp != ep)
         {
-            pp->h = CW(CW(pp->h) + (dh));
-            pp->v = CW(CW(pp->v) + (dv));
+            pp->h = pp->h + (dh);
+            pp->v = pp->v + (dv);
             pp++;
         }
     }

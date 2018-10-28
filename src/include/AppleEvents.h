@@ -34,8 +34,8 @@ typedef AEDesc descriptor_t;
 #define DESC_TYPE_X(desc) ((desc)->descriptorType)
 #define DESC_DATA_X(desc) ((desc)->dataHandle)
 
-#define DESC_TYPE(desc) (CL(DESC_TYPE_X(desc)))
-#define DESC_DATA(desc) (MR(DESC_DATA_X(desc)))
+#define DESC_TYPE(desc) (DESC_TYPE_X(desc))
+#define DESC_DATA(desc) (DESC_DATA_X(desc))
 
 typedef struct AEKeyDesc
 {
@@ -47,7 +47,7 @@ typedef AEKeyDesc key_desc_t;
 
 #define KEY_DESC_KEYWORD_X(keydesc) ((keydesc)->descKey)
 
-#define KEY_DESC_KEYWORD(keydesc) (CL(KEY_DESC_KEYWORD_X(keydesc)))
+#define KEY_DESC_KEYWORD(keydesc) (KEY_DESC_KEYWORD_X(keydesc))
 #define KEY_DESC_CONTENT(keydesc) ((keydesc)->descContent)
 
 typedef AEDesc AEAddressDesc;
@@ -168,9 +168,9 @@ typedef struct AE_hdlr_table_elt
     (HxX(table, n_allocated_bytes))
 
 #define AE_TABLE_N_ELTS(table) \
-    (CL(AE_TABLE_N_ELTS_X(table)))
+    (AE_TABLE_N_ELTS_X(table))
 #define AE_TABLE_N_ALLOCATED_BYTES(table) \
-    (CL(AE_TABLE_N_ALLOCATED_BYTES_X(table)))
+    (AE_TABLE_N_ALLOCATED_BYTES_X(table))
 
 typedef struct AE_hdlr_table
 {

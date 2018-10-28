@@ -52,16 +52,16 @@ draw_menu_title(muelem *elt,
     char *title;
     Rect dstr;
 
-    muhandle = MR(elt->muhandle);
+    muhandle = elt->muhandle;
 
     menu_bar_color(&bar_color);
     menu_title_color(MI_ID(muhandle), &title_color);
 
-    dstr.top = CW(hilite_p ? 1 : 0);
-    dstr.bottom = CW(CW(LM(MBarHeight)) - 1);
+    dstr.top = hilite_p ? 1 : 0;
+    dstr.bottom = LM(MBarHeight) - 1;
     dstr.left = elt->muleft;
     if(last_menu_p)
-        dstr.right = CW(muright);
+        dstr.right = muright;
     else
         dstr.right = elt[1].muleft;
 
@@ -73,7 +73,7 @@ draw_menu_title(muelem *elt,
     title = (char *)MI_DATA(muhandle);
 
 #if defined(COLOR_APPLE_MENU_ICON)
-    gd = CL(LM(MainDevice));
+    gd = LM(MainDevice);
     if(*title == 1
        && title[1] == '\024'
        && PIXMAP_PIXEL_SIZE(GD_PMAP(gd)) > 2)
@@ -81,7 +81,7 @@ draw_menu_title(muelem *elt,
         /* draw the color apple */
         dstr = apple->bounds;
         OffsetRect(&dstr,
-                   CW(elt->muleft) + MENULEFT - 6, 1);
+                   elt->muleft + MENULEFT - 6, 1);
 
         RGBForeColor(&ROMlib_black_rgb_color);
         RGBBackColor(&ROMlib_white_rgb_color);
@@ -100,8 +100,8 @@ draw_menu_title(muelem *elt,
                                             &title_color);
             RGBForeColor(&title_color);
         }
-        PORT_TX_MODE_X(MR(qdGlobals().thePort)) = CWC(srcCopy);
-        MoveTo(CW(elt->muleft) + MENULEFT - 3, 14);
+        PORT_TX_MODE_X(qdGlobals().thePort) = srcCopy;
+        MoveTo(elt->muleft + MENULEFT - 3, 14);
         if(ROMlib_AppleChar && title[0] == 1 && title[1] == APPLE_CHAR)
         {
             title[1] = (char)ROMlib_AppleChar;
@@ -138,7 +138,7 @@ realhilite(int16_t offset, highstate h)
     {
         if(offset > 0)
         {
-            mp = (muelem *)((char *)STARH(MR(LM(MenuList))) + offset);
+            mp = (muelem *)((char *)STARH(LM(MenuList)) + offset);
 
             draw_menu_title(mp,
                             offset == Hx(MENULIST, muoff),
@@ -154,10 +154,10 @@ realhilite(int16_t offset, highstate h)
             Rect r;
 
             /* toggle the entire menu bar */
-            mbar_height = CW(LM(MBarHeight));
+            mbar_height = LM(MBarHeight);
 
-            r = PORT_RECT(MR(wmgr_port));
-            r.bottom = CW(mbar_height - 1);
+            r = PORT_RECT(wmgr_port);
+            r.bottom = mbar_height - 1;
 
             if(h == HILITE)
                 menu_title_color(0, &bar_color);
@@ -168,16 +168,16 @@ realhilite(int16_t offset, highstate h)
             EraseRect(&r);
 
             PenSize(1, 1);
-            MoveTo(CW(r.left), mbar_height - 1);
-            LineTo(CW(r.right) - 1, mbar_height - 1);
+            MoveTo(r.left, mbar_height - 1);
+            LineTo(r.right - 1, mbar_height - 1);
 
-            HLock(MR(LM(MenuList)));
+            HLock(LM(MenuList));
             menulistp = STARH(MENULIST);
-            mpend = menulistp->mulist + CW(menulistp->muoff) / sizeof(muelem);
+            mpend = menulistp->mulist + menulistp->muoff / sizeof(muelem);
             for(mp = menulistp->mulist; mp != mpend; mp++)
                 draw_menu_title(mp, mp == mpend - 1,
-                                h == HILITE, CW(menulistp->muright));
-            HUnlock(MR(LM(MenuList)));
+                                h == HILITE, menulistp->muright);
+            HUnlock(LM(MenuList));
         }
     }
 }
@@ -190,8 +190,8 @@ mbdf_draw(int32_t draw_p)
     muelem *mp, *mpend;
     Rect r;
 
-    r = PORT_RECT(MR(wmgr_port));
-    r.bottom = CW(CW(LM(MBarHeight)) - 1);
+    r = PORT_RECT(wmgr_port);
+    r.bottom = LM(MBarHeight) - 1;
     ClipRect(&r);
 
     menu_bar_color(&bar_color);
@@ -199,29 +199,29 @@ mbdf_draw(int32_t draw_p)
     EraseRect(&r);
 
     PenSize(1, 1);
-    MoveTo(CW(r.left), CW(LM(MBarHeight)) - 1);
-    LineTo(CW(r.right) - 1, CW(LM(MBarHeight)) - 1);
+    MoveTo(r.left, LM(MBarHeight) - 1);
+    LineTo(r.right - 1, LM(MBarHeight) - 1);
     if(draw_p == DRAWMENUBAR)
     {
         /* draw titles */
-        r.bottom = CW(CW(r.bottom) - 1);
+        r.bottom = r.bottom - 1;
 
-        PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
-        PORT_TX_FONT_X(MR(wmgr_port)) = LM(SysFontFam);
+        PORT_TX_FACE_X(wmgr_port) = (Style)0;
+        PORT_TX_FONT_X(wmgr_port) = LM(SysFontFam);
 
-        HLock(MR(LM(MenuList)));
+        HLock(LM(MenuList));
         menulistp = STARH(MENULIST);
-        mpend = menulistp->mulist + CW(menulistp->muoff) / sizeof(muelem);
+        mpend = menulistp->mulist + menulistp->muoff / sizeof(muelem);
         for(mp = menulistp->mulist; mp != mpend; mp++)
-            draw_menu_title(mp, mp == mpend - 1, false, CW(menulistp->muright));
-        HUnlock(MR(LM(MenuList)));
+            draw_menu_title(mp, mp == mpend - 1, false, menulistp->muright);
+        HUnlock(LM(MenuList));
 
         /* highlite title if necessary */
         if(LM(TheMenu))
-            realhilite(ROMlib_mentosix(CW(LM(TheMenu))), HILITE);
+            realhilite(ROMlib_mentosix(LM(TheMenu)), HILITE);
 
         /* set ClipRgn to full open */
-        ClipRect(&PORT_RECT(MR(wmgr_port)));
+        ClipRect(&PORT_RECT(wmgr_port));
     }
 
     /* resent the fg/bk colors */
@@ -248,26 +248,26 @@ static LONGINT hit(LONGINT mousept)
     p.h = LoWord(mousept);
     p.v = HiWord(mousept);
 
-    if(p.v < CW(LM(MBarHeight)))
+    if(p.v < LM(MBarHeight))
     {
         mpend = HxX(MENULIST, mulist) + Hx(MENULIST, muoff) / sizeof(muelem);
-        for(mp = HxX(MENULIST, mulist); mp != mpend && CW(mp->muleft) <= p.h; mp++)
+        for(mp = HxX(MENULIST, mulist); mp != mpend && mp->muleft <= p.h; mp++)
             ;
         if(mp == HxX(MENULIST, mulist) || p.h > Hx(MENULIST, muright))
             /*-->*/ return NOTHITINMBAR;
         else
-            /*-->*/ return (char *)(mp - 1) - (char *)STARH(MR(LM(MenuList)));
+            /*-->*/ return (char *)(mp - 1) - (char *)STARH(LM(MenuList));
     }
     else
     {
-        mbdfep = (mbdfentry *)STARH(MR(LM(MBSaveLoc)));
-        for(mbdfp = (mbdfentry *)((char *)mbdfep + CW(((mbdfheader *)mbdfep)->lastMBSave));
+        mbdfep = (mbdfentry *)STARH(LM(MBSaveLoc));
+        for(mbdfp = (mbdfentry *)((char *)mbdfep + ((mbdfheader *)mbdfep)->lastMBSave);
             mbdfp != mbdfep && !PtInRect(p, &mbdfp->mbRectSave); mbdfp--)
             ;
         if(mbdfp == mbdfep)
             /*-->*/ return NOTHIT;
         else
-            /*-->*/ return CW(mbdfp->mbMLOffset);
+            /*-->*/ return mbdfp->mbMLOffset;
     }
 }
 
@@ -278,10 +278,10 @@ static void calc(LONGINT offset)
     muelem *mp, *mep, *firstmp;
     menulist *menulistp;
 
-    PORT_TX_FACE_X(MR(wmgr_port)) = (Style)CB(0);
-    PORT_TX_FONT_X(MR(wmgr_port)) = LM(SysFontFam);
+    PORT_TX_FACE_X(wmgr_port) = (Style)0;
+    PORT_TX_FONT_X(wmgr_port) = LM(SysFontFam);
 
-    HLock(MR(LM(MenuList)));
+    HLock(LM(MenuList));
     menulistp = STARH(MENULIST);
     firstmp = menulistp->mulist;
     if(offset == 0)
@@ -292,24 +292,24 @@ static void calc(LONGINT offset)
         left = MENULEFT;
     else
     {
-        mh = MR(mp[-1].muhandle);
+        mh = mp[-1].muhandle;
         HLock((Handle)mh);
         titsize = StringWidth(HxX(mh, menuData)) + SLOP;
         HUnlock((Handle)mh);
-        left = CW(mp[-1].muleft) + titsize;
+        left = mp[-1].muleft + titsize;
     }
-    for(mep = (muelem *)((char *)menulistp + CW(menulistp->muoff)) + 1;
+    for(mep = (muelem *)((char *)menulistp + menulistp->muoff) + 1;
         mp < mep; mp++)
     {
-        mp->muleft = CW(left);
-        mh = MR(mp->muhandle);
+        mp->muleft = left;
+        mh = mp->muhandle;
         HLock((Handle)mh);
         titsize = StringWidth(HxX(mh, menuData)) + SLOP;
         HUnlock((Handle)mh);
         left += titsize;
     }
-    menulistp->muright = CW(left);
-    HUnlock(MR(LM(MenuList)));
+    menulistp->muright = left;
+    HUnlock(LM(MenuList));
 }
 
 static void
@@ -317,10 +317,10 @@ init()
 {
     if(!LM(MBSaveLoc))
     {
-        LM(MBSaveLoc) = RM(NewHandle((Size)MBDFSTRUCTBYTES));
+        LM(MBSaveLoc) = NewHandle((Size)MBDFSTRUCTBYTES);
         HxX(MBSAVELOC, mbCustomStorage) = nullptr;
     }
-    HxX(MBSAVELOC, lastMBSave) = CWC(0);
+    HxX(MBSAVELOC, lastMBSave) = 0;
 }
 
 static void dispose()
@@ -349,7 +349,7 @@ static void height()
     FontInfo fi;
 
     GetFontInfo(&fi);
-    LM(MBarHeight) = CW(CW(fi.ascent) + CW(fi.descent) + CW(fi.leading) + 4);
+    LM(MBarHeight) = fi.ascent + fi.descent + fi.leading + 4;
 }
 
 static void
@@ -362,16 +362,16 @@ save(int16_t offset, Rect *rect)
     Rect save_rect;
     Ptr p;
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
     gd_pixmap = GD_PMAP(gd);
 
     {
-        HLockGuard guard(MR(LM(MBSaveLoc)));
+        HLockGuard guard(LM(MBSaveLoc));
 
         int current_mb_save;
 
         current_mb_save = Hx(MBSAVELOC, lastMBSave) + sizeof(mbdfentry);
-        HxX(MBSAVELOC, lastMBSave) = CW(current_mb_save);
+        HxX(MBSAVELOC, lastMBSave) = current_mb_save;
         mep = (mbdfentry *)((char *)STARH(MBSAVELOC) + current_mb_save);
 
         mep->mbRectSave = *rect;
@@ -388,23 +388,23 @@ save(int16_t offset, Rect *rect)
         if(save_pmh == nullptr)
             goto failure;
 
-        mep->mbMenuDir = CWC(MBRIGHTDIR);
-        mep->mbMLOffset = CW(offset);
-        mup = (muelem *)((char *)STARH(MR(LM(MenuList))) + offset);
+        mep->mbMenuDir = MBRIGHTDIR;
+        mep->mbMLOffset = offset;
+        mup = (muelem *)((char *)STARH(LM(MenuList)) + offset);
         mep->mbMLHandle = mup->muhandle;
-        mep->mbReserved = CLC(0);
-        save_rect.top = CW(CW(rect->top) - 1);
-        save_rect.left = CW(CW(rect->left) - 1);
-        save_rect.bottom = CW(CW(rect->bottom) + 2);
-        save_rect.right = CW(CW(rect->right) + 2);
+        mep->mbReserved = 0;
+        save_rect.top = rect->top - 1;
+        save_rect.left = rect->left - 1;
+        save_rect.bottom = rect->bottom + 2;
+        save_rect.right = rect->right + 2;
 
         bounds = &PIXMAP_BOUNDS(save_pmh);
 
         *bounds = save_rect;
         /* long align the left boundary */
-        bounds->left = CW(CW(save_rect.left) & ~31);
-        bounds->right = CW(std::min(CW(bounds->right),
-                               CW(PORT_BOUNDS(MR(qdGlobals().thePort)).right)));
+        bounds->left = save_rect.left & ~31;
+        bounds->right = std::min(bounds->right,
+                               PORT_BOUNDS(qdGlobals().thePort).right);
 
         height = RECT_HEIGHT(bounds);
         width = RECT_WIDTH(bounds);
@@ -417,26 +417,26 @@ save(int16_t offset, Rect *rect)
         pixmap_set_pixel_fields(STARH(save_pmh), gd_bpp);
 
         row_bytes = ((width * gd_bpp + 31) / 32) * 4;
-        PIXMAP_SET_ROWBYTES_X(save_pmh, CW(row_bytes));
+        PIXMAP_SET_ROWBYTES_X(save_pmh, row_bytes);
 
         p = NewPtr(height * row_bytes);
-        if(LM(MemErr) != CWC(noErr))
+        if(LM(MemErr) != noErr)
         {
             DisposePixMap(save_pmh);
             goto failure;
         }
-        PIXMAP_BASEADDR_X(save_pmh) = RM(p);
+        PIXMAP_BASEADDR_X(save_pmh) = p;
 
         {
             WRAPPER_PIXMAP_FOR_COPY(wrapper);
 
-            WRAPPER_SET_PIXMAP_X(wrapper, RM(save_pmh));
+            WRAPPER_SET_PIXMAP_X(wrapper, save_pmh);
 
-            CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), wrapper,
+            CopyBits(PORT_BITS_FOR_COPY(qdGlobals().thePort), wrapper,
                      &save_rect, &save_rect, srcCopy, nullptr);
         }
 
-        mep->mbBitsSave = RM((Handle)save_pmh);
+        mep->mbBitsSave = (Handle)save_pmh;
 
         goto done;
     failure:
@@ -454,14 +454,14 @@ save(int16_t offset, Rect *rect)
     PenNormal();
     RGBForeColor(&ROMlib_black_rgb_color);
 
-    save_rect.right = CW(CW(save_rect.right) - 1);
-    save_rect.bottom = CW(CW(save_rect.bottom) - 1);
+    save_rect.right = save_rect.right - 1;
+    save_rect.bottom = save_rect.bottom - 1;
     FrameRect(&save_rect);
 
-    MoveTo(CW(save_rect.right), CW(save_rect.top) + 3);
-    LineTo(CW(save_rect.right), CW(save_rect.bottom));
-    MoveTo(CW(save_rect.left) + 3, CW(save_rect.bottom));
-    LineTo(CW(save_rect.right), CW(save_rect.bottom));
+    MoveTo(save_rect.right, save_rect.top + 3);
+    LineTo(save_rect.right, save_rect.bottom);
+    MoveTo(save_rect.left + 3, save_rect.bottom);
+    LineTo(save_rect.right, save_rect.bottom);
 
     ClipRect(rect);
 }
@@ -469,7 +469,7 @@ save(int16_t offset, Rect *rect)
 static void
 restore(void)
 {
-    HLockGuard guard(MR(LM(MBSaveLoc)));
+    HLockGuard guard(LM(MBSaveLoc));
     mbdfentry *mep;
     PixMapHandle save_pmh;
     Rect save_rect;
@@ -477,12 +477,12 @@ restore(void)
     mep = (mbdfentry *)((char *)STARH(MBSAVELOC)
                         + Hx(MBSAVELOC, lastMBSave));
     save_rect = mep->mbRectSave;
-    save_rect.top = CW(CW(save_rect.top) - 1);
-    save_rect.left = CW(CW(save_rect.left) - 1);
-    save_rect.bottom = CW(CW(save_rect.bottom) + 2);
-    save_rect.right = CW(CW(save_rect.right) + 2);
+    save_rect.top = save_rect.top - 1;
+    save_rect.left = save_rect.left - 1;
+    save_rect.bottom = save_rect.bottom + 2;
+    save_rect.right = save_rect.right + 2;
 
-    save_pmh = (PixMapHandle)MR(mep->mbBitsSave);
+    save_pmh = (PixMapHandle)mep->mbBitsSave;
 
     if(save_pmh == nullptr)
     {
@@ -498,8 +498,8 @@ restore(void)
         {
             WRAPPER_PIXMAP_FOR_COPY(wrapper);
 
-            WRAPPER_SET_PIXMAP_X(wrapper, RM(save_pmh));
-            CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
+            WRAPPER_SET_PIXMAP_X(wrapper, save_pmh);
+            CopyBits(wrapper, PORT_BITS_FOR_COPY(qdGlobals().thePort),
                      &save_rect, &save_rect, srcCopy, nullptr);
         }
 
@@ -509,7 +509,7 @@ restore(void)
 
     mep->mbBitsSave = nullptr;
     HxX(MBSAVELOC, lastMBSave)
-        = CW(Hx(MBSAVELOC, lastMBSave) - sizeof(mbdfentry));
+        = Hx(MBSAVELOC, lastMBSave) - sizeof(mbdfentry);
 }
 
 static Rect *getrect(LONGINT offset)
@@ -521,29 +521,29 @@ static Rect *getrect(LONGINT offset)
     INTEGER dh, dv;
 
     hiword = HiWord(offset);
-    mp = (muelem *)((char *)STARH(MR(LM(MenuList))) + LoWord(offset));
-    mh = MR(mp->muhandle);
+    mp = (muelem *)((char *)STARH(LM(MenuList)) + LoWord(offset));
+    mh = mp->muhandle;
     if(Hx(mh, menuWidth) == -1 || Hx(mh, menuHeight) == -1)
         CalcMenuSize(mh);
     if(hiword)
     { /* hierarchical */
         /* note 7 and 5 below are guesses */
-        r.top = CW(std::max<INTEGER>(Hx(MBSAVELOC, mbItemRect.top), CW(LM(MBarHeight)) + 7));
-        r.left = CW(Hx(MBSAVELOC, mbItemRect.right) - 5);
-        r.bottom = CW(CW(r.top) + Hx(mh, menuHeight));
-        r.right = CW(CW(r.left) + Hx(mh, menuWidth));
+        r.top = std::max<INTEGER>(Hx(MBSAVELOC, mbItemRect.top), LM(MBarHeight) + 7);
+        r.left = Hx(MBSAVELOC, mbItemRect.right) - 5;
+        r.bottom = r.top + Hx(mh, menuHeight);
+        r.right = r.left + Hx(mh, menuWidth);
     }
     else
     { /* regular */
         r.top = LM(MBarHeight);
         r.left = mp->muleft;
-        r.bottom = CW(CW(r.top) + Hx(mh, menuHeight));
-        r.right = CW(CW(r.left) + Hx(mh, menuWidth));
+        r.bottom = r.top + Hx(mh, menuHeight);
+        r.right = r.left + Hx(mh, menuWidth);
     }
-    dh = CW(qdGlobals().screenBits.bounds.right) - 10 - CW(r.right);
+    dh = qdGlobals().screenBits.bounds.right - 10 - r.right;
     if(dh > 0)
         dh = 0;
-    dv = CW(qdGlobals().screenBits.bounds.bottom) - 10 - CW(r.bottom);
+    dv = qdGlobals().screenBits.bounds.bottom - 10 - r.bottom;
     if(dv > 0)
         dv = 0;
     OffsetRect(&r, dh, dv);
@@ -554,9 +554,9 @@ static mbdfentry *offtomep(LONGINT offset)
 {
     mbdfentry *mbdfp, *mbdfep;
 
-    mbdfep = (mbdfentry *)STARH(MR(LM(MBSaveLoc)));
-    for(mbdfp = (mbdfentry *)((char *)mbdfep + CW(((mbdfheader *)mbdfep)->lastMBSave));
-        mbdfp != mbdfep && CW(mbdfp->mbMLOffset) != offset; mbdfp--)
+    mbdfep = (mbdfentry *)STARH(LM(MBSaveLoc));
+    for(mbdfp = (mbdfentry *)((char *)mbdfep + ((mbdfheader *)mbdfep)->lastMBSave);
+        mbdfp != mbdfep && mbdfp->mbMLOffset != offset; mbdfp--)
         ;
     return mbdfp == mbdfep ? 0 : mbdfp;
 }
@@ -583,12 +583,12 @@ static RgnHandle menurgn(RgnHandle rgn)
 {
     Rect r;
 
-    if(CW(LM(MBarHeight)) <= 0)
+    if(LM(MBarHeight) <= 0)
         height();
-    r = PORT_RECT(MR(wmgr_port));
+    r = PORT_RECT(wmgr_port);
     r.bottom = LM(MBarHeight);
     RectRgn(rgn, &r);
-    SectRgn(rgn, MR(LM(GrayRgn)), rgn);
+    SectRgn(rgn, LM(GrayRgn), rgn);
     return rgn;
 }
 
@@ -603,7 +603,7 @@ int32_t Executor::C_mbdf0(int16_t sel, int16_t mess, int16_t param1,
     if(mess != mbInit) /* fun w/ Word 6 */
     {
         GetPort(&saveport);
-        SetPort(MR(wmgr_port));
+        SetPort(wmgr_port);
         draw_state_save(&draw_state);
     }
 
@@ -625,18 +625,18 @@ int32_t Executor::C_mbdf0(int16_t sel, int16_t mess, int16_t param1,
             dispose();
             break;
         case mbHilite:
-            ClipRect(&PORT_RECT(MR(wmgr_port))); /* full open */
+            ClipRect(&PORT_RECT(wmgr_port)); /* full open */
             mbdfhilite(param2);
             break;
         case mbHeight:
             height();
             break;
         case mbSave:
-            ClipRect(&PORT_RECT(MR(wmgr_port))); /* full open */
+            ClipRect(&PORT_RECT(wmgr_port)); /* full open */
             save(param1, (Rect *)SYN68K_TO_US(param2));
             break;
         case mbRestore:
-            ClipRect(&PORT_RECT(MR(wmgr_port))); /* full open */
+            ClipRect(&PORT_RECT(wmgr_port)); /* full open */
             restore();
             break;
         case mbRect:
@@ -656,7 +656,7 @@ int32_t Executor::C_mbdf0(int16_t sel, int16_t mess, int16_t param1,
     if(mess != mbInit)
     {
         draw_state_restore(&draw_state);
-        SetPort(MR(saveport));
+        SetPort(saveport);
     }
     return retval;
 }

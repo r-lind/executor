@@ -30,7 +30,7 @@ BOOLEAN Executor::C_snth5(SndChannelPtr chanp, SndCommand *cmdp,
         beenhere = 1;
     }
     done = true;
-    switch(Cx(cmdp->cmd))
+    switch(cmdp->cmd)
     {
         case initCmd:
             LM(SoundActive) = soundactive5;
@@ -60,7 +60,7 @@ BOOLEAN Executor::C_snth5(SndChannelPtr chanp, SndCommand *cmdp,
 #if 0
 	printf("CB"); fflush(stdout);
 #endif
-            MR(chanp->callBack)(chanp, cmdp);
+            chanp->callBack(chanp, cmdp);
             break;
         case syncCmd:
             /* TODO */
@@ -70,13 +70,13 @@ BOOLEAN Executor::C_snth5(SndChannelPtr chanp, SndCommand *cmdp,
             /* TODO */
             break;
         case bufferCmd:
-            bufp = (soundbuffer_t *)Cx(cmdp->param2);
+            bufp = (soundbuffer_t *)cmdp->param2;
 #if 0
-	printf("offset = %d, nsamples = %d, rate = 0x%x\n", Cx(bufp->offset),
-						   Cx(bufp->nsamples), Cx(bufp->rate));
+	printf("offset = %d, nsamples = %d, rate = 0x%x\n", bufp->offset,
+						   bufp->nsamples, bufp->rate);
 	printf("BU"); fflush(stdout);
 #endif
-            ROMlib_outbuffer((char *)bufp->buf, Cx(bufp->nsamples), Cx(bufp->rate),
+            ROMlib_outbuffer((char *)bufp->buf, bufp->nsamples, bufp->rate,
                              chanp);
             done = false;
             break;
@@ -99,7 +99,7 @@ BOOLEAN Executor::C_snth5(SndChannelPtr chanp, SndCommand *cmdp,
         case midiDataCmd: /* not implemented */
         default:
 #if 1
-            printf("unexpected sound command %d\n", (LONGINT)Cx(cmdp->cmd));
+            printf("unexpected sound command %d\n", (LONGINT)cmdp->cmd);
 #endif
             break;
     }

@@ -14,10 +14,10 @@ static void draw(BOOLEAN sel, Rect *rect, INTEGER doff, INTEGER dl,
 {
     GrafPtr savePort;
 
-    savePort = MR(qdGlobals().thePort);
+    savePort = qdGlobals().thePort;
     SetPort(HxP(list, port));
     EraseRect(rect);
-    MoveTo(CW(rect->left) + Hx(list, indent.h), CW(rect->top) + Hx(list, indent.v));
+    MoveTo(rect->left + Hx(list, indent.h), rect->top + Hx(list, indent.v));
     HLock((Handle)HxP(list, cells));
     DrawText((Ptr)STARH(HxP(list, cells)) + doff, 0, dl);
     HUnlock((Handle)HxP(list, cells));
@@ -35,10 +35,10 @@ void Executor::C_ldef0(INTEGER msg, BOOLEAN sel, Rect *rect, Cell cell,
     switch(msg)
     {
         case lInitMsg:
-            savePort = MR(qdGlobals().thePort);
+            savePort = qdGlobals().thePort;
             SetPort(HxP(list, port));
             GetFontInfo(&fi);
-            HxX(list, indent.h) = CWC(5);
+            HxX(list, indent.h) = 5;
             HxX(list, indent.v) = fi.ascent;
             SetPort(savePort);
             break;
@@ -46,7 +46,7 @@ void Executor::C_ldef0(INTEGER msg, BOOLEAN sel, Rect *rect, Cell cell,
             draw(sel, rect, doff, dl, list);
             break;
         case lHiliteMsg:
-            savePort = MR(qdGlobals().thePort);
+            savePort = qdGlobals().thePort;
             SetPort(HxP(list, port));
             InvertRect(rect);
             SetPort(savePort);

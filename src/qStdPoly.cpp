@@ -29,22 +29,22 @@ static void polyrgn(PolyHandle ph, RgnHandle rh)
     ep = (GUEST<Point> *)((char *)STARH(ph) + Hx(ph, polySize));
     firstp.h = Hx(ph, polyPoints[0].h);
     firstp.v = Hx(ph, polyPoints[0].v);
-    if(CW(ep[-1].h) == firstp.h && CW(ep[-1].v) == firstp.v)
+    if(ep[-1].h == firstp.h && ep[-1].v == firstp.v)
         ep--;
 
-    tmpvis = PORT_PEN_VIS_X(MR(qdGlobals().thePort));
-    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = CWC(0);
+    tmpvis = PORT_PEN_VIS_X(qdGlobals().thePort);
+    PORT_PEN_VIS_X(qdGlobals().thePort) = 0;
     OpenRgn();
-    MoveTo(CW(pp->h), CW(pp->v));
+    MoveTo(pp->h, pp->v);
     pp++;
     while(pp != ep)
     {
-        LineTo(CW(pp->h), CW(pp->v));
+        LineTo(pp->h, pp->v);
         pp++;
     }
     LineTo(firstp.h, firstp.v);
     CloseRgn(rh);
-    PORT_PEN_VIS_X(MR(qdGlobals().thePort)) = tmpvis;
+    PORT_PEN_VIS_X(qdGlobals().thePort) = tmpvis;
     HSetState((Handle)ph, state);
 }
 
@@ -57,19 +57,19 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
     INTEGER state;
     PAUSEDECL;
 
-    if(!ph || !*ph || HxX(ph, polySize) == CWC(10) || EmptyRect(&HxX(ph, polyBBox)))
+    if(!ph || !*ph || HxX(ph, polySize) == 10 || EmptyRect(&HxX(ph, polyBBox)))
         /*-->*/ return;
 
     state = HGetState((Handle)ph);
     HLock((Handle)ph);
-    if(MR(qdGlobals().thePort)->picSave)
+    if(qdGlobals().thePort->picSave)
     {
         ROMlib_drawingverbpicupdate(verb);
         PICOP(OP_framePoly + (int)verb);
         PICWRITE(STARH(ph), Hx(ph, polySize));
     }
 
-    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0 && !PORT_REGION_SAVE_X(MR(qdGlobals().thePort))
+    if(PORT_PEN_VIS(qdGlobals().thePort) < 0 && !PORT_REGION_SAVE_X(qdGlobals().thePort)
        && verb != frame)
     {
         HSetState((Handle)ph, state);
@@ -85,15 +85,15 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
 
             pp = HxX(ph, polyPoints);
             ep = (GUEST<Point> *)((char *)STARH(ph) + Hx(ph, polySize));
-            firstp.h = CW(pp[0].h);
-            firstp.v = CW(pp[0].v);
+            firstp.h = pp[0].h;
+            firstp.v = pp[0].v;
             MoveTo(firstp.h, firstp.v);
             for(++pp; pp != ep; pp++)
             {
-                p.h = CW(pp[0].h);
-                p.v = CW(pp[0].v);
+                p.h = pp[0].h;
+                p.v = pp[0].v;
                 StdLine(p);
-                PORT_PEN_LOC(MR(qdGlobals().thePort)) = pp[0];
+                PORT_PEN_LOC(qdGlobals().thePort) = pp[0];
             }
 
             break;

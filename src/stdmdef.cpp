@@ -22,9 +22,9 @@ using namespace Executor;
 static Rect *current_menu_rect;
 
 #define TOP_ARROW_P() \
-    (CW(LM(TopMenuItem)) < CW(current_menu_rect->top))
+    (LM(TopMenuItem) < current_menu_rect->top)
 #define BOTTOM_ARROW_P() \
-    (CW(LM(AtMenuBottom)) > CW(current_menu_rect->bottom))
+    (LM(AtMenuBottom) > current_menu_rect->bottom)
 
 static int16_t checksize, cloversize, lineheight, ascent;
 
@@ -150,7 +150,7 @@ void size_menu(MenuHandle mh, tablePtr tablep)
 
     width = height = actual_height = 0;
     /* the 32 is just a guess */
-    max_height = CW(qdGlobals().screenBits.bounds.bottom) - 32;
+    max_height = qdGlobals().screenBits.bounds.bottom - 32;
     for(tp = tablep->entry, ep = tp + tablep->count; tp != ep; tp++)
     {
         icon_info_t icon_info;
@@ -174,8 +174,8 @@ void size_menu(MenuHandle mh, tablePtr tablep)
             width = w;
     }
     TextFace(0);
-    HxX(mh, menuWidth) = CW(width);
-    HxX(mh, menuHeight) = CW(actual_height);
+    HxX(mh, menuWidth) = width;
+    HxX(mh, menuHeight) = actual_height;
 }
 
 static void
@@ -198,19 +198,19 @@ draw_right_arrow(Rect *menu_rect, MenuHandle mh, int item, int invert_p)
     };
     int x, y;
 
-    arrow_bitmap.baseAddr = RM((Ptr)right_arrow_bits);
-    arrow_bitmap.rowBytes = CWC(1);
+    arrow_bitmap.baseAddr = (Ptr)right_arrow_bits;
+    arrow_bitmap.rowBytes = 1;
     SetRect(&arrow_bitmap.bounds, 0, 0, /* right, bottom */ 6, 11);
 
-    y = CW(menu_rect->top) + 2;
-    x = CW(menu_rect->right) - 14;
+    y = menu_rect->top + 2;
+    x = menu_rect->right - 14;
 
-    dst_rect.top = CW(y);
-    dst_rect.left = CW(x);
-    dst_rect.bottom = CW(y + 11);
-    dst_rect.right = CW(x + 6);
+    dst_rect.top = y;
+    dst_rect.left = x;
+    dst_rect.bottom = y + 11;
+    dst_rect.right = x + 6;
 
-    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
+    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(qdGlobals().thePort),
              &arrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
 }
 
@@ -240,19 +240,19 @@ draw_arrow(Rect *menu_rect, MenuHandle mh, arrowtype arrdir)
 
     if(arrdir == uparrow)
     {
-        arrow_bitmap.baseAddr = RM((Ptr)up_arrow_bits);
-        arrow_bitmap.rowBytes = CWC(2);
+        arrow_bitmap.baseAddr = (Ptr)up_arrow_bits;
+        arrow_bitmap.rowBytes = 2;
         SetRect(&arrow_bitmap.bounds, 0, 0, /* right, bottom */ 11, 6);
 
-        top_of_item = CW(menu_rect->top);
+        top_of_item = menu_rect->top;
     }
     else if(arrdir == downarrow)
     {
-        arrow_bitmap.baseAddr = RM((Ptr)down_arrow_bits);
-        arrow_bitmap.rowBytes = CWC(2);
+        arrow_bitmap.baseAddr = (Ptr)down_arrow_bits;
+        arrow_bitmap.rowBytes = 2;
         SetRect(&arrow_bitmap.bounds, 0, 0, /* right, bottom */ 11, 6);
 
-        top_of_item = CW(menu_rect->bottom) - lineheight;
+        top_of_item = menu_rect->bottom - lineheight;
     }
     else
         gui_abort();
@@ -265,16 +265,16 @@ draw_arrow(Rect *menu_rect, MenuHandle mh, arrowtype arrdir)
 
     erase_rect.left = menu_rect->left;
     erase_rect.right = menu_rect->right;
-    erase_rect.top = CW(top_of_item);
-    erase_rect.bottom = CW(top_of_item + lineheight);
+    erase_rect.top = top_of_item;
+    erase_rect.bottom = top_of_item + lineheight;
     EraseRect(&erase_rect);
 
-    dst_rect.top = CW(top_of_item + 5);
-    dst_rect.left = CW(CW(menu_rect->left) + checksize);
-    dst_rect.bottom = CW(top_of_item + 5 + /* arrows are `6' tall */ 6);
-    dst_rect.right = CW(CW(menu_rect->left) + checksize
-                        + /* arrows are `11' wide */ 11);
-    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
+    dst_rect.top = top_of_item + 5;
+    dst_rect.left = menu_rect->left + checksize;
+    dst_rect.bottom = top_of_item + 5 + /* arrows are `6' tall */ 6;
+    dst_rect.right = menu_rect->left + checksize
+                        + /* arrows are `11' wide */ 11;
+    CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(qdGlobals().thePort),
              &arrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
 
     /* resent the fg/bk colors */
@@ -290,15 +290,15 @@ static void erasearrow(Rect *rp, tablePtr tablep, BOOLEAN upordown)
     Rect r;
     INTEGER x, y;
 
-    x = CW(rp->left) + checksize;
+    x = rp->left + checksize;
     if(upordown == UP)
-        y = CW(rp->top) + 5;
+        y = rp->top + 5;
     else
-        y = CW(rp->bottom) - lineheight + 5;
-    r.top = CW(y);
-    r.left = CW(x);
-    r.bottom = CW(y + 6);
-    r.right = CW(x + 11);
+        y = rp->bottom - lineheight + 5;
+    r.top = y;
+    r.left = x;
+    r.bottom = y + 6;
+    r.right = x + 11;
     EraseRect(&r);
 }
 
@@ -325,8 +325,8 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
     active_p = !((MI_ENABLE_FLAGS(mh) & bit) != bit
                  || divider_p);
 
-    top = tp[0].top + CW(LM(TopMenuItem));
-    bottom = tp[1].top + CW(LM(TopMenuItem));
+    top = tp[0].top + LM(TopMenuItem);
+    bottom = tp[1].top + LM(TopMenuItem);
 
     v = top + ascent;
 
@@ -377,8 +377,8 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
     }
     RGBBackColor(invert_p ? &title_color : &bk_color);
 
-    rtmp.top = CW(top);
-    rtmp.bottom = CW(bottom);
+    rtmp.top = top;
+    rtmp.bottom = bottom;
     rtmp.left = rp->left;
     rtmp.right = rp->right;
 
@@ -389,7 +389,7 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
        && !draw_right_arrow_p)
     {
         RGBForeColor(invert_p ? &bk_color : &mark_color);
-        MoveTo(CW(rp->left) + 2, v);
+        MoveTo(rp->left + 2, v);
         DrawChar(tp->options->mmarker);
     }
 
@@ -399,10 +399,10 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
     /* draw the icon */
     if(draw_icon_p)
     {
-        rtmp.top = CW(top + ICON_PAD / 2);
-        rtmp.left = CW(CW(rp->left) + checksize + 2);
-        rtmp.bottom = CW(CW(rtmp.top) + (icon_info.height - ICON_PAD));
-        rtmp.right = CW(CW(rtmp.left) + (icon_info.width - ICON_PAD));
+        rtmp.top = top + ICON_PAD / 2;
+        rtmp.left = rp->left + checksize + 2;
+        rtmp.bottom = rtmp.top + (icon_info.height - ICON_PAD);
+        rtmp.right = rtmp.left + (icon_info.width - ICON_PAD);
 
         if(icon_info.color_icon_p)
             PlotCIcon(&rtmp, (CIconHandle)icon_info.icon);
@@ -413,22 +413,22 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
     if(divider_p)
     {
         RGBForeColor(&title_color);
-        MoveTo(CW(rp->left), v - 4);
-        LineTo(CW(rp->right), v - 4);
+        MoveTo(rp->left, v - 4);
+        LineTo(rp->right, v - 4);
     }
     else
     {
         RGBForeColor(invert_p ? &bk_color : &title_color);
 
-        MoveTo(CW(rp->left) + icon_info.width + checksize + 2, v);
+        MoveTo(rp->left + icon_info.width + checksize + 2, v);
         TextFace(tp->options->mstyle);
         DrawString(tp->name);
         TextFace(0);
     }
     rtmp.left = rp->left;
     rtmp.right = rp->right;
-    rtmp.top = CW(top);
-    rtmp.bottom = CW(bottom);
+    rtmp.top = top;
+    rtmp.bottom = bottom;
     if((iskeyequiv(tp) || draw_right_arrow_p)
        && !divider_p)
     {
@@ -443,7 +443,7 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
 
             RGBForeColor(invert_p ? &bk_color : &command_color);
 
-            new_left = CW(rp->right) - (2 * cloversize + 1);
+            new_left = rp->right - (2 * cloversize + 1);
             MoveTo(new_left, v);
             DrawChar(commandMark);
             DrawChar(tp->options->mkeyeq);
@@ -452,7 +452,7 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
                 Rect r;
 
                 r = rtmp;
-                r.left = CW(new_left);
+                r.left = new_left;
                 PenMode(notPatBic);
                 PenPat(qdGlobals().gray);
                 PaintRect(&r);
@@ -483,13 +483,13 @@ draw_menu(MenuHandle mh, Rect *rp, tablePtr tablep)
     struct table::tableentry *tp, *ep;
     int16_t topcutoff, bottomcutoff;
 
-    if(CW(LM(TopMenuItem)) < CW(rp->top))
-        topcutoff = CW(rp->top) - CW(LM(TopMenuItem)) + lineheight;
+    if(LM(TopMenuItem) < rp->top)
+        topcutoff = rp->top - LM(TopMenuItem) + lineheight;
     else
         topcutoff = 0;
 
-    if(CW(LM(AtMenuBottom)) > CW(rp->bottom))
-        bottomcutoff = CW(rp->bottom) - CW(LM(TopMenuItem)) - lineheight;
+    if(LM(AtMenuBottom) > rp->bottom)
+        bottomcutoff = rp->bottom - LM(TopMenuItem) - lineheight;
     else
         bottomcutoff = 32767;
 
@@ -505,11 +505,11 @@ draw_menu(MenuHandle mh, Rect *rp, tablePtr tablep)
             bit = 1 << nitem;
             draw_item(rp, tp, bit, nitem, mh, false);
         }
-    if(CW(rp->top) > CW(LM(TopMenuItem)))
+    if(rp->top > LM(TopMenuItem))
         draw_arrow(rp, mh, uparrow);
-    if(CW(rp->bottom) < CW(LM(AtMenuBottom)))
+    if(rp->bottom < LM(AtMenuBottom))
         draw_arrow(rp, mh, downarrow);
-    HxX(MBSAVELOC, mbUglyScroll) = CWC(0);
+    HxX(MBSAVELOC, mbUglyScroll) = 0;
 }
 
 static void
@@ -520,8 +520,8 @@ fliprect(Rect *rp, int16_t i, tablePtr tablep, Rect *flipr)
     tp = &tablep->entry[i - 1];
     flipr->left = rp->left;
     flipr->right = rp->right;
-    flipr->top = CW(tp[0].top + CW(LM(TopMenuItem)));
-    flipr->bottom = CW(tp[1].top + CW(LM(TopMenuItem)));
+    flipr->top = tp[0].top + LM(TopMenuItem);
+    flipr->bottom = tp[1].top + LM(TopMenuItem);
 }
 
 static void
@@ -536,53 +536,53 @@ doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, BOOLEAN upordown,
 
     if(*itemp)
     {
-        /* flip (rp, CW (*itemp), tablep); */
-        draw_item(rp, &tablep->entry[CW(*itemp) - 1], 1 << CW(*itemp),
-                  CW(*itemp), mh, false);
-        *itemp = CWC(0);
+        /* flip (rp, (*itemp), tablep); */
+        draw_item(rp, &tablep->entry[*itemp - 1], 1 << *itemp,
+                  *itemp, mh, false);
+        *itemp = 0;
     }
     if(HxX(MBSAVELOC, mbUglyScroll))
     {
         /* don't sroll the scroll arrows */
         scrollr = *rp;
         if(TOP_ARROW_P())
-            scrollr.top = CW(CW(scrollr.top) + lineheight);
+            scrollr.top = scrollr.top + lineheight;
         if(BOTTOM_ARROW_P())
-            scrollr.bottom = CW(CW(scrollr.bottom) - lineheight);
+            scrollr.bottom = scrollr.bottom - lineheight;
 
         updater = *rp;
 
         if(upordown == UP)
         {
-            offset = std::min<INTEGER>(lineheight, CW(rp->top) - CW(LM(TopMenuItem)));
-            LM(TopMenuItem) = CW(CW(LM(TopMenuItem)) + offset);
-            LM(AtMenuBottom) = CW(CW(LM(AtMenuBottom)) + offset);
+            offset = std::min<INTEGER>(lineheight, rp->top - LM(TopMenuItem));
+            LM(TopMenuItem) = LM(TopMenuItem) + offset;
+            LM(AtMenuBottom) = LM(AtMenuBottom) + offset;
             if(TOP_ARROW_P())
             {
                 updater.top = scrollr.top;
-                updater.bottom = CW(CW(updater.top) + lineheight);
+                updater.bottom = updater.top + lineheight;
             }
             else
             {
                 updater.top = rp->top;
-                updater.bottom = CW(CW(updater.top) + 2 * lineheight);
+                updater.bottom = updater.top + 2 * lineheight;
                 erasearrow(rp, tablep, UP);
             }
         }
         else
         {
-            offset = std::max<INTEGER>(-lineheight, CW(rp->bottom) - CW(LM(AtMenuBottom)));
-            LM(TopMenuItem) = CW(CW(LM(TopMenuItem)) + offset);
-            LM(AtMenuBottom) = CW(CW(LM(AtMenuBottom)) + offset);
+            offset = std::max<INTEGER>(-lineheight, rp->bottom - LM(AtMenuBottom));
+            LM(TopMenuItem) = LM(TopMenuItem) + offset;
+            LM(AtMenuBottom) = LM(AtMenuBottom) + offset;
             if(BOTTOM_ARROW_P())
             {
                 updater.bottom = scrollr.bottom;
-                updater.top = CW(CW(updater.bottom) - lineheight);
+                updater.top = updater.bottom - lineheight;
             }
             else
             {
                 updater.bottom = rp->bottom;
-                updater.top = CW(CW(updater.bottom) - 2 * lineheight);
+                updater.top = updater.bottom - 2 * lineheight;
                 erasearrow(rp, tablep, DOWN);
             }
         }
@@ -591,24 +591,24 @@ doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, BOOLEAN upordown,
         DisposeRgn(updatergn);
         ClipRect(&updater);
         for(tp = tablep->entry, ep = tp + tablep->count, bit = 1 << 1;
-            tp[0].top < CW(updater.bottom) - CW(LM(TopMenuItem)) && tp != ep;
+            tp[0].top < updater.bottom - LM(TopMenuItem) && tp != ep;
             tp++, bit <<= 1)
-            if(tp[1].top > CW(updater.top) - CW(LM(TopMenuItem)))
+            if(tp[1].top > updater.top - LM(TopMenuItem))
                 draw_item(rp, tp, tp - tablep->entry + 1, bit, mh, false);
-        rtmp.top = rtmp.left = CWC(-32767);
-        rtmp.bottom = rtmp.right = CWC(32767);
+        rtmp.top = rtmp.left = -32767;
+        rtmp.bottom = rtmp.right = 32767;
         ClipRect(&rtmp);
     }
     else
-        HxX(MBSAVELOC, mbUglyScroll) = CWC(1);
+        HxX(MBSAVELOC, mbUglyScroll) = 1;
     if(upordown == DOWN)
     {
-        if(CW(LM(AtMenuBottom)) >= CW(rp->bottom))
+        if(LM(AtMenuBottom) >= rp->bottom)
             draw_arrow(rp, mh, downarrow);
     }
     else
     {
-        if(CW(LM(TopMenuItem)) <= CW(rp->top))
+        if(LM(TopMenuItem) <= rp->top)
             draw_arrow(rp, mh, uparrow);
     }
 }
@@ -624,51 +624,51 @@ void choose_menu(MenuHandle mh, Rect *rp, Point p, GUEST<int16_t> *itemp, tableP
 
     valid_rect.left = rp->left;
     valid_rect.right = rp->right;
-    valid_rect.top = CW(std::max(CW(rp->top), CW(LM(TopMenuItem))));
-    valid_rect.bottom = CW(std::min(CW(rp->bottom), CW(LM(AtMenuBottom))));
+    valid_rect.top = std::max(rp->top, LM(TopMenuItem));
+    valid_rect.bottom = std::min(rp->bottom, LM(AtMenuBottom));
 
     clip_rect.left = rp->left;
     clip_rect.right = rp->right;
-    clip_rect.top = CW(TOP_ARROW_P() ? CW(rp->top) + lineheight
-                                     : rp->top.get());
-    clip_rect.bottom = CW(BOTTOM_ARROW_P() ? CW(rp->bottom) - lineheight
-                                           : rp->bottom.get());
+    clip_rect.top = TOP_ARROW_P() ? rp->top + lineheight
+                                     : toHost(rp->top);
+    clip_rect.bottom = BOTTOM_ARROW_P() ? rp->bottom - lineheight
+                                           : toHost(rp->bottom);
     ClipRect(&clip_rect);
 
-    if(CW(*itemp) < 0)
-        *itemp = CWC(0);
+    if(*itemp < 0)
+        *itemp = 0;
     if(PtInRect(p, &valid_rect))
     {
         if(BOTTOM_ARROW_P()
-           && p.v >= CW(rp->bottom) - lineheight)
+           && p.v >= rp->bottom - lineheight)
             doupdown(mh, rp, tablep, DOWN, itemp);
         else if(TOP_ARROW_P()
-                && p.v < CW(rp->top) + lineheight)
+                && p.v < rp->top + lineheight)
             doupdown(mh, rp, tablep, UP, itemp);
         else
         {
             int32_t bit;
 
             for(tp = tablep->entry, ep = tp + tablep->count;
-                tp != ep && p.v >= tp->top + CW(LM(TopMenuItem));
+                tp != ep && p.v >= tp->top + LM(TopMenuItem);
                 tp++)
                 ;
             nitem = tp - tablep->entry;
-            LM(MenuDisable) = CL((menu_id << 16) | (uint16_t)nitem);
+            LM(MenuDisable) = (menu_id << 16) | (uint16_t)nitem;
 
             bit = (1 << nitem) | 1;
             if((MI_ENABLE_FLAGS(mh) & bit) != bit
                || (tp[-1].name[0] && tp[-1].name[1] == '-'))
                 nitem = 0;
-            if(CW(*itemp) != nitem)
+            if(*itemp != nitem)
             {
                 if(*itemp)
                     /* redraw this guy normally */
-                    draw_item(rp, &tablep->entry[CW(*itemp) - 1], 1 << CW(*itemp),
-                              CW(*itemp), mh, false);
+                    draw_item(rp, &tablep->entry[*itemp - 1], 1 << *itemp,
+                              *itemp, mh, false);
                 if(nitem)
                     draw_item(rp, &tablep->entry[nitem - 1], 1 << nitem, nitem, mh, true);
-                *itemp = CW(nitem);
+                *itemp = nitem;
             }
             if(nitem)
                 fliprect(rp, nitem, tablep, &HxX(MBSAVELOC, mbItemRect));
@@ -676,12 +676,12 @@ void choose_menu(MenuHandle mh, Rect *rp, Point p, GUEST<int16_t> *itemp, tableP
     }
     else if(*itemp)
     {
-        nitem = CW(*itemp);
+        nitem = *itemp;
         draw_item(rp, &tablep->entry[nitem - 1], 1 << nitem, nitem, mh, false);
-        *itemp = CWC(0);
+        *itemp = 0;
     }
-    clip_rect.top = clip_rect.left = CWC(-32767);
-    clip_rect.bottom = clip_rect.right = CWC(32767);
+    clip_rect.top = clip_rect.left = -32767;
+    clip_rect.bottom = clip_rect.right = 32767;
     ClipRect(&clip_rect);
 }
 
@@ -693,22 +693,22 @@ static void popuprect(MenuHandle mh, Rect *rp, Point p, GUEST<INTEGER> *itemp,
 
     if(Hx(mh, menuWidth) == -1 || Hx(mh, menuHeight) == -1)
         CalcMenuSize(mh);
-    rp->top = CW(p.v - tablep->entry[CW(*itemp) - 1].top);
-    rp->left = CW(p.h);
-    rp->right = CW(CW(rp->left) + Hx(mh, menuWidth));
+    rp->top = p.v - tablep->entry[*itemp - 1].top;
+    rp->left = p.h;
+    rp->right = rp->left + Hx(mh, menuWidth);
     *itemp = rp->top;
 
-    for(tp = tablep->entry; CW(rp->top) < CW(LM(MBarHeight)); tp++)
-        rp->top = CW(CW(rp->top) + (tp[1].top - tp[0].top));
+    for(tp = tablep->entry; rp->top < LM(MBarHeight); tp++)
+        rp->top = rp->top + (tp[1].top - tp[0].top);
 
-    rp->bottom = CW(CW(rp->top) + Hx(mh, menuHeight));
+    rp->bottom = rp->top + Hx(mh, menuHeight);
 
-    vmax = CW(qdGlobals().screenBits.bounds.bottom) - 2; /* subtract 2 for frame */
-    for(tp = tablep->entry + tablep->count - 1; CW(rp->bottom) > vmax; --tp)
-        rp->bottom = CW(CW(rp->bottom) - (tp[1].top - tp[0].top));
-    rp->top = CW(CW(rp->bottom) - Hx(mh, menuHeight));
-    for(tp = tablep->entry; CW(rp->top) < CW(LM(MBarHeight)); tp++)
-        rp->top = CW(CW(rp->top) + (tp[1].top - tp[0].top));
+    vmax = qdGlobals().screenBits.bounds.bottom - 2; /* subtract 2 for frame */
+    for(tp = tablep->entry + tablep->count - 1; rp->bottom > vmax; --tp)
+        rp->bottom = rp->bottom - (tp[1].top - tp[0].top);
+    rp->top = rp->bottom - Hx(mh, menuHeight);
+    for(tp = tablep->entry; rp->top < LM(MBarHeight); tp++)
+        rp->top = rp->top + (tp[1].top - tp[0].top);
 }
 
 void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
@@ -724,22 +724,22 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
     GrafPtr saveport;
 
     GetPort(&saveport_swapped);
-    saveport = MR(saveport_swapped);
-    SetPort(MR(wmgr_port));
+    saveport = saveport_swapped;
+    SetPort(wmgr_port);
 
     current_menu_rect = rp;
 
 #define MSWTEST
 #if defined(MSWTEST)
-    PORT_TX_FONT_X(MR(qdGlobals().thePort)) = LM(SysFontFam);
-    PORT_TX_FACE_X(MR(qdGlobals().thePort)) = 0;
-    PORT_TX_MODE_X(MR(qdGlobals().thePort)) = CWC(srcOr);
+    PORT_TX_FONT_X(qdGlobals().thePort) = LM(SysFontFam);
+    PORT_TX_FACE_X(qdGlobals().thePort) = 0;
+    PORT_TX_MODE_X(qdGlobals().thePort) = srcOr;
 #endif /* MSWTEST */
 
     GetFontInfo(&fi);
     checksize = CharWidth(checkMark) + 1; /* used to use widMax - 1 here */
-    lineheight = CW(fi.ascent) + CW(fi.descent) + CW(fi.leading);
-    ascent = CW(fi.ascent);
+    lineheight = fi.ascent + fi.descent + fi.leading;
+    ascent = fi.ascent;
     cloversize = CharWidth(commandMark);
 
     for(sp = (char *)STARH(mh) + SIZEOFMINFO + Hx(mh, menuData[0]), count = 0;
@@ -748,7 +748,7 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
         ;
     th = (tableHandle)NewHandle((Size)sizeof(table) + count * sizeof(struct table::tableentry));
     HLock((Handle)th);
-    tp = MR(*th);
+    tp = *th;
     tp->lasttick = TickCount();
     tp->count = count;
     v = 0;
@@ -765,7 +765,7 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
         v += icon_info.height ? std::max<INTEGER>(icon_info.height, lineheight) : lineheight;
     }
     tabp->top = v;
-    LM(AtMenuBottom) = CW(CW(LM(TopMenuItem)) + v);
+    LM(AtMenuBottom) = LM(TopMenuItem) + v;
 
     switch(mess)
     {

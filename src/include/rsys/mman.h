@@ -97,8 +97,8 @@ public:
  * by a handle.  They perform no byte swapping.  There is no need to
  * lock the handle before invoking these macros.  For example,
  * HASSIGN_2 (gdhandle,
- *	      gdRefNum, CWC (9),
- *	      gdID,     CWC (14));
+ *	      gdRefNum, 9,
+ *	      gdID,     14);
  */
 #define HASSIGN_1(h, f1, v1)               \
     do {                                   \

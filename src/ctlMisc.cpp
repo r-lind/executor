@@ -25,49 +25,49 @@ AuxCtlHandle Executor::default_aux_ctl;
 
 #define BLACK_RGB         \
     {                     \
-        CWC(0)            \
-        , CWC(0), CWC(0), \
+        0            \
+        , 0, 0, \
     }
 #define WHITE_RGB                                                   \
     {                                                               \
-        CWC((unsigned short)0xFFFF)                                 \
-        , CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF), \
+        (unsigned short)0xFFFF                                 \
+        , (unsigned short)0xFFFF, (unsigned short)0xFFFF, \
     }
 
 #define LT_BLUISH_RGB                                              \
     {                                                              \
-        CWC((unsigned short)0xCCCC)                                \
-        , CWC((unsigned short)0xCCCC), CWC((unsigned short)0xFFFF) \
+        (unsigned short)0xCCCC                                \
+        , (unsigned short)0xCCCC, (unsigned short)0xFFFF \
     }
 #define DK_BLUISH_RGB              \
     {                              \
-        CWC(0x3333)                \
-        , CWC(0x3333), CWC(0x6666) \
+        0x3333                \
+        , 0x3333, 0x6666 \
     }
 
 #define DK_GRAY                                                    \
     {                                                              \
-        CWC((unsigned short)0x5555)                                \
-        , CWC((unsigned short)0x5555), CWC((unsigned short)0x5555) \
+        (unsigned short)0x5555                                \
+        , (unsigned short)0x5555, (unsigned short)0x5555 \
     }
 
 const ColorSpec Executor::default_ctl_colors[] = {
-    { CWC(cFrameColor), BLACK_RGB },
-    { CWC(cBodyColor), WHITE_RGB },
-    { CWC(cTextColor), BLACK_RGB },
-    { CWC(cThumbColor), WHITE_RGB },
-    { CWC(4), DK_GRAY },
-    { CWC(cArrowsColorLight), WHITE_RGB },
-    { CWC(cArrowsColorDark), BLACK_RGB },
-    { CWC(cThumbLight), WHITE_RGB },
-    { CWC(cThumbDark), BLACK_RGB },
+    { cFrameColor, BLACK_RGB },
+    { cBodyColor, WHITE_RGB },
+    { cTextColor, BLACK_RGB },
+    { cThumbColor, WHITE_RGB },
+    { 4, DK_GRAY },
+    { cArrowsColorLight, WHITE_RGB },
+    { cArrowsColorDark, BLACK_RGB },
+    { cThumbLight, WHITE_RGB },
+    { cThumbDark, BLACK_RGB },
     /* used same as the w... color component */
-    { CWC(cHiliteLight), WHITE_RGB },
-    { CWC(cHiliteDark), BLACK_RGB },
-    { CWC(cTitleBarLight), WHITE_RGB },
-    { CWC(cTitleBarDark), BLACK_RGB },
-    { CWC(cTingeLight), LT_BLUISH_RGB },
-    { CWC(cTingeDark), DK_BLUISH_RGB },
+    { cHiliteLight, WHITE_RGB },
+    { cHiliteDark, BLACK_RGB },
+    { cTitleBarLight, WHITE_RGB },
+    { cTitleBarDark, BLACK_RGB },
+    { cTingeLight, LT_BLUISH_RGB },
+    { cTingeDark, DK_BLUISH_RGB },
 };
 
 #define KEEP_DEFAULT_CTL_CTAB_AROUND_FOR_OLD_SYSTEM_FILE_USERS
@@ -87,9 +87,9 @@ void Executor::ctl_color_init(void)
     {
         default_ctl_ctab
             = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(14));
-        CTAB_SIZE_X(default_ctl_ctab) = CWC(14);
-        CTAB_SEED_X(default_ctl_ctab) = CLC(0);
-        CTAB_FLAGS_X(default_ctl_ctab) = CWC(0);
+        CTAB_SIZE_X(default_ctl_ctab) = 14;
+        CTAB_SEED_X(default_ctl_ctab) = 0;
+        CTAB_FLAGS_X(default_ctl_ctab) = 0;
         memcpy(&CTAB_TABLE(default_ctl_ctab)[0],
                &default_ctl_colors[0],
                15 * sizeof default_ctl_colors[0]);
@@ -98,10 +98,10 @@ void Executor::ctl_color_init(void)
 
     HxX(default_aux_ctl, acNext) = CLC_NULL;
     HxX(default_aux_ctl, acOwner) = CLC_NULL;
-    HxX(default_aux_ctl, acCTable) = RM((CCTabHandle)GetResource(TICK("cctb"), 0));
-    HxX(default_aux_ctl, acFlags) = CWC(0);
-    HxX(default_aux_ctl, acReserved) = CLC(0);
-    HxX(default_aux_ctl, acRefCon) = CLC(0);
+    HxX(default_aux_ctl, acCTable) = (CCTabHandle)GetResource(TICK("cctb"), 0);
+    HxX(default_aux_ctl, acFlags) = 0;
+    HxX(default_aux_ctl, acReserved) = 0;
+    HxX(default_aux_ctl, acRefCon) = 0;
 }
 
 GUEST<AuxCtlHandle> *
@@ -110,15 +110,15 @@ Executor::lookup_aux_ctl(ControlHandle ctl)
     GUEST<AuxCtlHandle> *t;
 
     for(t = &LM(AuxCtlHead);
-        *t && HxP(MR(*t), acOwner) != ctl;
-        t = &HxX(MR(*t), acNext))
+        *t && HxP(*t, acOwner) != ctl;
+        t = &HxX(*t, acNext))
         ;
     return t;
 }
 
 void Executor::C_SetControlReference(ControlHandle c, LONGINT data) /* IMI-327 */
 {
-    HxX(c, contrlRfCon) = CL(data);
+    HxX(c, contrlRfCon) = data;
 }
 
 LONGINT Executor::C_GetControlReference(ControlHandle c) /* IMI-327 */
@@ -129,9 +129,9 @@ LONGINT Executor::C_GetControlReference(ControlHandle c) /* IMI-327 */
 void Executor::C_SetControlAction(ControlHandle c, ControlActionUPP a) /* IMI-328 */
 {
     if(a != (ControlActionUPP)-1)
-        HxX(c, contrlAction) = RM(a);
+        HxX(c, contrlAction) = a;
     else
-        HxX(c, contrlAction) = guest_cast<ControlActionUPP>(CLC(-1));
+        HxX(c, contrlAction) = guest_cast<ControlActionUPP>(-1);
 }
 
 ControlActionUPP Executor::C_GetControlAction(ControlHandle c) /* IMI-328 */
@@ -143,7 +143,7 @@ INTEGER Executor::C_GetControlVariant(ControlHandle c) /* IMV-222 */
 {
     AuxCtlHandle h;
 
-    for(h = MR(LM(AuxCtlHead)); h != 0 && HxP(h, acOwner) != c; h = HxP(h, acNext))
+    for(h = LM(AuxCtlHead); h != 0 && HxP(h, acOwner) != c; h = HxP(h, acNext))
         ;
     return h != 0 ? Hx(h, acFlags).get() : (INTEGER)0;
 }
@@ -161,7 +161,7 @@ BOOLEAN Executor::C_GetAuxiliaryControlRecord(ControlHandle ctl,
 
     if(!ctl)
     {
-        *aux_ctl = RM(default_aux_ctl);
+        *aux_ctl = default_aux_ctl;
         return true;
     }
     else
@@ -176,7 +176,7 @@ BOOLEAN Executor::C_GetAuxiliaryControlRecord(ControlHandle ctl,
         }
         else
         {
-            *aux_ctl = RM(default_aux_ctl);
+            *aux_ctl = default_aux_ctl;
             return true;
         }
     }

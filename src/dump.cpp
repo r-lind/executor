@@ -41,18 +41,18 @@
 #else /* mac */
 
 #define deref(x) (*(x))
-#define Cx(x) (x)
-#define CW(x) (x)
-#define CWC(x) (x)
-#define CL(x) (x)
-#define CLC(x) (x)
+#define x (x)
+#define x (x)
+#define x (x)
+#define x (x)
+#define x (x)
 #define theCPort ((CGrafPtr)thePort)
 #define CGrafPort_p(port) (((char *)(port))[6] & 0xC0)
 
 #define ROWBYTES_VALUE_BITS (0x3FFF)
 
-#define RECT_HEIGHT(r) (CW((r)->bottom) - CW((r)->top))
-#define RECT_WIDTH(r) (CW((r)->right) - CW((r)->left))
+#define RECT_HEIGHT(r) ((r)->bottom - (r)->top)
+#define RECT_WIDTH(r) ((r)->right - (r)->left)
 
 /* window accessors */
 #define WINDOW_PORT(wp) (&((WindowPeek)(wp))->port)
@@ -78,23 +78,23 @@
 #define WINDOW_REF_CON_X(wp) (((WindowPeek)(wp))->refCon)
 
 /* native byte order */
-#define WINDOW_KIND(wp) (Cx(WINDOW_KIND_X(wp)))
-#define WINDOW_VISIBLE(wp) (Cx(WINDOW_VISIBLE_X(wp)))
-#define WINDOW_HILITED(wp) (Cx(WINDOW_HILITED_X(wp)))
-#define WINDOW_GO_AWAY_FLAG(wp) (Cx(WINDOW_GO_AWAY_FLAG_X(wp)))
-#define WINDOW_SPARE_FLAG(wp) (Cx(WINDOW_SPARE_FLAG_X(wp)))
+#define WINDOW_KIND(wp) (WINDOW_KIND_X(wp))
+#define WINDOW_VISIBLE(wp) (WINDOW_VISIBLE_X(wp))
+#define WINDOW_HILITED(wp) (WINDOW_HILITED_X(wp))
+#define WINDOW_GO_AWAY_FLAG(wp) (WINDOW_GO_AWAY_FLAG_X(wp))
+#define WINDOW_SPARE_FLAG(wp) (WINDOW_SPARE_FLAG_X(wp))
 
-#define WINDOW_STRUCT_REGION(wp) (Cx(WINDOW_STRUCT_REGION_X(wp)))
-#define WINDOW_CONT_REGION(wp) (Cx(WINDOW_CONT_REGION_X(wp)))
-#define WINDOW_UPDATE_REGION(wp) (Cx(WINDOW_UPDATE_REGION_X(wp)))
-#define WINDOW_DEF_PROC(wp) (Cx(WINDOW_DEF_PROC_X(wp)))
-#define WINDOW_DATA(wp) (Cx(WINDOW_DATA_X(wp)))
-#define WINDOW_TITLE(wp) (Cx(WINDOW_TITLE_X(wp)))
-#define WINDOW_TITLE_WIDTH(wp) (Cx(WINDOW_TITLE_WIDTH_X(wp)))
-#define WINDOW_CONTROL_LIST(wp) (Cx(WINDOW_CONTROL_LIST_X(wp)))
-#define WINDOW_NEXT_WINDOW(wp) (Cx(WINDOW_NEXT_WINDOW_X(wp)))
-#define WINDOW_PIC(wp) (Cx(WINDOW_PIC_X(wp)))
-#define WINDOW_REF_CON(wp) (Cx(WINDOW_REF_CON_X(wp)))
+#define WINDOW_STRUCT_REGION(wp) (WINDOW_STRUCT_REGION_X(wp))
+#define WINDOW_CONT_REGION(wp) (WINDOW_CONT_REGION_X(wp))
+#define WINDOW_UPDATE_REGION(wp) (WINDOW_UPDATE_REGION_X(wp))
+#define WINDOW_DEF_PROC(wp) (WINDOW_DEF_PROC_X(wp))
+#define WINDOW_DATA(wp) (WINDOW_DATA_X(wp))
+#define WINDOW_TITLE(wp) (WINDOW_TITLE_X(wp))
+#define WINDOW_TITLE_WIDTH(wp) (WINDOW_TITLE_WIDTH_X(wp))
+#define WINDOW_CONTROL_LIST(wp) (WINDOW_CONTROL_LIST_X(wp))
+#define WINDOW_NEXT_WINDOW(wp) (WINDOW_NEXT_WINDOW_X(wp))
+#define WINDOW_PIC(wp) (WINDOW_PIC_X(wp))
+#define WINDOW_REF_CON(wp) (WINDOW_REF_CON_X(wp))
 
 /* dialog accessors */
 #define DIALOG_WINDOW(dialog) ((WindowPtr) & ((DialogPeek)(dialog))->window)
@@ -105,11 +105,11 @@
 #define DIALOG_EDIT_OPEN_X(dialog) (((DialogPeek)(dialog))->editOpen)
 #define DIALOG_ADEF_ITEM_X(dialog) (((DialogPeek)(dialog))->aDefItem)
 
-#define DIALOG_ITEMS(dialog) (CL(DIALOG_ITEMS_X(dialog)))
-#define DIALOG_TEXTH(dialog) (CL(DIALOG_TEXTH_X(dialog)))
-#define DIALOG_EDIT_FIELD(dialog) (CW(DIALOG_EDIT_FIELD_X(dialog)))
-#define DIALOG_EDIT_OPEN(dialog) (CW(DIALOG_EDIT_OPEN_X(dialog)))
-#define DIALOG_ADEF_ITEM(dialog) (CW(DIALOG_ADEF_ITEM_X(dialog)))
+#define DIALOG_ITEMS(dialog) (DIALOG_ITEMS_X(dialog))
+#define DIALOG_TEXTH(dialog) (DIALOG_TEXTH_X(dialog))
+#define DIALOG_EDIT_FIELD(dialog) (DIALOG_EDIT_FIELD_X(dialog))
+#define DIALOG_EDIT_OPEN(dialog) (DIALOG_EDIT_OPEN_X(dialog))
+#define DIALOG_ADEF_ITEM(dialog) (DIALOG_ADEF_ITEM_X(dialog))
 
 enum pixpat_pattern_types
 {
@@ -179,7 +179,7 @@ void dump_clear_field(int field)
         fprintf args;        \
     } while(0)
 
-Rect big_rect = { CWC((INTEGER)-32767), CWC((INTEGER)-32767), CWC(32767), CWC(32767) };
+Rect big_rect = { (INTEGER)-32767, (INTEGER)-32767, 32767, 32767 };
 
 void Executor::dump_init(char *dst)
 {
@@ -232,9 +232,9 @@ void Executor::dump_rect(Rect *r)
 {
     iprintf((o_fp, "%s(Rect *%p) {\n", field_name.c_str(), r));
     indent += 2;
-    iprintf((o_fp, "top 0x%x; left 0x%x;\n", CW(r->top), CW(r->left)));
+    iprintf((o_fp, "top 0x%x; left 0x%x;\n", r->top, r->left));
     iprintf((o_fp, "bottom 0x%x; right 0x%x; }\n",
-             CW(r->bottom), CW(r->right)));
+             r->bottom, r->right));
     indent -= 2;
     fflush(o_fp);
 }
@@ -250,7 +250,7 @@ void Executor::dump_pattern(Pattern x)
 void Executor::dump_point(GUEST<Point> x)
 {
     iprintf((o_fp, "%s(Point) { v 0x%x; h 0x%x; }\n",
-             field_name.c_str(), CW(x.v), CW(x.h)));
+             field_name.c_str(), x.v, x.h));
     fflush(o_fp);
 }
 
@@ -267,9 +267,9 @@ void Executor::dump_bitmap_data(BitMap *x, int depth, Rect *rect)
     if(!rect)
         rect = &x->bounds;
 
-    row_bytes = CW(x->rowBytes) & ROWBYTES_VALUE_BITS;
-    addr = (char *)&MR(x->baseAddr)[(CW(rect->top) - CW(x->bounds.top)) * row_bytes
-                                    + ((CW(rect->left) - CW(x->bounds.left))
+    row_bytes = x->rowBytes & ROWBYTES_VALUE_BITS;
+    addr = (char *)&x->baseAddr[(rect->top - x->bounds.top) * row_bytes
+                                    + ((rect->left - x->bounds.left)
                                        * depth)
                                         / 8];
     rows = RECT_HEIGHT(&x->bounds);
@@ -303,11 +303,11 @@ void Executor::dump_bits16(GUEST<Bits16> data)
     {
         BitMap x;
 
-        x.baseAddr = RM((Ptr)data);
-        x.rowBytes = CWC(2);
+        x.baseAddr = (Ptr)data;
+        x.rowBytes = 2;
         x.bounds.top = x.bounds.left = 0;
-        x.bounds.bottom = CWC(16);
-        x.bounds.right = CWC(16);
+        x.bounds.bottom = 16;
+        x.bounds.right = 16;
 
         dump_bitmap_data(&x, 1, nullptr);
     }
@@ -320,10 +320,10 @@ void Executor::dump_bitmap(BitMap *x, Rect *rect)
 {
     iprintf((o_fp, "%s(BitMap *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "baseAddr %p;\n", MR(x->baseAddr)));
+    iprintf((o_fp, "baseAddr %p;\n", x->baseAddr));
     if(dump_verbosity >= 3)
         dump_bitmap_data(x, 1, rect);
-    iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)CW(x->rowBytes)));
+    iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)x->rowBytes));
     dump_field(dump_rect, &x->bounds, "bounds");
     indent -= 2;
     iprintf((o_fp, "}\n"));
@@ -350,19 +350,19 @@ void Executor::dump_qdprocs(QDProcsPtr x)
     indent += 2;
     if(x != nullptr)
     {
-        iprintf((o_fp, "textProc    %p;\n", (ProcPtr)MR(x->textProc)));
-        iprintf((o_fp, "lineProc    %p;\n", (ProcPtr)MR(x->lineProc)));
-        iprintf((o_fp, "rectProc    %p;\n", (ProcPtr)MR(x->rectProc)));
-        iprintf((o_fp, "rRectProc   %p;\n", (ProcPtr)MR(x->rRectProc)));
-        iprintf((o_fp, "ovalProc    %p;\n", (ProcPtr)MR(x->ovalProc)));
-        iprintf((o_fp, "arcProc     %p;\n", (ProcPtr)MR(x->arcProc)));
-        iprintf((o_fp, "polyProc    %p;\n", (ProcPtr)MR(x->polyProc)));
-        iprintf((o_fp, "rgnProc     %p;\n", (ProcPtr)MR(x->rgnProc)));
-        iprintf((o_fp, "bitsProc    %p;\n", (ProcPtr)MR(x->bitsProc)));
-        iprintf((o_fp, "commentProc %p;\n", (ProcPtr)MR(x->commentProc)));
-        iprintf((o_fp, "txMeasProc  %p;\n", (ProcPtr)MR(x->txMeasProc)));
-        iprintf((o_fp, "getPicProc  %p;\n", (ProcPtr)MR(x->getPicProc)));
-        iprintf((o_fp, "putPicProc  %p;\n", (ProcPtr)MR(x->putPicProc)));
+        iprintf((o_fp, "textProc    %p;\n", (ProcPtr)x->textProc));
+        iprintf((o_fp, "lineProc    %p;\n", (ProcPtr)x->lineProc));
+        iprintf((o_fp, "rectProc    %p;\n", (ProcPtr)x->rectProc));
+        iprintf((o_fp, "rRectProc   %p;\n", (ProcPtr)x->rRectProc));
+        iprintf((o_fp, "ovalProc    %p;\n", (ProcPtr)x->ovalProc));
+        iprintf((o_fp, "arcProc     %p;\n", (ProcPtr)x->arcProc));
+        iprintf((o_fp, "polyProc    %p;\n", (ProcPtr)x->polyProc));
+        iprintf((o_fp, "rgnProc     %p;\n", (ProcPtr)x->rgnProc));
+        iprintf((o_fp, "bitsProc    %p;\n", (ProcPtr)x->bitsProc));
+        iprintf((o_fp, "commentProc %p;\n", (ProcPtr)x->commentProc));
+        iprintf((o_fp, "txMeasProc  %p;\n", (ProcPtr)x->txMeasProc));
+        iprintf((o_fp, "getPicProc  %p;\n", (ProcPtr)x->getPicProc));
+        iprintf((o_fp, "putPicProc  %p;\n", (ProcPtr)x->putPicProc));
     }
     else
         iprintf((o_fp, "<default grafprocs used>\n"));
@@ -375,31 +375,31 @@ void Executor::dump_grafport_real(GrafPtr x)
 {
     iprintf((o_fp, "%s(GrafPort *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "device %d;\n", CW(x->device)));
+    iprintf((o_fp, "device %d;\n", x->device));
     dump_field(dump_bitmap_null_rect, &x->portBits, "portBits");
     dump_field(dump_rect, &x->portRect, "portRect");
-    dump_field(dump_handle, MR(x->visRgn), "visRgn");
-    dump_field(dump_handle, MR(x->clipRgn), "clipRgn");
+    dump_field(dump_handle, x->visRgn, "visRgn");
+    dump_field(dump_handle, x->clipRgn, "clipRgn");
     dump_field(dump_pattern, x->bkPat, "bkPat");
     dump_field(dump_pattern, x->fillPat, "fillPat");
     dump_field(dump_point, x->pnLoc, "pnLoc");
     dump_field(dump_point, x->pnSize, "pnSize");
-    iprintf((o_fp, "pnMode %d;\n", CW(x->pnMode)));
+    iprintf((o_fp, "pnMode %d;\n", x->pnMode));
     dump_field(dump_pattern, x->pnPat, "pnPat");
-    iprintf((o_fp, "pnVis %d;\n", CW(x->pnVis)));
-    iprintf((o_fp, "txFont %d;\n", CW(x->txFont)));
+    iprintf((o_fp, "pnVis %d;\n", x->pnVis));
+    iprintf((o_fp, "txFont %d;\n", x->txFont));
     iprintf((o_fp, "txFace %d;\n", x->txFace));
-    iprintf((o_fp, "txMode %d;\n", CW(x->txMode)));
-    iprintf((o_fp, "txSize %d;\n", CW(x->txSize)));
-    iprintf((o_fp, "spExtra %d;\n", CL(x->spExtra)));
-    iprintf((o_fp, "fgColor 0x%x;\n", CL(x->fgColor)));
-    iprintf((o_fp, "bkColor 0x%x;\n", CL(x->bkColor)));
-    iprintf((o_fp, "colrBit %d;\n", CW(x->colrBit)));
-    iprintf((o_fp, "patStretch %d;\n", CW(x->patStretch)));
-    dump_field(dump_handle, MR(x->picSave), "picSave");
-    dump_field(dump_handle, MR(x->rgnSave), "rgnSave");
-    dump_field(dump_handle, MR(x->polySave), "polySave");
-    dump_field(dump_qdprocs, MR(x->grafProcs), "grafProcs");
+    iprintf((o_fp, "txMode %d;\n", x->txMode));
+    iprintf((o_fp, "txSize %d;\n", x->txSize));
+    iprintf((o_fp, "spExtra %d;\n", x->spExtra));
+    iprintf((o_fp, "fgColor 0x%x;\n", x->fgColor));
+    iprintf((o_fp, "bkColor 0x%x;\n", x->bkColor));
+    iprintf((o_fp, "colrBit %d;\n", x->colrBit));
+    iprintf((o_fp, "patStretch %d;\n", x->patStretch));
+    dump_field(dump_handle, x->picSave, "picSave");
+    dump_field(dump_handle, x->rgnSave, "rgnSave");
+    dump_field(dump_handle, x->polySave, "polySave");
+    dump_field(dump_qdprocs, x->grafProcs, "grafProcs");
     indent -= 2;
     iprintf((o_fp, "}\n"));
     fflush(o_fp);
@@ -408,21 +408,21 @@ void Executor::dump_grafport_real(GrafPtr x)
 GrafPtr
 theport(void)
 {
-    return MR(qdGlobals().thePort);
+    return qdGlobals().thePort;
 }
 
 void Executor::dump_theport(void)
 {
-    dump_grafport(MR(qdGlobals().thePort));
+    dump_grafport(qdGlobals().thePort);
 }
 
 void Executor::dump_rgb_color(RGBColor *x)
 {
     iprintf((o_fp, "%s(RGBColor) { red 0x%lx; green 0x%lx, blue 0x%lx; }\n",
              field_name.c_str(),
-             (long)CW(x->red),
-             (long)CW(x->green),
-             (long)CW(x->blue)));
+             (long)x->red,
+             (long)x->green,
+             (long)x->blue));
     fflush(o_fp);
 }
 
@@ -432,21 +432,21 @@ void Executor::dump_ctab(CTabHandle ctab)
 
     iprintf((o_fp, "%s(ColorTable **%p) {\n", field_name.c_str(), ctab));
     indent += 2;
-    iprintf((o_fp, "ctSeed 0x%x;\n", CL(x->ctSeed)));
-    iprintf((o_fp, "ctFlags 0x%x;\n", CW(x->ctFlags)));
-    iprintf((o_fp, "ctSize %d;\n", CW(x->ctSize)));
+    iprintf((o_fp, "ctSeed 0x%x;\n", x->ctSeed));
+    iprintf((o_fp, "ctFlags 0x%x;\n", x->ctFlags));
+    iprintf((o_fp, "ctSize %d;\n", x->ctSize));
     if(dump_verbosity >= 2)
     {
         int i;
 
         iprintf((o_fp, "ctTable\n"));
-        for(i = 0; i <= CW(x->ctSize); i++)
+        for(i = 0; i <= x->ctSize; i++)
         {
             iprintf((o_fp, "%d:[0x%x] { 0x%lx, 0x%lx, 0x%lx }\n",
-                     i, CW(x->ctTable[i].value),
-                     (long)CW(x->ctTable[i].rgb.red),
-                     (long)CW(x->ctTable[i].rgb.green),
-                     (long)CW(x->ctTable[i].rgb.blue)));
+                     i, x->ctTable[i].value,
+                     (long)x->ctTable[i].rgb.red,
+                     (long)x->ctTable[i].rgb.green,
+                     (long)x->ctTable[i].rgb.blue));
         }
         indent -= 2;
         iprintf((o_fp, "}\n"));
@@ -465,8 +465,8 @@ void Executor::dump_itab(ITabHandle itab)
 
     iprintf((o_fp, "%s(ITab **%p) {\n", field_name.c_str(), itab));
     indent += 2;
-    iprintf((o_fp, "iTabSeed 0x%x;\n", CL(x->iTabSeed)));
-    iprintf((o_fp, "iTabRes %d;\n", CW(x->iTabRes)));
+    iprintf((o_fp, "iTabSeed 0x%x;\n", x->iTabSeed));
+    iprintf((o_fp, "iTabRes %d;\n", x->iTabRes));
 
     /* we always omit the inverse table... */
     iprintf((o_fp, "[iTTable field omitted]; }\n"));
@@ -481,36 +481,36 @@ void Executor::dump_pixpat(PixPatHandle pixpat)
     iprintf((o_fp, "%s(PixPat **%p) {\n", field_name.c_str(), pixpat));
     indent += 2;
     iprintf((o_fp, "patType %s;\n",
-             x->patType == CWC(pixpat_old_style_pattern)
+             x->patType == pixpat_old_style_pattern
                  ? "old_style_pattern"
-                 : (x->patType == CWC(pixpat_color_pattern)
+                 : (x->patType == pixpat_color_pattern
                         ? "color_pattern"
-                        : (x->patType == CWC(pixpat_rgb_pattern)
+                        : (x->patType == pixpat_rgb_pattern
                                ? "rgb_pattern"
                                : "<unknown!>"))));
 
-    if(x->patType != CWC(pixpat_type_orig))
+    if(x->patType != pixpat_type_orig)
     {
         if(dump_verbosity
            && x->patMap)
-            dump_field(dump_pixmap_null_rect, MR(x->patMap), "patMap");
+            dump_field(dump_pixmap_null_rect, x->patMap, "patMap");
         else
-            dump_field(dump_handle, MR(x->patMap), "patMap");
-        dump_field(dump_handle, MR(x->patData), "patData");
+            dump_field(dump_handle, x->patMap, "patMap");
+        dump_field(dump_handle, x->patData, "patData");
     }
     else
     {
         iprintf((o_fp, "[pat{Map, Data} field omitted]; }\n"));
     }
-    dump_field(dump_handle, MR(x->patXData), "patXData");
-    iprintf((o_fp, "patXValid %d;\n", CW(x->patXValid)));
+    dump_field(dump_handle, x->patXData, "patXData");
+    iprintf((o_fp, "patXValid %d;\n", x->patXValid));
     if(dump_verbosity
        && x->patXMap
        && !x->patXValid)
-        dump_field(dump_pixmap_null_rect, (PixMapHandle)MR(x->patXMap),
+        dump_field(dump_pixmap_null_rect, (PixMapHandle)x->patXMap,
                    "patXMap");
     else
-        dump_field(dump_handle, MR(x->patXMap), "patXMap");
+        dump_field(dump_handle, x->patXMap, "patXMap");
     dump_field(dump_pattern, x->pat1Data, "pat1Data");
     indent -= 2;
     iprintf((o_fp, "}\n"));
@@ -521,31 +521,31 @@ void dump_pixmap_ptr(PixMapPtr x, Rect *rect)
 {
     iprintf((o_fp, "%s(PixMap *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "baseAddr %p;\n", MR(x->baseAddr)));
+    iprintf((o_fp, "baseAddr %p;\n", x->baseAddr));
     if(dump_verbosity >= 3
        && x->baseAddr)
     {
         if(!rect)
             rect = &x->bounds;
-        dump_bitmap_data((BitMap *)x, CW(x->pixelSize), rect);
+        dump_bitmap_data((BitMap *)x, x->pixelSize, rect);
     }
-    iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)CW(x->rowBytes)));
+    iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)x->rowBytes));
     dump_field(dump_rect, &x->bounds, "bounds");
-    iprintf((o_fp, "pmVersion 0x%x;\n", CW(x->pmVersion)));
-    iprintf((o_fp, "packType 0x%x;\n", CW(x->packType)));
-    iprintf((o_fp, "packSize 0x%x;\n", CL(x->packSize)));
+    iprintf((o_fp, "pmVersion 0x%x;\n", x->pmVersion));
+    iprintf((o_fp, "packType 0x%x;\n", x->packType));
+    iprintf((o_fp, "packSize 0x%x;\n", x->packSize));
     iprintf((o_fp, "hRes 0x%x, vRes 0x%x;\n",
-             CL(x->hRes), CL(x->vRes)));
-    iprintf((o_fp, "pixelType 0x%x;\n", CW(x->pixelType)));
-    iprintf((o_fp, "pixelSize %d;\n", CW(x->pixelSize)));
-    iprintf((o_fp, "cmpCount %d;\n", CW(x->cmpCount)));
-    iprintf((o_fp, "cmpSize %d;\n", CW(x->cmpSize)));
-    iprintf((o_fp, "planeBytes 0x%x;\n", CL(x->planeBytes)));
+             x->hRes, x->vRes));
+    iprintf((o_fp, "pixelType 0x%x;\n", x->pixelType));
+    iprintf((o_fp, "pixelSize %d;\n", x->pixelSize));
+    iprintf((o_fp, "cmpCount %d;\n", x->cmpCount));
+    iprintf((o_fp, "cmpSize %d;\n", x->cmpSize));
+    iprintf((o_fp, "planeBytes 0x%x;\n", x->planeBytes));
     if(dump_verbosity
        && x->pmTable)
-        dump_field(dump_ctab, MR(x->pmTable), "pmTable");
+        dump_field(dump_ctab, x->pmTable, "pmTable");
     else
-        dump_field(dump_handle, MR(x->pmTable), "pmTable");
+        dump_field(dump_handle, x->pmTable, "pmTable");
     iprintf((o_fp, "[Reserved field omitted]; }\n"));
     indent -= 2;
     fflush(o_fp);
@@ -562,31 +562,31 @@ void Executor::dump_pixmap(PixMapHandle pixmap, Rect *rect)
 
     iprintf((o_fp, "%s(PixMap **%p) {\n", field_name.c_str(), pixmap));
     indent += 2;
-    iprintf((o_fp, "baseAddr %p;\n", MR(x->baseAddr)));
+    iprintf((o_fp, "baseAddr %p;\n", x->baseAddr));
     if(dump_verbosity >= 3
        && x->baseAddr)
     {
         if(!rect)
             rect = &x->bounds;
-        dump_bitmap_data((BitMap *)x, CW(x->pixelSize), rect);
+        dump_bitmap_data((BitMap *)x, x->pixelSize, rect);
     }
-    iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)CW(x->rowBytes)));
+    iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)x->rowBytes));
     dump_field(dump_rect, &x->bounds, "bounds");
-    iprintf((o_fp, "pmVersion 0x%x;\n", CW(x->pmVersion)));
-    iprintf((o_fp, "packType 0x%x;\n", CW(x->packType)));
-    iprintf((o_fp, "packSize 0x%x;\n", CL(x->packSize)));
+    iprintf((o_fp, "pmVersion 0x%x;\n", x->pmVersion));
+    iprintf((o_fp, "packType 0x%x;\n", x->packType));
+    iprintf((o_fp, "packSize 0x%x;\n", x->packSize));
     iprintf((o_fp, "hRes 0x%x, vRes 0x%x;\n",
-             CL(x->hRes), CL(x->vRes)));
-    iprintf((o_fp, "pixelType 0x%x;\n", CW(x->pixelType)));
-    iprintf((o_fp, "pixelSize %d;\n", CW(x->pixelSize)));
-    iprintf((o_fp, "cmpCount %d;\n", CW(x->cmpCount)));
-    iprintf((o_fp, "cmpSize %d;\n", CW(x->cmpSize)));
-    iprintf((o_fp, "planeBytes 0x%x;\n", CL(x->planeBytes)));
+             x->hRes, x->vRes));
+    iprintf((o_fp, "pixelType 0x%x;\n", x->pixelType));
+    iprintf((o_fp, "pixelSize %d;\n", x->pixelSize));
+    iprintf((o_fp, "cmpCount %d;\n", x->cmpCount));
+    iprintf((o_fp, "cmpSize %d;\n", x->cmpSize));
+    iprintf((o_fp, "planeBytes 0x%x;\n", x->planeBytes));
     if(dump_verbosity
        && x->pmTable)
-        dump_field(dump_ctab, MR(x->pmTable), "pmTable");
+        dump_field(dump_ctab, x->pmTable, "pmTable");
     else
-        dump_field(dump_handle, MR(x->pmTable), "pmTable");
+        dump_field(dump_handle, x->pmTable, "pmTable");
     iprintf((o_fp, "[Reserved field omitted]; }\n"));
     indent -= 2;
     fflush(o_fp);
@@ -598,25 +598,25 @@ void Executor::dump_cqdprocs(CQDProcsPtr x)
     indent += 2;
     if(x != nullptr)
     {
-        iprintf((o_fp, "textProc     %p;\n", (ProcPtr)MR(x->textProc)));
-        iprintf((o_fp, "lineProc     %p;\n", (ProcPtr)MR(x->lineProc)));
-        iprintf((o_fp, "rectProc     %p;\n", (ProcPtr)MR(x->rectProc)));
-        iprintf((o_fp, "rRectProc    %p;\n", (ProcPtr)MR(x->rRectProc)));
-        iprintf((o_fp, "ovalProc     %p;\n", (ProcPtr)MR(x->ovalProc)));
-        iprintf((o_fp, "arcProc      %p;\n", (ProcPtr)MR(x->arcProc)));
-        iprintf((o_fp, "polyProc     %p;\n", (ProcPtr)MR(x->polyProc)));
-        iprintf((o_fp, "rgnProc      %p;\n", (ProcPtr)MR(x->rgnProc)));
-        iprintf((o_fp, "bitsProc     %p;\n", (ProcPtr)MR(x->bitsProc)));
-        iprintf((o_fp, "commentProc  %p;\n", (ProcPtr)MR(x->commentProc)));
-        iprintf((o_fp, "txMeasProc   %p;\n", (ProcPtr)MR(x->txMeasProc)));
-        iprintf((o_fp, "getPicProc   %p;\n", (ProcPtr)MR(x->getPicProc)));
-        iprintf((o_fp, "putPicProc   %p;\n", (ProcPtr)MR(x->putPicProc)));
-        iprintf((o_fp, "newProc1Proc %p;\n", (ProcPtr)MR(x->newProc1Proc)));
-        iprintf((o_fp, "newProc2Proc %p;\n", (ProcPtr)MR(x->newProc2Proc)));
-        iprintf((o_fp, "newProc3Proc %p;\n", (ProcPtr)MR(x->newProc3Proc)));
-        iprintf((o_fp, "newProc4Proc %p;\n", (ProcPtr)MR(x->newProc4Proc)));
-        iprintf((o_fp, "newProc5Proc %p;\n", (ProcPtr)MR(x->newProc5Proc)));
-        iprintf((o_fp, "newProc6Proc %p;\n", (ProcPtr)MR(x->newProc6Proc)));
+        iprintf((o_fp, "textProc     %p;\n", (ProcPtr)x->textProc));
+        iprintf((o_fp, "lineProc     %p;\n", (ProcPtr)x->lineProc));
+        iprintf((o_fp, "rectProc     %p;\n", (ProcPtr)x->rectProc));
+        iprintf((o_fp, "rRectProc    %p;\n", (ProcPtr)x->rRectProc));
+        iprintf((o_fp, "ovalProc     %p;\n", (ProcPtr)x->ovalProc));
+        iprintf((o_fp, "arcProc      %p;\n", (ProcPtr)x->arcProc));
+        iprintf((o_fp, "polyProc     %p;\n", (ProcPtr)x->polyProc));
+        iprintf((o_fp, "rgnProc      %p;\n", (ProcPtr)x->rgnProc));
+        iprintf((o_fp, "bitsProc     %p;\n", (ProcPtr)x->bitsProc));
+        iprintf((o_fp, "commentProc  %p;\n", (ProcPtr)x->commentProc));
+        iprintf((o_fp, "txMeasProc   %p;\n", (ProcPtr)x->txMeasProc));
+        iprintf((o_fp, "getPicProc   %p;\n", (ProcPtr)x->getPicProc));
+        iprintf((o_fp, "putPicProc   %p;\n", (ProcPtr)x->putPicProc));
+        iprintf((o_fp, "newProc1Proc %p;\n", (ProcPtr)x->newProc1Proc));
+        iprintf((o_fp, "newProc2Proc %p;\n", (ProcPtr)x->newProc2Proc));
+        iprintf((o_fp, "newProc3Proc %p;\n", (ProcPtr)x->newProc3Proc));
+        iprintf((o_fp, "newProc4Proc %p;\n", (ProcPtr)x->newProc4Proc));
+        iprintf((o_fp, "newProc5Proc %p;\n", (ProcPtr)x->newProc5Proc));
+        iprintf((o_fp, "newProc6Proc %p;\n", (ProcPtr)x->newProc6Proc));
     }
     else
         iprintf((o_fp, "<default grafprocs used>\n"));
@@ -629,53 +629,53 @@ void Executor::dump_cgrafport_real(CGrafPtr x)
 {
     iprintf((o_fp, "%s(CGrafPort *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "device 0x%x;\n", CW(x->device)));
+    iprintf((o_fp, "device 0x%x;\n", x->device));
     if(dump_verbosity
        && x->portPixMap)
-        dump_field(dump_pixmap_null_rect, MR(x->portPixMap), "portPixMap");
+        dump_field(dump_pixmap_null_rect, x->portPixMap, "portPixMap");
     else
-        dump_field(dump_handle, MR(x->portPixMap), "portPixMap");
-    iprintf((o_fp, "portVersion 0x%x;\n", CW(x->portVersion)));
-    dump_field(dump_handle, MR(x->grafVars), "grafVars");
-    iprintf((o_fp, "chExtra %d;\n", CW(x->chExtra)));
-    iprintf((o_fp, "pnLocHFrac 0x%x;\n", CW(x->pnLocHFrac)));
+        dump_field(dump_handle, x->portPixMap, "portPixMap");
+    iprintf((o_fp, "portVersion 0x%x;\n", x->portVersion));
+    dump_field(dump_handle, x->grafVars, "grafVars");
+    iprintf((o_fp, "chExtra %d;\n", x->chExtra));
+    iprintf((o_fp, "pnLocHFrac 0x%x;\n", x->pnLocHFrac));
     dump_field(dump_rect, &x->portRect, "portRect");
-    dump_field(dump_handle, MR(x->visRgn), "visRgn");
-    dump_field(dump_handle, MR(x->clipRgn), "clipRgn");
+    dump_field(dump_handle, x->visRgn, "visRgn");
+    dump_field(dump_handle, x->clipRgn, "clipRgn");
     if(dump_verbosity
        && x->bkPixPat)
-        dump_field(dump_pixpat, MR(x->bkPixPat), "bkPixPat");
+        dump_field(dump_pixpat, x->bkPixPat, "bkPixPat");
     else
-        dump_field(dump_handle, MR(x->bkPixPat), "bkPixPat");
+        dump_field(dump_handle, x->bkPixPat, "bkPixPat");
     dump_field(dump_rgb_color, &x->rgbFgColor, "rgbFgColor");
     dump_field(dump_rgb_color, &x->rgbBkColor, "rgbBkColor");
     dump_field(dump_point, x->pnLoc, "pnLoc");
     dump_field(dump_point, x->pnSize, "pnSize");
-    iprintf((o_fp, "pnMode %d;\n", CW(x->pnMode)));
+    iprintf((o_fp, "pnMode %d;\n", x->pnMode));
     if(dump_verbosity
        && x->pnPixPat)
-        dump_field(dump_pixpat, MR(x->pnPixPat), "pnPixPat");
+        dump_field(dump_pixpat, x->pnPixPat, "pnPixPat");
     else
-        dump_field(dump_handle, MR(x->pnPixPat), "pnPixPat");
+        dump_field(dump_handle, x->pnPixPat, "pnPixPat");
     if(dump_verbosity
        && x->fillPixPat)
-        dump_field(dump_pixpat, MR(x->fillPixPat), "fillPixPat");
+        dump_field(dump_pixpat, x->fillPixPat, "fillPixPat");
     else
-        dump_field(dump_handle, MR(x->fillPixPat), "fillPixPat");
-    iprintf((o_fp, "pnVis %d;\n", CW(x->pnVis)));
-    iprintf((o_fp, "txFont %d;\n", CW(x->txFont)));
+        dump_field(dump_handle, x->fillPixPat, "fillPixPat");
+    iprintf((o_fp, "pnVis %d;\n", x->pnVis));
+    iprintf((o_fp, "txFont %d;\n", x->txFont));
     iprintf((o_fp, "txFace %d;\n", x->txFace));
-    iprintf((o_fp, "txMode %d;\n", CW(x->txMode)));
-    iprintf((o_fp, "txSize %d;\n", CW(x->txSize)));
-    iprintf((o_fp, "spExtra %d;\n", CL(x->spExtra)));
-    iprintf((o_fp, "fgColor 0x%x;\n", CL(x->fgColor)));
-    iprintf((o_fp, "bkColor 0x%x;\n", CL(x->bkColor)));
-    iprintf((o_fp, "colrBit %d;\n", CW(x->colrBit)));
-    iprintf((o_fp, "patStretch %x;\n", CW(x->patStretch)));
-    dump_field(dump_handle, MR(x->picSave), "picSave");
-    dump_field(dump_handle, MR(x->rgnSave), "rgnSave");
-    dump_field(dump_handle, MR(x->polySave), "polySave");
-    dump_field(dump_cqdprocs, MR(x->grafProcs), "grafProcs");
+    iprintf((o_fp, "txMode %d;\n", x->txMode));
+    iprintf((o_fp, "txSize %d;\n", x->txSize));
+    iprintf((o_fp, "spExtra %d;\n", x->spExtra));
+    iprintf((o_fp, "fgColor 0x%x;\n", x->fgColor));
+    iprintf((o_fp, "bkColor 0x%x;\n", x->bkColor));
+    iprintf((o_fp, "colrBit %d;\n", x->colrBit));
+    iprintf((o_fp, "patStretch %x;\n", x->patStretch));
+    dump_field(dump_handle, x->picSave, "picSave");
+    dump_field(dump_handle, x->rgnSave, "rgnSave");
+    dump_field(dump_handle, x->polySave, "polySave");
+    dump_field(dump_cqdprocs, x->grafProcs, "grafProcs");
     indent -= 2;
     iprintf((o_fp, "}\n"));
     fflush(o_fp);
@@ -688,37 +688,37 @@ void Executor::dump_gdevice(GDHandle gdev)
 
     iprintf((o_fp, "%s(GDevice **%p) {\n", field_name.c_str(), gdev));
     indent += 2;
-    iprintf((o_fp, "gdID 0x%x;\n", CW(x->gdID)));
-    iprintf((o_fp, "gdType 0x%x;\n", CW(x->gdType)));
+    iprintf((o_fp, "gdID 0x%x;\n", x->gdID));
+    iprintf((o_fp, "gdType 0x%x;\n", x->gdType));
     if(dump_verbosity
        && x->gdITable)
-        dump_field(dump_itab, MR(x->gdITable), "gdITable");
+        dump_field(dump_itab, x->gdITable, "gdITable");
     else
-        dump_field(dump_handle, MR(x->gdITable), "gdITable");
-    iprintf((o_fp, "gdResPref 0x%x;\n", CW(x->gdResPref)));
+        dump_field(dump_handle, x->gdITable, "gdITable");
+    iprintf((o_fp, "gdResPref 0x%x;\n", x->gdResPref));
 #if 0
-  dump_field (dump_handle, CL (x->gdSearchProc), "gdSearchProc");
+  dump_field (dump_handle, x->gdSearchProc, "gdSearchProc");
 #else
-    iprintf((o_fp, "gdSearchProc %p;\n", MR(x->gdSearchProc)));
-    for(proc = MR(x->gdSearchProc); proc; proc = HxP(proc, nxtSrch))
+    iprintf((o_fp, "gdSearchProc %p;\n", x->gdSearchProc));
+    for(proc = x->gdSearchProc; proc; proc = HxP(proc, nxtSrch))
         iprintf((o_fp, "  proc [%p, %p]; %p\n",
                  proc, HxP(proc, nxtSrch), HxP(proc, srchProc)));
 #endif
-    dump_field(dump_handle, MR(x->gdCompProc), "gdCompProc");
-    iprintf((o_fp, "gdFlags 0x%hx;\n", (unsigned short)CW(x->gdFlags)));
+    dump_field(dump_handle, x->gdCompProc, "gdCompProc");
+    iprintf((o_fp, "gdFlags 0x%hx;\n", (unsigned short)x->gdFlags));
     if(dump_verbosity
        && x->gdPMap)
-        dump_field(dump_pixmap_null_rect, MR(x->gdPMap), "gdPMap");
+        dump_field(dump_pixmap_null_rect, x->gdPMap, "gdPMap");
     else
-        dump_field(dump_handle, MR(x->gdPMap), "gdPMap");
-    iprintf((o_fp, "gdRefCon 0x%x;\n", CL(x->gdRefCon)));
+        dump_field(dump_handle, x->gdPMap, "gdPMap");
+    iprintf((o_fp, "gdRefCon 0x%x;\n", x->gdRefCon));
     if(dump_verbosity
        && x->gdNextGD)
-        dump_field(dump_gdevice, (GDHandle)MR(x->gdNextGD), "gdNextGD");
+        dump_field(dump_gdevice, (GDHandle)x->gdNextGD, "gdNextGD");
     else
-        dump_field(dump_handle, MR(x->gdNextGD), "gdNextGD");
+        dump_field(dump_handle, x->gdNextGD, "gdNextGD");
     dump_field(dump_rect, &x->gdRect, "gdRect");
-    iprintf((o_fp, "gdMode 0x%x;\n", CL(x->gdMode)));
+    iprintf((o_fp, "gdMode 0x%x;\n", x->gdMode));
     iprintf((o_fp, "[CC, Reserved fields omitted]; }\n"));
     indent -= 2;
     fflush(o_fp);
@@ -726,12 +726,12 @@ void Executor::dump_gdevice(GDHandle gdev)
 
 void Executor::dump_thegdevice(void)
 {
-    dump_gdevice(MR(LM(TheGDevice)));
+    dump_gdevice(LM(TheGDevice));
 }
 
 void Executor::dump_maindevice(void)
 {
-    dump_gdevice(MR(LM(MainDevice)));
+    dump_gdevice(LM(MainDevice));
 }
 
 void Executor::dump_string(unsigned char *s)
@@ -753,34 +753,34 @@ void Executor::dump_palette(PaletteHandle palette)
 
     iprintf((o_fp, "%s(PaletteHandle **%p) {\n", field_name.c_str(), palette));
     indent += 2;
-    iprintf((o_fp, "pmEntries 0x%x;\n", CW(x->pmEntries)));
+    iprintf((o_fp, "pmEntries 0x%x;\n", x->pmEntries));
     if(pmWindow(x)
        && dump_verbosity >= 2
        && 0)
-        dump_grafport((GrafPtr)MR(pmWindow(x)));
+        dump_grafport((GrafPtr)pmWindow(x));
     else
-        dump_field(dump_handle, MR(pmWindow(x)), "pmWindow");
-    iprintf((o_fp, "pmPrivate 0x%x\n", CW(pmPrivate(x))));
-    iprintf((o_fp, "pmDevices 0x%x\n", CL(pmDevices(x))));
-    iprintf((o_fp, "pmSeeds %p\n", MR(pmSeeds(x))));
+        dump_field(dump_handle, pmWindow(x), "pmWindow");
+    iprintf((o_fp, "pmPrivate 0x%x\n", pmPrivate(x)));
+    iprintf((o_fp, "pmDevices 0x%x\n", pmDevices(x)));
+    iprintf((o_fp, "pmSeeds %p\n", pmSeeds(x)));
     if(dump_verbosity >= 2)
     {
         int i;
 
         iprintf((o_fp, "pmInfo\n"));
-        for(i = 0; i < CW(x->pmEntries); i++)
+        for(i = 0; i < x->pmEntries; i++)
         {
             iprintf((o_fp, "%3x { rgb { 0x%lx, 0x%lx, 0x%lx }\n",
                      i,
-                     (long)CW(x->pmInfo[i].ciRGB.red),
-                     (long)CW(x->pmInfo[i].ciRGB.green),
-                     (long)CW(x->pmInfo[i].ciRGB.blue)));
+                     (long)x->pmInfo[i].ciRGB.red,
+                     (long)x->pmInfo[i].ciRGB.green,
+                     (long)x->pmInfo[i].ciRGB.blue));
             iprintf((o_fp, "      usage 0x%x; tolerance 0x%x;\n",
-                     CW(x->pmInfo[i].ciUsage),
-                     CW(x->pmInfo[i].ciTolerance)));
+                     x->pmInfo[i].ciUsage,
+                     x->pmInfo[i].ciTolerance));
             iprintf((o_fp, "      flags 0x%x; private 0x%lx; };\n",
-                     CW(ciFlags(&x->pmInfo[i])),
-                     (unsigned long)CL(ciPrivate(&x->pmInfo[i]))));
+                     ciFlags(&x->pmInfo[i]),
+                     (unsigned long)ciPrivate(&x->pmInfo[i])));
         }
         indent -= 2;
         iprintf((o_fp, "}\n"));
@@ -799,53 +799,53 @@ void Executor::dump_ccrsr(CCrsrHandle ccrsr)
 
     iprintf((o_fp, "%s(CCrsrHandle **%p) {\n", field_name.c_str(), ccrsr));
     indent += 2;
-    iprintf((o_fp, "crsrType 0x%hx;\n", CW(x->crsrType)));
+    iprintf((o_fp, "crsrType 0x%hx;\n", x->crsrType));
     if(x->crsrMap
        && dump_verbosity >= 1)
-        dump_field(dump_pixmap_null_rect, MR(x->crsrMap), "crsrMap");
+        dump_field(dump_pixmap_null_rect, x->crsrMap, "crsrMap");
     else
-        dump_field(dump_handle, MR(x->crsrMap), "crsrMap");
-    dump_field(dump_handle, MR(x->crsrData), "crsrData");
+        dump_field(dump_handle, x->crsrMap, "crsrMap");
+    dump_field(dump_handle, x->crsrData, "crsrData");
     if(dump_verbosity >= 3
        && x->crsrXData
-       && x->crsrXValid != CW(0))
+       && x->crsrXValid != 0)
     {
         BitMap bm;
         int depth;
         /* dump the expanded pixel data */
 
-        depth = CW(x->crsrXValid);
-        bm.baseAddr = RM(deref(MR(x->crsrXData)));
-        bm.rowBytes = CW(2 * depth);
-        bm.bounds.top = bm.bounds.left = CWC(0);
-        bm.bounds.bottom = CWC(16);
-        bm.bounds.right = CWC(16);
+        depth = x->crsrXValid;
+        bm.baseAddr = deref(x->crsrXData);
+        bm.rowBytes = 2 * depth;
+        bm.bounds.top = bm.bounds.left = 0;
+        bm.bounds.bottom = 16;
+        bm.bounds.right = 16;
 
         field_name = "crsrXData";
         dump_bitmap_data(&bm, depth, nullptr);
         field_name = "";
     }
     else
-        dump_field(dump_handle, MR(x->crsrXData), "crsrXData");
-    iprintf((o_fp, "crsrXValid %d;\n", CW(x->crsrXValid)));
-    dump_field(dump_handle, MR(x->crsrXHandle), "crsrXHandle");
+        dump_field(dump_handle, x->crsrXData, "crsrXData");
+    iprintf((o_fp, "crsrXValid %d;\n", x->crsrXValid));
+    dump_field(dump_handle, x->crsrXHandle, "crsrXHandle");
     dump_field(dump_bits16, x->crsr1Data, "crsr1Data");
     dump_field(dump_bits16, x->crsrMask, "crsrMask");
     dump_field(dump_point, x->crsrHotSpot, "crsrHotSpot");
-    iprintf((o_fp, "crsrXTable %x\n", CL(x->crsrXTable)));
-    iprintf((o_fp, "crsrID 0x%x; }\n", CL(x->crsrID)));
+    iprintf((o_fp, "crsrXTable %x\n", x->crsrXTable));
+    iprintf((o_fp, "crsrID 0x%x; }\n", x->crsrID));
     indent -= 2;
     fflush(o_fp);
 }
 
 void Executor::dump_wmgrport(void)
 {
-    dump_grafport(MR(LM(WMgrPort)));
+    dump_grafport(LM(WMgrPort));
 }
 
 void Executor::dump_wmgrcport(void)
 {
-    dump_grafport((GrafPtr)MR(LM(WMgrCPort)));
+    dump_grafport((GrafPtr)LM(WMgrCPort));
 }
 
 void Executor::dump_string_handle(StringHandle sh)
@@ -919,7 +919,7 @@ void dump_dialog_items(DialogPeek dp)
     int i;
 
     item_data = (GUEST<int16_t> *)STARH(DIALOG_ITEMS(dp));
-    n_items = CW(*item_data);
+    n_items = *item_data;
     items = (itmp)&item_data[1];
     fprintf(o_fp, "%d items:\n", n_items);
     for(i = 0; i < n_items; i++)
@@ -929,9 +929,9 @@ void dump_dialog_items(DialogPeek dp)
         item = items;
         fprintf(o_fp, "item %d; type %d, hand %p, (%d, %d, %d, %d)\n",
                 i, (int)(item->itmtype),
-                MR(item->itmhand),
-                CW(item->itmr.top), CW(item->itmr.left),
-                CW(item->itmr.bottom), CW(item->itmr.right));
+                item->itmhand,
+                item->itmr.top, item->itmr.left,
+                item->itmr.bottom, item->itmr.right);
         BUMPIP(items);
     }
 }
@@ -940,7 +940,7 @@ void Executor::dump_aux_win_list(void)
 {
     AuxWinHandle t;
 
-    for(t = MR(LM(AuxWinHead)); t; t = MR(deref(t)->awNext))
+    for(t = LM(AuxWinHead); t; t = deref(t)->awNext)
     {
         dump_aux_win(t);
     }
@@ -952,13 +952,13 @@ void Executor::dump_aux_win(AuxWinHandle awh)
 
     iprintf((o_fp, "%s(AuxWinHandle **%p) {\n", field_name.c_str(), awh));
     indent += 2;
-    iprintf((o_fp, "awNext %p;\n", MR(aw->awNext)));
-    iprintf((o_fp, "awOwner %p;\n", MR(aw->awOwner)));
-    dump_field(dump_ctab, MR(aw->awCTable), "awCTable");
-    dump_field(dump_handle, MR(aw->dialogCItem), "dialogCItem");
-    iprintf((o_fp, "awFlags 0x%lx;\n", (long)CL(aw->awFlags)));
-    iprintf((o_fp, "awReserved %p;\n", MR(aw->awReserved)));
-    iprintf((o_fp, "awRefCon 0x%lx; }\n", (long)CL(aw->awRefCon)));
+    iprintf((o_fp, "awNext %p;\n", aw->awNext));
+    iprintf((o_fp, "awOwner %p;\n", aw->awOwner));
+    dump_field(dump_ctab, aw->awCTable, "awCTable");
+    dump_field(dump_handle, aw->dialogCItem, "dialogCItem");
+    iprintf((o_fp, "awFlags 0x%lx;\n", (long)aw->awFlags));
+    iprintf((o_fp, "awReserved %p;\n", aw->awReserved));
+    iprintf((o_fp, "awRefCon 0x%lx; }\n", (long)aw->awRefCon));
     indent -= 2;
 
     fflush(o_fp);
@@ -970,7 +970,7 @@ void Executor::dump_window_list(WindowPeek w)
     WindowPeek front_w;
 
     front_w = (WindowPeek)FrontWindow();
-    for(t_w = MR(LM(WindowList));
+    for(t_w = LM(WindowList);
         t_w;
         t_w = WINDOW_NEXT_WINDOW(t_w))
     {
@@ -992,7 +992,7 @@ void Executor::dump_rgn(RgnHandle rgn)
     iprintf((o_fp, "%s(RgnHandle **%p) {\n", field_name.c_str(), rgn));
     indent += 2;
     x = deref(rgn);
-    iprintf((o_fp, "rgnSize %d\n", CW(x->rgnSize)));
+    iprintf((o_fp, "rgnSize %d\n", x->rgnSize));
     dump_field(dump_rect, &x->rgnBBox, "rgnBBox");
     iprintf((o_fp, "[special data omitted]; }\n"));
     indent -= 2;
@@ -1151,7 +1151,7 @@ void dump_te(TEHandle te)
         line_starts = TE_LINE_STARTS(te);
 
         for(i = 0; i <= n_lines; i++)
-            iprintf((o_fp, "lineStart[%d]: %d\n", i, CW(line_starts[i])));
+            iprintf((o_fp, "lineStart[%d]: %d\n", i, line_starts[i]));
     }
 
     {
@@ -1227,21 +1227,21 @@ public:
 static INTEGER
 CountResourcesRN(LONGINT type, INTEGER rn)
 {
-    MapSaveGuard(CW(rn));
+    MapSaveGuard guard(rn);
     return Count1Resources(type);
 }
 
 static Handle
 GetIndResourceRN(LONGINT type, INTEGER i, INTEGER rn)
 {
-    MapSaveGuard(CW(rn));
+    MapSaveGuard guard(rn);
     return Get1IndResource(type, i);
 }
 
 static void
 AddResourceRN(Handle h, LONGINT type, INTEGER id, Str255 name, INTEGER rn)
 {
-    MapSaveGuard(CW(rn));
+    MapSaveGuard guard(rn);
     AddResource(h, type, id, name);
 }
 
@@ -1265,7 +1265,7 @@ copy_resources(INTEGER new_rn, INTEGER old_rn, LONGINT type)
         h = GetIndResourceRN(type, i, old_rn);
         GetResInfo(h, &id, &ignored, name);
         DetachResource(h);
-        AddResourceRN(h, type, CW(id), name, new_rn);
+        AddResourceRN(h, type, id, name, new_rn);
     }
     LM(ResLoad) = save_res_load;
     return noErr;
@@ -1362,8 +1362,8 @@ dump_textcenter(TCenterRecHdl h)
 void
 dump_zone_stats(void)
 {
-    iprintf((o_fp, "applzone free = %d\n", ZONE_ZCB_FREE(MR(LM(ApplZone)))));
-    iprintf((o_fp, " syszone free = %d\n", ZONE_ZCB_FREE(MR(LM(SysZone)))));
+    iprintf((o_fp, "applzone free = %d\n", ZONE_ZCB_FREE(LM(ApplZone))));
+    iprintf((o_fp, " syszone free = %d\n", ZONE_ZCB_FREE(LM(SysZone))));
 }
 
 #endif /* !NDEBUG */

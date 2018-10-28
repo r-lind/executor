@@ -31,10 +31,10 @@ static bool
 src_dst_overlap_and_dst_below_src_p(const Rect *srcr, const Rect *dstr,
                                     int dh, int dv)
 {
-    if((CW(dstr->top)) < (CW(srcr->bottom) + dv)
-       && (CW(srcr->top) + dv) <= (CW(dstr->top))
-       && (CW(srcr->left) + dh) < (CW(dstr->right))
-       && (CW(dstr->left)) < (CW(srcr->right) + dh))
+    if((dstr->top) < (srcr->bottom + dv)
+       && (srcr->top + dv) <= (dstr->top)
+       && (srcr->left + dh) < (dstr->right)
+       && (dstr->left) < (srcr->right + dh))
         return true;
     else
         return false;
@@ -44,7 +44,7 @@ static inline bool
 dy_zero_p(const Rect *srcr, const Rect *dstr,
           int dh, int dv)
 {
-    return (CW(srcr->top) + dv) == CW(dstr->top);
+    return (srcr->top + dv) == dstr->top;
 }
 
 void Executor::canonicalize_bogo_map_cleanup(const BitMap *bogo_map,
@@ -82,8 +82,8 @@ void Executor::canonicalize_bogo_map_cleanup(const BitMap *bogo_map,
 void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_addr,
                                      struct cleanup_info *info)
 {
-    int high_bits = ((unsigned short)CW(bogo_map->rowBytes)) >> 14;
-    int low_bit = ((unsigned short)CW(bogo_map->rowBytes)) & 1;
+    int high_bits = ((unsigned short)bogo_map->rowBytes) >> 14;
+    int low_bit = ((unsigned short)bogo_map->rowBytes) & 1;
 
     switch(high_bits)
     {
@@ -96,15 +96,15 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
             canonical->baseAddr = bogo_map->baseAddr;
             canonical->bounds = bogo_map->bounds;
 
-            canonical->pmVersion = CWC(0);
+            canonical->pmVersion = 0;
 
             /* no packing currently supported */
-            canonical->packType = CWC(0);
-            canonical->packSize = CLC(0);
+            canonical->packType = 0;
+            canonical->packSize = 0;
 
-            canonical->vRes = canonical->hRes = CLC(72 << 16);
+            canonical->vRes = canonical->hRes = 72 << 16;
 
-            gd_pmap = GD_PMAP(MR(LM(TheGDevice)));
+            gd_pmap = GD_PMAP(LM(TheGDevice));
             if(canonical->baseAddr == PIXMAP_BASEADDR_X(gd_pmap))
             {
                 pixmap_set_pixel_fields(canonical, PIXMAP_PIXEL_SIZE(gd_pmap));
@@ -121,11 +121,11 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
                 canonical->rowBytes = (bogo_map->rowBytes
                                        | PIXMAP_DEFAULT_ROW_BYTES_X);
                 info->cleanup_type = Executor::cleanup_info::cleanup_none;
-                canonical->pmTable = RM(validate_relative_bw_ctab());
+                canonical->pmTable = validate_relative_bw_ctab();
             }
-            canonical->planeBytes = CLC(0);
+            canonical->planeBytes = 0;
 
-            canonical->pmReserved = CLC(0);
+            canonical->pmReserved = 0;
             break;
         }
 
@@ -174,7 +174,7 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
             }
             else
             {
-                PixMapHandle pixmap_handle = MR(*(GUEST<PixMapHandle> *)bogo_map);
+                PixMapHandle pixmap_handle = *(GUEST<PixMapHandle> *)bogo_map;
 
                 *canonical_addr = STARH(pixmap_handle);
 
@@ -190,7 +190,7 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
     }
 #if !defined(NDEBUG)
     if((RECT_WIDTH(&BITMAP_BOUNDS(*canonical_addr))
-        * CW((*canonical_addr)->pixelSize)
+        * (*canonical_addr)->pixelSize
         / 8)
        > BITMAP_ROWBYTES(*canonical_addr))
         warning_unexpected("unlikely map");
@@ -238,13 +238,13 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
     }
 
     row_bytes = BITMAP_ROWBYTES(src);
-    pixel_size = CW(src->pixelSize);
+    pixel_size = src->pixelSize;
 
     direct_bits_p = (pixel_size == 16 || pixel_size == 32);
     if(pixel_size == 32)
-        pack_type = CWC(2);
+        pack_type = 2;
     else
-        pack_type = CWC(0);
+        pack_type = 0;
 
     if(direct_bits_p)
         opcode = mask ? OP_DirectBitsRgn : OP_DirectBitsRect;
@@ -258,7 +258,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
 
     if(direct_bits_p)
     {
-        GUEST<int32_t> swapped_bogo_baseaddr = CLC(0xFF);
+        GUEST<int32_t> swapped_bogo_baseaddr = 0xFF;
 
         PICWRITE(&swapped_bogo_baseaddr, sizeof swapped_bogo_baseaddr);
     }
@@ -286,16 +286,16 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
 
     if(!direct_bits_p)
     {
-        HLockGuard guard(MR(src->pmTable));
+        HLockGuard guard(src->pmTable);
         CTabPtr ctab;
 
-        ctab = STARH(MR(src->pmTable));
+        ctab = STARH(src->pmTable);
 
         /* write out the src color table */
         PICWRITE(&zero, sizeof zero);
         PICWRITE(&ctab->ctFlags, sizeof ctab->ctFlags);
         PICWRITE(&ctab->ctSize, sizeof ctab->ctSize);
-        for(i = 0; i <= CW(ctab->ctSize); i++)
+        for(i = 0; i <= ctab->ctSize; i++)
         {
             ColorSpec *elt;
 
@@ -307,7 +307,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
 
     PICWRITE(src_rect, sizeof *src_rect);
     PICWRITE(dst_rect, sizeof *dst_rect);
-    swapped_mode = CW(mode);
+    swapped_mode = mode;
     PICWRITE(&swapped_mode, sizeof swapped_mode);
     if(mask)
     {
@@ -315,13 +315,13 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
         PICWRITE(STARH(mask), Hx(mask, rgnSize));
     }
     height = RECT_HEIGHT(&src->bounds);
-    if(row_bytes < 8 || pack_type == CWC(2))
+    if(row_bytes < 8 || pack_type == 2)
     {
-        if(pack_type == CWC(2))
+        if(pack_type == 2)
         {
             uint8_t *current, *end;
 
-            current = (uint8_t *)MR(src->baseAddr) + 1;
+            current = (uint8_t *)src->baseAddr + 1;
             end = current + row_bytes * height;
 
             while(current < end)
@@ -333,7 +333,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
                 PICWRITE("", 1);
         }
         else
-            PICWRITE(MR(src->baseAddr), row_bytes * height);
+            PICWRITE(src->baseAddr, row_bytes * height);
     }
     else
     {
@@ -351,7 +351,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
 
         /* #### why the extra 5 bytes? */
         packed_line = (uint8_t *)alloca(row_bytes + 5);
-        baseaddr = (uint8_t *)MR(src->baseAddr);
+        baseaddr = (uint8_t *)src->baseAddr;
         ip = (Ptr)baseaddr;
         parity = 0;
 
@@ -368,14 +368,14 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
 
         for(i = 0; i < height; i++)
         {
-            GUEST<Ptr> op = RM((Ptr)packed_line);
+            GUEST<Ptr> op = (Ptr)packed_line;
             gui_assert((uint8_t *)ip == &baseaddr[row_bytes * i]);
-            GUEST<Ptr> ip2 = RM(ip);
+            GUEST<Ptr> ip2 = ip;
             PackBits(&ip2, &op, row_bytes);
-            ip = MR(ip2);
-            count = MR(op) - (Ptr)packed_line;
+            ip = ip2;
+            count = op - (Ptr)packed_line;
             parity += count + countsize;
-            swappedcount = CW(count);
+            swappedcount = count;
             PICWRITE(countloc, countsize);
             PICWRITE(packed_line, count);
         }
@@ -398,8 +398,8 @@ void Executor::ROMlib_bogo_stdbits(BitMap *src_bogo_map, BitMap *dst_bogo_map,
 
     struct cleanup_info cleanup_info[2];
 
-    if(CW(dst_rect->bottom) <= CW(dst_rect->top)
-       || CW(dst_rect->right) <= CW(dst_rect->left)
+    if(dst_rect->bottom <= dst_rect->top
+       || dst_rect->right <= dst_rect->left
        || (mask && !SectRect(dst_rect, &HxX(mask, rgnBBox), &dummy_rect)))
         return;
 
@@ -419,12 +419,12 @@ void Executor::ROMlib_bogo_stdbits(BitMap *src_bogo_map, BitMap *dst_bogo_map,
     canonicalize_bogo_map(src_bogo_map, &src, &cleanup_info[0]);
     canonicalize_bogo_map(dst_bogo_map, &dst, &cleanup_info[1]);
 
-    if(MR(qdGlobals().thePort)->picSave)
+    if(qdGlobals().thePort->picSave)
     {
         write_copybits_picdata(src, dst, src_rect, dst_rect, mode, mask);
     }
 
-    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
+    if(PORT_PEN_VIS(qdGlobals().thePort) < 0)
         return;
 
     ROMlib_real_copy_bits(src, dst, src_rect, dst_rect, mode, mask);
@@ -442,15 +442,15 @@ void Executor::StdBitsPicSaveFlag(const BitMap *src_bogo_map,
 
     /* we want the actual port bits, no fooling; so don't use the
      accessor macros */
-    BitMap *dst_bogo_map = &MR(qdGlobals().thePort)->portBits;
+    BitMap *dst_bogo_map = &qdGlobals().thePort->portBits;
 
     PixMap dummy_space[2];
     PixMap *src = &dummy_space[0], *dst = &dummy_space[1];
 
     struct cleanup_info cleanup_info[2];
 
-    if(CW(dst_rect->bottom) <= CW(dst_rect->top)
-       || CW(dst_rect->right) <= CW(dst_rect->left)
+    if(dst_rect->bottom <= dst_rect->top
+       || dst_rect->right <= dst_rect->left
        || (mask && !SectRect(dst_rect, &HxX(mask, rgnBBox), &dummy_rect)))
         return;
 
@@ -472,13 +472,13 @@ void Executor::StdBitsPicSaveFlag(const BitMap *src_bogo_map,
 
     if(savepic)
     {
-        if(MR(qdGlobals().thePort)->picSave)
+        if(qdGlobals().thePort->picSave)
         {
             write_copybits_picdata(src, dst, src_rect, dst_rect, mode, mask);
         }
     }
 
-    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
+    if(PORT_PEN_VIS(qdGlobals().thePort) < 0)
         return;
 
     ROMlib_real_copy_bits(src, dst, src_rect, dst_rect, mode, mask);
@@ -527,16 +527,16 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
     TEMP_ALLOC_DECL(temp_scale_bits);
     TEMP_ALLOC_DECL(temp_overlap_bits);
 
-    the_gd = MR(LM(TheGDevice));
+    the_gd = LM(TheGDevice);
     the_gd_pmap = GD_PMAP(the_gd);
-    current_port = MR(qdGlobals().thePort);
+    current_port = qdGlobals().thePort;
 
 #if defined(SAVE_CURSOR)
     screen_src_p = active_screen_addr_p(src);
 #endif
 
     dst_rgb_spec = pixmap_rgb_spec(dst);
-    dst_depth = CW(dst->pixelSize);
+    dst_depth = dst->pixelSize;
 
     switch(dst_depth)
     {
@@ -569,12 +569,12 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
     /* if the source and dest differ in depths, perform a depth
      conversion on the src, so it matches that of the depth */
     if(src->pixelSize != dst->pixelSize
-       || (src->pmTable != dst->pmTable && (CW(src->pixelSize) < 16
-                                            && (CTAB_SEED_X(MR(src->pmTable))
+       || (src->pmTable != dst->pmTable && (src->pixelSize < 16
+                                            && (CTAB_SEED_X(src->pmTable)
                                                     /* we assume the destination has the same color table as
 		  the current graphics device */
                                                     != CTAB_SEED_X(PIXMAP_TABLE(GD_PMAP(the_gd)))
-                                                && CTAB_SEED_X(MR(src->pmTable)) != CLC(0)))))
+                                                && CTAB_SEED_X(src->pmTable) != 0))))
     {
         PixMap *new_src = (PixMap *)alloca(sizeof(PixMap));
         /* convert_pixmap expects the src rect to be aligned to byte
@@ -592,7 +592,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         }
 #endif /* SAVE_CURSOR */
 
-        src_depth = CW(src->pixelSize);
+        src_depth = src->pixelSize;
 
         switch(src_depth)
         {
@@ -617,20 +617,20 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 	 coordinates; and round down (up) to the byte boundary, and
 	 re-translate to boundary-relative bitmap coords */
         widened_src_rect->left
-            = CW(((CW(src_rect->left) - CW(src->bounds.left))
+            = ((src_rect->left - src->bounds.left)
                   & ~src_sub_byte_bits)
-                 + CW(src->bounds.left));
+                 + src->bounds.left;
         widened_src_rect->right
-            = CW((((CW(src_rect->right) - CW(src->bounds.left))
+            = (((src_rect->right - src->bounds.left)
                    + src_sub_byte_bits)
                   & ~src_sub_byte_bits)
-                 + CW(src->bounds.left));
+                 + src->bounds.left;
 
         /* the new_src should `be a pixmap' (have the pixmap bits set in
          the rowBytes) only if the dst is a pixmap; convert_pixmap
          does different things if the destination is a bitmap */
         new_src->rowBytes = (PIXMAP_DEFAULT_ROW_BYTES_X
-                             | CW((((RECT_WIDTH(widened_src_rect)
+                             | ((((RECT_WIDTH(widened_src_rect)
                                      * dst_depth)
                                     + 31)
                                    / 32)
@@ -639,10 +639,10 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         /* Allocate temporary storage for the new_src_bits bitmap. */
 
         n_bytes_needed = (BITMAP_ROWBYTES(new_src)
-                          * (CW(src_rect->bottom) - CW(src_rect->top)));
+                          * (src_rect->bottom - src_rect->top));
 
         TEMP_ALLOC_ALLOCATE(new_src_bits, temp_depth_bits, n_bytes_needed);
-        new_src->baseAddr = RM((Ptr)new_src_bits);
+        new_src->baseAddr = (Ptr)new_src_bits;
 
         pixmap_set_pixel_fields(new_src, dst_depth);
         new_src->pmTable = PIXMAP_TABLE_X(the_gd_pmap);
@@ -680,11 +680,11 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
                 / 8)
                + 3)
             & ~3;
-        new_src->rowBytes = CW(new_src_row_bytes) | PIXMAP_DEFAULT_ROW_BYTES_X;
+        new_src->rowBytes = new_src_row_bytes | PIXMAP_DEFAULT_ROW_BYTES_X;
 
         TEMP_ALLOC_ALLOCATE(scale_base, temp_scale_bits,
                             new_src_row_bytes * RECT_HEIGHT(dst_rect));
-        new_src->baseAddr = RM((Ptr)scale_base);
+        new_src->baseAddr = (Ptr)scale_base;
 
         pixmap_set_pixel_fields(new_src, dst_depth);
 
@@ -698,7 +698,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 
     /* compute the mask region before checking if the source and dest
      overlap becuase we only double buffer if dy is nonzero */
-    /* intersect the region mask with MR(qdGlobals().thePort) bounds, MR(qdGlobals().thePort) rect, the
+    /* intersect the region mask with qdGlobals().thePort bounds, qdGlobals().thePort rect, the
      destination rect, and the port {clip, vis} regions */
     mask_region = NewRgn();
 
@@ -711,12 +711,12 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 
     if(src->baseAddr == dst->baseAddr
        && (src_dst_overlap_and_dst_below_src_p(src_rect, dst_rect,
-                                               CW(dst->bounds.left) - CW(src->bounds.left),
-                                               CW(dst->bounds.top) - CW(src->bounds.top)))
+                                               dst->bounds.left - src->bounds.left,
+                                               dst->bounds.top - src->bounds.top))
        && (!RGN_SMALL_P(mask_region)
            || dy_zero_p(src_rect, dst_rect,
-                        CW(dst->bounds.left) - CW(src->bounds.left),
-                        CW(dst->bounds.top) - CW(src->bounds.top))))
+                        dst->bounds.left - src->bounds.left,
+                        dst->bounds.top - src->bounds.top)))
     {
         PixMap *new_src;
         void *overlap_bits;
@@ -740,17 +740,17 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         SectRect(&src->bounds, src_rect, &clipped_src_rect);
 
         height = RECT_HEIGHT(&clipped_src_rect);
-        offset = CW(clipped_src_rect.top) - CW(src_rect->top);
+        offset = clipped_src_rect.top - src_rect->top;
 
-        copy_rect.top = CW(CW(src_rect->top) + offset);
-        copy_rect.bottom = CW(CW(src_rect->top) + offset + height);
+        copy_rect.top = src_rect->top + offset;
+        copy_rect.bottom = src_rect->top + offset + height;
         copy_rect.left = src->bounds.left;
         copy_rect.right = src->bounds.right;
 
         new_src->rowBytes = src->rowBytes;
         TEMP_ALLOC_ALLOCATE(overlap_bits, temp_overlap_bits,
                             height * BITMAP_ROWBYTES(src));
-        new_src->baseAddr = RM((Ptr)overlap_bits);
+        new_src->baseAddr = (Ptr)overlap_bits;
         new_src->bounds = copy_rect;
 
         pixmap_set_pixel_fields(new_src, dst_depth);
@@ -817,9 +817,9 @@ ROMlib_real_copy_bits(PixMap *src, PixMap *dst,
     {
         int default_nbits, new_nbits;
 
-        default_nbits = (RECT_WIDTH(src_rect) * CW(dst->pixelSize) * RECT_HEIGHT(src_rect));
+        default_nbits = (RECT_WIDTH(src_rect) * dst->pixelSize * RECT_HEIGHT(src_rect));
 
-        new_nbits = ((RECT_WIDTH(dst_rect) * CW(src->pixelSize) * RECT_HEIGHT(dst_rect)) + (RECT_WIDTH(dst_rect) * CW(dst->pixelSize) * RECT_HEIGHT(dst_rect)));
+        new_nbits = ((RECT_WIDTH(dst_rect) * src->pixelSize * RECT_HEIGHT(dst_rect)) + (RECT_WIDTH(dst_rect) * dst->pixelSize * RECT_HEIGHT(dst_rect)));
         shrink_first_p = (new_nbits < default_nbits);
     }
 
@@ -848,14 +848,14 @@ ROMlib_real_copy_bits(PixMap *src, PixMap *dst,
 #endif /* SAVE_CURSOR */
 
         new_src = (PixMap *)alloca(sizeof *new_src);
-        src_depth = CW(src->pixelSize);
+        src_depth = src->pixelSize;
         temp_row_bytes = (RECT_WIDTH(dst_rect) * src_depth + 31) / 32 * 4;
         temp_bytes_needed = temp_row_bytes * RECT_HEIGHT(dst_rect);
         TEMP_ALLOC_ALLOCATE(temp_bits, temp_alloc_bits, temp_bytes_needed);
 
         *new_src = *src;
-        new_src->baseAddr = RM((Ptr)temp_bits);
-        new_src->rowBytes = CW(temp_row_bytes | PIXMAP_DEFAULT_ROWBYTES);
+        new_src->baseAddr = (Ptr)temp_bits;
+        new_src->rowBytes = temp_row_bytes | PIXMAP_DEFAULT_ROWBYTES;
         new_src->bounds = *dst_rect;
 
         scale_blt_bitmap((blt_bitmap_t *)src, (blt_bitmap_t *)new_src,

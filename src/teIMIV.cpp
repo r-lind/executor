@@ -32,8 +32,8 @@ void Executor::C_TEPinScroll(int16_t dh, int16_t dv, TEHandle te) /* IMIV-57 */
 
     if(dv > 0)
     {
-        int view_rect_top = CW(view_rect->top);
-        int dest_rect_top = CW(dest_rect->top);
+        int view_rect_top = view_rect->top;
+        int dest_rect_top = dest_rect->top;
 
         /* `destRect.top' must stay below `viewRect.bottom' */
 
@@ -43,7 +43,7 @@ void Executor::C_TEPinScroll(int16_t dh, int16_t dv, TEHandle te) /* IMIV-57 */
     else
     {
         Point end_pt;
-        int view_rect_bottom = CW(view_rect->bottom);
+        int view_rect_bottom = view_rect->bottom;
         int dest_rect_bottom;
 
         {
@@ -71,7 +71,7 @@ void Executor::C_TEPinScroll(int16_t dh, int16_t dv, TEHandle te) /* IMIV-57 */
 
         if(dh > 0)
         {
-            maxshift = CW(view_rect->left) - CW(dest_rect->left);
+            maxshift = view_rect->left - dest_rect->left;
             if(maxshift > 0)
                 dh = std::min(maxshift, dh);
             else
@@ -79,7 +79,7 @@ void Executor::C_TEPinScroll(int16_t dh, int16_t dv, TEHandle te) /* IMIV-57 */
         }
         else
         {
-            maxshift = CW(view_rect->left) - CW(dest_rect->left);
+            maxshift = view_rect->left - dest_rect->left;
             if(maxshift < 0)
                 dh = std::max(maxshift, dh);
             else
@@ -103,9 +103,9 @@ void Executor::ROMlib_teautoloop(TEHandle teh)
     GUEST<Point> pt;
 
     GetMouse(&pt);
-    if(CW(pt.v) < Hx(teh, viewRect.top))
+    if(pt.v < Hx(teh, viewRect.top))
         TEPinScroll(0, Hx(teh, lineHeight), teh);
-    else if(CW(pt.v) > Hx(teh, viewRect.bottom))
+    else if(pt.v > Hx(teh, viewRect.bottom))
         TEPinScroll(0, -Hx(teh, lineHeight), teh);
 }
 
@@ -135,7 +135,7 @@ void Executor::C_TESelView(TEHandle teh) /* IMIV-57 */
     int16_t dh, dv;
     Point start, stop;
 
-    if(STARH(TEHIDDENH(teh))->flags & CLC(TEAUTOVIEWBIT))
+    if(STARH(TEHIDDENH(teh))->flags & TEAUTOVIEWBIT)
     {
         TE_CHAR_TO_POINT(teh, TE_SEL_START(teh), &start);
         TE_CHAR_TO_POINT(teh, TE_SEL_END(teh), &stop);
@@ -151,7 +151,7 @@ void Executor::C_TESelView(TEHandle teh) /* IMIV-57 */
 void Executor::C_TEAutoView(BOOLEAN autoflag, TEHandle teh) /* IMIV-57 */
 {
     if(autoflag)
-        STARH(TEHIDDENH(teh))->flags |= CLC(TEAUTOVIEWBIT);
+        STARH(TEHIDDENH(teh))->flags |= TEAUTOVIEWBIT;
     else
-        STARH(TEHIDDENH(teh))->flags &= CLC(~TEAUTOVIEWBIT);
+        STARH(TEHIDDENH(teh))->flags &= ~TEAUTOVIEWBIT;
 }

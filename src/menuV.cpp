@@ -27,7 +27,7 @@ void Executor::C_InitProcMenu(INTEGER mbid)
 #if 0
     /* NOTE:  We don't dispose this guy because it is a phoney resource */
     if (LM(MBDFHndl))
-	DisposeHandle(Cx(LM(MBDFHndl)));
+	DisposeHandle(LM(MBDFHndl));
 #endif
 
     /* NOTE: even though the docs imply that the low three bits of the
@@ -37,14 +37,14 @@ void Executor::C_InitProcMenu(INTEGER mbid)
      * GetResource to fail.  A small test program then confirmed that
      * the bits are not masked off.
      */
-    LM(MBDFHndl) = RM(GetResource(TICK("MBDF"), mbid));
-    HxX(MENULIST, mufu) = CW(mbid);
+    LM(MBDFHndl) = GetResource(TICK("MBDF"), mbid);
+    HxX(MENULIST, mufu) = mbid;
     MBDFCALL(mbInit, 0, 0L);
 }
 
 LONGINT Executor::C_MenuChoice()
 {
-    return Cx(LM(MenuDisable));
+    return LM(MenuDisable);
 }
 
 void Executor::C_GetItemCmd(MenuHandle mh, INTEGER item,
@@ -53,7 +53,7 @@ void Executor::C_GetItemCmd(MenuHandle mh, INTEGER item,
     mextp mep;
 
     if((mep = ROMlib_mitemtop(mh, item, (StringPtr *)0)))
-        *cmdp = CW((unsigned short)(unsigned char)mep->mkeyeq);
+        *cmdp = (unsigned short)(unsigned char)mep->mkeyeq;
 }
 
 void Executor::C_SetItemCmd(MenuHandle mh, INTEGER item, CharParameter cmd)
@@ -108,8 +108,8 @@ LONGINT Executor::C_PopUpMenuSelect(MenuHandle mh, INTEGER top, INTEGER left,
         item = count;
     }
 
-    ThePortGuard guard(MR(wmgr_port));
-    tempi = CW(item);
+    ThePortGuard guard(wmgr_port);
+    tempi = item;
     MENUCALL(mPopUpRect, mh, &saver, p, &tempi);
     ROMlib_rootless_openmenu(saver);
     LM(TopMenuItem) = tempi;
@@ -117,12 +117,12 @@ LONGINT Executor::C_PopUpMenuSelect(MenuHandle mh, INTEGER top, INTEGER left,
 
     MBDFCALL(mbSave, where, ptr_to_longint(&saver));
 
-    auto saveclip = PORT_CLIP_REGION_X(MR(qdGlobals().thePort)); /* ick */
-    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(NewRgn());
-    RectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), &saver);
+    auto saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort); /* ick */
+    PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
+    RectRgn(PORT_CLIP_REGION(qdGlobals().thePort), &saver);
     MENUCALL(mDrawMsg, mh, &saver, p, nullptr);
-    DisposeRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)));
-    PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclip;
+    DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
+    PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
     MBDFCALL(mbSaveAlt, 0, where);
     
     return ROMlib_menuhelper(mh, &saver, where, true, 1);

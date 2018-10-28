@@ -24,7 +24,7 @@ void Executor::C_ROMlib_mysound(INTEGER i)
 
 void Executor::C_ErrorSound(SoundProcPtr sp) /* IMI-411 */
 {
-    LM(DABeeper) = RM(sp);
+    LM(DABeeper) = sp;
 }
 
 void Executor::C_InitDialogs(ProcPtr rp) /* IMI-411 */
@@ -33,8 +33,8 @@ void Executor::C_InitDialogs(ProcPtr rp) /* IMI-411 */
 
     TheZoneGuard guard(LM(SysZone));
 
-    LM(DlgFont) = CWC(systemFont);
-    LM(ResumeProc) = RM(rp);
+    LM(DlgFont) = systemFont;
+    LM(ResumeProc) = rp;
     ErrorSound(&ROMlib_mysound);
     GUEST<Handle> tmp;
     PtrToHand(nothing, &tmp, (LONGINT)1);
@@ -49,5 +49,5 @@ void Executor::C_InitDialogs(ProcPtr rp) /* IMI-411 */
 
 void Executor::SetDialogFont(INTEGER i) /* IMI-412 */
 {
-    LM(DlgFont) = CW(i);
+    LM(DlgFont) = i;
 }

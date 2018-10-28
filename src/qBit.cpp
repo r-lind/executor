@@ -36,15 +36,15 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
 	  those actual bytes, not the logical structure that is the
 	  portBits */
     dst_is_theport_p
-        = (!memcmp(dst_bitmap, &MR(qdGlobals().thePort)->portBits, sizeof(BitMap))
+        = (!memcmp(dst_bitmap, &qdGlobals().thePort->portBits, sizeof(BitMap))
            || (IS_PIXMAP_PTR_P(dst_bitmap)
-               && CGrafPort_p(MR(qdGlobals().thePort))
+               && CGrafPort_p(qdGlobals().thePort)
                && !memcmp(dst_bitmap,
                           STARH(CPORT_PIXMAP(theCPort)),
                           sizeof(BitMap))));
     if(dst_is_theport_p)
     {
-        if(!CGrafPort_p(MR(qdGlobals().thePort)) && mode >= blend)
+        if(!CGrafPort_p(qdGlobals().thePort) && mode >= blend)
         {
             warning_unexpected("mode = %d", mode);
             mode = srcCopy;
@@ -59,24 +59,24 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
         RgnHandle big_region;
         QDProcsPtr gp;
 
-        /* save away MR(qdGlobals().thePort) fields */
+        /* save away qdGlobals().thePort fields */
         /* this saves the port bits (in the case of a GrafPort), and
 	      the portPixMap in the case of a CGrafPort (among other
 	      things */
-        savevisr = PORT_VIS_REGION_X(MR(qdGlobals().thePort));
-        saveclipr = PORT_CLIP_REGION_X(MR(qdGlobals().thePort));
+        savevisr = PORT_VIS_REGION_X(qdGlobals().thePort);
+        saveclipr = PORT_CLIP_REGION_X(qdGlobals().thePort);
 
         big_region = NewRgn();
         SetRectRgn(big_region, -32767, -32767, 32767, 32767);
-        PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = RM(big_region);
-        PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = RM(big_region);
+        PORT_VIS_REGION_X(qdGlobals().thePort) = big_region;
+        PORT_CLIP_REGION_X(qdGlobals().thePort) = big_region;
 
-        /* give a warning of _StdBits or MR(qdGlobals().thePort)'s bitsProc has
+        /* give a warning of _StdBits or qdGlobals().thePort's bitsProc has
 	      been patched out */
-        gp = PORT_GRAF_PROCS(MR(qdGlobals().thePort));
+        gp = PORT_GRAF_PROCS(qdGlobals().thePort);
         if(gp
-           && MR(gp->bitsProc) != &StdBits)
-            warning_unexpected("MR(qdGlobals().thePort) bitsProc patched out!");
+           && gp->bitsProc != &StdBits)
+            warning_unexpected("qdGlobals().thePort bitsProc patched out!");
 
         if(StdBits.isPatched())
             warning_unexpected("_StdBits patched out!");
@@ -85,8 +85,8 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
                             src_rect, dst_rect, mode, mask);
 
         /* restore fields */
-        PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = savevisr;
-        PORT_CLIP_REGION_X(MR(qdGlobals().thePort)) = saveclipr;
+        PORT_VIS_REGION_X(qdGlobals().thePort) = savevisr;
+        PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclipr;
         DisposeRgn(big_region);
     }
 
@@ -109,44 +109,44 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
             
       bogo_port_pixmap = nullptr;
       
-      /* save away MR(qdGlobals().thePort) fields */
+      /* save away qdGlobals().thePort fields */
       /* this saves the port bits (in the case of a GrafPort), and
 	 the portPixMap in the case of a CGrafPort (among other
 	 things */
-      savemap = MR(qdGlobals().thePort)->portBits;
-      savevisr = PORT_VIS_REGION_X (MR(qdGlobals().thePort));
-      saveclipr = PORT_CLIP_REGION_X (MR(qdGlobals().thePort));
-      saverect = PORT_RECT (MR(qdGlobals().thePort));
+      savemap = qdGlobals().thePort->portBits;
+      savevisr = PORT_VIS_REGION_X (qdGlobals().thePort);
+      saveclipr = PORT_CLIP_REGION_X (qdGlobals().thePort);
+      saverect = PORT_RECT (qdGlobals().thePort);
       
-      if ((dst_bitmap->rowBytes & CWC (1 << 15))
-	  && ! (dst_bitmap->rowBytes & CWC (1 << 14)))
+      if ((dst_bitmap->rowBytes & 1 << 15)
+	  && ! (dst_bitmap->rowBytes & 1 << 14))
 	{
 	  GUEST<Handle> t;
 
 	  PtrToHand ((Ptr) dst_bitmap, &t, sizeof (PixMap));
 	  bogo_port_pixmap = (PixMapHandle) t;
-	  CPORT_PIXMAP_X_NO_ASSERT (theCPort) = CL (bogo_port_pixmap);
+	  CPORT_PIXMAP_X_NO_ASSERT (theCPort) = bogo_port_pixmap;
 	  CPORT_VERSION_X_NO_ASSERT (theCPort) = CPORT_FLAG_BITS_X;
 	}
       else
-	MR(qdGlobals().thePort)->portBits = *dst_bitmap;
+	qdGlobals().thePort->portBits = *dst_bitmap;
       
       big_region = NewRgn ();
       SetRectRgn (big_region, -32767, -32767, 32767, 32767);
-      PORT_VIS_REGION_X (MR(qdGlobals().thePort)) = CL (big_region);
-      PORT_CLIP_REGION_X (MR(qdGlobals().thePort)) = CL (big_region);
-      SetRect (&PORT_RECT (MR(qdGlobals().thePort)), -32767, -32767, 32767, 32767);
+      PORT_VIS_REGION_X (qdGlobals().thePort) = big_region;
+      PORT_CLIP_REGION_X (qdGlobals().thePort) = big_region;
+      SetRect (&PORT_RECT (qdGlobals().thePort), -32767, -32767, 32767, 32767);
       
-      if (src_bitmap == &MR(qdGlobals().thePort)->portBits)
+      if (src_bitmap == &qdGlobals().thePort->portBits)
 	src_bitmap = &savemap;
       
       CALLBITS (src_bitmap, &tmp_rect, dst_rect, mode, mask);
       
       /* restore fields */
-      PORT_VIS_REGION_X (MR(qdGlobals().thePort)) = savevisr;
-      PORT_CLIP_REGION_X (MR(qdGlobals().thePort)) = saveclipr;
-      PORT_RECT (MR(qdGlobals().thePort)) = saverect;
-      MR(qdGlobals().thePort)->portBits = savemap;
+      PORT_VIS_REGION_X (qdGlobals().thePort) = savevisr;
+      PORT_CLIP_REGION_X (qdGlobals().thePort) = saveclipr;
+      PORT_RECT (qdGlobals().thePort) = saverect;
+      qdGlobals().thePort->portBits = savemap;
       if (bogo_port_pixmap)
 	DisposeHandle ((Handle) bogo_port_pixmap);
       DisposeRgn (big_region);
@@ -166,25 +166,25 @@ void Executor::C_ScrollRect(Rect *rp, INTEGER dh, INTEGER dv,
 
     PAUSERECORDING;
 
-    cgrafport_p = CGrafPort_p(MR(qdGlobals().thePort));
+    cgrafport_p = CGrafPort_p(qdGlobals().thePort);
     if(cgrafport_p)
     {
-        fg_rgb = CPORT_RGB_FG_COLOR(MR(qdGlobals().thePort));
-        bk_rgb = CPORT_RGB_BK_COLOR(MR(qdGlobals().thePort));
+        fg_rgb = CPORT_RGB_FG_COLOR(qdGlobals().thePort);
+        bk_rgb = CPORT_RGB_BK_COLOR(qdGlobals().thePort);
     }
-    fg_color = PORT_FG_COLOR_X(MR(qdGlobals().thePort));
-    bk_color = PORT_BK_COLOR_X(MR(qdGlobals().thePort));
+    fg_color = PORT_FG_COLOR_X(qdGlobals().thePort);
+    bk_color = PORT_BK_COLOR_X(qdGlobals().thePort);
 
     RGBForeColor(&ROMlib_black_rgb_color);
     RGBBackColor(&ROMlib_white_rgb_color);
 
-    SectRect(rp, &HxX(PORT_VIS_REGION(MR(qdGlobals().thePort)), rgnBBox), rp);
-    SectRect(rp, &HxX(PORT_CLIP_REGION(MR(qdGlobals().thePort)), rgnBBox), rp);
-    SectRect(rp, &PORT_RECT(MR(qdGlobals().thePort)), rp);
-    SectRect(rp, &PORT_BOUNDS(MR(qdGlobals().thePort)), rp);
+    SectRect(rp, &HxX(PORT_VIS_REGION(qdGlobals().thePort), rgnBBox), rp);
+    SectRect(rp, &HxX(PORT_CLIP_REGION(qdGlobals().thePort), rgnBBox), rp);
+    SectRect(rp, &PORT_RECT(qdGlobals().thePort), rp);
+    SectRect(rp, &PORT_BOUNDS(qdGlobals().thePort), rp);
     srcregion = NewRgn();
-    CopyRgn(PORT_VIS_REGION(MR(qdGlobals().thePort)), srcregion);
-    SectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), srcregion, srcregion);
+    CopyRgn(PORT_VIS_REGION(qdGlobals().thePort), srcregion);
+    SectRgn(PORT_CLIP_REGION(qdGlobals().thePort), srcregion, srcregion);
     OffsetRgn(srcregion, dh, dv);
 
     RectRgn(temp2 = NewRgn(), rp);
@@ -192,56 +192,56 @@ void Executor::C_ScrollRect(Rect *rp, INTEGER dh, INTEGER dv,
 
     srcr = *rp;
 #if 0
-  OffsetRect(&srcr, -CW (PORT_BOUNDS (MR(qdGlobals().thePort)).left),
-	     -CW (PORT_BOUNDS (MR(qdGlobals().thePort)).top));   /* loc to glob */
+  OffsetRect(&srcr, -PORT_BOUNDS (qdGlobals().thePort).left,
+	     -PORT_BOUNDS (qdGlobals().thePort).top);   /* loc to glob */
 #endif
     dstr = srcr;
     updatergn2 = NewRgn();
     RectRgn(updatergn2, &srcr);
     if(dh > 0)
     {
-        dstr.left = CW(CW(dstr.left) + dh);
-        srcr.right = CW(CW(srcr.right) - dh);
+        dstr.left = dstr.left + dh;
+        srcr.right = srcr.right - dh;
     }
     else
     {
-        srcr.left = CW(CW(srcr.left) - dh);
-        dstr.right = CW(CW(dstr.right) + dh);
+        srcr.left = srcr.left - dh;
+        dstr.right = dstr.right + dh;
     }
     if(dv > 0)
     {
-        dstr.top = CW(CW(dstr.top) + dv);
-        srcr.bottom = CW(CW(srcr.bottom) - dv);
+        dstr.top = dstr.top + dv;
+        srcr.bottom = srcr.bottom - dv;
     }
     else
     {
-        srcr.top = CW(CW(srcr.top) - dv);
-        dstr.bottom = CW(CW(dstr.bottom) + dv);
+        srcr.top = srcr.top - dv;
+        dstr.bottom = dstr.bottom + dv;
     }
     RectRgn(temp = NewRgn(), &dstr);
     DiffRgn(updatergn2, temp, updatergn2);
 #if 0
   OffsetRgn(updatergn2,
-	    CW (PORT_BOUNDS (MR(qdGlobals().thePort)).left),
-	    CW (PORT_BOUNDS (MR(qdGlobals().thePort)).top)); /* glob to loc */
+	    PORT_BOUNDS (qdGlobals().thePort).left,
+	    PORT_BOUNDS (qdGlobals().thePort).top); /* glob to loc */
 #endif
     UnionRgn(updatergn2, temp2, updatergn2);
 
     /* I guess here we should clip to portRect, visRgn and clipRgn */
-    CopyRgn(PORT_VIS_REGION(MR(qdGlobals().thePort)), temp);
-    SectRgn(temp, PORT_CLIP_REGION(MR(qdGlobals().thePort)), temp);
+    CopyRgn(PORT_VIS_REGION(qdGlobals().thePort), temp);
+    SectRgn(temp, PORT_CLIP_REGION(qdGlobals().thePort), temp);
     SectRgn(temp, srcregion, temp);
 
-    CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
+    CopyBits(PORT_BITS_FOR_COPY(qdGlobals().thePort), PORT_BITS_FOR_COPY(qdGlobals().thePort),
              &srcr, &dstr, srcCopy, temp);
 
     if(cgrafport_p)
     {
-        CPORT_RGB_FG_COLOR(MR(qdGlobals().thePort)) = fg_rgb;
-        CPORT_RGB_BK_COLOR(MR(qdGlobals().thePort)) = bk_rgb;
+        CPORT_RGB_FG_COLOR(qdGlobals().thePort) = fg_rgb;
+        CPORT_RGB_BK_COLOR(qdGlobals().thePort) = bk_rgb;
     }
-    PORT_FG_COLOR_X(MR(qdGlobals().thePort)) = fg_color;
-    PORT_BK_COLOR_X(MR(qdGlobals().thePort)) = bk_color;
+    PORT_FG_COLOR_X(qdGlobals().thePort) = fg_color;
+    PORT_BK_COLOR_X(qdGlobals().thePort) = bk_color;
 
     EraseRgn(updatergn2);
     if(updatergn)

@@ -39,16 +39,16 @@ Executor::image_init(pixel_image_desc_t *image_desc)
         IMAGE_X_BITS(retval, i) = x_bits = NewPixMap();
         IMAGE_X_BITS_VALID(retval, i) = -1;
 
-        PIXMAP_BASEADDR_X(bits) = RM((Ptr)image_desc->bits[i].raw_bits);
-        PIXMAP_SET_ROWBYTES_X(bits, CW(image_desc->bits[i].row_bytes));
-        bounds.top = CW(image_desc->bounds.top);
-        bounds.left = CW(image_desc->bounds.left);
-        bounds.bottom = CW(image_desc->bounds.bottom);
-        bounds.right = CW(image_desc->bounds.right);
+        PIXMAP_BASEADDR_X(bits) = (Ptr)image_desc->bits[i].raw_bits;
+        PIXMAP_SET_ROWBYTES_X(bits, image_desc->bits[i].row_bytes);
+        bounds.top = image_desc->bounds.top;
+        bounds.left = image_desc->bounds.left;
+        bounds.bottom = image_desc->bounds.bottom;
+        bounds.right = image_desc->bounds.right;
         retval->bounds = bounds;
         PIXMAP_BOUNDS(bits) = bounds;
         bpp = image_desc->bits[i].bpp;
-        PIXMAP_CMP_SIZE_X(bits) = PIXMAP_PIXEL_SIZE_X(bits) = CW(bpp);
+        PIXMAP_CMP_SIZE_X(bits) = PIXMAP_PIXEL_SIZE_X(bits) = bpp;
         if(i == 0)
         {
             /* the `zero' image is simply a 1bbp black and white image */
@@ -65,15 +65,15 @@ Executor::image_init(pixel_image_desc_t *image_desc)
             bits_ctab = PIXMAP_TABLE(bits);
             SetHandleSize((Handle)bits_ctab,
                           CTAB_STORAGE_FOR_SIZE((1 << bpp) - 1));
-            CTAB_SIZE_X(bits_ctab) = CW((1 << bpp) - 1);
+            CTAB_SIZE_X(bits_ctab) = (1 << bpp) - 1;
             bits_ctab_table = CTAB_TABLE(bits_ctab);
             for(j = 0; j <= (1 << bpp) - 1; j++)
             {
-                bits_ctab_table[j].value = CW(j);
+                bits_ctab_table[j].value = j;
                 bits_ctab_table[j].rgb = {};
             }
-            CTAB_FLAGS_X(bits_ctab) = CWC(0);
-            CTAB_SEED_X(bits_ctab) = CL(GetCTSeed());
+            CTAB_FLAGS_X(bits_ctab) = 0;
+            CTAB_SEED_X(bits_ctab) = GetCTSeed();
         }
 
         {
@@ -86,15 +86,15 @@ Executor::image_init(pixel_image_desc_t *image_desc)
             x_row_bytes = MAX_ROWBYTES_FOR_WIDTH(width);
             p = NewPtr(x_row_bytes * height);
             memset(p, 0, x_row_bytes * height);
-            PIXMAP_BASEADDR_X(x_bits) = RM(p);
-            PIXMAP_SET_ROWBYTES_X(x_bits, CW(x_row_bytes));
+            PIXMAP_BASEADDR_X(x_bits) = p;
+            PIXMAP_SET_ROWBYTES_X(x_bits, x_row_bytes);
         }
     }
 
     return retval;
 }
 
-/* all image_... functions assume MR(qdGlobals().thePort) as target */
+/* all image_... functions assume qdGlobals().thePort as target */
 void Executor::image_copy(pixel_image_t *image, int color_p /* visual */,
                           Rect *dst_rect, int mode)
 {
@@ -105,7 +105,7 @@ void Executor::image_copy(pixel_image_t *image, int color_p /* visual */,
     image_validate_x_bits(image, color_p);
 
     x_bits = IMAGE_X_BITS(image, color_p);
-    WRAPPER_SET_PIXMAP_X(wrapper, RM(x_bits));
+    WRAPPER_SET_PIXMAP_X(wrapper, x_bits);
     x_bits_bounds = PIXMAP_BOUNDS(x_bits);
 
 #if 0
@@ -113,7 +113,7 @@ void Executor::image_copy(pixel_image_t *image, int color_p /* visual */,
   RGBBackColor (&ROMlib_white_rgb_color);
 #endif
 
-    CopyBits(wrapper, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
+    CopyBits(wrapper, PORT_BITS_FOR_COPY(qdGlobals().thePort),
              &x_bits_bounds, dst_rect, mode, nullptr);
 }
 
@@ -126,7 +126,7 @@ void Executor::image_validate_x_bits(pixel_image_t *image, int color_p /* visual
     GUEST<INTEGER> gd_bpp_x;
     int bits_ctab_seed_x;
 
-    gdev = MR(LM(TheGDevice));
+    gdev = LM(TheGDevice);
     gd_pixmap = GD_PMAP(gdev);
     gd_pixmap_ctab = PIXMAP_TABLE(gd_pixmap);
     gd_bpp_x = PIXMAP_PIXEL_SIZE_X(gd_pixmap);
@@ -181,5 +181,5 @@ void Executor::image_update_ctab(pixel_image_t *image, const RGBColor *new_color
     }
 
     if(ctab_changed_p)
-        CTAB_SEED_X(bits_ctab) = CL(GetCTSeed());
+        CTAB_SEED_X(bits_ctab) = GetCTSeed();
 }

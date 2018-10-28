@@ -136,7 +136,7 @@ validate_colors_for_control(ControlHandle ctl)
     int i;
 
     /* FIXME: tmp hack */
-    current_ctl_color_p = (CGrafPort_p(MR(qdGlobals().thePort)) != 0);
+    current_ctl_color_p = (CGrafPort_p(qdGlobals().thePort) != 0);
 
     hilited_p = (CTL_HILITE_X(ctl) != 255
                  && CTL_MIN(ctl) < CTL_MAX(ctl));
@@ -150,7 +150,7 @@ validate_colors_for_control(ControlHandle ctl)
     for(i = 0; i <= 14; i++)
         ctl_ctab_colors[i] = default_ctl_colors[i].rgb;
 
-    t_aux_c = MR(*lookup_aux_ctl(ctl));
+    t_aux_c = *lookup_aux_ctl(ctl);
     if(t_aux_c && HxZ(t_aux_c, acCTable))
     {
         CTabHandle c_ctab;
@@ -167,7 +167,7 @@ validate_colors_for_control(ControlHandle ctl)
             int index;
 
             c_ctab_entry = &c_ctab_table[i];
-            index = CW(c_ctab_entry->value);
+            index = c_ctab_entry->value;
             if(index >= 0 && index < (int)NELEM(ctl_ctab_colors))
                 ctl_ctab_colors[index] = c_ctab_entry->rgb;
         }
@@ -301,16 +301,16 @@ void draw_arrow(ControlHandle ctl, int part)
     if(vert_p)
     {
         if(part == inUpButton)
-            r.bottom = CW(CW(r.top) + width);
+            r.bottom = r.top + width;
         else
-            r.top = CW(CW(r.bottom) - width);
+            r.top = r.bottom - width;
     }
     else
     {
         if(part == inUpButton)
-            r.right = CW(CW(r.left) + height);
+            r.right = r.left + height;
         else
-            r.left = CW(CW(r.right) - height);
+            r.left = r.right - height;
     }
     active_p = (CTL_HILITE(ctl) == part);
 
@@ -333,17 +333,17 @@ void draw_page(ControlHandle ctl)
     width = RECT_WIDTH(&r);
     if(SB_VERT_P(height, width))
     {
-        r.top = CW(CW(r.top) + width);
-        r.bottom = CW(CW(r.bottom) - width);
-        r.left = CW(CW(r.left) + 1);
-        r.right = CW(CW(r.right) - 1);
+        r.top = r.top + width;
+        r.bottom = r.bottom - width;
+        r.left = r.left + 1;
+        r.right = r.right - 1;
     }
     else
     {
-        r.left = CW(CW(r.left) + height);
-        r.right = CW(CW(r.right) - height);
-        r.top = CW(CW(r.top) + 1);
-        r.bottom = CW(CW(r.bottom) - 1);
+        r.left = r.left + height;
+        r.right = r.right - height;
+        r.top = r.top + 1;
+        r.bottom = r.bottom - 1;
     }
 
     /* page_{fg, bk} colors are dependent on whether or not the sb is
@@ -373,22 +373,22 @@ void thumb_rect(ControlHandle ctl, Rect *thumb_rect_out)
         if(SB_VERT_P(height, width))
         {
             thumb_rect_out->top
-                = CW((short)(CW(r.top) + width
+                = (short)(r.top + width
                              + ((val - min)
-                                * ((LONGINT)height - 3 * width) / diff)));
-            thumb_rect_out->bottom = CW(CW(thumb_rect_out->top) + width);
-            thumb_rect_out->left = CW(CW(r.left) + 1);
-            thumb_rect_out->right = CW(CW(r.right) - 1);
+                                * ((LONGINT)height - 3 * width) / diff));
+            thumb_rect_out->bottom = thumb_rect_out->top + width;
+            thumb_rect_out->left = r.left + 1;
+            thumb_rect_out->right = r.right - 1;
         }
         else
         {
             thumb_rect_out->left
-                = CW((short)(CW(r.left) + height
+                = (short)(r.left + height
                              + ((val - min)
-                                * ((LONGINT)width - 3 * height) / diff)));
-            thumb_rect_out->right = CW(CW(thumb_rect_out->left) + height);
-            thumb_rect_out->top = CW(CW(r.top) + 1);
-            thumb_rect_out->bottom = CW(CW(r.bottom) - 1);
+                                * ((LONGINT)width - 3 * height) / diff));
+            thumb_rect_out->right = thumb_rect_out->left + height;
+            thumb_rect_out->top = r.top + 1;
+            thumb_rect_out->bottom = r.bottom - 1;
         }
     }
     else
@@ -414,8 +414,8 @@ LocalToGlobalRect(Rect *rp)
 static void
 GlobalToLocalRgn(RgnHandle rgn)
 {
-    OffsetRgn(rgn, CW(PORT_BOUNDS(MR(qdGlobals().thePort)).left),
-              CW(PORT_BOUNDS(MR(qdGlobals().thePort)).top));
+    OffsetRgn(rgn, PORT_BOUNDS(qdGlobals().thePort).left,
+              PORT_BOUNDS(qdGlobals().thePort).top);
 }
 
 typedef struct
@@ -447,15 +447,15 @@ void draw_thumb(ControlHandle ctl)
             {
                 dst_rect.top = new_thumb.top;
                 dst_rect.bottom = new_thumb.bottom;
-                dst_rect.left = CW(CW(new_thumb.left) - 1);
-                dst_rect.right = CW(CW(new_thumb.right) + 1);
+                dst_rect.left = new_thumb.left - 1;
+                dst_rect.right = new_thumb.right + 1;
             }
             else
             {
                 dst_rect.left = new_thumb.left;
                 dst_rect.right = new_thumb.right;
-                dst_rect.top = CW(CW(new_thumb.top) - 1);
-                dst_rect.bottom = CW(CW(new_thumb.bottom) + 1);
+                dst_rect.top = new_thumb.top - 1;
+                dst_rect.bottom = new_thumb.bottom + 1;
             }
 
             /* if the old_thumb rect is empty, ie., the thumb was not
@@ -546,22 +546,22 @@ where(ControlHandle ctl, Point p)
         width = RECT_WIDTH(&r);
         if(SB_VERT_P(height, width))
         {
-            if(p.v <= CW(r.top) + width)
+            if(p.v <= r.top + width)
                 return inUpButton;
-            else if(p.v >= CW(r.bottom) - width)
+            else if(p.v >= r.bottom - width)
                 return inDownButton;
-            else if(p.v < CW(thumbr.top))
+            else if(p.v < thumbr.top)
                 return inPageUp;
             else
                 return inPageDown;
         }
         else
         {
-            if(p.h <= CW(r.left) + height)
+            if(p.h <= r.left + height)
                 return inUpButton;
-            else if(p.h >= CW(r.right) - height)
+            else if(p.h >= r.right - height)
                 return inDownButton;
-            else if(p.h < CW(thumbr.left))
+            else if(p.h < thumbr.left)
                 return inPageUp;
             else
                 return inPageDown;
@@ -586,10 +586,10 @@ void Executor::C_new_pos_ctl(INTEGER depth, INTEGER flags, GDHandle target,
 
     r = CTL_RECT(ctl);
 
-    top = CW(r.top);
-    left = CW(r.left);
-    bottom = CW(r.bottom);
-    right = CW(r.right);
+    top = r.top;
+    left = r.left;
+    bottom = r.bottom;
+    right = r.right;
 
     height = bottom - top;
     width = right - left;
@@ -604,20 +604,20 @@ void Executor::C_new_pos_ctl(INTEGER depth, INTEGER flags, GDHandle target,
     if(SB_VERT_P(height, width))
     {
         a = top + width;
-        thumb_top = CW(thumbr.top) + HiWord(p) - a;
-        CTL_VALUE_X(ctl) = CW(min + (thumb_top
+        thumb_top = thumbr.top + HiWord(p) - a;
+        CTL_VALUE_X(ctl) = min + (thumb_top
                                      * ((LONGINT)max - min + 1)
-                                     / (bottom - a - (2 * width) + 1)));
+                                     / (bottom - a - (2 * width) + 1));
         if(CTL_VIS_X(ctl) == 255)
             draw_thumb(ctl);
     }
     else
     {
         a = left + height;
-        thumb_left = CW(thumbr.left) + LoWord(p) - a;
-        CTL_VALUE_X(ctl) = CW(min + (thumb_left
+        thumb_left = thumbr.left + LoWord(p) - a;
+        CTL_VALUE_X(ctl) = min + (thumb_left
                                      * ((LONGINT)max - min + 1)
-                                     / (right - a - (2 * height) + 1)));
+                                     / (right - a - (2 * height) + 1));
         if(CTL_VIS_X(ctl) == 255)
             draw_thumb(ctl);
     }
@@ -646,17 +646,17 @@ save_and_switch_to_color_port_if_needed(save_t *sp)
 {
     bool retval;
 
-    if(CGrafPort_p(MR(qdGlobals().thePort)))
+    if(CGrafPort_p(qdGlobals().thePort))
         retval = false;
     else
     {
         CGrafPtr wp;
 
-        sp->port = MR(qdGlobals().thePort);
-        sp->cp = *(CGrafPtr)MR(qdGlobals().thePort);
-        wp = (CGrafPtr)MR(wmgr_port);
-        sp->cp.portPixMap = RM((PixMapHandle)CopyMacHandle((Handle)MR(wp->portPixMap)));
-        PIXMAP_BOUNDS(PPR(sp->cp.portPixMap)) = MR(qdGlobals().thePort)->portBits.bounds;
+        sp->port = qdGlobals().thePort;
+        sp->cp = *(CGrafPtr)qdGlobals().thePort;
+        wp = (CGrafPtr)wmgr_port;
+        sp->cp.portPixMap = (PixMapHandle)CopyMacHandle((Handle)wp->portPixMap);
+        PIXMAP_BOUNDS(sp->cp.portPixMap) = qdGlobals().thePort->portBits.bounds;
         sp->cp.portVersion = wp->portVersion;
         sp->cp.grafVars = wp->grafVars;
         sp->cp.chExtra = wp->chExtra;
@@ -678,7 +678,7 @@ static void
 restore(const save_t *sp)
 {
     SetPort(sp->port);
-    DisposeHandle((Handle)PPR(sp->cp.portPixMap));
+    DisposeHandle((Handle)sp->cp.portPixMap);
 }
 
 LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
@@ -715,7 +715,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
     {
         case drawCntl:
             if(Hx(c, contrlVis)
-               && SectRect(&HxX(PORT_VIS_REGION(MR(qdGlobals().thePort)), rgnBBox),
+               && SectRect(&HxX(PORT_VIS_REGION(qdGlobals().thePort), rgnBBox),
                            &HxX(c, contrlRect), &r))
             {
                 validate_colors_for_control(c);
@@ -765,7 +765,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
             }
             break;
         case initCntl:
-            temph = RM((Handle)NewRgn());
+            temph = (Handle)NewRgn();
             HxX(c, contrlData) = temph;
             thumb_rect(c, &tempr);
             LocalToGlobalRect(&tempr);
@@ -794,29 +794,29 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
             break;
         case thumbCntl:
             pl = ptr_from_longint<struct lsastr *>(param);
-            p.v = CW(pl->limitRect.top);
-            p.h = CW(pl->limitRect.left);
+            p.v = pl->limitRect.top;
+            p.h = pl->limitRect.left;
             pl->slopRect = pl->limitRect = CTL_RECT(c);
             thumbr = HxX(CTL_DATA(c), rgnBBox);
             GlobalToLocalRect(&thumbr);
             rp = &thumbr;
-            height = CW(pl->slopRect.bottom) - CW(pl->slopRect.top);
-            width = CW(pl->slopRect.right) - CW(pl->slopRect.left);
+            height = pl->slopRect.bottom - pl->slopRect.top;
+            width = pl->slopRect.right - pl->slopRect.left;
             if(SB_VERT_P(height, width))
             {
-                pl->axis = CWC(vAxisOnly);
-                pl->limitRect.top = CW(CW(pl->limitRect.top)
-                                       + (width - (CW(rp->top) - p.v)));
-                pl->limitRect.bottom = CW(CW(pl->limitRect.bottom)
-                                          - (width - (p.v - CW(rp->bottom)) - 1));
+                pl->axis = vAxisOnly;
+                pl->limitRect.top = pl->limitRect.top
+                                       + (width - (rp->top - p.v));
+                pl->limitRect.bottom = pl->limitRect.bottom
+                                          - (width - (p.v - rp->bottom) - 1);
             }
             else
             {
-                pl->axis = CWC(hAxisOnly);
-                pl->limitRect.left = CW(CW(pl->limitRect.left)
-                                        + height - (CW(rp->left) - p.h));
-                pl->limitRect.right = CW(CW(pl->limitRect.right)
-                                         - height - (p.h - CW(rp->right)) - 1);
+                pl->axis = hAxisOnly;
+                pl->limitRect.left = pl->limitRect.left
+                                        + height - (rp->left - p.h);
+                pl->limitRect.right = pl->limitRect.right
+                                         - height - (p.h - rp->right) - 1;
             }
             InsetRect(&pl->slopRect, -20, -20);
             break;

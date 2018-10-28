@@ -118,7 +118,7 @@ enum\
 visibility type name (type0 arg0)\
 \
 #define warning_unexpected(fmt, args...) fprintf (stderr, "UNEXPECTED " fmt, ## args);\
-#define CW(x) (x)\
+#define x (x)\
 #define warning_unimplemented(fmt, args...) fprintf (stderr, "UNIMPLEMENTED " fmt, ## args);
 /beginning of code to test/,/end of code to test/!d
 EOF

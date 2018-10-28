@@ -82,7 +82,7 @@ StringHandle Executor::C_NewString(StringPtr s)
     GUEST<Handle> retval;
 
     PtrToHand((Ptr)s, &retval, (LONGINT)U(s[0]) + 1);
-    return ((StringHandle)MR(retval));
+    return ((StringHandle)retval);
 }
 
 void Executor::C_SetString(StringHandle h, StringPtr s)
@@ -241,8 +241,8 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
 {
     char *ip, *op, *ep, *erp, *markp, c;
 
-    ip = (char *)MR(*sp);
-    op = (char *)MR(*dp);
+    ip = (char *)*sp;
+    op = (char *)*dp;
     ep = ip + len;
     erp = ip + len - 2;
     markp = op++;
@@ -269,8 +269,8 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
         }
         markp = op++;
     }
-    *sp = RM((Ptr)ip);
-    *dp = RM((Ptr)op - 1);
+    *sp = (Ptr)ip;
+    *dp = (Ptr)op - 1;
 }
 
 #define UNPACK_BITS_BODY(out_type)                                           \
@@ -279,8 +279,8 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
         const int8_t *ip;                                                      \
         out_type *op, *ep;                                                   \
                                                                              \
-        ip = (const int8_t *)MR(*sp);                                          \
-        op = (out_type *)MR(*dp);                                            \
+        ip = (const int8_t *)*sp;                                          \
+        op = (out_type *)*dp;                                            \
         ep = (out_type *)((int8_t *)op + len);                                 \
                                                                              \
         while(op < ep)                                                       \
@@ -302,8 +302,8 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
             }                                                                \
         }                                                                    \
                                                                              \
-        *sp = RM((Ptr)ip);                                                   \
-        *dp = RM((Ptr)op);                                                   \
+        *sp = (Ptr)ip;                                                   \
+        *dp = (Ptr)op;                                                   \
     } while(false)
 
 void Executor::unpack_int16_t_bits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
@@ -396,24 +396,24 @@ void Executor::C_LongMul(LONGINT a, LONGINT b, Int64Bit *c)
     lb = b & 0xFFFF;
     halb = ha * lb;
     lahb = la * hb;
-    c->hiLong = CL(ha * hb);
-    c->loLong = CL(la * lb);
-    c->hiLong = CL(CL(c->hiLong) + (halb >> 16));
-    c->hiLong = CL(CL(c->hiLong) + (lahb >> 16));
-    carry = CL(c->loLong) >> 31;
-    c->loLong = CL(CL(c->loLong) + (halb << 16));
+    c->hiLong = ha * hb;
+    c->loLong = la * lb;
+    c->hiLong = c->hiLong + (halb >> 16);
+    c->hiLong = c->hiLong + (lahb >> 16);
+    carry = c->loLong >> 31;
+    c->loLong = c->loLong + (halb << 16);
     carry += (halb >> 15) & 1;
-    c->loLong = CL(CL(c->loLong) + (lahb << 16));
+    c->loLong = c->loLong + (lahb << 16);
     carry += (lahb >> 15) & 1;
     carry >>= 1;
-    c->hiLong = CL(CL(c->hiLong) + (carry));
+    c->hiLong = c->hiLong + (carry);
     if(sign == -1)
     {
         c->hiLong = ~c->hiLong;
         if(c->loLong)
-            c->loLong = CL(~CL(c->loLong) + 1);
+            c->loLong = ~c->loLong + 1;
         else
-            c->hiLong = CL(CL(c->hiLong) + 1);
+            c->hiLong = c->hiLong + 1;
     }
 }
 

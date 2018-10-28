@@ -88,44 +88,44 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
         }
         else
         {
-            srcblt_src_row_bytes = CW(src->rowBytes) & ROWBYTES_VALUE_BITS;
-            src_baseaddr = (char *)MR(src->baseAddr);
+            srcblt_src_row_bytes = src->rowBytes & ROWBYTES_VALUE_BITS;
+            src_baseaddr = (char *)src->baseAddr;
         }
         if(active_screen_addr_p(dst))
         {
             srcblt_dst_row_bytes = vdriver_real_screen_row_bytes;
             dst_baseaddr = (char *)vdriver_real_screen_baseaddr;
-            top = CW(dst->bounds.top);
-            left = CW(dst->bounds.left);
+            top = dst->bounds.top;
+            left = dst->bounds.left;
 
             /* Hide the cursor if necessary. */
-            old_vis_p |= (vdriver->hideCursorIfIntersects(CW(rp->rgnBBox.top) - top,
-                                                         CW(rp->rgnBBox.left) - left,
-                                                         CW(rp->rgnBBox.bottom) - top,
-                                                         CW(rp->rgnBBox.right) - left));
+            old_vis_p |= (vdriver->hideCursorIfIntersects(rp->rgnBBox.top - top,
+                                                         rp->rgnBBox.left - left,
+                                                         rp->rgnBBox.bottom - top,
+                                                         rp->rgnBBox.right - left));
             cursor_maybe_changed_p = true;
         }
         else
         {
-            srcblt_dst_row_bytes = CW(dst->rowBytes) & ROWBYTES_VALUE_BITS;
-            dst_baseaddr = (char *)MR(dst->baseAddr);
+            srcblt_dst_row_bytes = dst->rowBytes & ROWBYTES_VALUE_BITS;
+            dst_baseaddr = (char *)dst->baseAddr;
         }
     }
     else
 #endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
     {
         /* Default to values for non-screen blit. */
-        srcblt_src_row_bytes = CW(src->rowBytes) & ROWBYTES_VALUE_BITS;
-        srcblt_dst_row_bytes = CW(dst->rowBytes) & ROWBYTES_VALUE_BITS;
-        src_baseaddr = (char *)MR(src->baseAddr);
-        dst_baseaddr = (char *)MR(dst->baseAddr);
+        srcblt_src_row_bytes = src->rowBytes & ROWBYTES_VALUE_BITS;
+        srcblt_dst_row_bytes = dst->rowBytes & ROWBYTES_VALUE_BITS;
+        src_baseaddr = (char *)src->baseAddr;
+        dst_baseaddr = (char *)dst->baseAddr;
     }
 
     /* Compute the offset to map dst y coords to src bitmap coords.*/
-    src_y_offset = (CW(src_origin->v) - CW(src->bounds.top)
-                    - CW(dst_origin->v));
+    src_y_offset = (src_origin->v - src->bounds.top
+                    - dst_origin->v);
     src_baseaddr += src_y_offset * srcblt_src_row_bytes;
-    dst_baseaddr -= CW(dst->bounds.top) * srcblt_dst_row_bytes;
+    dst_baseaddr -= dst->bounds.top * srcblt_dst_row_bytes;
 
     /* Handle the common case of flipped fg/bk colors and a copy xfer mode. */
     if((mode & 3) == (srcCopy & 3) /* either srcCopy or notSrcCopy */
@@ -136,10 +136,10 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
         srcblt_fg_color = ~0;
     }
 
-    srcblt_x_offset = -(CW(dst->bounds.left) << log2_bpp);
+    srcblt_x_offset = -(dst->bounds.left << log2_bpp);
 
-    src_x_offset = (((CW(src_origin->h) - CW(src->bounds.left))
-                     - (CW(dst_origin->h) - CW(dst->bounds.left)))
+    src_x_offset = (((src_origin->h - src->bounds.left)
+                     - (dst_origin->h - dst->bounds.left))
                     << log2_bpp);
     src_baseaddr += (src_x_offset >> 3);
     left_shift = src_x_offset & 7;

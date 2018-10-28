@@ -50,23 +50,23 @@ init(ControlHandle ctl)
     {
         GUEST<Handle> hh;
 
-        hh = RM((Handle)mh);
+        hh = (Handle)mh;
         HandToHand(&hh);
         flags = CTL_VALUE(ctl);
 
-        POPUP_MENU_ID_X(data) = CW(mid);
+        POPUP_MENU_ID_X(data) = mid;
         POPUP_MENU_X(data) = guest_cast<MenuHandle>(hh);
     }
     /* private fields */
     POPUP_TITLE_WIDTH(data) = CTL_MAX(ctl);
     POPUP_FLAGS(data) = flags;
 
-    CTL_DATA_X(ctl) = RM((Handle)data);
+    CTL_DATA_X(ctl) = (Handle)data;
 
-    CTL_ACTION_X(ctl) = guest_cast<ControlActionUPP>(CLC(-1));
-    CTL_VALUE_X(ctl) = CWC(1);
-    CTL_MIN_X(ctl) = CWC(1);
-    CTL_MAX_X(ctl) = CW(CountMItems(mh));
+    CTL_ACTION_X(ctl) = guest_cast<ControlActionUPP>(-1);
+    CTL_VALUE_X(ctl) = 1;
+    CTL_MIN_X(ctl) = 1;
+    CTL_MAX_X(ctl) = CountMItems(mh);
     CheckItem(mh, 1, true);
 }
 
@@ -167,10 +167,10 @@ draw(ControlHandle ctl, draw_state_t draw_state,
     }
 
     ctl_rect = &CTL_RECT(ctl);
-    top = CW(ctl_rect->top);
-    left = CW(ctl_rect->left);
-    bottom = CW(ctl_rect->bottom);
-    right = CW(ctl_rect->right);
+    top = ctl_rect->top;
+    left = ctl_rect->left;
+    bottom = ctl_rect->bottom;
+    right = ctl_rect->right;
 
     title = CTL_TITLE(ctl);
 
@@ -186,10 +186,10 @@ draw(ControlHandle ctl, draw_state_t draw_state,
     }
 
     GetFontInfo(&font_info);
-    ascent = CW(font_info.ascent);
+    ascent = font_info.ascent;
     height = (ascent
-              + CW(font_info.descent)
-              + CW(font_info.leading));
+              + font_info.descent
+              + font_info.leading);
     title_width = POPUP_TITLE_WIDTH(data);
 
     icon_p = get_icon_info(item_info, &icon_info, true);
@@ -236,7 +236,7 @@ draw(ControlHandle ctl, draw_state_t draw_state,
         erase_rect.left = ctl_rect->left;
         erase_rect.bottom = ctl_rect->bottom;
         if(title_only_p)
-            erase_rect.right = CW(left + title_width);
+            erase_rect.right = left + title_width;
         else
             erase_rect.right = ctl_rect->right;
         EraseRect(&erase_rect);
@@ -254,10 +254,10 @@ draw(ControlHandle ctl, draw_state_t draw_state,
      then should probably hilite from
      `center - icon_info.height / 2' to
      `center + icon_info.height / 2' */
-    t_rect.top = CW(baseline - ascent);
-    t_rect.left = CW(left);
-    t_rect.bottom = CW(baseline - ascent + height);
-    t_rect.right = CW(left + title_width);
+    t_rect.top = baseline - ascent;
+    t_rect.left = left;
+    t_rect.bottom = baseline - ascent + height;
+    t_rect.right = left + title_width;
 
     PenMode(patCopy);
     EraseRect(&t_rect);
@@ -298,10 +298,10 @@ draw(ControlHandle ctl, draw_state_t draw_state,
     RGBForeColor(&ROMlib_black_rgb_color);
     RGBBackColor(&ROMlib_white_rgb_color);
 
-    t_rect.top = CW(draw_top);
-    t_rect.left = CW(item_left - 1);
-    t_rect.bottom = CW(draw_bottom - 1);
-    t_rect.right = CW(right - 1);
+    t_rect.top = draw_top;
+    t_rect.left = item_left - 1;
+    t_rect.bottom = draw_bottom - 1;
+    t_rect.right = right - 1;
 
     EraseRect(&t_rect);
 
@@ -325,10 +325,10 @@ draw(ControlHandle ctl, draw_state_t draw_state,
 
     if(icon_p)
     {
-        t_rect.top = CW(center - icon_info.height / 2);
-        t_rect.left = CW(item_left);
-        t_rect.bottom = CW(CW(t_rect.top) + (icon_info.height - ICON_PAD));
-        t_rect.right = CW(CW(t_rect.left) + (icon_info.width - ICON_PAD));
+        t_rect.top = center - icon_info.height / 2;
+        t_rect.left = item_left;
+        t_rect.bottom = t_rect.top + (icon_info.height - ICON_PAD);
+        t_rect.right = t_rect.left + (icon_info.width - ICON_PAD);
 
         if(icon_info.color_icon_p)
             PlotCIcon(&t_rect, (CIconHandle)icon_info.icon);
@@ -398,16 +398,16 @@ draw(ControlHandle ctl, draw_state_t draw_state,
             image_bits(00000100), image_bits(00000000),
         };
 
-        arrow_bitmap.baseAddr = RM((Ptr)down_arrow_bits);
-        arrow_bitmap.rowBytes = CWC(2);
+        arrow_bitmap.baseAddr = (Ptr)down_arrow_bits;
+        arrow_bitmap.rowBytes = 2;
         SetRect(&arrow_bitmap.bounds, 0, 0, /* right, bottom */ 11, 6);
 
-        dst_rect.top = CW(center - 3);
-        dst_rect.left = CW(right - 22);
-        dst_rect.bottom = CW(center - 3 + /* arrows are `6' tall */ 6);
-        dst_rect.right = CW(right - 22
-                            + /* arrows are `11' wide */ 11);
-        CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
+        dst_rect.top = center - 3;
+        dst_rect.left = right - 22;
+        dst_rect.bottom = center - 3 + /* arrows are `6' tall */ 6;
+        dst_rect.right = right - 22
+                            + /* arrows are `11' wide */ 11;
+        CopyBits(&arrow_bitmap, PORT_BITS_FOR_COPY(qdGlobals().thePort),
                  &arrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
     }
 }
@@ -509,13 +509,13 @@ int32_t Executor::C_cdef1008(int16_t var, ControlHandle ctl, int16_t message,
                  true, true, &top, &left);
 
             port_bounds = &PORT_BOUNDS(CTL_OWNER(ctl));
-            top -= CW(port_bounds->top);
-            left -= CW(port_bounds->left);
+            top -= port_bounds->top;
+            left -= port_bounds->left;
             CalcMenuSize(mh);
             value = PopUpMenuSelect(mh, top, left, orig_value);
 
             if(value)
-                CTL_VALUE_X(ctl) = CW(value);
+                CTL_VALUE_X(ctl) = value;
             draw(ctl, draw_state, window_font, window_size, window_font_p,
                  false, false, nullptr, nullptr);
 

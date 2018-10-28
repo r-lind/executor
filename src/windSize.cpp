@@ -31,16 +31,16 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
     WindowPeek w;
 
     w = (WindowPeek)wp;
-    gp = MR(qdGlobals().thePort);
+    gp = qdGlobals().thePort;
     if(WINDOW_VISIBLE_X(w))
     {
-        SetPort(MR(wmgr_port));
-        ClipRect(&GD_BOUNDS(MR(LM(TheGDevice))));
+        SetPort(wmgr_port);
+        ClipRect(&GD_BOUNDS(LM(TheGDevice)));
         ClipAbove(w);
         movepart = NewRgn();
         updatepart = NewRgn();
         behindpart = NewRgn();
-        SectRgn(PORT_CLIP_REGION(MR(wmgr_port)),
+        SectRgn(PORT_CLIP_REGION(wmgr_port),
                 WINDOW_STRUCT_REGION(w), movepart);
 
 #if 1
@@ -55,9 +55,9 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
             Rect tmpr;
             RgnHandle last_three_pixels;
 
-            tmpr = GD_BOUNDS(MR(LM(TheGDevice)));
-            tmpr.top = CW(CW(tmpr.bottom) - 1);
-            tmpr.left = CW(CW(tmpr.right) - 3);
+            tmpr = GD_BOUNDS(LM(TheGDevice));
+            tmpr.top = tmpr.bottom - 1;
+            tmpr.left = tmpr.right - 3;
             last_three_pixels = NewRgn();
             RectRgn(last_three_pixels, &tmpr);
             DiffRgn(movepart, last_three_pixels, movepart);
@@ -84,11 +84,11 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
  *	 Picture editting window come up in the wrong place.
  *	 (That could be due to other inconsistencies though, like the
  */
-    h += CW(PORT_BOUNDS(w).left) - CW(PORT_RECT(w).left);
-    v += CW(PORT_BOUNDS(w).top) - CW(PORT_RECT(w).top);
+    h += PORT_BOUNDS(w).left - PORT_RECT(w).left;
+    v += PORT_BOUNDS(w).top - PORT_RECT(w).top;
 #else
-    h += CW(PORT_BOUNDS(w).left);
-    v += CW(PORT_BOUNDS(w).top);
+    h += PORT_BOUNDS(w).left;
+    v += PORT_BOUNDS(w).top;
 #endif
     if(WINDOW_VISIBLE_X(w))
     {
@@ -96,10 +96,10 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
 
         OffsetRect(&r, h, v);
         OffsetRgn(movepart, h, v);
-        SectRgn(movepart, PORT_CLIP_REGION(MR(wmgr_port)), movepart);
-        ClipRect(&GD_BOUNDS(MR(LM(TheGDevice))));
+        SectRgn(movepart, PORT_CLIP_REGION(wmgr_port), movepart);
+        ClipRect(&GD_BOUNDS(LM(TheGDevice)));
 
-        WRAPPER_SET_PIXMAP_X(wrapper, GD_PMAP_X(MR(LM(TheGDevice))));
+        WRAPPER_SET_PIXMAP_X(wrapper, GD_PMAP_X(LM(TheGDevice)));
 
 #define NEW_CLIP_HACK
 #if defined(NEW_CLIP_HACK)
@@ -114,9 +114,9 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
             Rect srcr, dstr;
 
             SectRect(&HxX(WINDOW_STRUCT_REGION(w), rgnBBox),
-                     &GD_BOUNDS(MR(LM(TheGDevice))), &srcr);
+                     &GD_BOUNDS(LM(TheGDevice)), &srcr);
 
-            dstr = GD_BOUNDS(MR(LM(TheGDevice)));
+            dstr = GD_BOUNDS(LM(TheGDevice));
             OffsetRect(&dstr, h, v);
             SectRect(&dstr, &r, &dstr);
             CopyBits(wrapper, wrapper, &srcr, &dstr, srcCopy, movepart);
@@ -133,10 +133,10 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
     OffsetRect(&PORT_BOUNDS(w), -h, -v);
     if(WINDOW_VISIBLE_X(w))
     {
-        ClipRect(&GD_BOUNDS(MR(LM(TheGDevice))));
+        ClipRect(&GD_BOUNDS(LM(TheGDevice)));
         ClipAbove(w);
         DiffRgn(WINDOW_STRUCT_REGION(w), movepart, updatepart);
-        SectRgn(PORT_CLIP_REGION(MR(wmgr_port)), updatepart, updatepart);
+        SectRgn(PORT_CLIP_REGION(wmgr_port), updatepart, updatepart);
         DiffRgn(behindpart, movepart, behindpart);
         DiffRgn(behindpart, updatepart, behindpart);
         PaintOne(w, updatepart);
@@ -167,24 +167,24 @@ void Executor::C_DragWindow(WindowPtr wp, Point p, Rect *rp)
     bool cmddown;
     Rect r;
 
-    ThePortGuard guard(MR(wmgr_port));
+    ThePortGuard guard(wmgr_port);
     GetOSEvent(0, &ev);
-    SetClip(MR(LM(GrayRgn)));
-    cmddown = (bool)(ev.modifiers & CWC(cmdKey));
+    SetClip(LM(GrayRgn));
+    cmddown = (bool)(ev.modifiers & cmdKey);
     if(cmddown)
         ClipAbove((WindowPeek)wp);
     rh = NewRgn();
     CopyRgn(WINDOW_STRUCT_REGION(wp), rh);
     r = *rp;
-    if(CW(r.top) < 24)
-        r.top = CWC(24);
+    if(r.top < 24)
+        r.top = 24;
     l = DragGrayRgn(rh, p, &r, &r, noConstraint, (ProcPtr)0);
     if((uint32_t)l != 0x80008000)
         MoveWindow(wp,
-                   (-CW(PORT_BOUNDS(wp).left)
-                    + LoWord(l) + CW(PORT_RECT(wp).left)),
-                   (-CW(PORT_BOUNDS(wp).top)
-                    + HiWord(l) + CW(PORT_RECT(wp).top)),
+                   (-PORT_BOUNDS(wp).left
+                    + LoWord(l) + PORT_RECT(wp).left),
+                   (-PORT_BOUNDS(wp).top
+                    + HiWord(l) + PORT_RECT(wp).top),
                    !cmddown);
 
     DisposeRgn(rh);
@@ -218,37 +218,37 @@ LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, Rect *rp)
     p.h = startp.h;
     p.v = startp.v;
 #if 0
-    r.left   = CW (- CW (PORT_BOUNDS (w).left));
-    r.top    = CW (- CW (PORT_BOUNDS (w).top));
-    r.right  = CW (CW (r.left) + RECT_WIDTH (&PORT_RECT (w)));
-    r.bottom = CW (CW (r.top)  + RECT_HEIGHT (&PORT_RECT (w)));
+    r.left   = - PORT_BOUNDS (w).left;
+    r.top    = - PORT_BOUNDS (w).top;
+    r.right  = r.left + RECT_WIDTH (&PORT_RECT (w));
+    r.bottom = r.top  + RECT_HEIGHT (&PORT_RECT (w));
 #else
-    r.left = CW(CW(PORT_RECT(w).left) - CW(PORT_BOUNDS(w).left));
-    r.top = CW(CW(PORT_RECT(w).top) - CW(PORT_BOUNDS(w).top));
-    r.right = CW(CW(PORT_RECT(w).right) - CW(PORT_BOUNDS(w).left));
-    r.bottom = CW(CW(PORT_RECT(w).bottom) - CW(PORT_BOUNDS(w).top));
+    r.left = PORT_RECT(w).left - PORT_BOUNDS(w).left;
+    r.top = PORT_RECT(w).top - PORT_BOUNDS(w).top;
+    r.right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
+    r.bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 #endif
 
-    pinr.left = CW(CW(r.left) + CW(rp->left));
-    if(CW(pinr.left) <= CW(r.left) && CW(rp->left) > 0)
-        pinr.left = CWC(32767);
+    pinr.left = r.left + rp->left;
+    if(pinr.left <= r.left && rp->left > 0)
+        pinr.left = 32767;
 
-    pinr.top = CW(CW(r.top) + CW(rp->top));
-    if(CW(pinr.top) <= CW(r.top) && CW(rp->top) > 0)
-        pinr.top = CWC(32767);
+    pinr.top = r.top + rp->top;
+    if(pinr.top <= r.top && rp->top > 0)
+        pinr.top = 32767;
 
-    pinr.right = CW(CW(r.left) + CW(rp->right));
-    if(CW(pinr.right) <= CW(r.left) && CW(rp->right) > 0)
-        pinr.right = CWC(32767);
+    pinr.right = r.left + rp->right;
+    if(pinr.right <= r.left && rp->right > 0)
+        pinr.right = 32767;
 
-    pinr.bottom = CW(CW(r.top) + CW(rp->bottom));
-    if(CW(pinr.bottom) <= CW(r.top) && CW(rp->bottom) > 0)
-        pinr.bottom = CWC(32767);
+    pinr.bottom = r.top + rp->bottom;
+    if(pinr.bottom <= r.top && rp->bottom > 0)
+        pinr.bottom = 32767;
 
-    gp = MR(qdGlobals().thePort);
-    SETUP_PORT((GrafPtr)MR(LM(WMgrPort)));
-    SETUP_PORT(MR(wmgr_port));
-    ClipRect(&GD_BOUNDS(MR(LM(TheGDevice))));
+    gp = qdGlobals().thePort;
+    SETUP_PORT((GrafPtr)LM(WMgrPort));
+    SETUP_PORT(wmgr_port);
+    ClipRect(&GD_BOUNDS(LM(TheGDevice)));
     ClipAbove((WindowPeek)w);
     WINDCALL((WindowPtr)w, wGrow, ptr_to_longint(&r));
     while(!GetOSEvent(mUpMask, &ev))
@@ -260,8 +260,8 @@ LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, Rect *rp)
         if(p.h != ep.h || p.v != ep.v)
         {
             WINDCALL((WindowPtr)w, wGrow, ptr_to_longint(&r));
-            r.right = CW(CW(r.right) + (ep.h - p.h));
-            r.bottom = CW(CW(r.bottom) + (ep.v - p.v));
+            r.right = r.right + (ep.h - p.h);
+            r.bottom = r.bottom + (ep.v - p.v);
             WINDCALL((WindowPtr)w, wGrow, ptr_to_longint(&r));
             p.h = ep.h;
             p.v = ep.v;
@@ -269,10 +269,10 @@ LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, Rect *rp)
         CALLDRAGHOOK();
     }
     WINDCALL((WindowPtr)w, wGrow, ptr_to_longint(&r));
-    RESTORE_PORT((GrafPtr)MR(LM(WMgrPort)));
+    RESTORE_PORT((GrafPtr)LM(WMgrPort));
     RESTORE_PORT(gp);
     if(p.h != startp.h || p.v != startp.v)
-        /*-->*/ return (((LONGINT)(CW(r.bottom) - CW(r.top)) << 16) | (unsigned short)(CW(r.right) - CW(r.left)));
+        /*-->*/ return (((LONGINT)(r.bottom - r.top) << 16) | (unsigned short)(r.right - r.left));
     else
         return (0L);
 }
@@ -287,10 +287,10 @@ void Executor::C_SizeWindow(WindowPtr w, INTEGER width, INTEGER height,
         if(WINDOW_VISIBLE_X(w))
             SaveOld((WindowPeek)w);
 
-        PORT_RECT(w).right = CW(CW(PORT_RECT(w).left) + width);
-        PORT_RECT(w).bottom = CW(CW(PORT_RECT(w).top) + height);
+        PORT_RECT(w).right = PORT_RECT(w).left + width;
+        PORT_RECT(w).bottom = PORT_RECT(w).top + height;
 
-        ThePortGuard guard(MR(wmgr_port));
+        ThePortGuard guard(wmgr_port);
         WINDCALL(w, wCalcRgns, 0);
         if(WINDOW_VISIBLE_X(w))
         {

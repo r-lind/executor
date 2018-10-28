@@ -28,10 +28,10 @@ void cachecheck(HVCB *vcbp)
     cachehead *headp;
     INTEGER i;
 
-    headp = (cachehead *)CL(vcbp->vcbCtlBuf);
-    for(i = Cx(headp->nitems), cachep = Cx(headp->flink); --i >= 0;
-        cachep = Cx(cachep->flink))
-        if(Cx(cachep->flags) & CACHEBUSY)
+    headp = (cachehead *)vcbp->vcbCtlBuf;
+    for(i = headp->nitems, cachep = headp->flink; --i >= 0;
+        cachep = cachep->flink)
+        if(cachep->flags & CACHEBUSY)
             warning_unexpected("busy");
 }
 #endif /* defined(CACHECHECK) */
@@ -40,9 +40,9 @@ Volume *getVolume(void *vpb)
 {
     IOParam *pb = (IOParam*)vpb;
     LONGINT dir;
-    HVCB *vcbp = ROMlib_findvcb(Cx(pb->ioVRefNum), MR(pb->ioNamePtr), &dir, true);
+    HVCB *vcbp = ROMlib_findvcb(pb->ioVRefNum, pb->ioNamePtr, &dir, true);
     if(!vcbp)
-        vcbp = ROMlib_findvcb(Cx(pb->ioVRefNum), (StringPtr)0, &dir, true);
+        vcbp = ROMlib_findvcb(pb->ioVRefNum, (StringPtr)0, &dir, true);
 
     if(vcbp)
         return ((VCBExtra*)vcbp)->volume;
@@ -54,9 +54,9 @@ Volume *getVolume(void *vpb)
 Volume *getIVolume(void *vpb)
 {
     VolumeParam *pb = (VolumeParam*)vpb;
-    if(Cx(pb->ioVolIndex) > 0)
+    if(pb->ioVolIndex > 0)
     {
-        HVCB *vcbp = (HVCB *)ROMlib_indexqueue(&LM(VCBQHdr), Cx(pb->ioVolIndex));
+        HVCB *vcbp = (HVCB *)ROMlib_indexqueue(&LM(VCBQHdr), pb->ioVolIndex);
         if(vcbp)
             return ((VCBExtra*)vcbp)->volume;
         else
@@ -72,10 +72,10 @@ Volume *getFileVolume(void *vpb)
    
     HVCB *vcbp;
 
-    filecontrolblock *fcbp = ROMlib_refnumtofcbp(Cx(pb->ioRefNum));
+    filecontrolblock *fcbp = ROMlib_refnumtofcbp(pb->ioRefNum);
     if(fcbp)
     {
-        vcbp = MR(fcbp->fcbVPtr);
+        vcbp = fcbp->fcbVPtr;
         return ((VCBExtra*)vcbp)->volume;
     }
     else
@@ -87,10 +87,10 @@ static BOOLEAN hfsvol(IOParam *pb)
     HVCB *vcbp;
     LONGINT dir;
 
-    vcbp = ROMlib_findvcb(Cx(pb->ioVRefNum), MR(pb->ioNamePtr), &dir, true);
+    vcbp = ROMlib_findvcb(pb->ioVRefNum, pb->ioNamePtr, &dir, true);
     if(!vcbp)
     {
-        vcbp = ROMlib_findvcb(Cx(pb->ioVRefNum), (StringPtr)0, &dir, true);
+        vcbp = ROMlib_findvcb(pb->ioVRefNum, (StringPtr)0, &dir, true);
         if(!vcbp)
             return true; /* hopefully is a messed up working dir
 				    reference */
@@ -112,9 +112,9 @@ static BOOLEAN hfsIvol(VolumeParam *pb) /* potentially Indexed vol */
     HVCB *vcbp;
 
     retval = false;
-    if(Cx(pb->ioVolIndex) > 0)
+    if(pb->ioVolIndex > 0)
     {
-        vcbp = (HVCB *)ROMlib_indexqueue(&LM(VCBQHdr), Cx(pb->ioVolIndex));
+        vcbp = (HVCB *)ROMlib_indexqueue(&LM(VCBQHdr), pb->ioVolIndex);
         if(vcbp && vcbp->vcbCTRef)
             retval = true;
     }
@@ -128,10 +128,10 @@ static BOOLEAN hfsfil(IOParam *pb)
     filecontrolblock *fcbp;
     HVCB *vcbp;
 
-    fcbp = ROMlib_refnumtofcbp(Cx(pb->ioRefNum));
+    fcbp = ROMlib_refnumtofcbp(pb->ioRefNum);
     if(fcbp)
     {
-        vcbp = MR(fcbp->fcbVPtr);
+        vcbp = fcbp->fcbVPtr;
         if(vcbp->vcbCTRef)
         {
 #if defined(CACHECHECK)
@@ -231,15 +231,15 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
     OSErr retval;
     DrvQExtra *dqp;
 
-    switch(Cx(pb->ioParam.ioRefNum))
+    switch(pb->ioParam.ioRefNum)
     {
         case OURHFSDREF:
             if(ROMlib_directdiskaccess)
             {
-                dqp = ROMlib_dqbydrive(Cx(pb->ioParam.ioVRefNum));
+                dqp = ROMlib_dqbydrive(pb->ioParam.ioVRefNum);
                 if(!dqp)
                 {
-                    pb->ioParam.ioResult = CW(nsvErr);
+                    pb->ioParam.ioResult = nsvErr;
                     pb->ioParam.ioActCount = 0;
                 }
                 else
@@ -248,32 +248,32 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
                         try_to_reopen(dqp);
                     if(dqp->hfs.fd == -1)
                     {
-                        pb->ioParam.ioResult = CWC(nsvErr);
+                        pb->ioParam.ioResult = nsvErr;
                         pb->ioParam.ioActCount = 0;
                     }
-                    else if(Cx(pb->ioParam.ioPosMode) != fsFromStart)
+                    else if(pb->ioParam.ioPosMode != fsFromStart)
                     {
-                        pb->ioParam.ioResult = CW(paramErr); /* for now */
+                        pb->ioParam.ioResult = paramErr; /* for now */
                         pb->ioParam.ioActCount = 0;
                     }
                     else
-                        pb->ioParam.ioResult = CW(ROMlib_transphysblk(&dqp->hfs,
-                                                                      Cx(pb->ioParam.ioPosOffset),
-                                                                      Cx(pb->ioParam.ioReqCount) / PHYSBSIZE,
-                                                                      MR(pb->ioParam.ioBuffer), reading,
-                                                                      &pb->ioParam.ioActCount));
+                        pb->ioParam.ioResult = ROMlib_transphysblk(&dqp->hfs,
+                                                                      pb->ioParam.ioPosOffset,
+                                                                      pb->ioParam.ioReqCount / PHYSBSIZE,
+                                                                      pb->ioParam.ioBuffer, reading,
+                                                                      &pb->ioParam.ioActCount);
                 }
             }
             else
             {
-                pb->ioParam.ioResult = CW(vLckdErr);
+                pb->ioParam.ioResult = vLckdErr;
                 pb->ioParam.ioActCount = 0;
             }
-            retval = Cx(pb->ioParam.ioResult);
+            retval = pb->ioParam.ioResult;
             break;
 
         default:
-            if(CW(pb->ioParam.ioPosMode) & NEWLINEMODE)
+            if(pb->ioParam.ioPosMode & NEWLINEMODE)
             {
                 char *buf, *p_to_find, *p_alternate, *p;
                 unsigned char to_find;
@@ -281,17 +281,17 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
                 ParamBlockRec pbr;
 
                 pbr = *pb;
-                to_find = CW(pb->ioParam.ioPosMode) >> 8;
-                pbr.ioParam.ioPosMode &= CWC(0x7F);
+                to_find = pb->ioParam.ioPosMode >> 8;
+                pbr.ioParam.ioPosMode &= 0x7F;
 
-                buf = (char *)alloca(CL(pb->ioParam.ioReqCount));
+                buf = (char *)alloca(pb->ioParam.ioReqCount);
 
-                pbr.ioParam.ioBuffer = RM((Ptr)buf);
+                pbr.ioParam.ioBuffer = (Ptr)buf;
                 retval = PBRead(&pbr, false);
                 pb->ioParam.ioActCount = pbr.ioParam.ioActCount;
                 pb->ioParam.ioPosOffset = pbr.ioParam.ioPosOffset;
 
-                act_count = CL(pb->ioParam.ioActCount);
+                act_count = pb->ioParam.ioActCount;
                 p_to_find = (char *)memchr(buf, to_find, act_count);
 
                 if(to_find == '\r' && ROMlib_newlinetocr)
@@ -310,14 +310,14 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
 
                     retval = noErr; /* we couldn't have gotten EOF yet */
                     to_backup = act_count - (p + 1 - buf);
-                    pb->ioParam.ioActCount = RM( MR(pb->ioParam.ioActCount) - to_backup );
+                    pb->ioParam.ioActCount =  pb->ioParam.ioActCount - to_backup ;
                     {
                         ParamBlockRec newpb;
                         OSErr newerr;
 
                         newpb.ioParam.ioRefNum = pb->ioParam.ioRefNum;
-                        newpb.ioParam.ioPosMode = CWC(fsFromMark);
-                        newpb.ioParam.ioPosOffset = CL(-to_backup);
+                        newpb.ioParam.ioPosMode = fsFromMark;
+                        newpb.ioParam.ioPosOffset = -to_backup;
                         newerr = PBSetFPos(&newpb, false);
                         if(newerr != noErr)
                             warning_unexpected("err = %d", newerr);
@@ -326,10 +326,10 @@ OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
                     if(ROMlib_newlinetocr && to_find == '\r')
                         *p = '\r';
                 }
-                memcpy(MR(pb->ioParam.ioBuffer), MR(pbr.ioParam.ioBuffer),
-                       CL(pb->ioParam.ioActCount));
-                ROMlib_destroy_blocks(US_TO_SYN68K(MR(pb->ioParam.ioBuffer)),
-                                      CL(pb->ioParam.ioActCount), true);
+                memcpy(pb->ioParam.ioBuffer, pbr.ioParam.ioBuffer,
+                       pb->ioParam.ioActCount);
+                ROMlib_destroy_blocks(US_TO_SYN68K(pb->ioParam.ioBuffer),
+                                      pb->ioParam.ioActCount, true);
             }
             else
             {
@@ -354,42 +354,42 @@ OSErr Executor::PBWrite(ParmBlkPtr pb, BOOLEAN async)
     HVCB *vcbp;
     DrvQExtra *dqp;
 
-    switch(Cx(pb->ioParam.ioRefNum))
+    switch(pb->ioParam.ioRefNum)
     {
         case OURHFSDREF:
             if(!ROMlib_directdiskaccess)
-                pb->ioParam.ioResult = CW(vLckdErr);
+                pb->ioParam.ioResult = vLckdErr;
             else
             {
-                dqp = ROMlib_dqbydrive(Cx(pb->ioParam.ioVRefNum));
+                dqp = ROMlib_dqbydrive(pb->ioParam.ioVRefNum);
                 if(dqp && dqp->hfs.fd == -1)
                     try_to_reopen(dqp);
-                vcbp = ROMlib_vcbbydrive(Cx(pb->ioParam.ioVRefNum));
+                vcbp = ROMlib_vcbbydrive(pb->ioParam.ioVRefNum);
                 if(!dqp)
-                    pb->ioParam.ioResult = CW(nsvErr);
-                else if(vcbp && (Cx(vcbp->vcbAtrb) & VSOFTLOCKBIT))
-                    pb->ioParam.ioResult = CW(vLckdErr);
-                else if(vcbp && (Cx(vcbp->vcbAtrb) & VHARDLOCKBIT))
-                    pb->ioParam.ioResult = CW(wPrErr);
-                else if(Cx(pb->ioParam.ioPosMode) != fsFromStart)
-                    pb->ioParam.ioResult = CW(paramErr); /* for now */
+                    pb->ioParam.ioResult = nsvErr;
+                else if(vcbp && (vcbp->vcbAtrb & VSOFTLOCKBIT))
+                    pb->ioParam.ioResult = vLckdErr;
+                else if(vcbp && (vcbp->vcbAtrb & VHARDLOCKBIT))
+                    pb->ioParam.ioResult = wPrErr;
+                else if(pb->ioParam.ioPosMode != fsFromStart)
+                    pb->ioParam.ioResult = paramErr; /* for now */
                 else
-                    pb->ioParam.ioResult = CW(ROMlib_transphysblk(&dqp->hfs,
-                                                                  Cx(pb->ioParam.ioPosOffset),
-                                                                  Cx(pb->ioParam.ioReqCount) / PHYSBSIZE,
-                                                                  MR(pb->ioParam.ioBuffer), writing,
-                                                                  &pb->ioParam.ioActCount));
+                    pb->ioParam.ioResult = ROMlib_transphysblk(&dqp->hfs,
+                                                                  pb->ioParam.ioPosOffset,
+                                                                  pb->ioParam.ioReqCount / PHYSBSIZE,
+                                                                  pb->ioParam.ioBuffer, writing,
+                                                                  &pb->ioParam.ioActCount);
             }
-            if(pb->ioParam.ioResult != CWC(noErr))
+            if(pb->ioParam.ioResult != noErr)
                 pb->ioParam.ioActCount = 0;
-            retval = Cx(pb->ioParam.ioResult);
+            retval = pb->ioParam.ioResult;
             break;
 
 #if 0
     case SOUND_DRIVER_REF:
-	p = (char *) Cx(pb->ioParam.ioBuffer);
-	if (CW(*(short *)p) == ffMode) {
-	    n = Cx(pb->ioParam.ioReqCount);
+	p = (char *) pb->ioParam.ioBuffer;
+	if (*(short *)p == ffMode) {
+	    n = pb->ioParam.ioReqCount;
 	    ROMlib_dosound(p + 4, n - 4, (void (*)(void)) 0);
 	}
 	retval = noErr;
@@ -435,8 +435,8 @@ OSErr Executor::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval = fnfErr; // no driver found
 
-    if(pb->ioParam.ioBuffer == nullptr && pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
-       && MR(pb->ioParam.ioNamePtr)[1] == '.')
+    if(pb->ioParam.ioBuffer == nullptr && pb->ioParam.ioNamePtr && pb->ioParam.ioNamePtr[0]
+       && pb->ioParam.ioNamePtr[1] == '.')
         retval = ROMlib_driveropen((ParmBlkPtr)pb, async);
     
     if(retval != fnfErr)
@@ -486,7 +486,7 @@ swappedstr255print (const char *prefix, Str255 sp)
       unsigned char *cp;
       int n;
 
-      cp = (unsigned char *) MR(sp);
+      cp = (unsigned char *) sp;
       n = *cp++;
       while (n-- > 0)
 	putchar (*cp++);
@@ -503,13 +503,13 @@ OSErr Executor::PBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
     BOOLEAN ishfs;
     GUEST<StringPtr> savep;
 
-    if(CW(pb->dirInfo.ioFDirIndex) < 0 && pb->hFileInfo.ioDirID == CLC(1))
+    if(pb->dirInfo.ioFDirIndex < 0 && pb->hFileInfo.ioDirID == 1)
         retval = -43; /* perhaps we should check for a valid volume
 			 first */
     else
     {
         savep = pb->dirInfo.ioNamePtr;
-        if(pb->dirInfo.ioFDirIndex != CWC(0)) /* IMIV-155, 156 */
+        if(pb->dirInfo.ioFDirIndex != 0) /* IMIV-155, 156 */
             pb->dirInfo.ioNamePtr = 0;
         Volume *v = getVolume(pb);
         ishfs = hfsvol((IOParam *)pb);
@@ -623,7 +623,7 @@ OSErr Executor::PBHGetFInfo(HParmBlkPtr pb, BOOLEAN async)
     GUEST<StringPtr> savep;
 
     savep = pb->ioParam.ioNamePtr;
-    if(CW(pb->fileParam.ioFDirIndex) > 0) /* IMIV-155, 156 */
+    if(pb->fileParam.ioFDirIndex > 0) /* IMIV-155, 156 */
         pb->ioParam.ioNamePtr = 0;
     Volume *v = getVolume(pb);
     ishfs = hfsvol((IOParam *)pb);
@@ -655,8 +655,8 @@ OSErr Executor::PBOpen(ParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval = fnfErr; // no driver found
 
-    if(pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]    // fixme: PBHOpen also checks ioBuffer
-       && MR(pb->ioParam.ioNamePtr)[1] == '.')
+    if(pb->ioParam.ioNamePtr && pb->ioParam.ioNamePtr[0]    // fixme: PBHOpen also checks ioBuffer
+       && pb->ioParam.ioNamePtr[1] == '.')
         retval = ROMlib_driveropen(pb, async);
 
     if(retval != fnfErr)
@@ -693,8 +693,8 @@ void test_serial(void)
 
     memset(&pb_in, 0, sizeof pb_in);
     memset(&pb_out, 0, sizeof pb_out);
-    pb_in.ioParam.ioNamePtr = RM((StringPtr) "\004.AIn");
-    pb_out.ioParam.ioNamePtr = RM((StringPtr) "\005.AOut");
+    pb_in.ioParam.ioNamePtr = (StringPtr) "\004.AIn";
+    pb_out.ioParam.ioNamePtr = (StringPtr) "\005.AOut";
     open_in_val = PBOpen(&pb_in, false);
     open_out_val = PBOpen(&pb_out, false);
     close_in_val = PBClose(&pb_in, false);
@@ -856,7 +856,7 @@ OSErr Executor::PBGetFInfo(ParmBlkPtr pb, BOOLEAN async)
     OSErr retval;
 
     savep = pb->ioParam.ioNamePtr;
-    if(CW(pb->fileParam.ioFDirIndex) > 0) /* IMIV-155, 156 */
+    if(pb->fileParam.ioFDirIndex > 0) /* IMIV-155, 156 */
         pb->ioParam.ioNamePtr = 0;
     Volume *v = getVolume(pb);
     ishfs = hfsvol((IOParam *)pb);
@@ -1007,7 +1007,7 @@ OSErr Executor::PBMountVol(ParmBlkPtr pb)
     INTEGER vref;
     OSErr retval;
 
-    vref = CW(pb->ioParam.ioVRefNum);
+    vref = pb->ioParam.ioVRefNum;
     if(vref == 1 || vref == 2)
         retval = noErr;
     else
@@ -1056,45 +1056,45 @@ OSErr Executor::PBHGetVolParms(HParmBlkPtr pb, BOOLEAN async)
     ((byte_count)                       \
      >= (int)offsetof(std::remove_reference<decltype(*(ptr))>::type, field) + (int)sizeof((ptr)->field))
 
-    vcbp = ROMlib_findvcb(Cx(pb->ioParam.ioVRefNum),
-                          MR(pb->ioParam.ioNamePtr), &dir, false);
+    vcbp = ROMlib_findvcb(pb->ioParam.ioVRefNum,
+                          pb->ioParam.ioNamePtr, &dir, false);
     if(vcbp)
     {
-        infop = (getvolparams_info_t *)MR(pb->ioParam.ioBuffer);
-        rc = CL(pb->ioParam.ioReqCount);
+        infop = (getvolparams_info_t *)pb->ioParam.ioBuffer;
+        rc = pb->ioParam.ioReqCount;
         nused = 0;
         if(roomfor(infop, vMVersion, rc))
         {
-            infop->vMVersion = CWC(2);
+            infop->vMVersion = 2;
             nused += sizeof(infop->vMVersion);
         }
         if(roomfor(infop, vMAttrib, rc))
         {
-            infop->vMAttrib = CLC(VOL_BITS);
+            infop->vMAttrib = VOL_BITS;
             nused += sizeof(infop->vMAttrib);
         }
         if(roomfor(infop, vMLocalHand, rc))
         {
-            infop->vMLocalHand = CLC(0);
+            infop->vMLocalHand = 0;
             nused += sizeof(infop->vMLocalHand);
         }
         if(roomfor(infop, vMServerAdr, rc))
         {
-            infop->vMServerAdr = CLC(0);
+            infop->vMServerAdr = 0;
             nused += sizeof(infop->vMServerAdr);
         }
         if(roomfor(infop, vMForeignPrivID, rc))
         {
-            infop->vMForeignPrivID = CWC(2); /* fsUnixPriv + 1 */
+            infop->vMForeignPrivID = 2; /* fsUnixPriv + 1 */
             nused += sizeof(infop->vMForeignPrivID);
         }
-        pb->ioParam.ioActCount = CL((LONGINT)nused);
+        pb->ioParam.ioActCount = (LONGINT)nused;
         err = noErr;
     }
     else
     {
         err = nsvErr;
-        pb->ioParam.ioActCount = CLC(0);
+        pb->ioParam.ioActCount = 0;
     }
     FAKEASYNC(pb, async, err);
 }

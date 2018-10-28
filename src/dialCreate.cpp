@@ -38,27 +38,27 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
     OffsetRect(&dst->itmr, base_pt.h, base_pt.v);
     data = ITEM_DATA(dst);
 
-    gd_bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(MR(LM(MainDevice))));
+    gd_bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)));
 
     /* many items have a resource id at the beginning of the resource
      data */
-    res_id = CW(*data);
+    res_id = *data;
 
-    if(CB(dst->itmtype) & ctrlItem)
+    if(dst->itmtype & ctrlItem)
     {
         Rect r;
         bool visible_p = true;
         ControlHandle ctl;
 
         r = dst->itmr;
-        if(CW(r.left) > 8192)
+        if(r.left > 8192)
         {
             visible_p = false;
-            r.left = CW(CW(r.left) - 16384);
-            r.right = CW(CW(r.right) - 16384);
+            r.left = r.left - 16384;
+            r.right = r.right - 16384;
         }
 
-        if((CB(dst->itmtype) & resCtrl) == resCtrl)
+        if((dst->itmtype & resCtrl) == resCtrl)
         {
             Rect *ctl_rect;
             GUEST<INTEGER> top, left;
@@ -71,7 +71,7 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
                 top = ctl_rect->top;
                 left = ctl_rect->left;
                 if(r.top != top || r.left != left)
-                    MoveControl(ctl, CW(r.left), CW(r.top));
+                    MoveControl(ctl, r.left, r.top);
             }
         }
         else
@@ -79,16 +79,16 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
             ctl = NewControl((WindowPtr)dp, &r,
                              (StringPtr)&dst->itmlen,
                              visible_p, 0, 0, 1,
-                             CB(dst->itmtype) & resCtrl, 0L);
+                             dst->itmtype & resCtrl, 0L);
         }
-        dst->itmhand = RM((Handle)ctl);
+        dst->itmhand = (Handle)ctl;
 
         ValidRect(&dst->itmr);
 
         {
             AuxWinHandle aux_win_h;
 
-            aux_win_h = MR(*lookup_aux_win((WindowPtr)dp));
+            aux_win_h = *lookup_aux_win((WindowPtr)dp);
             if(aux_win_h && HxX(aux_win_h, dialogCItem))
             {
                 Handle item_color_info_h;
@@ -110,8 +110,8 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
 
                         CCTabHandle color_table;
 
-                        color_table_bytes = CW(ctl_color_info->data);
-                        color_table_offset = CW(ctl_color_info->offset);
+                        color_table_bytes = ctl_color_info->data;
+                        color_table_offset = ctl_color_info->offset;
 
                         color_table_base = ((char *)item_color_info
                                             + color_table_offset);
@@ -126,14 +126,14 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
             }
         }
     }
-    else if(CB(dst->itmtype) & (statText | editText))
+    else if(dst->itmtype & (statText | editText))
     {
         PtrToHand((Ptr)data, &dst->itmhand, dst->itmlen);
-        if((CB(dst->itmtype) & editText)
+        if((dst->itmtype & editText)
            && DIALOG_EDIT_FIELD(dp) == -1)
             ROMlib_dpntoteh(dp, item_no);
     }
-    else if(CB(dst->itmtype) & iconItem)
+    else if(dst->itmtype & iconItem)
     {
         Handle h = nullptr;
 
@@ -152,11 +152,11 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
             if(!h || CICON_P(h))
                 warning_unexpected("dubious icon handle");
         }
-        dst->itmhand = RM(h);
+        dst->itmhand = h;
     }
-    else if(CB(dst->itmtype) & picItem)
+    else if(dst->itmtype & picItem)
     {
-        dst->itmhand = RM((Handle)GetPicture(res_id));
+        dst->itmhand = (Handle)GetPicture(res_id);
     }
     else
     {
@@ -190,7 +190,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
                    proc_id, (CWindowPtr)behind, go_away_flag, ref_con);
         if(w_ctab && CTAB_SIZE(w_ctab) > -1)
         {
-            ThePortGuard guard(MR(qdGlobals().thePort));
+            ThePortGuard guard(qdGlobals().thePort);
             SetWinColor(DIALOG_WINDOW(dp), w_ctab);
         }
     }
@@ -202,10 +202,10 @@ ROMlib_new_dialog_common(DialogPtr dp,
     {
         AuxWinHandle aux_win_h;
 
-        aux_win_h = MR(*lookup_aux_win(dp));
+        aux_win_h = *lookup_aux_win(dp);
         gui_assert(aux_win_h);
 
-        HxX(aux_win_h, dialogCItem) = RM(item_color_table_h);
+        HxX(aux_win_h, dialogCItem) = item_color_table_h;
     }
 
     // FIXME: #warning We no longer call TEStyleNew, this helps LB password
@@ -214,12 +214,12 @@ ROMlib_new_dialog_common(DialogPtr dp,
 
     Rect newr;
 
-    TextFont(CW(LM(DlgFont)));
-    newr.top = newr.left = CWC(0);
-    newr.bottom = CW(CW(bounds->bottom) - CW(bounds->top));
-    newr.right = CW(CW(bounds->right) - CW(bounds->left));
+    TextFont(LM(DlgFont));
+    newr.top = newr.left = 0;
+    newr.bottom = bounds->bottom - bounds->top;
+    newr.right = bounds->right - bounds->left;
     InvalRect(&newr);
-    WINDOW_KIND_X(dp) = CWC(dialogKind);
+    WINDOW_KIND_X(dp) = dialogKind;
 
     {
         Rect emptyrect;
@@ -234,17 +234,17 @@ ROMlib_new_dialog_common(DialogPtr dp,
 	 ***************************************************************/
         te = TENew(&emptyrect, &emptyrect);
 
-        DIALOG_TEXTH_X(dp) = RM(te);
+        DIALOG_TEXTH_X(dp) = te;
         TEAutoView(true, te);
         DisposeHandle(TE_HTEXT(te));
         TE_HTEXT_X(te) = CLC_NULL;
     }
 
-    DIALOG_EDIT_FIELD_X(dp) = CWC(-1);
-    DIALOG_EDIT_OPEN_X(dp) = CWC(0);
-    DIALOG_ADEF_ITEM_X(dp) = CWC(1);
+    DIALOG_EDIT_FIELD_X(dp) = -1;
+    DIALOG_EDIT_OPEN_X(dp) = 0;
+    DIALOG_ADEF_ITEM_X(dp) = 1;
 
-    DIALOG_ITEMS_X(dp) = RM(items);
+    DIALOG_ITEMS_X(dp) = items;
     if(items)
     {
         Point zero_pt;
@@ -259,7 +259,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
 
         ip = (GUEST<INTEGER> *)STARH(items);
         itp = (itmp)(ip + 1);
-        i = CW(*ip);
+        i = *ip;
         item_no = 1;
         while(i-- >= 0)
         {
@@ -308,7 +308,7 @@ void Executor::dialog_compute_rect(Rect *dialog_rect, Rect *dst_rect,
     dialog_width = RECT_WIDTH(dialog_rect);
     dialog_height = RECT_HEIGHT(dialog_rect);
 
-    screen_rect = &GD_RECT(MR(LM(MainDevice)));
+    screen_rect = &GD_RECT(LM(MainDevice));
     screen_width = RECT_WIDTH(screen_rect);
     screen_height = RECT_HEIGHT(screen_rect);
 
@@ -336,9 +336,9 @@ void Executor::dialog_compute_rect(Rect *dialog_rect, Rect *dst_rect,
 
                 parent_rect = &PORT_RECT(parent);
 
-                top = CW(parent_rect->top) + 16;
-                left = ((CW(parent_rect->left)
-                         + CW(parent_rect->right))
+                top = parent_rect->top + 16;
+                left = ((parent_rect->left
+                         + parent_rect->right)
                             / 2
                         + dialog_width / 2);
 
@@ -426,12 +426,12 @@ void Executor::C_CloseDialog(DialogPtr dp) /* IMI-413 */
     {
         /* #### should `items' be locked? */
         ip = (GUEST<INTEGER> *)STARH(items);
-        i = CW(*ip);
+        i = *ip;
         itp = (itmp)(ip + 1);
         while(i-- >= 0)
         {
-            if(CB(itp->itmtype) & (editText | statText))
-                DisposeHandle((Handle)MR(itp->itmhand));
+            if(itp->itmtype & (editText | statText))
+                DisposeHandle((Handle)itp->itmhand);
             BUMPIP(itp);
         }
     }
@@ -443,7 +443,7 @@ void Executor::C_DisposeDialog(DialogPtr dp) /* IMI-415 */
     TEHandle teh;
 
     CloseDialog(dp);
-    DisposeHandle(MR(((DialogPeek)dp)->items));
+    DisposeHandle(((DialogPeek)dp)->items);
     teh = DIALOG_TEXTH(dp);
 
     /* accounted for elsewhere */

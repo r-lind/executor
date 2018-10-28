@@ -200,7 +200,7 @@ void Executor::futzwithdosdisks(void)
                     try_to_mount_disk(DRIVE_NAME_OF(i), fd | MARKER, &mess_s,
                                       blocksize, 16 * PHYSBSIZE,
                                       flags, 0);
-                    mess = CL(mess_s);
+                    mess = mess_s;
                     if(mess)
                     {
                         if(mess >> 16 == 0)

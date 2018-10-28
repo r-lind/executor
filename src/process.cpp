@@ -55,9 +55,9 @@ static process_info_t *current_process_info;
 static const int default_process_mode_flags = 0;
 
 /* ### not currently used */
-static ProcessSerialNumber system_process = { CLC(0), CLC(kSystemProcess) };
-static ProcessSerialNumber no_process = { CLC(0), CLC(kNoProcess) };
-static ProcessSerialNumber current_process = { CLC(0), CLC(kCurrentProcess) };
+static ProcessSerialNumber system_process = { 0, kSystemProcess };
+static ProcessSerialNumber no_process = { 0, kNoProcess };
+static ProcessSerialNumber current_process = { 0, kCurrentProcess };
 
 void Executor::process_create(bool desk_accessory_p,
                               uint32_t type, uint32_t signature)
@@ -88,13 +88,13 @@ void Executor::process_create(bool desk_accessory_p,
     info->signature = signature;
 
     /* ### fixme; major bogosity */
-    info->size = (zone_size(MR(LM(ApplZone)))
+    info->size = (zone_size(LM(ApplZone))
                   /* + A5 world size */
                   /* + stack size */);
     info->launch_ticks = TickCount();
 
-    info->serial_number.highLongOfPSN = CL(-1);
-    info->serial_number.lowLongOfPSN = CL(next_free_psn++);
+    info->serial_number.highLongOfPSN = -1;
+    info->serial_number.lowLongOfPSN = next_free_psn++;
 
     info->next = process_info_list;
     process_info_list = info;
@@ -167,21 +167,21 @@ OSErr Executor::C_GetProcessInformation(ProcessSerialNumber *serial_number,
         return paramErr;
 
     PROCESS_INFO_SERIAL_NUMBER(process_info) = info->serial_number;
-    PROCESS_INFO_TYPE_X(process_info) = CL(info->type);
-    PROCESS_INFO_SIGNATURE_X(process_info) = CL(info->signature);
-    PROCESS_INFO_MODE_X(process_info) = CL(info->mode);
+    PROCESS_INFO_TYPE_X(process_info) = info->type;
+    PROCESS_INFO_SIGNATURE_X(process_info) = info->signature;
+    PROCESS_INFO_MODE_X(process_info) = info->mode;
     PROCESS_INFO_LOCATION_X(process_info) = guest_cast<Ptr>(LM(ApplZone));
-    PROCESS_INFO_SIZE_X(process_info) = CL(info->size);
+    PROCESS_INFO_SIZE_X(process_info) = info->size;
 
     /* ### set current zone to applzone? */
-    PROCESS_INFO_FREE_MEM_X(process_info) = CL(FreeMem());
+    PROCESS_INFO_FREE_MEM_X(process_info) = FreeMem();
 
     PROCESS_INFO_LAUNCHER(process_info) = no_process;
 
-    PROCESS_INFO_LAUNCH_DATE_X(process_info) = CL(info->launch_ticks);
+    PROCESS_INFO_LAUNCH_DATE_X(process_info) = info->launch_ticks;
     current_ticks = TickCount();
     PROCESS_INFO_ACTIVE_TIME_X(process_info)
-        = CL(current_ticks - info->launch_ticks);
+        = current_ticks - info->launch_ticks;
 
     return noErr;
 }

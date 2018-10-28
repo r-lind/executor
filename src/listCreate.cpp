@@ -17,18 +17,18 @@ using namespace Executor;
 void Executor::ROMlib_vminmax(INTEGER *minp, INTEGER *maxp,
                               ListPtr lp) /* INTERNAL */
 {
-    *minp = CW(lp->dataBounds.top);
-    *maxp = *minp + CW(lp->dataBounds.bottom) - CW(lp->visible.bottom) + CW(lp->visible.top);
-    if(CW(lp->cellSize.v) * (CW(lp->visible.bottom) - CW(lp->visible.top)) > CW(lp->rView.bottom) - CW(lp->rView.top))
+    *minp = lp->dataBounds.top;
+    *maxp = *minp + lp->dataBounds.bottom - lp->visible.bottom + lp->visible.top;
+    if(lp->cellSize.v * (lp->visible.bottom - lp->visible.top) > lp->rView.bottom - lp->rView.top)
         ++*maxp;
 }
 
 void Executor::ROMlib_hminmax(INTEGER *minp, INTEGER *maxp,
                               ListPtr lp) /* INTERNAL */
 {
-    *minp = CW(lp->dataBounds.left);
-    *maxp = *minp + CW(lp->dataBounds.right) - CW(lp->visible.right) + CW(lp->visible.left);
-    if(CW(lp->cellSize.h) * (CW(lp->visible.right) - CW(lp->visible.left)) > CW(lp->rView.right) - CW(lp->rView.left))
+    *minp = lp->dataBounds.left;
+    *maxp = *minp + lp->dataBounds.right - lp->visible.right + lp->visible.left;
+    if(lp->cellSize.h * (lp->visible.right - lp->visible.left) > lp->rView.right - lp->rView.left)
         ++*maxp;
 }
 
@@ -84,7 +84,7 @@ check_lists(void)
 
         gp = HxP((*pp)->list, port);
         if(gp != (*pp)->orig_port)
-            (*pp)->lastTextProc = MR(gp->grafProcs)->textProc;
+            (*pp)->lastTextProc = gp->grafProcs->textProc;
     }
 }
 #endif
@@ -110,26 +110,26 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     GUEST<Handle> temph;
     LISTDECL();
 
-    noffs = (CW(bounds->right) - CW(bounds->left)) * (CW(bounds->bottom) - CW(bounds->top)) + 1;
+    noffs = (bounds->right - bounds->left) * (bounds->bottom - bounds->top) + 1;
     retval = (ListHandle)NewHandle(sizeof(ListRec) - sizeof(HxX(retval, cellArray)) + (noffs + 1) * sizeof(INTEGER));
     if(!retval)
         /*-->*/ return 0; /* couldn't allocate memory */
 
-    temph = RM(GetResource(TICK("LDEF"), proc));
+    temph = GetResource(TICK("LDEF"), proc);
     if(!(HxX(retval, listDefProc) = temph))
     {
         DisposeHandle((Handle)retval);
         /*-->*/ return 0; /* spooey list definition proc */
     }
 
-    tempdatah = RM((DataHandle)NewHandle(0));
+    tempdatah = (DataHandle)NewHandle(0);
     HxX(retval, cells) = tempdatah;
     HLock((Handle)retval);
     lp = STARH(retval);
 
     lp->dataBounds = *bounds;
     lp->rView = *rview;
-    lp->port = RM(wind);
+    lp->port = wind;
     lp->indent.h = 0;
     lp->indent.v = 0;
     lp->selFlags = 0;
@@ -140,16 +140,16 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
 #endif
     lp->lReserved = 0;
     lp->clikTime = 0;
-    lp->clikLoc.h = CWC(-32768);
-    lp->clikLoc.v = CWC(-32768);
-    lp->mouseLoc.h = CWC(-1);
-    lp->mouseLoc.v = CWC(-1);
+    lp->clikLoc.h = -32768;
+    lp->clikLoc.v = -32768;
+    lp->mouseLoc.h = -1;
+    lp->mouseLoc.v = -1;
     lp->lClikLoop = 0;
-    lp->lastClick.h = CWC(-1);
-    lp->lastClick.v = CWC(-1);
+    lp->lastClick.h = -1;
+    lp->lastClick.v = -1;
     lp->refCon = 0;
     lp->userHandle = nullptr;
-    lp->maxIndex = CWC(-1); /* What is this anyway? */
+    lp->maxIndex = -1; /* What is this anyway? */
     ip = (INTEGER *)lp->cellArray;
     for(i = 0; i <= noffs; i++)
         *ip++ = 0;
@@ -164,28 +164,28 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     if(scrollv)
     {
         r = lp->rView;
-        r.top = CW(CW(r.top) - 1);
+        r.top = r.top - 1;
         r.left = r.right;
-        r.right = CW(CW(r.right) + (16));
-        r.bottom = CW(CW(r.bottom) + 1);
+        r.right = r.right + (16);
+        r.bottom = r.bottom + 1;
         ROMlib_vminmax(&min, &max, lp);
-        lp->vScroll = RM(NewControl((WindowPtr)wind, &r, (StringPtr) "",
-                                    draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0));
-        STARH(MR(lp->vScroll))->contrlRfCon = guest_cast<LONGINT>(RM(retval));
+        lp->vScroll = NewControl((WindowPtr)wind, &r, (StringPtr) "",
+                                    draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0);
+        STARH(lp->vScroll)->contrlRfCon = guest_cast<LONGINT>(retval);
         lp->listFlags |= lDoVAutoscroll;
     }
 
     if(scrollh)
     {
         r = lp->rView;
-        r.left = CW(CW(r.left) - 1);
+        r.left = r.left - 1;
         r.top = r.bottom;
-        r.bottom = CW(CW(r.bottom) + (16));
-        r.right = CW(CW(r.right) + 1);
+        r.bottom = r.bottom + (16);
+        r.right = r.right + 1;
         ROMlib_hminmax(&min, &max, lp);
-        lp->hScroll = RM(NewControl((WindowPtr)wind, &r, (StringPtr) "",
-                                    draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0));
-        STARH(MR(lp->hScroll))->contrlRfCon = guest_cast<LONGINT>(RM(retval));
+        lp->hScroll = NewControl((WindowPtr)wind, &r, (StringPtr) "",
+                                    draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0);
+        STARH(lp->hScroll)->contrlRfCon = guest_cast<LONGINT>(retval);
         lp->listFlags |= lDoHAutoscroll;
     }
 

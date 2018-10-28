@@ -50,10 +50,10 @@ typedef struct
 #define GENERIC_ELT_FONT_X(generic_elt) ((generic_elt)->Font)
 #define GENERIC_ELT_SIZE_X(generic_elt) ((generic_elt)->Size)
 
-#define GENERIC_ELT_HEIGHT(generic_elt) (CW(GENERIC_ELT_HEIGHT_X(generic_elt)))
-#define GENERIC_ELT_ASCENT(generic_elt) (CW(GENERIC_ELT_ASCENT_X(generic_elt)))
-#define GENERIC_ELT_FONT(generic_elt) (CW(GENERIC_ELT_FONT_X(generic_elt)))
-#define GENERIC_ELT_SIZE(generic_elt) (CW(GENERIC_ELT_SIZE_X(generic_elt)))
+#define GENERIC_ELT_HEIGHT(generic_elt) (GENERIC_ELT_HEIGHT_X(generic_elt))
+#define GENERIC_ELT_ASCENT(generic_elt) (GENERIC_ELT_ASCENT_X(generic_elt))
+#define GENERIC_ELT_FONT(generic_elt) (GENERIC_ELT_FONT_X(generic_elt))
+#define GENERIC_ELT_SIZE(generic_elt) (GENERIC_ELT_SIZE_X(generic_elt))
 
 typedef struct generic_elt
 {
@@ -126,8 +126,8 @@ typedef GUEST<tehiddenp> *tehiddenh;
 #define TEAUTOVIEWBIT 1 /* found by dumping the handle \
                before and after calling TEAutoView */
 
-#define TEHIDDENH(teh) (STARH((GUEST<tehiddenh> *)&(MR(*teh))->recalBack))
-#define TEHIDDENHX(teh) ((*(GUEST<tehiddenh> *)&(MR(*teh))->recalBack))
+#define TEHIDDENH(teh) (STARH((GUEST<tehiddenh> *)&(*teh)->recalBack))
+#define TEHIDDENHX(teh) ((*(GUEST<tehiddenh> *)&(*teh)->recalBack))
 
 extern void ROMlib_recompute_caret(TEHandle te);
 }

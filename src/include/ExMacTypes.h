@@ -94,7 +94,7 @@ struct NativePoint {
 };
 #endif
 
-#define ZEROPOINT(p) (p.v = CWC(0), p.h = CWC(0))
+#define ZEROPOINT(p) (p.v = 0, p.h = 0)
 
 struct Rect
 {
@@ -118,11 +118,11 @@ typedef Rect *RectPtr;
 
 inline short RECT_WIDTH(const Rect *r)
 {
-    return CW(r->right) - CW(r->left);
+    return r->right - r->left;
 }
 inline short RECT_HEIGHT(const Rect *r)
 {
-    return CW(r->bottom) - CW(r->top);
+    return r->bottom - r->top;
 }
 
 #define RECT_ZERO(r)                \

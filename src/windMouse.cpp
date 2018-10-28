@@ -35,11 +35,11 @@ INTEGER Executor::C_FindWindow(Point p, GUEST<WindowPtr> *wpp)
     *wpp = 0;
     if(MBDFCALL(mbHit, 0, pointaslong) != -1)
         return inMenuBar;
-    for(wp = MR(LM(WindowList)); wp; wp = WINDOW_NEXT_WINDOW(wp))
+    for(wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
         if(WINDOW_VISIBLE_X(wp) && PtInRgn(p, WINDOW_STRUCT_REGION(wp)))
         {
-            *wpp = RM((WindowPtr)wp);
+            *wpp = (WindowPtr)wp;
             if(WINDOW_KIND(wp) < 0)
             {
                 retval = inSysWindow;
@@ -64,9 +64,9 @@ static BOOLEAN xTrackBox(WindowPtr wp, Point pt, INTEGER part) /* IMIV-50 */
     BOOLEAN inpart = true, inp;
     EventRecord ev;
 
-    ThePortGuard guard(MR(wmgr_port));
+    ThePortGuard guard(wmgr_port);
 
-    SetClip(MR(LM(GrayRgn)));
+    SetClip(LM(GrayRgn));
 
     WINDCALL(wp, wDraw, part);
     while(!GetOSEvent(mUpMask, &ev))
@@ -128,27 +128,27 @@ void Executor::C_ZoomWindow(WindowPtr wp, INTEGER part,
         {
             u = &((WStateData *)STARH(WINDOW_DATA(wp)))->userState;
             u->top
-                = CW(CW(PORT_RECT(wp).top) - CW(PORT_BOUNDS(wp).top));
+                = PORT_RECT(wp).top - PORT_BOUNDS(wp).top;
             u->left
-                = CW(CW(PORT_RECT(wp).left) - CW(PORT_BOUNDS(wp).left));
+                = PORT_RECT(wp).left - PORT_BOUNDS(wp).left;
             u->bottom
-                = CW(CW(PORT_RECT(wp).bottom) - CW(PORT_BOUNDS(wp).top));
+                = PORT_RECT(wp).bottom - PORT_BOUNDS(wp).top;
             u->right
-                = CW(CW(PORT_RECT(wp).right) - CW(PORT_BOUNDS(wp).left));
+                = PORT_RECT(wp).right - PORT_BOUNDS(wp).left;
         }
 #endif
         behind = NewRgn();
         CopyRgn(WINDOW_STRUCT_REGION(wp), behind);
         if(part == inZoomIn)
-            PORT_RECT(wp) = MR(*(GUEST<WStateData *> *)WINDOW_DATA(wp))->userState;
+            PORT_RECT(wp) = (*(GUEST<WStateData *> *)WINDOW_DATA(wp))->userState;
         else
-            PORT_RECT(wp) = MR(*(GUEST<WStateData *> *)WINDOW_DATA(wp))->stdState;
+            PORT_RECT(wp) = (*(GUEST<WStateData *> *)WINDOW_DATA(wp))->stdState;
         OffsetRect(&PORT_BOUNDS(wp),
-                   -CW(PORT_RECT(wp).left) - CW(PORT_BOUNDS(wp).left),
-                   -CW(PORT_RECT(wp).top) - CW(PORT_BOUNDS(wp).top));
+                   -PORT_RECT(wp).left - PORT_BOUNDS(wp).left,
+                   -PORT_RECT(wp).top - PORT_BOUNDS(wp).top);
 
         OffsetRect(&PORT_RECT(wp),
-                   -CW(PORT_RECT(wp).left), -CW(PORT_RECT(wp).top));
+                   -PORT_RECT(wp).left, -PORT_RECT(wp).top);
         WINDCALL(wp, wCalcRgns, 0);
         UnionRgn(behind, WINDOW_STRUCT_REGION(wp), behind);
 
@@ -156,8 +156,8 @@ void Executor::C_ZoomWindow(WindowPtr wp, INTEGER part,
         PaintBehind(WINDOW_NEXT_WINDOW(wp), behind);
 
 #if !defined(THEPORTNEEDNTBEWMGRPORT)
-        gp = MR(qdGlobals().thePort);
-        SetPort(MR(wmgr_port));
+        gp = qdGlobals().thePort;
+        SetPort(wmgr_port);
 #endif /* THEPORTNEEDNTBEWMGRPORT */
         SetClip(WINDOW_STRUCT_REGION(wp));
         ClipAbove((WindowPeek)wp);

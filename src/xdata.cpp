@@ -22,8 +22,8 @@ bool Executor::update_xdata_if_needed(xdata_handle_t xh, PixPat *pixpat,
 
     x = STARH(xh);
 
-    if(x->ctab_seed_x != CTAB_SEED_X(MR(dest->pmTable))
-       || (1 << x->log2_bpp) != CW(dest->pixelSize)
+    if(x->ctab_seed_x != CTAB_SEED_X(dest->pmTable)
+       || (1 << x->log2_bpp) != dest->pixelSize
        || (x->log2_bpp >= 4 && x->rgb_spec != pixmap_rgb_spec(dest)))
     {
         if(x->raw_pat_bits_mem)
@@ -45,27 +45,27 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     static PixMap pattern_pixmap_tmpl = {
         /* baseAddr; to be filled in later */
         CLC_NULL,
-        CWC(PIXMAP_DEFAULT_ROWBYTES | 1),
-        { CWC(0), CWC(0), CWC(8), CWC(8) },
+        PIXMAP_DEFAULT_ROWBYTES | 1,
+        { 0, 0, 8, 8 },
         /* version */
-        CWC(0),
-        CWC(0),
-        CLC(0),
+        0,
+        0,
+        0,
 
-        CLC(72 << 16),
-        CLC(72 << 16),
+        72 << 16,
+        72 << 16,
 
-        CWC(0),
+        0,
         /* 1bpp */
-        CWC(1),
+        1,
         /* 1 component */
-        CWC(1),
-        CWC(1),
-        CLC(0),
+        1,
+        1,
+        0,
         /* color table; to be filled in later */
         CLC_NULL,
 
-        CLC(0),
+        0,
     };
     /* this is a template pattern to be used as the dest
      when performing the conversion from the old style
@@ -73,60 +73,60 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     static PixMap dst_pixmap_tmpl = {
         /* baseAddr; to be filled in later */
         CLC_NULL,
-        CWC(0),
-        { CWC(0), CWC(0), CWC(8), CWC(8) },
+        0,
+        { 0, 0, 8, 8 },
         /* version */
-        CWC(0),
-        CWC(0),
-        CLC(0),
+        0,
+        0,
+        0,
 
-        CLC(72 << 16),
-        CLC(72 << 16),
+        72 << 16,
+        72 << 16,
 
-        CWC(0),
-        CWC(0),
-        CWC(0),
-        CWC(0),
-        CLC(0),
+        0,
+        0,
+        0,
+        0,
+        0,
         /* color table; to be filled in later */
         CLC_NULL,
 
-        CLC(0),
+        0,
     };
     CTabPtr conv_table;
     CTabHandle fg_bk_ctab;
     int dst_row_bytes, target_depth;
 
-    pattern_pixmap_tmpl.baseAddr = RM((Ptr)&pattern[0]);
+    pattern_pixmap_tmpl.baseAddr = (Ptr)&pattern[0];
     fg_bk_ctab = validate_fg_bk_ctab();
-    pattern_pixmap_tmpl.pmTable = RM(ROMlib_bw_ctab);
+    pattern_pixmap_tmpl.pmTable = ROMlib_bw_ctab;
     conv_table = (CTabPtr)alloca(CTAB_STORAGE_FOR_SIZE(1));
     conv_table->ctSeed = CTAB_SEED_X(fg_bk_ctab);
-    conv_table->ctFlags = CWC(0);
-    conv_table->ctSize = CWC(1);
+    conv_table->ctFlags = 0;
+    conv_table->ctSize = 1;
 
-    conv_table->ctTable[0].value = CWC(0);
-    conv_table->ctTable[1].value = CWC(~0);
+    conv_table->ctTable[0].value = 0;
+    conv_table->ctTable[1].value = ~0;
 
-    target_depth = CW(target->pixelSize);
+    target_depth = target->pixelSize;
     dst_row_bytes = target_depth; /* old-style Patterns always 8 pixels wide. */
     *row_bytes = dst_row_bytes;
-    dst_pixmap_tmpl.rowBytes = (CW(dst_row_bytes)
+    dst_pixmap_tmpl.rowBytes = (dst_row_bytes
                                 | (target->rowBytes & ROWBYTES_FLAG_BITS_X)
                                 | PIXMAP_DEFAULT_ROWBYTES_X);
     pixmap_set_pixel_fields(&dst_pixmap_tmpl, target_depth);
     if(target_depth > 8)
     {
         if(active_screen_addr_p(target))
-            dst_pixmap_tmpl.pixelType = CWC(vdriver_rgb_pixel_type);
+            dst_pixmap_tmpl.pixelType = vdriver_rgb_pixel_type;
         else
-            dst_pixmap_tmpl.pixelType = CWC(RGBDirect);
+            dst_pixmap_tmpl.pixelType = RGBDirect;
     }
     else
-        dst_pixmap_tmpl.pixelType = CWC(Indirect);
+        dst_pixmap_tmpl.pixelType = Indirect;
 
-    dst_pixmap_tmpl.pmTable = PIXMAP_TABLE_X(GD_PMAP(MR(LM(TheGDevice))));
-    dst_pixmap_tmpl.baseAddr = RM((Ptr)bits);
+    dst_pixmap_tmpl.pmTable = PIXMAP_TABLE_X(GD_PMAP(LM(TheGDevice)));
+    dst_pixmap_tmpl.baseAddr = (Ptr)bits;
 
     convert_pixmap(&pattern_pixmap_tmpl, &dst_pixmap_tmpl,
                    &ROMlib_pattern_bounds, conv_table);
@@ -138,7 +138,7 @@ raw_bits_for_color_pattern(PixPatPtr pixpat, PixMap *target,
 {
     PixMapHandle patmap;
 
-    patmap = MR(pixpat->patMap);
+    patmap = pixpat->patMap;
     HLockGuard guard(patmap);
     int row_bytes;
     int target_depth;
@@ -149,18 +149,18 @@ raw_bits_for_color_pattern(PixPatPtr pixpat, PixMap *target,
 
     src = STARH(patmap);
     bounds = &src->bounds;
-    target_depth = CW(target->pixelSize);
+    target_depth = target->pixelSize;
     row_bytes = ((RECT_WIDTH(bounds) * target_depth) + 7) / 8;
     *row_bytesp = row_bytes;
 
     dst = *target;
     dst.bounds = *bounds;
-    dst.rowBytes = (CW(row_bytes)
+    dst.rowBytes = (row_bytes
                     | (target->rowBytes & ROWBYTES_FLAG_BITS_X)
                     | PIXMAP_DEFAULT_ROWBYTES_X);
-    dst.baseAddr = RM((Ptr)bits);
+    dst.baseAddr = (Ptr)bits;
 
-    data = MR(pixpat->patData);
+    data = pixpat->patData;
 
     HLockGuard guard2(data);
     src->baseAddr = *data;
@@ -179,9 +179,9 @@ raw_bits_for_rgb_pattern(PixPatPtr pixpat, PixMap *target,
    * table entry for the pixpat.  We copy the color in case any of the
    * relevant handles move when we call Color2Index.
    */
-    desired_color = CTAB_TABLE(PIXMAP_TABLE(MR(pixpat->patMap)))[4].rgb;
+    desired_color = CTAB_TABLE(PIXMAP_TABLE(pixpat->patMap))[4].rgb;
 
-    target_depth = CW(target->pixelSize);
+    target_depth = target->pixelSize;
 
     if(target_depth <= 8)
     {
@@ -226,7 +226,7 @@ static void
 raw_bits_for_pixpat(PixPat *pixpat, PixMap *target,
                     uint32_t *bits, int *row_bytes, int *height_override)
 {
-    switch(CW(pixpat->patType))
+    switch(pixpat->patType)
     {
         case pixpat_old_style_pattern:
             raw_bits_for_pattern(pixpat->pat1Data, target, bits, row_bytes);
@@ -300,8 +300,8 @@ xdata_for_raw_data(PixMap *target, xdata_t *x, uint32_t *raw_bits,
     memset(x, 0, sizeof *x);
 
     x->magic_cookie = XDATA_MAGIC_COOKIE;
-    x->log2_bpp = ROMlib_log2[CW(target->pixelSize)];
-    x->ctab_seed_x = CTAB_SEED_X(MR(target->pmTable));
+    x->log2_bpp = ROMlib_log2[target->pixelSize];
+    x->ctab_seed_x = CTAB_SEED_X(target->pmTable);
     x->rgb_spec = pixmap_rgb_spec(target);
 
     /* See if it's not a full long wide. */
@@ -449,7 +449,7 @@ Executor::xdata_for_pixpat_with_space(PixPat *pixpat, PixMap *target,
 	* space for the biggest possible bitmap that might be required.
 	*/
     {
-        const Rect *bounds = &PIXMAP_BOUNDS(MR(pixpat->patMap));
+        const Rect *bounds = &PIXMAP_BOUNDS(pixpat->patMap);
         height = RECT_HEIGHT(bounds);
         width = RECT_WIDTH(bounds);
     }

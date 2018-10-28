@@ -20,7 +20,7 @@ using namespace Executor;
 void Executor::C_TESetAlignment(INTEGER j, TEHandle teh)
 {
     TE_SLAM(teh);
-    HxX(teh, just) = CW(j);
+    HxX(teh, just) = j;
     TECalText(teh);
     TE_SLAM(teh);
 }
@@ -83,14 +83,14 @@ void Executor::C_TEScroll(int16_t dh, int16_t dv, TEHandle te)
     ScrollRect(&r, dh, dv, rh);
     OffsetRect(&TE_DEST_RECT(te), dh, dv);
 
-    save_vis = PORT_VIS_REGION(MR(qdGlobals().thePort));
+    save_vis = PORT_VIS_REGION(qdGlobals().thePort);
     SectRgn(rh, save_vis, rh);
-    PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = RM(rh);
+    PORT_VIS_REGION_X(qdGlobals().thePort) = rh;
 
-    vis_rgn_bbox = RGN_BBOX(PORT_VIS_REGION(MR(qdGlobals().thePort)));
+    vis_rgn_bbox = RGN_BBOX(PORT_VIS_REGION(qdGlobals().thePort));
     TEUpdate(&vis_rgn_bbox, te);
 
-    PORT_VIS_REGION_X(MR(qdGlobals().thePort)) = RM(save_vis);
+    PORT_VIS_REGION_X(qdGlobals().thePort) = save_vis;
     DisposeRgn(rh);
 
     TE_SLAM(te);

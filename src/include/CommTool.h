@@ -76,6 +76,6 @@ extern OSErr CRMRemove(QElemPtr);
 
 extern QElemPtr CRMSearch(QElemPtr);
 
-extern CRMErr InitCRM(void);
+extern CRMErr InitCRM();
 }
 #endif

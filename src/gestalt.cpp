@@ -395,7 +395,7 @@ gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
     if(selector == gestaltSoundAttr && ROMlib_PretendSound == soundoff)
         selector = 0;
 
-    *responsep = CLC(0); /* better safe than sorry */
+    *responsep = 0; /* better safe than sorry */
 
     if(searchlist && (gp = find_selector_on_list(selector)))
         retval = gp->selectorFunction(selector, responsep);
@@ -411,7 +411,7 @@ gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
             else
             {
                 retval = noErr;
-                *responsep = CL(gep->value);
+                *responsep = gep->value;
             }
         }
     }
@@ -422,7 +422,7 @@ gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
                        (selector >> 16) & 0xFF,
                        (selector >> 8) & 0xFF,
                        (selector)&0xFF,
-                       CL(*responsep),
+                       *responsep,
                        retval);
 
     return retval;
@@ -488,7 +488,7 @@ Executor::ROMlib_add_to_gestalt_list(OSType selector, OSErr retval, uint32_t new
         entryp = (decltype(entryp))((char *)gestalt_listp + listp_size);
         entryp->selector = selector;
         entryp->retval = retval;
-        entryp->value = CL(new_value);
+        entryp->value = new_value;
         listp_size += sizeof *gestalt_listp;
     }
 }
@@ -575,9 +575,9 @@ syszone_p(ProcPtr p)
 {
     THz syszone;
 
-    syszone = MR(LM(SysZone));
+    syszone = LM(SysZone);
     return ((uintptr_t)p >= (uintptr_t)&syszone->heapData
-            && (uintptr_t)p < (uintptr_t)MR(syszone->bkLim));
+            && (uintptr_t)p < (uintptr_t)syszone->bkLim);
 }
 
 static OSErr
@@ -630,7 +630,7 @@ OSErr Executor::C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
     {
         if(syszone_p((ProcPtr)selFunc))
         {
-            *oldSelFuncp = RM(gp->selectorFunction);
+            *oldSelFuncp = gp->selectorFunction;
             gp->selectorFunction = selFunc;
             retval = noErr;
         }
@@ -646,7 +646,7 @@ OSErr Executor::C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
             retval = gestaltUndefSelectorErr;
         else
         {
-            *oldSelFuncp = RM(&GestaltTablesOnly);
+            *oldSelFuncp = &GestaltTablesOnly;
             retval = new_link(selector, selFunc);
         }
     }

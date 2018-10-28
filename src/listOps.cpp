@@ -21,8 +21,8 @@ GUEST<INTEGER> *Executor::ROMlib_getoffp(Cell cell, /* INTERNAL */
 
     if(list && PtInRect(cell, rp = &HxX(list, dataBounds)))
     {
-        ncols = CW(rp->right) - CW(rp->left);
-        retval = HxX(list, cellArray) + ncols * (cell.v - CW(rp->top)) + (cell.h - CW(rp->left));
+        ncols = rp->right - rp->left;
+        retval = HxX(list, cellArray) + ncols * (cell.v - rp->top) + (cell.h - rp->left);
     }
     else
         retval = 0;
@@ -48,9 +48,9 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
         ep = ROMlib_getoffp(temp, list) + 1;
         ip_offset = (char *)ip - (char *)STARH(list);
         ep_offset = (char *)ep - (char *)STARH(list);
-        off0 = CW(ip[0]) & 0x7FFF;
-        off1 = CW(ip[1]) & 0x7FFF;
-        off2 = CW(ep[0]) & 0x7FFF;
+        off0 = ip[0] & 0x7FFF;
+        off1 = ip[1] & 0x7FFF;
+        off2 = ep[0] & 0x7FFF;
         len = off1 - off0;
 
         /*
@@ -102,7 +102,7 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
         if(delta)
         {
             while(++ip <= ep)
-                *ip = CW(CW(*ip) + (delta));
+                *ip = *ip + (delta);
         }
         if(Hx(list, listFlags) & DODRAW)
             C_LDraw(cell, list);
@@ -129,13 +129,13 @@ void Executor::C_LGetCell(Ptr dp, GUEST<INTEGER> *dlp, Cell cell,
 
     if((ip = ROMlib_getoffp(cell, list)))
     {
-        off1 = CW(*ip++) & 0x7fff;
-        off2 = CW(*ip) & 0x7fff;
+        off1 = *ip++ & 0x7fff;
+        off2 = *ip & 0x7fff;
         ntomove = off2 - off1;
-        if(ntomove > CW(*dlp))
-            ntomove = CW(*dlp);
+        if(ntomove > *dlp)
+            ntomove = *dlp;
         BlockMoveData((Ptr)STARH(HxP(list, cells)) + off1, dp, (Size)ntomove);
-        *dlp = CW(ntomove);
+        *dlp = ntomove;
     }
 }
 
@@ -153,27 +153,27 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
     INTEGER nh, nv;
 
     lp = STARH(list);
-    if(!(lp->cellSize.h = CW(csize.h)))
-        lp->cellSize.h = CW((CW(lp->rView.right) - CW(lp->rView.left)) / std::max(1, (CW(lp->dataBounds.right)
-                                                                                 - CW(lp->dataBounds.left))));
-    if(!(lp->cellSize.v = CW(csize.v)))
+    if(!(lp->cellSize.h = csize.h))
+        lp->cellSize.h = (lp->rView.right - lp->rView.left) / std::max(1, (lp->dataBounds.right
+                                                                                 - lp->dataBounds.left));
+    if(!(lp->cellSize.v = csize.v))
     {
-        gp = MR(qdGlobals().thePort);
-        SetPort(MR(lp->port));
+        gp = qdGlobals().thePort;
+        SetPort(lp->port);
         GetFontInfo(&fi);
         lp = STARH(list); /* could have moved */
-        lp->cellSize.v = CW(CW(fi.ascent) + CW(fi.descent) + CW(fi.leading));
+        lp->cellSize.v = fi.ascent + fi.descent + fi.leading;
         SetPort(gp);
     }
     lp->visible.right = lp->dataBounds.right;
     lp->visible.bottom = lp->dataBounds.bottom;
-    nh = (CW(lp->rView.right) - CW(lp->rView.left) + CW(lp->cellSize.h) - 1) / CW(lp->cellSize.h);
-    nv = (CW(lp->rView.bottom) - CW(lp->rView.top) + CW(lp->cellSize.v) - 1) / CW(lp->cellSize.v);
-    if(CW(lp->visible.right) - CW(lp->visible.left) > nh)
-        lp->visible.right = CW(CW(lp->visible.left) + nh);
+    nh = (lp->rView.right - lp->rView.left + lp->cellSize.h - 1) / lp->cellSize.h;
+    nv = (lp->rView.bottom - lp->rView.top + lp->cellSize.v - 1) / lp->cellSize.v;
+    if(lp->visible.right - lp->visible.left > nh)
+        lp->visible.right = lp->visible.left + nh;
 
-    if(CW(lp->visible.bottom) - CW(lp->visible.top) > nv)
-        lp->visible.bottom = CW(CW(lp->visible.top) + nv);
+    if(lp->visible.bottom - lp->visible.top > nv)
+        lp->visible.bottom = lp->visible.top + nv;
     {
         ControlHandle control;
 
@@ -211,12 +211,12 @@ BOOLEAN Executor::C_LGetSelect(BOOLEAN next, GUEST<Cell> *cellp,
         retval = false;
     else if(next)
     {
-        c.h = CW(cellp->h);
-        c.v = CW(cellp->v);
+        c.h = cellp->h;
+        c.v = cellp->v;
         if(!(ip = ROMlib_getoffp(c, list)))
         {
             temp.h = 0;
-            temp.h = CW(cellp->v) + 1;
+            temp.h = cellp->v + 1;
             ip = ROMlib_getoffp(temp, list);
         }
         if(!ip)
@@ -226,7 +226,7 @@ BOOLEAN Executor::C_LGetSelect(BOOLEAN next, GUEST<Cell> *cellp,
             temp.h = Hx(list, dataBounds.right) - 1;
             temp.v = Hx(list, dataBounds.bottom) - 1;
             ep = ROMlib_getoffp(temp, list) + 1;
-            while(ip != ep && !(CW(*ip) & 0x8000))
+            while(ip != ep && !(*ip & 0x8000))
                 ip++;
             if(ip == ep)
                 retval = false;
@@ -236,20 +236,20 @@ BOOLEAN Executor::C_LGetSelect(BOOLEAN next, GUEST<Cell> *cellp,
                 ncols = Hx(list, dataBounds.right) - Hx(list, dataBounds.left);
                 rown = nint / ncols;
                 coln = nint % ncols;
-                cellp->v = CW(Hx(list, dataBounds.top) + rown);
-                cellp->h = CW(Hx(list, dataBounds.left) + coln);
+                cellp->v = Hx(list, dataBounds.top) + rown;
+                cellp->h = Hx(list, dataBounds.left) + coln;
                 retval = true;
             }
         }
     }
     else
     {
-        p.h = CW(cellp->h);
-        p.v = CW(cellp->v);
+        p.h = cellp->h;
+        p.v = cellp->v;
         if(!(ip = ROMlib_getoffp(p, list)))
             retval = false;
         else
-            retval = (CW(*ip) & 0x8000) ? true : false;
+            retval = (*ip & 0x8000) ? true : false;
     }
     return retval;
 }

@@ -228,17 +228,17 @@ static void xSeedFill(unsigned char *srcp, unsigned char *dstp, INTEGER srcr,
     if(!useseeds)
         transfer((INTEGER *)0, (INTEGER *)dstp, 0, dstr, height,
                  width, Negate);
-    if(dstp >= (unsigned char *)MR(qdGlobals().screenBits.baseAddr))
+    if(dstp >= (unsigned char *)qdGlobals().screenBits.baseAddr)
     {
-        byteoff = dstp - (unsigned char *)MR(qdGlobals().screenBits.baseAddr);
-        voff = byteoff / CW(qdGlobals().screenBits.rowBytes);
-        if(voff < CW(qdGlobals().screenBits.bounds.bottom) - CW(qdGlobals().screenBits.bounds.top))
+        byteoff = dstp - (unsigned char *)qdGlobals().screenBits.baseAddr;
+        voff = byteoff / qdGlobals().screenBits.rowBytes;
+        if(voff < qdGlobals().screenBits.bounds.bottom - qdGlobals().screenBits.bounds.top)
         {
-            dirty_rect_accrue(CW(qdGlobals().screenBits.bounds.top) + voff,
-                              (CW(qdGlobals().screenBits.bounds.left)
-                               + (byteoff % CW(qdGlobals().screenBits.rowBytes) * 8L)),
-                              CW(temprect.top) + height,
-                              CW(temprect.left) + (LONGINT)width * 16);
+            dirty_rect_accrue(qdGlobals().screenBits.bounds.top + voff,
+                              (qdGlobals().screenBits.bounds.left
+                               + (byteoff % qdGlobals().screenBits.rowBytes * 8L)),
+                              temprect.top + height,
+                              temprect.left + (LONGINT)width * 16);
         }
     }
 }
@@ -256,7 +256,7 @@ create_scratch_bitmap_if_necessary(uint8_t **_fbuf,
     int screen_row_bytes;
     int screen_height;
 
-    gd_pmap = GD_PMAP(MR(LM(MainDevice)));
+    gd_pmap = GD_PMAP(LM(MainDevice));
     screen_fbuf = PIXMAP_BASEADDR(gd_pmap);
     screen_row_bytes = PIXMAP_ROWBYTES(gd_pmap);
     screen_height = RECT_HEIGHT(&PIXMAP_BOUNDS(gd_pmap));
@@ -278,11 +278,11 @@ create_scratch_bitmap_if_necessary(uint8_t **_fbuf,
 
         offset = fbuf - screen_fbuf;
 
-        src_rect->top = CW(offset / screen_row_bytes);
-        src_rect->bottom = CW(offset / screen_row_bytes + height);
-        src_rect->left = CW((offset % screen_row_bytes) * 8);
-        src_rect->right = CW((offset % screen_row_bytes) * 8
-                             + word_width * 16);
+        src_rect->top = offset / screen_row_bytes;
+        src_rect->bottom = offset / screen_row_bytes + height;
+        src_rect->left = (offset % screen_row_bytes) * 8;
+        src_rect->right = (offset % screen_row_bytes) * 8
+                             + word_width * 16;
 
         *src_pm = *STARH(gd_pmap);
 
@@ -365,16 +365,16 @@ copy_mask_1(BitMap *src_bm, BitMap *mask_bm, BitMap *dst_bm,
 
         MapRgn(mask_rgn, mask_rect, dst_rect);
 
-        save_pic_handle = PORT_PIC_SAVE_X(MR(qdGlobals().thePort));
-        save_graf_procs = PORT_GRAF_PROCS_X(MR(qdGlobals().thePort));
+        save_pic_handle = PORT_PIC_SAVE_X(qdGlobals().thePort);
+        save_graf_procs = PORT_GRAF_PROCS_X(qdGlobals().thePort);
 
-        PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
-        PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = nullptr;
+        PORT_PIC_SAVE_X(qdGlobals().thePort) = nullptr;
+        PORT_GRAF_PROCS_X(qdGlobals().thePort) = nullptr;
 
         CopyBits(src_bm, dst_bm, src_rect, dst_rect, srcCopy, mask_rgn);
 
-        PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = save_pic_handle;
-        PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = save_graf_procs;
+        PORT_PIC_SAVE_X(qdGlobals().thePort) = save_pic_handle;
+        PORT_GRAF_PROCS_X(qdGlobals().thePort) = save_graf_procs;
 
         DisposeRgn(mask_rect_rgn);
         DisposeRgn(mask_rgn);
@@ -396,16 +396,16 @@ copy_mask_1(BitMap *src_bm, BitMap *mask_bm, BitMap *dst_bm,
         dst_top = dst_bottom = *dst_rect;
 
         src_bottom.top = src_top.bottom
-            = CW(CW(src_top.bottom) - src_half);
+            = src_top.bottom - src_half;
         mask_bottom.top = mask_top.bottom
-            = CW(CW(mask_top.bottom) - mask_half);
+            = mask_top.bottom - mask_half;
         dst_bottom.top = dst_top.bottom
-            = CW(CW(dst_top.bottom) - dst_half);
+            = dst_top.bottom - dst_half;
 
         mask_top_bm = *mask_bm;
         mask_bottom_bm = *mask_bm;
         mask_bottom_bm.bounds.top = mask_top_bm.bounds.bottom
-            = CW(CW(mask_top_bm.bounds.bottom) - mask_half);
+            = mask_top_bm.bounds.bottom - mask_half;
 
         copy_mask_1(src_bm, &mask_top_bm, dst_bm,
                     &src_top, &mask_top, &dst_top);
@@ -432,8 +432,8 @@ void Executor::C_CopyMask(BitMap *src_bogo_map, BitMap *mask_bogo_map,
     row_bytes = (RECT_WIDTH(mask_rect) + 31) / 32 * 4;
     TEMP_ALLOC_ALLOCATE(mask_bits, temp_mask_bits,
                         row_bytes * RECT_HEIGHT(mask_rect));
-    mask_bm.baseAddr = RM((Ptr)mask_bits);
-    mask_bm.rowBytes = CW(row_bytes);
+    mask_bm.baseAddr = (Ptr)mask_bits;
+    mask_bm.rowBytes = row_bytes;
     mask_bm.bounds = *mask_rect;
 
     CopyBits(mask_bogo_map, &mask_bm,

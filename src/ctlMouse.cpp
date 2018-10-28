@@ -48,7 +48,7 @@ find_control_helper(Point p, ControlHandle c,
             {
                 retval = TestControl(c, p);
                 if(retval)
-                    *cp = RM(c);
+                    *cp = c;
             }
         }
     }
@@ -130,8 +130,8 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
         while(!GetOSEvent(mUpMask, &ev))
         {
             GlobalToLocal(&ev.where);
-            whereunswapped.h = CW(ev.where.h);
-            whereunswapped.v = CW(ev.where.v);
+            whereunswapped.h = ev.where.h;
+            whereunswapped.v = ev.where.v;
             inpart = TestControl(c, whereunswapped);
             CTLCALL(c, autoTrack, inpart);
         }
@@ -149,8 +149,8 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
 	      Quicken. */
         if(!CTLCALL(c, dragCntl, partstart))
         {
-            thumb._tlimit.left = CW(p.h);
-            thumb._tlimit.top = CW(p.v);
+            thumb._tlimit.left = p.h;
+            thumb._tlimit.top = p.v;
             CTLCALL(c, thumbCntl, ptr_to_longint(&thumb));
             rh = NewRgn();
 
@@ -158,7 +158,7 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
 
             PATASSIGN(LM(DragPattern), qdGlobals().ltGray);
             l = DragTheRgn(rh, p, &thumb._tlimit, &thumb._tslop,
-                           CW(thumb._taxis), (ProcPtr)a);
+                           thumb._taxis, (ProcPtr)a);
             if((uint32_t)l != 0x80008000)
             {
                 CTLCALL(c, posCntl, l);
@@ -177,8 +177,8 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
         while(!OSEventAvail(mUpMask, &ev) && StillDown())
         {
             GlobalToLocal(&ev.where);
-            whereunswapped.h = CW(ev.where.h);
-            whereunswapped.v = CW(ev.where.v);
+            whereunswapped.h = ev.where.h;
+            whereunswapped.v = ev.where.v;
             inpart = TestControl(c, whereunswapped);
             if(inpart && inpart != partstart)
                 inpart = 0;
@@ -192,8 +192,8 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
         }
         GetOSEvent(mUpMask, &ev);
         GlobalToLocal(&ev.where);
-        whereunswapped.h = CW(ev.where.h);
-        whereunswapped.v = CW(ev.where.v);
+        whereunswapped.h = ev.where.h;
+        whereunswapped.v = ev.where.v;
         if(HxX(c, contrlHilite))
         {
             HxX(c, contrlHilite) = 0;

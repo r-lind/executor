@@ -572,8 +572,8 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
                         keymod &= ~mod;
                 }
                 when = TickCount();
-                where.h = CW(LM(MouseLocation).h);
-                where.v = CW(LM(MouseLocation).v);
+                where.h = LM(MouseLocation).h;
+                where.v = LM(MouseLocation).v;
                 keywhat = ROMlib_xlate(mkvkey, keymod, down_p);
                 post_keytrans_key_events(down_p ? keyDown : keyUp,
                                          keywhat, when, where,
@@ -602,8 +602,8 @@ int sdl_event_interrupt(const SDL_Event *event)
 {
     if(event->type == SDL_MOUSEMOTION)
     {
-        mouseloc.h = CW(event->motion.x);
-        mouseloc.v = CW(event->motion.y);
+        mouseloc.h = event->motion.x;
+        mouseloc.v = event->motion.y;
         interrupt_generate(M68K_MOUSE_MOVED_PRIORITY);
         return (0); /* Drop the event */
     }
@@ -631,9 +631,9 @@ void sdl_events_init(void)
 
     /* hook into syn68k synchronous interrupts */
     mouse_callback = callback_install(handle_sdl_mouse, nullptr);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4) = CL(mouse_callback);
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4) = mouse_callback;
     event_callback = callback_install(handle_sdl_events, nullptr);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = CL(event_callback);
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = event_callback;
 
     /* then set up a filter that triggers the event interrupt */
     SDL_SetEventFilter(sdl_event_interrupt);

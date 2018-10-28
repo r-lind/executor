@@ -37,13 +37,13 @@ void
 Executor::CRMInstall(QElemPtr qp)
 {
     if(!commtool_head.qTail)
-        ((CRMRecPtr)qp)->crmDeviceID = CLC(1);
+        ((CRMRecPtr)qp)->crmDeviceID = 1;
     else
     {
         CRMRecPtr prevp;
 
-        prevp = (CRMRecPtr)MR(commtool_head.qTail);
-        ((CRMRecPtr)qp)->crmDeviceID = CL(CL(prevp->crmDeviceID) + 1);
+        prevp = (CRMRecPtr)commtool_head.qTail;
+        ((CRMRecPtr)qp)->crmDeviceID = prevp->crmDeviceID + 1;
     }
 
     Enqueue(qp, &commtool_head);
@@ -65,11 +65,11 @@ Executor::CRMSearch(QElemPtr qp)
     CRMRecPtr p;
     LONGINT min;
 
-    min = CL(((CRMRecPtr)qp)->crmDeviceID) + 1;
+    min = ((CRMRecPtr)qp)->crmDeviceID + 1;
 
-    for(p = (CRMRecPtr)MR(commtool_head.qHead);
-        p && CL(p->crmDeviceID) < min;
-        p = (CRMRecPtr)MR(p->qLink))
+    for(p = (CRMRecPtr)commtool_head.qHead;
+        p && p->crmDeviceID < min;
+        p = (CRMRecPtr)p->qLink)
         ;
     retval = (QElemPtr)p;
     return retval;
@@ -93,24 +93,24 @@ serial_insert(const char *input, const char *output, const char *name)
             retval = MemError();
         else
         {
-            p->version = CWC(curCRMSerRecVer);
-            p->inputDriverName = RM(stringhandle_from_c_string(input));
-            p->outputDriverName = RM(stringhandle_from_c_string(output));
-            p->name = RM(stringhandle_from_c_string(name));
+            p->version = curCRMSerRecVer;
+            p->inputDriverName = stringhandle_from_c_string(input);
+            p->outputDriverName = stringhandle_from_c_string(output);
+            p->name = stringhandle_from_c_string(name);
             p->deviceIcon = nullptr;
-            p->ratedSpeed = CLC(19200);
-            p->maxSpeed = CLC(57600);
-            p->reserved = CLC(0);
+            p->ratedSpeed = 19200;
+            p->maxSpeed = 57600;
+            p->reserved = 0;
             qp->qLink = nullptr;
-            qp->qType = CWC(crmType);
-            qp->crmVersion = CWC(crmRecVersion);
-            qp->crmPrivate = CLC(0);
-            qp->crmReserved = CWC(0);
-            qp->crmDeviceType = CLC(crmSerialDevice);
-            qp->crmDeviceID = CLC(0);
-            qp->crmAttributes = guest_cast<LONGINT>(RM(p));
-            qp->crmStatus = CLC(0);
-            qp->crmRefCon = CLC(0);
+            qp->qType = crmType;
+            qp->crmVersion = crmRecVersion;
+            qp->crmPrivate = 0;
+            qp->crmReserved = 0;
+            qp->crmDeviceType = crmSerialDevice;
+            qp->crmDeviceID = 0;
+            qp->crmAttributes = guest_cast<LONGINT>(p);
+            qp->crmStatus = 0;
+            qp->crmRefCon = 0;
             CRMInstall((QElemPtr)qp);
             retval = noErr;
         }
@@ -119,7 +119,7 @@ serial_insert(const char *input, const char *output, const char *name)
 }
 
 CRMErr
-Executor::InitCRM(void)
+Executor::InitCRM()
 {
     static bool beenhere;
     CRMErr retval;

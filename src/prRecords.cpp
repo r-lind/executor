@@ -18,7 +18,7 @@ using namespace Executor;
 static void
 set_wDev(THPrint hPrint)
 {
-    HxX(hPrint, prStl.wDev) = CWC(0x307);
+    HxX(hPrint, prStl.wDev) = 0x307;
 }
 
 void
@@ -27,17 +27,17 @@ Executor::ROMlib_set_default_resolution(THPrint hPrint, INTEGER vres, INTEGER hr
     printer_init();
     update_printing_globals();
 
-    HxX(hPrint, prInfo.iVRes) = CW(vres);
-    HxX(hPrint, prInfo.iHRes) = CW(hres);
-    HxX(hPrint, prInfo.rPage.top) = CWC(0);
-    HxX(hPrint, prInfo.rPage.left) = CWC(0);
-    HxX(hPrint, prInfo.rPage.bottom) = CW((ROMlib_paper_y - 72) * vres / 72);
-    HxX(hPrint, prInfo.rPage.right) = CW((ROMlib_paper_x - 72) * hres / 72);
+    HxX(hPrint, prInfo.iVRes) = vres;
+    HxX(hPrint, prInfo.iHRes) = hres;
+    HxX(hPrint, prInfo.rPage.top) = 0;
+    HxX(hPrint, prInfo.rPage.left) = 0;
+    HxX(hPrint, prInfo.rPage.bottom) = (ROMlib_paper_y - 72) * vres / 72;
+    HxX(hPrint, prInfo.rPage.right) = (ROMlib_paper_x - 72) * hres / 72;
 
-    HxX(hPrint, rPaper.top) = CW((INTEGER)(-0.5 * vres));
-    HxX(hPrint, rPaper.bottom) = CW((INTEGER)((ROMlib_paper_y - 36) * vres / 72));
-    HxX(hPrint, rPaper.left) = CW((INTEGER)(-0.5 * hres));
-    HxX(hPrint, rPaper.right) = CW((INTEGER)((ROMlib_paper_x - 36) * hres / 72));
+    HxX(hPrint, rPaper.top) = (INTEGER)(-0.5 * vres);
+    HxX(hPrint, rPaper.bottom) = (INTEGER)((ROMlib_paper_y - 36) * vres / 72);
+    HxX(hPrint, rPaper.left) = (INTEGER)(-0.5 * hres);
+    HxX(hPrint, rPaper.right) = (INTEGER)((ROMlib_paper_x - 36) * hres / 72);
 
     ROMlib_resolution_x = hres;
     ROMlib_resolution_y = vres;
@@ -51,29 +51,29 @@ void Executor::C_PrintDefault(THPrint hPrint)
        LaserWriter we're using wants */
 
     memset((char *)STARH(hPrint), 0, sizeof(TPrint));
-    HxX(hPrint, iPrVersion) = CW(ROMlib_PrDrvrVers);
+    HxX(hPrint, iPrVersion) = ROMlib_PrDrvrVers;
 
     ROMlib_set_default_resolution(hPrint, 72, 72);
 
     HxX(hPrint, prInfo.iDev) = 0;
 
     set_wDev(hPrint);
-    HxX(hPrint, prStl.iPageV) = CWC(1320); /* These were switched a while back */
-    HxX(hPrint, prStl.iPageH) = CWC(1020); /* but I think it was a mistake */
+    HxX(hPrint, prStl.iPageV) = 1320; /* These were switched a while back */
+    HxX(hPrint, prStl.iPageH) = 1020; /* but I think it was a mistake */
     HxX(hPrint, prStl.bPort) = 0;
     HxX(hPrint, prStl.feed) = 2;
 
     HxX(hPrint, prInfoPT.iDev) = 0;
-    HxX(hPrint, prInfoPT.iVRes) = CWC(72);
-    HxX(hPrint, prInfoPT.iHRes) = CWC(72);
+    HxX(hPrint, prInfoPT.iVRes) = 72;
+    HxX(hPrint, prInfoPT.iHRes) = 72;
     HxX(hPrint, prInfoPT.rPage) = HxX(hPrint, prInfo.rPage);
 
-    HxX(hPrint, prXInfo.iRowBytes) = CW((Hx(hPrint, prXInfo.iBandH) + 7) / 8);
+    HxX(hPrint, prXInfo.iRowBytes) = (Hx(hPrint, prXInfo.iBandH) + 7) / 8;
     /* TODO: what about the rest of prXInfo? (is zero for now) */
 
-    HxX(hPrint, prJob.iFstPage) = CWC(1);
-    HxX(hPrint, prJob.iLstPage) = CWC(9999);
-    HxX(hPrint, prJob.iCopies) = CWC(1);
+    HxX(hPrint, prJob.iFstPage) = 1;
+    HxX(hPrint, prJob.iLstPage) = 9999;
+    HxX(hPrint, prJob.iCopies) = 1;
     HxX(hPrint, prJob.bJDocLoop) = 2; /* used to be 1, but then File Maker
 					  Pro 2.1 would call PrOpenDoc
 					  and PrCloseDoc once for each page */
@@ -98,8 +98,8 @@ BOOLEAN Executor::C_PrValidate(THPrint hPrint) /* IMII-158 */
 
         if(first < 1 || first > last)
         {
-            HxX(hPrint, prJob.iFstPage) = CWC(1);
-            HxX(hPrint, prJob.iLstPage) = CWC(9999);
+            HxX(hPrint, prJob.iFstPage) = 1;
+            HxX(hPrint, prJob.iLstPage) = 9999;
         }
     }
     {
@@ -108,7 +108,7 @@ BOOLEAN Executor::C_PrValidate(THPrint hPrint) /* IMII-158 */
         copies = Hx(hPrint, prJob.iCopies);
 
         if(copies < 1 || copies > 99)
-            HxX(hPrint, prJob.iCopies) = CWC(1);
+            HxX(hPrint, prJob.iCopies) = 1;
     }
 
     HxX(hPrint, prJob.bJDocLoop) = 2;

@@ -17,24 +17,24 @@ namespace Executor
 
 #define PICOP(x)                   \
     {                              \
-        GUEST<INTEGER> op = CW(x); \
+        GUEST<INTEGER> op = x; \
         PICWRITE(&op, sizeof(op)); \
     }
 
 #define PICSAVEBEGIN(x)  \
-    if(MR(qdGlobals().thePort)->picSave) \
+    if(qdGlobals().thePort->picSave) \
     {                    \
         PICOP((x))
 
 #define PICSAVEBEGIN0()  \
-    if(MR(qdGlobals().thePort)->picSave) \
+    if(qdGlobals().thePort->picSave) \
     {
 
 #define PICSAVEEND }
 
 #define PAUSEDECL GUEST<Handle> savepichand
-#define PAUSERECORDING savepichand = MR(qdGlobals().thePort)->picSave, MR(qdGlobals().thePort)->picSave = 0
-#define RESUMERECORDING MR(qdGlobals().thePort)->picSave = savepichand
+#define PAUSERECORDING savepichand = qdGlobals().thePort->picSave, qdGlobals().thePort->picSave = 0
+#define RESUMERECORDING qdGlobals().thePort->picSave = savepichand
 
 class PausePicGuard
 {

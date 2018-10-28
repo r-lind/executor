@@ -49,19 +49,19 @@ typedef struct block_header
 
 #define BLOCK_LOCATION_OFFSET_X(block) ((block)->location_u)
 #define BLOCK_LOCATION_ZONE_X(block) ((block)->location_u)
-#define BLOCK_DATA_X(block) (RM((Ptr)(block)->data))
+#define BLOCK_DATA_X(block) ((Ptr)(block)->data)
 
-#define BLOCK_LOCATION_OFFSET(block) (CL(BLOCK_LOCATION_OFFSET_X(block)))
-#define BLOCK_LOCATION_ZONE(block) (MR(guest_cast<THz>(BLOCK_LOCATION_ZONE_X(block))))
+#define BLOCK_LOCATION_OFFSET(block) (BLOCK_LOCATION_OFFSET_X(block))
+#define BLOCK_LOCATION_ZONE(block) (guest_cast<THz>(BLOCK_LOCATION_ZONE_X(block)))
 #define BLOCK_DATA(block) ((Ptr)(block)->data)
 
 #define USE(block) (((block)->flags >> 6) & 0x3)
-#define PSIZE(block) (CL((block)->size))
+#define PSIZE(block) ((block)->size)
 #define SIZEC(block) ((block)->size_correction)
 
 #define SETUSE(block, use) ((block)->flags = (((block)->flags & 0x3F) \
                                               | (use) << 6))
-#define SETPSIZE(block, _size) ((block)->size = CL(_size))
+#define SETPSIZE(block, _size) ((block)->size = _size)
 #define SETSIZEC(block, sizec) ((block)->size_correction = (sizec))
 
 /* ### fixme; we also need to set the other reserved bits (in the
@@ -80,7 +80,7 @@ extern uintptr_t ROMlib_memtop;
 
 /* handle to block pointer */
 #define HANDLE_TO_BLOCK(handle)                          \
-    (VALID_ADDRESS(handle) && VALID_ADDRESS(MR(*handle)) \
+    (VALID_ADDRESS(handle) && VALID_ADDRESS(*handle) \
          ? (block_header_t *)((char *)STARH(handle)      \
                               - HDRSIZE)                 \
          : nullptr)
@@ -113,7 +113,7 @@ extern uintptr_t ROMlib_memtop;
     ((block)->master_ptr_flags = (state))
 
 /* set the master pointer of a handle to a given value */
-#define SETMASTER(handle, ptr) (*handle = RM((Ptr)ptr))
+#define SETMASTER(handle, ptr) (*handle = (Ptr)ptr)
 
 #define BLOCK_NEXT(block) \
     ((block_header_t *)((char *)(block) + PSIZE(block)))
@@ -127,9 +127,9 @@ extern uintptr_t ROMlib_memtop;
 #define BLOCK_SET_SIZEC(block, sizec) SETSIZEC(block, sizec)
 #define BLOCK_SET_PSIZE(block, psize) SETPSIZE(block, psize)
 #define BLOCK_SET_LOCATION_OFFSET(block, loc) \
-    ((block)->location_u = CL(loc))
+    ((block)->location_u = loc)
 #define BLOCK_SET_LOCATION_ZONE(block, loc) \
-    ((block)->location_u = guest_cast<uint32_t>(RM(loc)))
+    ((block)->location_u = guest_cast<uint32_t>(loc))
 #define BLOCK_SET_RESERVED(block)
 
 /* Zone record accessor macros */
@@ -144,14 +144,14 @@ extern uintptr_t ROMlib_memtop;
 #define ZONE_PURGE_PROC_X(zone) ((zone)->purgeProc)
 #define ZONE_ALLOC_PTR_X(zone) ((zone)->allocPtr)
 
-#define ZONE_BK_LIM(zone) (MR(ZONE_BK_LIM_X(zone)))
-#define ZONE_PURGE_PTR(zone) (MR(ZONE_PURGE_PTR_X(zone)))
-#define ZONE_HFST_FREE(zone) (MR(ZONE_HFST_FREE_X(zone)))
-#define ZONE_ZCB_FREE(zone) (CL(ZONE_ZCB_FREE_X(zone)))
-#define ZONE_GZ_PROC(zone) (MR(ZONE_GZ_PROC_X(zone)))
-#define ZONE_MORE_MAST(zone) (CW(ZONE_MORE_MAST_X(zone)))
-#define ZONE_PURGE_PROC(zone) (MR(ZONE_PURGE_PROC_X(zone)))
-#define ZONE_ALLOC_PTR(zone) ((block_header_t *)MR(ZONE_ALLOC_PTR_X(zone)))
+#define ZONE_BK_LIM(zone) (ZONE_BK_LIM_X(zone))
+#define ZONE_PURGE_PTR(zone) (ZONE_PURGE_PTR_X(zone))
+#define ZONE_HFST_FREE(zone) (ZONE_HFST_FREE_X(zone))
+#define ZONE_ZCB_FREE(zone) (ZONE_ZCB_FREE_X(zone))
+#define ZONE_GZ_PROC(zone) (ZONE_GZ_PROC_X(zone))
+#define ZONE_MORE_MAST(zone) (ZONE_MORE_MAST_X(zone))
+#define ZONE_PURGE_PROC(zone) (ZONE_PURGE_PROC_X(zone))
+#define ZONE_ALLOC_PTR(zone) ((block_header_t *)ZONE_ALLOC_PTR_X(zone))
 
 #define MEM_DEBUG_P() ERROR_ENABLED_P(ERROR_TRAP_FAILURE)
 
@@ -258,6 +258,6 @@ extern void mman_heap_death(const char *func, const char *where);
 #define HEAP_DEATH() \
     _HEAP_DEATH(__PRETTY_FUNCTION__, " in " __FILE__ ":", __LINE__)
 
-#define HEAPEND (MR(LM(HeapEnd)) + MIN_BLOCK_SIZE) /* temporary ctm hack */
+#define HEAPEND (LM(HeapEnd) + MIN_BLOCK_SIZE) /* temporary ctm hack */
 }
 #endif /* _MMAN_PRIVATE_H */

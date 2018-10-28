@@ -31,12 +31,12 @@ void Executor::C_StdComment(INTEGER kind, INTEGER size, Handle hand)
             break;
     }
 
-    GUEST<INTEGER> kind_s = CW(kind);
+    GUEST<INTEGER> kind_s = kind;
     if(size)
     {
         PICSAVEBEGIN(OP_LongComment);
         PICWRITE(&kind_s, sizeof(kind_s));
-        swappedsize = CW(size);
+        swappedsize = size;
         PICWRITE(&swappedsize, sizeof(swappedsize));
         state = HGetState(hand);
         HLock(hand);
@@ -66,24 +66,24 @@ void Executor::C_StdPutPic(const void  *sp, INTEGER bc)
     LONGINT oldhowfar, newhowfar;
     Size newsize;
 
-    pch = (piccachehand)PORT_PIC_SAVE(MR(qdGlobals().thePort));
+    pch = (piccachehand)PORT_PIC_SAVE(qdGlobals().thePort);
 
     if(pch)
     {
         oldhowfar = Hx(pch, pichowfar);
         ph = HxP(pch, pichandle);
         newhowfar = Hx(pch, pichowfar) + bc;
-        HxX(pch, pichowfar) = CL(newhowfar);
+        HxX(pch, pichowfar) = newhowfar;
         if(newhowfar > 32766)
-            HxX(ph, picSize) = CWC(32766);
+            HxX(ph, picSize) = 32766;
         else
-            HxX(ph, picSize) = CW(newhowfar);
+            HxX(ph, picSize) = newhowfar;
 
         if(Hx(pch, pichowfar) > Hx(pch, picsize))
         {
             newsize = (Hx(pch, pichowfar) + 0xFF) & ~(LONGINT)0xFF;
             SetHandleSize((Handle)ph, newsize);
-            HxX(pch, picsize) = CL(newsize);
+            HxX(pch, picsize) = newsize;
         }
         memmove((char *)STARH(ph) + oldhowfar, sp, bc);
     }

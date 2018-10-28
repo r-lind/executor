@@ -48,11 +48,11 @@ void Executor::SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
     Str255 save_name;
 
     str255assign(save_name, filename);
-    pbr.volumeParam.ioNamePtr = RM((StringPtr)save_name);
-    pbr.volumeParam.ioVolIndex = CWC(-1);
-    pbr.volumeParam.ioVRefNum = CW(vrefnum);
+    pbr.volumeParam.ioNamePtr = (StringPtr)save_name;
+    pbr.volumeParam.ioVolIndex = -1;
+    pbr.volumeParam.ioVRefNum = vrefnum;
     PBGetVInfo(&pbr, false);
-    LM(SFSaveDisk) = CW(-CW(pbr.volumeParam.ioVRefNum));
+    LM(SFSaveDisk) = -pbr.volumeParam.ioVRefNum;
 }
 
 void Executor::executor_main(void)
@@ -69,7 +69,7 @@ void Executor::executor_main(void)
     StringPtr fName;
 
     EM_A5 = US_TO_SYN68K(&tmpA5);
-    LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+    LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
     InitGraf((Ptr)quickbytes + sizeof(quickbytes) - 4);
     InitFonts();
     InitCRM();
@@ -85,15 +85,15 @@ void Executor::executor_main(void)
     memcpy(LM(FinderName) + 1, BROWSER_NAME, LM(FinderName)[0]);
 
     CountAppFiles(&mess, &count_s);
-    count = CW(count_s);
+    count = count_s;
     if(count > 0)
     {
         GetAppFiles(1, &thefile);
     
-        if(thefile.fType == CLC(FOURCC('A', 'P', 'P', 'L')))
+        if(thefile.fType == FOURCC('A', 'P', 'P', 'L'))
         {
             ClrAppFiles(1);
-            Munger(MR(LM(AppParmHandle)), 2L * sizeof(INTEGER), (Ptr)0,
+            Munger(LM(AppParmHandle), 2L * sizeof(INTEGER), (Ptr)0,
                 (LONGINT)sizeof(AppFile), (Ptr) "", 0L);
 
             fName = thefile.fName;
@@ -102,13 +102,13 @@ void Executor::executor_main(void)
     else
         thefile.fType = 0;
 
-    if(thefile.fType != CLC(FOURCC('A', 'P', 'P', 'L')))
+    if(thefile.fType != FOURCC('A', 'P', 'P', 'L'))
         ExitToShell();
 
-    hpb.hFileInfo.ioNamePtr = RM(&thefile.fName[0]);
+    hpb.hFileInfo.ioNamePtr = &thefile.fName[0];
     hpb.hFileInfo.ioVRefNum = thefile.vRefNum;
-    hpb.hFileInfo.ioFDirIndex = CWC(0);
-    hpb.hFileInfo.ioDirID = CLC(0);
+    hpb.hFileInfo.ioFDirIndex = 0;
+    hpb.hFileInfo.ioDirID = 0;
     PBGetCatInfo(&hpb, false);
 
     for(p = fName + fName[0] + 1;
@@ -121,11 +121,11 @@ void Executor::executor_main(void)
 
     wdpb.ioVRefNum = hpb.hFileInfo.ioVRefNum;
     wdpb.ioWDDirID = hpb.hFileInfo.ioFlParID;
-    SFSaveDisk_Update(CW(hpb.hFileInfo.ioVRefNum), fName);
+    SFSaveDisk_Update(hpb.hFileInfo.ioVRefNum, fName);
     LM(CurDirStore) = hpb.hFileInfo.ioFlParID;
-    wdpb.ioWDProcID = CLC(FOURCC('X', 'c', 't', 'r'));
+    wdpb.ioWDProcID = FOURCC('X', 'c', 't', 'r');
     wdpb.ioNamePtr = 0;
     PBOpenWD(&wdpb, false);
-    exevrefnum = CW(wdpb.ioVRefNum);
+    exevrefnum = wdpb.ioVRefNum;
     Launch(LM(CurApName), exevrefnum);
 }

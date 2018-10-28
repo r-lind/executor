@@ -96,11 +96,11 @@ std::shared_ptr<DirectoryItem> LocalVolume::resolveDir(short vRef, long dirID)
     else if(ISWDNUM(vRef))
     {
         auto wdp = WDNUMTOWDP(vRef);
-        return resolveDir(CL(wdp->dirid));
+        return resolveDir(wdp->dirid);
     }
     else if(vRef == 0)
     {
-        return resolveDir(CL(DefDirID));
+        return resolveDir(DefDirID);
     }
     else
     {
@@ -240,11 +240,11 @@ LocalVolume::FCBExtension& LocalVolume::getFCBX(short refNum)
 LocalVolume::FCBExtension& LocalVolume::openFCBX()
 {
     filecontrolblock* fcb = ROMlib_getfreefcbp();
-    short refNum = (char *)fcb - (char *)MR(LM(FCBSPtr));
+    short refNum = (char *)fcb - (char *)LM(FCBSPtr);
     int index = (refNum - 2) / 94;
 
     memset(fcb, 0, sizeof(*fcb));
-    fcb->fcbVPtr = RM(&vcb);
+    fcb->fcbVPtr = &vcb;
 
     if(fcbExtensions.size() < index + 1)
         fcbExtensions.resize(index + 1);
@@ -259,8 +259,8 @@ FileItemPtr LocalVolume::upgradeItem(FileItemPtr item, ItemFactory *betterFactor
 
     for(int i = 0; i < NFCB; i++)
     {
-        if(CL(ROMlib_fcblocks[i].fdfnum) == cnid
-           && MR(ROMlib_fcblocks[i].fcvptr) == &vcb)
+        if(ROMlib_fcblocks[i].fdfnum == cnid
+           && ROMlib_fcblocks[i].fcvptr == &vcb)
         {
             FCBExtension& fcbx = fcbExtensions[i];
             assert(fcbx.refNum == i * 94 + 2);
@@ -311,8 +311,8 @@ FileItemPtr LocalVolume::upgradeItem(FileItemPtr item, ItemFactory *betterFactor
 
     for(int i = 0; i < NFCB; i++)
     {
-        if(CL(ROMlib_fcblocks[i].fdfnum) == cnid
-           && MR(ROMlib_fcblocks[i].fcvptr) == &vcb)
+        if(ROMlib_fcblocks[i].fdfnum == cnid
+           && ROMlib_fcblocks[i].fcvptr == &vcb)
         {
             FCBExtension& fcbx = fcbExtensions[i];
             assert(fcbx.refNum == i * 94 + 2);
@@ -338,7 +338,7 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8
         {
             if(writeAccessRef > 0)
             {
-                refNum = CW(writeAccessRef);
+                refNum = writeAccessRef;
                 throw OSErrorException(opWrErr);
             }
         }
@@ -346,14 +346,14 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8
         auto access = fork == Fork::resource ? fileItem->openRF() : fileItem->open();
         FCBExtension& fcbx = openFCBX();
         fcbx.access = std::move(access);
-        fcbx.fcb->fcbFlNum = CL(fileItem->cnid());
+        fcbx.fcb->fcbFlNum = fileItem->cnid();
         fcbx.fcb->fcbMdRByt = 0;
         if(fork == Fork::resource)
             fcbx.fcb->fcbMdRByt |= RESOURCEBIT;
         if(permission != fsRdPerm)
             fcbx.fcb->fcbMdRByt |= WRITEBIT;
         fcbx.file = fileItem;
-        refNum = CW(fcbx.refNum);
+        refNum = fcbx.refNum;
 
         if(permission != fsRdPerm)
         {
@@ -366,31 +366,31 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8
 
 void LocalVolume::PBHOpenDF(HParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::data, pb->ioParam.ioPermssn);
+    openCommon(pb->ioParam.ioRefNum, resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, pb->fileParam.ioDirID), Fork::data, pb->ioParam.ioPermssn);
 }
 void LocalVolume::PBHOpenRF(HParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), Fork::resource, pb->ioParam.ioPermssn);
+    openCommon(pb->ioParam.ioRefNum, resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, pb->fileParam.ioDirID), Fork::resource, pb->ioParam.ioPermssn);
 }
 
 void LocalVolume::PBOpenDF(ParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::data, pb->ioParam.ioPermssn);
+    openCommon(pb->ioParam.ioRefNum, resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, 0), Fork::data, pb->ioParam.ioPermssn);
 }
 void LocalVolume::PBOpenRF(ParmBlkPtr pb)
 {
-    openCommon(pb->ioParam.ioRefNum, resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), Fork::resource, pb->ioParam.ioPermssn);
+    openCommon(pb->ioParam.ioRefNum, resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, 0), Fork::resource, pb->ioParam.ioPermssn);
 }
 
 void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
 {
-    ItemPtr item = resolveForInfo(MR(pb->hFileInfo.ioNamePtr),
-        CW(pb->hFileInfo.ioVRefNum), infoKind == InfoKind::FInfo ? 0 : pb->hFileInfo.ioDirID.get(), CW(pb->hFileInfo.ioFDirIndex),
+    ItemPtr item = resolveForInfo(pb->hFileInfo.ioNamePtr,
+        pb->hFileInfo.ioVRefNum, infoKind == InfoKind::FInfo ? 0 : pb->hFileInfo.ioDirID.get(), pb->hFileInfo.ioFDirIndex,
         infoKind == InfoKind::CatInfo);
 
-    if(CW(pb->hFileInfo.ioFDirIndex) != 0)
+    if(pb->hFileInfo.ioFDirIndex != 0)
     {
-        if(StringPtr outputName = MR(pb->hFileInfo.ioNamePtr))
+        if(StringPtr outputName = pb->hFileInfo.ioNamePtr)
         {
             const mac_string name = item->name();
             size_t n = std::min(name.size(), (size_t)255);
@@ -399,11 +399,11 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         }
     }
 
-    pb->hFileInfo.ioDirID = CL(item->cnid());   // a.k.a. pb->dirInfo.ioDrDirID
+    pb->hFileInfo.ioDirID = item->cnid();   // a.k.a. pb->dirInfo.ioDrDirID
 
     if(infoKind == InfoKind::CatInfo)
     {
-        pb->hFileInfo.ioFlParID = CL(item->parID());    // a.k.a. pb->dirInfo.ioDrParID
+        pb->hFileInfo.ioFlParID = item->parID();    // a.k.a. pb->dirInfo.ioDrParID
     }
 
     if(DirectoryItemPtr dirItem = std::dynamic_pointer_cast<DirectoryItem>(item))
@@ -414,7 +414,7 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         pb->dirInfo.ioFlAttrib = ATTRIB_ISADIR;
         
         itemCache->cacheDirectory(dirItem);
-        pb->dirInfo.ioDrNmFls = CW(dirItem->countItems());
+        pb->dirInfo.ioDrNmFls = dirItem->countItems();
 
         // TODO:
         // ioACUser
@@ -436,10 +436,10 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         size_t dsize = fileItem->open()->getEOF();
         size_t rsize = fileItem->openRF()->getEOF();
         
-        pb->hFileInfo.ioFlLgLen = CL(dsize);
-        pb->hFileInfo.ioFlPyLen = CL(dsize);
-        pb->hFileInfo.ioFlRLgLen = CL(rsize);
-        pb->hFileInfo.ioFlRLgLen = CL(rsize);
+        pb->hFileInfo.ioFlLgLen = dsize;
+        pb->hFileInfo.ioFlPyLen = dsize;
+        pb->hFileInfo.ioFlRLgLen = rsize;
+        pb->hFileInfo.ioFlRLgLen = rsize;
 
         // TODO:
         // ioFlCrDat
@@ -500,17 +500,17 @@ void LocalVolume::setInfoCommon(const ItemPtr& item, CInfoPBPtr pb, InfoKind inf
 
 void LocalVolume::PBSetCatInfo(CInfoPBPtr pb)
 {
-    setInfoCommon(resolve(MR(pb->hFileInfo.ioNamePtr), CW(pb->hFileInfo.ioVRefNum), CL(pb->hFileInfo.ioDirID)),
+    setInfoCommon(resolve(pb->hFileInfo.ioNamePtr, pb->hFileInfo.ioVRefNum, pb->hFileInfo.ioDirID),
         pb, InfoKind::CatInfo);
 }
 void LocalVolume::PBSetFInfo(ParmBlkPtr pb)
 {
-    setInfoCommon(resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0),
+    setInfoCommon(resolve(pb->fileParam.ioNamePtr, pb->fileParam.ioVRefNum, 0),
         reinterpret_cast<CInfoPBPtr>(pb), InfoKind::FInfo);
 }
 void LocalVolume::PBHSetFInfo(HParmBlkPtr pb)
 {
-    setInfoCommon(resolve(MR(pb->fileParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)),
+    setInfoCommon(resolve(pb->fileParam.ioNamePtr, pb->fileParam.ioVRefNum, pb->fileParam.ioDirID),
         reinterpret_cast<CInfoPBPtr>(pb), InfoKind::HFInfo);
 }
 
@@ -545,16 +545,16 @@ void LocalVolume::createCommon(NonexistentFile file)
 }
 void LocalVolume::PBCreate(ParmBlkPtr pb)
 {
-    createCommon(resolveForCreate(MR(pb->ioParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), 0));
+    createCommon(resolveForCreate(pb->ioParam.ioNamePtr, pb->fileParam.ioVRefNum, 0));
 }
 void LocalVolume::PBHCreate(HParmBlkPtr pb)
 {
-    createCommon(resolveForCreate(MR(pb->ioParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID)));
+    createCommon(resolveForCreate(pb->ioParam.ioNamePtr, pb->fileParam.ioVRefNum, pb->fileParam.ioDirID));
 }
 
 void LocalVolume::PBDirCreate(HParmBlkPtr pb)
 {
-    auto [parent, name] = resolveForCreate(MR(pb->ioParam.ioNamePtr), CW(pb->fileParam.ioVRefNum), CL(pb->fileParam.ioDirID));
+    auto [parent, name] = resolveForCreate(pb->ioParam.ioNamePtr, pb->fileParam.ioVRefNum, pb->fileParam.ioDirID);
     fs::path fn = toUnicodeFilename(name);
     fs::create_directory(parent->path() / fn);
 
@@ -564,7 +564,7 @@ void LocalVolume::PBDirCreate(HParmBlkPtr pb)
     auto item = parent->tryResolve(name);
     if(!item)
         throw OSErrorException(ioErr);
-    pb->fileParam.ioDirID = CL(item->cnid());
+    pb->fileParam.ioDirID = item->cnid();
 }
 
 
@@ -575,11 +575,11 @@ void LocalVolume::deleteCommon(ItemPtr item)
 
 void LocalVolume::PBDelete(ParmBlkPtr pb)
 {
-    deleteCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0));
+    deleteCommon(resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, 0));
 }
 void LocalVolume::PBHDelete(HParmBlkPtr pb)
 {
-    deleteCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)));
+    deleteCommon(resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, pb->fileParam.ioDirID));
 }
 
 void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
@@ -598,19 +598,19 @@ void LocalVolume::renameCommon(ItemPtr item, mac_string_view newName)
 
 void LocalVolume::PBRename(ParmBlkPtr pb)
 {
-    renameCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), 0), 
-                MR(guest_cast<StringPtr>(pb->ioParam.ioMisc)));
+    renameCommon(resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, 0), 
+                guest_cast<StringPtr>(pb->ioParam.ioMisc));
 }
 
 void LocalVolume::PBHRename(HParmBlkPtr pb)
 {
-    renameCommon(resolve(MR(pb->ioParam.ioNamePtr), CW(pb->ioParam.ioVRefNum), CL(pb->fileParam.ioDirID)), 
-                MR(guest_cast<StringPtr>(pb->ioParam.ioMisc)));
+    renameCommon(resolve(pb->ioParam.ioNamePtr, pb->ioParam.ioVRefNum, pb->fileParam.ioDirID), 
+                guest_cast<StringPtr>(pb->ioParam.ioMisc));
 }
 
 void LocalVolume::PBOpenWD(WDPBPtr pb)
 {
-    ItemPtr item = resolve(MR(pb->ioNamePtr), CW(pb->ioVRefNum), CL(pb->ioWDDirID));
+    ItemPtr item = resolve(pb->ioNamePtr, pb->ioVRefNum, pb->ioWDDirID);
     std::cout << "PBOpenWD: " << item->path() << std::endl;
 
     long dirID;
@@ -619,7 +619,7 @@ void LocalVolume::PBOpenWD(WDPBPtr pb)
     else
         dirID = item->parID();
 
-    OSErr err =  ROMlib_mkwd(pb, &vcb, dirID, Cx(pb->ioWDProcID));
+    OSErr err =  ROMlib_mkwd(pb, &vcb, dirID, pb->ioWDProcID);
     if(err)
         throw OSErrorException(err);
 }
@@ -628,11 +628,11 @@ void LocalVolume::PBRead(ParmBlkPtr pb)
 {
     pb->ioParam.ioActCount = 0;
     PBSetFPos(pb);
-    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
-    size_t req = CL(pb->ioParam.ioReqCount);
-    size_t act = fcbx.access->read(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), req);
-    pb->ioParam.ioActCount = CL(act);
-    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + act );
+    auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
+    size_t req = pb->ioParam.ioReqCount;
+    size_t act = fcbx.access->read(fcbx.fcb->fcbCrPs, pb->ioParam.ioBuffer, req);
+    pb->ioParam.ioActCount = act;
+    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs =  fcbx.fcb->fcbCrPs + act ;
 
     if(act < req)
         throw OSErrorException(eofErr);
@@ -641,26 +641,26 @@ void LocalVolume::PBWrite(ParmBlkPtr pb)
 {
     pb->ioParam.ioActCount = 0;
     setFPosCommon(pb, false);
-    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
     
     
     size_t n;
     try
     {
-        n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+        n = fcbx.access->write(fcbx.fcb->fcbCrPs, pb->ioParam.ioBuffer, pb->ioParam.ioReqCount);
     }
     catch(const UpgradeRequiredException&)
     {
         upgradeItem(fcbx.file, upgradedItemFactory);
-        n = fcbx.access->write(CL(fcbx.fcb->fcbCrPs), MR(pb->ioParam.ioBuffer), CL(pb->ioParam.ioReqCount));
+        n = fcbx.access->write(fcbx.fcb->fcbCrPs, pb->ioParam.ioBuffer, pb->ioParam.ioReqCount);
     }
     
-    pb->ioParam.ioActCount = CL(n);
-    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = CL( CL(fcbx.fcb->fcbCrPs) + n );
+    pb->ioParam.ioActCount = n;
+    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs =  fcbx.fcb->fcbCrPs + n ;
 }
 void LocalVolume::PBClose(ParmBlkPtr pb)
 {
-    short refNum = CW(pb->ioParam.ioRefNum);
+    short refNum = pb->ioParam.ioRefNum;
     auto& fcbx = getFCBX(refNum);
     fcbx.fcb->fcbFlNum = 0;
 
@@ -674,31 +674,31 @@ void LocalVolume::PBClose(ParmBlkPtr pb)
 
 void LocalVolume::PBGetFPos(ParmBlkPtr pb)
 {
-    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
-    pb->ioParam.ioReqCount = CL(0);
-    pb->ioParam.ioActCount = CL(0);
-    pb->ioParam.ioPosMode = CW(0);
+    auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
+    pb->ioParam.ioReqCount = 0;
+    pb->ioParam.ioActCount = 0;
+    pb->ioParam.ioPosMode = 0;
     pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs;
 }
 
 void LocalVolume::setFPosCommon(ParmBlkPtr pb, bool checkEOF)
 {
-    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
     ssize_t eof = (ssize_t) fcbx.access->getEOF();
-    ssize_t newPos = CL(fcbx.fcb->fcbCrPs);
+    ssize_t newPos = fcbx.fcb->fcbCrPs;
     
-    switch(CW(pb->ioParam.ioPosMode))
+    switch(pb->ioParam.ioPosMode)
     {
         case fsAtMark:
             break;
         case fsFromStart:
-            newPos = CL(pb->ioParam.ioPosOffset);
+            newPos = pb->ioParam.ioPosOffset;
             break;
         case fsFromLEOF:
-            newPos = eof + CL(pb->ioParam.ioPosOffset);
+            newPos = eof + pb->ioParam.ioPosOffset;
             break;
         case fsFromMark:
-            newPos = CL(fcbx.fcb->fcbCrPs) + CL(pb->ioParam.ioPosOffset);
+            newPos = fcbx.fcb->fcbCrPs + pb->ioParam.ioPosOffset;
             break;
     }
 
@@ -711,12 +711,12 @@ void LocalVolume::setFPosCommon(ParmBlkPtr pb, bool checkEOF)
     
     if(newPos < 0)
     {
-        newPos = CL(fcbx.fcb->fcbCrPs);     // MacOS 9 behavior.
+        newPos = fcbx.fcb->fcbCrPs;     // MacOS 9 behavior.
                                             // System 6 actually sets fcbCrPs to a negative value.
         err = posErr;
     }
 
-    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = CL(newPos);
+    pb->ioParam.ioPosOffset = fcbx.fcb->fcbCrPs = newPos;
 
     if(err)
         throw OSErrorException(err);
@@ -727,29 +727,29 @@ void LocalVolume::PBSetFPos(ParmBlkPtr pb)
 }
 void LocalVolume::PBGetEOF(ParmBlkPtr pb)
 {
-    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
     size_t n = fcbx.access->getEOF();
-    pb->ioParam.ioMisc = CL(n);
+    pb->ioParam.ioMisc = n;
 }
 
 void LocalVolume::PBSetEOF(ParmBlkPtr pb)
 {
-    auto& fcbx = getFCBX(CW(pb->ioParam.ioRefNum));
+    auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
     try
     {
-        fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
+        fcbx.access->setEOF(pb->ioParam.ioMisc);
     }
     catch(const UpgradeRequiredException&)
     {
         upgradeItem(fcbx.file, upgradedItemFactory);
-        fcbx.access->setEOF(CL(pb->ioParam.ioMisc));
+        fcbx.access->setEOF(pb->ioParam.ioMisc);
     }
 }
 
 void LocalVolume::PBCatMove(CMovePBPtr pb)
 {
-    ItemPtr item = resolve(MR(pb->ioNamePtr), CW(pb->ioVRefNum), CL(pb->ioDirID));
-    auto newParent = std::dynamic_pointer_cast<DirectoryItem>(resolve(MR(pb->ioNewName), CW(pb->ioVRefNum), CL(pb->ioNewDirID)));
+    ItemPtr item = resolve(pb->ioNamePtr, pb->ioVRefNum, pb->ioDirID);
+    auto newParent = std::dynamic_pointer_cast<DirectoryItem>(resolve(pb->ioNewName, pb->ioVRefNum, pb->ioNewDirID));
 
     if(!newParent)
         throw OSErrorException(dirNFErr);   // check this?
@@ -774,12 +774,12 @@ void LocalVolume::PBAllocate(ParmBlkPtr pb)
 {
     // no-op... emulated programs will have a hard time noticing that we're not actually pre-allocating blocks
     // just pretend that everything worked.
-    pb->ioParam.ioActCount = CL((CL(pb->ioParam.ioReqCount) + 511) & ~511);
+    pb->ioParam.ioActCount = (pb->ioParam.ioReqCount + 511) & ~511;
 }
 void LocalVolume::PBAllocContig(ParmBlkPtr pb)
 {
     // no-op, like PBALlocate above
-    pb->ioParam.ioActCount = CL((CL(pb->ioParam.ioReqCount) + 511) & ~511);
+    pb->ioParam.ioActCount = (pb->ioParam.ioReqCount + 511) & ~511;
 }
 void LocalVolume::PBLockRange(ParmBlkPtr pb)
 {
@@ -844,7 +844,7 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
         FSSpec spec;
         const auto& name = item->name();
         spec.vRefNum = vcb.vcbVRefNum;
-        spec.parID = CL(item->parID());
+        spec.parID = item->parID();
         memcpy(&spec.name[1], name.c_str(), name.size());
         spec.name[0] = name.size();
         return spec;
@@ -866,31 +866,31 @@ void Executor::MountLocalVolume()
     if(!vp)
         return;
     memset(vp, 0, sizeof(VCBExtra));
-    vp->vcb.vcbDrvNum = CWC(42);//pb->ioParam.ioVRefNum;
+    vp->vcb.vcbDrvNum = 42;//pb->ioParam.ioVRefNum;
 
     --ROMlib_nextvrn;
-    vp->vcb.vcbVRefNum = CW(ROMlib_nextvrn);
+    vp->vcb.vcbVRefNum = ROMlib_nextvrn;
 
     
     strcpy((char *)vp->vcb.vcbVN + 1, "vol");
     vp->vcb.vcbVN[0] = strlen((char *)vp->vcb.vcbVN+1);
 
-    vp->vcb.vcbSigWord = CWC(0x4244); /* IMIV-188 */
-    vp->vcb.vcbFreeBks = CWC(20480); /* arbitrary */
+    vp->vcb.vcbSigWord = 0x4244; /* IMIV-188 */
+    vp->vcb.vcbFreeBks = 20480; /* arbitrary */
     vp->vcb.vcbCrDate = 0; /* I'm lying here */
     vp->vcb.vcbVolBkUp = 0;
-    vp->vcb.vcbAtrb = CWC(VNONEJECTABLEBIT);
-    vp->vcb.vcbNmFls = CWC(100);
-    vp->vcb.vcbNmAlBlks = CWC(300);
-    vp->vcb.vcbAlBlkSiz = CLC(512);
-    vp->vcb.vcbClpSiz = CLC(1);
-    vp->vcb.vcbAlBlSt = CWC(10);
-    vp->vcb.vcbNxtCNID = CLC(1000);
+    vp->vcb.vcbAtrb = VNONEJECTABLEBIT;
+    vp->vcb.vcbNmFls = 100;
+    vp->vcb.vcbNmAlBlks = 300;
+    vp->vcb.vcbAlBlkSiz = 512;
+    vp->vcb.vcbClpSiz = 1;
+    vp->vcb.vcbAlBlSt = 10;
+    vp->vcb.vcbNxtCNID = 1000;
     if(!LM(DefVCBPtr))
     {
-        LM(DefVCBPtr) = RM((VCB *)vp);
+        LM(DefVCBPtr) = (VCB *)vp;
         LM(DefVRefNum) = vp->vcb.vcbVRefNum;
-        DefDirID = CLC(2); /* top level */
+        DefDirID = 2; /* top level */
     }
     Enqueue((QElemPtr)vp, &LM(VCBQHdr));
 
@@ -901,7 +901,7 @@ std::optional<FSSpec> Executor::nativePathToFSSpec(const fs::path& p)
 {
     VCBExtra *vcbp;
 
-    for(vcbp = (VCBExtra *)MR(LM(VCBQHdr).qHead); vcbp; vcbp = (VCBExtra *)MR(vcbp->vcb.qLink))
+    for(vcbp = (VCBExtra *)LM(VCBQHdr).qHead; vcbp; vcbp = (VCBExtra *)vcbp->vcb.qLink)
     {
         if(auto volume = dynamic_cast<LocalVolume*>(vcbp->volume))
         {

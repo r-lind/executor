@@ -30,7 +30,7 @@ INTEGER Executor::C_LAddColumn(INTEGER count, INTEGER coln,
     if(coln < Hx(list, dataBounds.left))
         coln = Hx(list, dataBounds.left);
 
-    HxX(list, dataBounds.right) = CW(Hx(list, dataBounds.right) + count);
+    HxX(list, dataBounds.right) = Hx(list, dataBounds.right) + count;
 
     if(noffsets)
     {
@@ -51,11 +51,11 @@ INTEGER Executor::C_LAddColumn(INTEGER count, INTEGER coln,
             ip -= nafter;
             op -= nafter;
             BlockMoveData(ip, op, nafter);
-            offset = CW(*(GUEST<INTEGER> *)op) & 0x7FFF;
+            offset = *(GUEST<INTEGER> *)op & 0x7FFF;
             for(i = 0; ++i <= count;)
             {
                 op -= sizeof(INTEGER);
-                *(GUEST<INTEGER> *)op = CW(offset);
+                *(GUEST<INTEGER> *)op = offset;
             }
             ip -= nbefore;
             op -= nbefore;
@@ -69,10 +69,10 @@ INTEGER Executor::C_LAddColumn(INTEGER count, INTEGER coln,
         if(Hx(list, listFlags) & DODRAW)
         {
             todraw = HxX(list, dataBounds);
-            todraw.left = CW(coln);
+            todraw.left = coln;
             SectRect(&todraw, &HxX(list, visible), &todraw);
-            for(c.v = CW(todraw.top); c.v < CW(todraw.bottom); c.v++)
-                for(c.h = CW(todraw.left); c.h < CW(todraw.right); c.h++)
+            for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
+                for(c.h = todraw.left; c.h < todraw.right; c.h++)
                     C_LDraw(c, list);
         }
     }
@@ -97,7 +97,7 @@ INTEGER Executor::C_LAddRow(INTEGER count, INTEGER rown,
     if(rown < Hx(list, dataBounds.top))
         rown = Hx(list, dataBounds.top);
 
-    HxX(list, dataBounds.bottom) = CW(Hx(list, dataBounds.bottom) + count);
+    HxX(list, dataBounds.bottom) = Hx(list, dataBounds.bottom) + count;
 
     if(noffsets)
     {
@@ -112,11 +112,11 @@ INTEGER Executor::C_LAddRow(INTEGER count, INTEGER rown,
         *--op = *--ip; /* sentinel */
         ip -= nafter;
         op -= nafter;
-        offset = CW(*ip) & 0x7FFF;
+        offset = *ip & 0x7FFF;
         BlockMoveData((Ptr)ip, (Ptr)op, nafter * sizeof(INTEGER));
         /* move the after rows */
         while(--noffsets >= 0)
-            *--op = CW(offset);
+            *--op = offset;
 
         p.h = Hx(list, cellSize.h);
         p.v = Hx(list, cellSize.v);
@@ -125,10 +125,10 @@ INTEGER Executor::C_LAddRow(INTEGER count, INTEGER rown,
         if(Hx(list, listFlags) & DODRAW)
         {
             todraw = HxX(list, dataBounds);
-            todraw.top = CW(rown);
+            todraw.top = rown;
             SectRect(&todraw, &HxX(list, visible), &todraw);
-            for(c.v = CW(todraw.top); c.v < CW(todraw.bottom); c.v++)
-                for(c.h = CW(todraw.left); c.h < CW(todraw.right); c.h++)
+            for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
+                for(c.h = todraw.left; c.h < todraw.right; c.h++)
                     C_LDraw(c, list);
         }
     }
@@ -150,10 +150,10 @@ compute_visible_rect(Rect *rp, ListHandle list, INTEGER top, INTEGER left,
     new_bottom = new_top + (bottom - top) * v;
     new_right = new_left + (right - left) * h;
 
-    rp->top = CW(new_top);
-    rp->left = CW(new_left);
-    rp->bottom = CW(new_bottom);
-    rp->right = CW(new_right);
+    rp->top = new_top;
+    rp->left = new_left;
+    rp->bottom = new_bottom;
+    rp->right = new_right;
 
     SectRect(rp, &HxX(list, rView), rp);
 }
@@ -200,7 +200,7 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
     if(coln > Hx(list, dataBounds.right))
         coln = Hx(list, dataBounds.right);
 
-    HxX(list, dataBounds.right) = CW(Hx(list, dataBounds.right) - count);
+    HxX(list, dataBounds.right) = Hx(list, dataBounds.right) - count;
 
     if(noffsets)
     {
@@ -216,11 +216,11 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
 		     bother adding delta when we know that it's zero */
         while(--nrows >= 0)
         {
-            off1 = CW(*ip) & 0x7FFF;
+            off1 = *ip & 0x7FFF;
             for(i = nbefore; --i >= 0;) /* copy before-offsets */
-                *op++ = CW(CW(*ip++) - delta);
+                *op++ = *ip++ - delta;
 
-            off2 = CW(*ip) & 0x7FFF;
+            off2 = *ip & 0x7FFF;
             ntomove = off2 - off1;
             BlockMoveData(dataip, dataop, ntomove); /* copy before-data */
             dataip += ntomove;
@@ -228,22 +228,22 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
 
             ip += count; /* skip count offsets */
 
-            off3 = CW(*ip) & 0x7FFF;
+            off3 = *ip & 0x7FFF;
             ntomove = off3 - off2;
             dataip += ntomove; /* skip appropriate data */
             delta += ntomove; /* note this */
 
-            off4 = CW(*ip) & 0x7FFF;
+            off4 = *ip & 0x7FFF;
             for(i = nafter; --i >= 0;) /* copy after-offsets */
-                *op++ = CW(CW(*ip++) - delta);
+                *op++ = *ip++ - delta;
 
-            off5 = CW(*ip) & 0x7FFF;
+            off5 = *ip & 0x7FFF;
             ntomove = off5 - off4;
             BlockMoveData(dataip, dataop, ntomove); /* copy before-data */
             dataip += ntomove;
             dataop += ntomove;
         }
-        *op++ = CW(CW(*ip++) - delta); /* sentinel */
+        *op++ = *ip++ - delta; /* sentinel */
         SetHandleSize((Handle)list,
                       GetHandleSize((Handle)list) - noffsets * sizeof(INTEGER));
         SetHandleSize((Handle)HxP(list, cells),
@@ -272,7 +272,7 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
             if(visible_left > 0 && visible_right > bounds_right)
             {
                 --visible_left;
-                HxX(list, visible.left) = CW(visible_left);
+                HxX(list, visible.left) = visible_left;
                 coln = visible_left;
             }
         }
@@ -288,10 +288,10 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
             EraseRect(&eraser);
 
             todraw = HxX(list, dataBounds);
-            todraw.left = CW(coln);
+            todraw.left = coln;
             SectRect(&todraw, &HxX(list, visible), &todraw);
-            for(c.v = CW(todraw.top); c.v < CW(todraw.bottom); c.v++)
-                for(c.h = CW(todraw.left); c.h < CW(todraw.right); c.h++)
+            for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
+                for(c.h = todraw.left; c.h < todraw.right; c.h++)
                     C_LDraw(c, list);
         }
     }
@@ -317,7 +317,7 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
     {
         SetHandleSize((Handle)HxP(list, cells), (Size)0);
         SetHandleSize((Handle)list, sizeof(ListRec));
-        HxX(list, cellArray)[0] = CWC(0);
+        HxX(list, cellArray)[0] = 0;
         HxX(list, dataBounds.bottom) = HxX(list, dataBounds.top);
         HxX(list, visible.top) = HxX(list, dataBounds.top);
         p.h = Hx(list, cellSize.h);
@@ -336,7 +336,7 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
     ncols = Hx(list, dataBounds.right) - Hx(list, dataBounds.left);
     noffsets = count * ncols;
 
-    HxX(list, dataBounds.bottom) = CW(Hx(list, dataBounds.bottom) - count);
+    HxX(list, dataBounds.bottom) = Hx(list, dataBounds.bottom) - count;
 
     if(noffsets)
     {
@@ -347,14 +347,14 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
         nafter = nrows * ncols - nbefore;
         ip = op = (GUEST<uint16_t> *)HxX(list, cellArray) + nbefore;
         ip += noffsets;
-        off1 = CW(*op) & 0x7FFF;
-        off2 = CW(*ip) & 0x7FFF;
+        off1 = *op & 0x7FFF;
+        off2 = *ip & 0x7FFF;
         delta = off2 - off1;
 
         while(--nafter >= 0)
-            *op++ = CW(CW(*ip++) - delta);
-        off3 = CW(*ip) & 0x7FFF;
-        *op = CW(CW(*ip) - delta); /* sentinel */
+            *op++ = *ip++ - delta;
+        off3 = *ip & 0x7FFF;
+        *op = *ip - delta; /* sentinel */
 
         ntomove = off3 - off2;
         BlockMoveData((Ptr)STARH(HxP(list, cells)) + off2,
@@ -388,7 +388,7 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
             if(visible_top > 0 && visible_bottom > bounds_bottom)
             {
                 --visible_top;
-                HxX(list, visible.top) = CW(visible_top);
+                HxX(list, visible.top) = visible_top;
                 rown = visible_top;
             }
         }
@@ -403,11 +403,11 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
             EraseRect(&eraser);
 
             todraw = HxX(list, dataBounds);
-            todraw.top = CW(rown);
+            todraw.top = rown;
             SectRect(&todraw, &HxX(list, visible), &todraw);
 
-            for(c.v = CW(todraw.top); c.v < CW(todraw.bottom); c.v++)
-                for(c.h = CW(todraw.left); c.h < CW(todraw.right); c.h++)
+            for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
+                for(c.h = todraw.left; c.h < todraw.right; c.h++)
                     C_LDraw(c, list);
         }
     }

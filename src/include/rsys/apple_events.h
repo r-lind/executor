@@ -55,9 +55,9 @@ typedef GUEST<list_header_ptr> *list_header_h;
 #define ATTRIBUTE_COUNT_X(aggr_desc_h) \
     (HxX((list_header_h)aggr_desc_h, attribute_count))
 
-#define PARAM_COUNT(aggr_desc_h) (CL(PARAM_COUNT_X(aggr_desc_h)))
-#define PARAM_OFFSET(aggr_desc_h) (CL(PARAM_OFFSET_X(aggr_desc_h)))
-#define ATTRIBUTE_COUNT(aggr_desc_h) (CL(ATTRIBUTE_COUNT_X(aggr_desc_h)))
+#define PARAM_COUNT(aggr_desc_h) (PARAM_COUNT_X(aggr_desc_h))
+#define PARAM_OFFSET(aggr_desc_h) (PARAM_OFFSET_X(aggr_desc_h))
+#define ATTRIBUTE_COUNT(aggr_desc_h) (ATTRIBUTE_COUNT_X(aggr_desc_h))
 
 /* #### always zero (?) */
 

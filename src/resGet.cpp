@@ -42,9 +42,9 @@ static INTEGER countmapresources(resmaphand map, ResType typ)
 
     retval = 0;
     WALKTR(map, i, tr)
-    if(CL(tr->rtyp) == typ)
+    if(tr->rtyp == typ)
     {
-        retval += 1 + Cx(tr->nres);
+        retval += 1 + tr->nres;
         break;
     }
     EWALKTR(tr)
@@ -68,7 +68,7 @@ INTEGER Executor::C_Count1Resources(ResType typ) /* IMIV-15 */
 {
     resmaphand map;
 
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), (Handle *)0);
+    map = ROMlib_rntohandl(LM(CurMap), (Handle *)0);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
@@ -84,9 +84,9 @@ static Handle getindmapresource(resmaphand map, ResType typ, INTEGER *indx)
     resref *rr;
 
     WALKTR(map, i, tr)
-    if(CL(tr->rtyp) == typ)
+    if(tr->rtyp == typ)
     {
-        nr = Cx(tr->nres) + 1;
+        nr = tr->nres + 1;
         WALKRR(map, tr, j, rr)
         if(--*indx == 0)
             /*-->*/ return ROMlib_mgetres(map, rr);
@@ -124,7 +124,7 @@ Handle Executor::C_Get1IndResource(ResType typ, INTEGER i) /* IMIV-15 */
     Handle retval;
     INTEGER tempi;
 
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), (Handle *)0);
+    map = ROMlib_rntohandl(LM(CurMap), (Handle *)0);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
@@ -154,10 +154,10 @@ OSErr Executor::ROMlib_maptypidtop(resmaphand map, ResType typ, INTEGER id,
     resref *rr;
 
     WALKTR(map, i, tr)
-    if(CL(tr->rtyp) == typ)
+    if(tr->rtyp == typ)
     {
         WALKRR(map, tr, j, rr)
-        if(Cx(rr->rid) == id)
+        if(rr->rid == id)
         {
             *ptr = rr;
             return (noErr);
@@ -216,18 +216,18 @@ static BOOLEAN acceptable(unsigned long addr)
 static void ROMlib_init_xdefs(void)
 {
 #if !defined(MAELSTROM_HACK)
-    ROMlib_defs[0] = guest_cast<LONGINT>(RM(&cdef0));
-    ROMlib_defs[1] = guest_cast<LONGINT>(RM(&cdef16));
-    ROMlib_defs[2] = guest_cast<LONGINT>(RM(&wdef0));
-    ROMlib_defs[3] = guest_cast<LONGINT>(RM(&wdef16));
-    ROMlib_defs[4] = guest_cast<LONGINT>(RM(&mdef0));
-    ROMlib_defs[5] = guest_cast<LONGINT>(RM(&ldef0));
-    ROMlib_defs[6] = guest_cast<LONGINT>(RM(&mbdf0));
-    ROMlib_defs[7] = guest_cast<LONGINT>(RM(&snth5));
-    ROMlib_defs[8] = guest_cast<LONGINT>(RM(&unixmount));
-    ROMlib_defs[9] = guest_cast<LONGINT>(RM(&cdef1008));
+    ROMlib_defs[0] = guest_cast<LONGINT>(&cdef0);
+    ROMlib_defs[1] = guest_cast<LONGINT>(&cdef16);
+    ROMlib_defs[2] = guest_cast<LONGINT>(&wdef0);
+    ROMlib_defs[3] = guest_cast<LONGINT>(&wdef16);
+    ROMlib_defs[4] = guest_cast<LONGINT>(&mdef0);
+    ROMlib_defs[5] = guest_cast<LONGINT>(&ldef0);
+    ROMlib_defs[6] = guest_cast<LONGINT>(&mbdf0);
+    ROMlib_defs[7] = guest_cast<LONGINT>(&snth5);
+    ROMlib_defs[8] = guest_cast<LONGINT>(&unixmount);
+    ROMlib_defs[9] = guest_cast<LONGINT>(&cdef1008);
 
-    *(LONGINT *)SYN68K_TO_US(0x58) = RM((LONGINT)ROMlib_defs);
+    *(LONGINT *)SYN68K_TO_US(0x58) = (LONGINT)ROMlib_defs;
 #else
     GUEST<THz> save_zone;
     Handle oldhandle, newhandle;
@@ -252,16 +252,16 @@ static void ROMlib_init_xdefs(void)
 #endif
     HLock(newhandle);
     ROMlib_defs = (GUEST<LONGINT> *)STARH(newhandle);
-    ROMlib_defs[0] = guest_cast<LONGINT>(RM(&cdef0));
-    ROMlib_defs[1] = guest_cast<LONGINT>(RM(&cdef16));
-    ROMlib_defs[2] = guest_cast<LONGINT>(RM(&wdef0));
-    ROMlib_defs[3] = guest_cast<LONGINT>(RM(&wdef16));
-    ROMlib_defs[4] = guest_cast<LONGINT>(RM(&mdef0));
-    ROMlib_defs[5] = guest_cast<LONGINT>(RM(&ldef0));
-    ROMlib_defs[6] = guest_cast<LONGINT>(RM(&mbdf0));
-    ROMlib_defs[7] = guest_cast<LONGINT>(RM(&snth5));
-    ROMlib_defs[8] = guest_cast<LONGINT>(RM(&unixmount));
-    ROMlib_defs[9] = guest_cast<LONGINT>(RM(&cdef1008));
+    ROMlib_defs[0] = guest_cast<LONGINT>(&cdef0);
+    ROMlib_defs[1] = guest_cast<LONGINT>(&cdef16);
+    ROMlib_defs[2] = guest_cast<LONGINT>(&wdef0);
+    ROMlib_defs[3] = guest_cast<LONGINT>(&wdef16);
+    ROMlib_defs[4] = guest_cast<LONGINT>(&mdef0);
+    ROMlib_defs[5] = guest_cast<LONGINT>(&ldef0);
+    ROMlib_defs[6] = guest_cast<LONGINT>(&mbdf0);
+    ROMlib_defs[7] = guest_cast<LONGINT>(&snth5);
+    ROMlib_defs[8] = guest_cast<LONGINT>(&unixmount);
+    ROMlib_defs[9] = guest_cast<LONGINT>(&cdef1008);
     *(LONGINT *)SYN68K_TO_US(0x58) = (LONGINT)(*newhandle).raw(); // ### use standard low mem access method
     LM(TheZone) = save_zone;
 #endif
@@ -347,14 +347,14 @@ Handle Executor::C_GetResource(ResType typ, INTEGER id)
 #endif /* !defined(MAC) */
 
     ROMlib_setreserr(ROMlib_typidtop(typ, id, &map, &rr));
-    if(Cx(LM(ResErr)) == resNotFound)
+    if(LM(ResErr) == resNotFound)
     {
         ROMlib_setreserr(noErr);
         retval = 0; /* IMIV */
     }
     else
     {
-        if(LM(ResErr) == CWC(noErr))
+        if(LM(ResErr) == noErr)
             retval = ROMlib_mgetres(map, rr);
         else
             retval = 0;
@@ -374,23 +374,23 @@ Handle Executor::C_Get1Resource(ResType typ, INTEGER id) /* IMIV-16 */
     resmaphand map;
     resref *rr;
 
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), nullptr);
+    map = ROMlib_rntohandl(LM(CurMap), nullptr);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
         return nullptr;
     }
     ROMlib_setreserr(ROMlib_maptypidtop(map, typ, id, &rr));
-    if(LM(ResErr) == CWC(noErr))
+    if(LM(ResErr) == noErr)
         retval = ROMlib_mgetres(map, rr);
     else
     {
         warn_resource_not_found(typ, id);
         retval = nullptr;
     }
-    if(LM(ResErr) == CWC(resNotFound))
+    if(LM(ResErr) == resNotFound)
         /* IMIV */
-        LM(ResErr) = CWC(noErr);
+        LM(ResErr) = noErr;
     return retval;
 }
 
@@ -401,11 +401,11 @@ static Handle getnamedmapresource(resmaphand map, ResType typ, StringPtr nam)
     resref *rr;
 
     WALKTR(map, i, tr)
-    if(CL(tr->rtyp) == typ)
+    if(tr->rtyp == typ)
     {
         WALKRR(map, tr, j, rr)
-        if(Cx(rr->noff) != -1 && EqualString((StringPtr)(
-                                                 (char *)STARH(map) + Hx(map, namoff) + Cx(rr->noff)),
+        if(rr->noff != -1 && EqualString((StringPtr)(
+                                                 (char *)STARH(map) + Hx(map, namoff) + rr->noff),
                                              (StringPtr)nam, 0, 1))
             /*-->*/ return ROMlib_mgetres(map, rr);
         EWALKRR(rr)
@@ -450,7 +450,7 @@ Handle Executor::C_Get1NamedResource(ResType typ, StringPtr s) /* IMIV-16 */
 {
     resmaphand map;
 
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), (Handle *)0);
+    map = ROMlib_rntohandl(LM(CurMap), (Handle *)0);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
@@ -483,10 +483,10 @@ void Executor::C_LoadResource(Handle volatile res)
     else
     {
         savemap = LM(CurMap);
-        LM(CurMap) = ((resmap *)STARH(MR(LM(TopMapHndl))))->resfn;
+        LM(CurMap) = ((resmap *)STARH(LM(TopMapHndl)))->resfn;
         ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
         LM(CurMap) = savemap;
-        if(LM(ResErr) == CWC(noErr))
+        if(LM(ResErr) == noErr)
         {
             BOOLEAN save_resload;
 
@@ -510,11 +510,11 @@ void Executor::C_ReleaseResource(Handle res)
 
     if(ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr)))
         /*-->*/ return;
-    if(Cx(rr->ratr) & resChanged)
+    if(rr->ratr & resChanged)
         ROMlib_wr(map, rr);
-    if(LM(ResErr) != CWC(noErr) || !rr->rhand)
+    if(LM(ResErr) != noErr || !rr->rhand)
         return;
-    h = MR(rr->rhand);
+    h = rr->rhand;
     if(*h)
         HClrRBit(h);
     DisposeHandle(h);
@@ -530,9 +530,9 @@ void Executor::C_DetachResource(Handle res)
 
     if(ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr)))
         /*-->*/ return;
-    if(LM(ResErr) != CWC(noErr) || !(h = (Handle)MR(rr->rhand)))
+    if(LM(ResErr) != noErr || !(h = (Handle)rr->rhand))
         return;
-    if(Cx(rr->ratr) & resChanged)
+    if(rr->ratr & resChanged)
     {
         ROMlib_setreserr(resAttrErr); /* IV-18 */
         return;

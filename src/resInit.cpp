@@ -89,13 +89,13 @@ INTEGER Executor::C_InitResources()
 
     ROMlib_setreserr(noErr);
     str255assign(LM(SysResName), SYSMACNAME);
-    LM(SysMap) = CW(OpenRFPerm((StringPtr)SYSMACNAME, Cx(LM(BootDrive)),
-                           fsCurPerm));
+    LM(SysMap) = OpenRFPerm((StringPtr)SYSMACNAME, LM(BootDrive),
+                           fsCurPerm);
 
-    if(LM(SysMap) == CWC(-1))
+    if(LM(SysMap) == -1)
     {
         fprintf(stderr, "OpenRFPerm (\"%.*s\", 0x%x, fsCurPerm) failed\n",
-                SYSMACNAME[0], SYSMACNAME + 1, (uint16_t)Cx(LM(BootDrive)));
+                SYSMACNAME[0], SYSMACNAME + 1, (uint16_t)LM(BootDrive));
 
         exit(1);
     }
@@ -110,7 +110,7 @@ INTEGER Executor::C_InitResources()
 
     ROMlib_set_appearance();
 
-    return CW(LM(SysMap));
+    return LM(SysMap);
 }
 
 void Executor::C_RsrcZoneInit() /* no op */

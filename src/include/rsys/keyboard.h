@@ -30,7 +30,7 @@ struct completer_t
 #define COMPLETER_N_RECS_X(p) ((p)->n_recs)
 #define COMPLETER_COMPLETER_RECS_X(p) ((p)->completer_recs)
 
-#define COMPLETER_N_RECS(p) (CW(COMPLETER_N_RECS_X(p)))
+#define COMPLETER_N_RECS(p) (COMPLETER_N_RECS_X(p))
 
 struct dead_key_rec_t
 {
@@ -52,9 +52,9 @@ struct dead_key_rec_t
                                       * sizeof(completer_pair_t)               \
                                   + 1))
 
-#define DEAD_KEY_TABLE_NUMBER(p) (CB(DEAD_KEY_TABLE_NUMBER_X(p)))
-#define DEAD_KEY_VIRT_KEY(p) (CB(DEAD_KEY_VIRT_KEY_X(p)))
-#define DEAD_KEY_NO_MATCH(p) (CB(DEAD_KEY_NO_MATCH_X(p)))
+#define DEAD_KEY_TABLE_NUMBER(p) (DEAD_KEY_TABLE_NUMBER_X(p))
+#define DEAD_KEY_VIRT_KEY(p) (DEAD_KEY_VIRT_KEY_X(p))
+#define DEAD_KEY_NO_MATCH(p) (DEAD_KEY_NO_MATCH_X(p))
 
 typedef struct kchr_str
 {
@@ -79,9 +79,9 @@ typedef GUEST<kchr_ptr_t> *kchr_hand;
 
 #define KCHR_DEAD_KEY_RECS_X(p) ((dead_key_rec_t *)(&KCHR_N_DEAD_KEY_RECS_X(p) + 1))
 
-#define KCHR_VERSION(p) (CW(KCHR_VERSION_X(p)))
-#define KCHR_N_TABLES(p) (CW(KCHR_N_TABLES_X(p)))
-#define KCHR_N_DEAD_KEY_RECS(p) (CW(KCHR_N_DEAD_KEY_RECS_X(p)))
+#define KCHR_VERSION(p) (KCHR_VERSION_X(p))
+#define KCHR_N_TABLES(p) (KCHR_N_TABLES_X(p))
+#define KCHR_N_DEAD_KEY_RECS(p) (KCHR_N_DEAD_KEY_RECS_X(p))
 
 /* MKV prefix denotes a true mac virtual key code (as opposed to the
    ones I made up) */

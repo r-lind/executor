@@ -21,7 +21,7 @@ void Executor::C_SetControlValue(ControlHandle c, INTEGER v) /* IMI-326 */
     else if(v > Hx(c, contrlMax))
         HxX(c, contrlValue) = HxX(c, contrlMax);
     else
-        HxX(c, contrlValue) = CW(v);
+        HxX(c, contrlValue) = v;
     CTLCALL(c, drawCntl, ALLINDICATORS);
 
     EM_D0 = 0;
@@ -35,9 +35,9 @@ INTEGER Executor::C_GetControlValue(ControlHandle c) /* IMI-326 */
 void Executor::C_SetControlMinimum(ControlHandle c, INTEGER v) /* IMI-326 */
 {
     CtlCallGuard guard(c);
-    HxX(c, contrlMin) = CW(v);
+    HxX(c, contrlMin) = v;
     if(Hx(c, contrlValue) < v)
-        HxX(c, contrlValue) = CW(v);
+        HxX(c, contrlValue) = v;
     CTLCALL(c, drawCntl, ALLINDICATORS);
 }
 
@@ -54,9 +54,9 @@ void Executor::C_SetControlMaximum(ControlHandle c, INTEGER v) /* IMI-327 */
     if(v < Hx(c, contrlMin))
         v = Hx(c, contrlMin);
 
-    HxX(c, contrlMax) = CW(v);
+    HxX(c, contrlMax) = v;
     if(Hx(c, contrlValue) > v)
-        HxX(c, contrlValue) = CW(v);
+        HxX(c, contrlValue) = v;
     CTLCALL(c, drawCntl, ALLINDICATORS);
 }
 

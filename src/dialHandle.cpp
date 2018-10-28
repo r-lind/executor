@@ -43,12 +43,12 @@ BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
     WriteWhenType when;
     SignedByte flags;
 
-    if(Cx(evt->what) == keyDown && ((Cx(evt->message) & 0xFF) == '\r' || (Cx(evt->message) & 0xFF) == NUMPAD_ENTER))
+    if(evt->what == keyDown && ((evt->message & 0xFF) == '\r' || (evt->message & 0xFF) == NUMPAD_ENTER))
     {
-        ip = ROMlib_dpnotoip(dp, CW(*ith = dp->aDefItem), &flags);
-        if(ip && (CB(ip->itmtype) & ctrlItem))
+        ip = ROMlib_dpnotoip(dp, *ith = dp->aDefItem, &flags);
+        if(ip && (ip->itmtype & ctrlItem))
         {
-            c = (ControlHandle)MR(ip->itmhand);
+            c = (ControlHandle)ip->itmhand;
             if(Hx(c, contrlVis) && U(Hx(c, contrlHilite)) != INACTIVE)
             {
                 if((when = ROMlib_when) != WriteNever)
@@ -56,12 +56,12 @@ BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                 HiliteControl(c, inButton);
                 Delay(5, nullptr);
                 HiliteControl(c, 0);
-                HSetState(MR(((DialogPeek)dp)->items), flags);
+                HSetState(((DialogPeek)dp)->items, flags);
                 ROMlib_WriteWhen(when);
                 /*-->*/ return -1;
             }
         }
-        HSetState(MR(((DialogPeek)dp)->items), flags);
+        HSetState(((DialogPeek)dp)->items, flags);
     }
     return false;
 }
@@ -102,7 +102,7 @@ inline int _FindWindow(Point pt, WindowPtr *wp)
     int retval;
 
     retval = FindWindow(pt, &__wp);
-    *(wp) = MR(__wp);
+    *(wp) = __wp;
 
     return retval;
 }
@@ -119,12 +119,12 @@ inline int _FindWindow(Point pt, WindowPtr *wp)
 void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI-415 */
 {
     /*
-   * The code used to save MR(qdGlobals().thePort) and restore it at the end of the
-   * function, but CALLMODALPROC expects MR(qdGlobals().thePort) to be unchanged which
+   * The code used to save qdGlobals().thePort and restore it at the end of the
+   * function, but CALLMODALPROC expects qdGlobals().thePort to be unchanged which
    * caused a bug in Macwrite II when size/fontsize... and clicking on
    * a size on the left.
    */
-    TheGDeviceGuard guard(MR(LM(MainDevice)));
+    TheGDeviceGuard guard(LM(MainDevice));
 
     EventRecord evt;
     DialogPeek dp;
@@ -135,11 +135,11 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
     bool done;
 
     dp = (DialogPeek)FrontWindow();
-    if(dp->window.windowKind != CWC(dialogKind) && CW(dp->window.windowKind) >= 0)
-        *item = CWC(-1);
+    if(dp->window.windowKind != dialogKind && dp->window.windowKind >= 0)
+        *item = -1;
     else
     {
-        idle = (Cx(dp->editField) == -1) ? 0 : MR(dp->textH);
+        idle = (dp->editField == -1) ? 0 : dp->textH;
         if(fp)
             fp2 = fp;
         else
@@ -153,10 +153,10 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
             if(idle)
                 TEIdle(idle);
             GetNextEvent(DIALOGEVTS, &evt);
-            whereunswapped.h = CW(evt.where.h);
-            whereunswapped.v = CW(evt.where.v);
+            whereunswapped.h = evt.where.h;
+            whereunswapped.v = evt.where.v;
 
-            mousedown_p = (CW(evt.what) == mouseDown);
+            mousedown_p = (evt.what == mouseDown);
 
             /* dummy initializations to keep gcc happy */
             temp_wp = nullptr;
@@ -192,13 +192,13 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
 void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI-415 */
 {
     /*
-   * The code used to save MR(qdGlobals().thePort) and restore it at the end of the
-   * function, but CALLMODALPROC expects MR(qdGlobals().thePort) to be unchanged which
+   * The code used to save qdGlobals().thePort and restore it at the end of the
+   * function, but CALLMODALPROC expects qdGlobals().thePort to be unchanged which
    * caused a bug in Macwrite II when size/fontsize... and clicking on
    * a size on the left.
    */
 
-    TheGDeviceGuard guard(MR(LM(MainDevice)));
+    TheGDeviceGuard guard(LM(MainDevice));
 
     EventRecord evt;
     DialogPeek dp;
@@ -209,11 +209,11 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
     bool done;
 
     dp = (DialogPeek)FrontWindow();
-    if(dp->window.windowKind != CWC(dialogKind) && CW(dp->window.windowKind) >= 0)
-        *item = CWC(-1);
+    if(dp->window.windowKind != dialogKind && dp->window.windowKind >= 0)
+        *item = -1;
     else
     {
-        idle = (Cx(dp->editField) == -1) ? TEHandle(nullptr) : dp->textH.get();
+        idle = (dp->editField == -1) ? TEHandle(nullptr) : dp->textH.get();
         if(fp)
             fp2 = fp;
         else
@@ -227,10 +227,10 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
             if(idle)
                 TEIdle(idle);
             GetNextEvent(DIALOGEVTS, &evt);
-            whereunswapped.h = CW(evt.where.h);
-            whereunswapped.v = CW(evt.where.v);
+            whereunswapped.h = evt.where.h;
+            whereunswapped.v = evt.where.v;
 
-            mousedown_p = (CW(evt.what) == mouseDown);
+            mousedown_p = (evt.what == mouseDown);
 
             /* dummy initializations to keep gcc happy */
             temp_wp = nullptr;
@@ -269,16 +269,16 @@ BOOLEAN Executor::C_IsDialogEvent(EventRecord *evt) /* IMI-416 */
     DialogPeek dp;
     Point p;
 
-    if(evt->what == CWC(activateEvt) || evt->what == CWC(updateEvt))
-        /*-->*/ return MR(guest_cast<WindowPeek>(evt->message))->windowKind == CWC(dialogKind);
+    if(evt->what == activateEvt || evt->what == updateEvt)
+        /*-->*/ return guest_cast<WindowPeek>(evt->message)->windowKind == dialogKind;
     dp = (DialogPeek)FrontWindow();
-    if(dp && dp->window.windowKind == CWC(dialogKind))
+    if(dp && dp->window.windowKind == dialogKind)
     {
-        if(dp->editField != CWC(-1))
-            TEIdle(MR(dp->textH));
-        p.h = CW(evt->where.h);
-        p.v = CW(evt->where.v);
-        /*-->*/ return evt->what != CWC(mouseDown) || (FindWindow(p, &wp) == inContent && MR(wp) == (WindowPtr)dp);
+        if(dp->editField != -1)
+            TEIdle(dp->textH);
+        p.h = evt->where.h;
+        p.v = evt->where.v;
+        /*-->*/ return evt->what != mouseDown || (FindWindow(p, &wp) == inContent && wp == (WindowPtr)dp);
     }
     return false;
 }
@@ -288,7 +288,7 @@ bool Executor::get_item_style_info(DialogPtr dp, int item_no,
 {
     AuxWinHandle aux_win_h;
 
-    aux_win_h = MR(*lookup_aux_win(dp));
+    aux_win_h = *lookup_aux_win(dp);
     if(aux_win_h && HxX(aux_win_h, dialogCItem))
     {
         Handle items_color_info_h;
@@ -303,8 +303,8 @@ bool Executor::get_item_style_info(DialogPtr dp, int item_no,
             uint16_t flags;
             int style_info_offset;
 
-            flags = CW(item_color_info->data);
-            style_info_offset = CW(item_color_info->offset);
+            flags = item_color_info->data;
+            style_info_offset = item_color_info->offset;
 
             *style_info = *(item_style_info_t *)((char *)items_color_info
                                                  + style_info_offset);
@@ -312,7 +312,7 @@ bool Executor::get_item_style_info(DialogPtr dp, int item_no,
             {
                 char *font_name;
 
-                font_name = (char *)items_color_info + CW(style_info->font);
+                font_name = (char *)items_color_info + style_info->font;
                 GetFNum((StringPtr)font_name, &style_info->font);
             }
 
@@ -337,11 +337,11 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
         restore_draw_state_p = true;
 
         if(flags & TEdoFont)
-            TextFont(CW(style_info.font));
+            TextFont(style_info.font);
         if(flags & TEdoFace)
-            TextFace(CB(style_info.face));
+            TextFace(style_info.face);
         if(flags & TEdoSize)
-            TextSize(CW(style_info.size));
+            TextSize(style_info.size);
         if(flags & TEdoColor)
             RGBForeColor(&style_info.foreground);
 #if 1
@@ -357,7 +357,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
     }
 
     r = ip->itmr;
-    if(CB(ip->itmtype) & statText)
+    if(ip->itmtype & statText)
     {
         GUEST<Handle> nh_s;
         Handle nh;
@@ -370,7 +370,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
 
         nh_s = ip->itmhand;
         HandToHand(&nh_s);
-        nh = MR(nh_s);
+        nh = nh_s;
 
         for(*sp = '0', hp = LM(DAStrings);
             *sp != '4'; ++*sp, hp++)
@@ -389,18 +389,18 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
         HUnlock(nh);
         DisposeHandle(nh);
     }
-    else if(CB(ip->itmtype) & editText)
+    else if(ip->itmtype & editText)
     {
         Handle text_h;
 
-        text_h = MR(ip->itmhand);
+        text_h = ip->itmhand;
         {
             HLockGuard guard(text_h);
             TETextBox(STARH(text_h), GetHandleSize(text_h),
                       &r, teFlushDefault);
         }
 
-        PORT_PEN_SIZE(MR(qdGlobals().thePort)).h = PORT_PEN_SIZE(MR(qdGlobals().thePort)).v = CWC(1);
+        PORT_PEN_SIZE(qdGlobals().thePort).h = PORT_PEN_SIZE(qdGlobals().thePort).v = 1;
         InsetRect(&r, -3, -3);
         FrameRect(&r);
     }
@@ -432,7 +432,7 @@ void Executor::dialog_draw_item(DialogPtr dp, itmp itemp, int itemno)
     {
         Handle icon;
 
-        icon = MR(itemp->itmhand);
+        icon = itemp->itmhand;
         if(CICON_P(icon))
             PlotCIcon(&itemp->itmr, (CIconHandle)icon);
         else
@@ -440,14 +440,14 @@ void Executor::dialog_draw_item(DialogPtr dp, itmp itemp, int itemno)
     }
     else if(itemp->itmtype & picItem)
     {
-        DrawPicture((PicHandle)MR(itemp->itmhand), &itemp->itmr);
+        DrawPicture((PicHandle)itemp->itmhand, &itemp->itmr);
     }
     else
     {
         Handle h;
 
         /* useritem */
-        h = MR(itemp->itmhand);
+        h = itemp->itmhand;
         if(h)
             CALLUSERITEM(dp, itemno, h);
     }
@@ -465,22 +465,22 @@ void Executor::C_DrawDialog(DialogPtr dp) /* IMI-418 */
 
     if(dp)
     {
-        gp = MR(qdGlobals().thePort);
+        gp = qdGlobals().thePort;
         SetPort((GrafPtr)dp);
-        if(Cx(((DialogPeek)dp)->editField) != -1)
-            TEDeactivate(MR(((DialogPeek)dp)->textH));
+        if(((DialogPeek)dp)->editField != -1)
+            TEDeactivate(((DialogPeek)dp)->textH);
         DrawControls((WindowPtr)dp);
-        state = HGetState(MR(((DialogPeek)dp)->items));
-        HSetState(MR(((DialogPeek)dp)->items), state | LOCKBIT);
-        intp = (GUEST<INTEGER> *)STARH(MR(((DialogPeek)dp)->items));
+        state = HGetState(((DialogPeek)dp)->items);
+        HSetState(((DialogPeek)dp)->items, state | LOCKBIT);
+        intp = (GUEST<INTEGER> *)STARH(((DialogPeek)dp)->items);
         ip = (itmp)(intp + 1);
-        for(i = Cx(*intp), inum = 1; i-- >= 0; inum++, BUMPIP(ip))
+        for(i = *intp, inum = 1; i-- >= 0; inum++, BUMPIP(ip))
         {
             dialog_draw_item(dp, ip, inum);
         }
-        if(Cx(((DialogPeek)dp)->editField) != -1)
-            TEActivate(MR(((DialogPeek)dp)->textH));
-        HSetState(MR(((DialogPeek)dp)->items), state);
+        if(((DialogPeek)dp)->editField != -1)
+            TEActivate(((DialogPeek)dp)->textH);
+        HSetState(((DialogPeek)dp)->items, state);
         SetPort(gp);
     }
 }
@@ -491,9 +491,9 @@ INTEGER Executor::C_FindDialogItem(DialogPtr dp, Point pt) /* IMIV-60 */
     INTEGER i, inum;
     itmp ip;
 
-    intp = (GUEST<INTEGER> *)STARH(MR(((DialogPeek)dp)->items));
+    intp = (GUEST<INTEGER> *)STARH(((DialogPeek)dp)->items);
     ip = (itmp)(intp + 1);
-    for(i = Cx(*intp), inum = 0; i-- >= 0; inum++, BUMPIP(ip))
+    for(i = *intp, inum = 0; i-- >= 0; inum++, BUMPIP(ip))
         if(PtInRect(pt, &ip->itmr))
             /*-->*/ return inum;
     return -1;
@@ -507,22 +507,22 @@ void Executor::C_UpdateDialog(DialogPtr dp, RgnHandle rgn) /* IMIV-60 */
     GrafPtr gp;
     SignedByte state;
 
-    gp = MR(qdGlobals().thePort);
+    gp = qdGlobals().thePort;
     SetPort((GrafPtr)dp);
     ShowWindow((WindowPtr)dp);
     DrawControls((WindowPtr)dp);
-    state = HGetState(MR(((DialogPeek)dp)->items));
-    HSetState(MR(((DialogPeek)dp)->items), state | LOCKBIT);
-    intp = (GUEST<INTEGER> *)STARH(MR(((DialogPeek)dp)->items));
+    state = HGetState(((DialogPeek)dp)->items);
+    HSetState(((DialogPeek)dp)->items, state | LOCKBIT);
+    intp = (GUEST<INTEGER> *)STARH(((DialogPeek)dp)->items);
     ip = (itmp)(intp + 1);
-    for(i = Cx(*intp), inum = 1; i-- >= 0; inum++, BUMPIP(ip))
+    for(i = *intp, inum = 1; i-- >= 0; inum++, BUMPIP(ip))
     {
         if(RectInRgn(&ip->itmr, rgn))
         {
             dialog_draw_item(dp, ip, inum);
         }
     }
-    HSetState(MR(((DialogPeek)dp)->items), state);
+    HSetState(((DialogPeek)dp)->items, state);
     SetPort(gp);
 }
 
@@ -542,38 +542,38 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
 
     dp = (DialogPeek)FrontWindow();
     retval = false;
-    *itemp = CWC(-1);
-    switch(Cx(evt->what))
+    *itemp = -1;
+    switch(evt->what)
     {
         case mouseDown:
             glocalp = evt->where;
-            gp = MR(qdGlobals().thePort);
+            gp = qdGlobals().thePort;
             SetPort((GrafPtr)dp);
             GlobalToLocal(&glocalp);
             localp = glocalp.get();
             SetPort(gp);
-            intp = (GUEST<INTEGER> *)STARH(MR(dp->items));
-            iend = Cx(*intp) + 2;
+            intp = (GUEST<INTEGER> *)STARH(dp->items);
+            iend = *intp + 2;
             ip = (itmp)(intp + 1);
             for(i = 0;
                 ++i != iend && !PtInRect(localp, &(ip->itmr));
                 BUMPIP(ip))
                 ;
-            itemenabled = !(CB(ip->itmtype) & itemDisable);
+            itemenabled = !(ip->itmtype & itemDisable);
             if(i == iend)
                 break;
-            if(CB(ip->itmtype) & editText)
+            if(ip->itmtype & editText)
             {
-                if(Cx(dp->editField) != i - 1)
+                if(dp->editField != i - 1)
                     ROMlib_dpntoteh(dp, i);
-                TEClick(localp, (Cx(evt->modifiers) & shiftKey) ? true : false,
-                        MR(dp->textH));
+                TEClick(localp, (evt->modifiers & shiftKey) ? true : false,
+                        dp->textH);
             }
-            else if(CB(ip->itmtype) & ctrlItem)
+            else if(ip->itmtype & ctrlItem)
             {
                 ControlHandle c;
 
-                c = (ControlHandle)MR(ip->itmhand);
+                c = (ControlHandle)ip->itmhand;
                 if(CTL_HILITE(c) == INACTIVE
                    || !TrackControl(c, localp,
                                     CTL_ACTION(c)))
@@ -581,16 +581,16 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
             }
             if(itemenabled)
             {
-                *itemp = CW(i);
+                *itemp = i;
                 retval = true;
                 break;
             }
             break;
         case keyDown:
         case autoKey:
-            if(Cx(dp->editField) == -1)
+            if(dp->editField == -1)
                 break;
-            c = Cx(evt->message) & 0xff;
+            c = evt->message & 0xff;
             switch(c)
             {
                 case '\t':
@@ -601,76 +601,76 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
                 default:
                     TEKey(c, DIALOG_TEXTH(dp));
             }
-            *itemp = CW(CW(dp->editField) + 1);
-            ip = ROMlib_dpnotoip(dp, CW(*itemp), &flags);
+            *itemp = dp->editField + 1;
+            ip = ROMlib_dpnotoip(dp, *itemp, &flags);
             if(ip)
-                retval = !(CB(ip->itmtype) & itemDisable);
+                retval = !(ip->itmtype & itemDisable);
             else
             {
                 warning_unexpected("couldn't resolve editField -- dp = %p, "
-                                   "CW (*itemp) = %d",
-                                   dp, CW(*itemp));
+                                   "*itemp = %d",
+                                   dp, *itemp);
                 retval = false;
             }
-            HSetState(MR(((DialogPeek)dp)->items), flags);
+            HSetState(((DialogPeek)dp)->items, flags);
             break;
         case updateEvt:
-            dp = MR(guest_cast<DialogPeek>(evt->message));
+            dp = guest_cast<DialogPeek>(evt->message);
             BeginUpdate((WindowPtr)dp);
             DrawDialog((DialogPtr)dp);
-            if(dp->editField != CWC(-1))
-                TEUpdate(&dp->window.port.portRect, MR(dp->textH));
+            if(dp->editField != -1)
+                TEUpdate(&dp->window.port.portRect, dp->textH);
             EndUpdate((WindowPtr)dp);
             break;
         case activateEvt:
-            dp = MR(guest_cast<DialogPeek>(evt->message));
-            if(dp->editField != CWC(-1))
+            dp = guest_cast<DialogPeek>(evt->message);
+            if(dp->editField != -1)
             {
-                if(Cx(evt->modifiers) & activeFlag)
-                    TEActivate(MR(dp->textH));
+                if(evt->modifiers & activeFlag)
+                    TEActivate(dp->textH);
                 else
-                    TEDeactivate(MR(dp->textH));
+                    TEDeactivate(dp->textH);
             }
             break;
     }
-    *dpp = RM((DialogPtr)dp);
+    *dpp = (DialogPtr)dp;
     return retval;
 }
 
 void Executor::DialogCut(DialogPtr dp) /* IMI-418 */
 {
-    if((((DialogPeek)dp)->editField) != CWC(-1))
-        TECut(MR(((DialogPeek)dp)->textH));
+    if((((DialogPeek)dp)->editField) != -1)
+        TECut(((DialogPeek)dp)->textH);
 }
 
 void Executor::DialogCopy(DialogPtr dp) /* IMI-418 */
 {
-    if((((DialogPeek)dp)->editField) != CWC(-1))
-        TECopy(MR(((DialogPeek)dp)->textH));
+    if((((DialogPeek)dp)->editField) != -1)
+        TECopy(((DialogPeek)dp)->textH);
 }
 
 void Executor::DialogPaste(DialogPtr dp) /* IMI-418 */
 {
-    if((((DialogPeek)dp)->editField) != CWC(-1))
-        TEPaste(MR(((DialogPeek)dp)->textH));
+    if((((DialogPeek)dp)->editField) != -1)
+        TEPaste(((DialogPeek)dp)->textH);
 }
 
 void Executor::DialogDelete(DialogPtr dp) /* IMI-418 */
 {
-    if((((DialogPeek)dp)->editField) != CWC(-1))
-        TEDelete(MR(((DialogPeek)dp)->textH));
+    if((((DialogPeek)dp)->editField) != -1)
+        TEDelete(((DialogPeek)dp)->textH);
 }
 
 void Executor::BEEPER(INTEGER n)
 {
     if(LM(DABeeper))
     {
-        if(MR(LM(DABeeper)) == &ROMlib_mysound)
+        if(LM(DABeeper) == &ROMlib_mysound)
             C_ROMlib_mysound((n));
         else
         {
             ROMlib_hook(dial_soundprocnumber);
-            MR(LM(DABeeper))
+            LM(DABeeper)
             (n);
         }
     }

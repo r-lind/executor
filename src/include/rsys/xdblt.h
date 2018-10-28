@@ -83,8 +83,8 @@ extern const uint32_t xdblt_mask_array[32] asm("_xdblt_mask_array");
         if(RGNP_SMALL_P(r))                                     \
         {                                                       \
             phony_special_region[0] = r->rgnBBox.top.raw();     \
-            phony_special_region[1] = CW(r->rgnBBox.left);      \
-            phony_special_region[2] = CW(r->rgnBBox.right);     \
+            phony_special_region[1] = r->rgnBBox.left;      \
+            phony_special_region[2] = r->rgnBBox.right;     \
             phony_special_region[4] = r->rgnBBox.bottom.raw();  \
             ptr_name = phony_special_region;                    \
         }                                                       \

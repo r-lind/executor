@@ -22,10 +22,10 @@ const LowMemGlobal<Byte[6]> macfpstate { 0xA4A }; // unknown ToolEqu.a (true-b);
 
 /* Macros for manipulating the sgn and exponent fields of an x80_t. */
 
-#define GET_X80_SGN(x) (MR((x)->sgn_and_exp) >> 15)
-#define SET_X80_SGN(x, v) ((x)->sgn_and_exp = CW((CW((x)->sgn_and_exp) & 0x7FFF) | (v << 15)))
-#define GET_X80_EXP(x) (MR((x)->sgn_and_exp) & 0x7FFF)
-#define SET_X80_EXP(x, v) ((x)->sgn_and_exp = CW((CW((x)->sgn_and_exp) & 0x8000) | v))
+#define GET_X80_SGN(x) ((x)->sgn_and_exp >> 15)
+#define SET_X80_SGN(x, v) ((x)->sgn_and_exp = ((x)->sgn_and_exp & 0x7FFF) | (v << 15))
+#define GET_X80_EXP(x) ((x)->sgn_and_exp & 0x7FFF)
+#define SET_X80_EXP(x, v) ((x)->sgn_and_exp = ((x)->sgn_and_exp & 0x8000) | v)
 
 
 /* This is meant to represent an IEEE FP value with 80 bits of precision.

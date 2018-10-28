@@ -33,7 +33,7 @@ is_window_ptr(WindowPeek w)
         retval = false;
     else
     {
-        for(wp = MR(LM(WindowList));
+        for(wp = LM(WindowList);
             wp && wp != w;
             wp = WINDOW_NEXT_WINDOW(wp))
             ;
@@ -46,7 +46,7 @@ is_window_ptr(WindowPeek w)
 void Executor::C_SetWRefCon(WindowPtr w, LONGINT data)
 {
     if(is_window_ptr((WindowPeek)w))
-        WINDOW_REF_CON_X(w) = CL(data);
+        WINDOW_REF_CON_X(w) = data;
 }
 
 /*
@@ -80,7 +80,7 @@ LONGINT Executor::C_GetWRefCon(WindowPtr w)
 void Executor::C_SetWindowPic(WindowPtr w, PicHandle p)
 {
     if(is_window_ptr((WindowPeek)w))
-        WINDOW_PIC_X(w) = RM(p);
+        WINDOW_PIC_X(w) = p;
 }
 
 PicHandle Executor::C_GetWindowPic(WindowPtr w)
@@ -101,14 +101,14 @@ PicHandle Executor::C_GetWindowPic(WindowPtr w)
 
 LONGINT Executor::C_PinRect(Rect *r, Point p)
 {
-    if(p.h < CW(r->left))
-        p.h = CW(r->left);
-    else if(p.h >= CW(r->right))
-        p.h = CW(r->right) - 1;
-    if(p.v < CW(r->top))
-        p.v = CW(r->top);
-    else if(p.v >= CW(r->bottom))
-        p.v = CW(r->bottom) - 1;
+    if(p.h < r->left)
+        p.h = r->left;
+    else if(p.h >= r->right)
+        p.h = r->right - 1;
+    if(p.v < r->top)
+        p.v = r->top;
+    else if(p.v >= r->bottom)
+        p.v = r->bottom - 1;
 
     return (((LONGINT)p.v << 16) | (unsigned short)p.h);
 }
@@ -229,12 +229,12 @@ void Executor::C_ClipAbove(WindowPeek w)
 {
     WindowPeek wp;
 
-    SectRgn(PORT_CLIP_REGION(MR(wmgr_port)), MR(LM(GrayRgn)),
-            PORT_CLIP_REGION(MR(wmgr_port)));
-    for(wp = MR(LM(WindowList)); wp != w; wp = WINDOW_NEXT_WINDOW(wp))
+    SectRgn(PORT_CLIP_REGION(wmgr_port), LM(GrayRgn),
+            PORT_CLIP_REGION(wmgr_port));
+    for(wp = LM(WindowList); wp != w; wp = WINDOW_NEXT_WINDOW(wp))
         if(WINDOW_VISIBLE_X(wp))
-            DiffRgn(PORT_CLIP_REGION(MR(wmgr_port)), WINDOW_STRUCT_REGION(wp),
-                    PORT_CLIP_REGION(MR(wmgr_port)));
+            DiffRgn(PORT_CLIP_REGION(wmgr_port), WINDOW_STRUCT_REGION(wp),
+                    PORT_CLIP_REGION(wmgr_port));
 }
 
 BOOLEAN Executor::C_CheckUpdate(EventRecord *ev)
@@ -242,7 +242,7 @@ BOOLEAN Executor::C_CheckUpdate(EventRecord *ev)
     WindowPeek wp;
     Rect picr;
 
-    for(wp = MR(LM(WindowList)); wp; wp = WINDOW_NEXT_WINDOW(wp))
+    for(wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
         if(WINDOW_VISIBLE_X(wp) && !EmptyRgn(WINDOW_UPDATE_REGION(wp)))
         {
             if(WINDOW_PIC(wp))
@@ -256,8 +256,8 @@ BOOLEAN Executor::C_CheckUpdate(EventRecord *ev)
             }
             else
             {
-                ev->what = CW(updateEvt);
-                ev->message = guest_cast<LONGINT>(RM(wp));
+                ev->what = updateEvt;
+                ev->message = guest_cast<LONGINT>(wp);
                 return true;
             }
         }
@@ -266,33 +266,33 @@ BOOLEAN Executor::C_CheckUpdate(EventRecord *ev)
 
 void Executor::C_SaveOld(WindowPeek w)
 {
-    LM(OldStructure) = RM(NewRgn());
-    LM(OldContent) = RM(NewRgn());
-    CopyRgn(WINDOW_STRUCT_REGION(w), MR(LM(OldStructure)));
-    CopyRgn(WINDOW_CONT_REGION(w), MR(LM(OldContent)));
+    LM(OldStructure) = NewRgn();
+    LM(OldContent) = NewRgn();
+    CopyRgn(WINDOW_STRUCT_REGION(w), LM(OldStructure));
+    CopyRgn(WINDOW_CONT_REGION(w), LM(OldContent));
 }
 
 void Executor::C_PaintOne(WindowPeek w, RgnHandle clobbered)
 {
     RgnHandle rh;
 
-    ThePortGuard guard(MR(wmgr_port));
+    ThePortGuard guard(wmgr_port);
     if(w)
         SetClip(WINDOW_STRUCT_REGION(w));
     else
-        ClipRect(&GD_BOUNDS(MR(LM(TheGDevice))));
+        ClipRect(&GD_BOUNDS(LM(TheGDevice)));
     ClipAbove(w);
-    SectRgn(PORT_CLIP_REGION(MR(wmgr_port)), clobbered,
-            PORT_CLIP_REGION(MR(wmgr_port)));
+    SectRgn(PORT_CLIP_REGION(wmgr_port), clobbered,
+            PORT_CLIP_REGION(wmgr_port));
     if(w)
     {
         rh = NewRgn();
-        SectRgn(PORT_CLIP_REGION(MR(wmgr_port)),
+        SectRgn(PORT_CLIP_REGION(wmgr_port),
                 WINDOW_STRUCT_REGION(w), rh);
         if(!EmptyRgn(rh))
         {
             WINDCALL((WindowPtr)w, wDraw, 0);
-            SectRgn(PORT_CLIP_REGION(MR(wmgr_port)),
+            SectRgn(PORT_CLIP_REGION(wmgr_port),
                     WINDOW_CONT_REGION(w), rh);
             if(!EmptyRgn(rh))
             {
@@ -318,7 +318,7 @@ void Executor::C_PaintOne(WindowPeek w, RgnHandle clobbered)
         }
         DisposeRgn(rh);
     }
-    else if(!EmptyRgn(PORT_CLIP_REGION(MR(wmgr_port))))
+    else if(!EmptyRgn(PORT_CLIP_REGION(wmgr_port)))
     {
         if(!ROMlib_rootless_drawdesk(clobbered))
         {
@@ -327,8 +327,8 @@ void Executor::C_PaintOne(WindowPeek w, RgnHandle clobbered)
             else
             {
                 if((USE_DESKCPAT_VAR & USE_DESKCPAT_BIT)
-                && PIXMAP_PIXEL_SIZE(GD_PMAP(MR(LM(MainDevice)))) > 2)
-                    FillCRgn(clobbered, MR(LM(DeskCPat)));
+                && PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice))) > 2)
+                    FillCRgn(clobbered, LM(DeskCPat));
                 else
                     FillRgn(clobbered, LM(DeskPattern));
             }
@@ -344,8 +344,8 @@ void Executor::C_PaintBehind(WindowPeek w, RgnHandle clobbered)
     rh = NewRgn();
     testrgn = NewRgn();
     CopyRgn(clobbered, rh);
-    LM(PaintWhite) = CWC(-1);
-    LM(SaveUpdate) = CWC(-1);
+    LM(PaintWhite) = -1;
+    LM(SaveUpdate) = -1;
     for(wp = w; wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
         if(WINDOW_VISIBLE_X(wp))
@@ -372,14 +372,14 @@ void Executor::C_CalcVis(WindowPeek w)
 
     if(w && WINDOW_VISIBLE_X(w))
     {
-        SectRgn(MR(LM(GrayRgn)), WINDOW_CONT_REGION(w), PORT_VIS_REGION(w));
-        for(wp = MR(LM(WindowList)); wp != w; wp = WINDOW_NEXT_WINDOW(wp))
+        SectRgn(LM(GrayRgn), WINDOW_CONT_REGION(w), PORT_VIS_REGION(w));
+        for(wp = LM(WindowList); wp != w; wp = WINDOW_NEXT_WINDOW(wp))
             if(WINDOW_VISIBLE_X(wp))
                 DiffRgn(PORT_VIS_REGION(w), WINDOW_STRUCT_REGION(wp),
                         PORT_VIS_REGION(w));
         OffsetRgn(PORT_VIS_REGION(w),
-                  CW(PORT_BOUNDS(w).left),
-                  CW(PORT_BOUNDS(w).top));
+                  PORT_BOUNDS(w).left,
+                  PORT_BOUNDS(w).top);
     }
 }
 void Executor::C_CalcVisBehind(WindowPeek w, RgnHandle clobbered)
@@ -393,7 +393,7 @@ void Executor::C_CalcVisBehind(WindowPeek w, RgnHandle clobbered)
     testrgn = NewRgn();
     CopyRgn(clobbered, rh);
     CalcVis((WindowPeek)w);
-    for(wp = MR(w->nextWindow); wp; wp = WINDOW_NEXT_WINDOW(wp))
+    for(wp = w->nextWindow; wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
         if(WINDOW_VISIBLE_X(wp))
         {
@@ -422,11 +422,11 @@ void Executor::C_DrawNew(WindowPeek w, BOOLEAN flag)
    * This works as IM describes, but I had to spend some time fiddling with
    * it so the code is still suspect.
    */
-    XorRgn(WINDOW_STRUCT_REGION(w), MR(LM(OldStructure)), r1);
-    XorRgn(MR(LM(OldContent)), WINDOW_CONT_REGION(w), r2);
+    XorRgn(WINDOW_STRUCT_REGION(w), LM(OldStructure), r1);
+    XorRgn(LM(OldContent), WINDOW_CONT_REGION(w), r2);
     UnionRgn(r1, r2, r2);
 
-    ThePortGuard guard(MR(wmgr_port));
+    ThePortGuard guard(wmgr_port);
     SetClip(WINDOW_STRUCT_REGION(w));
     ClipAbove(w);
     WINDCALL((WindowPtr)w, wDraw, 0);
@@ -444,7 +444,7 @@ INTEGER Executor::C_GetWVariant(WindowPtr w) /* IMV-208 */
     AuxWinHandle h;
     INTEGER retval;
 
-    for(h = MR(LM(AuxWinHead)); h != 0 && HxP(h, awOwner) != w; h = HxP(h, awNext))
+    for(h = LM(AuxWinHead); h != 0 && HxP(h, awOwner) != w; h = HxP(h, awNext))
         ;
     retval = h != 0 ? (Hx(h, awFlags) >> 24) & 0xFF : 0;
     return retval;

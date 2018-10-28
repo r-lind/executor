@@ -521,7 +521,7 @@ setup_trap_vectors(void)
 
     /* Set up the trap vector for the timer interrupt. */
     timer_callback = callback_install(catchalarm, nullptr);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = CL(timer_callback);
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = timer_callback;
 
     getPowerCore().handleInterrupt = &catchalarmPowerPC;
 
@@ -555,7 +555,7 @@ setup_trap_vectors(void)
         {
             syn68k_addr_t c;
             c = callback_install(unhandled_trap, (void *)i);
-            *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(i * 4) = CL(c);
+            *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(i * 4) = c;
         }
 }
 
@@ -936,7 +936,7 @@ int main(int argc, char **argv)
     // of code that jumps to the former trap entry of ResourceStub. 
     l = ostraptable[0x0FC];
     static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
-        CWC((unsigned short)0x4EF9), CWC(0), CWC(0) /* Filled in below. */
+        (unsigned short)0x4EF9, 0, 0 /* Filled in below. */
     };
     ((unsigned char *)jmpl_to_ResourceStub)[2] = l >> 24;
     ((unsigned char *)jmpl_to_ResourceStub)[3] = l >> 16;
@@ -979,16 +979,16 @@ int main(int argc, char **argv)
     LM(PortBUse) = 2; /* configured for Serial driver */
     memset(LM(KeyMap), 0, sizeof_KeyMap);
     {
-        static GUEST<uint16_t> ret = CWC((unsigned short)0x4E75);
+        static GUEST<uint16_t> ret = (unsigned short)0x4E75;
 
-        LM(JCrsrTask) = RM((ProcPtr)&ret);
+        LM(JCrsrTask) = (ProcPtr)&ret;
     }
 
     SET_HILITE_BIT();
     LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = CLC_NULL;
 
-    LM(OneOne) = CLC(0x00010001);
-    LM(Lo3Bytes) = CLC(0xFFFFFF);
+    LM(OneOne) = 0x00010001;
+    LM(Lo3Bytes) = 0xFFFFFF;
     LM(DragHook) = 0;
     LM(TopMapHndl) = 0;
     LM(SysMapHndl) = 0;
@@ -996,19 +996,19 @@ int main(int argc, char **argv)
     LM(MenuList) = 0;
     LM(MBSaveLoc) = 0;
 
-    LM(SysVersion) = CW(system_version);
-    //LM(FSFCBLen) = CWC(94);   // inited in ROMlib_fileinit
-    LM(ScrapState) = CWC(-1);
+    LM(SysVersion) = system_version;
+    //LM(FSFCBLen) = 94;   // inited in ROMlib_fileinit
+    LM(ScrapState) = -1;
 
     LM(TheZone) = LM(SysZone);
-    LM(UTableBase) = RM((DCtlHandlePtr)NewPtr(4 * NDEVICES));
-    memset(MR(LM(UTableBase)), 0, 4 * NDEVICES);
-    LM(UnitNtryCnt) = CW(NDEVICES);
+    LM(UTableBase) = (DCtlHandlePtr)NewPtr(4 * NDEVICES);
+    memset(LM(UTableBase), 0, 4 * NDEVICES);
+    LM(UnitNtryCnt) = NDEVICES;
     LM(TheZone) = LM(ApplZone);
 
-    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
+    LM(TEDoText) = (ProcPtr)&ROMlib_dotext; /* where should this go ? */
 
-    LM(SCSIFlags) = CWC(0xEC00); /* scsi+clock+xparam+mmu+adb
+    LM(SCSIFlags) = 0xEC00; /* scsi+clock+xparam+mmu+adb
 				 (no fpu,aux or pwrmgr) */
 
     LM(MCLKPCmiss1) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 72 (MacLinkPC starts
@@ -1025,16 +1025,16 @@ int main(int argc, char **argv)
     LM(PrintErr) = 0;
     LM(mouseoffset) = 0;
     LM(heapcheck) = 0;
-    LM(DefltStack) = CLC(0x2000); /* nobody really cares about these two */
-    LM(MinStack) = CLC(0x400); /* values ... */
+    LM(DefltStack) = 0x2000; /* nobody really cares about these two */
+    LM(MinStack) = 0x400; /* values ... */
     LM(IAZNotify) = 0;
     LM(CurPitch) = 0;
-    LM(JSwapFont) = RM((ProcPtr)&FMSwapFont);
-    LM(JInitCrsr) = RM((ProcPtr)&InitCursor);
+    LM(JSwapFont) = (ProcPtr)&FMSwapFont;
+    LM(JInitCrsr) = (ProcPtr)&InitCursor;
 
-    LM(Key1Trans) = RM((Ptr)&stub_Key1Trans);
-    LM(Key2Trans) = RM((Ptr)&stub_Key2Trans);
-    LM(JFLUSH) = RM(&FlushCodeCache);
+    LM(Key1Trans) = (Ptr)&stub_Key1Trans;
+    LM(Key2Trans) = (Ptr)&stub_Key2Trans;
+    LM(JFLUSH) = &FlushCodeCache;
     LM(JResUnknown1) = LM(JFLUSH); /* I don't know what these are supposed to */
     LM(JResUnknown2) = LM(JFLUSH); /* do, but they're not called enough for
 				   us to worry about the cache flushing
@@ -1049,26 +1049,26 @@ int main(int argc, char **argv)
     LM(UnitNtryCnt) = 0; /* how many units in the table */
 
     LM(TheZone) = LM(SysZone);
-    LM(VIA) = RM(NewPtr(16 * 512)); /* IMIII-43 */
-    memset(MR(LM(VIA)), 0, (LONGINT)16 * 512);
-    *(char *)MR(LM(VIA)) = 0x80; /* Sound Off */
+    LM(VIA) = NewPtr(16 * 512); /* IMIII-43 */
+    memset(LM(VIA), 0, (LONGINT)16 * 512);
+    *(char *)LM(VIA) = 0x80; /* Sound Off */
 
 #define SCC_SIZE 1024
 
-    LM(SCCRd) = RM(NewPtrSysClear(SCC_SIZE));
-    LM(SCCWr) = RM(NewPtrSysClear(SCC_SIZE));
+    LM(SCCRd) = NewPtrSysClear(SCC_SIZE);
+    LM(SCCWr) = NewPtrSysClear(SCC_SIZE);
 
-    LM(SoundBase) = RM(NewPtr(370 * sizeof(INTEGER)));
+    LM(SoundBase) = NewPtr(370 * sizeof(INTEGER));
 #if 0
-    memset(CL(LM(SoundBase)), 0, (LONGINT) 370 * sizeof(INTEGER));
+    memset(LM(SoundBase), 0, (LONGINT) 370 * sizeof(INTEGER));
 #else /* !0 */
     for(i = 0; i < 370; ++i)
-        ((GUEST<INTEGER> *)MR(LM(SoundBase)))[i] = CWC(0x8000); /* reference 0 sound */
+        ((GUEST<INTEGER> *)LM(SoundBase))[i] = 0x8000; /* reference 0 sound */
 #endif /* !0 */
     LM(TheZone) = LM(ApplZone);
-    LM(HiliteMode) = CB(0xFF);
+    LM(HiliteMode) = 0xFF;
     /* Mac II has 0x3FFF here */
-    LM(ROM85) = CWC(0x3FFF);
+    LM(ROM85) = 0x3FFF;
 
     LM(loadtrap) = 0;
 

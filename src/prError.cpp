@@ -12,10 +12,10 @@ using namespace Executor;
 
 INTEGER Executor::C_PrError()
 {
-    return CW(LM(PrintErr));
+    return LM(PrintErr);
 }
 
 void Executor::C_PrSetError(INTEGER iErr)
 {
-    LM(PrintErr) = CW(iErr);
+    LM(PrintErr) = iErr;
 }

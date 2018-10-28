@@ -13,8 +13,8 @@ using namespace Executor;
 
 INTEGER Executor::ROMlib_setreserr(INTEGER reserr) /* INTERNAL */
 {
-    LM(ResErr) = CW(reserr);
-    if(LM(ResErr) != CWC(noErr) && LM(ResErrProc))
+    LM(ResErr) = reserr;
+    if(LM(ResErr) != noErr && LM(ResErrProc))
     {
         ROMlib_hook(res_reserrprocnumber);
 
@@ -22,12 +22,12 @@ INTEGER Executor::ROMlib_setreserr(INTEGER reserr) /* INTERNAL */
 							 correct? */
         CALL_EMULATOR((syn68k_addr_t)CL_RAW((long)LM(ResErrProc).raw()));
     }
-    return CW(LM(ResErr));
+    return LM(ResErr);
 }
 
 INTEGER Executor::C_ResError()
 {
-    return CW(LM(ResErr));
+    return LM(ResErr);
 }
 
 INTEGER Executor::C_GetResFileAttrs(INTEGER rn)
@@ -54,5 +54,5 @@ void Executor::C_SetResFileAttrs(INTEGER rn, INTEGER attrs)
     if(!map)
         return; /* don't set reserr.  I kid you not, see I-127 */
     else
-        HxX(map, resfatr) = CW(attrs);
+        HxX(map, resfatr) = attrs;
 }

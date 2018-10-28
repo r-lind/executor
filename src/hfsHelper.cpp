@@ -139,16 +139,16 @@ void Executor::ROMlib_OurClose(void)
     HVCB *vcbp, *next;
     ParamBlockRec pbr;
 
-    for(vcbp = (HVCB *)MR(LM(VCBQHdr).qHead); vcbp; vcbp = next)
+    for(vcbp = (HVCB *)LM(VCBQHdr).qHead; vcbp; vcbp = next)
     {
-        next = (HVCB *)MR(vcbp->qLink);
+        next = (HVCB *)vcbp->qLink;
         pbr.ioParam.ioNamePtr = 0;
-        if(Cx(vcbp->vcbCTRef))
+        if(vcbp->vcbCTRef)
         {
             pbr.ioParam.ioVRefNum = vcbp->vcbVRefNum;
             PBUnmountVol(&pbr);
 #if defined(MACOSX_) || defined(MACOSX_)
-            if(!(Cx(vcbp->vcbAtrb) & VNONEJECTABLEBIT) && Cx(vcbp->vcbDrvNum))
+            if(!(vcbp->vcbAtrb & VNONEJECTABLEBIT) && vcbp->vcbDrvNum)
                 ROMlib_ejectfloppy(((VCBExtra *)vcbp)->u.hfs.fd);
 #endif
         }
@@ -187,7 +187,7 @@ static BOOLEAN isejectable(const charCx( *dname), LONGINT fd)
 	sr.sr_dma_max	           = sr.sr_cdb.cdb_c6.c6_len;
 	sr.sr_ioto	           = 1;
 	if (ioctl(fd, SGIOCREQ, &sr) == 0 && sr.sr_io_status == 0 &&
-							    Cx(inqp->ir_removable))
+							    inqp->ir_removable)
 	    retval = true;
     }
 #endif
@@ -262,7 +262,7 @@ read_driver_block_size(LONGINT fd, LONGINT bsize, LONGINT maxbytes,
     {
         if(aligned_buf[0] == 0x45 && aligned_buf[1] == 0x52)
         {
-            retval = (unsigned short)CW(*(GUEST<uint16_t> *)&aligned_buf[2]);
+            retval = (unsigned short)(*(GUEST<uint16_t> *)&aligned_buf[2]);
             warning_fs_log("fd = 0x%x, block size = %d", fd, retval);
         }
     }
@@ -311,9 +311,9 @@ Executor::try_to_mount_disk(const char *dname, LONGINT floppyfd, GUEST<LONGINT> 
     if(floppyfd < 0)
         /*-->*/ return;
 
-    drivenum = CW(dqp->dq.dQDrive);
+    drivenum = dqp->dq.dQDrive;
 
-    pb.ioParam.ioVRefNum = CW(drivenum);
+    pb.ioParam.ioVRefNum = drivenum;
 
     foundmap = false;
     first = true;
@@ -339,17 +339,17 @@ Executor::try_to_mount_disk(const char *dname, LONGINT floppyfd, GUEST<LONGINT> 
                         dqp = ROMlib_addtodq(2048L * 2, dname,
                                              partition, OURHFSDREF, flags,
                                              &hfs);
-                        drivenum = CW(dqp->dq.dQDrive);
-                        pb.ioParam.ioVRefNum = CW(drivenum);
+                        drivenum = dqp->dq.dQDrive;
+                        pb.ioParam.ioVRefNum = drivenum;
                     }
-                    dqp->hfs.offset = hfs.offset + (CL(partp->pmPyPartStart)
+                    dqp->hfs.offset = hfs.offset + (partp->pmPyPartStart
                                                     * driver_block_size);
                     err = hfsPBMountVol(&pb, floppyfd, dqp->hfs.offset, bsize,
                                         maxbytes, flags, dqp);
                     mess = ((LONGINT)err << 16) | drivenum;
                     if(first)
                     {
-                        *messp = CL(mess);
+                        *messp = mess;
                         first = false;
                     }
                     else
@@ -364,7 +364,7 @@ Executor::try_to_mount_disk(const char *dname, LONGINT floppyfd, GUEST<LONGINT> 
         else if(buf[0] == OLDMAPSIG0 && buf[1] == OLDMAPSIG1)
         {
             oldmapp = (oldblock1_t *)buf;
-            for(i = 0; i < NOLDENTRIES && (Cx(oldmapp->oldmapentry[i].pdStart) != 0 || Cx(oldmapp->oldmapentry[i].pdSize) != 0 || Cx(oldmapp->oldmapentry[i].pdFSID) != 0); ++i)
+            for(i = 0; i < NOLDENTRIES && (oldmapp->oldmapentry[i].pdStart != 0 || oldmapp->oldmapentry[i].pdSize != 0 || oldmapp->oldmapentry[i].pdFSID != 0); ++i)
             {
                 /*
 * NOTE: We initially tried looking for 'TFS1' in pdFSID, but our Cirrus 80
@@ -375,17 +375,17 @@ Executor::try_to_mount_disk(const char *dname, LONGINT floppyfd, GUEST<LONGINT> 
                     ++partition;
                     dqp = ROMlib_addtodq(2048L * 2, dname, partition,
                                          OURHFSDREF, flags, &hfs);
-                    drivenum = CW(dqp->dq.dQDrive);
-                    pb.ioParam.ioVRefNum = CW(drivenum);
+                    drivenum = dqp->dq.dQDrive;
+                    pb.ioParam.ioVRefNum = drivenum;
                 }
-                dqp->hfs.offset = hfs.offset + (CL(oldmapp->oldmapentry[i].pdStart)
+                dqp->hfs.offset = hfs.offset + (oldmapp->oldmapentry[i].pdStart
                                                 * driver_block_size);
                 err = hfsPBMountVol(&pb, floppyfd, dqp->hfs.offset,
                                     bsize, maxbytes, flags, dqp);
                 mess = ((LONGINT)err << 16) | drivenum;
                 if(first)
                 {
-                    *messp = CL(mess);
+                    *messp = mess;
                     first = false;
                 }
                 else
@@ -441,7 +441,7 @@ Executor::try_to_mount_disk(const char *dname, LONGINT floppyfd, GUEST<LONGINT> 
             dqp->hfs.offset = offset;
             err = hfsPBMountVol(&pb, floppyfd, offset, bsize, maxbytes,
                                 flags, dqp);
-            *messp = CL(((LONGINT)err << 16) | drivenum);
+            *messp = ((LONGINT)err << 16) | drivenum;
         }
     }
 }
@@ -608,10 +608,10 @@ Executor::ROMlib_transphysblk(hfs_access_t *hfsp, LONGINT physblock, short nphys
 
     pb.ioVRefNum = vcbp->vcbDrvNum;
     pb.ioRefNum = vcbp->vcbDRefNum;
-    pb.ioBuffer = CL(bufp);
-    pb.ioReqCount = CL(PHYSBSIZE * (LONGINT nphysblocks));
-    pb.ioPosMode = CW(fsFromStart);
-    pb.ioPosOffset = CL(physblock);
+    pb.ioBuffer = bufp;
+    pb.ioReqCount = PHYSBSIZE * (LONGINT nphysblocks);
+    pb.ioPosMode = fsFromStart;
+    pb.ioPosOffset = physblock;
     err = rw == reading ? PBRead((ParmBlkPtr)&pb, false) : PBWrite((ParmBlkPtr)&pb, false);
     if(actp)
         *actp = pb.ioActCount;
@@ -669,7 +669,7 @@ void *Executor::ROMlib_indexqueue(QHdr *qp, short index)
 {
     QElemPtr p;
 
-    for(p = MR(qp->qHead); (--index > 0) && p; p = MR(p->vcbQElem.qLink))
+    for(p = qp->qHead; (--index > 0) && p; p = p->vcbQElem.qLink)
         ;
     return p;
 }
@@ -694,7 +694,7 @@ OSErr Executor::ROMlib_writevcbp(HVCB *vcbp)
     INTEGER vflags;
     OSErr retval;
 
-    vflags = Cx(vcbp->vcbAtrb);
+    vflags = vcbp->vcbAtrb;
     if(vflags & VSOFTLOCKBIT)
         retval = vLckdErr;
     else if(vflags & VHARDLOCKBIT)

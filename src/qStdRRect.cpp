@@ -41,10 +41,10 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
     ox = 0;
 #endif /* LETGCCWAIL */
 
-    top = CW(r->top);
-    bottom = CW(r->bottom);
+    top = r->top;
+    bottom = r->bottom;
     dv = bottom - top;
-    dh = (right = CW(r->right)) - (left = CW(r->left));
+    dh = (right = r->right) - (left = r->left);
 
     maxsize = 10 + (6 * dv + 1) * sizeof(INTEGER);
     rh = (RgnHandle)NewHandle(maxsize);
@@ -74,7 +74,7 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
                 TERM;
             }
         }
-        HxX(rh, rgnSize) = CW((char *)ip - (char *)STARH(rh));
+        HxX(rh, rgnSize) = (char *)ip - (char *)STARH(rh);
         SetHandleSize((Handle)rh, (Size)Hx(rh, rgnSize));
         /*-->*/ return rh;
     }
@@ -98,8 +98,8 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
         rad = dv;
     }
 
-    centl = CW(r->left) + dh / 2;
-    centr = CW(r->left) + (dh + 1) / 2;
+    centl = r->left + dh / 2;
+    centr = r->left + (dh + 1) / 2;
     centt = top + dv / 2;
     first = true;
 
@@ -189,7 +189,7 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
         SetEmptyRgn(rh);
     else
     {
-        HxX(rh, rgnSize) = CW(sizeof(INTEGER) * (op - (INTEGER *)STARH(rh)));
+        HxX(rh, rgnSize) = sizeof(INTEGER) * (op - (INTEGER *)STARH(rh));
         SetHandleSize((Handle)rh, (Size)Hx(rh, rgnSize));
     }
 
@@ -208,28 +208,28 @@ void Executor::C_StdRRect(GrafVerb verb, Rect *r, INTEGER width, INTEGER height)
     GUEST<Point> p;
     PAUSEDECL;
 
-    if(MR(qdGlobals().thePort)->picSave)
+    if(qdGlobals().thePort->picSave)
     {
-        p.h = CW(width);
-        p.v = CW(height);
+        p.h = width;
+        p.v = height;
         ROMlib_drawingverbrectovalpicupdate(verb, r, &p);
         PICOP(OP_frameRRect + (int)verb);
         PICWRITE(r, sizeof(*r));
     }
 
-    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0
-       && (!PORT_REGION_SAVE(MR(qdGlobals().thePort)) || verb != frame))
+    if(PORT_PEN_VIS(qdGlobals().thePort) < 0
+       && (!PORT_REGION_SAVE(qdGlobals().thePort) || verb != frame))
         /*-->*/ return;
 
     PAUSERECORDING;
-    ovaldx = CW(r->right) - CW(r->left) - width;
-    ovaldy = CW(r->bottom) - CW(r->top) - height;
+    ovaldx = r->right - r->left - width;
+    ovaldy = r->bottom - r->top - height;
     if(width < 4 && height < 4)
         StdRect(verb, r);
     else
     {
-        rectdx = CW(r->right) - CW(r->left) - width / 2;
-        rectdy = CW(r->bottom) - CW(r->top) - height / 2;
+        rectdx = r->right - r->left - width / 2;
+        rectdy = r->bottom - r->top - height / 2;
 
         rh = NewRgn();
         corner = NewRgn();
@@ -237,12 +237,12 @@ void Executor::C_StdRRect(GrafVerb verb, Rect *r, INTEGER width, INTEGER height)
 
         RectRgn(rh, r);
 
-        SetRect(&tempr, CW(r->left), CW(r->top),
-                CW(r->left) + width, CW(r->top) + height);
+        SetRect(&tempr, r->left, r->top,
+                r->left + width, r->top + height);
         oval = ROMlib_circrgn(&tempr);
 
-        SetRect(&tempr, CW(r->left), CW(r->top),
-                CW(r->left) + width / 2, CW(r->top) + height / 2);
+        SetRect(&tempr, r->left, r->top,
+                r->left + width / 2, r->top + height / 2);
         RectRgn(smallr, &tempr);
 
         DiffRgn(smallr, oval, corner);

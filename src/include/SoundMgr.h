@@ -56,7 +56,7 @@ typedef struct SndChannel
 } * SndChannelPtr;
 
 #define SND_CHAN_FLAGS_X(c) (c->flags)
-#define SND_CHAN_FLAGS(c) (CW(SND_CHAN_FLAGS_X(c)))
+#define SND_CHAN_FLAGS(c) (SND_CHAN_FLAGS_X(c))
 
 enum
 {

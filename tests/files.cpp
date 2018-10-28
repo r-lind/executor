@@ -43,8 +43,8 @@ enum
     kioFlAttribSharePointMask     = 0x20
 };
 
-GUEST<LONGINT> toIoMisc(long x) { return CL((LONGINT)x); }
-GUEST<LONGINT> toIoMisc(void* x) { return guest_cast<LONGINT>(RM(x)); }
+GUEST<LONGINT> toIoMisc(long x) { return (LONGINT)x; }
+GUEST<LONGINT> toIoMisc(void* x) { return guest_cast<LONGINT>(x); }
 
 #define PTR(x) (&guestref(x))
 

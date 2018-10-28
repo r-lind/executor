@@ -63,9 +63,9 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
             row_bytes = BITMAP_ROWBYTES(new_src_pm);
             baseaddr_size = row_bytes * height;
             TEMP_ALLOC_ALLOCATE(new_bits, temp_alloc_space, baseaddr_size);
-            new_src_pm->baseAddr = RM((Ptr)new_bits);
+            new_src_pm->baseAddr = (Ptr)new_bits;
 
-            s = (uint8_t *)MR(src_pm->baseAddr);
+            s = (uint8_t *)src_pm->baseAddr;
             d = new_bits;
             for(y = 0; y < height; y++)
             {
@@ -117,24 +117,24 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
         bbox_height = RECT_HEIGHT(&bbox);
 
         row_bytes = ((bbox_width * bpp + 31) / 32) * 4;
-        new_src_pm->rowBytes = CW(row_bytes);
+        new_src_pm->rowBytes = row_bytes;
         TEMP_ALLOC_ALLOCATE(new_bits, temp_alloc_space,
                             row_bytes * bbox_height);
-        new_src_pm->baseAddr = RM((Ptr)new_bits);
+        new_src_pm->baseAddr = (Ptr)new_bits;
 
         pixmap_set_pixel_fields(new_src_pm, bpp);
 
-        new_src_pm->pmTable = RM(ROMlib_dont_depthconv_ctab);
+        new_src_pm->pmTable = ROMlib_dont_depthconv_ctab;
 
-        top = (CW(src_rect->top)
-               + (CW(bbox.top) - CW(dst_rect->top)));
-        left = (CW(src_rect->left)
-                + (CW(bbox.left) - CW(dst_rect->left)));
+        top = (src_rect->top
+               + (bbox.top - dst_rect->top));
+        left = (src_rect->left
+                + (bbox.left - dst_rect->left));
 
-        convert_src_rect.top = CW(top);
-        convert_src_rect.left = CW(left);
-        convert_src_rect.bottom = CW(top + bbox_height);
-        convert_src_rect.right = CW(left + bbox_width);
+        convert_src_rect.top = top;
+        convert_src_rect.left = left;
+        convert_src_rect.bottom = top + bbox_height;
+        convert_src_rect.right = left + bbox_width;
 
         if(mode == transparent
            || mode == hilite)
@@ -151,8 +151,8 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
             CTabHandle ctab;
             ITabHandle itab;
 
-            ctab = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
-            itab = GD_ITABLE(MR(LM(TheGDevice)));
+            ctab = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
+            itab = GD_ITABLE(LM(TheGDevice));
 
             convert_pixmap_with_IMV_mode(src_pm, dst_pm, new_src_pm,
                                          ctab, ctab, itab,
@@ -203,11 +203,11 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
     if(screen_dst_p && update_dirty_p)
     {
         const Rect *r = &RGN_BBOX(rh);
-        int dst_top = CW(dst_pm->bounds.top);
-        int dst_left = CW(dst_pm->bounds.left);
+        int dst_top = dst_pm->bounds.top;
+        int dst_left = dst_pm->bounds.left;
 
-        dirty_rect_accrue(CW(r->top) - dst_top, CW(r->left) - dst_left,
-                          CW(r->bottom) - dst_top, CW(r->right) - dst_left);
+        dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
+                          r->bottom - dst_top, r->right - dst_left);
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
@@ -249,7 +249,7 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
 #define BLT_PAT_SIMPLE(rh, mode, pixpat_accessor, pattern_accessor)                 \
     do                                                                              \
     {                                                                               \
-        GrafPtr the_port = MR(qdGlobals().thePort);                                                 \
+        GrafPtr the_port = qdGlobals().thePort;                                                 \
         if(CGrafPort_p(the_port))                                                   \
             blt_pixpat_to_pixmap_simple_mode(rh, mode,                              \
                                              pixpat_accessor((CGrafPtr)the_port),   \
@@ -262,7 +262,7 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
 #define BLT_PAT_FANCY(rh, mode, pixpat_accessor, pattern_accessor)            \
     do                                                                        \
     {                                                                         \
-        GrafPtr the_port = MR(qdGlobals().thePort);                                           \
+        GrafPtr the_port = qdGlobals().thePort;                                           \
         if(CGrafPort_p(the_port))                                             \
         {                                                                     \
             PixMapHandle cport_pmap = CPORT_PIXMAP((CGrafPtr)the_port);       \
@@ -275,7 +275,7 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
         else if(active_screen_addr_p(&the_port->portBits))                    \
         {                                                                     \
             PixMap copy_of_screen;                                            \
-            copy_of_screen = *(STARH(GD_PMAP(MR(LM(TheGDevice)))));               \
+            copy_of_screen = *(STARH(GD_PMAP(LM(TheGDevice))));               \
             copy_of_screen.bounds = the_port->portBits.bounds;                \
             blt_fancy_pat_mode_to_pixmap(rh, mode, nullptr,                      \
                                          pattern_accessor(the_port),          \
@@ -303,12 +303,12 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     GrafPtr the_port;
     bool update_dirty_p;
 
-    main_gd = MR(LM(MainDevice));
+    main_gd = LM(MainDevice);
     main_gd_pmap = GD_PMAP(main_gd);
     screen_dst_p = active_screen_addr_p(dst);
     bpp = PIXMAP_PIXEL_SIZE(main_gd_pmap);
 
-    the_port = MR(qdGlobals().thePort);
+    the_port = qdGlobals().thePort;
 
     /* ### is this if necessary? */
     if(screen_dst_p)
@@ -320,18 +320,18 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     }
     else
     {
-        dst_pixmap.pixelType = CWC(Indirect);
-        dst_pixmap.pixelSize = CWC(1);
+        dst_pixmap.pixelType = Indirect;
+        dst_pixmap.pixelSize = 1;
         dst_pixmap.baseAddr = dst->baseAddr;
         dst_pixmap.rowBytes = dst->rowBytes | PIXMAP_DEFAULT_ROWBYTES_X;
-        dst_pixmap.pmTable = RM(ROMlib_bw_ctab);
+        dst_pixmap.pmTable = ROMlib_bw_ctab;
 
         ROMlib_fg_bk(&fg_pixel, &bk_pixel, nullptr, nullptr, nullptr, false, false);
     }
 
     dst_pixmap.bounds = dst->bounds;
-    dst_top = CW(dst_pixmap.bounds.top);
-    dst_left = CW(dst_pixmap.bounds.left);
+    dst_top = dst_pixmap.bounds.top;
+    dst_left = dst_pixmap.bounds.left;
 
     /* Actually do the blt. */
     update_dirty_p = xdblt_pattern(rh, mode, -dst_left, -dst_top, src,
@@ -341,8 +341,8 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     if(screen_dst_p && update_dirty_p)
     {
         const Rect *r = &RGN_BBOX(rh);
-        dirty_rect_accrue(CW(r->top) - dst_top, CW(r->left) - dst_left,
-                          CW(r->bottom) - dst_top, CW(r->right) - dst_left);
+        dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
+                          r->bottom - dst_top, r->right - dst_left);
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
@@ -363,14 +363,14 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
         HLockGuard guard1(srch), guard2(dsth);
         PixPat *src = STARH(srch);
         PixMap *dst = STARH(dsth);
-        GrafPtr the_port = MR(qdGlobals().thePort);
+        GrafPtr the_port = qdGlobals().thePort;
 
         screen_dst_p = active_screen_addr_p(dst);
 
-        dst_top = CW(dst->bounds.top);
-        dst_left = CW(dst->bounds.left);
+        dst_top = dst->bounds.top;
+        dst_left = dst->bounds.left;
 
-        if(src->patType == CWC(pixpat_old_style_pattern))
+        if(src->patType == pixpat_old_style_pattern)
         {
             const rgb_spec_t *dst_rgb_spec;
             uint32_t fg_color;
@@ -392,13 +392,13 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
             bool handle_size_wrong_p;
             xdata_handle_t xh;
 
-            xh = (xdata_handle_t)MR(src->patXData);
+            xh = (xdata_handle_t)src->patXData;
             if(!xh)
             {
                 warning_unexpected("xdata handle NULL_STRING");
                 xh = (xdata_handle_t)NewHandle(sizeof(xdata_t));
                 HxX(xh, raw_pat_bits_mem) = nullptr;
-                src->patXData = RM((Handle)xh);
+                src->patXData = (Handle)xh;
                 xdata_valid_p = false;
                 handle_size_wrong_p = false;
             }
@@ -411,7 +411,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
                                      == XDATA_MAGIC_COOKIE));
             }
 
-            if(src->patXValid == CWC(-1)
+            if(src->patXValid == -1
                || !xdata_valid_p)
             {
                 if(xdata_valid_p)
@@ -431,7 +431,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
 
                 xdata_for_pixpat_with_space(src, dst, xh);
 
-                src->patXValid = CWC(0);
+                src->patXValid = 0;
             }
             else
             {
@@ -449,8 +449,8 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
     if(screen_dst_p && update_dirty_p)
     {
         const Rect *r = &RGN_BBOX(rh);
-        dirty_rect_accrue(CW(r->top) - dst_top, CW(r->left) - dst_left,
-                          CW(r->bottom) - dst_top, CW(r->right) - dst_left);
+        dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
+                          r->bottom - dst_top, r->right - dst_left);
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
@@ -477,7 +477,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
     TEMP_ALLOC_DECL(temp_alloc_space);
 
     /* Set up xdata for the thing being blitted. */
-    bpp = CW(pixmap->pixelSize);
+    bpp = pixmap->pixelSize;
     log2_bpp = ROMlib_log2[bpp];
 
     if(!pixpat_handle)
@@ -488,7 +488,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
     else
     {
         PixPat *pixpat = STARH(pixpat_handle);
-        if(pixpat->patType == CWC(pixpat_type_orig))
+        if(pixpat->patType == pixpat_type_orig)
         {
             xh = xdata_for_pattern(pixpat->pat1Data, pixmap);
             apply_fg_bk_p = true;
@@ -503,18 +503,18 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
     /* Set up the pattern bitmap. */
     HLock((Handle)xh);
     x = STARH(xh);
-    pattern_pm.bounds.top = CWC(0);
-    pattern_pm.bounds.left = CWC(0);
-    pattern_pm.bounds.bottom = CW(x->height_minus_1 + 1);
-    pattern_pm.bounds.right = CW((x->row_bytes << (5 - x->log2_bpp)) >> 2);
-    pattern_pm.rowBytes = CW(x->row_bytes);
+    pattern_pm.bounds.top = 0;
+    pattern_pm.bounds.left = 0;
+    pattern_pm.bounds.bottom = x->height_minus_1 + 1;
+    pattern_pm.bounds.right = (x->row_bytes << (5 - x->log2_bpp)) >> 2;
+    pattern_pm.rowBytes = x->row_bytes;
     if(x->pat_bits)
-        pattern_pm.baseAddr = RM((Ptr)x->pat_bits);
+        pattern_pm.baseAddr = (Ptr)x->pat_bits;
     else
-        pattern_pm.baseAddr = RM((Ptr)&x->pat_value);
+        pattern_pm.baseAddr = (Ptr)&x->pat_value;
 
     pixmap_set_pixel_fields(&pattern_pm, 1 << x->log2_bpp);
-    pattern_pm.pmTable = RM(ROMlib_dont_depthconv_ctab);
+    pattern_pm.pmTable = ROMlib_dont_depthconv_ctab;
 
     /* When dealing with an old-style pattern, we need to apply fg/bk colors. */
     if(apply_fg_bk_p)
@@ -532,7 +532,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
                           * ROMlib_pixel_tile_scale[log2_bpp]);
 
         /* Note that we don't care if we clobber the bits of this temp xdata. */
-        p = (uint32_t *)MR(pattern_pm.baseAddr);
+        p = (uint32_t *)pattern_pm.baseAddr;
         end = (uint32_t *)((char *)p + x->byte_size);
         for(; p != end; p++)
         {
@@ -546,13 +546,13 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
     bbox = RGN_BBOX(rh);
     converted_pm.bounds = bbox;
     row_bytes = (((RECT_WIDTH(&bbox) << log2_bpp) + 31U) / 32) * 4;
-    converted_pm.rowBytes = CW(row_bytes);
+    converted_pm.rowBytes = row_bytes;
     TEMP_ALLOC_ALLOCATE(new_bits, temp_alloc_space,
                         row_bytes * RECT_HEIGHT(&bbox));
-    converted_pm.baseAddr = RM((Ptr)new_bits);
+    converted_pm.baseAddr = (Ptr)new_bits;
 
     pixmap_set_pixel_fields(&converted_pm, 1 << log2_bpp);
-    converted_pm.pmTable = RM(ROMlib_dont_depthconv_ctab);
+    converted_pm.pmTable = ROMlib_dont_depthconv_ctab;
 
     if(mode == transparent || mode == hilite)
     {
@@ -569,10 +569,10 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
         CTabHandle ctab;
         ITabHandle itab;
 
-        ctab = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
-        itab = GD_ITABLE(MR(LM(TheGDevice)));
+        ctab = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
+        itab = GD_ITABLE(LM(TheGDevice));
 
-        if(CGrafPort_p(MR(qdGlobals().thePort)))
+        if(CGrafPort_p(qdGlobals().thePort))
             op_color = CPORT_OP_COLOR(theCPort);
         else /* I have no idea what I'm supposed to do in this case */
             op_color = ROMlib_black_rgb_color;
@@ -598,11 +598,11 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
     if(active_screen_addr_p(pixmap))
     {
         const Rect *r = &RGN_BBOX(rh);
-        int dst_top = CW(pixmap->bounds.top);
-        int dst_left = CW(pixmap->bounds.left);
+        int dst_top = pixmap->bounds.top;
+        int dst_left = pixmap->bounds.left;
 
-        dirty_rect_accrue(CW(r->top) - dst_top, CW(r->left) - dst_left,
-                          CW(r->bottom) - dst_top, CW(r->right) - dst_left);
+        dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
+                          r->bottom - dst_top, r->right - dst_left);
         if(ROMlib_when == WriteInBltrgn)
         {
             dirty_rect_update_screen();
@@ -620,13 +620,13 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
 static inline int
 theport_bpp(void)
 {
-    GrafPtr the_port = MR(qdGlobals().thePort);
+    GrafPtr the_port = qdGlobals().thePort;
     int bpp;
 
     if(CGrafPort_p(the_port))
         bpp = PIXMAP_PIXEL_SIZE(CPORT_PIXMAP((CGrafPtr)the_port));
     else if(active_screen_addr_p(&the_port->portBits))
-        bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(MR(LM(MainDevice))));
+        bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)));
     else
         bpp = 1;
 
@@ -671,25 +671,25 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
     if(!rgn || EmptyRgn(rgn))
         return;
 
-    if(HxX(rgn, rgnSize) & CWC(0x8000))
+    if(HxX(rgn, rgnSize) & 0x8000)
     {
         warning_unexpected("negative rgnSize = 0x%x\n", Hx(rgn, rgnSize));
         return;
     }
 
-    if(MR(qdGlobals().thePort)->picSave)
+    if(qdGlobals().thePort->picSave)
     {
         ROMlib_drawingverbpicupdate(verb);
         PICOP(OP_frameRgn + (int)verb);
         HLockGuard guard(rgn);
         RgnPtr rp = STARH(rgn);
-        PICWRITE(rp, CW(rp->rgnSize));
+        PICWRITE(rp, rp->rgnSize);
     }
 
     /* intersect the region to be drawn with the
      port bounds and port rect */
     rh = NewRgn();
-    r = PORT_BOUNDS(MR(qdGlobals().thePort));
+    r = PORT_BOUNDS(qdGlobals().thePort);
 
     RectRgn(rh, &r);
     SectRgn(rgn, rh, rh);
@@ -701,14 +701,14 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
 
         /* remove the current region from rgnSave */
         /* #warning "How does XOR remove it?  e.g. two framerects in a row." */
-        pen_size = PORT_PEN_SIZE(MR(qdGlobals().thePort));
-        rsave = (RgnHandle)PORT_REGION_SAVE(MR(qdGlobals().thePort));
+        pen_size = PORT_PEN_SIZE(qdGlobals().thePort);
+        rsave = (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort);
         if(rsave)
             XorRgn(rgn, rsave, rsave);
 
         /* construct the frame */
         /* #warning "We inset the region AFTER we've clipped it to the port bounds???" */
-        InsetRgn(rh, CW(pen_size.h), CW(pen_size.v));
+        InsetRgn(rh, pen_size.h, pen_size.v);
         XorRgn(rgn, rh, rh);
 
         /* now `paint' the frame */
@@ -719,22 +719,22 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
     /* if verb == frame, we juke region_save above, so this check
    * probably can't be moved up.  on the other hand, are we supposed
    * to juke region_save if the pen isn't visible? -Mat */
-    if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
+    if(PORT_PEN_VIS(qdGlobals().thePort) < 0)
     {
         DisposeRgn(rh);
         return;
     }
 
-    SectRgn(rh, PORT_VIS_REGION(MR(qdGlobals().thePort)), rh);
-    SectRgn(rh, PORT_CLIP_REGION(MR(qdGlobals().thePort)), rh);
+    SectRgn(rh, PORT_VIS_REGION(qdGlobals().thePort), rh);
+    SectRgn(rh, PORT_CLIP_REGION(qdGlobals().thePort), rh);
 
-    if(GWorld_p(MR(qdGlobals().thePort)))
-        LockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
+    if(GWorld_p(qdGlobals().thePort))
+        LockPixels(CPORT_PIXMAP(qdGlobals().thePort));
 
     switch(verb)
     {
         case paint:
-            ROMlib_blt_pn(rh, PORT_PEN_MODE(MR(qdGlobals().thePort)));
+            ROMlib_blt_pn(rh, PORT_PEN_MODE(qdGlobals().thePort));
             break;
         case erase:
             BLT_PAT_SIMPLE(rh, patCopy, CPORT_BK_PIXPAT, PORT_BK_PAT);
@@ -758,8 +758,8 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
             break;
     }
 
-    if(GWorld_p(MR(qdGlobals().thePort)))
-        UnlockPixels(CPORT_PIXMAP(MR(qdGlobals().thePort)));
+    if(GWorld_p(qdGlobals().thePort))
+        UnlockPixels(CPORT_PIXMAP(qdGlobals().thePort));
 
     SET_HILITE_BIT();
     DisposeRgn(rh);

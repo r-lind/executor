@@ -48,8 +48,8 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
     /* 0x00 or 0x100, depending on the state of the last xorred byte */
     unsigned int tableindex;
 
-    if((bmp->rowBytes & ~CWC(ROWMASK))
-       && ((PixMap *)bmp)->pixelSize != CWC(1))
+    if((bmp->rowBytes & ~ROWMASK)
+       && ((PixMap *)bmp)->pixelSize != 1)
         /*-->*/ return pixmapTooDeepErr;
 
     SetHandleSize((Handle)rh, MAXRGNSIZE);
@@ -70,11 +70,11 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
             *outp++ = CW_RAW(v);                                     \
     } while(0)
 
-    top = CW(bmp->bounds.top);
-    left = CW(bmp->bounds.left);
-    bottom = CW(bmp->bounds.bottom);
-    right = CW(bmp->bounds.right);
-    rowbytes = CW(bmp->rowBytes) & ROWMASK;
+    top = bmp->bounds.top;
+    left = bmp->bounds.left;
+    bottom = bmp->bounds.bottom;
+    right = bmp->bounds.right;
+    rowbytes = bmp->rowBytes & ROWMASK;
     linelen = (right - left + 7) / 8;
     if(linelen <= 0)
         /*-->*/ goto it_is_empty;
@@ -86,7 +86,7 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
     memset(zeroline, 0, linelen);
 
     line0p = zeroline;
-    line1p = (unsigned char *)MR(bmp->baseAddr);
+    line1p = (unsigned char *)bmp->baseAddr;
     for(y = top; y <= bottom; ++y)
     {
         if(y == bottom)
@@ -143,7 +143,7 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
             HxX(rh, rgnBBox) = bmp->bounds;
 /* #warning we are not setting the bounding box properly */
 #if 1
-            HxX(rh, rgnSize) = CW(rgnsize);
+            HxX(rh, rgnSize) = rgnsize;
 #else
             RGN_SET_SMALL(rh);
 #endif

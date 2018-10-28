@@ -137,7 +137,7 @@ dump_indirect_pm(PixMap *pm)
     height = RECT_HEIGHT(&pm->bounds);
     width = RECT_WIDTH(&pm->bounds);
 
-    bpp = CW(pm->pixelSize);
+    bpp = pm->pixelSize;
 
     if((bpp != 8 && bpp != 4)
        || VDRIVER_BYPASS_INTERNAL_FBUF_P())
@@ -151,8 +151,8 @@ dump_indirect_pm(PixMap *pm)
         TEMP_ALLOC_ALLOCATE(fbuf, temp_fbuf_bits, fbuf_size);
         row_bytes = (width * bpp + 31) / 32 * 4;
 
-        tiff_pm->baseAddr = RM((Ptr)fbuf);
-        tiff_pm->rowBytes = CW(row_bytes | PIXMAP_DEFAULT_ROW_BYTES);
+        tiff_pm->baseAddr = (Ptr)fbuf;
+        tiff_pm->rowBytes = row_bytes | PIXMAP_DEFAULT_ROW_BYTES;
         tiff_pm->bounds = pm->bounds;
 
         pixmap_set_pixel_fields(tiff_pm, bpp);
@@ -236,14 +236,14 @@ dump_indirect_pm(PixMap *pm)
 
         memset(color_map, 0xFF, color_map_size);
 
-        color_table_size = CTAB_SIZE(MR(tiff_pm->pmTable));
-        color_table = CTAB_TABLE(MR(tiff_pm->pmTable));
+        color_table_size = CTAB_SIZE(tiff_pm->pmTable);
+        color_table = CTAB_TABLE(tiff_pm->pmTable);
 
         for(i = 0; i <= color_table_size; i++)
         {
-            color_map[i] = CW(color_table[i].rgb.red);
-            color_map[i + (1 << bpp)] = CW(color_table[i].rgb.green);
-            color_map[i + (2 << bpp)] = CW(color_table[i].rgb.blue);
+            color_map[i] = color_table[i].rgb.red;
+            color_map[i + (1 << bpp)] = color_table[i].rgb.green;
+            color_map[i + (2 << bpp)] = color_table[i].rgb.blue;
         }
     }
 
@@ -304,7 +304,7 @@ void Executor::do_dump_screen(void)
     GDHandle gd;
     PixMapHandle gd_pmh;
 
-    gd = MR(LM(MainDevice));
+    gd = LM(MainDevice);
     gd_pmh = GD_PMAP(gd);
 
     HLockGuard guard(gd_pmh);
@@ -312,7 +312,7 @@ void Executor::do_dump_screen(void)
     int log2_bpp;
 
     gd_pm = STARH(gd_pmh);
-    log2_bpp = ROMlib_log2[CW(gd_pm->pixelSize)];
+    log2_bpp = ROMlib_log2[gd_pm->pixelSize];
 
     (*dump_fns[log2_bpp])(gd_pm);
 }

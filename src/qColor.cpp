@@ -20,19 +20,19 @@ using namespace Executor;
 /* color quickdraw global stuff */
 
 ColorSpec Executor::ROMlib_white_cspec = {
-    CWC(0), { CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF) }
+    0, { (unsigned short)0xFFFF, (unsigned short)0xFFFF, (unsigned short)0xFFFF }
 };
 
 ColorSpec Executor::ROMlib_black_cspec = {
-    CWC(1), { CWC(0x0), CWC(0x0), CWC(0x0) }
+    1, { 0x0, 0x0, 0x0 }
 };
 
 ColorSpec Executor::ROMlib_gray_cspec = {
-    CWC(0), { CWC((unsigned short)0x8000), CWC((unsigned short)0x8000), CWC((unsigned short)0x8000) }
+    0, { (unsigned short)0x8000, (unsigned short)0x8000, (unsigned short)0x8000 }
 };
 
 Rect Executor::ROMlib_pattern_bounds = {
-    CWC(0), CWC(0), CWC(8), CWC(8),
+    0, 0, 8, 8,
 };
 
 /* end global color quickdraw stuff */
@@ -40,14 +40,14 @@ Rect Executor::ROMlib_pattern_bounds = {
 /* FIXME: replace this with a correct references
    to the low global LM(QDColors) */
 struct qd_color_elt Executor::ROMlib_QDColors[] = {
-    { { CWC(0x0000), CWC(0x0000), CWC(0x0000) }, blackColor },
-    { { CWC((unsigned short)0xFC00), CWC((unsigned short)0xF37D), CWC(0x052F) }, yellowColor },
-    { { CWC((unsigned short)0xF2D7), CWC((unsigned short)0x0856), CWC((unsigned short)0x84EC) }, magentaColor },
-    { { CWC((unsigned short)0xDD6B), CWC((unsigned short)0x08C2), CWC((unsigned short)0x06A2) }, redColor },
-    { { CWC((unsigned short)0x0241), CWC((unsigned short)0xAb54), CWC((unsigned short)0xEAFF) }, cyanColor },
-    { { CWC(0x0000), CWC((unsigned short)0x64AF), CWC((unsigned short)0x11B0) }, greenColor },
-    { { CWC(0x0000), CWC(0x0000), CWC(0xD400) }, blueColor },
-    { { CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF), CWC((unsigned short)0xFFFF) }, whiteColor },
+    { { 0x0000, 0x0000, 0x0000 }, blackColor },
+    { { (unsigned short)0xFC00, (unsigned short)0xF37D, 0x052F }, yellowColor },
+    { { (unsigned short)0xF2D7, (unsigned short)0x0856, (unsigned short)0x84EC }, magentaColor },
+    { { (unsigned short)0xDD6B, (unsigned short)0x08C2, (unsigned short)0x06A2 }, redColor },
+    { { (unsigned short)0x0241, (unsigned short)0xAb54, (unsigned short)0xEAFF }, cyanColor },
+    { { 0x0000, (unsigned short)0x64AF, (unsigned short)0x11B0 }, greenColor },
+    { { 0x0000, 0x0000, 0xD400 }, blueColor },
+    { { (unsigned short)0xFFFF, (unsigned short)0xFFFF, (unsigned short)0xFFFF }, whiteColor },
 };
 
 RGBColor *
@@ -74,13 +74,13 @@ void Executor::C_ForeColor(LONGINT c)
 {
     GrafPtr the_port;
 
-    the_port = MR(qdGlobals().thePort);
+    the_port = qdGlobals().thePort;
     if(the_port)
     {
         if(CGrafPort_p(the_port))
             RGBForeColor(ROMlib_qd_color_to_rgb(c));
         else
-            PORT_FG_COLOR_X(the_port) = CL(c);
+            PORT_FG_COLOR_X(the_port) = c;
     }
 }
 
@@ -88,19 +88,19 @@ void Executor::C_BackColor(LONGINT c)
 {
     GrafPtr the_port;
 
-    the_port = MR(qdGlobals().thePort);
+    the_port = qdGlobals().thePort;
     if(the_port)
     {
         if(CGrafPort_p(the_port))
             RGBBackColor(ROMlib_qd_color_to_rgb(c));
         else
-            PORT_BK_COLOR_X(the_port) = CL(c);
+            PORT_BK_COLOR_X(the_port) = c;
     }
 }
 
 void Executor::C_ColorBit(INTEGER b)
 {
-    PORT_COLR_BIT_X(MR(qdGlobals().thePort)) = CW(b);
+    PORT_COLR_BIT_X(qdGlobals().thePort) = b;
 }
 
 typedef CTabHandle clut_res_handle;
@@ -144,8 +144,8 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
             /* if the color table is b/w, set the seed to be the b/w clut
 	   seed */
             /* #### ctab_id or a new seed? */
-            CTAB_SEED_X(ctab) = CL(ctab_id == 33 ? 1 : ctab_id);
-            CTAB_SIZE_X(ctab) = CW(ctab_size);
+            CTAB_SEED_X(ctab) = ctab_id == 33 ? 1 : ctab_id;
+            CTAB_SIZE_X(ctab) = ctab_size;
             CTAB_FLAGS_X(ctab) = CTAB_GDEVICE_BIT_X;
 
             table = CTAB_TABLE(ctab);
@@ -153,15 +153,15 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
             stride = 0xFFFF0000UL / ctab_size;
             for(c = 0xFFFF0000UL, i = 0; i < ctab_size; c -= stride, i++)
             {
-                table[i].value = CW(i);
+                table[i].value = i;
                 table[i].rgb.red = table[i].rgb.green = table[i].rgb.blue
-                    = CW((c + 0x8000) >> 16);
+                    = (c + 0x8000) >> 16;
             }
 
             /* Make sure the last entry is _exactly_ black. */
-            table[ctab_size].value = CW(ctab_size);
+            table[ctab_size].value = ctab_size;
             table[ctab_size].rgb.red = table[ctab_size].rgb.green
-                = table[ctab_size].rgb.blue = CWC(0);
+                = table[ctab_size].rgb.blue = 0;
 
             return ctab;
         }
@@ -189,7 +189,7 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
                               ctab_handle_size);
 
                 /* #### ctab_id or a new seed? */
-                CTAB_SEED_X(ctab) = CL(ctab_id);
+                CTAB_SEED_X(ctab) = ctab_id;
             }
             else if(ctab_id >= 0 && ctab_id <= 8)
             {
@@ -200,9 +200,9 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
                 ctab_size = (1 << ctab_id) - 1;
                 ctab = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(ctab_size));
 
-                CTAB_SIZE_X(ctab) = CW(ctab_size);
+                CTAB_SIZE_X(ctab) = ctab_size;
                 CTAB_FLAGS_X(ctab) = CTAB_GDEVICE_BIT_X;
-                CTAB_SEED_X(ctab) = CL(ctab_id);
+                CTAB_SEED_X(ctab) = ctab_id;
 
                 ctab_table = CTAB_TABLE(ctab);
                 memcpy(ctab_table, default_ctab_colors[ROMlib_log2[ctab_id]],

@@ -38,7 +38,7 @@ void Executor::hle_reset(void)
     if(current_hle_msg == nullptr)
         return;
 
-    DisposePtr(MR(guest_cast<Ptr>(current_hle_msg->theMsgEvent.when)));
+    DisposePtr(guest_cast<Ptr>(current_hle_msg->theMsgEvent.when));
     DisposePtr((Ptr)current_hle_msg);
 
     current_hle_msg = nullptr;
@@ -85,12 +85,12 @@ OSErr Executor::C_AcceptHighLevelEvent(TargetID *sender_id_return,
     /* #### *sender_id_return = ...; */
     *refcon_return = current_hle_msg->userRefCon;
 
-    if(CL(*msg_buf_length_return) < CL(current_hle_msg->msgLength))
+    if(*msg_buf_length_return < current_hle_msg->msgLength)
         retval = bufferIsSmall;
 
     if(retval == noErr)
-        memcpy(msg_buf, MR(guest_cast<Ptr>(current_hle_msg->theMsgEvent.when)),
-               CL(current_hle_msg->msgLength));
+        memcpy(msg_buf, guest_cast<Ptr>(current_hle_msg->theMsgEvent.when),
+               current_hle_msg->msgLength);
 
     *msg_buf_length_return = current_hle_msg->msgLength;
 
@@ -133,9 +133,9 @@ OSErr Executor::C_PostHighLevelEvent(EventRecord *evt, Ptr receiver_id,
         goto done;
     }
 
-    hle_msg->HighLevelEventMsgHeaderlength = CWC(0);
-    hle_msg->version = CWC(0);
-    hle_msg->reserved1 = CLC(-1);
+    hle_msg->HighLevelEventMsgHeaderlength = 0;
+    hle_msg->version = 0;
+    hle_msg->reserved1 = -1;
     hle_msg->theMsgEvent = *evt;
 
     /* #### copy the message buffer? */
@@ -147,19 +147,19 @@ OSErr Executor::C_PostHighLevelEvent(EventRecord *evt, Ptr receiver_id,
         goto done;
     }
     memcpy(msg_buf_copy, msg_buf, msg_length);
-    hle_msg->theMsgEvent.when = guest_cast<int32_t>(RM(msg_buf_copy));
-    hle_msg->theMsgEvent.modifiers = CWC(-1);
+    hle_msg->theMsgEvent.when = guest_cast<int32_t>(msg_buf_copy);
+    hle_msg->theMsgEvent.modifiers = -1;
 
-    hle_msg->userRefCon = CL(refcon);
-    hle_msg->postingOptions = CL(post_options);
-    hle_msg->msgLength = CL(msg_length);
+    hle_msg->userRefCon = refcon;
+    hle_msg->postingOptions = post_options;
+    hle_msg->msgLength = msg_length;
 
     /* stick the new msg */
     elt = (hle_q_elt_t *)NewPtr(sizeof *t);
     if(MemError() != noErr)
     {
         retval = MemError();
-        DisposePtr(MR(guest_cast<Ptr>(hle_msg->theMsgEvent.when)));
+        DisposePtr(guest_cast<Ptr>(hle_msg->theMsgEvent.when));
         DisposePtr((Ptr)hle_msg);
         goto done;
     }

@@ -54,7 +54,7 @@ typedef GUEST<resmapptr> *resmaphand;
 #define TYPEOFF(map) Hx(map, typoff)
 #define TYPEOFFX(map) ((STARH(map))->typoff)
 
-#define NUMTMINUS1(map) CW(*(GUEST<INTEGER> *)((char *)STARH(map) + Hx(map, typoff)))
+#define NUMTMINUS1(map) (*(GUEST<INTEGER> *)((char *)STARH(map) + Hx(map, typoff)))
 #define NUMTMINUS1X(map) (*(GUEST<INTEGER> *)((char *)STARH(map) + Hx(map, typoff)))
 
 #define MAPLEN(map) Hx(map, rh.maplen)
@@ -108,12 +108,12 @@ extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
 #define REF0 0 /* special refrence number signifying system file */
 
 #define WALKMAPCUR(map)                                       \
-    for(map = ROMlib_rntohandl(CW(LM(CurMap)), (Handle *)0); map; \
+    for(map = ROMlib_rntohandl(LM(CurMap), (Handle *)0); map; \
         map = (resmaphand)HxP(map, nextmap))                  \
     {
 
 #define WALKMAPTOP(map)                        \
-    for(map = (resmaphand)MR(LM(TopMapHndl)); map; \
+    for(map = (resmaphand)LM(TopMapHndl); map; \
         map = (resmaphand)HxP(map, nextmap))   \
     {
 
@@ -131,8 +131,8 @@ extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
     }
 
 #define WALKRR(map, tr, j, rr)                                             \
-    rr = (resref *)((char *)STARH(map) + Hx(map, typoff) + Cx(tr->rloff)); \
-    j = Cx(tr->nres);                                                      \
+    rr = (resref *)((char *)STARH(map) + Hx(map, typoff) + tr->rloff); \
+    j = tr->nres;                                                      \
     while(j-- >= 0)                                                        \
     {
 

@@ -260,7 +260,7 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 
 #define TE_TX_FACE(te) (HxX((te), txFace))
 
-#define TE_STYLIZED_P(te) (HxX((te), txSize) == CWC(-1))
+#define TE_STYLIZED_P(te) (HxX((te), txSize) == -1)
 #define TE_LINE_HEIGHT_X(te) (HxX((te), lineHeight))
 #define TE_FONT_ASCENT_X(te) (HxX((te), fontAscent))
 #define TE_LENGTH_X(te) (HxX((te), teLength))
@@ -279,26 +279,26 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TE_TX_MODE_X(te) (HxX((te), txMode))
 #define TE_IN_PORT_X(te) (HxX((te), inPort))
 
-#define TE_LINE_HEIGHT(te) (CW(TE_LINE_HEIGHT_X(te)))
-#define TE_FONT_ASCENT(te) (CW(TE_FONT_ASCENT_X(te)))
-#define TE_LENGTH(te) (CW(TE_LENGTH_X(te)))
-#define TE_ACTIVE(te) (CW(TE_ACTIVE_X(te)))
-#define TE_CARET_STATE(te) (CW(TE_CARET_STATE_X(te)))
-#define TE_SEL_START(te) (CW(TE_SEL_START_X(te)))
-#define TE_SEL_END(te) (CW(TE_SEL_END_X(te)))
-#define TE_N_LINES(te) (CW(TE_N_LINES_X(te)))
-#define TE_CLICK_STUFF(te) (CW(TE_CLICK_STUFF_X(te)))
-#define TE_CLICK_LOC(te) (CW(TE_CLICK_LOC_X(te)))
-#define TE_CLICK_TIME(te) (CL(TE_CLICK_TIME_X(te)))
-#define TE_HTEXT(te) (MR(TE_HTEXT_X(te)))
-#define TE_JUST(te) (CW(TE_JUST_X(te)))
-#define TE_TX_FONT(te) (CW(TE_TX_FONT_X(te)))
-#define TE_TX_SIZE(te) (CW(TE_TX_SIZE_X(te)))
-#define TE_TX_MODE(te) (CW(TE_TX_MODE_X(te)))
-#define TE_IN_PORT(te) (MR(TE_IN_PORT_X(te)))
+#define TE_LINE_HEIGHT(te) (TE_LINE_HEIGHT_X(te))
+#define TE_FONT_ASCENT(te) (TE_FONT_ASCENT_X(te))
+#define TE_LENGTH(te) (TE_LENGTH_X(te))
+#define TE_ACTIVE(te) (TE_ACTIVE_X(te))
+#define TE_CARET_STATE(te) (TE_CARET_STATE_X(te))
+#define TE_SEL_START(te) (TE_SEL_START_X(te))
+#define TE_SEL_END(te) (TE_SEL_END_X(te))
+#define TE_N_LINES(te) (TE_N_LINES_X(te))
+#define TE_CLICK_STUFF(te) (TE_CLICK_STUFF_X(te))
+#define TE_CLICK_LOC(te) (TE_CLICK_LOC_X(te))
+#define TE_CLICK_TIME(te) (TE_CLICK_TIME_X(te))
+#define TE_HTEXT(te) (TE_HTEXT_X(te))
+#define TE_JUST(te) (TE_JUST_X(te))
+#define TE_TX_FONT(te) (TE_TX_FONT_X(te))
+#define TE_TX_SIZE(te) (TE_TX_SIZE_X(te))
+#define TE_TX_MODE(te) (TE_TX_MODE_X(te))
+#define TE_IN_PORT(te) (TE_IN_PORT_X(te))
 
 #define TE_FLAGS_X(te) (HxX(TEHIDDENH(te), flags))
-#define TE_FLAGS(te) (CL(TE_FLAGS_X(te)))
+#define TE_FLAGS(te) (TE_FLAGS_X(te))
 
 
 #define TEP_DO_TEXT(tep, start, end, what) \
@@ -335,7 +335,7 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TEP_SEL_POINT(tep) ((tep)->selPoint)
 #define TEP_TX_FACE(tep) ((tep)->txFace)
 
-#define TEP_STYLIZED_P(tep) ((tep)->txSize == CWC(-1))
+#define TEP_STYLIZED_P(tep) ((tep)->txSize == -1)
 #define TEP_LINE_HEIGHT_X(tep) ((tep)->lineHeight)
 #define TEP_FONT_ASCENT_X(tep) ((tep)->fontAscent)
 #define TEP_LENGTH_X(tep) ((tep)->teLength)
@@ -352,38 +352,38 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TEP_TX_SIZE_X(tep) ((tep)->txSize)
 #define TEP_IN_PORT_X(tep) ((tep)->inPort)
 
-#define TEP_LINE_HEIGHT(tep) (CW(TEP_LINE_HEIGHT_X(tep)))
-#define TEP_FONT_ASCENT(tep) (CW(TEP_FONT_ASCENT_X(tep)))
-#define TEP_LENGTH(tep) (CW(TEP_LENGTH_X(tep)))
-#define TEP_ACTIVE(tep) (CW(TEP_ACTIVE_X(tep)))
-#define TEP_CARET_STATE(tep) (CW(TEP_CARET_STATE_X(tep)))
-#define TEP_SEL_START(tep) (CW(TEP_SEL_START_X(tep)))
-#define TEP_SEL_END(tep) (CW(TEP_SEL_END_X(tep)))
-#define TEP_N_LINES(tep) (CW(TEP_N_LINES_X(tep)))
-#define TEP_CLICK_STUFF(tep) (CW(TEP_CLICK_STUFF_X(tep)))
-#define TEP_CLICK_LOC(tep) (CL(TEP_CLICK_LOC_X(tep)))
-#define TEP_HTEXT(tep) (MR(TEP_HTEXT_X(tep)))
-#define TEP_JUST(tep) (CW(TEP_JUST_X(tep)))
-#define TEP_TX_FONT(tep) (CW(TEP_TX_FONT_X(tep)))
-#define TEP_TX_SIZE(tep) (CW(TEP_TX_SIZE_X(tep)))
-#define TEP_IN_PORT(tep) (MR(TEP_IN_PORT_X(tep)))
+#define TEP_LINE_HEIGHT(tep) (TEP_LINE_HEIGHT_X(tep))
+#define TEP_FONT_ASCENT(tep) (TEP_FONT_ASCENT_X(tep))
+#define TEP_LENGTH(tep) (TEP_LENGTH_X(tep))
+#define TEP_ACTIVE(tep) (TEP_ACTIVE_X(tep))
+#define TEP_CARET_STATE(tep) (TEP_CARET_STATE_X(tep))
+#define TEP_SEL_START(tep) (TEP_SEL_START_X(tep))
+#define TEP_SEL_END(tep) (TEP_SEL_END_X(tep))
+#define TEP_N_LINES(tep) (TEP_N_LINES_X(tep))
+#define TEP_CLICK_STUFF(tep) (TEP_CLICK_STUFF_X(tep))
+#define TEP_CLICK_LOC(tep) (TEP_CLICK_LOC_X(tep))
+#define TEP_HTEXT(tep) (TEP_HTEXT_X(tep))
+#define TEP_JUST(tep) (TEP_JUST_X(tep))
+#define TEP_TX_FONT(tep) (TEP_TX_FONT_X(tep))
+#define TEP_TX_SIZE(tep) (TEP_TX_SIZE_X(tep))
+#define TEP_IN_PORT(tep) (TEP_IN_PORT_X(tep))
 
 inline TEStyleHandle TE_GET_STYLE(TEHandle te)
 {
     if(!TE_STYLIZED_P(te))
         return nullptr;
-    return MR(*(GUEST<TEStyleHandle> *)&TE_TX_FONT_X(te));
+    return *(GUEST<TEStyleHandle> *)&TE_TX_FONT_X(te);
 }
 inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 {
     if(!TEP_STYLIZED_P(tep))
         return nullptr;
-    return MR(*(GUEST<TEStyleHandle> *)&TEP_TX_FONT_X(tep));
+    return *(GUEST<TEStyleHandle> *)&TEP_TX_FONT_X(tep);
 }
 
 
 #define TEP_HEIGHT_FOR_LINE(tep, lineno)                           \
-    (TEP_STYLIZED_P(tep) && TEP_LINE_HEIGHT_X(tep) == CWC(-1)      \
+    (TEP_STYLIZED_P(tep) && TEP_LINE_HEIGHT_X(tep) == -1      \
          ? ({                                                      \
                TEStyleHandle te_style = TEP_GET_STYLE(tep);        \
                LHElement *lh = STARH(TE_STYLE_LH_TABLE(te_style)); \
@@ -391,7 +391,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
            })                                                      \
          : TEP_LINE_HEIGHT(tep))
 #define TEP_ASCENT_FOR_LINE(tep, lineno)                           \
-    (TEP_STYLIZED_P(tep) && TEP_FONT_ASCENT_X(tep) == CWC(-1)      \
+    (TEP_STYLIZED_P(tep) && TEP_FONT_ASCENT_X(tep) == -1      \
          ? ({                                                      \
                TEStyleHandle te_style = TEP_GET_STYLE(tep);        \
                LHElement *lh = STARH(TE_STYLE_LH_TABLE(te_style)); \
@@ -407,7 +407,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 #define LINE_START_X(line_starts, index) \
     ((line_starts)[index])
 #define LINE_START(line_starts, index) \
-    (CW(LINE_START_X(line_starts, index)))
+    (LINE_START_X(line_starts, index))
 
 #define TE_STYLE_SIZE_FOR_N_RUNS(n_runs)         \
     (sizeof(TEStyleRec)                          \
@@ -426,14 +426,14 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 #define TE_STYLE_NULL_STYLE_X(te_style) \
     (HxX((te_style), nullStyle))
 
-#define TE_STYLE_N_RUNS(te_style) (CW(TE_STYLE_N_RUNS_X(te_style)))
-#define TE_STYLE_N_STYLES(te_style) (CW(TE_STYLE_N_STYLES_X(te_style)))
+#define TE_STYLE_N_RUNS(te_style) (TE_STYLE_N_RUNS_X(te_style))
+#define TE_STYLE_N_STYLES(te_style) (TE_STYLE_N_STYLES_X(te_style))
 #define TE_STYLE_STYLE_TABLE(te_style) \
-    (MR(TE_STYLE_STYLE_TABLE_X(te_style)))
+    (TE_STYLE_STYLE_TABLE_X(te_style))
 #define TE_STYLE_LH_TABLE(te_style) \
-    (MR(TE_STYLE_LH_TABLE_X(te_style)))
+    (TE_STYLE_LH_TABLE_X(te_style))
 #define TE_STYLE_NULL_STYLE(te_style) \
-    (MR(TE_STYLE_NULL_STYLE_X(te_style)))
+    (TE_STYLE_NULL_STYLE_X(te_style))
 
 #define TE_STYLE_NULL_SCRAP(te_style) \
     (NULL_STYLE_NULL_SCRAP(TE_STYLE_NULL_STYLE(te_style)))
@@ -441,7 +441,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 #define NULL_STYLE_NULL_SCRAP_X(null_style) \
     (HxX((null_style), nullScrap))
 #define NULL_STYLE_NULL_SCRAP(null_style) \
-    (MR(NULL_STYLE_NULL_SCRAP_X(null_style)))
+    (NULL_STYLE_NULL_SCRAP_X(null_style))
 
 #define SCRAP_N_STYLES_X(scrap) \
     (HxX((scrap), scrpNStyles))
@@ -449,7 +449,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 #define SCRAP_ST_ELT(scrap, elt_i) \
     (&(HxX((scrap), scrpStyleTab))[elt_i])
 #define SCRAP_N_STYLES(scrap) \
-    (CW(SCRAP_N_STYLES_X(scrap)))
+    (SCRAP_N_STYLES_X(scrap))
 
 #define SCRAP_SIZE_FOR_N_STYLES(n_styles) \
     (sizeof(StScrpRec) + ((n_styles)-1) * sizeof(ScrpSTElement))
@@ -463,8 +463,8 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 #define STYLE_RUN_START_CHAR_X(run) ((run)->startChar)
 #define STYLE_RUN_STYLE_INDEX_X(run) ((run)->styleIndex)
 
-#define STYLE_RUN_START_CHAR(run) (CW(STYLE_RUN_START_CHAR_X(run)))
-#define STYLE_RUN_STYLE_INDEX(run) (CW(STYLE_RUN_STYLE_INDEX_X(run)))
+#define STYLE_RUN_START_CHAR(run) (STYLE_RUN_START_CHAR_X(run))
+#define STYLE_RUN_STYLE_INDEX(run) (STYLE_RUN_STYLE_INDEX_X(run))
 
 #define TS_FACE(ts) ((ts)->tsFace)
 
@@ -472,13 +472,13 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 #define TS_SIZE_X(ts) ((ts)->tsSize)
 #define TS_COLOR(ts) ((ts)->tsColor)
 
-#define TS_FONT(ts) (CW(TS_FONT_X(ts)))
-#define TS_SIZE(ts) (CW(TS_SIZE_X(ts)))
+#define TS_FONT(ts) (TS_FONT_X(ts))
+#define TS_SIZE(ts) (TS_SIZE_X(ts))
 
 #define LH_HEIGHT_X(lh) ((lh)->lhHeight)
-#define LH_HEIGHT(lh) (CW(LH_HEIGHT_X(lh)))
+#define LH_HEIGHT(lh) (LH_HEIGHT_X(lh))
 #define LH_ASCENT_X(lh) ((lh)->lhAscent)
-#define LH_ASCENT(lh) (CW(LH_ASCENT_X(lh)))
+#define LH_ASCENT(lh) (LH_ASCENT_X(lh))
 
 #define STYLE_TABLE_SIZE_FOR_N_STYLES(n_styles) \
     ((n_styles) * sizeof(STElement))
@@ -495,16 +495,16 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 #define ST_ELT_SIZE_X(st_elt) ((st_elt)->stSize)
 #define ST_ELT_COLOR(st_elt) ((st_elt)->stColor)
 
-#define ST_ELT_COUNT(st_elt) (CW(ST_ELT_COUNT_X(st_elt)))
-#define ST_ELT_HEIGHT(st_elt) (CW(ST_ELT_HEIGHT_X(st_elt)))
-#define ST_ELT_ASCENT(st_elt) (CW(ST_ELT_ASCENT_X(st_elt)))
-#define ST_ELT_FONT(st_elt) (CW(ST_ELT_FONT_X(st_elt)))
-#define ST_ELT_SIZE(st_elt) (CW(ST_ELT_SIZE_X(st_elt)))
+#define ST_ELT_COUNT(st_elt) (ST_ELT_COUNT_X(st_elt))
+#define ST_ELT_HEIGHT(st_elt) (ST_ELT_HEIGHT_X(st_elt))
+#define ST_ELT_ASCENT(st_elt) (ST_ELT_ASCENT_X(st_elt))
+#define ST_ELT_FONT(st_elt) (ST_ELT_FONT_X(st_elt))
+#define ST_ELT_SIZE(st_elt) (ST_ELT_SIZE_X(st_elt))
 
 #define SCRAP_ELT_START_CHAR_X(scrap_elt) \
     ((scrap_elt)->scrpStartChar)
 #define SCRAP_ELT_START_CHAR(scrap_elt) \
-    (CL(SCRAP_ELT_START_CHAR_X(scrap_elt)))
+    (SCRAP_ELT_START_CHAR_X(scrap_elt))
 
 extern bool adjust_attrs(TextStyle *orig_attrs, TextStyle *new_attrs,
                          TextStyle *dst_attrs, TextStyle *continuous_attrs,

@@ -119,8 +119,8 @@ emit_rest(char *map_name)
             fprintf(o_fp, "BitMap %s_%d =\n", map_name, bits[i].bpp);
             fprintf(o_fp, "{\n");
             fprintf(o_fp, "  nullptr,");
-            fprintf(o_fp, "  CWC (%d),\n", bits[i].row_bytes);
-            fprintf(o_fp, "  { CWC (%d), CWC (%d), CWC (%d), CWC (%d) }\n",
+            fprintf(o_fp, "  %d,\n", bits[i].row_bytes);
+            fprintf(o_fp, "  { %d, %d, %d, %d }\n",
                     bounds.top, bounds.left,
                     bounds.bottom, bounds.right);
             fprintf(o_fp, "};\n");
@@ -163,7 +163,7 @@ emit_rest(char *map_name)
             {
                 struct rgb_color *color = &colors[color_i];
 
-                fprintf(o_fp, "        { CWC(%d), CWC(%d), CWC(%d) },\n",
+                fprintf(o_fp, "        { %d, %d, %d },\n",
                         (color->red),
                         (color->green),
                         (color->blue));

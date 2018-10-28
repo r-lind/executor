@@ -14,14 +14,14 @@
 using namespace Executor;
 
 #define LIST_CLASS_P(desc)                     \
-    (DESC_TYPE_X(desc) == CLC(typeAEList)      \
-     || DESC_TYPE_X(desc) == CLC(typeAERecord) \
-     || DESC_TYPE_X(desc) == CLC(typeAppleEvent))
+    (DESC_TYPE_X(desc) == typeAEList      \
+     || DESC_TYPE_X(desc) == typeAERecord \
+     || DESC_TYPE_X(desc) == typeAppleEvent)
 #define RECORD_CLASS_P(desc)                \
-    (DESC_TYPE_X(desc) == CLC(typeAERecord) \
-     || DESC_TYPE_X(desc) == CLC(typeAppleEvent))
+    (DESC_TYPE_X(desc) == typeAERecord \
+     || DESC_TYPE_X(desc) == typeAppleEvent)
 #define APPLE_EVENT_CLASS_P(desc) \
-    (DESC_TYPE_X(desc) == CLC(typeAppleEvent))
+    (DESC_TYPE_X(desc) == typeAppleEvent)
 
 static OSErr
 get_subdesc_info(Handle aggr_desc_h, subdesc_info_t *info,
@@ -61,7 +61,7 @@ get_subdesc_info(Handle aggr_desc_h, subdesc_info_t *info,
             info->base_offset = (offsetof(ae_header_t, target)
                                  /* type, key, size */
                                  + 12
-                                 + CL(inline_target_desc->size)
+                                 + inline_target_desc->size
                                  /* two unknown longs */
                                  + 8);
         }
@@ -98,7 +98,7 @@ desc_offset(Handle aggr_desc_h, int index, subdesc_info_t *info,
         else
             desc = (inline_desc_t *)t;
 
-        t += (CL(desc->size)
+        t += (desc->size
               /* inline key desc header size */
               + info->inline_desc_header_size);
     }
@@ -160,7 +160,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
             aggr_desc_p = (char *)STARH(aggr_desc_h);
             t = (GUEST<int16_t> *)(aggr_desc_p + aggr_desc_size);
             /* ';;' */
-            t[0] = CWC(0x3b3b);
+            t[0] = 0x3b3b;
         }
     }
 
@@ -183,7 +183,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
         if(index == info.count + 1)
             old_size = 0;
         else
-            old_size = CL(inline_desc->size) + info.inline_desc_header_size;
+            old_size = inline_desc->size + info.inline_desc_header_size;
 
         if(delete_p)
             new_size = 0;
@@ -198,8 +198,8 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
             diff = new_size - old_size;
 
             SetHandleSize(aggr_desc_h, aggr_desc_size + diff);
-            if(LM(MemErr) != CWC(noErr))
-                AE_RETURN_ERROR(CW(LM(MemErr)));
+            if(LM(MemErr) != noErr)
+                AE_RETURN_ERROR(LM(MemErr));
             aggr_desc_p = (char *)STARH(aggr_desc_h);
             if(aggr_desc_size < offset + old_size)
                 abort();
@@ -217,8 +217,8 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
                     aggr_desc_p + offset + new_size,
                     aggr_desc_size - offset - old_size);
             SetHandleSize(aggr_desc_h, aggr_desc_size - diff);
-            if(LM(MemErr) != CWC(noErr))
-                AE_RETURN_ERROR(CW(LM(MemErr)));
+            if(LM(MemErr) != noErr)
+                AE_RETURN_ERROR(LM(MemErr));
             aggr_desc_p = (char *)STARH(aggr_desc_h);
         }
         memset(aggr_desc_p + offset, '\000', new_size);
@@ -235,7 +235,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
         if(attribute_p)
         {
             PARAM_OFFSET_X(aggr_desc_h)
-                = CL(PARAM_OFFSET(aggr_desc_h) - old_size + new_size);
+                = PARAM_OFFSET(aggr_desc_h) - old_size + new_size;
         }
 
         if(!delete_p)
@@ -243,22 +243,22 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
             if(index == info.count + 1)
             {
                 info.count++;
-                *(info.count_p) = CL(info.count);
+                *(info.count_p) = info.count;
             }
 
-            inline_desc->size = CL(*size_return);
+            inline_desc->size = *size_return;
         }
         else
         {
             info.count--;
-            *(info.count_p) = CL(info.count);
+            *(info.count_p) = info.count;
         }
     }
 
     if(!delete_p)
     {
         *addr_return = (aggr_desc_p + offset);
-        *size_return = CL(inline_desc->size);
+        *size_return = inline_desc->size;
     }
 
     AE_RETURN_ERROR(noErr);
@@ -281,13 +281,13 @@ find_key_index(Handle aggr_desc_h, int32_t keyword, bool attribute_p,
 
         inline_key_desc = (inline_key_desc_t *)t;
 
-        if(CL(inline_key_desc->key) == keyword)
+        if(inline_key_desc->key == keyword)
         {
             *index_return = count;
             return true;
         }
 
-        t += (CL(inline_key_desc->size)
+        t += (inline_key_desc->size
               /* inline key desc header size */
               + 12);
     }
@@ -338,7 +338,7 @@ aggr_put_nth_desc(Handle aggr_handle,
         return false;
     }
 
-    inline_desc->type = CL(in_desc_type);
+    inline_desc->type = in_desc_type;
     memcpy(inline_desc->data, STARH(in_desc_data), size);
 
     *out_failcode = noErr;
@@ -367,10 +367,10 @@ aggr_get_nth_desc(Handle aggr_handle,
         inline_out_desc = (inline_desc_t *)addr;
 
         if(out_keyword)
-            *out_keyword = CLC(typeWildCard);
+            *out_keyword = typeWildCard;
         {
             HLockGuard guard(aggr_handle);
-            err = AECreateDesc(CL(inline_out_desc->type),
+            err = AECreateDesc(inline_out_desc->type,
                                (Ptr)inline_out_desc->data, size,
                                out_desc);
         }
@@ -387,7 +387,7 @@ aggr_get_nth_desc(Handle aggr_handle,
             *out_keyword = inline_out_desc->key;
         {
             HLockGuard guard(aggr_handle);
-            err = AECreateDesc(CL(inline_out_desc->type),
+            err = AECreateDesc(inline_out_desc->type,
                                (Ptr)inline_out_desc->data, size,
                                out_desc);
         }
@@ -430,8 +430,8 @@ aggr_put_key_desc(Handle aggr_handle,
     if(err != noErr)
         return false;
 
-    inline_key_desc->key = CL(keyword);
-    inline_key_desc->type = CL(in_desc_type);
+    inline_key_desc->key = keyword;
+    inline_key_desc->type = in_desc_type;
     memcpy(inline_key_desc->data, STARH(in_desc_data), size);
 
     return true;
@@ -465,8 +465,8 @@ aggr_get_key_desc(Handle aggr_handle,
 
                 {
                     HLockGuard guard(aggr_handle);
-                    err = AECreateDesc(CL(target->type),
-                                       (Ptr)target->data, CL(target->size),
+                    err = AECreateDesc(target->type,
+                                       (Ptr)target->data, target->size,
                                        out_desc);
                 }
                 if(err != noErr)
@@ -514,7 +514,7 @@ aggr_get_key_desc(Handle aggr_handle,
 
     {
         HLockGuard guard(aggr_handle);
-        err = AECreateDesc(CL(inline_key_desc->type),
+        err = AECreateDesc(inline_key_desc->type,
                            (Ptr)inline_key_desc->data, size,
                            out_desc);
     }
@@ -569,7 +569,7 @@ ae_desc_to_ptr(descriptor_t *desc,
 
     memcpy(data, STARH(desc_data), copy_size);
 
-    *size_out = CL(copy_size);
+    *size_out = copy_size;
 }
 
 #if 0
@@ -607,7 +607,7 @@ dump_union_desc (union desc *foo, bool key_pair_p)
 	       (type >>  0) & 0xFF);
   
   ae_desc_to_ptr (desc, (Ptr) data, 1024, &size);
-  size = CL (size);
+  size = size;
   
   switch (type)
     {
@@ -690,13 +690,13 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
     event_data = (ae_header_t *)alloca(event_size);
     memset(event_data, '\000', event_size);
 
-    event_data->param_offset = CL(event_size + 2);
+    event_data->param_offset = event_size + 2;
 
-    event_data->event_class = CL(event_class);
-    event_data->event_id = CL(event_id);
+    event_data->event_class = event_class;
+    event_data->event_id = event_id;
 
-    event_data->target.size = CL(target_size);
-    event_data->target.type = CL(target_type);
+    event_data->target.size = target_size;
+    event_data->target.type = target_type;
     memcpy(&event_data->target.data[0], STARH(target_data), target_size);
 
     {
@@ -705,7 +705,7 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
         t = (GUEST<int32_t> *)((char *)event_data + sizeof *event_data + target_size);
 
         t[0] = TICKX("aevt");
-        t[1] = CLC(0x00010001);
+        t[1] = 0x00010001;
     }
 
     {
@@ -714,7 +714,7 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
         t = (GUEST<int16_t> *)((char *)event_data + sizeof *event_data + target_size + 8);
 
         /* ';;' */
-        t[0] = CWC(0x3b3b);
+        t[0] = 0x3b3b;
     }
 
     AE_RETURN_ERROR(AECreateDesc(typeAppleEvent,
@@ -742,8 +742,8 @@ OSErr Executor::C_AECreateDesc(DescType type, Ptr data, Size data_size,
         memset(STARH(h), 0, data_size);
     }
 
-    DESC_TYPE_X(desc_out) = CL(type);
-    DESC_DATA_X(desc_out) = RM(h);
+    DESC_TYPE_X(desc_out) = type;
+    DESC_DATA_X(desc_out) = h;
 
     AE_RETURN_ERROR(noErr);
 }
@@ -786,8 +786,8 @@ OSErr Executor::C_AECreateList(Ptr list_elt_prefix, Size list_elt_prefix_size,
 
     memset(&header, '\000', sizeof header);
 
-    header.attribute_count = CL(type);
-    header.param_offset = CLC(0x18);
+    header.attribute_count = type;
+    header.param_offset = 0x18;
 
     AE_RETURN_ERROR(AECreateDesc(type,
                                  (Ptr)&header, sizeof header,
@@ -805,7 +805,7 @@ OSErr Executor::C_AECountItems(AEDescList *list, GUEST<int32_t> *count_out)
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
-    *count_out = CL(info.count);
+    *count_out = info.count;
 
     AE_RETURN_ERROR(noErr);
 }
@@ -905,7 +905,7 @@ OSErr Executor::C_AESizeOfNthItem(AEDescList *list, int32_t index,
         AE_RETURN_ERROR(errAEIllegalIndex);
 
     *type_out = DESC_TYPE_X(desc);
-    *size_out = CL(GetHandleSize((Handle)DESC_DATA(desc)));
+    *size_out = GetHandleSize((Handle)DESC_DATA(desc));
 
     AE_RETURN_ERROR(noErr);
 }
@@ -1010,7 +1010,7 @@ OSErr Executor::C_AESizeOfParam(AERecord *record, AEKeyword keyword,
         AE_RETURN_ERROR(errAEDescNotFound);
 
     *type_out = DESC_TYPE_X(desc);
-    *size_out = CL(GetHandleSize((Handle)DESC_DATA(desc)));
+    *size_out = GetHandleSize((Handle)DESC_DATA(desc));
 
     AE_RETURN_ERROR(noErr);
 }
@@ -1120,7 +1120,7 @@ OSErr Executor::C_AESizeOfAttribute(AppleEvent *evt, AEKeyword keyword,
         AE_RETURN_ERROR(errAEDescNotFound);
 
     *type_out = DESC_TYPE_X(desc);
-    *size_out = CL(GetHandleSize((Handle)DESC_DATA(desc)));
+    *size_out = GetHandleSize((Handle)DESC_DATA(desc));
 
     AE_RETURN_ERROR(noErr);
 }

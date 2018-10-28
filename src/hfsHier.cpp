@@ -29,9 +29,9 @@ static OSErr cathelper(CInfoPBPtr pb, BOOLEAN async, catop op)
     BOOLEAN ignorename;
 
     vcbp = 0;
-    if(CW(pb->hFileInfo.ioFDirIndex) > 0 && op == catGet)
+    if(pb->hFileInfo.ioFDirIndex > 0 && op == catGet)
     {
-        err = ROMlib_btpbindex((IOParam *)pb, CL(pb->hFileInfo.ioDirID), &vcbp, &frp,
+        err = ROMlib_btpbindex((IOParam *)pb, pb->hFileInfo.ioDirID, &vcbp, &frp,
                                &catkeyp, false);
         if(err != noErr)
             goto done;
@@ -53,7 +53,7 @@ static OSErr cathelper(CInfoPBPtr pb, BOOLEAN async, catop op)
     }
     else
     {
-        if(CW(pb->hFileInfo.ioFDirIndex) < 0)
+        if(pb->hFileInfo.ioFDirIndex < 0)
         {
             kind = directory;
             ignorename = true;
@@ -63,7 +63,7 @@ static OSErr cathelper(CInfoPBPtr pb, BOOLEAN async, catop op)
             kind = filekind(regular | directory);
             ignorename = false;
         }
-        err = ROMlib_findvcbandfile((IOParam *)pb, CL(pb->hFileInfo.ioDirID),
+        err = ROMlib_findvcbandfile((IOParam *)pb, pb->hFileInfo.ioDirID,
                                     &btparamrec, &kind, ignorename);
         if(err != noErr)
             goto done;
@@ -86,11 +86,11 @@ static OSErr cathelper(CInfoPBPtr pb, BOOLEAN async, catop op)
             if(op == catGet)
             {
                 if(UPDATE_IONAMEPTR_P(*pbf))
-                    str255assign(MR(pbf->ioNamePtr), catkeyp->ckrCName);
+                    str255assign(pbf->ioNamePtr, catkeyp->ckrCName);
                 pbf->ioACUser = 0;
-                pbf->ioFlAttrib = CB(open_attrib_bits(CL(frp->filFlNum), vcbp,
-                                                      &pbf->ioFRefNum));
-                pbf->ioFlAttrib |= frp->filFlags & CB(INHERITED_FLAG_BITS);
+                pbf->ioFlAttrib = open_attrib_bits(frp->filFlNum, vcbp,
+                                                      &pbf->ioFRefNum);
+                pbf->ioFlAttrib |= frp->filFlags & INHERITED_FLAG_BITS;
                 memmove(&pbf->ioFlFndrInfo, &frp->filUsrWds,
                         (LONGINT)sizeof(pbf->ioFlFndrInfo));
                 pbf->ioDirID = frp->filFlNum;
@@ -130,7 +130,7 @@ static OSErr cathelper(CInfoPBPtr pb, BOOLEAN async, catop op)
             if(op == catGet)
             {
                 if(UPDATE_IONAMEPTR_P(*pbd))
-                    str255assign(MR(pbd->ioNamePtr), catkeyp->ckrCName);
+                    str255assign(pbd->ioNamePtr, catkeyp->ckrCName);
 
                 pbd->ioACUser = 0;
 
@@ -214,29 +214,28 @@ static OSErr parentchild(HVCB *vcbp, catkey *parentcatp,
     btparam btparamrec;
 
     err = noErr;
-    parid = CL(parentdirp->dirDirID);
-    if(parid == CL(childdirp->dirDirID))
+    parid = parentdirp->dirDirID;
+    if(parid == childdirp->dirDirID)
         err = badMovErr; /* can't move into oneself */
-    else if(parentdirp->dirVal != CWC(0))
+    else if(parentdirp->dirVal != 0)
     { /* no need to check if no children */
         if(parid <= 2) /* automatic disqualification; can't move */
             err = badMovErr; /* root directory */
         else
         {
-            newid = CL(childcatp->ckrParID);
+            newid = childcatp->ckrParID;
             err = ROMlib_makecatparam(&btparamrec, vcbp, (LONGINT)0, 0, (Ptr)0);
-            ctref = CW(vcbp->vcbCTRef);
+            ctref = vcbp->vcbCTRef;
             while(err == noErr && newid > 2 && newid != parid)
             {
-                btparamrec.tofind.catk.ckrParID = CL(newid);
+                btparamrec.tofind.catk.ckrParID = newid;
                 err = ROMlib_keyfind(&btparamrec);
                 if(err == noErr && !btparamrec.success)
                 {
                     err = fsDSIntErr;
                     warning_unexpected("no success in parentchild");
                 }
-                newid = CL(
-                    ((threadrec *)DATAPFROMKEY(btparamrec.foundp))->thdParID);
+                newid = ((threadrec *)DATAPFROMKEY(btparamrec.foundp))->thdParID;
             }
             if(err == noErr)
                 err = newid <= 2 ? noErr : badMovErr;
@@ -258,7 +257,7 @@ OSErr Executor::hfsPBCatMove(CMovePBPtr pb, BOOLEAN async)
     BOOLEAN ignorename;
 
     srccurkind = (filekind)(regular | directory);
-    err = ROMlib_findvcbandfile((IOParam *)pb, CL(pb->ioDirID), &srcbtparam,
+    err = ROMlib_findvcbandfile((IOParam *)pb, pb->ioDirID, &srcbtparam,
                                 &srccurkind, false);
     if(err == noErr)
     {
@@ -267,7 +266,7 @@ OSErr Executor::hfsPBCatMove(CMovePBPtr pb, BOOLEAN async)
         iop.ioNamePtr = pb->ioNewName;
         dstcurkind = directory;
         ignorename = iop.ioNamePtr == nullptr;
-        err = ROMlib_findvcbandfile(&iop, CL(pb->ioNewDirID), &dstdirbtparam, &dstcurkind,
+        err = ROMlib_findvcbandfile(&iop, pb->ioNewDirID, &dstdirbtparam, &dstcurkind,
                                     ignorename);
         if(err == noErr)
         {
@@ -277,7 +276,7 @@ OSErr Executor::hfsPBCatMove(CMovePBPtr pb, BOOLEAN async)
             {
                 dstdirdrp = (directoryrec *)DATAPFROMKEY(dstdirbtparam.foundp);
                 dstbtparam = dstdirbtparam;
-                err = ROMlib_makecatkey((catkey *)&dstbtparam.tofind, CL(dstdirdrp->dirDirID),
+                err = ROMlib_makecatkey((catkey *)&dstbtparam.tofind, dstdirdrp->dirDirID,
                                         srcbtparam.foundp->catk.ckrCName[0],
                                         (Ptr)srcbtparam.foundp->catk.ckrCName + 1);
                 dstbtparam.leafindex = -1;

@@ -40,8 +40,8 @@ void Executor::AppendDITL(DialogPtr dp, Handle new_items_h, DITLMethod method)
         GetDialogItem(dp, method, &item_type, &item_h, &item_rect);
 
         resize_p = false;
-        base_pt.v = CW(item_rect.top);
-        base_pt.h = CW(item_rect.left);
+        base_pt.v = item_rect.top;
+        base_pt.h = item_rect.left;
     }
     else
     {
@@ -56,12 +56,12 @@ void Executor::AppendDITL(DialogPtr dp, Handle new_items_h, DITLMethod method)
             case appendDITLRight:
                 resize_p = true;
                 base_pt.v = 0;
-                base_pt.h = CW(dp_port_rect->right);
+                base_pt.h = dp_port_rect->right;
                 break;
 
             case appendDITLBottom:
                 resize_p = true;
-                base_pt.v = CW(dp_port_rect->bottom);
+                base_pt.v = dp_port_rect->bottom;
                 base_pt.h = 0;
                 break;
         }
@@ -79,7 +79,7 @@ void Executor::AppendDITL(DialogPtr dp, Handle new_items_h, DITLMethod method)
         int i;
 
         base_itemp = (char *)STARH(items_h);
-        item_count = CW(*(GUEST<int16_t> *)base_itemp) + 1;
+        item_count = *(GUEST<int16_t> *)base_itemp + 1;
         itemp = (itmp)((GUEST<int16_t> *)STARH(items_h) + 1);
 
         for(i = 0; i < item_count; i++)
@@ -111,14 +111,14 @@ void Executor::AppendDITL(DialogPtr dp, Handle new_items_h, DITLMethod method)
         int i;
 
         base_itemp = (char *)STARH(items_h);
-        item_count = CW(*(GUEST<int16_t> *)base_itemp) + 1;
+        item_count = *(GUEST<int16_t> *)base_itemp + 1;
 
         base_new_itemp = (char *)STARH(new_items_h);
         new_itemp = (itmp)((GUEST<int16_t> *)STARH(new_items_h) + 1);
-        new_item_count = CW(*(GUEST<int16_t> *)base_new_itemp) + 1;
+        new_item_count = *(GUEST<int16_t> *)base_new_itemp + 1;
 
         /* update the count for the new items */
-        *(GUEST<int16_t> *)base_itemp = CW(item_count + new_item_count - 1);
+        *(GUEST<int16_t> *)base_itemp = item_count + new_item_count - 1;
 
         ThePortGuard portGuard(dp);
 
@@ -135,8 +135,8 @@ void Executor::AppendDITL(DialogPtr dp, Handle new_items_h, DITLMethod method)
 
             InvalRect(&itemp->itmr);
 
-            width = std::max<int>(width, CW(itemp->itmr.left));
-            height = std::max<int>(height, CW(itemp->itmr.bottom));
+            width = std::max<int>(width, itemp->itmr.left);
+            height = std::max<int>(height, itemp->itmr.bottom);
 
             BUMPIP(new_itemp);
         }
@@ -167,7 +167,7 @@ void Executor::ShortenDITL(DialogPtr dp, int16_t n_items)
         HLockGuard guard(item_h);
         base_itemp = (char *)STARH(item_h);
         itemp = (itmp)((GUEST<int16_t> *)STARH(item_h) + 1);
-        count = CW(*(GUEST<int16_t> *)base_itemp) + 1;
+        count = *(GUEST<int16_t> *)base_itemp + 1;
 
         if(count < n_items)
             n_items = count;
@@ -198,11 +198,11 @@ void Executor::ShortenDITL(DialogPtr dp, int16_t n_items)
 			  fields will be set up with sane values */
                         TEDeactivate(te);
 
-                        DIALOG_EDIT_FIELD_X(dp) = CWC(-1);
-                        DIALOG_EDIT_OPEN_X(dp) = CWC(0);
+                        DIALOG_EDIT_FIELD_X(dp) = -1;
+                        DIALOG_EDIT_OPEN_X(dp) = 0;
                     }
 
-                    DisposeHandle((Handle)MR(itemp->itmhand));
+                    DisposeHandle((Handle)itemp->itmhand);
                     /* when editText items are drawn, the box around
 		      them is inset `-3', so we also need to do that
 		      when erasing */
@@ -211,13 +211,13 @@ void Executor::ShortenDITL(DialogPtr dp, int16_t n_items)
                 }
                 else if(itemp->itmtype & ctrlItem)
                 {
-                    DisposeControl((ControlHandle)MR(itemp->itmhand));
+                    DisposeControl((ControlHandle)itemp->itmhand);
                 }
                 else if(itemp->itmtype & iconItem)
                 {
                     Handle icon;
 
-                    icon = MR(itemp->itmhand);
+                    icon = itemp->itmhand;
                     if(CICON_P(icon))
                         DisposeCIcon((CIconHandle)icon);
                     erase_p = true;
@@ -242,7 +242,7 @@ void Executor::ShortenDITL(DialogPtr dp, int16_t n_items)
                 }
             }
         }
-        *(GUEST<int16_t> *)base_itemp = CW(first_item_to_dispose - 1);
+        *(GUEST<int16_t> *)base_itemp = first_item_to_dispose - 1;
     }
 
     SetHandleSize((Handle)item_h, item_h_size);
@@ -254,7 +254,7 @@ int16_t Executor::CountDITL(DialogPtr dp)
     int16_t count;
 
     items = DIALOG_ITEMS(dp);
-    count = CW(*(GUEST<int16_t> *)STARH(items)) + 1;
+    count = *(GUEST<int16_t> *)STARH(items) + 1;
 
     return count;
 }

@@ -51,7 +51,7 @@ struct hunger_info SoundFake::GetHungerInfo()
 
 void SoundFake::sound_clear_pending()
 {
-    fake_sound_tm_task.tmCount = CLC(-1);
+    fake_sound_tm_task.tmCount = -1;
     num_fake_buffers_enqueued = 0;
 }
 
@@ -64,7 +64,7 @@ void SoundFake::NoteSoundInterrupt(void)
 /* Installs a time manager task to call back at the requested time. */
 void SoundFake::set_up_tm_task(void)
 {
-    fake_sound_tm_task.tmAddr = guest_cast<ProcPtr>(CL((uint32_t)fake_sound_callback));
+    fake_sound_tm_task.tmAddr = guest_cast<ProcPtr>((uint32_t)fake_sound_callback);
     InsTime((QElemPtr)&fake_sound_tm_task);
     PrimeTime((QElemPtr)&fake_sound_tm_task, MSECS_FOR_BUFFER_TO_PLAY);
 }

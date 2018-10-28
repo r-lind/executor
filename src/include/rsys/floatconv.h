@@ -118,9 +118,9 @@ x80_to_ieee(const x80_t *x)
     else
     {
         temp64.exp = GET_X80_EXP(x) - 16383 + 1023;
-        templ = CL(x->man.hilo.man_hi);
+        templ = x->man.hilo.man_hi;
         temp64.man_hi = templ >> 11;
-        temp64.man_lo = ((templ & 0xFFF) << 21) | (CL(x->man.hilo.man_lo) >> 11);
+        temp64.man_lo = ((templ & 0xFFF) << 21) | (x->man.hilo.man_lo >> 11);
     }
     retval = *(double *)&temp64;
 
@@ -213,8 +213,8 @@ f64_to_ieee(const f64_t *f)
     volatile f64_t temp1 __attribute__((aligned(8)));
     volatile native_f64_t temp2 __attribute__((aligned(8)));
     memcpy(&temp1, f, sizeof temp1);
-    temp2.hilo.hi = CL(temp1.hilo.lo);
-    temp2.hilo.lo = CL(temp1.hilo.hi);
+    temp2.hilo.hi = temp1.hilo.lo;
+    temp2.hilo.lo = temp1.hilo.hi;
     return *(double *)&temp2;
 #else /* !LITTLEENDIAN */
     double d;
@@ -305,8 +305,8 @@ comp_to_ieee(const comp_t *cp)
       c.val <<= first_one_bit;
       SET_X80_SGN (&temp_x80, is_negative);
       SET_X80_EXP (&temp_x80, 16383 - first_one_bit);
-      temp_x80.man.hilo.man_hi = CL (c.hilo.hi);
-      temp_x80.man.hilo.man_lo = CL (c.hilo.lo);
+      temp_x80.man.hilo.man_hi = c.hilo.hi;
+      temp_x80.man.hilo.man_lo = c.hilo.lo;
       retval = x80_to_ieee (&temp_x80);
 #else
         retval = c.val;
@@ -360,8 +360,8 @@ ieee_to_x80(ieee_t n, x80_t *x)
     SET_X80_SGN(x, temp64p->sgn);
     SET_X80_EXP(x, temp64p->exp + 16383 - 1023);
     templ = temp64p->man_lo;
-    x->man.hilo.man_hi = CL(0x80000000 | ((temp64p->man_hi) << 11) | (templ >> 21));
-    x->man.hilo.man_lo = CL(templ << 11);
+    x->man.hilo.man_hi = 0x80000000 | ((temp64p->man_hi) << 11) | (templ >> 21);
+    x->man.hilo.man_lo = templ << 11;
 #elif defined(powerpc) || defined(__ppc__)
     union ieee754_double d;
 
@@ -420,7 +420,7 @@ ieee_to_f32(ieee_t val, f32_t *dest)
 #else /* QUADALIGN */
     volatile f32_t temp;
     temp.f = (float)val;
-    *(uint32_t *)dest = CL(temp.n);
+    *(uint32_t *)dest = temp.n;
 #endif
 }
 

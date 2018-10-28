@@ -22,7 +22,7 @@ static INTEGER fromhex(char c);
 
 static BOOLEAN EquivRect(Rect *rp1, Rect *rp2)
 {
-    return Cx(rp1->bottom) - Cx(rp1->top) == Cx(rp2->bottom) - Cx(rp2->top) && Cx(rp1->right) - Cx(rp1->left) == Cx(rp2->right) - Cx(rp2->left);
+    return rp1->bottom - rp1->top == rp2->bottom - rp2->top && rp1->right - rp1->left == rp2->right - rp2->left;
 }
 
 #define RANDSEED ((ULONGINT)randSeed)
@@ -31,9 +31,9 @@ INTEGER Executor::C_Random()
     INTEGER retval;
 
         // FIXME: what is going on here?
-    LM(RndSeed) = Cx(TickCount()); /* what better? */
+    LM(RndSeed) = TickCount(); /* what better? */
 
-    int32_t randSeed = CL(qdGlobals().randSeed);
+    int32_t randSeed = qdGlobals().randSeed;
     if(randSeed >= 0x80000000)
         randSeed = (randSeed & 0x7FFFFFFF) + 1;
     randSeed = (randSeed * 16807 + ((((randSeed >> 14) * 16807) + (((randSeed & ((1 << 14) - 1)) * 16807) >> 14))
@@ -41,7 +41,7 @@ INTEGER Executor::C_Random()
                    & 0x7FFFFFFF;
     if(randSeed == 0x7FFFFFFF)
         randSeed = 0;
-    qdGlobals().randSeed = CL(randSeed);
+    qdGlobals().randSeed = randSeed;
     retval = randSeed;
     return retval == -32768 ? 0 : retval;
 }
@@ -52,23 +52,23 @@ BOOLEAN Executor::C_GetPixel(INTEGER h, INTEGER v)
     unsigned char temp_fbuf[4];
     Rect src_rect, dst_rect;
 
-    gui_assert(!CGrafPort_p(MR(qdGlobals().thePort)));
+    gui_assert(!CGrafPort_p(qdGlobals().thePort));
 
-    temp_bm.baseAddr = RM((Ptr)temp_fbuf);
-    temp_bm.bounds.top = CWC(0);
-    temp_bm.bounds.bottom = CWC(1);
-    temp_bm.bounds.left = CWC(0);
-    temp_bm.bounds.right = CWC(1);
-    temp_bm.rowBytes = CWC(4);
+    temp_bm.baseAddr = (Ptr)temp_fbuf;
+    temp_bm.bounds.top = 0;
+    temp_bm.bounds.bottom = 1;
+    temp_bm.bounds.left = 0;
+    temp_bm.bounds.right = 1;
+    temp_bm.rowBytes = 4;
 
-    src_rect.top = CW(v);
-    src_rect.bottom = CW(v + 1);
-    src_rect.left = CW(h);
-    src_rect.right = CW(h + 1);
+    src_rect.top = v;
+    src_rect.bottom = v + 1;
+    src_rect.left = h;
+    src_rect.right = h + 1;
 
     dst_rect = temp_bm.bounds;
 
-    CopyBits(PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)), &temp_bm,
+    CopyBits(PORT_BITS_FOR_COPY(qdGlobals().thePort), &temp_bm,
              &src_rect, &dst_rect, srcCopy, nullptr);
 
     return (*temp_fbuf & 0x80) != 0;
@@ -107,18 +107,18 @@ void Executor::C_ScalePt(GUEST<Point> *pt, Rect *srcr, Rect *dstr)
 
     if(pt->h || pt->v)
     {
-        srcdh = Cx(srcr->right) - Cx(srcr->left);
-        srcdv = Cx(srcr->bottom) - Cx(srcr->top);
-        dstdh = Cx(dstr->right) - Cx(dstr->left);
-        dstdv = Cx(dstr->bottom) - Cx(dstr->top);
+        srcdh = srcr->right - srcr->left;
+        srcdv = srcr->bottom - srcr->top;
+        dstdh = dstr->right - dstr->left;
+        dstdv = dstr->bottom - dstr->top;
 
-        pt->h = CW(((((LONGINT)CW(pt->h) * dstdh) << 1) / srcdh + 1) >> 1);
-        pt->v = CW(((((LONGINT)CW(pt->v) * dstdv) << 1) / srcdv + 1) >> 1);
+        pt->h = ((((LONGINT)pt->h * dstdh) << 1) / srcdh + 1) >> 1;
+        pt->v = ((((LONGINT)pt->v * dstdv) << 1) / srcdv + 1) >> 1;
 
-        if(CW(pt->v) < 1)
-            pt->v = CWC(1);
-        if(CW(pt->h) < 1)
-            pt->h = CWC(1);
+        if(pt->v < 1)
+            pt->v = 1;
+        if(pt->h < 1)
+            pt->h = 1;
     }
 }
 
@@ -126,17 +126,17 @@ void Executor::C_MapPt(GUEST<Point> *pt, Rect *srcr, Rect *dstr)
 {
     INTEGER srcdh, srcdv, dstdh, dstdv;
 
-    srcdh = Cx(srcr->right) - Cx(srcr->left);
-    srcdv = Cx(srcr->bottom) - Cx(srcr->top);
-    dstdh = Cx(dstr->right) - Cx(dstr->left);
-    dstdv = Cx(dstr->bottom) - Cx(dstr->top);
+    srcdh = srcr->right - srcr->left;
+    srcdv = srcr->bottom - srcr->top;
+    dstdh = dstr->right - dstr->left;
+    dstdv = dstr->bottom - dstr->top;
 
-    pt->h = CW(CW(pt->h) - (Cx(srcr->left)));
-    pt->v = CW(CW(pt->v) - (Cx(srcr->top)));
-    pt->h = CW((LONGINT)CW(pt->h) * dstdh / srcdh);
-    pt->v = CW((LONGINT)CW(pt->v) * dstdv / srcdv);
-    pt->h = CW(CW(pt->h) + (Cx(dstr->left)));
-    pt->v = CW(CW(pt->v) + (Cx(dstr->top)));
+    pt->h = pt->h - (srcr->left);
+    pt->v = pt->v - (srcr->top);
+    pt->h = (LONGINT)pt->h * dstdh / srcdh;
+    pt->v = (LONGINT)pt->v * dstdv / srcdv;
+    pt->h = pt->h + (dstr->left);
+    pt->v = pt->v + (dstr->top);
 }
 
 void Executor::C_MapRect(Rect *r, Rect *srcr, Rect *dstr)
@@ -161,18 +161,18 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
     BOOLEAN done;
 
     if(EquivRect(srcr, dstr))
-        OffsetRgn(rh, Cx(dstr->left) - Cx(srcr->left),
-                  Cx(dstr->top) - Cx(srcr->top));
+        OffsetRgn(rh, dstr->left - srcr->left,
+                  dstr->top - srcr->top);
     else
     {
         if(RGN_SMALL_P(rh))
             MapRect(&HxX(rh, rgnBBox), srcr, dstr);
         else
         {
-            srcdh = CW(srcr->right) - (xoff1 = CW(srcr->left));
-            dstdh = CW(dstr->right) - (xoff2 = CW(dstr->left));
-            srcdv = CW(srcr->bottom) - (yoff1 = CW(srcr->top));
-            dstdv = CW(dstr->bottom) - (yoff2 = CW(dstr->top));
+            srcdh = srcr->right - (xoff1 = srcr->left);
+            dstdh = dstr->right - (xoff2 = dstr->left);
+            srcdv = srcr->bottom - (yoff1 = srcr->top);
+            dstdv = dstr->bottom - (yoff2 = dstr->top);
             xcoff = FixRatio(dstdh, srcdh);
             ycoff = FixRatio(dstdv, srcdv);
             ip = op = (GUEST<INTEGER> *)STARH(rh) + 5;
@@ -182,13 +182,13 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
             freebuf = buf2;
             do
             {
-                done = (newv = CW(*ip++)) == 32767;
+                done = (newv = *ip++) == 32767;
                 MAPV(newv);
                 if(newv != oldv || done)
                 {
                     if(mergebuf[0] != 32767)
                     {
-                        *op++ = CW(oldv);
+                        *op++ = oldv;
                         saveop = op;
                         hold = IMPOSSIBLE;
                         for(tempp = mergebuf; (x1 = *tempp++) != 32767;)
@@ -200,17 +200,17 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
                                 hold = IMPOSSIBLE;
                             else
                             {
-                                *op++ = CW(hold);
+                                *op++ = hold;
                                 hold = (unsigned short)x1;
                             }
                         }
                         if(hold != IMPOSSIBLE)
-                            *op++ = CW(hold);
+                            *op++ = hold;
                         gui_assert(!((op - saveop) & 1));
                         if(op == saveop)
                             --op;
                         else
-                            *op++ = CWC(32767);
+                            *op++ = 32767;
                     }
                     gui_assert(op < ip);
                     mergebuf[0] = 32767;
@@ -219,13 +219,13 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
                 if(!done)
                 {
                     for(tempp = freebuf, ipe = mergebuf,
-                    x1 = CW(*ip++), x2 = *ipe++;
+                    x1 = *ip++, x2 = *ipe++;
                         ;)
                     {
                         if(x1 < x2)
                         {
                             *tempp++ = x1;
-                            x1 = CW(*ip++);
+                            x1 = *ip++;
                         }
                         else if(x1 > x2)
                         {
@@ -236,7 +236,7 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
                         {
                             if(x1 == 32767)
                                 /*-->*/ break;
-                            x1 = CW(*ip++);
+                            x1 = *ip++;
                             x2 = *ipe++;
                         }
                     }
@@ -247,7 +247,7 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
                     mergebuf = tempp;
                 }
             } while(!done);
-            *op++ = CWC(32767);
+            *op++ = 32767;
             ROMlib_sizergn(rh, false);
         }
     }
@@ -258,8 +258,8 @@ void Executor::C_MapPoly(PolyHandle poly, Rect *srcr, Rect *dstr)
     GUEST<Point> *ip, *ep;
 
     if(EquivRect(srcr, dstr))
-        OffsetPoly(poly, Cx(dstr->left) - Cx(srcr->left),
-                   Cx(dstr->top) - Cx(srcr->top));
+        OffsetPoly(poly, dstr->left - srcr->left,
+                   dstr->top - srcr->top);
     else
     {
         MapPt((GUEST<Point> *)&HxX(poly, polyBBox.top), srcr, dstr);

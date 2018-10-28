@@ -159,7 +159,7 @@ AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile)
     file->read(24, &guestref(n), 2);
     descriptors.resize(n);
     file->read(26, descriptors.data(), sizeof(EntryDescriptor) * n);
-    std::sort(descriptors.begin(), descriptors.end(), [](auto& a, auto& b) { return CL(a.offset) < CL(b.offset); });
+    std::sort(descriptors.begin(), descriptors.end(), [](auto& a, auto& b) { return a.offset < b.offset; });
 }
 
 AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile, create_single_t)
@@ -189,14 +189,14 @@ size_t AppleSingleDoubleFile::getEOF(uint32_t entryId)
 {
     auto p = findEntry(entryId);
     if(p != descriptors.end())
-        return CL(p->length);
+        return p->length;
     return 0;
 }
 
 AppleSingleDoubleFile::EntryDescriptorIterator AppleSingleDoubleFile::findEntry(uint32_t entryId)
 {
     return std::find_if(descriptors.begin(), descriptors.end(),
-        [entryId](auto& desc) { return CL(desc.entryId) == entryId; });
+        [entryId](auto& desc) { return desc.entryId == entryId; });
 }
 
 AppleSingleDoubleFile::EntryDescriptorIterator AppleSingleDoubleFile::setEOFCommon(uint32_t entryId, size_t sz, bool allowShrink)
@@ -209,29 +209,29 @@ AppleSingleDoubleFile::EntryDescriptorIterator AppleSingleDoubleFile::setEOFComm
     {
         if(sz == 0)
             return p;
-        p = descriptors.insert(p, EntryDescriptor{CL(entryId), CL(0), CL(0)});
+        p = descriptors.insert(p, EntryDescriptor{entryId, 0, 0});
     }
     
     // keep a record of the previous layout
     auto oldDescriptors = descriptors;
 
     // update EOF for selected entry
-    if(allowShrink || CL(p->length) < sz)
-        p->length = CL(sz);
+    if(allowShrink || p->length < sz)
+        p->length = sz;
 
     // update offsets for entries
     uint32_t offset = 24 + 2 + sizeof(EntryDescriptor) * descriptors.size();
     for(auto& desc : descriptors)
     {
-        if(offset > CL(desc.offset))
+        if(offset > desc.offset)
         {
-            desc.offset = CL(offset + 256);
+            desc.offset = offset + 256;
         }
-        else if(CL(desc.offset) - offset > 512)
+        else if(desc.offset - offset > 512)
         {
-            desc.offset = CL(offset + 256); 
+            desc.offset = offset + 256; 
         }
-        offset = CL(desc.offset) + CL(desc.length);
+        offset = desc.offset + desc.length;
     }
 
     // shift data around.
@@ -239,11 +239,11 @@ AppleSingleDoubleFile::EntryDescriptorIterator AppleSingleDoubleFile::setEOFComm
     for(auto src = oldDescriptors.begin(), dst = descriptors.begin();
         dst != descriptors.end(); ++src, ++dst)
     {
-        uint32_t dstOffset = CL(dst->offset);
-        uint32_t srcOffset = CL(src->offset);        
+        uint32_t dstOffset = dst->offset;
+        uint32_t srcOffset = src->offset;        
         if(dstOffset < srcOffset)
         {
-            uint32_t n = std::min(CL(dst->length), CL(src->length));
+            uint32_t n = std::min(dst->length, src->length);
 
             while(n)
             {
@@ -262,11 +262,11 @@ AppleSingleDoubleFile::EntryDescriptorIterator AppleSingleDoubleFile::setEOFComm
     for(auto src = oldDescriptors.rbegin(), dst = descriptors.rbegin();
         dst != descriptors.rend(); ++src, ++dst)
     {
-        uint32_t dstOffset = CL(dst->offset);
-        uint32_t srcOffset = CL(src->offset);        
+        uint32_t dstOffset = dst->offset;
+        uint32_t srcOffset = src->offset;        
         if(dstOffset > srcOffset)
         {
-            uint32_t n = std::min(CL(dst->length), CL(src->length));
+            uint32_t n = std::min(dst->length, src->length);
             dstOffset += n;
             srcOffset += n;
             while(n)
@@ -303,11 +303,11 @@ size_t AppleSingleDoubleFile::read(uint32_t entryId, size_t offset, void *p, siz
     auto descIt = findEntry(entryId);
     if(descIt != descriptors.end())
     {
-        if(offset >= CL(descIt->length))
+        if(offset >= descIt->length)
             return 0;
-        if(offset + n > CL(descIt->length))
-            n = CL(descIt->length) - offset;
-        return file->read(offset + CL(descIt->offset), p, n);
+        if(offset + n > descIt->length)
+            n = descIt->length - offset;
+        return file->read(offset + descIt->offset, p, n);
     }
     return 0;
 }
@@ -317,7 +317,7 @@ size_t AppleSingleDoubleFile::write(uint32_t entryId, size_t offset, void *p, si
     if(n == 0)
         return 0;
     auto descIt = setEOFCommon(entryId, offset + n, false);
-    return file->write(CL(descIt->offset) + offset, p, n);
+    return file->write(descIt->offset + offset, p, n);
 }
 
 

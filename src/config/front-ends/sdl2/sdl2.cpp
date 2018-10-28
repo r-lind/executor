@@ -117,9 +117,9 @@ void SDL2VideoDriver::setColors(int first_color, int num_colors, const ColorSpec
     for(int i = 0; i < num_colors; i++)
     {
         sdlColors[i].a = 255;
-        sdlColors[i].r = CW(colors[i].rgb.red) >> 8;
-        sdlColors[i].g = CW(colors[i].rgb.green) >> 8;
-        sdlColors[i].b = CW(colors[i].rgb.blue) >> 8;
+        sdlColors[i].r = colors[i].rgb.red >> 8;
+        sdlColors[i].g = colors[i].rgb.green >> 8;
+        sdlColors[i].b = colors[i].rgb.blue >> 8;
     }
 
     SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, first_color, num_colors);
@@ -195,8 +195,8 @@ void SDL2VideoDriver::pumpEvents()
         switch(event.type)
         {
             case SDL_MOUSEMOTION:
-                LM(MouseLocation).h = CW(event.motion.x);
-                LM(MouseLocation).v = CW(event.motion.y);
+                LM(MouseLocation).h = event.motion.x;
+                LM(MouseLocation).v = event.motion.y;
 
                 adb_apeiron_hack(false);
                 break;
@@ -253,8 +253,8 @@ void SDL2VideoDriver::pumpEvents()
                         keymod &= ~mod;
                 }
                 when = TickCount();
-                where.h = CW(LM(MouseLocation).h);
-                where.v = CW(LM(MouseLocation).v);
+                where.h = LM(MouseLocation).h;
+                where.v = LM(MouseLocation).v;
                 keywhat = ROMlib_xlate(mkvkey, keymod, down_p);
                 post_keytrans_key_events(down_p ? keyDown : keyUp,
                                          keywhat, when, where,

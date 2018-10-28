@@ -13,7 +13,7 @@ using namespace Executor;
 INTEGER Executor::C_CurResFile()
 {
     ROMlib_setreserr(noErr);
-    return (Cx(LM(CurMap)));
+    return (LM(CurMap));
 }
 
 /* ROMlib_findmapres:
@@ -27,7 +27,7 @@ OSErr Executor::ROMlib_findmapres(resmaphand map, Handle r, typref **trp,
     resref *rr;
 
     WALKTANDR(map, i, tr, j, rr)
-    if((Handle)MR(rr->rhand) == r)
+    if((Handle)rr->rhand == r)
     {
         *trp = tr;
         *rrp = rr;
@@ -66,7 +66,7 @@ INTEGER Executor::C_HomeResFile(Handle res)
     resref *rr;
 
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return (-1);
     else
         return (Hx(map, resfn));
@@ -77,11 +77,11 @@ void Executor::C_UseResFile(INTEGER rn)
     Handle map;
 
     if(rn == 0)
-        rn = Cx(LM(SysMap));
+        rn = LM(SysMap);
     ROMlib_invalar();
     if(ROMlib_rntohandl(rn, &map))
     {
-        LM(CurMap) = CW(rn);
+        LM(CurMap) = rn;
         ROMlib_setreserr(noErr);
     }
     else

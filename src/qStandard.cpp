@@ -11,17 +11,17 @@ using namespace Executor;
 
 void Executor::C_SetStdProcs(QDProcs *procs)
 {
-    procs->textProc = RM(&StdText);
-    procs->lineProc = RM(&StdLine);
-    procs->rectProc = RM(&StdRect);
-    procs->rRectProc = RM(&StdRRect);
-    procs->ovalProc = RM(&StdOval);
-    procs->arcProc = RM(&StdArc);
-    procs->polyProc = RM(&StdPoly);
-    procs->rgnProc = RM(&StdRgn);
-    procs->bitsProc = RM(&StdBits);
-    procs->commentProc = RM(&StdComment);
-    procs->txMeasProc = RM(&StdTxMeas);
-    procs->getPicProc = RM(&StdGetPic);
-    procs->putPicProc = RM(&StdPutPic);
+    procs->textProc = &StdText;
+    procs->lineProc = &StdLine;
+    procs->rectProc = &StdRect;
+    procs->rRectProc = &StdRRect;
+    procs->ovalProc = &StdOval;
+    procs->arcProc = &StdArc;
+    procs->polyProc = &StdPoly;
+    procs->rgnProc = &StdRgn;
+    procs->bitsProc = &StdBits;
+    procs->commentProc = &StdComment;
+    procs->txMeasProc = &StdTxMeas;
+    procs->getPicProc = &StdGetPic;
+    procs->putPicProc = &StdPutPic;
 }

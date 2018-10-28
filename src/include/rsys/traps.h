@@ -275,8 +275,8 @@ private:
 
 
 #define LOWMEM_ACCESSOR(NAME) \
-    inline decltype(NAME)::type LMGet##NAME() { return MR(LM(NAME)); } \
-    inline void LMSet##NAME(decltype(NAME)::type val) { LM(NAME) = RM(val); } \
+    inline decltype(NAME)::type LMGet##NAME() { return LM(NAME); } \
+    inline void LMSet##NAME(decltype(NAME)::type val) { LM(NAME) = val; } \
     NOTRAP_FUNCTION2(LMGet##NAME); \
     NOTRAP_FUNCTION2(LMSet##NAME)
 

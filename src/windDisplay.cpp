@@ -22,8 +22,8 @@ void Executor::C_SetWTitle(WindowPtr w, StringPtr t)
         return;
     PtrToXHand((Ptr)t, (Handle)WINDOW_TITLE(w), (LONGINT)t[0] + 1);
 
-    ThePortGuard guard(MR(wmgr_port));
-    WINDOW_TITLE_WIDTH_X(w) = CW(StringWidth(t));
+    ThePortGuard guard(wmgr_port);
+    WINDOW_TITLE_WIDTH_X(w) = StringWidth(t);
 
     if(WINDOW_VISIBLE_X(w))
     {
@@ -46,7 +46,7 @@ WindowPeek Executor::ROMlib_firstvisible(WindowPtr w) /* INTERNAL */
 
     for(wp = (WindowPeek)w;
         wp && (!WINDOW_VISIBLE_X(wp)
-               || wp == (WindowPeek)MR(LM(GhostWindow)));
+               || wp == (WindowPeek)LM(GhostWindow));
         wp = WINDOW_NEXT_WINDOW(wp))
         ;
     return wp;
@@ -56,7 +56,7 @@ WindowPtr Executor::C_FrontWindow()
 {
     WindowPtr retval;
 
-    retval = (WindowPtr)ROMlib_firstvisible((WindowPtr)MR(LM(WindowList)));
+    retval = (WindowPtr)ROMlib_firstvisible((WindowPtr)LM(WindowList));
     return retval;
 }
 
@@ -64,7 +64,7 @@ void Executor::C_HiliteWindow(WindowPtr w, BOOLEAN flag)
 {
     if(!w)
         return;
-    ThePortGuard guard(MR(wmgr_port));
+    ThePortGuard guard(wmgr_port);
     SetClip(WINDOW_STRUCT_REGION(w));
     ClipAbove((WindowPeek)w);
     if(flag && !WINDOW_HILITED_X(w))
@@ -84,11 +84,11 @@ void Executor::C_BringToFront(WindowPtr w)
     WindowPeek wp;
     RgnHandle hidden;
 
-    if(MR(LM(WindowList)) != (WindowPeek)w)
+    if(LM(WindowList) != (WindowPeek)w)
     {
-        ThePortGuard guard(MR(wmgr_port));
-        SetClip(MR(LM(GrayRgn)));
-        for(wp = MR(LM(WindowList));
+        ThePortGuard guard(wmgr_port);
+        SetClip(LM(GrayRgn));
+        for(wp = LM(WindowList);
             wp && WINDOW_NEXT_WINDOW(wp) != (WindowPeek)w;
             wp = WINDOW_NEXT_WINDOW(wp))
             ;
@@ -96,7 +96,7 @@ void Executor::C_BringToFront(WindowPtr w)
         {
             WINDOW_NEXT_WINDOW_X(wp) = WINDOW_NEXT_WINDOW_X(w);
             WINDOW_NEXT_WINDOW_X(w) = LM(WindowList);
-            LM(WindowList) = RM((WindowPeek)w);
+            LM(WindowList) = (WindowPeek)w;
             if(WINDOW_VISIBLE_X(w))
             {
                 /* notify the palette manager that the `FrontWindow ()'
@@ -106,8 +106,8 @@ void Executor::C_BringToFront(WindowPtr w)
                 hidden = NewRgn();
                 CopyRgn(PORT_VIS_REGION(w), hidden);
                 OffsetRgn(hidden,
-                          -Cx(PORT_BOUNDS(w).left),
-                          -Cx(PORT_BOUNDS(w).top));
+                          -PORT_BOUNDS(w).left,
+                          -PORT_BOUNDS(w).top);
                 XorRgn(WINDOW_STRUCT_REGION(w), hidden, hidden);
                 PaintOne((WindowPeek)w, hidden);
                 CalcVisBehind((WindowPeek)w, hidden);
@@ -125,8 +125,8 @@ void Executor::C_SelectWindow(WindowPtr w)
     if(cactive != w)
     {
         HiliteWindow(cactive, false);
-        LM(CurDeactive) = RM(cactive);
-        LM(CurActivate) = RM(w);
+        LM(CurDeactive) = cactive;
+        LM(CurActivate) = w;
     }
     BringToFront(w);
     HiliteWindow(w, true);
@@ -140,7 +140,7 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
         /* notify the palette manager that the `FrontWindow ()' may have
 	 changed */
         pm_front_window_maybe_changed_hook();
-        ThePortGuard guard(MR(wmgr_port));
+        ThePortGuard guard(wmgr_port);
         AuxWinHandle aux_w;
         RGBColor *content_color = nullptr;
         CTabHandle w_ctab;
@@ -155,11 +155,11 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
         WINDCALL(w, wCalcRgns, 0);
         SetClip(WINDOW_STRUCT_REGION(w));
         ClipAbove((WindowPeek)w);
-        CalcVisBehind((WindowPeek)w, PORT_CLIP_REGION(MR(wmgr_port)));
+        CalcVisBehind((WindowPeek)w, PORT_CLIP_REGION(wmgr_port));
         WINDCALL(w, wDraw, 0);
         CopyRgn(WINDOW_CONT_REGION(w), WINDOW_UPDATE_REGION(w));
 
-        aux_w = MR(*lookup_aux_win(w));
+        aux_w = *lookup_aux_win(w);
         w_ctab = HxP(aux_w, awCTable);
         if(w_ctab)
         {
@@ -168,7 +168,7 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
 
             for(i = 0; i < CTAB_SIZE(w_ctab); i++)
             {
-                if(w_ctab_table[i].value == CWC(wContentColor))
+                if(w_ctab_table[i].value == wContentColor)
                     content_color = &w_ctab_table[i].rgb;
             }
         }
@@ -186,8 +186,8 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
         /* notify the palette manager that the `FrontWindow ()' may have
 	 changed */
         pm_front_window_maybe_changed_hook();
-        ThePortGuard guard(MR(wmgr_port));
-        SetClip(MR(LM(GrayRgn)));
+        ThePortGuard guard(wmgr_port);
+        SetClip(LM(GrayRgn));
         SetEmptyRgn(PORT_VIS_REGION(w));
         PaintBehind(WINDOW_NEXT_WINDOW(w), WINDOW_STRUCT_REGION(w));
         CalcVisBehind(WINDOW_NEXT_WINDOW(w), WINDOW_STRUCT_REGION(w));
@@ -210,7 +210,7 @@ void Executor::C_HideWindow(WindowPtr w)
             if(nextvis)
                 SelectWindow((WindowPtr)nextvis);
             else
-                LM(CurDeactive) = RM(w);
+                LM(CurDeactive) = w;
             WINDOW_HILITED_X(w) = false;
         }
         ShowHide(w, false);
@@ -230,13 +230,13 @@ void Executor::C_ShowWindow(WindowPtr w)
         if(FrontWindow() == w && !WINDOW_HILITED_X(w))
         {
             HiliteWindow(w, true);
-            LM(CurActivate) = RM(w);
+            LM(CurActivate) = w;
             for(t = WINDOW_NEXT_WINDOW(w);
                 t && !WINDOW_HILITED_X(t);
                 t = WINDOW_NEXT_WINDOW(t))
                 ;
             HiliteWindow((WindowPtr)t, false);
-            LM(CurDeactive) = RM((WindowPtr)t);
+            LM(CurDeactive) = (WindowPtr)t;
         }
     }
 }
@@ -274,7 +274,7 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
     if(behind)
     {
         WINDOW_NEXT_WINDOW_X(w) = WINDOW_NEXT_WINDOW_X(behind);
-        WINDOW_NEXT_WINDOW_X(behind) = RM((WindowPeek)w);
+        WINDOW_NEXT_WINDOW_X(behind) = (WindowPeek)w;
     }
     else
     {
@@ -286,7 +286,7 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
             wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW_X(STARH(wpp)))
             ;
         if(STARH(wpp) != (WindowPeek)w)
-            WINDOW_NEXT_WINDOW_X(STARH(wpp)) = RM((WindowPeek)w);
+            WINDOW_NEXT_WINDOW_X(STARH(wpp)) = (WindowPeek)w;
 #endif /* SEND_BEHIND */
         WINDOW_NEXT_WINDOW_X(w) = 0;
     }
@@ -294,8 +294,8 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
     temprgn = NewRgn();
     CopyRgn(PORT_VIS_REGION(w), temprgn);
     OffsetRgn(temprgn,
-              -Cx(PORT_BOUNDS(w).left),
-              -Cx(PORT_BOUNDS(w).top));
+              -PORT_BOUNDS(w).left,
+              -PORT_BOUNDS(w).top);
     XorRgn(WINDOW_STRUCT_REGION(w), temprgn, temprgn);
     CalcVisBehind(oldbehind, temprgn);
     PaintBehind(oldbehind, temprgn);
@@ -303,13 +303,13 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
 #if 0
     newfront = (WindowPeek) FrontWindow ();
     if (oldfront != newfront) {
-	LM(CurDeactive) = CL((WindowPtr) oldfront);
+	LM(CurDeactive) = (WindowPtr) oldfront;
 	HiliteWindow((WindowPtr) oldfront, false);
-	LM(CurActivate) = CL((WindowPtr) newfront);
+	LM(CurActivate) = (WindowPtr) newfront;
 	HiliteWindow((WindowPtr) newfront, true);
     }
 #else /* 0 */
-    if(oldfront == (WindowPeek)w && MR(LM(WindowList)) != (WindowPeek)w)
+    if(oldfront == (WindowPeek)w && LM(WindowList) != (WindowPeek)w)
     {
         ThePortGuard guard(w);
         r = HxX(PORT_VIS_REGION(w), rgnBBox);
@@ -323,19 +323,19 @@ void Executor::C_DrawGrowIcon(WindowPtr w)
 {
     if(!ROMlib_emptyvis && WINDOW_VISIBLE(w))
     {
-        ThePortGuard guard(MR(wmgr_port));
+        ThePortGuard guard(wmgr_port);
         SetClip(PORT_CLIP_REGION(w));
         OffsetRgn(WINDOW_STRUCT_REGION(w),
-                  CW(PORT_BOUNDS(w).left),
-                  CW(PORT_BOUNDS(w).top));
-        SectRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)), WINDOW_STRUCT_REGION(w),
-                PORT_CLIP_REGION(MR(qdGlobals().thePort)));
+                  PORT_BOUNDS(w).left,
+                  PORT_BOUNDS(w).top);
+        SectRgn(PORT_CLIP_REGION(qdGlobals().thePort), WINDOW_STRUCT_REGION(w),
+                PORT_CLIP_REGION(qdGlobals().thePort));
         OffsetRgn(WINDOW_STRUCT_REGION(w),
-                  -CW(PORT_BOUNDS(w).left),
-                  -CW(PORT_BOUNDS(w).top));
-        OffsetRgn(PORT_CLIP_REGION(MR(qdGlobals().thePort)),
-                  -CW(PORT_BOUNDS(w).left),
-                  -CW(PORT_BOUNDS(w).top));
+                  -PORT_BOUNDS(w).left,
+                  -PORT_BOUNDS(w).top);
+        OffsetRgn(PORT_CLIP_REGION(qdGlobals().thePort),
+                  -PORT_BOUNDS(w).left,
+                  -PORT_BOUNDS(w).top);
         ClipAbove((WindowPeek)w);
         WINDCALL(w, wDrawGIcon, 0);
     }

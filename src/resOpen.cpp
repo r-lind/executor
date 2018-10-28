@@ -31,15 +31,15 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
     ROMlib_setreserr(HCreate(vrefnum, parid, name, creator, type)); /* ????
 								       might
 								    be wrong */
-    if(LM(ResErr) != CWC(noErr) && Cx(LM(ResErr)) != dupFNErr)
+    if(LM(ResErr) != noErr && LM(ResErr) != dupFNErr)
         return;
     ROMlib_setreserr(HOpenRF(vrefnum, parid, name, fsRdWrPerm, guestref(f)));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return;
     
     GUEST<LONGINT> leof;
     ROMlib_setreserr(GetEOF(f, &leof));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
     {
         FSClose(f);
         return;
@@ -50,16 +50,16 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
         FSClose(f);
         return;
     }
-    buf.bhead.rdatoff = buf.bhead.rmapoff = CL(sizeof(reshead) + sizeof(rsrvrec));
-    buf.bhead.datlen = CLC(0); /* No data */
-    buf.bhead.maplen = CLC(sizeof(resmap) + sizeof(INTEGER));
-    buf.bmap.namoff = CWC(sizeof(resmap) + sizeof(INTEGER));
-    buf.bmap.resfatr = CWC(0); /* No special attributes */
-    buf.bmap.typoff = CWC(sizeof(resmap));
-    buf.negone = CWC(-1); /* zero types (0 - 1) */
+    buf.bhead.rdatoff = buf.bhead.rmapoff = sizeof(reshead) + sizeof(rsrvrec);
+    buf.bhead.datlen = 0; /* No data */
+    buf.bhead.maplen = sizeof(resmap) + sizeof(INTEGER);
+    buf.bmap.namoff = sizeof(resmap) + sizeof(INTEGER);
+    buf.bmap.resfatr = 0; /* No special attributes */
+    buf.bmap.typoff = sizeof(resmap);
+    buf.negone = -1; /* zero types (0 - 1) */
     lc = sizeof(buf);
     ROMlib_setreserr(FSWriteAll(f, guestref(lc), (Ptr)&buf));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return;
     ROMlib_setreserr(FSClose(f));
 }
@@ -98,7 +98,7 @@ Handle Executor::ROMlib_mgetres(resmaphand map, resref *rr)
         EM_A2 = US_TO_SYN68K(rr);
 #define TEMPORARYHACKUNTILWESWAPTABLES
 #if !defined(TEMPORARYHACKUNTILWESWAPTABLES)
-        EM_A0 = (LONGINT)CL(ostraptable[0xFC]);
+        EM_A0 = (LONGINT)ostraptable[0xFC];
 #else /* defined(TEMPORARYHACKUNTILWESWAPTABLES) */
         EM_A0 = (LONGINT)ostraptable[0xFC];
 #endif
@@ -147,22 +147,22 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
    * resource is to be treated as a non-compressed resource.
    */
 
-    if(err != noErr || info.compressedResourceTag != CLC(COMPRESSED_TAG))
+    if(err != noErr || info.compressedResourceTag != COMPRESSED_TAG)
     {
-        SetFPos(rn, fsFromStart, CL(master_save_pos));
+        SetFPos(rn, fsFromStart, master_save_pos);
         ROMlib_setreserr(noErr);
         /*->*/ return false;
     }
 
-    if(info.typeFlags != CLC(COMPRESSED_FLAGS))
+    if(info.typeFlags != COMPRESSED_FLAGS)
         retval = false;
     else
     {
         GUEST<LONGINT> save_pos;
 
         GetFPos(rn, &save_pos);
-        *dcmp_handlep = GetResource(TICK("dcmp"), CW(info.dcmpID));
-        SetFPos(rn, fsFromStart, CL(save_pos));
+        *dcmp_handlep = GetResource(TICK("dcmp"), info.dcmpID);
+        SetFPos(rn, fsFromStart, save_pos);
 
         if(!*dcmp_handlep)
             retval = false;
@@ -172,7 +172,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
             int32_t working_size;
 
             LoadResource(*dcmp_handlep);
-            final_size = CL(info.uncompressedSize);
+            final_size = info.uncompressedSize;
 
             /* 
 	   * The MacTech article says that the workingBufferFractionalSize
@@ -183,7 +183,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
 	   * possibly allocating more room than we needed.
 	   */
 
-            working_size = (*dlenp + (double)*dlenp * CB(info.workingBufferFractionalRatio) / (1 << 8));
+            working_size = (*dlenp + (double)*dlenp * info.workingBufferFractionalRatio / (1 << 8));
 
 #define DONT_TRUST_FRACTIONAL_RATIO
 #if defined(DONT_TRUST_FRACTIONAL_RATIO)
@@ -197,7 +197,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
             {
                 *dlenp -= sizeof info;
                 *final_sizep = final_size;
-                *offsetp = CB(info.expansionBufferSize);
+                *offsetp = info.expansionBufferSize;
                 retval = true;
             }
         }
@@ -236,7 +236,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         if(!decompress_setup(Hx(map, resfn), &dlen, &uncompressed_size,
                              &dcmp_offset, &dcmp_handle, &dcmp_workspace))
         {
-            if(LM(ResErr) == CWC(noErr))
+            if(LM(ResErr) == noErr)
                 compressed_p = false;
             else
             {
@@ -260,13 +260,13 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         {
             LM(TheZone) = ((rr->ratr & resSysHeap)
                            ? LM(SysZone)
-                           : (GUEST<THz>)RM(HandleZone((Handle)map)));
+                           : (GUEST<THz>)HandleZone((Handle)map));
             retval = NewHandle(uncompressed_size + dcmp_offset);
-            rr->rhand = RM(retval);
+            rr->rhand = retval;
         }
         else
         {
-            retval = MR(rr->rhand);
+            retval = rr->rhand;
             ReallocateHandle(retval, uncompressed_size + dcmp_offset);
         }
         err = MemError();
@@ -275,7 +275,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         {
             if(dcmp_workspace)
                 DisposePtr(dcmp_workspace);
-            DisposeHandle(MR(rr->rhand));
+            DisposeHandle(rr->rhand);
             rr->rhand = nullptr;
             retval = nullptr;
         }
@@ -316,7 +316,7 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
 {
     Handle retval;
 
-    retval = MR(rr->rhand);
+    retval = rr->rhand;
     if(retval && *retval)
         ROMlib_setreserr(noErr);
     else
@@ -329,7 +329,7 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
         state = hlock_return_orig_state((Handle)map);
         loc = Hx(map, rh.rdatoff) + B3TOLONG(rr->doff);
         ROMlib_setreserr(SetFPos(Hx(map, resfn), fsFromStart, loc));
-        if(LM(ResErr) != CWC(noErr))
+        if(LM(ResErr) != noErr)
             retval = nullptr;
         else
         {
@@ -340,20 +340,20 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
             lc = sizeof(Size);
             err = FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)&dlen_s);
             ROMlib_setreserr(err);
-            if(LM(ResErr) != CWC(noErr))
+            if(LM(ResErr) != noErr)
                 retval = nullptr;
             else
             {
-                int32_t dlen = CL(dlen_s);
+                int32_t dlen = dlen_s;
                 if(LM(ResLoad))
                     retval = mgetres_helper(map, rr, dlen, retval);
                 else if(!rr->rhand)
                 {
                     LM(TheZone) = ((rr->ratr & resSysHeap)
                                    ? LM(SysZone)
-                                   : (GUEST<THz>)RM(HandleZone((Handle)map)));
+                                   : (GUEST<THz>)HandleZone((Handle)map));
                     retval = NewEmptyHandle();
-                    rr->rhand = RM(retval);
+                    rr->rhand = retval;
                 }
 
                 /* we can only set the state bits if the block pointer
@@ -421,7 +421,7 @@ void Executor::C_CloseResFile(INTEGER rn)
     ROMlib_invalar();
     if(rn == REF0)
     {
-        for(map = (resmaphand)MR(LM(TopMapHndl)); map; map = nextmap)
+        for(map = (resmaphand)LM(TopMapHndl); map; map = nextmap)
         {
             nextmap = (resmaphand)HxP(map, nextmap);
             CloseResFile(Hx(map, resfn));
@@ -440,20 +440,20 @@ void Executor::C_CloseResFile(INTEGER rn)
         OSErr save_ResErr;
 
         UpdateResFile(rn);
-        save_ResErr = CW(LM(ResErr));
+        save_ResErr = LM(ResErr);
 
         /* update linked list */
 
-        if(map == (resmaphand)MR(LM(TopMapHndl)))
+        if(map == (resmaphand)LM(TopMapHndl))
             LM(TopMapHndl) = HxX(map, nextmap);
         else
             HxX(ph, nextmap) = HxX(map, nextmap);
 
-        if(Cx(LM(CurMap)) == rn)
+        if(LM(CurMap) == rn)
         {
             //                printf("curmap %02x topmaphndl %08x\n", (int) LM(CurMap).raw(), (int)LM(TopMapHndl).raw());
             if(LM(TopMapHndl))
-                LM(CurMap) = STARH((resmaphand)MR(LM(TopMapHndl)))->resfn;
+                LM(CurMap) = STARH((resmaphand)LM(TopMapHndl))->resfn;
             else
                 LM(CurMap) = 0;
         }
@@ -462,7 +462,7 @@ void Executor::C_CloseResFile(INTEGER rn)
 
         WALKTANDR(map, i, tr, j, rr)
         {
-            if(Handle h = MR(rr->rhand))
+            if(Handle h = rr->rhand)
             {
                 if(*h)
                     HClrRBit(h);
@@ -493,7 +493,7 @@ already_open_res_file(GUEST<INTEGER> swapped_vref, GUEST<LONGINT> swapped_file_n
     if(err == noErr && fcbp->fdfnum == swapped_file_num)
     {
         VCB *vptr;
-        vptr = MR(fcbp->fcvptr);
+        vptr = fcbp->fcvptr;
         if(vptr->vcbVRefNum == swapped_vref && (fcbp->fcflags & fcfisres))
             retval = Hx(map, resfn);
     }
@@ -525,9 +525,9 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         Str255 local_name;
 
         str255assign(local_name, fn);
-        pbr.volumeParam.ioNamePtr = RM((StringPtr)local_name);
-        pbr.volumeParam.ioVRefNum = CW(vref);
-        pbr.volumeParam.ioVolIndex = CWC(-1);
+        pbr.volumeParam.ioNamePtr = (StringPtr)local_name;
+        pbr.volumeParam.ioVRefNum = vref;
+        pbr.volumeParam.ioVolIndex = -1;
         err = PBHGetVInfo(&pbr, false);
         if(err)
         {
@@ -535,10 +535,10 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
             return -1;
         }
 
-        cpb.hFileInfo.ioNamePtr = RM(fn);
-        cpb.hFileInfo.ioVRefNum = CW(vref);
-        cpb.hFileInfo.ioFDirIndex = CWC(0);
-        cpb.hFileInfo.ioDirID = CL(dirid);
+        cpb.hFileInfo.ioNamePtr = fn;
+        cpb.hFileInfo.ioVRefNum = vref;
+        cpb.hFileInfo.ioFDirIndex = 0;
+        cpb.hFileInfo.ioDirID = dirid;
         if((ROMlib_setreserr(PBGetCatInfo(&cpb, 0))) == noErr
            && perm > fsRdPerm)
         {
@@ -548,34 +548,34 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
                                          cpb.hFileInfo.ioDirID);
             if(fref != -1)
             {
-                LM(CurMap) = CW(fref);
+                LM(CurMap) = fref;
                 /*-->*/ return fref;
             }
         }
     }
 
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         /*-->*/ return -1;
 
     ROMlib_invalar();
-    pbr.ioParam.ioNamePtr = RM(fn);
-    pbr.ioParam.ioVRefNum = CW(vref);
-    pbr.fileParam.ioFDirIndex = CWC(0);
-    pbr.ioParam.ioPermssn = CB(perm);
-    pbr.ioParam.ioMisc = CLC(0);
-    pbr.fileParam.ioDirID = CL(dirid);
+    pbr.ioParam.ioNamePtr = fn;
+    pbr.ioParam.ioVRefNum = vref;
+    pbr.fileParam.ioFDirIndex = 0;
+    pbr.ioParam.ioPermssn = perm;
+    pbr.ioParam.ioMisc = 0;
+    pbr.fileParam.ioDirID = dirid;
     ROMlib_setreserr(PBHOpenRF(&pbr, false));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return (-1);
-    f = CW(pbr.ioParam.ioRefNum);
+    f = pbr.ioParam.ioRefNum;
     lc = sizeof(hd);
     ROMlib_setreserr(FSReadAll(f, guestref(lc), (Ptr)&hd));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
     {
         FSClose(f);
         return (-1);
     }
-    map = (resmaphand)NewHandle(CL(hd.maplen));
+    map = (resmaphand)NewHandle(hd.maplen);
     err = MemError();
     if(ROMlib_setreserr(err))
     {
@@ -583,16 +583,16 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     }
 
-    ROMlib_setreserr(SetFPos(f, fsFromStart, Cx(hd.rmapoff)));
-    if(LM(ResErr) != CWC(noErr))
+    ROMlib_setreserr(SetFPos(f, fsFromStart, hd.rmapoff));
+    if(LM(ResErr) != noErr)
     {
         DisposeHandle((Handle)map);
         FSClose(f);
         return (-1);
     }
-    lc = CL(hd.maplen);
+    lc = hd.maplen;
     ROMlib_setreserr(FSReadAll(f, guestref(lc), (Ptr)STARH(map)));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
     {
         DisposeHandle((Handle)map);
         FSClose(f);
@@ -632,9 +632,9 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
     }
 
     HxX(map, nextmap) = LM(TopMapHndl);
-    HxX(map, resfn) = CW(f);
-    LM(TopMapHndl) = RM((Handle)map);
-    LM(CurMap) = CW(f);
+    HxX(map, resfn) = f;
+    LM(TopMapHndl) = (Handle)map;
+    LM(CurMap) = f;
 
     /* check for resprload bits */
 

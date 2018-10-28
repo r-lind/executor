@@ -20,8 +20,8 @@ OSErr Executor::ROMlib_dirbusy(LONGINT dirid, HVCB *vcbp)
 #if defined(MAC)
     wdentry *wdp, *ewdp;
 
-    for(wdp = (wdentry *)(CL(LM(WDCBsPtr)) + sizeof(INTEGER)),
-    ewdp = (wdentry *)(CL(LM(WDCBsPtr)) + CW(*(INTEGER *)CL(LM(WDCBsPtr))));
+    for(wdp = (wdentry *)(LM(WDCBsPtr) + sizeof(INTEGER)),
+    ewdp = (wdentry *)(LM(WDCBsPtr) + *(INTEGER *)LM(WDCBsPtr));
         wdp != ewdp; wdp++)
         ;
     return wdp == ewdp ? noErr : fBsyErr;
@@ -40,21 +40,21 @@ OSErr Executor::ROMlib_mkwd(WDPBPtr pb, HVCB *vcbp, LONGINT dirid,
     GUEST<THz> saveZone;
 
     firstfreep = 0;
-    for(wdp = (wdentry *)(MR(LM(WDCBsPtr)) + sizeof(INTEGER)),
-    ewdp = (wdentry *)(MR(LM(WDCBsPtr)) + CW(*(GUEST<INTEGER> *)MR(LM(WDCBsPtr))));
+    for(wdp = (wdentry *)(LM(WDCBsPtr) + sizeof(INTEGER)),
+    ewdp = (wdentry *)(LM(WDCBsPtr) + *(GUEST<INTEGER> *)LM(WDCBsPtr));
         wdp != ewdp; wdp++)
     {
         if(!firstfreep && !wdp->vcbp)
             firstfreep = wdp;
-        if(MR(wdp->vcbp) == vcbp && CL(wdp->dirid) == dirid && CL(wdp->procid) == procid)
+        if(wdp->vcbp == vcbp && wdp->dirid == dirid && wdp->procid == procid)
         {
-            pb->ioVRefNum = CW(WDPTOWDNUM(wdp));
+            pb->ioVRefNum = WDPTOWDNUM(wdp);
             /*-->*/ return noErr;
         }
     }
     if(!firstfreep)
     {
-        n_wd_bytes = CW(*(GUEST<INTEGER> *)MR(LM(WDCBsPtr)));
+        n_wd_bytes = *(GUEST<INTEGER> *)LM(WDCBsPtr);
         new_n_wd_bytes = (n_wd_bytes - sizeof(INTEGER)) * 2 + sizeof(INTEGER);
         saveZone = LM(TheZone);
         LM(TheZone) = LM(SysZone);
@@ -64,10 +64,10 @@ OSErr Executor::ROMlib_mkwd(WDPBPtr pb, HVCB *vcbp, LONGINT dirid,
             retval = tmwdoErr;
         else
         {
-            BlockMoveData(MR(LM(WDCBsPtr)), newptr, n_wd_bytes);
-            DisposePtr(MR(LM(WDCBsPtr)));
-            LM(WDCBsPtr) = RM(newptr);
-            *(GUEST<INTEGER> *)newptr = CW(new_n_wd_bytes);
+            BlockMoveData(LM(WDCBsPtr), newptr, n_wd_bytes);
+            DisposePtr(LM(WDCBsPtr));
+            LM(WDCBsPtr) = newptr;
+            *(GUEST<INTEGER> *)newptr = new_n_wd_bytes;
             firstfreep = (wdentry *)(newptr + n_wd_bytes);
             retval = noErr;
         }
@@ -76,10 +76,10 @@ OSErr Executor::ROMlib_mkwd(WDPBPtr pb, HVCB *vcbp, LONGINT dirid,
         retval = noErr;
     if(retval == noErr)
     {
-        firstfreep->vcbp = RM(vcbp);
-        firstfreep->dirid = CL(dirid);
-        firstfreep->procid = CL(procid);
-        pb->ioVRefNum = CW(WDPTOWDNUM(firstfreep));
+        firstfreep->vcbp = vcbp;
+        firstfreep->dirid = dirid;
+        firstfreep->procid = procid;
+        pb->ioVRefNum = WDPTOWDNUM(firstfreep);
         retval = noErr;
     }
     return retval;
@@ -95,7 +95,7 @@ OSErr Executor::hfsPBOpenWD(WDPBPtr pb, BOOLEAN async)
     StringPtr namep;
 
     kind = (filekind)(regular | directory);
-    retval = ROMlib_findvcbandfile((IOParam *)pb, Cx(pb->ioWDDirID),
+    retval = ROMlib_findvcbandfile((IOParam *)pb, pb->ioWDDirID,
                                    &btparamrec, &kind, false);
     if(retval != noErr)
         PBRETURN(pb, retval);
@@ -103,12 +103,12 @@ OSErr Executor::hfsPBOpenWD(WDPBPtr pb, BOOLEAN async)
     retval = ROMlib_cleancache(vcbp);
     if(retval != noErr)
         PBRETURN(pb, retval);
-    namep = MR(pb->ioNamePtr);
+    namep = pb->ioNamePtr;
     if(kind == directory && namep && namep[0])
-        dirid = CL(((directoryrec *)DATAPFROMKEY(btparamrec.foundp))->dirDirID);
+        dirid = ((directoryrec *)DATAPFROMKEY(btparamrec.foundp))->dirDirID;
     else
-        dirid = CL(pb->ioWDDirID);
-    retval = ROMlib_mkwd(pb, vcbp, dirid, CL(pb->ioWDProcID));
+        dirid = pb->ioWDDirID;
+    retval = ROMlib_mkwd(pb, vcbp, dirid, pb->ioWDProcID);
 
     PBRETURN(pb, retval);
 }
@@ -119,9 +119,9 @@ OSErr Executor::hfsPBCloseWD(WDPBPtr pb, BOOLEAN async)
     OSErr retval;
 
     retval = noErr;
-    if(ISWDNUM(Cx(pb->ioVRefNum)))
+    if(ISWDNUM(pb->ioVRefNum))
     {
-        wdp = WDNUMTOWDP(Cx(pb->ioVRefNum));
+        wdp = WDNUMTOWDP(pb->ioVRefNum);
         if(wdp)
             wdp->vcbp = 0;
         else
@@ -141,45 +141,45 @@ OSErr Executor::hfsPBGetWDInfo(WDPBPtr pb, BOOLEAN async)
     foundelsewhere = false;
     retval = noErr;
     wdp = 0;
-    if(Cx(pb->ioWDIndex) > 0)
+    if(pb->ioWDIndex > 0)
     {
-        i = Cx(pb->ioWDIndex);
-        wdp = (wdentry *)(MR(LM(WDCBsPtr)) + sizeof(INTEGER));
-        ewdp = (wdentry *)(MR(LM(WDCBsPtr)) + CW(*(GUEST<INTEGER> *)MR(LM(WDCBsPtr))));
-        if(Cx(pb->ioVRefNum) < 0)
+        i = pb->ioWDIndex;
+        wdp = (wdentry *)(LM(WDCBsPtr) + sizeof(INTEGER));
+        ewdp = (wdentry *)(LM(WDCBsPtr) + *(GUEST<INTEGER> *)LM(WDCBsPtr));
+        if(pb->ioVRefNum < 0)
         {
             for(; wdp != ewdp; wdp++)
-                if(wdp->vcbp && MR(wdp->vcbp)->vcbVRefNum == pb->ioVRefNum && --i <= 0)
+                if(wdp->vcbp && wdp->vcbp->vcbVRefNum == pb->ioVRefNum && --i <= 0)
                     break;
         }
-        else if(pb->ioVRefNum == CWC(0))
+        else if(pb->ioVRefNum == 0)
         {
             for(; wdp != ewdp && i > 1; ++wdp)
                 if(wdp->vcbp)
                     --i;
         }
-        else /* if (Cx(pb->ioVRefNum) > 0 */
+        else /* if (pb->ioVRefNum > 0 */
         {
             for(; wdp != ewdp; wdp++)
-                if(MR(wdp->vcbp)->vcbDrvNum == pb->ioVRefNum && --i <= 0)
+                if(wdp->vcbp->vcbDrvNum == pb->ioVRefNum && --i <= 0)
                     break;
         }
         if(wdp == ewdp || !wdp->vcbp)
             wdp = 0;
     }
-    else if(ISWDNUM(Cx(pb->ioVRefNum)))
-        wdp = WDNUMTOWDP(Cx(pb->ioVRefNum));
+    else if(ISWDNUM(pb->ioVRefNum))
+        wdp = WDNUMTOWDP(pb->ioVRefNum);
     else
     {
-        vcbp = ROMlib_findvcb(Cx(pb->ioVRefNum), (StringPtr)0, (LONGINT *)0,
+        vcbp = ROMlib_findvcb(pb->ioVRefNum, (StringPtr)0, (LONGINT *)0,
                               true);
         if(vcbp)
         {
             if(pb->ioNamePtr)
-                str255assign(MR(pb->ioNamePtr), (StringPtr)vcbp->vcbVN);
+                str255assign(pb->ioNamePtr, (StringPtr)vcbp->vcbVN);
             pb->ioWDProcID = 0;
             pb->ioVRefNum = pb->ioWDVRefNum = vcbp->vcbVRefNum;
-            pb->ioWDDirID = (vcbp == MR(LM(DefVCBPtr))) ? DefDirID : toGuest(2);
+            pb->ioWDDirID = (vcbp == LM(DefVCBPtr)) ? DefDirID : toGuest(2);
             foundelsewhere = true;
         }
     }
@@ -189,12 +189,12 @@ OSErr Executor::hfsPBGetWDInfo(WDPBPtr pb, BOOLEAN async)
         if(wdp)
         {
             if(pb->ioNamePtr)
-                str255assign(MR(pb->ioNamePtr),
-                             (StringPtr)MR(wdp->vcbp)->vcbVN);
-            if(Cx(pb->ioWDIndex) > 0)
-                pb->ioVRefNum = MR(wdp->vcbp)->vcbVRefNum;
+                str255assign(pb->ioNamePtr,
+                             (StringPtr)wdp->vcbp->vcbVN);
+            if(pb->ioWDIndex > 0)
+                pb->ioVRefNum = wdp->vcbp->vcbVRefNum;
             pb->ioWDProcID = wdp->procid;
-            pb->ioWDVRefNum = MR(wdp->vcbp)->vcbVRefNum;
+            pb->ioWDVRefNum = wdp->vcbp->vcbVRefNum;
             pb->ioWDDirID = wdp->dirid;
         }
         else
@@ -211,7 +211,7 @@ Executor::GetWDInfo(INTEGER wd, GUEST<INTEGER> *vrefp, GUEST<LONGINT> *dirp, GUE
 
     WDPBRec wdp;
     memset(&wdp, 0, sizeof wdp);
-    wdp.ioVRefNum = CW(wd);
+    wdp.ioVRefNum = wd;
     retval = PBGetWDInfo(&wdp, false);
     if(retval == noErr)
     {
@@ -229,11 +229,11 @@ void Executor::ROMlib_adjustdirid(LONGINT *diridp, HVCB *vcbp, INTEGER vrefnum)
     if(*(ULONGINT *)diridp <= 1 && ISWDNUM(vrefnum))
     {
         wdp = WDNUMTOWDP(vrefnum);
-        if(MR(wdp->vcbp) == vcbp)
-            *diridp = CL(wdp->dirid);
+        if(wdp->vcbp == vcbp)
+            *diridp = wdp->dirid;
     }
-    else if(*diridp == 0 && !vrefnum /* vcbp == CL(LM(DefVCBPtr)) */)
-        *diridp = CL(DefDirID);
+    else if(*diridp == 0 && !vrefnum /* vcbp == LM(DefVCBPtr) */)
+        *diridp = DefDirID;
     if(*diridp == 0)
         *diridp = 2;
 }

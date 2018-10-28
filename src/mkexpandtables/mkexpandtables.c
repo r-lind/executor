@@ -38,7 +38,7 @@ static void buildexpandtable4(void)
         }
 #endif /* defined(LITTLEENDIAN) */
 
-        printf("CLC(0x%08X),", retval); /* NOTE: LONGINT is not a long */
+        printf("0x%08X,", retval); /* NOTE: LONGINT is not a long */
         putchar((i & 3) == 3 ? '\n' : ' ');
     }
     printf("};\n");
@@ -64,7 +64,7 @@ static void buildexpandtable2(void)
         retval = ((unsigned short)retval >> 8) | ((unsigned char)retval << 8);
 #endif /* defined(LITTLEENDIAN) */
 
-        printf("CWC(0x%04X),", (LONGINT)(unsigned short)retval);
+        printf("0x%04X,", (LONGINT)(unsigned short)retval);
         putchar((i & 7) == 7 ? '\n' : ' ');
     }
     printf("};\n");

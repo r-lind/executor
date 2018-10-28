@@ -902,14 +902,14 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
     /* Compute sign. */
     if(n < 0)
     {
-        dp->sgn = CB(1);
+        dp->sgn = 1;
         n = -n;
     }
     else
-        dp->sgn = CB(0);
+        dp->sgn = 0;
 
     /* Default to 0 exp, in case of infinity, etc, just to be consistent. */
-    dp->exp = CWC(0);
+    dp->exp = 0;
 
     if(n == 0)
         strcpy(c_string, "0");
@@ -946,7 +946,7 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
             digit_string++;
 
         /* Check which format they want and act accordingly. */
-        if((sp2->style & CWC(DECIMALTYPEMASK)) == CWC(FloatDecimal))
+        if((sp2->style & DECIMALTYPEMASK) == FloatDecimal)
         {
             /* Floating style. */
             digits_to_keep = digits;
@@ -962,7 +962,7 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
             c_string[0] = '\0'; /* zero */
         else
             exponent += round_string(digit_string, c_string,
-                                     CB(dp->sgn), digits_to_keep);
+                                     dp->sgn, digits_to_keep);
 
         /* Make sure the string is short enough. */
         if((int)strlen(c_string) > digits_to_keep)
@@ -972,7 +972,7 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
         if(c_string[0] == '\0')
             strcpy(c_string, "0");
 
-        dp->exp = CW(exponent);
+        dp->exp = exponent;
     }
 
     /* See if the generated string is too LONGINT. */
@@ -987,7 +987,7 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
         old_len = strlen(c_string);
         c_string[SIGDIGLEN] = 0;
         new_len = SIGDIGLEN;
-        dp->exp = CW(CW(dp->exp) + old_len - new_len);
+        dp->exp = dp->exp + old_len - new_len;
     }
 #endif
 
@@ -998,7 +998,7 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
 
     warning_floating_point("Fx2dec(" IEEE_T_FORMAT ", digits=%d) == %s%s * 10**%d",
                            (IEEE_T_PRINT_CAST)in, digits, dp->sgn ? "-" : "",
-                           c_string, CW(dp->exp));
+                           c_string, dp->exp);
 }
 
 #if defined(CYGWIN32)
@@ -1053,7 +1053,7 @@ void Executor::C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel)
             for(p = (char *)sp->sig + 1, n = 0; p <= last_char; p++)
                 n = (n * 10) + (*p - '0');
 
-            exp = CW(sp->exp);
+            exp = sp->exp;
 
             if(exp > 0)
                 n *= pow(10.0, exp);
@@ -1095,7 +1095,7 @@ void Executor::C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel)
     warning_floating_point("Fdec2x(%s%.*s * 10**%d) == " IEEE_T_FORMAT "",
                            sp->sgn ? "-" : "",
                            (uint8_t)sp->sig[0], &sp->sig[1],
-                           CW(sp->exp), (IEEE_T_PRINT_CAST)in);
+                           sp->exp, (IEEE_T_PRINT_CAST)in);
 }
 
 void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)

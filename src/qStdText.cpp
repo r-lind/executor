@@ -52,26 +52,26 @@ static void charblit(BitMap *fbmp, BitMap *tbmp, Rect *srect, Rect *drect,
         /*-->*/ return;
     /* Find the first column of pixels to be copied. */
 
-    firstfrom = CW(srect->left) - CW(fbmp->bounds.left);
+    firstfrom = srect->left - fbmp->bounds.left;
 
     /* Find the last column of pixels to be copied. */
 
-    lastfrom = CW(srect->right) - CW(fbmp->bounds.left);
+    lastfrom = srect->right - fbmp->bounds.left;
 
     /* Find the first column pixels are to be copied to. */
 
-    firstto = CW(drect->left) - CW(tbmp->bounds.left);
+    firstto = drect->left - tbmp->bounds.left;
 
     /* Find the last column pixels are to be copied to. */
 
-    lastto = CW(drect->right) - CW(tbmp->bounds.left);
-    numrows = CW(srect->bottom) - CW(srect->top);
+    lastto = drect->right - tbmp->bounds.left;
+    numrows = srect->bottom - srect->top;
     /* 
  * If it is to be put into italics, start with the characters
  * shifted over and shift them back one pixel at a time later.
  * Only do this once (the firsttime)
  */
-    if((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic) && firsttime)
+    if((PORT_TX_FACE(qdGlobals().thePort) & (int)italic) && firsttime)
     {
         INTEGER temp;
         temp = (numrows) / 2;
@@ -83,9 +83,9 @@ static void charblit(BitMap *fbmp, BitMap *tbmp, Rect *srect, Rect *drect,
  * because the BLITROW macro increments the row number at the beginning.
  * I had a reason for this, but I don't currently remember it.
  */
-    firstfromword = (GUEST<uint16_t> *)(MR(fbmp->baseAddr) + BITMAP_ROWBYTES(fbmp) * (CW(srect->top) - CW(fbmp->bounds.top) - 1)) + firstfrom / 16;
+    firstfromword = (GUEST<uint16_t> *)(fbmp->baseAddr + BITMAP_ROWBYTES(fbmp) * (srect->top - fbmp->bounds.top - 1)) + firstfrom / 16;
 
-    firsttoword = (GUEST<uint16_t> *)(MR(tbmp->baseAddr) + BITMAP_ROWBYTES(tbmp) * (CW(drect->top) - CW(tbmp->bounds.top) - 1)) + firstto / 16;
+    firsttoword = (GUEST<uint16_t> *)(tbmp->baseAddr + BITMAP_ROWBYTES(tbmp) * (drect->top - tbmp->bounds.top - 1)) + firstto / 16;
     /*
  * Calculate the number of words to be taken from one bitmap and the
  * number to be put to the other minus one.  The minus one is because
@@ -149,18 +149,18 @@ static void charblit(BitMap *fbmp, BitMap *tbmp, Rect *srect, Rect *drect,
         nextfromword = firstfromword += numfromwords;                                           \
         nexttoword = firsttoword += numtowords;                                                 \
         /* Read the first two words and mask off the unused bits */                             \
-        nextlong = (((ULONGINT)CW(*nextfromword) << 16) + CW(*(nextfromword + 1))) & firstmask; \
+        nextlong = (((ULONGINT)*nextfromword << 16) + *(nextfromword + 1)) & firstmask; \
         nextfromword += 2;                                                                      \
         for(j = wordstodo; --j >= 0;)                                                           \
         {                                                                                       \
             /* Write the next word, calculated by taking the appropriate                        \
              * 16 bits from a LONGINT. */                                                       \
-            *nexttoword++ |= CW(nextlong >> shiftsize);                                         \
+            *nexttoword++ |= nextlong >> shiftsize;                                         \
             /* Prepare the LONGINT for the next pass. */                                        \
-            nextlong = (nextlong << 16) + CW(*nextfromword++);                                  \
+            nextlong = (nextlong << 16) + *nextfromword++;                                  \
         }                                                                                       \
         /* Write the last word with the appropriate bits masked out. */                         \
-        *nexttoword |= CW((nextlong & lastmask) >> shiftsize);                                  \
+        *nexttoword |= (nextlong & lastmask) >> shiftsize;                                  \
     }
 
 /*
@@ -218,7 +218,7 @@ static void charblit(BitMap *fbmp, BitMap *tbmp, Rect *srect, Rect *drect,
             lastmask = 0xFFFFFFFF << (16 - lastmaskend);                      \
     }
 
-    if((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic) && firsttime)
+    if((PORT_TX_FACE(qdGlobals().thePort) & (int)italic) && firsttime)
     {
         if(!((i = numrows) & 1))
         {
@@ -288,10 +288,10 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     PAUSEDECL;
 
     p = (unsigned char *)textbufp;
-    num.h = CW(nump->h);
-    num.v = CW(nump->v);
-    den.h = CW(denp->h);
-    den.v = CW(denp->v);
+    num.h = nump->h;
+    num.v = nump->v;
+    den.h = denp->h;
+    den.v = denp->v;
     retval = 0;
     if(action == text_helper_measure)
     {
@@ -303,11 +303,11 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         if(n <= 0)
             /*-->*/ return retval;
 
-        if(MR(qdGlobals().thePort)->picSave)
+        if(qdGlobals().thePort->picSave)
         {
             ROMlib_textpicupdate(num, den);
             PICOP(OP_LongText);
-            PICWRITE(&PORT_PEN_LOC(MR(qdGlobals().thePort)), sizeof(PORT_PEN_LOC(MR(qdGlobals().thePort))));
+            PICWRITE(&PORT_PEN_LOC(qdGlobals().thePort), sizeof(PORT_PEN_LOC(qdGlobals().thePort)));
             count = n;
             PICWRITE(&count, sizeof(count));
             PICWRITE(p, count);
@@ -315,106 +315,106 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
                 PICWRITE("", 1); /* even things out */
         }
 
-        if(PORT_PEN_VIS(MR(qdGlobals().thePort)) < 0)
+        if(PORT_PEN_VIS(qdGlobals().thePort) < 0)
         {
             GUEST<Point> swapped_num;
             GUEST<Point> swapped_den;
 
-            swapped_num.h = CW(num.h);
-            swapped_num.v = CW(num.v);
-            swapped_den.h = CW(den.h);
-            swapped_den.v = CW(den.v);
-            PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)
+            swapped_num.h = num.h;
+            swapped_num.v = num.v;
+            swapped_den.h = den.h;
+            swapped_den.v = den.v;
+            PORT_PEN_LOC(qdGlobals().thePort).h = PORT_PEN_LOC(qdGlobals().thePort).h
                                          + (CALLTXMEAS(n, textbufp,
                                                        &swapped_num,
-                                                       &swapped_den, 0)));
+                                                       &swapped_den, 0));
             /*-->*/ return retval;
         }
     }
 
-    fmi.needBits = CB(true);
-    fmi.family = PORT_TX_FONT_X(MR(qdGlobals().thePort));
-    fmi.size = PORT_TX_SIZE_X(MR(qdGlobals().thePort));
-    fmi.face = PORT_TX_FACE_X(MR(qdGlobals().thePort));
-    fmi.device = PORT_DEVICE_X(MR(qdGlobals().thePort));
-    fmi.numer.h = CW(num.h);
-    fmi.numer.v = CW(num.v);
-    fmi.denom.h = CW(den.h);
-    fmi.denom.v = CW(den.v);
+    fmi.needBits = true;
+    fmi.family = PORT_TX_FONT_X(qdGlobals().thePort);
+    fmi.size = PORT_TX_SIZE_X(qdGlobals().thePort);
+    fmi.face = PORT_TX_FACE_X(qdGlobals().thePort);
+    fmi.device = PORT_DEVICE_X(qdGlobals().thePort);
+    fmi.numer.h = num.h;
+    fmi.numer.v = num.v;
+    fmi.denom.h = den.h;
+    fmi.denom.v = den.v;
     fmop = FMSwapFont(&fmi);
 
     if(action == text_helper_measure)
     {
         if(fmop->numer.h && fmop->denom.h)
-            nump->h = CW((LONGINT)Cx(fmop->numer.h) << 8 / Cx(fmop->denom.h));
+            nump->h = (LONGINT)fmop->numer.h << 8 / fmop->denom.h;
         else
             nump->h = fmop->numer.h;
 
         if(fmop->numer.v && fmop->denom.h)
-            nump->v = CW((LONGINT)Cx(fmop->numer.v) << 8 / Cx(fmop->denom.h));
+            nump->v = (LONGINT)fmop->numer.v << 8 / fmop->denom.h;
         else
             nump->v = fmop->numer.v;
         denp->h = WIDTHPTR->hFactor;
         denp->v = WIDTHPTR->hFactor;
         if(finfop)
         {
-            finfop->ascent = CW((unsigned short)CB(fmop->ascent));
-            finfop->descent = CW((unsigned short)CB(fmop->descent));
-            finfop->widMax = CW((unsigned short)CB(fmop->widMax));
-            finfop->leading = CW((unsigned short)CB(fmop->leading));
+            finfop->ascent = (unsigned short)fmop->ascent;
+            finfop->descent = (unsigned short)fmop->descent;
+            finfop->widMax = (unsigned short)fmop->widMax;
+            finfop->leading = (unsigned short)fmop->leading;
         }
     }
 
-    extra = Cx(fmop->extra);
+    extra = fmop->extra;
     fixed_extra = FIXED(extra);
-    widthstate = HGetState((Handle)MR(LM(WidthTabHandle)));
-    HLock((Handle)MR(LM(WidthTabHandle)));
-    if((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)underline) && Cx(fmop->descent) < 2)
+    widthstate = HGetState((Handle)LM(WidthTabHandle));
+    HLock((Handle)LM(WidthTabHandle));
+    if((PORT_TX_FACE(qdGlobals().thePort) & (int)underline) && fmop->descent < 2)
         descent = 2;
     else
-        descent = Cx(fmop->descent);
+        descent = fmop->descent;
 
     PAUSERECORDING;
-    fmopstate = HGetState((Handle)MR(fmop->fontHandle));
-    HLock(MR(fmop->fontHandle));
-    fp = (FontRec *)STARH(MR(fmop->fontHandle));
-    fmap.baseAddr = RM((Ptr)(&fp->rowWords + 1));
-    fmap.rowBytes = CW(CW(fp->rowWords) * 2);
+    fmopstate = HGetState((Handle)fmop->fontHandle);
+    HLock(fmop->fontHandle);
+    fp = (FontRec *)STARH(fmop->fontHandle);
+    fmap.baseAddr = (Ptr)(&fp->rowWords + 1);
+    fmap.rowBytes = fp->rowWords * 2;
     fmap.bounds.left = fmap.bounds.top = 0;
-    fmap.bounds.right = CW(CW(fp->rowWords) * 16);
+    fmap.bounds.right = fp->rowWords * 16;
     fmap.bounds.bottom = fp->fRectHeight;
     srect.top = misrect.top = 0;
     srect.bottom = misrect.bottom = fp->fRectHeight;
-    widp = (GUEST<INTEGER> *)&(fp->owTLoc) + Cx(fp->owTLoc);
-    locp = ((GUEST<INTEGER> *)&(fp->rowWords) + Cx(fp->rowWords) * Cx(fp->fRectHeight)
+    widp = (GUEST<INTEGER> *)&(fp->owTLoc) + fp->owTLoc;
+    locp = ((GUEST<INTEGER> *)&(fp->rowWords) + fp->rowWords * fp->fRectHeight
             + 1);
 
     // makes no sense and is unused
     // (widp points to big-endian, bitmask is native endian)
-    //        INTEGER missing = *(widp + Cx(fp->lastChar) - Cx(fp->firstChar) + 1) & 0xff;
-    misrect.left = *(locp + Cx(fp->lastChar) - Cx(fp->firstChar) + 1);
-    misrect.right = *(locp + Cx(fp->lastChar) - Cx(fp->firstChar) + 2);
-    drect.left = PORT_PEN_LOC(MR(qdGlobals().thePort)).h;
-    drect.top = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v) - CW(fp->ascent));
-    drect.bottom = CW(CW(drect.top) + Cx(fp->fRectHeight));
+    //        INTEGER missing = *(widp + fp->lastChar - fp->firstChar + 1) & 0xff;
+    misrect.left = *(locp + fp->lastChar - fp->firstChar + 1);
+    misrect.right = *(locp + fp->lastChar - fp->firstChar + 2);
+    drect.left = PORT_PEN_LOC(qdGlobals().thePort).h;
+    drect.top = PORT_PEN_LOC(qdGlobals().thePort).v - fp->ascent;
+    drect.bottom = drect.top + fp->fRectHeight;
 
-    hOutput = Cx(WIDTHPTR->hOutput);
-    vOutput = Cx(WIDTHPTR->vOutput);
+    hOutput = WIDTHPTR->hOutput;
+    vOutput = WIDTHPTR->vOutput;
     hOutputInverse = FixRatio(1 << 8, hOutput);
 
-    space_extra = PORT_SP_EXTRA(MR(qdGlobals().thePort));
-    spacewidth = (CL(WIDTHPTR->tabData[(unsigned)' ']) + space_extra
-                  - CL(WIDTHPTR->sExtra));
+    space_extra = PORT_SP_EXTRA(qdGlobals().thePort);
+    spacewidth = (WIDTHPTR->tabData[(unsigned)' '] + space_extra
+                  - WIDTHPTR->sExtra);
 
     if(action == text_helper_draw)
     {
         GUEST<Point> swapped_num;
         GUEST<Point> swapped_den;
 
-        swapped_num.h = CW(num.h);
-        swapped_num.v = CW(num.v);
-        swapped_den.h = CW(den.h);
-        swapped_den.v = CW(den.v);
+        swapped_num.h = num.h;
+        swapped_num.v = num.v;
+        swapped_den.h = den.h;
+        swapped_den.v = den.v;
 
         strwidth = text_helper(n, textbufp, &swapped_num, &swapped_den, 0, 0,
                                text_helper_measure);
@@ -427,12 +427,12 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
 #endif
 
     /* SPEEDUP:  make the stylemap be of the same alignment as
-     MR(qdGlobals().thePort).portBits when it matters to the blitter */
+     qdGlobals().thePort.portBits when it matters to the blitter */
 
-    rightitalicoffset = ((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic)
-                             ? CB(fmop->ascent) / 2 - 1
+    rightitalicoffset = ((PORT_TX_FACE(qdGlobals().thePort) & (int)italic)
+                             ? fmop->ascent / 2 - 1
                              : 0);
-    leftitalicoffset = ((PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)italic)
+    leftitalicoffset = ((PORT_TX_FACE(qdGlobals().thePort) & (int)italic)
                             ? descent / 2 + 1
                             : 0);
 
@@ -441,30 +441,30 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         if(strwidth <= 0)
             /*-->*/ return 0;
 
-        stylemap.rowBytes = CW((strwidth - Cx(fp->kernMax) + leftitalicoffset + rightitalicoffset + 31) / 32 * 4);
-        stylemap.bounds.top = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v)
-                                 - CB(fmop->ascent));
+        stylemap.rowBytes = (strwidth - fp->kernMax + leftitalicoffset + rightitalicoffset + 31) / 32 * 4;
+        stylemap.bounds.top = PORT_PEN_LOC(qdGlobals().thePort).v
+                                 - fmop->ascent;
 #if 0
-      stylemap.bounds.bottom = CW (CW (PORT_PEN_LOC (MR(qdGlobals().thePort)).v)
+      stylemap.bounds.bottom =  ( (PORT_PEN_LOC (qdGlobals().thePort).v)
 				   + descent);
 #else
         {
             int height;
 
-            height = std::max<int>(CB(fmop->ascent) + descent, Cx(fp->fRectHeight));
-            stylemap.bounds.bottom = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).v)
-                                        - CB(fmop->ascent) + height);
+            height = std::max<int>(fmop->ascent + descent, fp->fRectHeight);
+            stylemap.bounds.bottom = PORT_PEN_LOC(qdGlobals().thePort).v
+                                        - fmop->ascent + height;
         }
 #endif
-        stylemap.bounds.left = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)
-                                  + Cx(fp->kernMax) - leftitalicoffset);
-        stylemap.bounds.right = CW(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)
-                                   + strwidth + rightitalicoffset);
+        stylemap.bounds.left = PORT_PEN_LOC(qdGlobals().thePort).h
+                                  + fp->kernMax - leftitalicoffset;
+        stylemap.bounds.right = PORT_PEN_LOC(qdGlobals().thePort).h
+                                   + strwidth + rightitalicoffset;
         if(fmop->shadow)
-            stylemap.bounds.left = CW(CW(stylemap.bounds.left) - 1);
-        nbytes = ((CW(stylemap.bounds.bottom) - CW(stylemap.bounds.top)) * CW(stylemap.rowBytes));
-        stylemap.baseAddr = RM((Ptr)ALLOCA(nbytes));
-        memset(MR(stylemap.baseAddr), 0, nbytes);
+            stylemap.bounds.left = stylemap.bounds.left - 1;
+        nbytes = ((stylemap.bounds.bottom - stylemap.bounds.top) * stylemap.rowBytes);
+        stylemap.baseAddr = (Ptr)ALLOCA(nbytes);
+        memset(stylemap.baseAddr, 0, nbytes);
         bmp = &stylemap;
     }
 #if !defined(LETGCCWAIL)
@@ -483,36 +483,36 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
  *	  has already been emboldened... (This is simple to fix)
  */
 
-    first = Cx(fp->firstChar);
-    max = Cx(fp->lastChar) - Cx(fp->firstChar);
-    misintwidth = CW(misrect.right) - CW(misrect.left);
+    first = fp->firstChar;
+    max = fp->lastChar - fp->firstChar;
+    misintwidth = misrect.right - misrect.left;
     misfixwidth = FIXED(misintwidth);
-    left = FIXED(CW(PORT_PEN_LOC(MR(qdGlobals().thePort)).h)) + FIXEDONEHALF;
+    left = FIXED(PORT_PEN_LOC(qdGlobals().thePort).h) + FIXEDONEHALF;
     left_begin = left;
     widths = WIDTHPTR->tabData;
-    kernmax = Cx(fp->kernMax);
+    kernmax = fp->kernMax;
     leftmost = left >> 16;
-    WIDTHPTR->tabData[(unsigned)' '] = CL(spacewidth);
-    WIDTHPTR->sExtra = CL(space_extra);
+    WIDTHPTR->tabData[(unsigned)' '] = spacewidth;
+    WIDTHPTR->sExtra = space_extra;
     if(action == text_helper_draw)
-        ASSERT_SAFE(MR(stylemap.baseAddr));
+        ASSERT_SAFE(stylemap.baseAddr);
     for(ep = p + n; p != ep; p++)
     {
         if(charlocp)
-            *charlocp++ = CW((left - left_begin + 0xffff) >> 16);
+            *charlocp++ = (left - left_begin + 0xffff) >> 16;
         c = *p;
-        width = CL(widths[c]);
-        if((c -= Cx(fp->firstChar)) < 0 || c > max
-           || (wid = CW(widp[c])) == -1)
+        width = widths[c];
+        if((c -= fp->firstChar) < 0 || c > max
+           || (wid = widp[c]) == -1)
         {
-            drect.left = CW(left >> 16);
-            if(CW(drect.left) < leftmost)
-                leftmost = CW(drect.left);
-            drect.right = CW(CW(drect.left) + misintwidth);
+            drect.left = left >> 16;
+            if(drect.left < leftmost)
+                leftmost = drect.left;
+            drect.right = drect.left + misintwidth;
             if(action == text_helper_draw)
             {
                 charblit(&fmap, bmp, &misrect, &drect, true);
-                ASSERT_SAFE(MR(stylemap.baseAddr));
+                ASSERT_SAFE(stylemap.baseAddr);
             }
             if(LM(FractEnable))
                 left += width;
@@ -523,21 +523,21 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         {
             srect.left = locp[c];
             srect.right = locp[c + 1];
-            drect.left = CW(left >> 16);
-            drect.left = CW(CW(drect.left) + (offset = (wid >> 8) + kernmax));
-            if(CW(drect.left) < leftmost)
-                leftmost = CW(drect.left);
-            drect.right = CW(CW(drect.left) + CW(srect.right) - CW(srect.left));
+            drect.left = left >> 16;
+            drect.left = drect.left + (offset = (wid >> 8) + kernmax);
+            if(drect.left < leftmost)
+                leftmost = drect.left;
+            drect.right = drect.left + srect.right - srect.left;
             if(action == text_helper_draw)
             {
                 charblit(&fmap, bmp, &srect, &drect, true);
-                ASSERT_SAFE(MR(stylemap.baseAddr));
+                ASSERT_SAFE(stylemap.baseAddr);
             }
             if(LM(FractEnable))
                 left += width;
             else
             {
-                if(c == ' ' - Cx(fp->firstChar))
+                if(c == ' ' - fp->firstChar)
                     left += spacewidth;
                 else
                     left += FIXED((wid & 0xFF) + extra);
@@ -545,44 +545,44 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
         }
     }
     if(charlocp)
-        *charlocp = CW((left - left_begin + 0xffff) >> 16);
+        *charlocp = (left - left_begin + 0xffff) >> 16;
     if(action == text_helper_measure)
     {
         retval = (left - left_begin + 0xFFFF) >> 16;
     }
     else
     {
-        ASSERT_SAFE(MR(stylemap.baseAddr));
-        stylemap.bounds.right = CW((left >> 16) + rightitalicoffset);
-        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)bold)
+        ASSERT_SAFE(stylemap.baseAddr);
+        stylemap.bounds.right = (left >> 16) + rightitalicoffset;
+        if(PORT_TX_FACE(qdGlobals().thePort) & (int)bold)
         {
             stylemap2 = stylemap;
-            stylemap2.baseAddr = RM((Ptr)ALLOCA(nbytes));
-            ASSERT_SAFE(MR(stylemap.baseAddr));
+            stylemap2.baseAddr = (Ptr)ALLOCA(nbytes);
+            ASSERT_SAFE(stylemap.baseAddr);
 #if 0
-	  BlockMoveData(MR(stylemap.baseAddr), MR(stylemap2.baseAddr), (Size) nbytes);
+	  BlockMoveData(stylemap.baseAddr, stylemap2.baseAddr, (Size) nbytes);
 #else
-            memcpy(MR(stylemap2.baseAddr), MR(stylemap.baseAddr), (Size)nbytes);
+            memcpy(stylemap2.baseAddr, stylemap.baseAddr, (Size)nbytes);
 #endif
             srect = stylemap.bounds;
             drect = srect;
 
-            ASSERT_SAFE(MR(stylemap.baseAddr));
-            for(i = 0; i++ < Cx(fmop->bold);)
+            ASSERT_SAFE(stylemap.baseAddr);
+            for(i = 0; i++ < fmop->bold;)
             {
-                drect.left = CW(CW(drect.left) + 1);
-                srect.right = CW(CW(srect.right) - 1);
+                drect.left = drect.left + 1;
+                srect.right = srect.right - 1;
                 charblit(&stylemap2, bmp, &srect, &drect, false);
-                ASSERT_SAFE(MR(stylemap.baseAddr));
+                ASSERT_SAFE(stylemap.baseAddr);
             }
-            ASSERT_SAFE(MR(stylemap.baseAddr));
+            ASSERT_SAFE(stylemap.baseAddr);
         }
 
-        ASSERT_SAFE(MR(stylemap.baseAddr));
-        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)underline)
+        ASSERT_SAFE(stylemap.baseAddr);
+        if(PORT_TX_FACE(qdGlobals().thePort) & (int)underline)
         {
-            p = ((unsigned char *)MR(bmp->baseAddr) + BITMAP_ROWBYTES(bmp) * (CB(fmop->ascent) + 1));
-            for(i = 0; i++ < Cx(fmop->ulThick);)
+            p = ((unsigned char *)bmp->baseAddr + BITMAP_ROWBYTES(bmp) * (fmop->ascent + 1));
+            for(i = 0; i++ < fmop->ulThick;)
             {
                 carryforward = 0;
                 /*
@@ -607,103 +607,103 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
                 }
             }
         }
-        ASSERT_SAFE(MR(stylemap.baseAddr));
+        ASSERT_SAFE(stylemap.baseAddr);
 
-        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)(outline | shadow))
+        if(PORT_TX_FACE(qdGlobals().thePort) & (int)(outline | shadow))
         {
             stylemap2 = stylemap;
             stylemap3 = stylemap;
             stylemap2.baseAddr = stylemap.baseAddr;
-            stylemap3.baseAddr = RM((Ptr)ALLOCA(nbytes));
+            stylemap3.baseAddr = (Ptr)ALLOCA(nbytes);
 #if 0
-	  BlockMoveData(MR(stylemap2.baseAddr), MR(stylemap3.baseAddr),	(Size) nbytes);
+	  BlockMoveData(stylemap2.baseAddr, stylemap3.baseAddr,	(Size) nbytes);
 #else
-            memcpy(MR(stylemap3.baseAddr), MR(stylemap2.baseAddr), (Size)nbytes);
+            memcpy(stylemap3.baseAddr, stylemap2.baseAddr, (Size)nbytes);
 #endif
-            stylemap.baseAddr = RM((Ptr)ALLOCA(nbytes));
+            stylemap.baseAddr = (Ptr)ALLOCA(nbytes);
 
             srect = stylemap.bounds;
             drect = srect;
 
-            srect.left = CW(CW(srect.left) + 1);
-            drect.right = CW(CW(drect.right) - 1);
-            ASSERT_SAFE(MR(stylemap.baseAddr));
+            srect.left = srect.left + 1;
+            drect.right = drect.right - 1;
+            ASSERT_SAFE(stylemap.baseAddr);
             charblit(&stylemap2, &stylemap3, &srect, &drect, false);
-            ASSERT_SAFE(MR(stylemap.baseAddr));
-            srect.left = CW(CW(srect.left) - 1); /* restore */
-            drect.right = CW(CW(drect.right) + 1);
-            for(i = 0; i++ < Cx(fmop->shadow);)
+            ASSERT_SAFE(stylemap.baseAddr);
+            srect.left = srect.left - 1; /* restore */
+            drect.right = drect.right + 1;
+            for(i = 0; i++ < fmop->shadow;)
             {
-                drect.left = CW(CW(drect.left) + 1);
-                srect.right = CW(CW(srect.right) - 1);
+                drect.left = drect.left + 1;
+                srect.right = srect.right - 1;
                 charblit(&stylemap2, &stylemap3, &srect, &drect, false);
             }
-            ASSERT_SAFE(MR(stylemap.baseAddr));
-            drect.left = CW(CW(drect.left) - Cx(fmop->shadow)); /* restore */
-            srect.right = CW(CW(srect.right) + Cx(fmop->shadow));
+            ASSERT_SAFE(stylemap.baseAddr);
+            drect.left = drect.left - fmop->shadow; /* restore */
+            srect.right = srect.right + fmop->shadow;
 
 #if 0
-	  BlockMoveData(MR(stylemap3.baseAddr), MR(bmp->baseAddr), (Size) nbytes);
+	  BlockMoveData(stylemap3.baseAddr, bmp->baseAddr, (Size) nbytes);
 #else
-            memcpy(MR(bmp->baseAddr), MR(stylemap3.baseAddr), (Size)nbytes);
+            memcpy(bmp->baseAddr, stylemap3.baseAddr, (Size)nbytes);
 #endif
 
-            srect.top = CW(CW(srect.top) + 1);
-            drect.bottom = CW(CW(drect.bottom) - 1);
-            ASSERT_SAFE(MR(stylemap.baseAddr));
+            srect.top = srect.top + 1;
+            drect.bottom = drect.bottom - 1;
+            ASSERT_SAFE(stylemap.baseAddr);
             charblit(&stylemap3, bmp, &srect, &drect, false);
-            srect.top = CW(CW(srect.top) - 1); /* restore */
-            drect.bottom = CW(CW(drect.bottom) + 1);
-            ASSERT_SAFE(MR(stylemap.baseAddr));
-            for(i = 0; i++ < Cx(fmop->shadow);)
+            srect.top = srect.top - 1; /* restore */
+            drect.bottom = drect.bottom + 1;
+            ASSERT_SAFE(stylemap.baseAddr);
+            for(i = 0; i++ < fmop->shadow;)
             {
-                drect.top = CW(CW(drect.top) + 1);
-                srect.bottom = CW(CW(srect.bottom) - 1);
+                drect.top = drect.top + 1;
+                srect.bottom = srect.bottom - 1;
                 charblit(&stylemap3, bmp, &srect, &drect, false);
             }
-            drect.top = CW(CW(drect.top) - Cx(fmop->shadow)); /* restore */
-            srect.bottom = CW(CW(srect.bottom) + Cx(fmop->shadow));
+            drect.top = drect.top - fmop->shadow; /* restore */
+            srect.bottom = srect.bottom + fmop->shadow;
 
-            ASSERT_SAFE(MR(stylemap3.baseAddr));
-            ASSERT_SAFE(MR(stylemap.baseAddr));
+            ASSERT_SAFE(stylemap3.baseAddr);
+            ASSERT_SAFE(stylemap.baseAddr);
         }
 
-        drect.top = CW(CW(bmp->bounds.top)
-                       - (FixMul((LONGINT)CB(fmop->ascent) << 16,
+        drect.top = bmp->bounds.top
+                       - (FixMul((LONGINT)fmop->ascent << 16,
                                  (Fixed)(vOutput - 256) << 8)
-                          >> 16));
-        drect.left = CW(leftmost);
-        drect.bottom = CW(CW(drect.top)
-                          + (FixMul((LONGINT)(CW(bmp->bounds.bottom)
-                                              - CW(bmp->bounds.top))
+                          >> 16);
+        drect.left = leftmost;
+        drect.bottom = drect.top
+                          + (FixMul((LONGINT)(bmp->bounds.bottom
+                                              - bmp->bounds.top)
                                         << 16,
                                     (Fixed)vOutput << 8)
-                             >> 16));
-        drect.right = CW(leftmost + (FixMul((LONGINT)(CW(bmp->bounds.right)
+                             >> 16);
+        drect.right = leftmost + (FixMul((LONGINT)(bmp->bounds.right
                                                       - leftmost)
                                                 << 16,
                                             (Fixed)hOutput << 8)
-                                     >> 16));
+                                     >> 16);
         srect = bmp->bounds;
-        srect.left = CW(leftmost);
-        ASSERT_SAFE(MR(stylemap.baseAddr));
-        StdBits(bmp, &srect, &drect, PORT_TX_MODE(MR(qdGlobals().thePort)) & 0x37, (RgnHandle)0);
-        ASSERT_SAFE(MR(stylemap.baseAddr));
-        if(PORT_TX_FACE(MR(qdGlobals().thePort)) & (int)(outline | shadow))
+        srect.left = leftmost;
+        ASSERT_SAFE(stylemap.baseAddr);
+        StdBits(bmp, &srect, &drect, PORT_TX_MODE(qdGlobals().thePort) & 0x37, (RgnHandle)0);
+        ASSERT_SAFE(stylemap.baseAddr);
+        if(PORT_TX_FACE(qdGlobals().thePort) & (int)(outline | shadow))
         {
-            ASSERT_SAFE(MR(stylemap.baseAddr));
+            ASSERT_SAFE(stylemap.baseAddr);
             StdBits(&stylemap2, &srect, &drect, srcXor, (RgnHandle)0);
-            ASSERT_SAFE(MR(stylemap.baseAddr));
-            ASSERT_SAFE(MR(stylemap2.baseAddr));
+            ASSERT_SAFE(stylemap.baseAddr);
+            ASSERT_SAFE(stylemap2.baseAddr);
         }
 
-        PORT_PEN_LOC(MR(qdGlobals().thePort)).h = CW(CW(drect.right) - (FixMul((LONGINT)rightitalicoffset << 16,
+        PORT_PEN_LOC(qdGlobals().thePort).h = drect.right - (FixMul((LONGINT)rightitalicoffset << 16,
                                                                (Fixed)hOutput << 8)
-                                                        >> 16));
-        ASSERT_SAFE(MR(stylemap.baseAddr));
+                                                        >> 16);
+        ASSERT_SAFE(stylemap.baseAddr);
     }
-    HSetState(MR(fmop->fontHandle), fmopstate);
-    HSetState((Handle)MR(LM(WidthTabHandle)), widthstate);
+    HSetState(fmop->fontHandle, fmopstate);
+    HSetState((Handle)LM(WidthTabHandle), widthstate);
     RESUMERECORDING;
     ALLOCAEND
     return retval;
@@ -734,10 +734,10 @@ void Executor::C_StdText(INTEGER n, Ptr textbufp, Point num, Point den)
         GUEST<Point> swapped_num;
         GUEST<Point> swapped_den;
 
-        swapped_num.h = CW(num.h);
-        swapped_num.v = CW(num.v);
-        swapped_den.h = CW(den.h);
-        swapped_den.v = CW(den.v);
+        swapped_num.h = num.h;
+        swapped_num.v = num.v;
+        swapped_den.h = den.h;
+        swapped_den.v = den.v;
         text_helper(n, textbufp, &swapped_num, &swapped_den, 0, 0,
                     text_helper_draw);
     }
@@ -772,7 +772,7 @@ void Executor::C_MeasureText(INTEGER n, Ptr text, Ptr chars) /* IMIV-25 */
 {
     GUEST<Point> num, den;
 
-    num.h = num.v = den.h = den.v = CWC(1);
+    num.h = num.v = den.h = den.v = 1;
     xStdTxMeas(n, (unsigned char *)text, &num, &den,
                (FontInfo *)0, (GUEST<INTEGER> *)chars);
 }

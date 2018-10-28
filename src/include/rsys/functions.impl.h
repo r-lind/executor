@@ -170,12 +170,12 @@ namespace stack
     void push(T x)
     {
         EM_A7 -= (sizeof(GUEST<T>) + 1) & ~1;
-        *(ptr_from_longint<GUEST<T>*>(EM_A7)) = RM(x);
+        *(ptr_from_longint<GUEST<T>*>(EM_A7)) = x;
     }
     template<class T>
     T pop()
     {
-        T retval = MR(*ptr_from_longint<GUEST<T>*>(EM_A7));
+        T retval = *ptr_from_longint<GUEST<T>*>(EM_A7);
         EM_A7 += (sizeof(GUEST<T>) + 1) & ~1;
         return retval;
     }
@@ -199,7 +199,7 @@ namespace callfrom68K
         static void invokeFrom68K(const F& fptr, Args... args)
         {
             Ret retval = fptr(args...);
-            *ptr_from_longint<GUEST<Ret>*>(EM_A7) = RM(retval);
+            *ptr_from_longint<GUEST<Ret>*>(EM_A7) = retval;
         }
     };
 

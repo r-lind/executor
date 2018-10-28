@@ -19,9 +19,9 @@ void Executor::ROMlib_rootless_update(RgnHandle extra)
     if(vdriver->isRootless())
     {
         RgnHandle rgn = NewRgn();
-        SetRectRgn(rgn, 0,0, CW(qdGlobals().screenBits.bounds.right), CW(LM(MBarHeight)));
+        SetRectRgn(rgn, 0,0, qdGlobals().screenBits.bounds.right, LM(MBarHeight));
 
-        for(WindowPeek wp = MR(LM(WindowList)); wp; wp = WINDOW_NEXT_WINDOW(wp))
+        for(WindowPeek wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
         {
             if(WINDOW_VISIBLE_X(wp))
             {
@@ -52,10 +52,10 @@ void Executor::ROMlib_rootless_openmenu(Rect r)
 #endif
     if(vdriver->isRootless())
     {
-        r.left   = CW(CW(r.left  ) - 1);
-        r.top    = CW(CW(r.top   ) - 1);
-        r.right  = CW(CW(r.right ) + 2);
-        r.bottom = CW(CW(r.bottom) + 2);
+        r.left   = r.left   - 1;
+        r.top    = r.top    - 1;
+        r.right  = r.right  + 2;
+        r.bottom = r.bottom + 2;
         rootlessMenus.push_back(r);
         ROMlib_rootless_update();
     }

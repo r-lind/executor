@@ -63,9 +63,9 @@ void send_image(int width, int height,
         color = &header.image_color_map[i];
         color_spec = &CTAB_TABLE(ctab)[i];
 
-        color->red = CW(color_spec->rgb.red);
-        color->green = CW(color_spec->rgb.green);
-        color->blue = CW(color_spec->rgb.blue);
+        color->red = color_spec->rgb.red;
+        color->green = color_spec->rgb.green;
+        color->blue = color_spec->rgb.blue;
     }
     /* connect to server, and send */
     gethostname(hostname, 1024);
@@ -119,8 +119,8 @@ void dump_grafport_image(GrafPort *port)
     r = PORT_RECT(port);
     bounds = PORT_BOUNDS(port);
     OffsetRect(&bounds,
-               CW(r.left) - CW(bounds.left),
-               CW(r.top) - CW(bounds.top));
+               r.left - bounds.left,
+               r.top - bounds.top);
     SectRect(&r, &bounds, &r);
     dump_image(&port->portBits, &r);
 }
@@ -141,7 +141,7 @@ void dump_image(BitMap *bogo_bitmap, Rect *rect)
     height = RECT_HEIGHT(rect);
 
     /* destination must be 8bpp */
-    depth = CW(pixmap->pixelSize);
+    depth = pixmap->pixelSize;
     if(depth != 8)
     {
         int map_width, map_height;
@@ -155,18 +155,18 @@ void dump_image(BitMap *bogo_bitmap, Rect *rect)
         map_row_bytes = ((width * 8 + 31) / 32) * 4;
         base_addr = (char *)alloca(map_row_bytes * height);
 
-        new_pixmap.rowBytes = CW(map_row_bytes);
-        new_pixmap.baseAddr = RM((Ptr)base_addr);
+        new_pixmap.rowBytes = map_row_bytes;
+        new_pixmap.baseAddr = (Ptr)base_addr;
 
-        new_pixmap.pixelSize = CWC(8);
-        new_pixmap.cmpCount = CWC(1);
-        new_pixmap.cmpSize = CWC(8);
+        new_pixmap.pixelSize = 8;
+        new_pixmap.cmpCount = 1;
+        new_pixmap.cmpSize = 8;
 
         new_pixmap.pmTable = nullptr;
 
         conv_table = (ColorTable *)alloca(CTAB_STORAGE_FOR_SIZE(1 << depth));
         for(i = 0; i < (1 << depth); i++)
-            conv_table->ctTable[i].value = CW(i);
+            conv_table->ctTable[i].value = i;
 
         convert_pixmap(pixmap, &new_pixmap, rect,
                        conv_table);
@@ -175,19 +175,19 @@ void dump_image(BitMap *bogo_bitmap, Rect *rect)
     }
     else
     {
-        map_row_bytes = CW(pixmap->rowBytes
-                           & ~ROWBYTES_FLAG_BITS_X);
-        base_addr = (char *)MR(pixmap->baseAddr);
+        map_row_bytes = pixmap->rowBytes
+                           & ~ROWBYTES_FLAG_BITS_X;
+        base_addr = (char *)pixmap->baseAddr;
     }
 
     row_bytes = width;
     _base_addr
-        = &base_addr[(CW(rect->top) - CW(pixmap->bounds.top)) * map_row_bytes
-                     + (CW(rect->left) - CW(pixmap->bounds.left))];
+        = &base_addr[(rect->top - pixmap->bounds.top) * map_row_bytes
+                     + (rect->left - pixmap->bounds.left)];
     send_image(width, height,
                map_row_bytes, row_bytes,
                _base_addr,
-               MR(pixmap->pmTable));
+               pixmap->pmTable);
 
     canonicalize_bogo_map_cleanup((BitMap *)&pixmap, &cleanup);
 }
@@ -200,9 +200,9 @@ void dump_rgn_as_image(RgnHandle rh)
 
     bm.bounds = RGN_BBOX(rh);
     row_bytes = ((RECT_WIDTH(&bm.bounds) + 31) / 32) * 4;
-    bm.rowBytes = CW(row_bytes);
+    bm.rowBytes = row_bytes;
     baseaddr = (char *)alloca(row_bytes * RECT_HEIGHT(&bm.bounds));
-    bm.baseAddr = RM((Ptr)baseaddr);
+    bm.baseAddr = (Ptr)baseaddr;
     memset(baseaddr, '\377', row_bytes * RECT_HEIGHT(&bm.bounds));
 
     CopyBits(&bm, &bm,

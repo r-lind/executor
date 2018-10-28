@@ -24,7 +24,7 @@ INTEGER Executor::C_UniqueID(ResType typ)
     resref *rr;
 
     curmap = LM(CurMap);
-    LM(CurMap) = ((resmap *)STARH(MR(LM(TopMapHndl))))->resfn;
+    LM(CurMap) = ((resmap *)STARH(LM(TopMapHndl)))->resfn;
     while(ROMlib_typidtop(typ, ++startid, &map, &rr) != resNotFound)
         ;
     LM(CurMap) = curmap;
@@ -37,7 +37,7 @@ INTEGER Executor::C_Unique1ID(ResType typ) /* IMIV-16 */
     static INTEGER startid = 0;
     resref *rr;
 
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), (Handle *)0);
+    map = ROMlib_rntohandl(LM(CurMap), (Handle *)0);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
@@ -58,15 +58,15 @@ void Executor::C_GetResInfo(Handle res, GUEST<INTEGER> *id,
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
 
 #if !defined(STEF_GetResInfoFix)
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return;
 #else
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
     {
         if(id)
-            *id = CWC(-1);
+            *id = -1;
         if(typ)
-            *typ = CLC((ResType)0);
+            *typ = (ResType)0;
         if(name)
             name[0] = 0;
         /*-->*/ return;
@@ -78,9 +78,9 @@ void Executor::C_GetResInfo(Handle res, GUEST<INTEGER> *id,
         *typ = tr->rtyp;
     if(name)
     {
-        if(rr->noff != CWC(-1))
+        if(rr->noff != -1)
             str255assign(name,
-                         (StringPtr)((char *)STARH(map) + Hx(map, namoff) + Cx(rr->noff)));
+                         (StringPtr)((char *)STARH(map) + Hx(map, namoff) + rr->noff));
         else
             name[0] = 0;
     }
@@ -93,9 +93,9 @@ INTEGER Executor::C_GetResAttrs(Handle res)
     resref *rr;
 
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         /*-->*/ return 0;
-    return (Cx(rr->ratr));
+    return (rr->ratr);
 }
 
 LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
@@ -107,7 +107,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
     LONGINT loc, lc;
 
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         /*-->*/ return -1;
 
     if(usehandle && *res) /* STARH is overkill */
@@ -116,7 +116,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
     {
         loc = Hx(map, rh.rdatoff) + B3TOLONG(rr->doff);
         ROMlib_setreserr(SetFPos(Hx(map, resfn), fsFromStart, loc));
-        if(LM(ResErr) != CWC(noErr))
+        if(LM(ResErr) != noErr)
             /*-->*/ return -1;
 
         /* If the resource is compressed and we want the memory size, not
@@ -134,20 +134,20 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
             lc = sizeof(l);
             GetFPos(Hx(map, resfn), &master_save_pos);
             ROMlib_setreserr(FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)l));
-            if(LM(ResErr) != CWC(noErr) || l[1] != CLC(COMPRESSED_TAG))
+            if(LM(ResErr) != noErr || l[1] != COMPRESSED_TAG)
             {
-                SetFPos(Hx(map, resfn), fsFromStart, CL(master_save_pos));
+                SetFPos(Hx(map, resfn), fsFromStart, master_save_pos);
                 goto not_compressed_after_all;
             }
             else
             {
-                if(l[2] != CLC(COMPRESSED_FLAGS))
+                if(l[2] != COMPRESSED_FLAGS)
                 {
                     ROMlib_setreserr(CantDecompress);
                     return -1;
                 }
                 else
-                    retval = CL(l[3]);
+                    retval = l[3];
             }
         }
         else
@@ -156,8 +156,8 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
             lc = sizeof(retval);
             GUEST<Size> tmpRet;
             ROMlib_setreserr(FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)&tmpRet));
-            retval = CL(tmpRet);
-            if(LM(ResErr) != CWC(noErr))
+            retval = tmpRet;
+            if(LM(ResErr) != noErr)
                 /*-->*/ return -1;
         }
     }

@@ -36,9 +36,9 @@ typedef GUEST<WHandlePtr> *WHandleHandle;
 
 #define FONTRESID(font, size) (((font) << 7) | (size))
 
-#define WIDTHPTR ((WPtr)MR(LM(WidthPtr)))
-#define WIDTHTABHANDLE ((WHandle)MR(LM(WidthTabHandle)))
-#define WIDTHLISTHAND ((WHandleHandle)MR(LM(WidthListHand)))
+#define WIDTHPTR ((WPtr)LM(WidthPtr))
+#define WIDTHTABHANDLE ((WHandle)LM(WidthTabHandle))
+#define WIDTHLISTHAND ((WHandleHandle)LM(WidthListHand))
 
 extern Fixed font_width_expand(Fixed width, Fixed extra,
                                Fixed hOutputInverse);

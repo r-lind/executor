@@ -20,7 +20,7 @@ void Executor::C_CMY2RGB(CMYColor *cmy_color, RGBColor *rgb_color)
 
 void Executor::C_RGB2CMY(RGBColor *rgb_color, CMYColor *cmy_color)
 {
-    /* use `bar = ~foo' instead of `bar = CW (MaxSmallFract - CW (foo))'
+    /* use `bar = ~foo' instead of `bar = MaxSmallFract - foo'
      to compute the complement value */
 
     cmy_color->cyan.raw(~rgb_color->red.raw());
@@ -40,21 +40,21 @@ static inline GUEST<uint16_t>
 value(unsigned long n1, unsigned long n2, unsigned long hue)
 {
     if(hue < ANGLE_TO_SF(60))
-        return CW(n1 + SF_MULT(n2 - n1,
-                               SF_MULT(hue, C_TO_SF(6))));
+        return n1 + SF_MULT(n2 - n1,
+                               SF_MULT(hue, C_TO_SF(6)));
     else if(hue < ANGLE_TO_SF(180))
-        return CW(n2);
+        return n2;
     else if(hue < ANGLE_TO_SF(240))
-        return CW(n1 + SF_MULT(n2 - n1,
+        return n1 + SF_MULT(n2 - n1,
                                SF_MULT(ANGLE_TO_SF(240) - hue,
-                                       C_TO_SF(6))));
+                                       C_TO_SF(6)));
     else
-        return CW(n1);
+        return n1;
 }
 
 void Executor::C_HSL2RGB(HSLColor *hsl_color, RGBColor *rgb_color)
 {
-    if(hsl_color->saturation == CWC(0))
+    if(hsl_color->saturation == 0)
     {
         rgb_color->red = hsl_color->lightness;
         rgb_color->green = hsl_color->lightness;
@@ -65,9 +65,9 @@ void Executor::C_HSL2RGB(HSLColor *hsl_color, RGBColor *rgb_color)
         unsigned long m1, m2;
 
         /* the hue represents a angle in the range [0, 360) */
-        unsigned long h = CW(hsl_color->hue);
-        unsigned long s = CW(hsl_color->saturation);
-        unsigned long l = CW(hsl_color->lightness);
+        unsigned long h = hsl_color->hue;
+        unsigned long s = hsl_color->saturation;
+        unsigned long l = hsl_color->lightness;
 
         if(l <= (MaxSmallFract / 2))
             m2 = SF_MULT(l, (C_TO_SF(1) + s));
@@ -87,9 +87,9 @@ void Executor::C_HSL2RGB(HSLColor *hsl_color, RGBColor *rgb_color)
 
 void Executor::C_RGB2HSL(RGBColor *rgb_color, HSLColor *hsl_color)
 {
-    unsigned long r = CW(rgb_color->red);
-    unsigned long g = CW(rgb_color->green);
-    unsigned long b = CW(rgb_color->blue);
+    unsigned long r = rgb_color->red;
+    unsigned long g = rgb_color->green;
+    unsigned long b = rgb_color->blue;
 
     unsigned long max = std::max(r, std::max(g, b));
     unsigned long min = std::min(r, std::min(g, b));
@@ -147,14 +147,14 @@ void Executor::C_RGB2HSL(RGBColor *rgb_color, HSLColor *hsl_color)
             gui_fatal("r = 0x%lx, g = 0x%lx, b = 0x%lx", r, g, b);
     }
 
-    hsl_color->hue = CW(h);
-    hsl_color->saturation = CW(s);
-    hsl_color->lightness = CW(l);
+    hsl_color->hue = h;
+    hsl_color->saturation = s;
+    hsl_color->lightness = l;
 }
 
 void Executor::C_HSV2RGB(HSVColor *hsv_color, RGBColor *rgb_color)
 {
-    if(hsv_color->saturation == CWC(0))
+    if(hsv_color->saturation == 0)
     {
         rgb_color->red = hsv_color->value;
         rgb_color->green = hsv_color->value;
@@ -163,9 +163,9 @@ void Executor::C_HSV2RGB(HSVColor *hsv_color, RGBColor *rgb_color)
     else
     {
         /* the hue represents a angle in the range [0, 360) */
-        unsigned long h = CW(hsv_color->hue);
-        unsigned long s = CW(hsv_color->saturation);
-        unsigned long v = CW(hsv_color->value);
+        unsigned long h = hsv_color->hue;
+        unsigned long s = hsv_color->saturation;
+        unsigned long v = hsv_color->value;
 
         /* one of the six color verticies of the hex cone, [0, 6) */
         unsigned sextant = SF_TO_C(h * 6);
@@ -181,35 +181,35 @@ void Executor::C_HSV2RGB(HSVColor *hsv_color, RGBColor *rgb_color)
         switch(sextant)
         {
             case 0:
-                rgb_color->red = CW(v);
-                rgb_color->green = CW(t);
-                rgb_color->blue = CW(p);
+                rgb_color->red = v;
+                rgb_color->green = t;
+                rgb_color->blue = p;
                 break;
             case 1:
-                rgb_color->red = CW(q);
-                rgb_color->green = CW(v);
-                rgb_color->blue = CW(p);
+                rgb_color->red = q;
+                rgb_color->green = v;
+                rgb_color->blue = p;
                 break;
             case 2:
-                rgb_color->red = CW(p);
-                rgb_color->green = CW(v);
-                rgb_color->blue = CW(t);
+                rgb_color->red = p;
+                rgb_color->green = v;
+                rgb_color->blue = t;
                 break;
             case 3:
-                rgb_color->red = CW(p);
-                rgb_color->green = CW(q);
-                rgb_color->blue = CW(v);
+                rgb_color->red = p;
+                rgb_color->green = q;
+                rgb_color->blue = v;
                 break;
             case 4:
-                rgb_color->red = CW(t);
-                rgb_color->green = CW(p);
-                rgb_color->blue = CW(v);
+                rgb_color->red = t;
+                rgb_color->green = p;
+                rgb_color->blue = v;
                 break;
             case 5:
             case 6:
-                rgb_color->red = CW(v);
-                rgb_color->green = CW(p);
-                rgb_color->blue = CW(q);
+                rgb_color->red = v;
+                rgb_color->green = p;
+                rgb_color->blue = q;
                 break;
             default:
                 gui_fatal("sextant = %d", sextant);
@@ -219,9 +219,9 @@ void Executor::C_HSV2RGB(HSVColor *hsv_color, RGBColor *rgb_color)
 
 void Executor::C_RGB2HSV(RGBColor *rgb_color, HSVColor *hsv_color)
 {
-    unsigned long r = CW(rgb_color->red);
-    unsigned long g = CW(rgb_color->green);
-    unsigned long b = CW(rgb_color->blue);
+    unsigned long r = rgb_color->red;
+    unsigned long g = rgb_color->green;
+    unsigned long b = rgb_color->blue;
 
     unsigned long max = std::max(r, std::max(g, b));
     unsigned long min = std::min(r, std::min(g, b));
@@ -273,9 +273,9 @@ void Executor::C_RGB2HSV(RGBColor *rgb_color, HSVColor *hsv_color)
             gui_fatal("r = 0x%lx, g = 0x%lx, b = 0x%lx", r, g, b);
     }
 
-    hsv_color->hue = CW(h);
-    hsv_color->saturation = CW(s);
-    hsv_color->value = CW(v);
+    hsv_color->hue = h;
+    hsv_color->saturation = s;
+    hsv_color->value = v;
 }
 
 SmallFract Executor::C_Fix2SmallFract(Fixed f)

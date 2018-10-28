@@ -29,25 +29,25 @@
 using namespace Executor;
 
 static myalerttab_t myalerttab = {
-    CWC(8),
+    8,
 
 #define WELCOME_CODE 0x28
-    CWC(WELCOME_CODE), /* 1. normally "Welcome to M*cintosh", now copyright stuff */
-    CWC(10),
-    CWC(50),
-    CWC(150),
-    CWC(31),
-    CWC(0),
-    CWC(151),
+    WELCOME_CODE, /* 1. normally "Welcome to M*cintosh", now copyright stuff */
+    10,
+    50,
+    150,
+    31,
+    0,
+    151,
 
-    CWC(50), /* 2. primary text */
-    CWC(56),
-    { CWC(108), CWC(105) },
+    50, /* 2. primary text */
+    56,
+    { 108, 105 },
     "\251 Abacus Research and Development, Inc.  1986-1999",
 
-    CWC(31), /* 3. ARDI icon */
-    CWC(136),
-    { CWC(99), CWC(56), CWC(131), CWC(88) },
+    31, /* 3. ARDI icon */
+    136,
+    { 99, 56, 131, 88 },
     { { 0xff, 0xff, 0xff, 0xff },
       { 0x88, 0x88, 0x88, 0x89 },
       { 0x9d, 0xdd, 0xdd, 0xdd },
@@ -74,31 +74,31 @@ static myalerttab_t myalerttab = {
       { 0x88, 0x88, 0x88, 0x89 },
       { 0xff, 0xff, 0xff, 0xff } },
 
-    CWC(150), /* 4. secondary text */
-    CWC(50),
-    { CWC(122), CWC(125) },
+    150, /* 4. secondary text */
+    50,
+    { 122, 125 },
     "Please click on \"Info\" for more information\0\0",
 
-    CWC(151), /* 5. the buttons */
-    CWC(26),
-    CWC(2),
-    CWC(153),
-    { CWC(150), CWC(50), CWC(170), CWC(100) }, /* OK rect */
-    CWC(0),
-    CWC(155),
-    { CWC(150), CWC(130), CWC(170), CWC(190) }, /* Abort rect */
-    CWC(156),
+    151, /* 5. the buttons */
+    26,
+    2,
+    153,
+    { 150, 50, 170, 100 }, /* OK rect */
+    0,
+    155,
+    { 150, 130, 170, 190 }, /* Abort rect */
+    156,
 
-    CWC(153), /* 6. OK button */
-    CWC(4),
+    153, /* 6. OK button */
+    4,
     "OK\0",
 
-    CWC(155), /* 7. Info button */
-    CWC(6),
+    155, /* 7. Info button */
+    6,
     "Info\0",
 
-    CWC(156), /* 8. Info "procedure" */
-    CWC(4),
+    156, /* 8. Info "procedure" */
+    4,
     nullptr, /* was mydolicense, which we no longer use */
 };
 
@@ -114,10 +114,10 @@ static GUEST<INTEGER> *findid(INTEGER id)
     int i;
     GUEST<INTEGER> *ip;
 
-    for(i = CW(*(GUEST<INTEGER> *)MR(LM(DSAlertTab))),
-    ip = (GUEST<INTEGER> *)MR(LM(DSAlertTab)) + 1;
-        i > 0 && CW(*ip) != id;
-        --i, ip = (GUEST<INTEGER> *)((char *)ip + CW(ip[1]) + 2 * sizeof(INTEGER)))
+    for(i = *(GUEST<INTEGER> *)LM(DSAlertTab),
+    ip = (GUEST<INTEGER> *)LM(DSAlertTab) + 1;
+        i > 0 && *ip != id;
+        --i, ip = (GUEST<INTEGER> *)((char *)ip + ip[1] + 2 * sizeof(INTEGER)))
         ;
     return i > 0 ? ip : nullptr;
 }
@@ -128,7 +128,7 @@ static void drawtextstring(INTEGER id, INTEGER offsetx, INTEGER offsety)
 
     if(id && (tp = (struct tdef *)findid(id)))
     {
-        MoveTo(CW(tp->loc.h) + offsetx, CW(tp->loc.v) + offsety);
+        MoveTo(tp->loc.h + offsetx, tp->loc.v + offsety);
         DrawText_c_string(tp->text);
     }
 }
@@ -142,13 +142,13 @@ static void drawicon(INTEGER id, INTEGER offsetx, INTEGER offsety)
     ip = (struct idef *)findid(id);
     if(id && ip)
     {
-        bm.baseAddr = RM((Ptr)ip->ike);
-        bm.rowBytes = CWC(4);
-        bm.bounds.left = bm.bounds.top = CWC(0);
-        bm.bounds.right = bm.bounds.bottom = CWC(32);
+        bm.baseAddr = (Ptr)ip->ike;
+        bm.rowBytes = 4;
+        bm.bounds.left = bm.bounds.top = 0;
+        bm.bounds.right = bm.bounds.bottom = 32;
         old_loc = ip->loc;
         C_OffsetRect(&ip->loc, offsetx, offsety);
-        CopyBits(&bm, PORT_BITS_FOR_COPY(MR(qdGlobals().thePort)),
+        CopyBits(&bm, PORT_BITS_FOR_COPY(qdGlobals().thePort),
                  &bm.bounds, &ip->loc, srcCopy, nullptr);
         ip->loc = old_loc;
     }
@@ -172,7 +172,7 @@ static void dobuttons(INTEGER id, INTEGER offsetx, INTEGER offsety)
 
     if((bp = (struct bdef *)findid(id)))
     {
-        for(i = 0; i < Cx(bp->nbut); i++)
+        for(i = 0; i < bp->nbut; i++)
         {
 
             /* Offset buttons; this hack is to center the splash screen
@@ -180,18 +180,18 @@ static void dobuttons(INTEGER id, INTEGER offsetx, INTEGER offsety)
 	     */
 
             C_OffsetRect(&bp->buts[i].butloc, offsetx, offsety);
-            if((sp = (struct sdef *)findid(CW(bp->buts[i].butstrid))))
+            if((sp = (struct sdef *)findid(bp->buts[i].butstrid)))
             {
                 textp = sp->text;
                 tcnt = strlen(textp);
                 twid = TextWidth((Ptr)textp, 0, tcnt);
-                MoveTo((CW(bp->buts[i].butloc.left) + CW(bp->buts[i].butloc.right) - twid) / 2,
-                       (CW(bp->buts[i].butloc.top) + CW(bp->buts[i].butloc.bottom)) / 2 + 4);
+                MoveTo((bp->buts[i].butloc.left + bp->buts[i].butloc.right - twid) / 2,
+                       (bp->buts[i].butloc.top + bp->buts[i].butloc.bottom) / 2 + 4);
                 DrawText((Ptr)textp, 0, tcnt);
             }
 #if defined(BILLBUTTONS)
-            h = CW(bp->buts[i].butloc.right) - CW(bp->buts[i].butloc.left);
-            v = (CW(bp->buts[i].butloc.bottom) - CW(bp->buts[i].butloc.top)) / 2;
+            h = bp->buts[i].butloc.right - bp->buts[i].butloc.left;
+            v = (bp->buts[i].butloc.bottom - bp->buts[i].butloc.top) / 2;
             if(h > v)
                 h = v;
             if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
@@ -209,19 +209,19 @@ static void dobuttons(INTEGER id, INTEGER offsetx, INTEGER offsety)
         for(done = 0; !done;)
         {
             C_GetNextEvent(mDownMask | keyDownMask, &evt);
-            if(evt.what == CWC(mouseDown) || evt.what == CWC(keyDown))
+            if(evt.what == mouseDown || evt.what == keyDown)
             {
-                p.h = CW(evt.where.h);
-                p.v = CW(evt.where.v);
-                for(i = 0; !done && i < CW(bp->nbut); i++)
+                p.h = evt.where.h;
+                p.v = evt.where.v;
+                for(i = 0; !done && i < bp->nbut; i++)
                 {
-                    if(PtInRect(p, &bp->buts[i].butloc) || ((evt.what == CWC(keyDown)) && (((CL(evt.message) & charCodeMask) == '\r') || ((CL(evt.message) & charCodeMask) == NUMPAD_ENTER))))
+                    if(PtInRect(p, &bp->buts[i].butloc) || ((evt.what == keyDown) && (((evt.message & charCodeMask) == '\r') || ((evt.message & charCodeMask) == NUMPAD_ENTER))))
                     {
                         if((pp = (struct pdef *)
-                                findid(CW(bp->buts[i].butprocid))))
+                                findid(bp->buts[i].butprocid)))
                             /* NOTE:  we will have to do a better
 				      job here sometime */
-                            (*(void (*)(void))MR(pp->proc))();
+                            (*(void (*)(void))pp->proc)();
                         done = 1;
                     }
                 }
@@ -229,12 +229,12 @@ static void dobuttons(INTEGER id, INTEGER offsetx, INTEGER offsety)
                     SysBeep(1);
             }
         }
-        if(evt.what == CWC(mouseDown))
+        if(evt.what == mouseDown)
             while(!C_GetNextEvent(mUpMask, &evt))
                 ;
 
         /* Move all buttons back. */
-        for(i = 0; i < Cx(bp->nbut); i++)
+        for(i = 0; i < bp->nbut; i++)
             C_OffsetRect(&bp->buts[i].butloc, -offsetx, -offsety);
     }
 }
@@ -258,29 +258,29 @@ void Executor::C_SysError(short errorcode)
 
     LONGINT tmpa5;
 
-    main_gd_rect = PIXMAP_BOUNDS(GD_PMAP(MR(LM(MainDevice))));
+    main_gd_rect = PIXMAP_BOUNDS(GD_PMAP(LM(MainDevice)));
 
     if(!LM(DSAlertTab))
     {
 #if defined(CLIFF_CENTERING_ALGORITHM)
-        LM(DSAlertTab) = CL((Ptr)&myalerttab);
-        LM(DSAlertRect).top = CWC(64);
-        LM(DSAlertRect).left = CWC(32);
-        LM(DSAlertRect).bottom = CWC(190);
-        LM(DSAlertRect).right = CWC(480);
+        LM(DSAlertTab) = (Ptr)&myalerttab;
+        LM(DSAlertRect).top = 64;
+        LM(DSAlertRect).left = 32;
+        LM(DSAlertRect).bottom = 190;
+        LM(DSAlertRect).right = 480;
 #else
-        INTEGER screen_width = CW(main_gd_rect.right);
-        INTEGER screen_height = CW(main_gd_rect.bottom);
+        INTEGER screen_width = main_gd_rect.right;
+        INTEGER screen_height = main_gd_rect.bottom;
 
-        LM(DSAlertTab) = RM((Ptr)&myalerttab);
-        LM(DSAlertRect).top = CW((screen_height - 126) / 3);
-        LM(DSAlertRect).left = CW((screen_width - 448) / 2);
-        LM(DSAlertRect).bottom = CW(CW(LM(DSAlertRect).top) + 126);
-        LM(DSAlertRect).right = CW(CW(LM(DSAlertRect).left) + 448);
+        LM(DSAlertTab) = (Ptr)&myalerttab;
+        LM(DSAlertRect).top = (screen_height - 126) / 3;
+        LM(DSAlertRect).left = (screen_width - 448) / 2;
+        LM(DSAlertRect).bottom = LM(DSAlertRect).top + 126;
+        LM(DSAlertRect).right = LM(DSAlertRect).left + 448;
 #endif
 
-        offsetx = CW(LM(DSAlertRect).left) - 32;
-        offsety = CW(LM(DSAlertRect).top) - 64;
+        offsetx = LM(DSAlertRect).left - 32;
+        offsety = LM(DSAlertRect).top - 64;
     }
     else
     {
@@ -292,9 +292,9 @@ void Executor::C_SysError(short errorcode)
     /*	  NOT DONE YET... signal handlers sort of do that anyway */
 
     /* 2. Store errorcode in LM(DSErrCode) */
-    LM(DSErrCode) = CW(errorcode);
+    LM(DSErrCode) = errorcode;
 
-    /* 3. If no Cx(LM(DSAlertTab)), bitch */
+    /* 3. If no LM(DSAlertTab), bitch */
     if(!LM(DSAlertTab))
     {
         write(2, "This machine thinks its a sadmac\n",
@@ -304,14 +304,14 @@ void Executor::C_SysError(short errorcode)
 
 /* 4. Allocate and re-initialize QuickDraw */
     EM_A5 = US_TO_SYN68K(&tmpa5);
-    LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+    LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
     InitGraf((Ptr)quickbytes + sizeof(quickbytes) - 4);
     ROMlib_initport(&alertport);
     SetPort(&alertport);
     InitCursor();
-    rp = RM(&viscliprgn);
-    alertport.visRgn = alertport.clipRgn = RM(&rp);
-    viscliprgn.rgnSize = CWC(10);
+    rp = &viscliprgn;
+    alertport.visRgn = alertport.clipRgn = &rp;
+    viscliprgn.rgnSize = 10;
     viscliprgn.rgnBBox = main_gd_rect;
 
     /* 5, 6. Draw alert box if the errorcode is >= 0 */
@@ -323,13 +323,13 @@ void Executor::C_SysError(short errorcode)
         r = LM(DSAlertRect);
         FillRect(&r, qdGlobals().white);
 #if defined(OLDSTYLEALERT)
-        r.right = CW(CW(r.right) - (2));
-        r.bottom = CW(CW(r.bottom) - (2));
+        r.right = r.right - (2);
+        r.bottom = r.bottom - (2);
         FrameRect(&r);
         PenSize(2, 2);
-        MoveTo(CW(r.left) + 2, CW(r.bottom));
-        LineTo(CW(r.right), CW(r.bottom));
-        LineTo(CW(r.right), CW(r.top) + 2);
+        MoveTo(r.left + 2, r.bottom);
+        LineTo(r.right, r.bottom);
+        LineTo(r.right, r.top + 2);
         PenSize(1, 1);
 #else /* OLDSTYLEALERT */
         FrameRect(&r);
@@ -344,20 +344,20 @@ void Executor::C_SysError(short errorcode)
 
     ap = (struct adef *)findid(errorcode);
     if(!ap)
-        ap = (struct adef *)((INTEGER *)MR(LM(DSAlertTab)) + 1);
+        ap = (struct adef *)((INTEGER *)LM(DSAlertTab) + 1);
 
     /* 7. text strings */
-    drawtextstring(CW(ap->primetextid), offsetx, offsety);
-    drawtextstring(CW(ap->secondtextid), offsetx, offsety);
+    drawtextstring(ap->primetextid, offsetx, offsety);
+    drawtextstring(ap->secondtextid, offsetx, offsety);
 
     /* 8. icon */
-    drawicon(CW(ap->iconid), offsetx, offsety);
+    drawicon(ap->iconid, offsetx, offsety);
 
     /* 9. TODO: figure out what to do with the proc ... */
 
     /* 10, 11, 12, 13. check for non-zero button id */
     /* #warning We blow off LM(ResumeProc) until we can properly handle it */
     if(ap->buttonid)
-        dobuttons(/* CL(LM(ResumeProc)) ? Cx(ap->buttonid) + 1 : */ Cx(ap->buttonid),
+        dobuttons(/* LM(ResumeProc) ? ap->buttonid + 1 : */ ap->buttonid,
                   offsetx, offsety);
 }

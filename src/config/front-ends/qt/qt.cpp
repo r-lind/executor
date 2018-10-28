@@ -276,8 +276,8 @@ public:
                 keymod &= ~alphaLock;
         }
         when = TickCount();
-        where.h = CW(LM(MouseLocation).h);
-        where.v = CW(LM(MouseLocation).v);
+        where.h = LM(MouseLocation).h;
+        where.v = LM(MouseLocation).v;
         keywhat = ROMlib_xlate(mkvkey, keymod, down_p);
         post_keytrans_key_events(down_p ? keyDown : keyUp,
                              keywhat, when, where,
@@ -327,9 +327,9 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 
     C_OpenPort(&grayRegionPort);
     short grayRegionRowBytes = ((width() + 31) & ~31) / 8;
-    grayRegionPort.portBits.baseAddr = RM((Ptr) framebuffer() + rowBytes() * height());
-    grayRegionPort.portBits.rowBytes = CW( grayRegionRowBytes );
-    grayRegionPort.portBits.bounds = { CW(0), CW(0), CW(height()), CW(width()) };
+    grayRegionPort.portBits.baseAddr = (Ptr) framebuffer() + rowBytes() * height();
+    grayRegionPort.portBits.rowBytes =  grayRegionRowBytes ;
+    grayRegionPort.portBits.bounds = { 0, 0, height(), width() };
     grayRegionPort.portRect = grayRegionPort.portBits.bounds;
 
     memset(framebuffer() + rowBytes() * height(), 0, grayRegionRowBytes * height());
@@ -341,7 +341,7 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 
     rootlessRegion = QBitmap::fromData(
         QSize((width() + 31)&~31, height()),
-        (const uchar*)MR(grayRegionPort.portBits.baseAddr),
+        (const uchar*)grayRegionPort.portBits.baseAddr,
         QImage::Format_Mono);
     
     window->setMask(*rootlessRegion);
@@ -435,9 +435,9 @@ void QtVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *
     for(int i = 0; i < num_colors; i++)
     {
         qcolors[i] = qRgb(
-            CW(colors[i].rgb.red) >> 8,
-            CW(colors[i].rgb.green) >> 8,
-            CW(colors[i].rgb.blue) >> 8
+            colors[i].rgb.red >> 8,
+            colors[i].rgb.green >> 8,
+            colors[i].rgb.blue >> 8
         );
     }
     qimage->setColorTable(qcolors);
@@ -489,7 +489,7 @@ void QtVideoDriver::convertRect(QRect r)
             auto dst = (uint16_t*) (qimage->scanLine(y)) + r.left();
 
             for(int i = 0; i < r.width(); i++)
-                *dst++ = CW(*src++);
+                *dst++ = *src++;
         }
     }
     else if(bpp_ == 32)
@@ -500,7 +500,7 @@ void QtVideoDriver::convertRect(QRect r)
             auto dst = (uint32_t*) (qimage->scanLine(y)) + r.left();
 
             for(int i = 0; i < r.width(); i++)
-                *dst++ = CL(*src++);
+                *dst++ = *src++;
         }
     }
 }
@@ -531,8 +531,8 @@ void QtVideoDriver::pumpEvents()
     macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
 #endif
     cursorPos = window->mapFromGlobal(cursorPos);
-    LM(MouseLocation).h = CW(cursorPos.x());
-    LM(MouseLocation).v = CW(cursorPos.y());
+    LM(MouseLocation).h = cursorPos.x();
+    LM(MouseLocation).v = cursorPos.y();
 
     adb_apeiron_hack(false);
 

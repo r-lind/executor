@@ -21,29 +21,29 @@
 
 using namespace Executor;
 
-#define GD_CLUT_P(gd) (GD_TYPE_X(gd) == CWC(clutType))
+#define GD_CLUT_P(gd) (GD_TYPE_X(gd) == clutType)
 
-#define CI_ALLOCATED_BIT_X CLC(0x80000000)
+#define CI_ALLOCATED_BIT_X 0x80000000
 
 #define CI_ALLOCATED_ENTRY_P(entry) ((entry)->ciPrivate & CI_ALLOCATED_BIT_X)
 #define CI_SET_ALLOCATED_ENTRY(entry, index) \
-    ((entry)->ciPrivate = CI_ALLOCATED_BIT_X | CL(((index)&0xFF) << 16))
+    ((entry)->ciPrivate = CI_ALLOCATED_BIT_X | (((index)&0xFF) << 16))
 #define CI_DEALLOCATE_ENTRY(entry) \
-    ((entry)->ciPrivate = CLC(0))
+    ((entry)->ciPrivate = 0)
 #define CI_ENTRY_INDEX(entry) \
-    ((CL((entry)->ciPrivate) >> 16) & 0xFF)
+    (((entry)->ciPrivate >> 16) & 0xFF)
 #define CI_ENTRY_INDEX_X(entry) \
-    (CL(CI_ENTRY_INDEX(entry)))
+    (CI_ENTRY_INDEX(entry))
 #define CI_USAGE_X(entry) ((entry)->ciUsage)
-#define CI_USAGE(entry) (CW(CI_USAGE_X(entry)))
+#define CI_USAGE(entry) (CI_USAGE_X(entry))
 #define CI_TOLERANCE_X(entry) ((entry)->ciTolerance)
-#define CI_TOLERANCE(entry) (CW(CI_TOLERANCE_X(entry)))
+#define CI_TOLERANCE(entry) (CI_TOLERANCE_X(entry))
 #define CI_USAGE_HAS_BITS_P(entry, bits) \
     ((CI_USAGE(entry) & 0xF) == (bits))
 #define CI_RGB(entry) ((entry)->ciRGB)
 
 #define PALETTE_MODIFIED_BIT (0x8000)
-#define PALETTE_MODIFIED_BIT_X (CWC(0x8000))
+#define PALETTE_MODIFIED_BIT_X (0x8000)
 #define PALETTE_MODIFIED_P(palette) \
     (HxX(palette, pmPrivate) & PALETTE_MODIFIED_BIT_X)
 #define PALETTE_SET_MODIFIED(palette) \
@@ -53,7 +53,7 @@ using namespace Executor;
 
 #define PALETTE_SEED_X(palette) \
     (*(GUEST<LONGINT> *)STARH(HxP(palette, pmSeeds)))
-#define PALETTE_SEED(palette) (MR(PALETTE_SEED_X(palette)))
+#define PALETTE_SEED(palette) (PALETTE_SEED_X(palette))
 
 #define ELT_FREE_P(elt)                    \
     (!((elt)->value & (CTAB_RESERVED_BIT_X \
@@ -87,7 +87,7 @@ lookup_pm_resource_holders(void)
 
     for(i = 0; i < n_resource_holders; i++)
     {
-        if(device_to_resholder[i] == MR(LM(TheGDevice)))
+        if(device_to_resholder[i] == LM(TheGDevice))
             return pm_resource_holders[i];
         else if(device_to_resholder[i] == nullptr)
             null_index = i;
@@ -122,7 +122,7 @@ lookup_pm_resource_holders(void)
         index = null_index;
     }
 
-    device_to_resholder[index] = MR(LM(TheGDevice));
+    device_to_resholder[index] = LM(TheGDevice);
     pm_resource_holders[index]
         = (pm_resource_holder_t *)malloc(256 * sizeof *pm_resource_holders[index]);
 
@@ -181,7 +181,7 @@ get_current_palette(void)
 {
     window_palette_alist_t elt;
 
-    elt = window_palette_alist_elt((WindowPtr)MR(qdGlobals().thePort));
+    elt = window_palette_alist_elt((WindowPtr)qdGlobals().thePort);
     if(!elt)
         elt = window_palette_alist_elt(FrontWindow());
     return elt ? elt->palette : nullptr;
@@ -191,7 +191,7 @@ int window_p(WindowPtr w)
 {
     WindowPeek t_w;
 
-    for(t_w = MR(LM(WindowList));
+    for(t_w = LM(WindowList);
         t_w;
         t_w = WINDOW_NEXT_WINDOW(t_w))
     {
@@ -213,9 +213,9 @@ INTEGER Executor::C_PMgrVersion()
 static inline int
 rgb_delta(RGBColor *c1, RGBColor *c2)
 {
-    return std::max(std::max(std::abs(CW(c1->red) - CW(c2->red)),
-                   std::abs(CW(c1->green) - CW(c2->green))),
-               std::abs(CW(c1->blue) - CW(c2->blue)));
+    return std::max(std::max(std::abs(c1->red - c2->red),
+                   std::abs(c1->green - c2->green)),
+               std::abs(c1->blue - c2->blue));
 }
 
 int pm_allocate_animated_elt(ColorSpec *elt, int elt_i, ColorInfo *entry,
@@ -265,7 +265,7 @@ void pm_deallocate_entry(ColorInfo *entry, int change_color_env_p)
 
     index = CI_ENTRY_INDEX(entry);
 
-    gd_pixmap = GD_PMAP(MR(LM(TheGDevice)));
+    gd_pixmap = GD_PMAP(LM(TheGDevice));
     gd_ctab = PIXMAP_TABLE(gd_pixmap);
     gd_ctab_table = CTAB_TABLE(gd_ctab);
 
@@ -291,13 +291,13 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
     bool entry0_explicit, entry0_animated, entry0_tolerant;
     bool entry1_explicit, entry1_animated, entry1_tolerant;
 
-    entry0_explicit = (CI_USAGE_X(entry0) & CWC(pmExplicit)) != CWC(0);
-    entry0_animated = (CI_USAGE_X(entry0) & CWC(pmAnimated)) != CWC(0);
-    entry0_tolerant = (CI_USAGE_X(entry0) & CWC(pmTolerant)) != CWC(0);
+    entry0_explicit = (CI_USAGE_X(entry0) & pmExplicit) != 0;
+    entry0_animated = (CI_USAGE_X(entry0) & pmAnimated) != 0;
+    entry0_tolerant = (CI_USAGE_X(entry0) & pmTolerant) != 0;
 
-    entry1_explicit = (CI_USAGE_X(entry1) & CWC(pmExplicit)) != CWC(0);
-    entry1_animated = (CI_USAGE_X(entry1) & CWC(pmAnimated)) != CWC(0);
-    entry1_tolerant = (CI_USAGE_X(entry1) & CWC(pmTolerant)) != CWC(0);
+    entry1_explicit = (CI_USAGE_X(entry1) & pmExplicit) != 0;
+    entry1_animated = (CI_USAGE_X(entry1) & pmAnimated) != 0;
+    entry1_tolerant = (CI_USAGE_X(entry1) & pmTolerant) != 0;
 
     /* explicit takes precidence over non-explicit */
     if(entry0_explicit && !entry1_explicit)
@@ -560,7 +560,7 @@ pm_do_updates_gd_changed(void)
     window_palette_alist_t t;
     WindowPtr front_w;
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
 
     if(!GD_CLUT_P(gd))
         /* no updates to do here */
@@ -569,7 +569,7 @@ pm_do_updates_gd_changed(void)
     gd_pixmap = GD_PMAP(gd);
     gd_ctab = PIXMAP_TABLE(gd_pixmap);
 
-    CTAB_SEED_X(gd_ctab) = CL(GetCTSeed());
+    CTAB_SEED_X(gd_ctab) = GetCTSeed();
 
     LM(PaintWhite) = 0;
     front_w = FrontWindow();
@@ -577,7 +577,7 @@ pm_do_updates_gd_changed(void)
     {
         if(t->w == (WindowPtr)-1)
         {
-            PaintOne((WindowPeek)nullptr, MR(LM(GrayRgn)));
+            PaintOne((WindowPeek)nullptr, LM(GrayRgn));
         }
         else if(!window_p(t->w))
             continue;
@@ -589,7 +589,7 @@ pm_do_updates_gd_changed(void)
             PaintOne((WindowPeek)t->w, WINDOW_STRUCT_REGION(t->w));
         }
     }
-    LM(PaintWhite) = CWC(-1);
+    LM(PaintWhite) = -1;
 
     dirty_rect_update_screen();
     vdriver->setColors(0, CTAB_SIZE(gd_ctab) + 1, CTAB_TABLE(gd_ctab));
@@ -627,7 +627,7 @@ void Executor::C_ActivatePalette(WindowPtr src_window)
     entries = PALETTE_ENTRIES(palette);
     palette_info = PALETTE_INFO(palette);
 
-    gd = MR(LM(TheGDevice));
+    gd = LM(TheGDevice);
     gd_pixmap = GD_PMAP(gd);
     gd_bpp = PIXMAP_PIXEL_SIZE(gd_pixmap);
     gd_ctab = PIXMAP_TABLE(gd_pixmap);
@@ -702,7 +702,7 @@ void Executor::C_ActivatePalette(WindowPtr src_window)
         pm_do_updates_gd_changed();
 
     PALETTE_CLEAR_MODIFIED(palette);
-    if(PALETTE_SEEDS_X(palette) != guest_cast<Handle>(CLC(-1)))
+    if(PALETTE_SEEDS_X(palette) != guest_cast<Handle>(-1))
         PALETTE_SEED_X(palette) = CTAB_SEED_X(gd_ctab);
 }
 
@@ -717,9 +717,9 @@ void Executor::C_RestoreDeviceClut(GDHandle gd)
     warning_unimplemented("RestoreDeviceClut implementation may be shaky.");
 
     if(gd == nullptr)
-        gd = MR(LM(MainDevice));
+        gd = LM(MainDevice);
 
-    if(gd != MR(LM(MainDevice)) || !GD_CLUT_P(gd))
+    if(gd != LM(MainDevice) || !GD_CLUT_P(gd))
         return;
 
     gd_pixmap = GD_PMAP(gd);
@@ -798,31 +798,31 @@ void Executor::C_InitPalettes()
 
         default_palette
             = (PaletteHandle)(NewHandle(PALETTE_STORAGE_FOR_ENTRIES(2)));
-        PALETTE_ENTRIES_X(default_palette) = CWC(2);
+        PALETTE_ENTRIES_X(default_palette) = 2;
 
-        PALETTE_PRIVATE_X(default_palette) = CWC(0);
+        PALETTE_PRIVATE_X(default_palette) = 0;
 
         /* ### don't know what these fields fields are for, unitialized
  	 them to some random value */
         PALETTE_WINDOW_X(default_palette) = nullptr;
-        PALETTE_DEVICES_X(default_palette) = CLC(-1);
+        PALETTE_DEVICES_X(default_palette) = -1;
 
         default_palette_info = PALETTE_INFO(default_palette);
 
         entry = &default_palette_info[0];
         entry->ciRGB = ROMlib_white_rgb_color;
-        entry->ciUsage = CWC(pmCourteous);
-        entry->ciTolerance = CWC(0);
-        entry->ciPrivate = CLC(0);
+        entry->ciUsage = pmCourteous;
+        entry->ciTolerance = 0;
+        entry->ciPrivate = 0;
 
         entry = &default_palette_info[1];
         entry->ciRGB = ROMlib_black_rgb_color;
-        entry->ciUsage = CWC(pmCourteous);
-        entry->ciTolerance = CWC(0);
-        entry->ciPrivate = CLC(0);
+        entry->ciUsage = pmCourteous;
+        entry->ciTolerance = 0;
+        entry->ciPrivate = 0;
 
         /* initial contents don't matter */
-        PALETTE_SEEDS_X(default_palette) = RM(NewHandle(sizeof(int)));
+        PALETTE_SEEDS_X(default_palette) = NewHandle(sizeof(int));
         PALETTE_SET_MODIFIED(default_palette);
     }
 
@@ -848,10 +848,10 @@ PaletteHandle Executor::C_NewPalette(INTEGER entries, CTabHandle src_colors,
     memset(STARH(new_palette), 0, PALETTE_STORAGE_FOR_ENTRIES(entries));
 
     /* initial contents don't matter */
-    PALETTE_SEEDS_X(new_palette) = RM(NewHandle(sizeof(int)));
+    PALETTE_SEEDS_X(new_palette) = NewHandle(sizeof(int));
     PALETTE_SET_MODIFIED(new_palette);
 
-    PALETTE_ENTRIES_X(new_palette) = CW(entries);
+    PALETTE_ENTRIES_X(new_palette) = entries;
     info = PALETTE_INFO(new_palette);
 
     i = 0;
@@ -864,16 +864,16 @@ PaletteHandle Executor::C_NewPalette(INTEGER entries, CTabHandle src_colors,
         for(; i < entries && i <= max_colors; i++)
         {
             info[i].ciRGB = colors[i].rgb;
-            info[i].ciUsage = CW(src_usage);
-            info[i].ciTolerance = CW(src_tolerance);
+            info[i].ciUsage = src_usage;
+            info[i].ciTolerance = src_tolerance;
         }
     }
 
     for(; i < entries; i++)
     {
         info[i].ciRGB = ROMlib_black_rgb_color;
-        info[i].ciUsage = CW(src_usage);
-        info[i].ciTolerance = CW(src_tolerance);
+        info[i].ciUsage = src_usage;
+        info[i].ciTolerance = src_tolerance;
     }
 
     return new_palette;
@@ -898,7 +898,7 @@ PaletteHandle Executor::C_GetNewPalette(INTEGER id)
                   palette_size);
 
     /* initial contents don't matter */
-    PALETTE_SEEDS_X(retval) = RM(NewHandle(sizeof(int)));
+    PALETTE_SEEDS_X(retval) = NewHandle(sizeof(int));
     PALETTE_SET_MODIFIED(retval);
 
     return retval;
@@ -1045,9 +1045,9 @@ void Executor::C_ResizePalette(PaletteHandle palette, INTEGER new_size)
 
             entry = &entries[i];
             entry->ciRGB = ROMlib_white_rgb_color;
-            entry->ciUsage = CWC(pmCourteous);
-            entry->ciFlags = entries->ciTolerance = CWC(0);
-            entry->ciPrivate = CLC(0);
+            entry->ciUsage = pmCourteous;
+            entry->ciFlags = entries->ciTolerance = 0;
+            entry->ciPrivate = 0;
         }
     }
 }
@@ -1115,7 +1115,7 @@ set_palette_common(WindowPtr dst_window, PaletteHandle src_palette,
 #if 0
   /* clear the palette bits, and set the new update */
   PALETTE_PRIVATE_X (src_palette) &= ~PALETTE_UPDATE_FLAG_BITS_X;
-  PALETTE_PRIVATE_X (src_palette) |= CW (c_update);
+  PALETTE_PRIVATE_X (src_palette) |= c_update;
 #else
     elt->c_update = c_update;
 #endif
@@ -1143,7 +1143,7 @@ void Executor::C_NSetPalette(WindowPtr dst_window, PaletteHandle src_palette,
 void Executor::C_SetPaletteUpdates(PaletteHandle palette, INTEGER update)
 {
     PALETTE_PRIVATE_X(palette) &= ~PALETTE_UPDATE_FLAG_BITS_X;
-    PALETTE_PRIVATE_X(palette) |= CW(update);
+    PALETTE_PRIVATE_X(palette) |= update;
 }
 
 INTEGER Executor::C_GetPaletteUpdates(PaletteHandle palette)
@@ -1176,20 +1176,20 @@ PaletteHandle Executor::C_GetPalette(WindowPtr src_window)
         }                                                                              \
         info = &PALETTE_INFO(palette)[(entry)];                                        \
                                                                                        \
-        if(CI_USAGE_X(info) & CWC(pmExplicit))                                         \
+        if(CI_USAGE_X(info) & pmExplicit)                                         \
         {                                                                              \
             int gd_index_mask;                                                         \
                                                                                        \
-            gd_index_mask = CTAB_SIZE(PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice)))));          \
-            index_macro_x(MR(qdGlobals().thePort)) = CL((entry)&gd_index_mask);                        \
+            gd_index_mask = CTAB_SIZE(PIXMAP_TABLE(GD_PMAP(LM(TheGDevice))));          \
+            index_macro_x(qdGlobals().thePort) = (entry)&gd_index_mask;                        \
         }                                                                              \
-        else if(CI_USAGE_X(info) & CWC(pmAnimated))                                    \
+        else if(CI_USAGE_X(info) & pmAnimated)                                    \
         {                                                                              \
             if(CI_ALLOCATED_ENTRY_P(info))                                             \
             {                                                                          \
-                index_macro_x(MR(qdGlobals().thePort)) = CI_ENTRY_INDEX_X(info);                       \
+                index_macro_x(qdGlobals().thePort) = CI_ENTRY_INDEX_X(info);                       \
                 /* this necessary? */                                                  \
-                rgb_macro(MR(qdGlobals().thePort)) = CI_RGB(info);                                     \
+                rgb_macro(qdGlobals().thePort) = CI_RGB(info);                                     \
             }                                                                          \
             else                                                                       \
             {                                                                          \
@@ -1199,10 +1199,10 @@ PaletteHandle Executor::C_GetPalette(WindowPtr src_window)
                                    entry);                                             \
             }                                                                          \
         }                                                                              \
-        else if((CI_USAGE_X(info) & CWC(pmTolerant))                                   \
+        else if((CI_USAGE_X(info) & pmTolerant)                                   \
                 || ((CI_USAGE_X(info)                                                  \
                      & CI_USAGE_TYPE_BITS_X)                                           \
-                    == CWC(pmCourteous)))                                              \
+                    == pmCourteous))                                              \
         {                                                                              \
             rgb_fn(&CI_RGB(info));                                                     \
         }                                                                              \
@@ -1233,19 +1233,19 @@ void Executor::C_SaveFore(ColorSpec *cp)
     warning_unimplemented("always uses RGB");
 
     GetForeColor(&cp->rgb);
-    cp->value = CWC(useRGB);
+    cp->value = useRGB;
 }
 
 void Executor::C_RestoreFore(ColorSpec *cp)
 {
-    switch(CW(cp->value))
+    switch(cp->value)
     {
         case usePM:
             warning_unimplemented("using rgb, even though pm was requested");
             goto USE_RGB_ANYWAY;
             break;
         default:
-            warning_unexpected("value = 0x%x (using rgb)", CW(cp->value));
+            warning_unexpected("value = 0x%x (using rgb)", cp->value);
         /* FALL THROUGH */
         case useRGB:
         USE_RGB_ANYWAY:
@@ -1259,19 +1259,19 @@ void Executor::C_SaveBack(ColorSpec *cp)
     warning_unimplemented("always uses RGB");
 
     GetBackColor(&cp->rgb);
-    cp->value = CWC(useRGB);
+    cp->value = useRGB;
 }
 
 void Executor::C_RestoreBack(ColorSpec *cp)
 {
-    switch(CW(cp->value))
+    switch(cp->value)
     {
         case usePM:
             warning_unimplemented("using rgb, even though pm was requested");
             goto USE_RGB_ANYWAY;
             break;
         default:
-            warning_unexpected("value = 0x%x (using rgb)", CW(cp->value));
+            warning_unexpected("value = 0x%x (using rgb)", cp->value);
         /* FALL THROUGH */
         case useRGB:
         USE_RGB_ANYWAY:
@@ -1296,7 +1296,7 @@ void Executor::C_AnimateEntry(WindowPtr dst_window, INTEGER dst_entry,
     entry = &palette->pmInfo[dst_entry];
 
     /* do nothing if the entry is not animated */
-    if((CI_USAGE_X(entry) & CWC(pmAnimated)) != CWC(pmAnimated))
+    if((CI_USAGE_X(entry) & pmAnimated) != pmAnimated)
         return;
 
     CI_RGB(entry) = *src_rgb_color;
@@ -1313,7 +1313,7 @@ void Executor::C_AnimateEntry(WindowPtr dst_window, INTEGER dst_entry,
        * this, so for now we'll assume the window's palette is
        * used by LM(TheGDevice).  This is fairly reasonable.
        */
-        gdev = MR(LM(TheGDevice));
+        gdev = LM(TheGDevice);
         gd_ctab = PIXMAP_TABLE(GD_PMAP(gdev));
         ctab_index = CI_ENTRY_INDEX(entry);
 
@@ -1354,7 +1354,7 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
 
     /* Compute the number of entries in the table to modify. */
     dst_length = std::min<INTEGER>((CTAB_SIZE(src_ctab) + 1) - src_index, dst_length);
-    dst_length = std::min<INTEGER>(CW(palette->pmEntries) - dst_entry, dst_length);
+    dst_length = std::min<INTEGER>(palette->pmEntries - dst_entry, dst_length);
 
     src_cspec = &CTAB_TABLE(src_ctab)[src_index];
 
@@ -1369,7 +1369,7 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
     {
         CTabHandle ctab;
         dirty_rect_update_screen();
-        ctab = PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice))));
+        ctab = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
         vdriver->setColors(0, CTAB_SIZE(ctab) + 1, CTAB_TABLE(ctab));
     }
 }
@@ -1424,8 +1424,8 @@ void Executor::C_SetEntryUsage(PaletteHandle dst_palette, INTEGER entry_index,
     }
     entry = &PALETTE_INFO(dst_palette)[entry_index];
 
-    CI_USAGE_X(entry) = CW(src_usage);
-    CI_TOLERANCE_X(entry) = CW(src_tolerance);
+    CI_USAGE_X(entry) = src_usage;
+    CI_TOLERANCE_X(entry) = src_tolerance;
 
     pm_deallocate_entry(entry, false);
 
@@ -1451,7 +1451,7 @@ void Executor::C_CTab2Palette(CTabHandle src_ctab, PaletteHandle dst_palette,
     /* resize the palette */
     SetHandleSize((Handle)dst_palette,
                   PALETTE_STORAGE_FOR_ENTRIES(ctab_size + 1));
-    PALETTE_ENTRIES_X(dst_palette) = CW(ctab_size + 1);
+    PALETTE_ENTRIES_X(dst_palette) = ctab_size + 1;
 
     ctab_table = CTAB_TABLE(src_ctab);
     palette_info = PALETTE_INFO(dst_palette);
@@ -1463,8 +1463,8 @@ void Executor::C_CTab2Palette(CTabHandle src_ctab, PaletteHandle dst_palette,
         pm_deallocate_entry(entry, false);
 
         entry->ciRGB = ctab_table[i].rgb;
-        entry->ciUsage = CW(src_usage);
-        entry->ciTolerance = CW(src_tolerance);
+        entry->ciUsage = src_usage;
+        entry->ciTolerance = src_tolerance;
     }
     PALETTE_SET_MODIFIED(dst_palette);
 }
@@ -1485,15 +1485,15 @@ void Executor::C_Palette2CTab(PaletteHandle src_palette, CTabHandle dst_ctab)
     SetHandleSize((Handle)dst_ctab,
                   CTAB_STORAGE_FOR_SIZE(palette_entries - 1));
 
-    CTAB_SEED_X(dst_ctab) = CLC(0);
-    CTAB_FLAGS_X(dst_ctab) = CWC(0);
-    CTAB_SIZE_X(dst_ctab) = CW(palette_entries - 1);
+    CTAB_SEED_X(dst_ctab) = 0;
+    CTAB_FLAGS_X(dst_ctab) = 0;
+    CTAB_SIZE_X(dst_ctab) = palette_entries - 1;
 
     palette_info = PALETTE_INFO(src_palette);
     ctab_table = CTAB_TABLE(dst_ctab);
     for(i = 0; i < palette_entries; i++)
     {
-        ctab_table[i].value = CW(i);
+        ctab_table[i].value = i;
 
         ctab_table[i].rgb = palette_info[i].ciRGB;
     }
@@ -1513,17 +1513,17 @@ LONGINT Executor::C_Entry2Index(INTEGER entry_index)
         gui_abort();
     entry = &PALETTE_INFO(palette)[entry_index];
 
-    if((CI_USAGE_X(entry) & CWC(pmTolerant))
-       || CI_USAGE_X(entry) & CWC(pmCourteous))
+    if((CI_USAGE_X(entry) & pmTolerant)
+       || CI_USAGE_X(entry) & pmCourteous)
     {
         /* return the index for ciRGB */
         return Color2Index(&entry->ciRGB);
     }
-    else if(CI_USAGE_X(entry) & CWC(pmExplicit))
+    else if(CI_USAGE_X(entry) & pmExplicit)
     {
         int gd_index_mask;
 
-        gd_index_mask = CTAB_SIZE(PIXMAP_TABLE(GD_PMAP(MR(LM(TheGDevice)))));
+        gd_index_mask = CTAB_SIZE(PIXMAP_TABLE(GD_PMAP(LM(TheGDevice))));
         return ((long)entry_index) & gd_index_mask;
     }
     else if(CI_ALLOCATED_ENTRY_P(entry))
@@ -1531,7 +1531,7 @@ LONGINT Executor::C_Entry2Index(INTEGER entry_index)
         return CI_ENTRY_INDEX(entry);
     }
     else
-        gui_fatal("unhandled entry usage `%d'", CW(entry->ciUsage));
+        gui_fatal("unhandled entry usage `%d'", entry->ciUsage);
 }
 
 void Executor::C_CopyPalette(PaletteHandle src_palette,
@@ -1567,7 +1567,7 @@ void Executor::C_CopyPalette(PaletteHandle src_palette,
 
     for(i = 0; i < n_entries; i++, dst_entry++)
     {
-        dst_entry->ciFlags = CWC(0);
-        dst_entry->ciPrivate = CLC(0);
+        dst_entry->ciFlags = 0;
+        dst_entry->ciPrivate = 0;
     }
 }

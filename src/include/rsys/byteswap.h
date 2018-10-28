@@ -18,6 +18,8 @@ namespace Executor
 
 #define CW_RAW(rhs) (rhs)
 #define CL_RAW(rhs) (rhs)
+#define CWC_RAW(rhs) (rhs)
+#define CLC_RAW(rhs) (rhs)
 
 #else /* !defined (BIGENDIAN) */
 
@@ -34,82 +36,11 @@ inline TT CL_RAW(TT n)
 
 #endif
 
-#if 1
-/*template<class TT, class To = 
-    std::enable_if_t<std::is_integral_v<TT>,
-        std::conditional_t<std::is_signed_v<TT>, int16_t, uint16_t>
-    >>
-inline To CW(TT x)
-{
-    return x;
-}
-inline int16_t CW(int16_t x) { return x; }*/
-
-template<typename T> T CW(T x) { return x; }
-template<typename T> T CL(T x) { return x; }
-//template<typename T> T MR(T x) { return x; }
-//template<typename T> T RM(T x) { return x; }
-template<typename T> T Cx(T x) { return x; }
-
-#else
-template<class TT, class To = 
-    std::enable_if_t<std::is_integral_v<TT>,
-        std::conditional_t<std::is_signed_v<TT>, int16_t, uint16_t>
-    >>
-inline GUEST<To> CW(TT x)
-{
-    return GUEST<To>::fromHost(x);
-}
-inline GUEST<int16_t> CW(int16_t x) { return GUEST<int16_t>::fromHost(x); }
-
-inline uint16_t CW(GUEST<uint16_t> x) { return x.get(); }
-inline int16_t CW(GUEST<int16_t> x) { return x.get(); }
-
-template<class TT, class To = 
-    std::enable_if_t<std::is_integral_v<TT>,// || std::is_enum_v<TT>,
-        std::conditional_t<std::is_signed_v<TT>, int32_t, uint32_t>
-    >>
-inline GUEST<To> CL(TT x)
-{
-    return GUEST<To>::fromHost(x);
-}
-inline GUEST<int32_t> CL(int32_t x) { return GUEST<int32_t>::fromHost(x); }
-
-inline uint32_t CL(GUEST<uint32_t> x) { return x.get(); }
-inline int32_t CL(GUEST<int32_t> x) { return x.get(); }
-
-inline unsigned char Cx(unsigned char x) { return x; }
-inline signed char Cx(signed char x) { return x; }
-inline char Cx(char x) { return x; }
-
-inline GUEST<uint16_t> Cx(uint16_t x) { return CW(x); }
-inline GUEST<int16_t> Cx(int16_t x) { return CW(x); }
-
-inline GUEST<uint32_t> Cx(uint32_t x) { return CL(x); }
-inline GUEST<int32_t> Cx(int32_t x) { return CL(x); }
-
-template<class TT>
-TT Cx(guestvalues::GuestWrapper<TT> x) { return x.get(); }
-
-template<class TT>
-TT Cx(TT x); // no definition. Make sure we get a linker error if an unexpected version of Cx is used.
-
-
-inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
-
-#endif
-
-#define PPR(n) MR(n)
-
 #if defined(BIGENDIAN)
 
 #define CW_RAW(rhs) (rhs)
 #define CL_RAW(rhs) (rhs)
-#define CWC_RAW(rhs) (rhs)
-#define CLC_RAW(rhs) (rhs)
 
-#define CWC(rhs) CW(rhs)
-#define CLC(rhs) CL(rhs)
 
 #else /* !defined (BIGENDIAN) */
 
@@ -123,25 +54,19 @@ inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
           | (((unsigned int)(n)&0xFF000000)              \
              >> 24))))
 
-//#define CWC(n) (GUEST<decltype(CWC_RAW(n))>::fromRaw(CWC_RAW(n)))
-//#define CLC(n) (GUEST<decltype(CLC_RAW(n))>::fromRaw(CLC_RAW(n)))
-#define CWC(rhs) CW(rhs)
-#define CLC(rhs) CL(rhs)
 
 #endif /* !defined (BIGENDIAN) */
 
 #define CLC_NULL nullptr
 
-#define CB(rhs) (rhs)
-#define CBC(rhs) (rhs)
 
-#define STARH(h) MR(*h)
+#define STARH(h) (*h)
 
 // HxZ is a handle dereference where the member selected is itself some form
 // of packed pointer, but we're only checking to see if it's zero or non-zero
 // (e.g. if (HxZ(hand)) )
 
-#define Hx(handle, field) MR(STARH(handle)->field)
+#define Hx(handle, field) STARH(handle)->field
 #define HxX(handle, field) (STARH(handle)->field)
 
 #define HxP(handle, field) Hx(handle, field)

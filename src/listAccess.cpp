@@ -22,11 +22,11 @@ void Executor::C_LGetCellDataLocation(GUEST<INTEGER> *offsetp, GUEST<INTEGER> *l
 
     if((ip = ROMlib_getoffp(cell, list)))
     {
-        *offsetp = *ip++ & CWC(0x7FFF);
-        *lenp = CW((CW(*ip) & 0x7FFF) - CW(*offsetp));
+        *offsetp = *ip++ & 0x7FFF;
+        *lenp = (*ip & 0x7FFF) - *offsetp;
     }
     else
-        *offsetp = *lenp = CWC(-1);
+        *offsetp = *lenp = -1;
 }
 
 BOOLEAN Executor::C_LNextCell(BOOLEAN hnext, BOOLEAN vnext, GUEST<Cell> *cellp,
@@ -36,8 +36,8 @@ BOOLEAN Executor::C_LNextCell(BOOLEAN hnext, BOOLEAN vnext, GUEST<Cell> *cellp,
     Point scratch;
     INTEGER right, bottom;
 
-    scratch.v = CW(cellp->v);
-    scratch.h = CW(cellp->h);
+    scratch.v = cellp->v;
+    scratch.h = cellp->h;
     right = Hx(list, dataBounds.right);
     bottom = Hx(list, dataBounds.bottom);
     if(hnext)
@@ -62,8 +62,8 @@ BOOLEAN Executor::C_LNextCell(BOOLEAN hnext, BOOLEAN vnext, GUEST<Cell> *cellp,
     }
     if(retval)
     {
-        cellp->v = CW(scratch.v);
-        cellp->h = CW(scratch.h);
+        cellp->v = scratch.v;
+        cellp->h = scratch.h;
     }
     return retval;
 }
@@ -78,16 +78,16 @@ void Executor::C_LRect(Rect *cellrect, Cell cell, ListHandle list) /* IMIV-274 *
         csize.h = Hx(list, cellSize.h);
         csize.v = Hx(list, cellSize.v);
         *cellrect = HxX(list, rView);
-        cellrect->top = CW(CW(cellrect->top) + ((cell.v - Hx(list, visible.top)) * csize.v));
-        cellrect->left = CW(CW(cellrect->left) + ((cell.h - Hx(list, visible.left)) * csize.h));
-        if((temp = CW(cellrect->top) + csize.v) < CW(cellrect->bottom))
-            cellrect->bottom = CW(temp);
-        if((temp = CW(cellrect->left) + csize.h) < CW(cellrect->right))
-            cellrect->right = CW(temp);
+        cellrect->top = cellrect->top + ((cell.v - Hx(list, visible.top)) * csize.v);
+        cellrect->left = cellrect->left + ((cell.h - Hx(list, visible.left)) * csize.h);
+        if((temp = cellrect->top + csize.v) < cellrect->bottom)
+            cellrect->bottom = temp;
+        if((temp = cellrect->left + csize.h) < cellrect->right)
+            cellrect->right = temp;
     }
     else
     {
-        cellrect->top = cellrect->left = cellrect->bottom = cellrect->right = CWC(0);
+        cellrect->top = cellrect->left = cellrect->bottom = cellrect->right = 0;
     }
 }
 
@@ -131,12 +131,12 @@ BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
     HLock((Handle)HxP(list, cells));
 
     fp = proc ? (cmpf)proc : &IUMagString;
-    cell.h = CW(cellp->h);
-    cell.v = CW(cellp->v);
+    cell.h = cellp->h;
+    cell.v = cellp->v;
     swappedcell = *cellp;
     /* TODO: SPEEDUP:  the following is a stupid way to do the loop, instead ip
 		 and ep should be used! */
-    while((C_LGetCellDataLocation(&offS, &lenS, cell, list), len = CW(lenS), off = CW(offS),
+    while((C_LGetCellDataLocation(&offS, &lenS, cell, list), len = lenS, off = offS,
            len != -1)
           && CALLCMP(dp, (Ptr)STARH(HxP(list, cells)) + off, dl, len, fp) != 0)
         if(!C_LNextCell(true, true, &swappedcell, list))
@@ -146,16 +146,16 @@ BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
         }
         else
         {
-            cell.h = CW(swappedcell.h);
-            cell.v = CW(swappedcell.v);
+            cell.h = swappedcell.h;
+            cell.v = swappedcell.v;
         }
 
     HUnlock((Handle)HxP(list, cells));
     HUnlock((Handle)list);
     if(len != -1)
     {
-        cellp->h = CW(cell.h);
-        cellp->v = CW(cell.v);
+        cellp->h = cell.h;
+        cellp->v = cell.v;
         /*-->*/ return true;
     }
     else
@@ -174,9 +174,9 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
     oldright = Hx(list, rView.right);
     oldbottom = Hx(list, rView.bottom);
     newright = Hx(list, rView.left) + width;
-    HxX(list, rView.right) = CW(newright);
+    HxX(list, rView.right) = newright;
     newbottom = Hx(list, rView.top) + height;
-    HxX(list, rView.bottom) = CW(newbottom);
+    HxX(list, rView.bottom) = newbottom;
     ch = HxP(list, hScroll);
     cv = HxP(list, vScroll);
 
@@ -200,12 +200,12 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
                 MoveControl(cv, newright, Hx(list, rView.top) - 1);
                 SizeControl(cv, 16, newbottom - Hx(list, rView.top) + 2);
             }
-            r.top = CW(std::min(oldbottom, newbottom));
-            r.bottom = CW(std::max(oldbottom, newbottom));
-            r.left = CW(Hx(list, rView.left) - 1);
-            r.right = CW(std::max(oldright, newright));
+            r.top = std::min(oldbottom, newbottom);
+            r.bottom = std::max(oldbottom, newbottom);
+            r.left = Hx(list, rView.left) - 1;
+            r.right = std::max(oldright, newright);
             if(ch)
-                r.bottom = CW(CW(r.bottom) + (16));
+                r.bottom = r.bottom + (16);
             RectRgn(rectrgn, &r);
             UnionRgn(rectrgn, updatergn, updatergn);
         }
@@ -218,12 +218,12 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
             if(cv)
                 MoveControl(cv, newright, Hx(list, rView.top) - 1);
         }
-        r.left = CW(std::min(oldright, newright));
-        r.right = CW(std::max(oldright, newright));
-        r.top = CW(Hx(list, rView.top) - 1);
-        r.bottom = CW(std::max(oldbottom, newbottom));
+        r.left = std::min(oldright, newright);
+        r.right = std::max(oldright, newright);
+        r.top = Hx(list, rView.top) - 1;
+        r.bottom = std::max(oldbottom, newbottom);
         if(cv)
-            r.right = CW(CW(r.right) + (16));
+            r.right = r.right + (16);
         RectRgn(rectrgn, &r);
         UnionRgn(rectrgn, updatergn, updatergn);
     }
@@ -235,12 +235,12 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
         {
             SizeControl(cv, 16, newbottom - Hx(list, rView.top) + 2);
         }
-        r.top = CW(std::min(oldbottom, newbottom));
-        r.bottom = CW(std::max(oldbottom, newbottom));
-        r.left = CW(Hx(list, rView.left) - 1);
-        r.right = CW(std::max(oldright, newright));
+        r.top = std::min(oldbottom, newbottom);
+        r.bottom = std::max(oldbottom, newbottom);
+        r.left = Hx(list, rView.left) - 1;
+        r.right = std::max(oldright, newright);
         if(ch)
-            r.bottom = CW(CW(r.bottom) + (16));
+            r.bottom = r.bottom + (16);
         RectRgn(rectrgn, &r);
         UnionRgn(rectrgn, updatergn, updatergn);
     }

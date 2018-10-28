@@ -73,17 +73,17 @@ raw_read_write(func_t func, our_file_info_t *op, LONGINT *lengthp,
     ParamBlockRec pbr;
 
     syncint_check_interrupt();
-    pbr.ioParam.ioVRefNum = CW(op->vref);
-    pbr.ioParam.ioRefNum = CW(op->dref);
-    pbr.ioParam.ioBuffer = RM((Ptr)buf);
-    pbr.ioParam.ioReqCount = CL(*lengthp);
-    pbr.ioParam.ioPosMode = CWC(fsFromStart);
-    pbr.ioParam.ioPosOffset = CL(op->pos);
+    pbr.ioParam.ioVRefNum = op->vref;
+    pbr.ioParam.ioRefNum = op->dref;
+    pbr.ioParam.ioBuffer = (Ptr)buf;
+    pbr.ioParam.ioReqCount = *lengthp;
+    pbr.ioParam.ioPosMode = fsFromStart;
+    pbr.ioParam.ioPosOffset = op->pos;
     retval = func(&pbr, false);
     if(retval == noErr)
     {
-        *lengthp = CL(pbr.ioParam.ioActCount);
-        op->pos += CL(pbr.ioParam.ioActCount);
+        *lengthp = pbr.ioParam.ioActCount;
+        op->pos += pbr.ioParam.ioActCount;
     }
     return retval;
 }
@@ -153,7 +153,7 @@ begin_track_buffering_for_write(void)
         length = 0;
     }
     else
-        retval = CW(LM(MemErr));
+        retval = LM(MemErr);
     return retval;
 }
 

@@ -52,8 +52,8 @@ void Executor::SetSoundVol(INTEGER vol)
 static inline bool
 qfull_p(SndChannelPtr chanp)
 {
-    return ((CW(chanp->qTail) == CW(chanp->qHead) - 1 || (chanp->qHead == CWC(0)
-                                                          && CW(chanp->qTail) == CW(chanp->qLength) - 1)));
+    return ((chanp->qTail == chanp->qHead - 1 || (chanp->qHead == 0
+                                                          && chanp->qTail == chanp->qLength - 1)));
 }
 
 static inline bool
@@ -66,7 +66,7 @@ qempty_p(SndChannelPtr chanp)
    * get 2.0 out the door.
    */
     return (chanp->qHead == chanp->qTail
-            || CW(chanp->qLength) <= 0);
+            || chanp->qLength <= 0);
 }
 
 static inline void
@@ -74,9 +74,9 @@ enq(SndChannelPtr chanp, SndCommand cmd)
 {
     unsigned tail;
 
-    tail = CW(chanp->qTail);
+    tail = chanp->qTail;
     chanp->queue[tail] = cmd;
-    chanp->qTail = CW((tail + 1) % CW(chanp->qLength));
+    chanp->qTail = (tail + 1) % chanp->qLength;
 }
 
 static inline SndCommand
@@ -85,9 +85,9 @@ deq(SndChannelPtr chanp)
     SndCommand ret;
     unsigned head;
 
-    head = CW(chanp->qHead);
+    head = chanp->qHead;
     ret = chanp->queue[head];
-    chanp->qHead = CW((head + 1) % CW(chanp->qLength));
+    chanp->qHead = (head + 1) % chanp->qLength;
 
     return ret;
 }
@@ -264,12 +264,12 @@ int Executor::ROMlib_get_snd_cmds(Handle sndh, SndCommand **cmdsp)
     int retval;
 
     p = STARH(sndh);
-    format = CW(*(GUEST<INTEGER> *)p);
+    format = *(GUEST<INTEGER> *)p;
     switch(format)
     {
         case 1:
             p += 2;
-            num_formats = CW(*(GUEST<INTEGER> *)p);
+            num_formats = *(GUEST<INTEGER> *)p;
             switch(num_formats)
             {
                 case 0:
@@ -297,7 +297,7 @@ int Executor::ROMlib_get_snd_cmds(Handle sndh, SndCommand **cmdsp)
 
     /* Now p points to "Number of sound commands" field of resource */
 
-    retval = CW(*(GUEST<INTEGER> *)p);
+    retval = *(GUEST<INTEGER> *)p;
     *cmdsp = (SndCommand *)(p + 2);
 
     return retval;
@@ -317,7 +317,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
         resp = nullptr;
 
     if(resp)
-        format = CW(*(GUEST<INTEGER> *)resp);
+        format = *(GUEST<INTEGER> *)resp;
     else
         format = 0;
 
@@ -349,7 +349,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
 
                 foo = nullptr;
                 SndNewChannel(&foo, sampledSynth, 0, 0);
-                chanp = MR(foo);
+                chanp = foo;
             }
 
             for(i = 0; i < num_commands; i++)
@@ -360,16 +360,16 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
 
                 /* If high bit of cmd is set, then param2 is actually an
            offset */
-                if(cmd.cmd & CWC(0x8000))
+                if(cmd.cmd & 0x8000)
                 {
-                    cmd.param2 = guest_cast<LONGINT>(RM((resp + CL(cmd.param2))));
-                    cmd.cmd &= CWC(~0x8000);
+                    cmd.param2 = guest_cast<LONGINT>((resp + cmd.param2));
+                    cmd.cmd &= ~0x8000;
                 }
 
                 /* Need to figure this out properly; FIXME */
-                if(format == 2 && i == 0 && cmd.cmd == CWC(soundCmd))
+                if(format == 2 && i == 0 && cmd.cmd == soundCmd)
                 {
-                    cmd.cmd = CWC(bufferCmd);
+                    cmd.cmd = bufferCmd;
                 }
 
                 C_SndDoCommand(chanp, &cmd, 0);
@@ -411,25 +411,25 @@ OSErr Executor::C_SndNewChannel(GUEST<SndChannelPtr> *chanpp, INTEGER synth,
         case soundon:
             if(STARH(chanpp) == nullptr)
             {
-                *chanpp = RM((SndChannelPtr)NewPtr(sizeof(SndChannel)));
+                *chanpp = (SndChannelPtr)NewPtr(sizeof(SndChannel));
                 chanp = STARH(chanpp);
-                chanp->flags = CWC(CHAN_ALLOC_FLAG);
+                chanp->flags = CHAN_ALLOC_FLAG;
             }
             else
             {
                 chanp = STARH(chanpp);
-                chanp->flags = CWC(0);
+                chanp->flags = 0;
             }
             chanp->nextChan = allchans;
-            allchans = RM(chanp);
-            chanp->firstMod = RM((Ptr)NewPtr(sizeof(ModifierStub)));
+            allchans = chanp;
+            chanp->firstMod = (Ptr)NewPtr(sizeof(ModifierStub));
             SND_CHAN_TIME(chanp) = 0;
             SND_CHAN_CURRENT_START(chanp) = 0;
-            chanp->callBack = RM(userroutinep);
+            chanp->callBack = userroutinep;
             /*chanp->userInfo = 0;*/
             chanp->wait = 0;
             chanp->cmdInProg.cmd = 0;
-            chanp->qLength = CWC(stdQLength);
+            chanp->qLength = stdQLength;
             chanp->qHead = 0;
             chanp->qTail = 0;
             retval = noErr;
@@ -462,17 +462,17 @@ OSErr Executor::C_SndAddModifier(SndChannelPtr chanp, ProcPtr mod, INTEGER id,
             break;
 #if defined(OLD_BROKEN_NEXTSTEP_SOUND)
         case soundon:
-            if((unsigned short)chanp->qLength != (unsigned short)CWC(stdQLength))
+            if((unsigned short)chanp->qLength != (unsigned short)stdQLength)
                 retval = badChannel;
             else
             {
                 modp = (ModifierStubPtr)NewPtr(sizeof(ModifierStub));
                 modp->nextStub = chanp->firstMod;
-                chanp->firstMod = CL(modp);
+                chanp->firstMod = modp;
                 modp->flags = 0;
                 if(mod)
                 {
-                    modp->code = CL(mod);
+                    modp->code = mod;
                     modp->hState = 0;
                 }
                 else
@@ -492,9 +492,9 @@ OSErr Executor::C_SndAddModifier(SndChannelPtr chanp, ProcPtr mod, INTEGER id,
                 modp->every = 0;
                 if(modp->code)
                 {
-                    cmd.cmd = CWC(initCmd);
-                    cmd.param1 = CWC(0);
-                    cmd.param2 = CL(init);
+                    cmd.cmd = initCmd;
+                    cmd.param1 = 0;
+                    cmd.param2 = init;
                     retval = SndDoImmediate(chanp, &cmd);
                 }
                 else
@@ -509,7 +509,7 @@ OSErr Executor::C_SndAddModifier(SndChannelPtr chanp, ProcPtr mod, INTEGER id,
 #if defined(OLD_BROKEN_NEXTSTEP_SOUND)
 static void dumpcmd(SndCommand *cmdp)
 {
-    printf("#%x,1-%x,2-%x.", (LONGINT)CW(cmdp->cmd), (LONGINT)CW(cmdp->param1), (LONGINT)CL(cmdp->param2));
+    printf("#%x,1-%x,2-%x.", (LONGINT)cmdp->cmd, (LONGINT)cmdp->param1, (LONGINT)cmdp->param2);
 }
 #endif
 
@@ -535,11 +535,11 @@ static void recsndcmd(SndChannelPtr chanp, SndCommand *cmdp, ModifierStubPtr mp)
         do
         {
             doanother = callasynth(chanp, cmdp, mp);
-            recsndcmd(chanp, cmdp, MR(mp->nextStub));
+            recsndcmd(chanp, cmdp, mp->nextStub);
             if(doanother)
             {
-                cmdp->cmd = CWC(requestNextCmd);
-                cmdp->param1 = CW(++i);
+                cmdp->cmd = requestNextCmd;
+                cmdp->param1 = ++i;
                 cmdp->param2 = 0;
             }
         } while(doanother);
@@ -564,10 +564,10 @@ earlier (snd_time t1, snd_time t2)
 static inline unsigned int
 snd_duration(SoundHeaderPtr hp)
 {
-    return CL(hp->length);
+    return hp->length;
 }
 
-#define CMD_DONE(c) (SND_CHAN_FLAGS_X(c) &= CWC(~CHAN_CMDINPROG_FLAG))
+#define CMD_DONE(c) (SND_CHAN_FLAGS_X(c) &= ~CHAN_CMDINPROG_FLAG)
 
 static void
 do_current_command(SndChannelPtr chanp, struct hunger_info info)
@@ -577,10 +577,10 @@ do_current_command(SndChannelPtr chanp, struct hunger_info info)
     SoundHeaderPtr hp;
     SndCommand cmd;
 
-    switch(CW(chanp->cmdInProg.cmd))
+    switch(chanp->cmdInProg.cmd)
     {
         case bufferCmd:
-            hp = MR(guest_cast<SoundHeaderPtr>(chanp->cmdInProg.param2));
+            hp = guest_cast<SoundHeaderPtr>(chanp->cmdInProg.param2);
 
             if(hp->encode != stdSH)
             {
@@ -597,13 +597,13 @@ do_current_command(SndChannelPtr chanp, struct hunger_info info)
             {
                 duration = snd_duration(hp);
 
-                sp = (hp->samplePtr ? (unsigned char *)MR(hp->samplePtr)
+                sp = (hp->samplePtr ? (unsigned char *)hp->samplePtr
                                     : hp->sampleArea);
 
                 warning_sound_log("bufferCmd dur %d", (int)duration);
 
-                if(resample(sp, info.buf, CL(hp->length),
-                            info.bufsize, CL(hp->sampleRate),
+                if(resample(sp, info.buf, hp->length,
+                            info.bufsize, hp->sampleRate,
                             SND_RATE << 16,
                             &SND_CHAN_CURRENT_START(chanp),
                             &SND_CHAN_PREV_SAMP(chanp),
@@ -618,7 +618,7 @@ do_current_command(SndChannelPtr chanp, struct hunger_info info)
         case callBackCmd:
             warning_sound_log("callBackCmd");
             cmd = chanp->cmdInProg;
-            MR(chanp->callBack)
+            chanp->callBack
             (chanp, &cmd);
             CMD_DONE(chanp);
             break;
@@ -635,7 +635,7 @@ do_current_command(SndChannelPtr chanp, struct hunger_info info)
     }
 }
 
-#define SND_DB_DONE(c) (SND_CHAN_FLAGS_X(c) &= CWC(~CHAN_DBINPROG_FLAG))
+#define SND_DB_DONE(c) (SND_CHAN_FLAGS_X(c) &= ~CHAN_DBINPROG_FLAG)
 
 static void
 do_current_db(SndChannelPtr chanp, struct hunger_info info)
@@ -645,9 +645,9 @@ do_current_db(SndChannelPtr chanp, struct hunger_info info)
     unsigned char *sp;
 
     dbhp = SND_CHAN_DBHP(chanp);
-    dbp = MR(dbhp->dbhBufferPtr[SND_CHAN_CURRENT_DB(chanp)]);
+    dbp = dbhp->dbhBufferPtr[SND_CHAN_CURRENT_DB(chanp)];
 
-    if(!(dbp->dbFlags & CLC(dbBufferReady)))
+    if(!(dbp->dbFlags & dbBufferReady))
     {
         /* This buffer isn't ready */
         warning_sound_log("notready");
@@ -662,11 +662,11 @@ do_current_db(SndChannelPtr chanp, struct hunger_info info)
 		     f2d (SND_CHAN_CURRENT_START (chanp)),
 		     (int) SND_CHAN_TIME (chanp),
 		     (int) info.t3,
-		     CL (dbp->dbNumFrames),
-		     CL (dbhp->dbhSampleRate) / (double) (1 << 16));
+		     dbp->dbNumFrames,
+		     dbhp->dbhSampleRate / (double) (1 << 16));
 #endif
-    if(resample(sp, info.buf, CL(dbp->dbNumFrames),
-                info.bufsize, CL(dbhp->dbhSampleRate),
+    if(resample(sp, info.buf, dbp->dbNumFrames,
+                info.bufsize, dbhp->dbhSampleRate,
                 SND_RATE << 16,
                 &SND_CHAN_CURRENT_START(chanp),
                 &SND_CHAN_PREV_SAMP(chanp),
@@ -674,8 +674,8 @@ do_current_db(SndChannelPtr chanp, struct hunger_info info)
                 info.t3))
     {
         /* We are done with this buffer */
-        dbp->dbFlags &= CLC(~dbBufferReady);
-        if(dbp->dbFlags & CLC(dbLastBuffer))
+        dbp->dbFlags &= ~dbBufferReady;
+        if(dbp->dbFlags & dbLastBuffer)
             /* We are completely done */
             SND_DB_DONE(chanp);
         else
@@ -685,13 +685,13 @@ do_current_db(SndChannelPtr chanp, struct hunger_info info)
         }
 #if 0
       warning_sound_log ("dblback %p ch %p bp %p",
-			 CL (dbhp->dbhDoubleBack),
+			 dbhp->dbhDoubleBack,
 			 chanp, dbp);
       warning_sound_log (" frs %d flgs %d ui1 %x ui2 %x",
-			 CL (dbp->dbNumFrames),
-			 CL (dbp->dbFlags),
-			 CL (dbp->dbUserInfo[0]),
-			 CL (dbp->dbUserInfo[1]));
+			 dbp->dbNumFrames,
+			 dbp->dbFlags,
+			 dbp->dbUserInfo[0],
+			 dbp->dbUserInfo[1]);
 #endif
         (dbhp->dbhDoubleBack)(chanp, dbp);
     }
@@ -725,7 +725,7 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
     info = SOUND_GET_HUNGER_INFO();
 
     /* For each channel, grab some samples and mix them in */
-    for(chanp = MR(allchans); chanp != nullptr; chanp = MR(chanp->nextChan))
+    for(chanp = allchans; chanp != nullptr; chanp = chanp->nextChan)
     {
         if(earlier_p(SND_CHAN_TIME(chanp), info.t2))
         {
@@ -750,7 +750,7 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
             else if(!qempty_p(chanp))
             {
                 chanp->cmdInProg = deq(chanp);
-                SND_CHAN_FLAGS_X(chanp) |= CWC(CHAN_CMDINPROG_FLAG);
+                SND_CHAN_FLAGS_X(chanp) |= CHAN_CMDINPROG_FLAG;
                 did_something = 1;
             }
             else
@@ -786,21 +786,21 @@ OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
     if(!cmdp)
         warning_sound_log("cmdp = nullptr");
     else
-        warning_sound_log("cmd %d param1 0x%x param2 0x%x nowait %d", CW(cmdp->cmd),
-                          CW(cmdp->param1), CL(cmdp->param2), CW(nowait));
+        warning_sound_log("cmd %d param1 0x%x param2 0x%x nowait %d", cmdp->cmd,
+                          cmdp->param1, cmdp->param2, nowait);
 #endif
 
 #if ERROR_SUPPORTED_P(ERROR_SOUND_LOG)
-    if(cmdp->cmd == CWC(bufferCmd))
+    if(cmdp->cmd == bufferCmd)
     {
         SoundHeaderPtr hp;
 
-        hp = MR(guest_cast<SoundHeaderPtr>(cmdp->param2));
+        hp = guest_cast<SoundHeaderPtr>(cmdp->param2);
         if(!hp)
             warning_sound_log("hp = nullptr");
         else
             warning_sound_log(" len %d rate 0x%x encode %d freq %d",
-                              CL(hp->length), CL(hp->sampleRate), hp->encode,
+                              hp->length, hp->sampleRate, hp->encode,
                               hp->baseFrequency);
     }
 #endif
@@ -835,7 +835,7 @@ OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
             if(retval == noErr)
             {
                 enq(chanp, *cmdp);
-                chanp->flags |= CWC(CHAN_BUSY_FLAG);
+                chanp->flags |= CHAN_BUSY_FLAG;
             }
             break;
     }
@@ -861,13 +861,13 @@ OSErr Executor::C_SndDoImmediate(SndChannelPtr chanp, SndCommand *cmdp)
             SOUND_GO();
 #if 0 /* This is not a good check for badChannel */
       if ((unsigned short) chanp->qLength
-	  != (unsigned short) CWC (stdQLength))
+	  != (unsigned short) stdQLength)
 	retval = badChannel;
       else
 #endif
             {
                 cmd = *cmdp;
-                switch(CW(cmd.cmd))
+                switch(cmd.cmd)
                 {
                     case flushCmd:
                         warning_sound_log("flushCmd");
@@ -891,13 +891,13 @@ OSErr Executor::C_SndDoImmediate(SndChannelPtr chanp, SndCommand *cmdp)
                     case bufferCmd:
                         warning_sound_log("bufferCmd");
                         chanp->cmdInProg = cmd;
-                        SND_CHAN_FLAGS_X(chanp) |= CWC(CHAN_CMDINPROG_FLAG);
+                        SND_CHAN_FLAGS_X(chanp) |= CHAN_CMDINPROG_FLAG;
                         SND_CHAN_CURRENT_START(chanp) = SND_PROMOTE(SND_CHAN_TIME(chanp));
                         retval = noErr;
                         break;
 
                     default:
-                        warning_sound_log("UNKNOWN CMD %d", CW(cmd.cmd));
+                        warning_sound_log("UNKNOWN CMD %d", cmd.cmd);
                         retval = noErr;
                 }
             }
@@ -927,14 +927,14 @@ OSErr Executor::C_SndChannelStatus(SndChannelPtr chanp, INTEGER length,
                 ret = paramErr;
             else
             {
-                statusp->scStartTime = CLC(0);
-                statusp->scEndTime = CLC(0);
-                statusp->scCurrentTime = CLC(0);
+                statusp->scStartTime = 0;
+                statusp->scEndTime = 0;
+                statusp->scCurrentTime = 0;
                 statusp->scChannelBusy = (SND_CHAN_CMDINPROG_P(chanp)
                                           || !qempty_p(chanp));
                 statusp->scChannelPaused = 0; /* FIXME */
-                statusp->scChannelAttributes = CLC(0x80); /* FIXME */
-                statusp->scCPULoad = CLC(0);
+                statusp->scChannelAttributes = 0x80; /* FIXME */
+                statusp->scCPULoad = 0;
                 ret = noErr;
             }
             break;
@@ -1012,28 +1012,28 @@ OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, BOOLEAN quitnow)
             retval = noErr;
             if(quitnow)
             {
-                cmd.cmd = CWC(flushCmd);
-                cmd.param1 = CWC(0);
-                cmd.param2 = CLC(0);
+                cmd.cmd = flushCmd;
+                cmd.param1 = 0;
+                cmd.param2 = 0;
                 retval = SndDoImmediate(chanp, &cmd);
             }
             if(retval == noErr)
             {
-                cmd.cmd = CWC(quietCmd);
+                cmd.cmd = quietCmd;
                 retval = SndDoImmediate(chanp, &cmd);
             }
 #if 0
 	vchanp = chanp;
-	while (vchanp->flags & CWC(CHAN_BUSY_FLAG)) {
+	while (vchanp->flags & CHAN_BUSY_FLAG) {
            // ###
 	}
-	nextmp = CL(chanp->firstMod);
+	nextmp = chanp->firstMod;
 	while ((mp = nextmp)) {
-	    nextmp = CL(mp->nextStub);
-	    cmd.cmd = CWC(freeCmd);
+	    nextmp = mp->nextStub;
+	    cmd.cmd = freeCmd;
 	    callasynth(chanp, &cmd, mp);
 	    if (mp->flags & MOD_SYNTH_FLAG) {
-		h = RecoverHandle((Ptr) CL(mp->code));
+		h = RecoverHandle((Ptr) mp->code);
 		HSetState(h, mp->hState);
 	    }
 	    DisposePtr((Ptr) mp);
@@ -1041,14 +1041,14 @@ OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, BOOLEAN quitnow)
 #endif
 
             for(pp = &allchans;
-                *pp && MR(*pp) != chanp;
-                pp = (GUEST<SndChannelPtr> *)&MR(*pp)->nextChan)
+                *pp && *pp != chanp;
+                pp = (GUEST<SndChannelPtr> *)& (*pp)->nextChan)
                 ;
             if(*pp)
             {
                 *pp = chanp->nextChan;
-                DisposePtr((Ptr)MR(chanp->firstMod));
-                if(chanp->flags & CWC(CHAN_ALLOC_FLAG))
+                DisposePtr((Ptr)chanp->firstMod);
+                if(chanp->flags & CHAN_ALLOC_FLAG)
                     DisposePtr((Ptr)chanp);
             }
             else
@@ -1068,17 +1068,17 @@ void ROMlib_soundcomplete(void *vp)
     SndChannelPtr chanp;
 
     chanp = vp;
-    if(chanp->flags & CWC(CHAN_IMMEDIATE_FLAG))
-        chanp->flags &= CWC(~CHAN_IMMEDIATE_FLAG);
+    if(chanp->flags & CHAN_IMMEDIATE_FLAG)
+        chanp->flags &= ~CHAN_IMMEDIATE_FLAG;
     else
     {
-        chanp->qHead = CW(CW(chanp->qHead) + 1);
-        if((unsigned short)chanp->qHead == (unsigned short)CWC(stdQLength))
-            chanp->qHead = CWC(0);
+        chanp->qHead = chanp->qHead + 1;
+        if((unsigned short)chanp->qHead == (unsigned short)stdQLength)
+            chanp->qHead = 0;
         if(chanp->qHead == chanp->qTail)
-            chanp->flags &= CWC(~CHAN_BUSY_FLAG);
+            chanp->flags &= ~CHAN_BUSY_FLAG;
         else
-            recsndcmd(chanp, &chanp->queue[CW(chanp->qHead)], CL(chanp->firstMod));
+            recsndcmd(chanp, &chanp->queue[chanp->qHead], chanp->firstMod);
     }
 }
 #endif

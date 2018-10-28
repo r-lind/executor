@@ -102,7 +102,7 @@ namespace callconv
     {
         syn68k_addr_t afterwards(syn68k_addr_t ret)
         {
-            Loc::set(CW(LM(MemErr)));
+            Loc::set(LM(MemErr));
             return ret;
         }
     };
@@ -110,7 +110,7 @@ namespace callconv
     {
         syn68k_addr_t afterwards(syn68k_addr_t ret)
         {
-            auto err = CW(LM(MemErr));
+            auto err = LM(MemErr);
             if(err < 0)
                 Loc::set(err);
             return ret;

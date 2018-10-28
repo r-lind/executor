@@ -39,26 +39,26 @@ void Executor::C_SetResInfo(Handle res, INTEGER id, StringPtr name)
     OSErr err;
 
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return;
     if(rr->ratr & resProtected)
     {
         ROMlib_setreserr(resAttrErr); /* IV-18 */
         return;
     }
-    rr->rid = CW(id);
+    rr->rid = id;
     if(name)
     {
         sl = U(name[0]);
-        if(U(*(sp = (char *)STARH(map) + Hx(map, namoff) + Cx(rr->noff))) < sl || rr->noff == CWC(-1))
+        if(U(*(sp = (char *)STARH(map) + Hx(map, namoff) + rr->noff)) < sl || rr->noff == -1)
         {
             SetHandleSize((Handle)map, Hx(map, rh.maplen) + sl + 1);
             err = MemError();
             if(ROMlib_setreserr(err))
                 return;
-            rr->noff = CW(Hx(map, rh.maplen) - Hx(map, namoff));
-            HxX(map, rh.maplen) = CL(Hx(map, rh.maplen) + sl + 1);
-            sp = (char *)STARH(map) + Hx(map, namoff) + Cx(rr->noff);
+            rr->noff = Hx(map, rh.maplen) - Hx(map, namoff);
+            HxX(map, rh.maplen) = Hx(map, rh.maplen) + sl + 1;
+            sp = (char *)STARH(map) + Hx(map, namoff) + rr->noff;
             warning_unimplemented("we leak space here");
         }
         str255assign(sp, name);
@@ -72,7 +72,7 @@ void Executor::C_SetResAttrs(Handle res, INTEGER attrs)
     resref *rr;
 
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return;
     rr->ratr = attrs;
 }
@@ -85,7 +85,7 @@ void Executor::C_ChangedResource(Handle res)
     Size oldsize, newsize;
 
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return;
     if(rr->ratr & resProtected)
     {
@@ -93,14 +93,14 @@ void Executor::C_ChangedResource(Handle res)
         return;
     }
     rr->ratr |= resChanged;
-    HxX(map, resfatr) |= CWC(mapChanged);
+    HxX(map, resfatr) |= mapChanged;
     if(rr->doff[0] != 0xff || rr->doff[1] != 0xff || rr->doff[2] != 0xff)
     {
         oldsize = ROMlib_SizeResource(res, false);
-        newsize = GetHandleSize((Handle)MR(rr->rhand));
+        newsize = GetHandleSize((Handle)rr->rhand);
         if(newsize > oldsize)
         {
-            HxX(map, resfatr) |= CWC(mapCompact);
+            HxX(map, resfatr) |= mapCompact;
             rr->doff[0] = rr->doff[1] = rr->doff[2] = 0xff;
         }
     }
@@ -113,20 +113,20 @@ static LONGINT addtype(resmaphand map, ResType typ)
     LONGINT off;
 
     WALKTR(map, i, tr)
-    if(tr->rtyp == CL(typ))
+    if(tr->rtyp == typ)
         return ((LONGINT)((char *)tr - (char *)STARH(map)));
     EWALKTR(tr)
     ROMlib_invalar();
-    t.rtyp = CL(typ);
-    t.nres = CWC(-1);
-    t.rloff = CW(NAMEOFF(map) - TYPEOFF(map));
+    t.rtyp = typ;
+    t.nres = -1;
+    t.rloff = NAMEOFF(map) - TYPEOFF(map);
     off = (LONGINT)((char *)tr - (char *)STARH(map));
     Munger((Handle)map, off, (Ptr) "", (LONGINT)0, (Ptr)&t, sizeof(t));
-    NUMTMINUS1X(map) = CW(NUMTMINUS1(map) + 1);
-    MAPLENX(map) = CL(MAPLEN(map) + sizeof(t));
-    NAMEOFFX(map) = CW(NAMEOFF(map) + sizeof(t));
+    NUMTMINUS1X(map) = NUMTMINUS1(map) + 1;
+    MAPLENX(map) = MAPLEN(map) + sizeof(t);
+    NAMEOFFX(map) = NAMEOFF(map) + sizeof(t);
     WALKTR(map, i, tr)
-    tr->rloff = CW(CW(tr->rloff) + sizeof(t));
+    tr->rloff = tr->rloff + sizeof(t);
     EWALKTR(tr)
     return (off);
 }
@@ -146,7 +146,7 @@ static LONGINT addname(resmaphand map, StringPtr name)
         Munger((Handle)map, MAPLEN(map), (Ptr) "", (LONGINT)0, (Ptr)name,
                namelen);
         retval = MAPLEN(map) - NAMEOFF(map);
-        MAPLENX(map) = CL(MAPLEN(map) + namelen);
+        MAPLENX(map) = MAPLEN(map) + namelen;
     }
     return retval;
 }
@@ -166,7 +166,7 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
         return;
     }
     ROMlib_setreserr(noErr);
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), (Handle *)0);
+    map = ROMlib_rntohandl(LM(CurMap), (Handle *)0);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
@@ -179,21 +179,21 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
     }
     ROMlib_setreserr(noErr);
     toff = addtype(map, typ);
-    r.rid = CW(id);
-    r.noff = CW(addname(map, name));
-    r.ratr = CB(resChanged);
+    r.rid = id;
+    r.noff = addname(map, name);
+    r.ratr = resChanged;
     r.doff[0] = r.doff[1] = r.doff[2] = 0xff;
-    HxX(map, resfatr) |= CWC(mapChanged);
-    r.rhand = RM(data);
+    HxX(map, resfatr) |= mapChanged;
+    r.rhand = data;
     HSetRBit(data);
     tr = (typref *)((char *)STARH(map) + toff);
 #if 1
     WALKRR(map, tr, j, rr)
-    if(Cx(rr->rid) > id)
+    if(rr->rid > id)
         break;
     EWALKRR(rr)
 #else /* 0 */
-    rr = (resref *)((char *)STARH(map) + Hx(map, typoff) + Cx(tr->rloff));
+    rr = (resref *)((char *)STARH(map) + Hx(map, typoff) + tr->rloff);
 #endif /* 0 */
     roff = (LONGINT)((char *)rr - (char *)STARH(map));
     /* roff is from the beginning of the map */
@@ -201,15 +201,15 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
            sizeof(resref));
     roff -= TYPEOFF(map);
     /* roff is from the beginning of the typelist */
-    MAPLENX(map) = CL(MAPLEN(map) + sizeof(resref));
-    NAMEOFFX(map) = CW(NAMEOFF(map) + sizeof(resref));
+    MAPLENX(map) = MAPLEN(map) + sizeof(resref);
+    NAMEOFFX(map) = NAMEOFF(map) + sizeof(resref);
     tr2 = (typref *)((char *)STARH(map) + toff);
-    tr2->nres = CW(CW(tr2->nres) + 1);
+    tr2->nres = tr2->nres + 1;
     WALKTR(map, i, tr)
-    if(Cx(tr->rloff) >= roff && tr != tr2)
-        /*  if (Cx(tr->rloff) > roff)  would probably work, but I'm chicken
+    if(tr->rloff >= roff && tr != tr2)
+        /*  if (tr->rloff > roff)  would probably work, but I'm chicken
 								      -- ctm */
-        tr->rloff = CW(CW(tr->rloff) + sizeof(resref));
+        tr->rloff = tr->rloff + sizeof(resref);
     EWALKTR(tr)
 }
 
@@ -230,14 +230,14 @@ void Executor::C_RemoveResource(Handle res)
         ROMlib_setreserr(rmvResFailed);
         /*-->*/ return;
     }
-    map = ROMlib_rntohandl(Cx(LM(CurMap)), (Handle *)0);
+    map = ROMlib_rntohandl(LM(CurMap), (Handle *)0);
     if(!map)
     {
         ROMlib_setreserr(resFNotFound);
         /*-->*/ return;
     }
     ROMlib_setreserr(ROMlib_findmapres(map, res, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         /*-->*/ return;
     if(rr->ratr & resProtected)
     {
@@ -247,43 +247,43 @@ void Executor::C_RemoveResource(Handle res)
     HSetState(res, HGetState(res) & ~RSRCBIT);
     troff = (char *)tr - (char *)STARH(map);
     rroff = (char *)rr - (char *)STARH(map);
-    if(rr->noff != CWC(-1))
+    if(rr->noff != -1)
     {
-        nmoff = Cx(rr->noff) + NAMEOFF(map);
+        nmoff = rr->noff + NAMEOFF(map);
         nlen = U(*((char *)STARH(map) + nmoff)) + 1;
         Munger((Handle)map, nmoff, (Ptr)0, nlen, (Ptr) "", (LONGINT)0);
         nmoff -= NAMEOFF(map);
-        MAPLENX(map) = CL(MAPLEN(map) - nlen);
+        MAPLENX(map) = MAPLEN(map) - nlen;
     }
     else
         nmoff = 0x7fff;
-    HxX(map, resfatr) |= CWC(mapChanged | mapCompact);
+    HxX(map, resfatr) |= mapChanged | mapCompact;
     Munger((Handle)map, rroff, (Ptr)0, (LONGINT)sizeof(resref),
            (Ptr) "", (LONGINT)0);
     rroff -= TYPEOFF(map);
-    MAPLENX(map) = CL(MAPLEN(map) - sizeof(resref));
-    NAMEOFFX(map) = CW(NAMEOFF(map) - sizeof(resref));
+    MAPLENX(map) = MAPLEN(map) - sizeof(resref);
+    NAMEOFFX(map) = NAMEOFF(map) - sizeof(resref);
     tr = (typref *)((char *)STARH(map) + troff);
-    tr->nres = CW(CW(tr->nres) - 1);
-    if(tr->nres == CWC(-1))
+    tr->nres = tr->nres - 1;
+    if(tr->nres == -1)
     {
         ROMlib_invalar();
-        NUMTMINUS1X(map) = CW(NUMTMINUS1(map) - 1);
+        NUMTMINUS1X(map) = NUMTMINUS1(map) - 1;
         Munger((Handle)map, troff, (Ptr)0, (LONGINT)sizeof(typref), (Ptr) "",
                (LONGINT)0);
         tloss = sizeof(typref);
-        MAPLENX(map) = CL(MAPLEN(map) - sizeof(typref));
-        NAMEOFFX(map) = CW(NAMEOFF(map) - sizeof(typref));
+        MAPLENX(map) = MAPLEN(map) - sizeof(typref);
+        NAMEOFFX(map) = NAMEOFF(map) - sizeof(typref);
     }
     else
         tloss = 0;
     WALKTR(map, i, tr)
-    if(Cx(tr->rloff) > rroff)
-        tr->rloff = CW(CW(tr->rloff) - sizeof(resref));
-    tr->rloff = CW(CW(tr->rloff) - tloss);
+    if(tr->rloff > rroff)
+        tr->rloff = tr->rloff - sizeof(resref);
+    tr->rloff = tr->rloff - tloss;
     WALKRR(map, tr, j, rr)
-    if(Cx(rr->noff) > nmoff)
-        rr->noff = CW(CW(rr->noff) - nlen);
+    if(rr->noff > nmoff)
+        rr->noff = rr->noff - nlen;
     EWALKRR(rr)
     EWALKTR(tr)
 }
@@ -308,7 +308,7 @@ static OSErr writemap(resmaphand map)
     lc = Hx(map, rh.maplen);
     terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)STARH(map));
     if(terr == noErr)
-        HxX(map, resfatr) &= CWC(~(mapChanged));
+        HxX(map, resfatr) &= ~(mapChanged);
     return (terr);
 }
 
@@ -322,30 +322,30 @@ void Executor::ROMlib_wr(resmaphand map, resref *rr) /* INTERNAL */
     GUEST<LONGINT> swappedrsize;
     Handle res;
 
-    res = (Handle)MR(rr->rhand);
+    res = (Handle)rr->rhand;
     if((rr->ratr & resChanged) && res)
     {
         rsize = GetHandleSize(res);
         if(rr->doff[0] == 0xFF && rr->doff[1] == 0xFF && rr->doff[2] == 0xFF)
         {
             newloc = Hx(map, rh.rmapoff) - Hx(map, rh.rdatoff);
-            HxX(map, rh.rmapoff) = CL(Hx(map, rh.rmapoff) + rsize + sizeof(LONGINT));
-            HxX(map, rh.datlen) = CL(Hx(map, rh.datlen) + rsize + sizeof(LONGINT));
+            HxX(map, rh.rmapoff) = Hx(map, rh.rmapoff) + rsize + sizeof(LONGINT);
+            HxX(map, rh.datlen) = Hx(map, rh.datlen) + rsize + sizeof(LONGINT);
             B3ASSIGN(rr->doff, newloc);
         }
         else
             newloc = B3TOLONG(rr->doff);
         ROMlib_setreserr(SetFPos(Hx(map, resfn), fsFromStart, Hx(map, rh.rdatoff) + newloc));
-        if(LM(ResErr) != CWC(noErr))
+        if(LM(ResErr) != noErr)
             return;
         lc = sizeof(LONGINT);
-        swappedrsize = CL(rsize);
+        swappedrsize = rsize;
         ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)&swappedrsize));
-        if(LM(ResErr) != CWC(noErr))
+        if(LM(ResErr) != noErr)
             return;
         lc = rsize;
         ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), STARH(res)));
-        if(LM(ResErr) != CWC(noErr))
+        if(LM(ResErr) != noErr)
             return;
         rr->ratr &= ~resChanged;
     }
@@ -386,7 +386,7 @@ static void getdat(INTEGER fn, LONGINT datoff, LONGINT doff, Handle *h)
     SetFPos(fn, fsFromStart, datoff + doff);
     lc = sizeof(LONGINT);
     FSReadAll(fn, guestref(lc), (Ptr)&size_s);
-    size = CL(size_s);
+    size = size_s;
     gui_assert(size >= 0);
     *h = NewHandle(size);
     gui_assert(*h);
@@ -408,7 +408,7 @@ static void putdat(INTEGER fn, LONGINT datoff, LONGINT *doffp, Handle h)
     gui_assert(*doffp >= 0);
     SetFPos(fn, fsFromStart, datoff + *doffp);
     lc = sizeof(LONGINT);
-    swappedsize = CL(size);
+    swappedsize = size;
     FSWriteAll(fn, guestref(lc), (Ptr)&swappedsize);
     lc = size;
     HLock(h);
@@ -431,20 +431,20 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
         B3ASSIGN(sp->rrptr->doff, doff);
 #if 0
         if (sp->rrptr->ratr & resChanged) {
-            putdat(fn, datoff, &doff, (Handle) CL(sp->rrptr->rhand));
-        } else if (!sp->rrptr->rhand || !*(Handle)CL(sp->rrptr->rhand)) {
+            putdat(fn, datoff, &doff, (Handle) sp->rrptr->rhand);
+        } else if (!sp->rrptr->rhand || !*(Handle)sp->rrptr->rhand) {
 	    getdat(fn, datoff, sp->diskoff, &h);
 	    putdat(fn, datoff, &doff,  h);
 	    DisposeHandle(h);
 	} else if (doff != sp->diskoff)
-	    putdat(fn, datoff, &doff, (Handle) CL(sp->rrptr->rhand));
+	    putdat(fn, datoff, &doff, (Handle) sp->rrptr->rhand);
         else
-	    doff += GetHandleSize((Handle) CL(sp->rrptr->rhand)) +
+	    doff += GetHandleSize((Handle) sp->rrptr->rhand) +
 							       sizeof(LONGINT);
 #else
         if(sp->rrptr->ratr & resChanged)
         {
-            putdat(fn, datoff, &doff, (Handle)MR(sp->rrptr->rhand));
+            putdat(fn, datoff, &doff, (Handle)sp->rrptr->rhand);
             sp->rrptr->ratr &= ~resChanged;
         }
         else if(doff == sp->diskoff)
@@ -455,7 +455,7 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
             GUEST<LONGINT> size_s;
             FSReadAll(fn, guestref(lc), (Ptr)&size_s);
             gui_assert(lc == sizeof(LONGINT));
-            size = CL(size_s);
+            size = size_s;
             gui_assert(size >= 0);
             doff += size + sizeof(LONGINT);
         }
@@ -493,10 +493,10 @@ static void compactdata(resmaphand map)
                     Hx(map, rh.rdatoff));
     HSetState((Handle)st, ststate);
     HSetState((Handle)map, mapstate);
-    HxX(map, resfatr) |= CWC(mapChanged);
-    HxX(map, resfatr) |= CWC(~mapCompact);
-    HxX(map, rh.rmapoff) = CL(sizeof(reshead) + sizeof(rsrvrec) + datlen);
-    HxX(map, rh.datlen) = CL(datlen);
+    HxX(map, resfatr) |= mapChanged;
+    HxX(map, resfatr) |= ~mapCompact;
+    HxX(map, rh.rmapoff) = sizeof(reshead) + sizeof(rsrvrec) + datlen;
+    HxX(map, rh.datlen) = datlen;
     DisposeHandle((Handle)st);
 }
 
@@ -526,23 +526,23 @@ void Executor::C_UpdateResFile(INTEGER rn)
     if(err == noErr && (fp->fcflags & fcwriteperm))
     {
         needtowalk = true;
-        if(HxX(map, resfatr) & (CWC(mapCompact)))
+        if(HxX(map, resfatr) & (mapCompact))
         {
             compactdata(map);
             needtowalk = false;
         }
-        if(HxX(map, resfatr) & (CWC(mapChanged)))
+        if(HxX(map, resfatr) & (mapChanged))
         {
             if(needtowalk)
             {
                 WALKTANDR(map, i, tr, j, rr)
                 ROMlib_wr(map, rr);
-                if(LM(ResErr) != CWC(noErr))
+                if(LM(ResErr) != noErr)
                     return;
                 EWALKTANDR(tr, rr)
             }
             ROMlib_setreserr(writemap(map));
-            if(LM(ResErr) != CWC(noErr))
+            if(LM(ResErr) != noErr)
                 return;
         }
         iopb.ioRefNum = HxX(map, resfn);
@@ -557,7 +557,7 @@ void Executor::C_WriteResource(Handle res)
     resref *rr;
 
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
-    if(LM(ResErr) != CWC(noErr))
+    if(LM(ResErr) != noErr)
         return;
     ROMlib_wr(map, rr);
 }

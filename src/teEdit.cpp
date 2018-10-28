@@ -40,9 +40,9 @@ tedoinserttext(TEHandle te, int16_t hlen, int16_t len,
     memmove(&Text[start], ptr, len);
 
     HASSIGN_3(te,
-              selEnd, CW(TE_SEL_END(te) + len),
-              selStart, CW(TE_SEL_START(te) + len),
-              teLength, CW(TE_LENGTH(te) + len));
+              selEnd, TE_SEL_END(te) + len,
+              selStart, TE_SEL_START(te) + len,
+              teLength, TE_LENGTH(te) + len);
 }
 
 void Executor::ROMlib_teremovestyleinfo(TEStyleHandle te_style,
@@ -73,7 +73,7 @@ void Executor::ROMlib_teremovestyleinfo(TEStyleHandle te_style,
 
         null_scrap = TE_STYLE_NULL_SCRAP(te_style);
 
-        SCRAP_N_STYLES_X(null_scrap) = CWC(1);
+        SCRAP_N_STYLES_X(null_scrap) = 1;
         SetHandleSize((Handle)null_scrap, SCRAP_SIZE_FOR_N_STYLES(1));
         scrap_elt = SCRAP_ST_ELT(null_scrap, 0);
         st_elt = ST_ELT(TE_STYLE_STYLE_TABLE(te_style),
@@ -81,7 +81,7 @@ void Executor::ROMlib_teremovestyleinfo(TEStyleHandle te_style,
 
         generic_elt_copy(SCRAP_ELT_TO_GENERIC_ELT(scrap_elt),
                          ST_ELT_TO_GENERIC_ELT(st_elt));
-        SCRAP_ELT_START_CHAR_X(scrap_elt) = CLC(0);
+        SCRAP_ELT_START_CHAR_X(scrap_elt) = 0;
     }
 
     shift = end - start;
@@ -100,13 +100,13 @@ void Executor::ROMlib_teremovestyleinfo(TEStyleHandle te_style,
 
         current_run = &runs[current_run_index];
         STYLE_RUN_START_CHAR_X(current_run)
-            = CW(STYLE_RUN_START_CHAR(current_run) - shift);
+            = STYLE_RUN_START_CHAR(current_run) - shift;
     }
 
     memmove(&runs[start_run_index], &runs[end_run_index],
             (n_runs - end_run_index + 1) * sizeof *runs);
     n_runs -= end_run_index - start_run_index;
-    TE_STYLE_N_RUNS_X(te_style) = CW(n_runs);
+    TE_STYLE_N_RUNS_X(te_style) = n_runs;
     SetHandleSize((Handle)te_style,
                   TE_STYLE_SIZE_FOR_N_RUNS(n_runs));
 
@@ -137,9 +137,9 @@ tereplaceselection(TEHandle teh, int16_t start, int16_t stop, int16_t len,
     BlockMoveData(ptr, STARH(hText) + start, len);
 
     TE_SEL_END_X(teh) = TE_SEL_START_X(teh)
-        = CW(TE_SEL_START(teh) + len);
-    TE_LENGTH_X(teh) = CW(hlen + nchar);
-    TE_CARET_STATE_X(teh) = CWC(-1); /* will be highlit below */
+        = TE_SEL_START(teh) + len;
+    TE_LENGTH_X(teh) = hlen + nchar;
+    TE_CARET_STATE_X(teh) = -1; /* will be highlit below */
 }
 
 void te_style_insert_runs(TEStyleHandle te_style,
@@ -160,7 +160,7 @@ void te_style_insert_runs(TEStyleHandle te_style,
         StyleRun *run = &runs[run_i];
 
         STYLE_RUN_START_CHAR_X(run)
-            = CW(STYLE_RUN_START_CHAR(run) + len);
+            = STYLE_RUN_START_CHAR(run) + len;
     }
 
     for(run_i = 0; run_i < n_new_runs; run_i++)
@@ -192,10 +192,10 @@ void te_style_insert_runs(TEStyleHandle te_style,
 
             new_style = ST_ELT(style_table, new_style_index);
 
-            ST_ELT_COUNT_X(new_style) = CW(ST_ELT_COUNT(new_style) + 1);
+            ST_ELT_COUNT_X(new_style) = ST_ELT_COUNT(new_style) + 1;
             release_style_index(te_style, style_index);
 
-            STYLE_RUN_STYLE_INDEX_X(run) = CW(new_style_index);
+            STYLE_RUN_STYLE_INDEX_X(run) = new_style_index;
         }
     }
     stabilize_style_info(te_style);
@@ -233,7 +233,7 @@ void Executor::ROMlib_teinsertstyleinfo(TEHandle te,
             scrap = (StScrpHandle)NewHandle(sizeof(StScrpRec));
             cleanup_scrap_p = true;
 
-            SCRAP_N_STYLES_X(scrap) = CWC(1);
+            SCRAP_N_STYLES_X(scrap) = 1;
             scrap_elt = SCRAP_ST_ELT(scrap, 0);
 
             start_run_index = te_char_to_run_index(te_style, (start
@@ -245,7 +245,7 @@ void Executor::ROMlib_teinsertstyleinfo(TEHandle te,
 
             generic_elt_copy(SCRAP_ELT_TO_GENERIC_ELT(scrap_elt),
                              ST_ELT_TO_GENERIC_ELT(start_st_elt));
-            SCRAP_ELT_START_CHAR_X(scrap_elt) = CLC(0);
+            SCRAP_ELT_START_CHAR_X(scrap_elt) = 0;
         }
     }
 
@@ -264,15 +264,15 @@ void Executor::ROMlib_teinsertstyleinfo(TEHandle te,
                                       false);
 
         /* must swap here, the elt start char is a `int32_t' */
-        STYLE_RUN_START_CHAR_X(new_run) = CW(SCRAP_ELT_START_CHAR(scrap_elt));
-        STYLE_RUN_STYLE_INDEX_X(new_run) = CW(style_index);
+        STYLE_RUN_START_CHAR_X(new_run) = SCRAP_ELT_START_CHAR(scrap_elt);
+        STYLE_RUN_STYLE_INDEX_X(new_run) = style_index;
     }
     {
         StyleRun *new_run;
 
         new_run = &new_runs[scrap_n_styles];
-        STYLE_RUN_START_CHAR_X(new_run) = CW(len);
-        STYLE_RUN_STYLE_INDEX_X(new_run) = CWC(-1);
+        STYLE_RUN_START_CHAR_X(new_run) = len;
+        STYLE_RUN_STYLE_INDEX_X(new_run) = -1;
     }
 
     te_style_insert_runs(te_style, start, len, new_runs, scrap_n_styles);
@@ -306,7 +306,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
        && TE_LINE_HEIGHT(teh) == -1)
     {
         lht = TE_STYLE_LH_TABLE(te_style);
-        oldlh = CW((STARH(lht) + Hx(teh, nLines) - 1)->lhHeight);
+        oldlh = (STARH(lht) + Hx(teh, nLines) - 1)->lhHeight;
     }
     else
     {
@@ -321,9 +321,9 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
      what is going on.  PhysTCL points this out. */
 
     if(TE_SEL_START(teh) < 0)
-        TE_SEL_START_X(teh) = CWC(32767);
+        TE_SEL_START_X(teh) = 32767;
     if(TE_SEL_END(teh) < 0)
-        TE_SEL_END_X(teh) = CWC(32767);
+        TE_SEL_END_X(teh) = 32767;
 #endif
 
     start = TE_SEL_START(teh);
@@ -333,42 +333,42 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
     if(start < 0)
     {
         warning_unexpected("start = %d", start);
-        TE_SEL_START_X(teh) = CWC(0);
+        TE_SEL_START_X(teh) = 0;
         start = 0;
     }
 
     if(stop < 0)
     {
         warning_unexpected("stop = %d", stop);
-        TE_SEL_END_X(teh) = CWC(0);
+        TE_SEL_END_X(teh) = 0;
         stop = 0;
     }
 
     if(hlen < 0)
     {
         warning_unexpected("nlen = %d", hlen);
-        TE_LENGTH_X(teh) = CWC(0);
+        TE_LENGTH_X(teh) = 0;
         hlen = 0;
     }
 
     if(start > hlen)
     {
         warning_unexpected("start = %d, hlen = %d", start, hlen);
-        TE_SEL_START_X(teh) = CW(hlen);
+        TE_SEL_START_X(teh) = hlen;
         start = hlen;
     }
 
     if(stop > hlen)
     {
         warning_unexpected("stop = %d, hlen = %d", stop, hlen);
-        TE_SEL_END_X(teh) = CW(hlen);
+        TE_SEL_END_X(teh) = hlen;
         stop = hlen;
     }
 
     if(start > stop)
     {
         warning_unexpected("start = %d, stop = %d", start, stop);
-        TE_SEL_START_X(teh) = CW(stop);
+        TE_SEL_START_X(teh) = stop;
         start = stop;
     }
 
@@ -396,7 +396,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
                 {
                     if(start > 0)
                     {
-                        HxX(teh, selStart) = CW(Hx(teh, selStart) - 1);
+                        HxX(teh, selStart) = Hx(teh, selStart) - 1;
                         start = Hx(teh, selStart);
                     }
                 }
@@ -404,7 +404,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
                 {
                     if(stop < hlen)
                     {
-                        HxX(teh, selEnd) = CW(Hx(teh, selEnd) + 1);
+                        HxX(teh, selEnd) = Hx(teh, selEnd) + 1;
                         stop = Hx(teh, selEnd);
                     }
                 }
@@ -421,42 +421,42 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
     ROMlib_caltext(teh, start, nchar, &calstart, &calend);
     TE_CHAR_TO_POINT(teh, TE_LENGTH(teh), &newend);
     if(TE_STYLIZED_P(teh) && TE_LINE_HEIGHT(teh) == -1)
-        newlh = CW((STARH(lht) + TE_N_LINES(teh) - 1)->lhHeight);
+        newlh = (STARH(lht) + TE_N_LINES(teh) - 1)->lhHeight;
 
     if(oldend.v > newend.v)
     {
-        eraser.top = CW(newend.v);
-        eraser.left = CW(newend.h);
-        eraser.bottom = CW(newend.v + newlh);
+        eraser.top = newend.v;
+        eraser.left = newend.h;
+        eraser.bottom = newend.v + newlh;
         eraser.right = HxX(teh, viewRect.right);
         SectRect(&HxX(teh, viewRect), &eraser, &eraser);
         EraseRect(&eraser);
         eraser.top = eraser.bottom;
         eraser.left = HxX(teh, viewRect.left);
-        if(eraser.top != CW(oldend.v))
+        if(eraser.top != oldend.v)
         {
-            eraser.bottom = CW(oldend.v);
+            eraser.bottom = oldend.v;
             eraser.right = HxX(teh, viewRect.right);
             SectRect(&HxX(teh, viewRect), &eraser, &eraser);
             EraseRect(&eraser);
-            eraser.top = CW(oldend.v);
+            eraser.top = oldend.v;
         }
-        eraser.bottom = CW(oldend.v + oldlh);
-        eraser.right = CW(oldend.h);
+        eraser.bottom = oldend.v + oldlh;
+        eraser.right = oldend.h;
         SectRect(&HxX(teh, viewRect), &eraser, &eraser);
         EraseRect(&eraser);
     }
     else if(oldend.v == newend.v && oldend.h > newend.h)
     {
-        eraser.top = CW(oldend.v);
-        eraser.left = CW(newend.h);
-        eraser.bottom = CW(oldend.v + oldlh);
-        eraser.right = CW(oldend.h);
+        eraser.top = oldend.v;
+        eraser.left = newend.h;
+        eraser.bottom = oldend.v + oldlh;
+        eraser.right = oldend.h;
         SectRect(&HxX(teh, viewRect), &eraser, &eraser);
         EraseRect(&eraser);
     }
     if(TE_STYLIZED_P(teh))
-        SCRAP_N_STYLES_X(TE_STYLE_NULL_SCRAP(te_style)) = CWC(0);
+        SCRAP_N_STYLES_X(TE_STYLE_NULL_SCRAP(te_style)) = 0;
 
     TE_DO_TEXT(teh, calstart, calend, teDraw);
 
@@ -464,7 +464,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
         /* turn on any highliting */
         ROMlib_togglelite(teh);
     else
-        TE_CARET_STATE_X(teh) = CWC(255);
+        TE_CARET_STATE_X(teh) = 255;
 
     TERESTORE();
 }
@@ -490,10 +490,10 @@ static void doarrow(TEHandle te, CharParameter thec)
     sel_end = TEP_SEL_END(tep);
     length = TEP_LENGTH(tep);
 
-    if(TEP_CARET_STATE_X(tep) != CWC(caret_invis))
+    if(TEP_CARET_STATE_X(tep) != caret_invis)
     {
         ROMlib_togglelite(te);
-        TEP_CARET_STATE_X(tep) = CWC(caret_invis);
+        TEP_CARET_STATE_X(tep) = caret_invis;
     }
 
     switch(c)
@@ -526,17 +526,17 @@ static void doarrow(TEHandle te, CharParameter thec)
                 pt.v -= offset;
             else
                 pt.v += offset;
-            TEP_SEL_POINT(tep).h = CW(pt.h);
-            TEP_SEL_POINT(tep).v = CW(pt.v);
+            TEP_SEL_POINT(tep).h = pt.h;
+            TEP_SEL_POINT(tep).v = pt.v;
             sel_start = TEP_DO_TEXT(tep, 0, length, teFind);
             break;
         }
     }
 
-    TEP_SEL_START_X(tep) = CW(sel_start);
-    TEP_SEL_END_X(tep) = CW(sel_start);
+    TEP_SEL_START_X(tep) = sel_start;
+    TEP_SEL_END_X(tep) = sel_start;
     if(TEP_CARET_STATE(tep))
-        TEP_CARET_STATE_X(tep) = CWC(caret_vis);
+        TEP_CARET_STATE_X(tep) = caret_vis;
     ROMlib_togglelite(te);
     HSetState((Handle)te, te_flags);
 
@@ -562,7 +562,7 @@ void Executor::C_TEKey(CharParameter thec, TEHandle te)
                 TEStyleHandle te_style;
 
                 te_style = TE_GET_STYLE(te);
-                SCRAP_N_STYLES_X(TE_STYLE_NULL_SCRAP(te_style)) = CWC(0);
+                SCRAP_N_STYLES_X(TE_STYLE_NULL_SCRAP(te_style)) = 0;
             }
             break;
         case NUMPAD_ENTER:
@@ -594,7 +594,7 @@ void Executor::C_TECopy(TEHandle te)
     HLock(hText);
     Text = (char *)STARH(hText);
 
-    PtrToXHand((Ptr)&Text[start], MR(LM(TEScrpHandle)), len);
+    PtrToXHand((Ptr)&Text[start], LM(TEScrpHandle), len);
     if(TE_STYLIZED_P(te))
     {
         TEStyleHandle te_style;
@@ -644,9 +644,9 @@ void Executor::C_TECopy(TEHandle te)
             run_start = RUN_START_CHAR(current_run);
             SCRAP_ELT_START_CHAR_X(scrap_elt) = (run_start < start
                                                      ? 0
-                                                     : CL(run_start - start));
+                                                     : run_start - start);
         }
-        SCRAP_N_STYLES_X(scrap) = CW(n_scrap_styles);
+        SCRAP_N_STYLES_X(scrap) = n_scrap_styles;
 
         {
             HLockGuard guard(scrap);
@@ -657,12 +657,12 @@ void Executor::C_TECopy(TEHandle te)
 
         HSetState((Handle)te_style, te_style_flags);
     }
-    LM(TEScrpLength) = CW(len);
+    LM(TEScrpLength) = len;
 
     // FIXME: I seem to dimly remember that the TE scrap was separate from the global scrap.
     /* ### should this lock `LM(TEScrpHandle)'? */
-    vdriver->putScrap(TICK("TEXT"), CW(LM(TEScrpLength)),   
-                      (char *)STARH(MR(LM(TEScrpHandle))), CW(LM(ScrapCount)));
+    vdriver->putScrap(TICK("TEXT"), LM(TEScrpLength),   
+                      (char *)STARH(LM(TEScrpHandle)), LM(ScrapCount));
 
     HSetState(hText, hText_flags);
 }
@@ -677,12 +677,12 @@ void Executor::C_TEPaste(TEHandle teh)
 {
     Size s;
 
-    s = vdriver->getScrap(TICK("TEXT"), MR(LM(TEScrpHandle)));
+    s = vdriver->getScrap(TICK("TEXT"), LM(TEScrpHandle));
     if(s >= 0)
-        LM(TEScrpLength) = CW(s);
+        LM(TEScrpLength) = s;
 
-    HLockGuard guard(MR(LM(TEScrpHandle)));
-    ROMlib_tedoitall(teh, STARH(MR(LM(TEScrpHandle))), CW(LM(TEScrpLength)),
+    HLockGuard guard(LM(TEScrpHandle));
+    ROMlib_tedoitall(teh, STARH(LM(TEScrpHandle)), LM(TEScrpLength),
                      false, nullptr);
 }
 
