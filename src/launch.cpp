@@ -450,7 +450,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     ROMlib_directdiskaccess = false;
     ROMlib_clear_gestalt_list();
     ParseConfigFile("ExecutorDefault", 0);
-    ParseConfigFile(appNameUTF8, err == noErr ? CL(finfo.fdCreator) : 0);
+    ParseConfigFile(appNameUTF8, err == noErr ? CL(finfo.fdCreator).raw() : 0);
     ROMlib_clockonoff(!ROMlib_noclock);
     if((ROMlib_ScreenSize.first != INITIALPAIRVALUE
         || ROMlib_MacSize.first != INITIALPAIRVALUE))

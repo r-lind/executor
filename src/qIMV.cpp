@@ -37,13 +37,13 @@ void Executor::C_SetStdCProcs(CQDProcs *cProcs) /* IMV-77 */
     cProcs->txMeasProc = RM(&StdTxMeas);
     cProcs->getPicProc = RM(&StdGetPic);
     cProcs->putPicProc = RM(&StdPutPic);
-    cProcs->opcodeProc = RM(nullptr) /* ??? */;
-    cProcs->newProc1Proc = RM(nullptr) /* ??? */;
-    cProcs->newProc2Proc = RM(nullptr) /* ??? */;
-    cProcs->newProc3Proc = RM(nullptr) /* ??? */;
-    cProcs->newProc4Proc = RM(nullptr) /* ??? */;
-    cProcs->newProc5Proc = RM(nullptr) /* ??? */;
-    cProcs->newProc6Proc = RM(nullptr) /* ??? */;
+    cProcs->opcodeProc = nullptr /* ??? */;
+    cProcs->newProc1Proc = nullptr /* ??? */;
+    cProcs->newProc2Proc = nullptr /* ??? */;
+    cProcs->newProc3Proc = nullptr /* ??? */;
+    cProcs->newProc4Proc = nullptr /* ??? */;
+    cProcs->newProc5Proc = nullptr /* ??? */;
+    cProcs->newProc6Proc = nullptr /* ??? */;
 }
 
 void Executor::C_GetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)

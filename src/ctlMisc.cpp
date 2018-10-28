@@ -145,7 +145,7 @@ INTEGER Executor::C_GetControlVariant(ControlHandle c) /* IMV-222 */
 
     for(h = MR(LM(AuxCtlHead)); h != 0 && HxP(h, acOwner) != c; h = HxP(h, acNext))
         ;
-    return h != 0 ? Hx(h, acFlags) : (INTEGER)0;
+    return h != 0 ? Hx(h, acFlags).get() : (INTEGER)0;
 }
 
 /* according to IM-MTE; this has been renamed

@@ -643,7 +643,7 @@ void Executor::C_ActivatePalette(WindowPtr src_window)
      have nothing to do */
     if(!PALETTE_MODIFIED_P(palette)
        /* PM5.0a sets the seeds to `-1', as far as i can tell */
-       && PALETTE_SEEDS_X(palette) != guest_cast<Handle> CLC(-1)
+       && PALETTE_SEEDS_X(palette) != ptr_from_longint<Handle>(-1)
        /* we only have a single display currently */
        && PALETTE_SEED_X(palette) == CTAB_SEED_X(gd_ctab))
         return;

@@ -151,7 +151,7 @@ typedef struct TTxtPicRec
 #define TEXTPIC_JUST(h) (HxX(h, tJus))
 #define TEXTPIC_FLOP(h) (HxX(h, tFlop))
 #define TEXTPIC_ANGLE_X(h) (HxX(h, tAngle))
-#define TEXTPIC_ANGLE(h) (CW(TEXTPIC_ANGLE_X(h)))
+#define TEXTPIC_ANGLE(h) (TEXTPIC_ANGLE_X(h).get())
 #define TEXTPIC_LINE(h) (HxX(h, tLine))
 #define TEXTPIC_COMMENT(h) (HxX(h, tCmnt))
 #define TEXTPIC_ANGLE_FIXED_X(h) (HxX(h, tAngleFixed))

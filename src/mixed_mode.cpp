@@ -279,7 +279,7 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
         PowerPCFrame& parentFrame = *ptr_from_longint<PowerPCFrame*>(cpu.r[1]);
 
         for(int i = 0; i < nParameters; i++)
-            paramValues[i] = (i+2) < 8 ? cpu.r[i+2+3] : CL(parentFrame.parameters[i+2]);
+            paramValues[i] = (i+2) < 8 ? cpu.r[i+2+3] : CL(parentFrame.parameters[i+2]).get();
     }
     else
         std::abort();

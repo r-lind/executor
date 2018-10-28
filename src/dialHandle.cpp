@@ -213,7 +213,7 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
         *item = CWC(-1);
     else
     {
-        idle = (Cx(dp->editField) == -1) ? TEHandle(nullptr) : MR(dp->textH);
+        idle = (Cx(dp->editField) == -1) ? TEHandle(nullptr) : dp->textH.get();
         if(fp)
             fp2 = fp;
         else

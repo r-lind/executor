@@ -440,7 +440,7 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
         }
     }
 
-    gui_assert((int)(PIXPAT_MAP_X(pixpat).raw()) == CLC(sizeof(PixPat)).raw());
+    gui_assert(ptr_to_longint(PIXPAT_MAP_X(pixpat)) == sizeof(PixPat));
 
     PIXPAT_MAP_X(pixpat) = RM(patmap);
 

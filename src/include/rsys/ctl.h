@@ -81,7 +81,7 @@ class CtlCallGuard : private ThePortGuard
 {
 public:
     CtlCallGuard(ControlHandle ctl)
-        : ThePortGuard(CTL_OWNER(ctl))
+        : ThePortGuard(CTL_OWNER(ctl).get())
     {
     }
 };

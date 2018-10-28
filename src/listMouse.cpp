@@ -131,8 +131,8 @@ static void scrollbyvalues(ListHandle list)
     ControlHandle ch;
     Point p;
 
-    h = (ch = HxP(list, hScroll)) ? GetControlValue(ch) : Hx(list, visible.left);
-    v = (ch = HxP(list, vScroll)) ? GetControlValue(ch) : Hx(list, visible.top);
+    h = (ch = HxP(list, hScroll)) ? GetControlValue(ch) : toHost(Hx(list, visible.left));
+    v = (ch = HxP(list, vScroll)) ? GetControlValue(ch) : toHost(Hx(list, visible.top));
     C_LScroll(h - Hx(list, visible.left), v - Hx(list, visible.top), list);
     HxX(list, visible.left) = CW(h);
     HxX(list, visible.top) = CW(v);

@@ -1101,7 +1101,7 @@ static void eatPixMap(PixMapPtr pixp, INTEGER rowb)
     /* TODO:  byte swapping stuff, testing */
 
     /* x(pixp->baseAddr)   = 0; will be set later */
-    pixp->rowBytes = rowb ? CW(rowb) : eatINTEGERX();
+    pixp->rowBytes = rowb ? CW(rowb) : eatINTEGER();
     eatRect(&pixp->bounds);
     pixp->pmVersion = eatINTEGERX();
     pixp->packType = eatINTEGERX();
@@ -1122,7 +1122,7 @@ static void eatPixMap(PixMapPtr pixp, INTEGER rowb)
 static void eatBitMap(BitMap *bp, INTEGER rowb)
 {
     bp->baseAddr = 0;
-    bp->rowBytes = rowb ? CW(rowb) : eatINTEGERX();
+    bp->rowBytes = rowb ? CW(rowb) : eatINTEGER();
     eatRect(&bp->bounds);
 }
 

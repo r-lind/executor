@@ -44,7 +44,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
     devicen = -CW(p->cntrlParam.ioCRefNum) - 1;
     if(devicen < 0 || devicen >= NDEVICES)
         retval = badUnitErr;
-    else if(LM(UTableBase) == guest_cast<DCtlHandlePtr>(CLC(-1)) || (h = MR(MR(LM(UTableBase))[devicen])) == 0 || *h == 0)
+    else if(LM(UTableBase) == guest_cast<DCtlHandlePtr>(CLC(-1)) || (h = MR(MR(LM(UTableBase))[devicen])) == nullptr || *h == nullptr)
         retval = unitEmptyErr;
     else
     {

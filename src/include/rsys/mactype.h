@@ -87,7 +87,8 @@ template<typename T, typename = void>
 struct GuestTypeTraits;
 
 template<typename T>
-struct GuestTypeTraits<T, std::enable_if_t<std::is_integral_v<T> && sizeof(T) <= 4>>
+struct GuestTypeTraits<T, std::enable_if_t<
+    (std::is_integral_v<T> || std::is_enum_v<T>) && sizeof(T) <= 4>>
 {
     using HostType = T;
     using GuestType = T;
@@ -109,6 +110,18 @@ struct GuestTypeTraits<T, std::enable_if_t<std::is_integral_v<T> && 4 < sizeof(T
 
     static GuestType host_to_guest(HostType x) { return SwapTyped(x); }
     static HostType guest_to_host(GuestType x) { return SwapTyped(x); }
+};
+
+template<>
+struct GuestTypeTraits<std::nullptr_t>
+{
+    using HostType = std::nullptr_t;
+    using GuestType = uint32_t;
+    static constexpr bool fitsInRegister = true;
+
+    static GuestType host_to_guest(HostType x) { return 0; }
+
+    static uint32_t host_to_reg(HostType x) { return 0; }
 };
 
 template<typename T>
@@ -249,7 +262,7 @@ struct GuestWrapper : GuestWrapperOps<T>
     {
         static_assert(Traits::fitsInRegister);
         if constexpr(Traits::fitsInRegister)
-            return Traits::host_to_reg(this->get());
+            return SwapTyped(this->raw());
         else
             return 0;
     }
@@ -258,7 +271,7 @@ struct GuestWrapper : GuestWrapperOps<T>
     {
         static_assert(Traits::fitsInRegister);
         if constexpr(Traits::fitsInRegister)
-            this->set(Traits::reg_to_host(x));
+            this->raw(SwapTyped(static_cast<GuestType>(x)));
     }
 
     GuestWrapper() = default;
@@ -299,6 +312,10 @@ struct GuestWrapper : GuestWrapperOps<T>
     }
 
     operator T() const { return this->get(); }
+
+    template<typename T2>
+    explicit operator T2() const { return (T2)this->get(); }
+
 #else
     //GuestWrapper(std::enable_if_t<std::is_convertible_v<std::nullptr_t, T>, std::nullptr_t>)
     GuestWrapper(std::nullptr_t)
@@ -325,28 +342,29 @@ struct GuestWrapper : GuestWrapperOps<T>
         return this->raw() != 0;
     }
 
-
-    template<typename T2, typename result = decltype(T() == T2()),
+#ifndef AUTOMATIC_CONVERSIONS
+    /*template<typename T2, typename result = decltype(T() == T2()),
         typename enable = std::enable_if_t<sizeof(T) == sizeof(T2)>>
     bool operator==(GuestWrapper<T2> b) const
     {
         return this->raw() == b.raw();
-    }
+    }*/
     bool operator==(GuestWrapper<T> b) const
     {
         return this->raw() == b.raw();
     }
 
-    template<typename T2, typename result = decltype(T() != T2()),
+    /*template<typename T2, typename result = decltype(T() != T2()),
         typename enable = std::enable_if_t<sizeof(T) != sizeof(T2)>>
     bool operator!=(GuestWrapper<T2> b) const
     {
         return this->raw() != b.raw();
-    }
+    }*/
     bool operator!=(GuestWrapper<T> b) const
     {
         return this->raw() != b.raw();
     }
+#endif
 
 //#ifdef AUTOMATIC_CONVERSIONS
 #if 0
@@ -381,12 +399,6 @@ struct GuestWrapper : GuestWrapperOps<T>
 #endif
 };
 
-template<class T1, class T2>
-auto operator==(GuestWrapper<T1> a, T2 b)
-    -> decltype(GuestTypeTraits<T1>::HostType() == GuestTypeTraits<T2>::HostType())
-{
-    return a.get() == b;
-}
 
 template<typename T>
 struct GuestWrapperOps<T*> : GuestWrapperGetSet<T*>
@@ -423,7 +435,7 @@ struct GuestWrapperOps<T, std::enable_if_t<std::is_integral_v<T>>> : GuestWrappe
         return GuestWrapper<T>::fromRaw(~this->raw());
     }
 };
-
+#if 0
 template<class T1, class T2>
 std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
     GuestWrapper<T1>>
@@ -439,22 +451,7 @@ operator|(GuestWrapper<T1> x, GuestWrapper<T2> y)
 {
     return GuestWrapper<T1>::fromRaw(x.raw() | y.raw());
 }
-
-template<class T1, class T2>
-std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
-    GuestWrapper<T1>&>
-operator&=(GuestWrapper<T1>& x, GuestWrapper<T2> y)
-{
-    return x = x & y;
-}
-
-template<class T1, class T2>
-std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
-    GuestWrapper<T1>&>
-operator|=(GuestWrapper<T1>& x, GuestWrapper<T2> y)
-{
-    return x = x | y;
-}
+#endif
 
 template<>
 struct GuestWrapperStorage<Point>
@@ -482,10 +479,120 @@ struct GuestWrapperStorage<Point>
         : v(v), h(h) {}
 };
 
+
+
+
+template<class T1>
+auto operator==(GuestWrapper<T1*> a, std::nullptr_t)
+{
+    return !a;
+}
+
+template<class T1>
+auto operator==(std::nullptr_t, GuestWrapper<T1*> a)
+{
+    return !a;
+}
+template<class T1>
+auto operator!=(GuestWrapper<T1*> a, std::nullptr_t)
+{
+    return (bool)a;
+}
+
+template<class T1>
+auto operator!=(std::nullptr_t, GuestWrapper<T1*> a)
+{
+    return (bool)a;
+}
+
+#define DECLARE_OPERATOR_1(OP, TYPE_A, TYPE_B, USE_A, USE_B)                                             \
+    template<class T1, class T2>                                                                         \
+    auto operator OP(TYPE_A a, TYPE_B b)                                                                 \
+        ->decltype(typename GuestTypeTraits<T1>::HostType() OP typename GuestTypeTraits<T2>::HostType()) \
+    {                                                                                                    \
+        return USE_A OP USE_B;                                                                           \
+    }
+
+#define DECLARE_OPERATOR(OP)                                 \
+    DECLARE_OPERATOR_1(OP, GuestWrapper<T1>, T2, a.get(), b) \
+    DECLARE_OPERATOR_1(OP, T1, GuestWrapper<T2>, a, b.get()) \
+    DECLARE_OPERATOR_1(OP, GuestWrapper<T1>, GuestWrapper<T2>, a.get(), b.get())
+
+#define DECLARE_ASSIGNMENT_OPERATOR_1(OP, TYPE_B)                     \
+    template<class T1, class T2>                                      \
+    auto operator OP##=(GuestWrapper<T1> &a, TYPE_B b)                \
+        ->decltype(a = a OP typename GuestTypeTraits<T2>::HostType()) \
+    {                                                                 \
+        return a = a OP b;                                            \
+    }
+
+#define DECLARE_ASSIGNMENT_OPERATOR(OP)                 \
+    DECLARE_ASSIGNMENT_OPERATOR_1(OP, GuestWrapper<T2>) \
+    DECLARE_ASSIGNMENT_OPERATOR_1(OP, T2)
+
+#define DECLARE_OPERATOR_AND_ASSIGNMENT(OP) \
+    DECLARE_OPERATOR(OP)                    \
+    DECLARE_ASSIGNMENT_OPERATOR(OP)
+
+DECLARE_OPERATOR(==)
+DECLARE_OPERATOR(!=)
+DECLARE_OPERATOR(>)
+DECLARE_OPERATOR(<)
+DECLARE_OPERATOR(>=)
+DECLARE_OPERATOR(<=)
+DECLARE_OPERATOR_AND_ASSIGNMENT(+)
+DECLARE_OPERATOR_AND_ASSIGNMENT(-)
+DECLARE_OPERATOR_AND_ASSIGNMENT(*)
+DECLARE_OPERATOR_AND_ASSIGNMENT(/)
+DECLARE_OPERATOR_AND_ASSIGNMENT(>>)
+DECLARE_OPERATOR_AND_ASSIGNMENT(<<)
+DECLARE_OPERATOR_AND_ASSIGNMENT(&)
+DECLARE_OPERATOR_AND_ASSIGNMENT(|)
+DECLARE_OPERATOR_AND_ASSIGNMENT(^)
+
+#define DECLARE_UNARY_OP(OP)                                    \
+    template<class T1>                                          \
+    auto operator OP(GuestWrapper<T1> a)                        \
+        ->decltype(OP typename GuestTypeTraits<T1>::HostType()) \
+    {                                                           \
+        return OP a.get();                                      \
+    }
+
+DECLARE_UNARY_OP(-)
+DECLARE_UNARY_OP(~)
+
+template<class T>
+T& declref();
+
+#define DECLARE_PREFIX_POSTFIX(OP, IMPL)                                                       \
+    template<class T1>                                                                   \
+    auto operator OP(GuestWrapper<T1> &a)                                                \
+        ->GuestWrapper<decltype(declref<typename GuestTypeTraits<T1>::HostType>() OP)> & \
+    {                                                                                    \
+        return a IMPL;                                                                   \
+    }                                                                                    \
+    template<class T1>                                                                   \
+    auto operator OP(GuestWrapper<T1> &a, int)                                           \
+        ->decltype(declref<typename GuestTypeTraits<T1>::HostType>() OP)                 \
+    {                                                                                    \
+        auto tmp = a;                                                                    \
+        a IMPL;                                                                          \
+        return tmp.get();                                                                \
+    }
+
+DECLARE_PREFIX_POSTFIX(++, += 1)
+DECLARE_PREFIX_POSTFIX(--, -= 1)
+
 #define GUEST_STRUCT    struct is_guest_struct {}
 
 template<typename TT, typename SFINAE = void>
 struct GuestType
+{
+    using type = GuestWrapper<TT>;
+};
+
+template<typename TT>
+struct GuestType<GuestWrapper<TT>>
 {
     using type = GuestWrapper<TT>;
 };
@@ -540,6 +647,7 @@ struct GuestType<TT[0]>
 template<typename TT>
 using GUEST = typename guestvalues::GuestType<TT>::type;
 
+/*
 template<typename TT>
 GUEST<TT> RM(TT p)
 {
@@ -558,9 +666,29 @@ inline signed char RM(signed char c) { return c; }
 inline char MR(char c) { return c; }
 inline unsigned char MR(unsigned char c) { return c; }
 inline signed char MR(signed char c) { return c; }
+*/
+
+template<typename T>
+GUEST<T> toGuest(T x)
+{
+    return GUEST<T>(x);
+}
+
+template<typename T>
+T toHost(guestvalues::GuestWrapper<T> x)
+{
+    return x;
+}
 
 
-template<typename TO, typename FROM, typename = std::enable_if<sizeof(GUEST<TO>) == sizeof(GUEST<FROM>)>>
+template<typename T>
+T RM(T x) { return x; }
+template<typename T>
+T MR(T x) { return x; }
+
+template<typename TO, typename FROM, 
+    typename = typename guestvalues::GuestTypeTraits<FROM>::HostType,
+    typename = std::enable_if<sizeof(GUEST<TO>) == sizeof(GUEST<FROM>)>>
 GUEST<TO> guest_cast(guestvalues::GuestWrapper<FROM> p)
 {
     //return GUEST<TO>((TO)(FROM)p);
@@ -570,6 +698,16 @@ GUEST<TO> guest_cast(guestvalues::GuestWrapper<FROM> p)
 }
 
 
+template<typename TO, typename FROM,
+    typename = typename guestvalues::GuestTypeTraits<FROM>::HostType>
+GUEST<TO> guest_cast(FROM in)
+{
+    //return GUEST<TO>((TO)(FROM)p);
+    GUEST<FROM> p(in);
+    GUEST<TO> result;
+    result.raw_host_order(p.raw_host_order());
+    return result;
+}
 }
 
 #endif /* _MACTYPE_H_ */

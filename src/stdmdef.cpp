@@ -630,9 +630,9 @@ void choose_menu(MenuHandle mh, Rect *rp, Point p, GUEST<int16_t> *itemp, tableP
     clip_rect.left = rp->left;
     clip_rect.right = rp->right;
     clip_rect.top = CW(TOP_ARROW_P() ? CW(rp->top) + lineheight
-                                     : CW(rp->top));
+                                     : rp->top.get());
     clip_rect.bottom = CW(BOTTOM_ARROW_P() ? CW(rp->bottom) - lineheight
-                                           : CW(rp->bottom));
+                                           : rp->bottom.get());
     ClipRect(&clip_rect);
 
     if(CW(*itemp) < 0)

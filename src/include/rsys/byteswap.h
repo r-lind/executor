@@ -34,6 +34,24 @@ inline TT CL_RAW(TT n)
 
 #endif
 
+#if 1
+/*template<class TT, class To = 
+    std::enable_if_t<std::is_integral_v<TT>,
+        std::conditional_t<std::is_signed_v<TT>, int16_t, uint16_t>
+    >>
+inline To CW(TT x)
+{
+    return x;
+}
+inline int16_t CW(int16_t x) { return x; }*/
+
+template<typename T> T CW(T x) { return x; }
+template<typename T> T CL(T x) { return x; }
+//template<typename T> T MR(T x) { return x; }
+//template<typename T> T RM(T x) { return x; }
+template<typename T> T Cx(T x) { return x; }
+
+#else
 template<class TT, class To = 
     std::enable_if_t<std::is_integral_v<TT>,
         std::conditional_t<std::is_signed_v<TT>, int16_t, uint16_t>
@@ -79,6 +97,8 @@ TT Cx(TT x); // no definition. Make sure we get a linker error if an unexpected 
 
 inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
 
+#endif
+
 #define PPR(n) MR(n)
 
 #define PTR_MINUSONE ((void *)-1)
@@ -105,8 +125,10 @@ inline std::nullptr_t RM(std::nullptr_t p) { return nullptr; }
           | (((unsigned int)(n)&0xFF000000)              \
              >> 24))))
 
-#define CWC(n) (GUEST<decltype(CWC_RAW(n))>::fromRaw(CWC_RAW(n)))
-#define CLC(n) (GUEST<decltype(CLC_RAW(n))>::fromRaw(CLC_RAW(n)))
+//#define CWC(n) (GUEST<decltype(CWC_RAW(n))>::fromRaw(CWC_RAW(n)))
+//#define CLC(n) (GUEST<decltype(CLC_RAW(n))>::fromRaw(CLC_RAW(n)))
+#define CWC(rhs) CW(rhs)
+#define CLC(rhs) CL(rhs)
 
 #endif /* !defined (BIGENDIAN) */
 

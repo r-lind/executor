@@ -33,7 +33,7 @@ typedef GUEST<itmp> *itmh;
                          + ((HxX(dlogh, dlglen) + 2) & ~1)))
 
 #define DIALOG_RES_POSITION(dlog) \
-    CW(DIALOG_RES_POSITION_X(dlog))
+    (DIALOG_RES_POSITION_X(dlog).get())
 
 #define ALERT_RES_HAS_POSITION_P(alerth) \
     ((sizeof(altstr) + 2) == GetHandleSize((Handle)(alerth)))
@@ -41,7 +41,7 @@ typedef GUEST<itmp> *itmh;
 #define ALERT_RES_POSITION_X(alerth) \
     (*(GUEST<int16_t> *)((char *)&HxX(alerth, altstag) + 2))
 #define ALERT_RES_POSITION(alerth) \
-    CW(ALERT_RES_POSITION_X(alerth))
+    (ALERT_RES_POSITION_X(alerth).get())
 
 #define noAutoCenter (0)
 #define alertPositionParentWindow (0xB00A)

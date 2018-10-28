@@ -228,7 +228,7 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define ROWBYTES_FLAG_BITS (3 << 14)
 #define ROWBYTES_FLAG_BITS_X (CWC(ROWBYTES_FLAG_BITS))
 #define PIXMAP_FLAGS_X(pixmap) \
-    (GUEST<uint16_t>::fromRaw(HxX(pixmap, rowBytes).raw() & ROWBYTES_FLAG_BITS_X.raw()))
+    (HxX(pixmap, rowBytes) & ROWBYTES_FLAG_BITS_X)
 #define PIXMAP_FLAGS(pixmap) (CW(PIXMAP_FLAGS_X(pixmap)))
 
 /* ### phase out; eventually i'd like to see consistent use of
@@ -257,7 +257,7 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define PIXMAP_ROWBYTES(pixmap) (CW(PIXMAP_ROWBYTES_X(pixmap)))
 
 #define PIXMAP_SET_ROWBYTES_X(pixmap, value) \
-    (HxX(pixmap, rowBytes).raw((((value).raw() & ROWBYTES_VALUE_BITS_X.raw()) | PIXMAP_FLAGS_X(pixmap).raw())))
+    (HxX(pixmap, rowBytes) = ((value) & ROWBYTES_VALUE_BITS_X) | PIXMAP_FLAGS_X(pixmap))
 
 #define PIXMAP_VERSION_X(pixmap) (HxX(pixmap, pmVersion))
 #define PIXMAP_PACK_TYPE_X(pixmap) (HxX(pixmap, packType))
@@ -286,7 +286,7 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define PIXMAP_HRES(pixmap) (Cx(PIXMAP_HRES_X(pixmap)))
 #define PIXMAP_VRES(pixmap) (Cx(PIXMAP_VRES_X(pixmap)))
 #define PIXMAP_PIXEL_TYPE(pixmap) (Cx(PIXMAP_PIXEL_TYPE_X(pixmap)))
-#define PIXMAP_PIXEL_SIZE(pixmap) (Cx(PIXMAP_PIXEL_SIZE_X(pixmap)))
+#define PIXMAP_PIXEL_SIZE(pixmap) (Cx(PIXMAP_PIXEL_SIZE_X(pixmap).get()))
 #define PIXMAP_CMP_COUNT(pixmap) (Cx(PIXMAP_CMP_COUNT_X(pixmap)))
 #define PIXMAP_CMP_SIZE(pixmap) (Cx(PIXMAP_CMP_SIZE_X(pixmap)))
 #define PIXMAP_PLANE_BYTES(pixmap) (Cx(PIXMAP_PLANE_BYTES_X(pixmap)))
@@ -346,18 +346,18 @@ enum pixpat_pattern_types
 #define BITMAP_BOUNDS(bitmap) ((bitmap)->bounds)
 
 #define BITMAP_FLAGS_X(bitmap) \
-    GUEST<uint16_t>::fromRaw((bitmap)->rowBytes.raw() & ROWBYTES_FLAG_BITS_X.raw())
+    (((bitmap)->rowBytes & ROWBYTES_FLAG_BITS_X))
 #define BITMAP_FLAGS(bitmap)		((bitmap)->rowBytes).get() & ROWBYTES_FLAG_BITS)
 
 #define BITMAP_DEFAULT_ROWBYTES_X (CWC(0))
 
 #define BITMAP_ROWBYTES_X(bitmap) \
-    GUEST<uint16_t>::fromRaw((bitmap)->rowBytes.raw() & ~ROWBYTES_FLAG_BITS_X.raw())
+    ((bitmap)->rowBytes & ~ROWBYTES_FLAG_BITS_X)
 #define BITMAP_ROWBYTES(bitmap) ((uint16_t)(bitmap)->rowBytes.get() & ~ROWBYTES_FLAG_BITS)
 
 #define BITMAP_SET_ROWBYTES_X(bitmap, value)                               \
-    ((bitmap)->rowBytes.raw((((value).raw() & ~ROWBYTES_FLAG_BITS_X.raw()) \
-                             | BITMAP_FLAGS_X(bitmap).raw())))
+    ((bitmap)->rowBytes = (((value) & ~ROWBYTES_FLAG_BITS_X) \
+                             | BITMAP_FLAGS_X(bitmap)))
 
 #define BITMAP_BASEADDR_X(bitmap) ((bitmap)->baseAddr)
 #define BITMAP_BASEADDR(bitmap) (PPR(BITMAP_BASEADDR_X(bitmap)))

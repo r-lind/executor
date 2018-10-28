@@ -435,7 +435,7 @@ OSErr Executor::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval = fnfErr; // no driver found
 
-    if(pb->ioParam.ioBuffer == 0 && pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
+    if(pb->ioParam.ioBuffer == nullptr && pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
        && MR(pb->ioParam.ioNamePtr)[1] == '.')
         retval = ROMlib_driveropen((ParmBlkPtr)pb, async);
     

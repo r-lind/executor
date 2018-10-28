@@ -643,7 +643,7 @@ void Executor::C_TECopy(TEHandle te)
                              ST_ELT_TO_GENERIC_ELT(style));
             run_start = RUN_START_CHAR(current_run);
             SCRAP_ELT_START_CHAR_X(scrap_elt) = (run_start < start
-                                                     ? CLC(0)
+                                                     ? 0
                                                      : CL(run_start - start));
         }
         SCRAP_N_STYLES_X(scrap) = CW(n_scrap_styles);

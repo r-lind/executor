@@ -589,7 +589,7 @@ void Executor::C_CloseWindow(WindowPtr w)
 
     /* NOTE: we can't use THEPORT_SAVE_EXCURSION here, becuase of this
        odd behavior */
-    savgp = MR(qdGlobals().thePort) == (GrafPtr)w ? (GrafPtr)MR(wmgr_port) : MR(qdGlobals().thePort);
+    savgp = MR(qdGlobals().thePort) == (GrafPtr)w ? wmgr_port : qdGlobals().thePort;
     SetPort(MR(wmgr_port));
     SetClip(MR(LM(GrayRgn)));
     PaintBehind(WINDOW_NEXT_WINDOW(w), WINDOW_STRUCT_REGION(w));

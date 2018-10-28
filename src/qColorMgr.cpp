@@ -290,7 +290,7 @@ BOOLEAN Executor::C_RealColor(RGBColor *rgb)
     closest = &(CTAB_TABLE(table)[index].rgb);
 
     /* high `resolution' bits */
-    mask = CW(((1 << resolution) - 1) << (16 - resolution)).raw();
+    mask = CW(((1 << resolution) - 1) << (16 - resolution));
 
     return !(((rgb->red.raw() ^ closest->red.raw()) & mask)
              || ((rgb->green.raw() ^ closest->green.raw()) & mask)

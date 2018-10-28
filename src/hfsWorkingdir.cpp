@@ -179,7 +179,7 @@ OSErr Executor::hfsPBGetWDInfo(WDPBPtr pb, BOOLEAN async)
                 str255assign(MR(pb->ioNamePtr), (StringPtr)vcbp->vcbVN);
             pb->ioWDProcID = 0;
             pb->ioVRefNum = pb->ioWDVRefNum = vcbp->vcbVRefNum;
-            pb->ioWDDirID = (vcbp == MR(LM(DefVCBPtr))) ? DefDirID : CLC(2);
+            pb->ioWDDirID = (vcbp == MR(LM(DefVCBPtr))) ? DefDirID : toGuest(2);
             foundelsewhere = true;
         }
     }

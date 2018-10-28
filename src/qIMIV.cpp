@@ -368,8 +368,8 @@ copy_mask_1(BitMap *src_bm, BitMap *mask_bm, BitMap *dst_bm,
         save_pic_handle = PORT_PIC_SAVE_X(MR(qdGlobals().thePort));
         save_graf_procs = PORT_GRAF_PROCS_X(MR(qdGlobals().thePort));
 
-        PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = RM(nullptr);
-        PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = RM(nullptr);
+        PORT_PIC_SAVE_X(MR(qdGlobals().thePort)) = nullptr;
+        PORT_GRAF_PROCS_X(MR(qdGlobals().thePort)) = nullptr;
 
         CopyBits(src_bm, dst_bm, src_rect, dst_rect, srcCopy, mask_rgn);
 

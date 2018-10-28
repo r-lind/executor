@@ -322,7 +322,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
         format = 0;
 
     warning_sound_log("chanp %p fmt %d num_fmts %d async %d",
-                      chanp, format, resp ? CW(*((GUEST<INTEGER> *)(resp + 2))) : 0,
+                      chanp, format, resp ? toHost(*((GUEST<INTEGER> *)(resp + 2))) : 0,
                       async);
 
     warning_sound_log(" sndh %s", (HGetState(sndh) & LOCKBIT) ? "Locked" : "Unlocked");
@@ -630,7 +630,7 @@ do_current_command(SndChannelPtr chanp, struct hunger_info info)
 
         default:
             warning_sound_log("UNKNOWN CMD %d\n",
-                              chanp ? CW(chanp->cmdInProg.cmd) : 0);
+                              chanp ? chanp->cmdInProg.cmd.get() : 0);
             CMD_DONE(chanp);
     }
 }

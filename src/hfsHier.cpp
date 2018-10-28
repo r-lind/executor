@@ -266,7 +266,7 @@ OSErr Executor::hfsPBCatMove(CMovePBPtr pb, BOOLEAN async)
         iop = *(IOParam *)pb;
         iop.ioNamePtr = pb->ioNewName;
         dstcurkind = directory;
-        ignorename = iop.ioNamePtr == 0;
+        ignorename = iop.ioNamePtr == nullptr;
         err = ROMlib_findvcbandfile(&iop, CL(pb->ioNewDirID), &dstdirbtparam, &dstcurkind,
                                     ignorename);
         if(err == noErr)

@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include "filesystem.h"
+#include "mactype.h"
 
 namespace Executor
 {
@@ -16,6 +17,14 @@ struct mac_string_view : std::basic_string_view<unsigned char>
     {
         if(pascalString)
             *this = mac_string_view(pascalString + 1, pascalString[0]);
+    }
+    mac_string_view(GUEST<unsigned char*> pascalString)
+        : mac_string_view(toHost(pascalString))
+    {
+    }
+    mac_string_view(GUEST<const unsigned char*> pascalString)
+        : mac_string_view(toHost(pascalString))
+    {
     }
 
     mac_string_view(const unsigned char* p, size_t n)

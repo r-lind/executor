@@ -385,7 +385,7 @@ void LocalVolume::PBOpenRF(ParmBlkPtr pb)
 void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
 {
     ItemPtr item = resolveForInfo(MR(pb->hFileInfo.ioNamePtr),
-        CW(pb->hFileInfo.ioVRefNum), infoKind == InfoKind::FInfo ? 0 : CL(pb->hFileInfo.ioDirID), CW(pb->hFileInfo.ioFDirIndex),
+        CW(pb->hFileInfo.ioVRefNum), infoKind == InfoKind::FInfo ? 0 : pb->hFileInfo.ioDirID.get(), CW(pb->hFileInfo.ioFDirIndex),
         infoKind == InfoKind::CatInfo);
 
     if(CW(pb->hFileInfo.ioFDirIndex) != 0)
