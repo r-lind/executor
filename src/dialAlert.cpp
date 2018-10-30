@@ -26,7 +26,7 @@ int16_t alert_extra_icon_id = -32768;
 static icon_item_template_t icon_item_template = {
     /* item count - 1 */
     0,
-    CLC_NULL,
+    nullptr,
     {
         10,
         20,

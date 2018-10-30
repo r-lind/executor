@@ -94,10 +94,10 @@ void Executor::C_InitCPort(CGrafPtr p)
     RGBBackColor(&ROMlib_white_rgb_color);
     PORT_COLR_BIT_X(p) = 0;
     PORT_PAT_STRETCH_X(p) = 0;
-    PORT_PIC_SAVE_X(p) = CLC_NULL;
-    PORT_REGION_SAVE_X(p) = CLC_NULL;
-    PORT_POLY_SAVE_X(p) = CLC_NULL;
-    PORT_GRAF_PROCS_X(p) = CLC_NULL;
+    PORT_PIC_SAVE_X(p) = nullptr;
+    PORT_REGION_SAVE_X(p) = nullptr;
+    PORT_POLY_SAVE_X(p) = nullptr;
+    PORT_GRAF_PROCS_X(p) = nullptr;
 
     PenPat(qdGlobals().black);
     BackPat(qdGlobals().white);
@@ -114,7 +114,7 @@ void Executor::C_InitCPort(CGrafPtr p)
      and all other fields are zero'd */
 
     /* A test case shows that grafVars is allocated only if it was nullptr. */
-    if(CPORT_GRAFVARS_X(p) == CLC_NULL)
+    if(CPORT_GRAFVARS_X(p) == nullptr)
         CPORT_GRAFVARS_X(p) = NewHandleClear(sizeof(GrafVars));
 
     /* #warning "p->grafVars not initialized" */
@@ -391,7 +391,7 @@ PixPatHandle Executor::C_NewPixPat()
               patMap, NewPixMap(),
               patData, NewHandle(0),
               patType, pixpat_type_color,
-              patXMap, CLC_NULL,
+              patXMap, nullptr,
               patXData, xdata,
               patXValid, -1);
 
@@ -449,7 +449,7 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     xdata = NewHandle(sizeof(xdata_t));
     memset(STARH(xdata), 0, sizeof(xdata_t));
     PIXPAT_XDATA_X(pixpat) = xdata;
-    PIXPAT_XMAP_X(pixpat) = CLC_NULL;
+    PIXPAT_XMAP_X(pixpat) = nullptr;
 
     pixpat_data_offset = PIXPAT_DATA_AS_OFFSET(pixpat);
     pixpat_data_size = (PIXMAP_TABLE_AS_OFFSET(patmap)

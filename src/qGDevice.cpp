@@ -62,7 +62,7 @@ void Executor::gd_allocate_main_device(void)
     Rect *gd_rect;
 
     SET_HILITE_BIT();
-    LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = CLC_NULL;
+    LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = nullptr;
 
     graphics_device = NewGDevice(/* no driver */ 0,
                                  mode_from_bpp(vdriver->bpp()));

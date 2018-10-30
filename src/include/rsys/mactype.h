@@ -20,7 +20,6 @@
 #error C++ required
 #endif
 
-#define AUTOMATIC_CONVERSIONS
 
 namespace Executor
 {
@@ -37,9 +36,6 @@ struct Point
 #if defined(BIGENDIAN)
 template<typename T>
 T SwapTyped(T x) { return x; }
-
-inline Point SwapPoint(Point x) { return x; }
-
 #else
 inline unsigned char SwapTyped(unsigned char x) { return x; }
 inline signed char SwapTyped(signed char x) { return x; }
@@ -53,8 +49,6 @@ inline int32_t SwapTyped(int32_t x) { return swap32((uint32_t)x); }
 
 inline uint64_t SwapTyped(uint64_t x) { return swap64(x); }
 inline int64_t SwapTyped(int64_t x) { return swap64((uint64_t)x); }
-
-inline Point SwapPoint(Point x) { return Point { SwapTyped(x.v), SwapTyped(x.h) }; }
 #endif
 
 
@@ -197,6 +191,9 @@ struct GuestTypeTraits<Point>
     
     static uint32_t host_to_reg(HostType x) { return ((uint32_t)x.v << 16) | (x.h & 0xFFFFU); }
     static HostType reg_to_host(uint32_t x) { return Point{ int16_t(x >> 16), int16_t(x & 0xFFFF) }; }
+
+private:
+    static Point SwapPoint(Point x) { return Point { SwapTyped(x.v), SwapTyped(x.h) }; }
 };
 
 template<typename T>
@@ -299,7 +296,6 @@ struct GuestWrapper : GuestWrapperOps<T>
     }
 
 
-#ifdef AUTOMATIC_CONVERSIONS
     GuestWrapper(const T &y)
     {
         this->set(y);
@@ -315,14 +311,6 @@ struct GuestWrapper : GuestWrapperOps<T>
 
     template<typename T2>
     explicit operator T2() const { return (T2)this->get(); }
-
-#else
-    //GuestWrapper(std::enable_if_t<std::is_convertible_v<std::nullptr_t, T>, std::nullptr_t>)
-    GuestWrapper(std::nullptr_t)
-    {
-        this->raw(0);
-    }
-#endif
 
     static GuestWrapper<T> fromRaw(GuestType r)
     {
@@ -341,72 +329,14 @@ struct GuestWrapper : GuestWrapperOps<T>
     {
         return this->raw() != 0;
     }
-
-#ifndef AUTOMATIC_CONVERSIONS
-    /*template<typename T2, typename result = decltype(T() == T2()),
-        typename enable = std::enable_if_t<sizeof(T) == sizeof(T2)>>
-    bool operator==(GuestWrapper<T2> b) const
-    {
-        return this->raw() == b.raw();
-    }*/
-    bool operator==(GuestWrapper<T> b) const
-    {
-        return this->raw() == b.raw();
-    }
-
-    /*template<typename T2, typename result = decltype(T() != T2()),
-        typename enable = std::enable_if_t<sizeof(T) != sizeof(T2)>>
-    bool operator!=(GuestWrapper<T2> b) const
-    {
-        return this->raw() != b.raw();
-    }*/
-    bool operator!=(GuestWrapper<T> b) const
-    {
-        return this->raw() != b.raw();
-    }
-#endif
-
-//#ifdef AUTOMATIC_CONVERSIONS
-#if 0
-    template<typename T2>
-    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool> 
-    friend auto
-    operator==(GuestWrapper<T> a, T2 b) -> decltype(a.get() == b)
-    {
-        return a.get() == b;
-    }
-    template<typename T2> 
-    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
-    friend auto
-    operator!=(GuestWrapper<T> a, T2 b) -> decltype(a.get() == b)
-    {
-        return a.get() != b;
-    }
-    template<typename T2>
-    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
-    friend auto
-    operator==(T2 a, GuestWrapper<T> b) -> decltype(a == b.get())
-    {
-        return a == b.get();
-    }
-    template<typename T2>
-    //friend std::enable_if_t<std::is_convertible_v<T2,T>, bool>
-    friend auto
-    operator!=(T2 a, GuestWrapper<T> b) -> decltype(a == b.get())
-    {
-        return a != b.get();
-    }
-#endif
 };
 
 
 template<typename T>
 struct GuestWrapperOps<T*> : GuestWrapperGetSet<T*>
 {
-#ifdef AUTOMATIC_CONVERSIONS
     T& operator*() const { return *this->get(); }
     T* operator->() const { return this->get(); }
-#endif
 };
 
 template<>
@@ -435,23 +365,7 @@ struct GuestWrapperOps<T, std::enable_if_t<std::is_integral_v<T>>> : GuestWrappe
         return GuestWrapper<T>::fromRaw(~this->raw());
     }
 };
-#if 0
-template<class T1, class T2>
-std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
-    GuestWrapper<T1>>
-operator&(GuestWrapper<T1> x, GuestWrapper<T2> y)
-{
-    return GuestWrapper<T1>::fromRaw(x.raw() & y.raw());
-}
 
-template<class T1, class T2>
-std::enable_if_t<std::is_integral_v<T1> && std::is_integral_v<T2> && sizeof(T1) == sizeof(T2),
-    GuestWrapper<T1>>
-operator|(GuestWrapper<T1> x, GuestWrapper<T2> y)
-{
-    return GuestWrapper<T1>::fromRaw(x.raw() | y.raw());
-}
-#endif
 
 template<>
 struct GuestWrapperStorage<Point>
@@ -550,6 +464,7 @@ DECLARE_OPERATOR_AND_ASSIGNMENT(&)
 DECLARE_OPERATOR_AND_ASSIGNMENT(|)
 DECLARE_OPERATOR_AND_ASSIGNMENT(^)
 
+
 #define DECLARE_UNARY_OP(OP)                                    \
     template<class T1>                                          \
     auto operator OP(GuestWrapper<T1> a)                        \
@@ -582,6 +497,14 @@ T& declref();
 
 DECLARE_PREFIX_POSTFIX(++, += 1)
 DECLARE_PREFIX_POSTFIX(--, -= 1)
+
+#undef DECLARE_OPERATOR
+#undef DECLARE_OPERATOR_1
+#undef DECLARE_ASSIGNMENT_OPERATOR
+#undef DECLARE_ASSIGNMENT_OPERATOR_1
+#undef DECLARE_OPERATOR_AND_ASSIGNMENT
+#undef DECLARE_UNARY_OP
+#undef DECLARE_PREFIX_POSTFIX
 
 #define GUEST_STRUCT    struct is_guest_struct {}
 
@@ -723,6 +646,19 @@ public:
 };
 template<class T>
 GuestRef<T> guestref(T& x) { return GuestRef<T>(x); }
+
+
+#define STARH(h) (*h)
+
+// HxZ is a handle dereference where the member selected is itself some form
+// of packed pointer, but we're only checking to see if it's zero or non-zero
+// (e.g. if (HxZ(hand)) )
+
+#define Hx(handle, field) STARH(handle)->field
+#define HxX(handle, field) (STARH(handle)->field)
+
+#define HxP(handle, field) Hx(handle, field)
+#define HxZ(handle, field) HxX(handle, field)
 
 }
 

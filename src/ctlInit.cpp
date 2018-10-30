@@ -71,8 +71,8 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
                contrlValue, value,
                contrlMin, min,
                contrlMax, max,
-               contrlData, CLC_NULL,
-               contrlAction, CLC_NULL,
+               contrlData, nullptr,
+               contrlAction, nullptr,
                contrlRfCon, rc);
 
     WINDOW_CONTROL_LIST_X(wst) = retval;

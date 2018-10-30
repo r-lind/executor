@@ -969,12 +969,12 @@ retry:
     {
         LONGINT retval;
 
-        ZONE_ALLOC_PTR_X(current_zone) = CLC_NULL;
+        ZONE_ALLOC_PTR_X(current_zone) = nullptr;
         ROMlib_hook(memory_gznumber);
         retval = current_zone->gzProc(size);
 
         if(retval)
-            ZONE_ALLOC_PTR_X(current_zone) = CLC_NULL;
+            ZONE_ALLOC_PTR_X(current_zone) = nullptr;
         if(biggest_block != old_biggest_block)
         {
             old_biggest_block = biggest_block;

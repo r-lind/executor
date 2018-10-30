@@ -584,14 +584,14 @@ void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
     first_block = ZONE_HEAP_DATA(zone);
 
     zone->bkLim = (Ptr)last_block;
-    zone->purgePtr = CLC_NULL;
-    zone->hFstFree = CLC_NULL;
+    zone->purgePtr = nullptr;
+    zone->hFstFree = nullptr;
     zone->zcbFree = limitPtr - (Ptr)zone - 64;
     zone->gzProc = pGrowZone;
     zone->moreMast = cMoreMasters;
     zone->flags = 0;
     zone->minCBFree = 0;
-    zone->purgeProc = CLC_NULL;
+    zone->purgeProc = nullptr;
     zone->cntRel = zone->cntNRel = zone->cntEmpty = zone->cntHandles
         = 0;
 
@@ -1150,7 +1150,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
     auto save_alloc_ptr = ZONE_ALLOC_PTR_X(current_zone);
 #endif
 
-    ZONE_ALLOC_PTR_X(current_zone) = CLC_NULL;
+    ZONE_ALLOC_PTR_X(current_zone) = nullptr;
 
     ReserveMem(size);
     if(ROMlib_relalloc(size, &b))
@@ -1514,7 +1514,7 @@ Size _CompactMem_flags(Size sizeneeded, bool sys_p)
     startfront_p = (src == ZONE_HEAP_DATA(current_zone));
 
 repeat:
-    ZONE_ALLOC_PTR_X(current_zone) = CLC_NULL;
+    ZONE_ALLOC_PTR_X(current_zone) = nullptr;
     amtfree = 0;
 
     while(src != ZONE_BK_LIM(current_zone)

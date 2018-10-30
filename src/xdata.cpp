@@ -44,7 +44,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
      pattern to the destination */
     static PixMap pattern_pixmap_tmpl = {
         /* baseAddr; to be filled in later */
-        CLC_NULL,
+        nullptr,
         PIXMAP_DEFAULT_ROWBYTES | 1,
         { 0, 0, 8, 8 },
         /* version */
@@ -63,7 +63,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
         1,
         0,
         /* color table; to be filled in later */
-        CLC_NULL,
+        nullptr,
 
         0,
     };
@@ -72,7 +72,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
      pattern to the destination */
     static PixMap dst_pixmap_tmpl = {
         /* baseAddr; to be filled in later */
-        CLC_NULL,
+        nullptr,
         0,
         { 0, 0, 8, 8 },
         /* version */
@@ -89,7 +89,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
         0,
         0,
         /* color table; to be filled in later */
-        CLC_NULL,
+        nullptr,
 
         0,
     };

@@ -985,7 +985,7 @@ int main(int argc, char **argv)
     }
 
     SET_HILITE_BIT();
-    LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = CLC_NULL;
+    LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = nullptr;
 
     LM(OneOne) = 0x00010001;
     LM(Lo3Bytes) = 0xFFFFFF;

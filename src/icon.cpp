@@ -288,9 +288,9 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
                       & ROWBYTES_VALUE_BITS)
         * height;
 
-    cicon->iconMask.baseAddr = CLC_NULL;
+    cicon->iconMask.baseAddr = nullptr;
 
-    cicon->iconBMap.baseAddr = CLC_NULL;
+    cicon->iconBMap.baseAddr = nullptr;
 
     {
         CTabHandle color_table;
@@ -303,7 +303,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
         CTAB_SEED_X(color_table) = GetCTSeed();
         cicon->iconPMap.pmTable = color_table;
 
-        cicon->iconPMap.baseAddr = CLC_NULL;
+        cicon->iconPMap.baseAddr = nullptr;
         cicon->iconData = NewHandle(pmap_data_size);
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_data_offset,
                       (Ptr)STARH(cicon->iconData),

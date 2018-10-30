@@ -161,7 +161,7 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
     else
     {
         /* useritem */
-        dst->itmhand = CLC_NULL;
+        dst->itmhand = nullptr;
     }
 }
 
@@ -237,7 +237,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
         DIALOG_TEXTH_X(dp) = te;
         TEAutoView(true, te);
         DisposeHandle(TE_HTEXT(te));
-        TE_HTEXT_X(te) = CLC_NULL;
+        TE_HTEXT_X(te) = nullptr;
     }
 
     DIALOG_EDIT_FIELD_X(dp) = -1;

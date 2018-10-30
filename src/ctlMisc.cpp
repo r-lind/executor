@@ -96,8 +96,8 @@ void Executor::ctl_color_init(void)
     }
 #endif
 
-    HxX(default_aux_ctl, acNext) = CLC_NULL;
-    HxX(default_aux_ctl, acOwner) = CLC_NULL;
+    HxX(default_aux_ctl, acNext) = nullptr;
+    HxX(default_aux_ctl, acOwner) = nullptr;
     HxX(default_aux_ctl, acCTable) = (CCTabHandle)GetResource(TICK("cctb"), 0);
     HxX(default_aux_ctl, acFlags) = 0;
     HxX(default_aux_ctl, acReserved) = 0;
