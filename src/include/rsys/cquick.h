@@ -740,10 +740,14 @@ class ThePortGuard
     GUEST<GrafPtr> savePort;
 
 public:
-    ThePortGuard(GrafPtr port)
+    explicit ThePortGuard(GrafPtr port)
         : savePort(qdGlobals().thePort)
     {
         SetPort(port);
+    }
+    explicit ThePortGuard(GUEST<GrafPtr> port)
+        : ThePortGuard(port.get())
+    {
     }
     ThePortGuard()
         : savePort(qdGlobals().thePort)
@@ -761,10 +765,14 @@ class TheGDeviceGuard
     GDHandle saveDevice;
 
 public:
-    TheGDeviceGuard(GDHandle device)
+    explicit TheGDeviceGuard(GDHandle device)
         : saveDevice(LM(TheGDevice))
     {
         SetGDevice(device);
+    }
+    explicit TheGDeviceGuard(GUEST<GDHandle> device)
+        : TheGDeviceGuard(device.get())
+    {
     }
     ~TheGDeviceGuard()
     {

@@ -50,6 +50,12 @@ typedef OpaqueUntyped68KProc* ProcPtr;
 template<typename F, typename CallConv = callconv::Pascal>
 struct UPP {};
 
+namespace guestvalues
+{
+    template<typename T>
+    struct GuestWrapper;
+}
+
 template<typename Ret, typename... Args, typename CallConv>
 struct UPP<Ret(Args...), CallConv>
 {
@@ -66,6 +72,12 @@ struct UPP<Ret(Args...), CallConv>
     }
     explicit constexpr UPP(intptr_t ptr)
         : ptr((void*)ptr)
+    {
+    }
+    
+    template<typename T>
+    explicit UPP(guestvalues::GuestWrapper<T> p)
+        : ptr(p.get())
     {
     }
 
