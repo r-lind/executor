@@ -377,7 +377,7 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     PAUSERECORDING;
     fmopstate = HGetState((Handle)fmop->fontHandle);
     HLock(fmop->fontHandle);
-    fp = (FontRec *)STARH(fmop->fontHandle);
+    fp = (FontRec *)(*fmop->fontHandle);
     fmap.baseAddr = (Ptr)(&fp->rowWords + 1);
     fmap.rowBytes = fp->rowWords * 2;
     fmap.bounds.left = fmap.bounds.top = 0;

@@ -146,7 +146,7 @@ void Executor::C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
     INTEGER quant, page;
     ListPtr lp;
 
-    lp = STARH(guest_cast<ListHandle>(HxX(ch, contrlRfCon)));
+    lp = *guest_cast<ListHandle>(HxX(ch, contrlRfCon));
 
     page = ch == lp->hScroll ? lp->visible.right - lp->visible.left - 1
                                  : lp->visible.bottom - lp->visible.top - 1;

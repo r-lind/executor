@@ -134,7 +134,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
 
         icon_item_h = NewHandle(sizeof icon_item_template);
         icon_item_template.res_id = alert_extra_icon_id;
-        memcpy(STARH(icon_item_h), &icon_item_template,
+        memcpy(*icon_item_h, &icon_item_template,
                sizeof icon_item_template);
 
         AppendDITL((DialogPtr)dp, icon_item_h, overlayDITL);
@@ -215,7 +215,7 @@ static void lockditl(INTEGER id, BOOLEAN flag)
     if((ih = lockres(TICK("DITL"), id, flag)))
     {
         nitem = **(GUEST<GUEST<INTEGER> *> *)ih;
-        ip = (itmp)((INTEGER *)STARH(ih) + 1);
+        ip = (itmp)((INTEGER *)*ih + 1);
         while(nitem-- >= 0)
         {
             if((ip->itmtype & RESCTL) == RESCTL)

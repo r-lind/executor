@@ -382,7 +382,7 @@ OSErr Executor::C_ResolveAlias(FSSpecPtr fromFile, AliasHandle alias,
 
     warning_unimplemented("stub for Launch WON'T WORK WITH FULL PATH SPEC");
     retval = noErr;
-    headp = (decltype(headp))STARH(alias);
+    headp = (decltype(headp))*alias;
     str255assign(volname, headp->volumeName);
     fs.parID = headp->ioDirID; /* NOT VALID IF THIS IS A FULL PATH SPEC */
     str255assign(fs.name, headp->fileName);
@@ -469,7 +469,7 @@ parse2 (AliasHandle ah, const void *addrs[], int count)
       const alias_head_t *headp;
       const INTEGER *partp, *ep;
 		
-      headp = (alias_head_t *) STARH (ah);
+      headp = (alias_head_t *) *ah;
       partp = (INTEGER *) (&headp[1]);
       ep = (INTEGER *) ((char *) headp + std::min(size, headp->length));
       memset (addrs, 0, count * sizeof addrs[0]);
@@ -562,7 +562,7 @@ init_tail(alias_tail_t *tailp, Str32 zoneName, Str31 serverName,
         int name_len;
 
         name_len = std::min(GetHandleSize(h), 31);
-        memcpy(tailp->network_identity_owner_name, STARH(h), name_len);
+        memcpy(tailp->network_identity_owner_name, *h, name_len);
     }
     tailp->weird_info[0] = 0x00A8;
     tailp->weird_info[1] = 0x6166;
@@ -608,7 +608,7 @@ assemble_pieces(GUEST<AliasHandle> *ahp, alias_head_t *headp, int n_pieces, ...)
         char *op;
 
         headp->length = n_bytes_needed;
-        op = (char *)STARH(h);
+        op = (char *)*h;
         memcpy(op, headp, sizeof(*headp));
         op += sizeof(*headp);
         va_start(va, n_pieces);
@@ -732,7 +732,7 @@ OSErr Executor::C_NewAliasMinimal(FSSpecPtr fsp, GUEST<AliasHandle> *ahp)
                 int len;
 
                 len = std::min(GetHandleSize(h), 32);
-                memcpy(serverName, STARH(h), len);
+                memcpy(serverName, *h, len);
             }
             init_tail(&tail, (StringPtr) "\1*", serverName, volName);
             retval = assemble_pieces(ahp, &head, 1,

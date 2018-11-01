@@ -637,7 +637,7 @@ CopyMacHandle(Handle h)
     s = GetHandleSize(h);
     retval = NewHandle(s);
     if(retval)
-        memcpy(STARH(retval), STARH(h), s);
+        memcpy(*retval, *h, s);
     return retval;
 }
 

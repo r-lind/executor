@@ -110,7 +110,7 @@ static void ROMlib_togglealarm()
 
     if(ROMlib_alarmonmbar)
     {
-        CopyBits(&save_alarm_bitmap, (BitMap *)STARH(GD_PMAP(LM(TheGDevice))),
+        CopyBits(&save_alarm_bitmap, (BitMap *)*GD_PMAP(LM(TheGDevice)),
                  &save_alarm_bitmap.bounds, &screen_alarm_rect,
                  srcCopy, nullptr);
         ROMlib_alarmonmbar = false;
@@ -134,11 +134,11 @@ static void ROMlib_togglealarm()
                 src_alarm_bitmap.baseAddr = (Ptr)hard_coded_alarm;
 
             /* save the screen to save_alarm_bitmap */
-            CopyBits((BitMap *)STARH(GD_PMAP(LM(TheGDevice))), &save_alarm_bitmap,
+            CopyBits((BitMap *)*GD_PMAP(LM(TheGDevice)), &save_alarm_bitmap,
                      &screen_alarm_rect, &save_alarm_bitmap.bounds,
                      srcCopy, nullptr);
             /* and copy the new alarm to the screen */
-            CopyBits(&src_alarm_bitmap, (BitMap *)STARH(GD_PMAP(LM(TheGDevice))),
+            CopyBits(&src_alarm_bitmap, (BitMap *)*GD_PMAP(LM(TheGDevice)),
                      &src_alarm_bitmap.bounds, &screen_alarm_rect,
                      srcCopy, nullptr);
             ROMlib_alarmonmbar = true;

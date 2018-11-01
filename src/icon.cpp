@@ -251,7 +251,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
     if(cicon_res_handle == nullptr)
         return nullptr;
 
-    cicon_res = STARH(cicon_res_handle);
+    cicon_res = *cicon_res_handle;
     height = RECT_HEIGHT(&cicon_res->iconPMap.bounds);
     mask_data_size = cicon_res->iconMask.rowBytes * height;
     bmap_data_size = cicon_res->iconBMap.rowBytes * height;
@@ -269,8 +269,8 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
     int pmap_data_size;
     CIconPtr cicon;
 
-    cicon = STARH(cicon_handle);
-    cicon_res = STARH(cicon_res_handle);
+    cicon = *cicon_handle;
+    cicon_res = *cicon_res_handle;
 
     BlockMoveData((Ptr)cicon_res, (Ptr)cicon, new_size);
 
@@ -298,7 +298,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
         color_table
             = (CTabHandle)NewHandle(pmap_ctab_size);
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_ctab_offset,
-                      (Ptr)STARH(color_table),
+                      (Ptr)*color_table,
                       pmap_ctab_size);
         CTAB_SEED_X(color_table) = GetCTSeed();
         cicon->iconPMap.pmTable = color_table;
@@ -306,7 +306,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
         cicon->iconPMap.baseAddr = nullptr;
         cicon->iconData = NewHandle(pmap_data_size);
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_data_offset,
-                      (Ptr)STARH(cicon->iconData),
+                      (Ptr)(*cicon->iconData),
                       pmap_data_size);
     }
 
@@ -375,7 +375,7 @@ OSErr Executor::C_GetIconSuite(GUEST<Handle> *icon_suite_return, short res_id,
 
     HLockGuard guard(icon_suite);
 
-    icons = (Handle *)STARH(icon_suite);
+    icons = (Handle *)*icon_suite;
 
     for(i = 0; i < N_SUITE_ICONS; i++)
     {
@@ -412,7 +412,7 @@ OSErr Executor::C_AddIconToSuite(Handle icon_data, Handle icon_suite,
 {
     Handle *icons;
 
-    icons = (Handle *)STARH(icon_suite);
+    icons = (Handle *)*icon_suite;
     icons[restype_to_index(type)] = icon_data;
 
     ICON_RETURN_ERROR(noErr);
@@ -423,7 +423,7 @@ OSErr Executor::C_GetIconFromSuite(GUEST<Handle> *icon_data_return,
 {
     Handle *icons, icon_data;
 
-    icons = (Handle *)STARH(icon_suite);
+    icons = (Handle *)*icon_suite;
     icon_data = icons[restype_to_index(type)];
 
     if(icon_data == nullptr)
@@ -443,7 +443,7 @@ find_best_icon(bool small_p, int bpp,
     Handle icon_data, icon_mask;
     int best_icon;
 
-    icons = (Handle *)STARH(icon_suite_h);
+    icons = (Handle *)*icon_suite_h;
 
     sized_icons = (small_p
                        ? &icons[small_bw_icon]
@@ -539,7 +539,7 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
     icon_pm.cmpCount = 1;
     icon_pm.pmTable = color_table;
 
-    mask_bm.baseAddr = (Ptr)(char *)STARH(icon_mask)
+    mask_bm.baseAddr = (Ptr)(char *)*icon_mask
                           + icon_size * icon_size / 8;
     mask_bm.rowBytes = icon_size / 8;
     mask_bm.bounds = icon_rect;
@@ -567,7 +567,7 @@ short Executor::C_GetSuiteLabel(Handle suite)
     short retval;
     cotton_suite_layout_t *suitep;
 
-    suitep = (cotton_suite_layout_t *)STARH(suite);
+    suitep = (cotton_suite_layout_t *)*suite;
     retval = suitep->label;
     return retval;
 }
@@ -577,7 +577,7 @@ OSErr Executor::C_SetSuiteLabel(Handle suite, short label)
     OSErr retval;
     cotton_suite_layout_t *suitep;
 
-    suitep = (cotton_suite_layout_t *)STARH(suite);
+    suitep = (cotton_suite_layout_t *)*suite;
     suitep->label = label;
     retval = noErr;
 
@@ -678,7 +678,7 @@ OSErr Executor::C_DisposeIconSuite(Handle suite, Boolean dispose_data_p)
         Handle *icons;
         int i;
 
-        icons = (Handle *)STARH(suite);
+        icons = (Handle *)*suite;
         for(i = 0; i < N_SUITE_ICONS; i++)
         {
             Handle icon;

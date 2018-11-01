@@ -120,7 +120,7 @@ static void updateclip(void)
         PICOP(OP_Clip);
         state = HGetState((Handle)PORT_CLIP_REGION(qdGlobals().thePort));
         HLock((Handle)PORT_CLIP_REGION(qdGlobals().thePort));
-        PICWRITE(STARH(PORT_CLIP_REGION(qdGlobals().thePort)),
+        PICWRITE(*PORT_CLIP_REGION(qdGlobals().thePort),
                  Hx(PORT_CLIP_REGION(qdGlobals().thePort), rgnSize));
         HSetState((Handle)PORT_CLIP_REGION(qdGlobals().thePort), state);
     }

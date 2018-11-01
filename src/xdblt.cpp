@@ -119,7 +119,7 @@ hide_cursor_if_necessary(RgnHandle rh, const PixMap *dst, bool *old_vis)
 
     top = dst->bounds.top;
     left = dst->bounds.left;
-    rp = STARH(rh);
+    rp = *rh;
 
     *old_vis = vdriver->hideCursorIfIntersects(rp->rgnBBox.top - top,
                                               rp->rgnBBox.left - left,
@@ -213,7 +213,7 @@ bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
 
     if(active_screen_p
        && mode == (patCopy & 3) /* patCopy or notPatCopy */
-       && (r = STARH(rh), r->rgnSize == RGN_SMALL_SIZE_X))
+       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE_X))
     {
         int top, left;
 
@@ -635,7 +635,7 @@ do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
 
     if(v == tv
        && raw_mode == XDBLT_COPY
-       && (r = STARH(rh), r->rgnSize == RGN_SMALL_SIZE_X)
+       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE_X)
        && active_screen_addr_p(dst))
     {
         int top, left;
@@ -777,7 +777,7 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
 
         {
             HLockGuard guard(xh);
-            xdata_t *x = STARH(xh);
+            xdata_t *x = *xh;
             p = x->pat_bits;
             if(p)
             {

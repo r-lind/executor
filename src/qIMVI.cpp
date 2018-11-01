@@ -53,8 +53,8 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
         /*-->*/ return pixmapTooDeepErr;
 
     SetHandleSize((Handle)rh, MAXRGNSIZE);
-    outp = (INTEGER *)((char *)STARH(rh) + RGN_SMALL_SIZE);
-    endoutp = (INTEGER *)((char *)STARH(rh) + MAXRGNSIZE);
+    outp = (INTEGER *)((char *)*rh + RGN_SMALL_SIZE);
+    endoutp = (INTEGER *)((char *)*rh + MAXRGNSIZE);
 
 #define OUTPUT(v)                                                    \
     do                                                               \
@@ -123,7 +123,7 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
         line1p = saveline1p + rowbytes;
     }
     OUTPUT(RGN_STOP);
-    rgnsize = (char *)outp - (char *)STARH(rh);
+    rgnsize = (char *)outp - (char *)*rh;
     switch(rgnsize)
     {
         case RGN_SMALL_SIZE + sizeof(INTEGER):

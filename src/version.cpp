@@ -56,11 +56,11 @@ const char *ROMlib_executor_full_name = "Executor " EXECUTOR_VERSION
         LoadResource(h);                                \
         HUnlock(h); /* safe to do -- app not running */ \
         SetHandleSize(h, len);                          \
-        memcpy(STARH(h), str, len);                     \
+        memcpy(*h, str, len);                     \
         if(_typ == TICK("STR "))                        \
-            *(char *)STARH(h) = len - 1;                \
+            *(char *)*h = len - 1;                \
         else if(_typ == TICK("vers"))                   \
-            ((char *)STARH(h))[12] = len - 13;          \
+            ((char *)*h)[12] = len - 13;          \
     })
 
 #define UPDATE_VERS(major, minor, rev, vers, fmt, args...)                                                       \

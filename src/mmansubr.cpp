@@ -175,7 +175,7 @@ addr_info(char *addr)
         /* `addr' might be a handle, and `block' might be a block of
          master pointers for this handle */
         handle = (Handle)addr;
-        ptr = (char *)STARH(handle);
+        ptr = (char *)*handle;
 
         ptr_block = addr_block(addr_zone, ptr);
         if(ptr_block != nullptr
@@ -235,7 +235,7 @@ handle_addr_info:
        to call this code `handle', and `addr_is_handle_p' must be set
        up */
 
-    ptr = (char *)STARH(handle);
+    ptr = (char *)*handle;
     ptr_block = HANDLE_TO_BLOCK(handle);
 
     handle_block = addr_block(addr_zone, (char *)handle);

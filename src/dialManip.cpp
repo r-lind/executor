@@ -44,7 +44,7 @@ itmp Executor::ROMlib_dpnotoip(DialogPeek dp, INTEGER itemno,
 
     items = DIALOG_ITEMS(dp);
     *flags = hlock_return_orig_state(items);
-    intp = (GUEST<INTEGER> *)STARH(items);
+    intp = (GUEST<INTEGER> *)*items;
     if(itemno <= 0 || itemno > *intp + 1)
         retval = 0;
     else
@@ -75,7 +75,7 @@ static itmp htoip(Handle h, WindowPeek *wp_return, int16_t *nop_return,
             items = DIALOG_ITEMS(wp);
             flags = hlock_return_orig_state(items);
 
-            ip = (GUEST<INTEGER> *)STARH(items);
+            ip = (GUEST<INTEGER> *)*items;
             retval = (itmp)(ip + 1);
             for(i = *ip + 1, nop = 1; i--; BUMPIP(retval))
             {
@@ -135,7 +135,7 @@ settexth(DialogPeek dp, itmp ip, int item_no)
     current_port = qdGlobals().thePort;
 
     te = DIALOG_TEXTH(dp);
-    tep = STARH(te);
+    tep = *te;
 
     TEP_DEST_RECT(tep) = TEP_VIEW_RECT(tep) = ITEM_RECT(ip);
 
@@ -294,7 +294,7 @@ void Executor::C_GetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
             if(hs > 255) /* can't strassign with no leading count */
                 hs = 255;
             text[0] = hs;
-            BlockMoveData(STARH(item), (Ptr)text + 1, hs);
+            BlockMoveData(*item, (Ptr)text + 1, hs);
         }
     }
 }
@@ -316,7 +316,7 @@ void Executor::C_SetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
         /* test on Mac shows that if the size can't be set, the copy
 	 isn't done, but the rest is */
         if(LM(MemErr) == noErr)
-            BlockMoveData((Ptr)&text[1], STARH(item), hs);
+            BlockMoveData((Ptr)&text[1], *item, hs);
         ip = htoip(item, &wp, &no, &flags);
         if(ip)
         {
@@ -354,7 +354,7 @@ void Executor::ROMlib_dpntoteh(DialogPeek dp, INTEGER no) /* INTERNAL */
     if(no == 0)
     {
         /* special case ... find next */
-        intp = (GUEST<INTEGER> *)STARH(dp->items);
+        intp = (GUEST<INTEGER> *)(*dp->items);
         num = *intp + 1;
         ip = ROMlib_dpnotoip(dp, no = dp->editField + 1, &flags);
         do

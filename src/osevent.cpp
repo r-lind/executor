@@ -78,7 +78,7 @@ Executor::ROMlib_kchr_ptr(void)
         gui_assert(kchr_hand);
         LoadResource(kchr_hand);
         HLock(kchr_hand);
-        kchr_ptr = STARH(kchr_hand);
+        kchr_ptr = *kchr_hand;
     }
     return kchr_ptr;
 }
@@ -107,7 +107,7 @@ Executor::ROMlib_set_keyboard(const char *keyboardname)
             HUnlock(kchr_hand);
         }
         HLock(new_h);
-        kchr_ptr = STARH(new_h);
+        kchr_ptr = *new_h;
     }
     return !!new_h;
 }

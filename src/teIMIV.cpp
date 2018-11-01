@@ -25,7 +25,7 @@ void Executor::C_TEPinScroll(int16_t dh, int16_t dv, TEHandle te) /* IMIV-57 */
 
     te_flags = HGetState((Handle)te);
     HLock((Handle)te);
-    tep = STARH(te);
+    tep = *te;
 
     view_rect = &TEP_VIEW_RECT(tep);
     dest_rect = &TEP_DEST_RECT(tep);
@@ -135,7 +135,7 @@ void Executor::C_TESelView(TEHandle teh) /* IMIV-57 */
     int16_t dh, dv;
     Point start, stop;
 
-    if(STARH(TEHIDDENH(teh))->flags & TEAUTOVIEWBIT)
+    if((*TEHIDDENH(teh))->flags & TEAUTOVIEWBIT)
     {
         TE_CHAR_TO_POINT(teh, TE_SEL_START(teh), &start);
         TE_CHAR_TO_POINT(teh, TE_SEL_END(teh), &stop);
@@ -151,7 +151,7 @@ void Executor::C_TESelView(TEHandle teh) /* IMIV-57 */
 void Executor::C_TEAutoView(BOOLEAN autoflag, TEHandle teh) /* IMIV-57 */
 {
     if(autoflag)
-        STARH(TEHIDDENH(teh))->flags |= TEAUTOVIEWBIT;
+        (*TEHIDDENH(teh))->flags |= TEAUTOVIEWBIT;
     else
-        STARH(TEHIDDENH(teh))->flags &= ~TEAUTOVIEWBIT;
+        (*TEHIDDENH(teh))->flags &= ~TEAUTOVIEWBIT;
 }

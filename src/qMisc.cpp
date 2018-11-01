@@ -175,7 +175,7 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
             dstdv = dstr->bottom - (yoff2 = dstr->top);
             xcoff = FixRatio(dstdh, srcdh);
             ycoff = FixRatio(dstdv, srcdv);
-            ip = op = (GUEST<INTEGER> *)STARH(rh) + 5;
+            ip = op = (GUEST<INTEGER> *)*rh + 5;
             oldv = -32768;
             buf1[0] = 32767;
             mergebuf = buf1;

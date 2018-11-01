@@ -79,7 +79,7 @@ extern const uint32_t xdblt_mask_array[32] asm("_xdblt_mask_array");
 #define SETUP_SPECIAL_RGN(rh, ptr_name)                         \
     do                                                          \
     {                                                           \
-        RgnPtr r = STARH(rh);                                   \
+        RgnPtr r = *(rh);                                   \
         if(RGNP_SMALL_P(r))                                     \
         {                                                       \
             phony_special_region[0] = r->rgnBBox.top.raw();     \

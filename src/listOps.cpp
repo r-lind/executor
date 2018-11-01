@@ -46,8 +46,8 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
         temp.h = Hx(list, dataBounds.right) - 1;
         temp.v = Hx(list, dataBounds.bottom) - 1;
         ep = ROMlib_getoffp(temp, list) + 1;
-        ip_offset = (char *)ip - (char *)STARH(list);
-        ep_offset = (char *)ep - (char *)STARH(list);
+        ip_offset = (char *)ip - (char *)*list;
+        ep_offset = (char *)ep - (char *)*list;
         off0 = ip[0] & 0x7FFF;
         off1 = ip[1] & 0x7FFF;
         off2 = ep[0] & 0x7FFF;
@@ -78,7 +78,7 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
             }
         }
 
-        sp = (Ptr)STARH(HxP(list, cells)) + off1;
+        sp = (Ptr)*HxP(list, cells) + off1;
         BlockMoveData(sp, sp + delta, (Size)off2 - off1);
 
         if(delta < 0)
@@ -94,10 +94,10 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
                 warning_unexpected("err = %d, delta = %d", err, delta);
         }
 
-        BlockMoveData(dp, (Ptr)STARH(HxP(list, cells)) + off0 + (addorrep == Add ? len : 0), (Size)dl);
+        BlockMoveData(dp, (Ptr)*HxP(list, cells) + off0 + (addorrep == Add ? len : 0), (Size)dl);
 
-        ip = (GUEST<INTEGER> *)((char *)STARH(list) + ip_offset);
-        ep = (GUEST<INTEGER> *)((char *)STARH(list) + ep_offset);
+        ip = (GUEST<INTEGER> *)((char *)*list + ip_offset);
+        ep = (GUEST<INTEGER> *)((char *)*list + ep_offset);
 
         if(delta)
         {
@@ -134,7 +134,7 @@ void Executor::C_LGetCell(Ptr dp, GUEST<INTEGER> *dlp, Cell cell,
         ntomove = off2 - off1;
         if(ntomove > *dlp)
             ntomove = *dlp;
-        BlockMoveData((Ptr)STARH(HxP(list, cells)) + off1, dp, (Size)ntomove);
+        BlockMoveData((Ptr)*HxP(list, cells) + off1, dp, (Size)ntomove);
         *dlp = ntomove;
     }
 }
@@ -152,7 +152,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
     FontInfo fi;
     INTEGER nh, nv;
 
-    lp = STARH(list);
+    lp = *list;
     if(!(lp->cellSize.h = csize.h))
         lp->cellSize.h = (lp->rView.right - lp->rView.left) / std::max(1, (lp->dataBounds.right
                                                                                  - lp->dataBounds.left));
@@ -161,7 +161,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
         gp = qdGlobals().thePort;
         SetPort(lp->port);
         GetFontInfo(&fi);
-        lp = STARH(list); /* could have moved */
+        lp = *list; /* could have moved */
         lp->cellSize.v = fi.ascent + fi.descent + fi.leading;
         SetPort(gp);
     }
@@ -181,7 +181,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
         {
             INTEGER min, max;
 
-            ROMlib_hminmax(&min, &max, STARH(list));
+            ROMlib_hminmax(&min, &max, *list);
             SetControlMaximum(control, max);
         }
     }
@@ -192,7 +192,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
         {
             INTEGER min, max;
 
-            ROMlib_vminmax(&min, &max, STARH(list));
+            ROMlib_vminmax(&min, &max, *list);
             SetControlMaximum(control, max);
         }
     }

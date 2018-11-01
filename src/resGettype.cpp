@@ -37,7 +37,7 @@ static INTEGER inserttypes(resmaphand map, INTEGER ninserted, BOOLEAN first)
     GUEST<ResType> *next, *check;
     GUEST<ResType> candidate;
 
-    next = STARH(ar) + ninserted;
+    next = *ar + ninserted;
     if(first)
     {
         WALKTR(map, i, tr)
@@ -48,7 +48,7 @@ static INTEGER inserttypes(resmaphand map, INTEGER ninserted, BOOLEAN first)
     {
         WALKTR(map, i, tr)
         candidate = tr->rtyp;
-        check = STARH(ar);
+        check = *ar;
         for(j = ninserted - 1; --j > -1 && *check++ != candidate;)
             ;
         if(j <= -1)
@@ -58,7 +58,7 @@ static INTEGER inserttypes(resmaphand map, INTEGER ninserted, BOOLEAN first)
         }
         EWALKTR(tr)
     }
-    return next - STARH(ar);
+    return next - *ar;
 }
 
 static INTEGER initar(INTEGER rn)
@@ -126,7 +126,7 @@ void Executor::C_GetIndType(GUEST<ResType> *typ, INTEGER indx)
     if(indx <= 0 || indx > initar(ARRN_ALL))
         *typ = 0;
     else
-        *typ = STARH(ar)[indx - 1];
+        *typ = (*ar)[indx - 1];
 }
 
 void Executor::C_Get1IndType(GUEST<ResType> *typ, INTEGER indx) /* IMIV-15 */
@@ -134,5 +134,5 @@ void Executor::C_Get1IndType(GUEST<ResType> *typ, INTEGER indx) /* IMIV-15 */
     if(indx <= 0 || indx > initar(LM(CurMap)))
         *typ = 0;
     else
-        *typ = STARH(ar)[indx - 1];
+        *typ = (*ar)[indx - 1];
 }

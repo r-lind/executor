@@ -37,7 +37,7 @@ void Executor::C_GetWTitle(WindowPtr w, StringPtr t)
 {
     if(!w || !t)
         /*-->*/ return;
-    str255assign(t, STARH(WINDOW_TITLE(w)));
+    str255assign(t, *WINDOW_TITLE(w));
 }
 
 WindowPeek Executor::ROMlib_firstvisible(WindowPtr w) /* INTERNAL */
@@ -264,13 +264,13 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
        || WINDOW_NEXT_WINDOW(w) == (WindowPeek)w)
         /*-->*/ return;
     for(wpp = (GUEST<WindowPeek> *)&LM(WindowList);
-        *wpp && STARH(wpp) != (WindowPeek)w;
-        wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW_X(STARH(wpp)))
+        *wpp && *wpp != (WindowPeek)w;
+        wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW_X(*wpp))
         ;
     if(!*wpp)
         /*-->*/ return;
     *wpp = WINDOW_NEXT_WINDOW_X(w);
-    oldbehind = STARH(wpp);
+    oldbehind = *wpp;
     if(behind)
     {
         WINDOW_NEXT_WINDOW_X(w) = WINDOW_NEXT_WINDOW_X(behind);
@@ -282,11 +282,11 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
 #if defined(SEND_BEHIND)
         if(!*wpp) /* what if 'w' is the only window? */
             wpp = (GUEST<WindowPeek> *)&LM(WindowList);
-        for(; WINDOW_NEXT_WINDOW_X(STARH(wpp));
-            wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW_X(STARH(wpp)))
+        for(; WINDOW_NEXT_WINDOW_X(*wpp);
+            wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW_X(*wpp))
             ;
-        if(STARH(wpp) != (WindowPeek)w)
-            WINDOW_NEXT_WINDOW_X(STARH(wpp)) = (WindowPeek)w;
+        if(*wpp != (WindowPeek)w)
+            WINDOW_NEXT_WINDOW_X(*wpp) = (WindowPeek)w;
 #endif /* SEND_BEHIND */
         WINDOW_NEXT_WINDOW_X(w) = 0;
     }

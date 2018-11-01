@@ -117,8 +117,8 @@ INTEGER Executor::C_Transliterate(Handle srch, Handle dsth, INTEGER target,
 {
     char *sp, *dp, *ep;
 
-    sp = (char *)STARH(srch);
-    dp = (char *)STARH(dsth);
+    sp = (char *)*srch;
+    dp = (char *)*dsth;
     ep = sp + GetHandleSize(srch);
     if(target & smTransLower)
     {
@@ -552,7 +552,7 @@ INTEGER Executor::C_ReplaceText(Handle base_text, Handle subst_text, Str15 key)
     LONGINT offset;
     LONGINT l;
 
-    p = (Ptr)STARH(subst_text);
+    p = (Ptr)*subst_text;
     len = GetHandleSize(subst_text);
     offset = 0;
     while(retval >= 0 && (l = Munger(base_text, offset, (Ptr)key + 1, key[0], nullptr, 1)) >= 0)

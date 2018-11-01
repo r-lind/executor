@@ -25,7 +25,7 @@ void Executor::C_PrOpen()
     {
         h = GetString(-8192);
         HLock((Handle)h);
-        ROMlib_printresfile = OpenRFPerm(STARH(h), LM(BootDrive), fsCurPerm);
+        ROMlib_printresfile = OpenRFPerm(*h, LM(BootDrive), fsCurPerm);
 #if defined(NEXTSTEP)
         if(ROMlib_printresfile == -1)
             ROMlib_printresfile

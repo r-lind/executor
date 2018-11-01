@@ -59,8 +59,8 @@ void Executor::gd_black_white(GDHandle gdh,
     GDPtr gd;
     PixMapPtr gd_pmap;
 
-    gd = STARH(gdh);
-    gd_pmap = STARH(gd->gdPMap);
+    gd = *gdh;
+    gd_pmap = (*gd->gdPMap);
 
     pixmap_black_white(gd_pmap, black_return, white_return);
 }
@@ -331,8 +331,8 @@ sort_color_table(CTabHandle dsth, const CTabHandle srch)
     CTabPtr src, dst;
     INTEGER src_ct_size;
 
-    src = STARH(srch);
-    dst = STARH(dsth);
+    src = *srch;
+    dst = *dsth;
 
     /* Claris Home Page has some PICTs with color tables that are too large,
      so we make sure we don't try to copy too much. */

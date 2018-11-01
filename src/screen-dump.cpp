@@ -311,7 +311,7 @@ void Executor::do_dump_screen(void)
     PixMap *gd_pm;
     int log2_bpp;
 
-    gd_pm = STARH(gd_pmh);
+    gd_pm = *gd_pmh;
     log2_bpp = ROMlib_log2[gd_pm->pixelSize];
 
     (*dump_fns[log2_bpp])(gd_pm);

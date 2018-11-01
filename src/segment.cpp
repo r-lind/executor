@@ -378,7 +378,7 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv)
             newcount = Hx(fh, count) + 1;
             HxX(fh, count) = newcount;
             SetHandleSize((Handle)fh,
-                            (char *)&HxX(fh, files)[newcount] - (char *)STARH(fh));
+                            (char *)&HxX(fh, files)[newcount] - (char *)*fh);
             HxX(fh, files)[Hx(fh, count) - 1] = app;
         }
     }
@@ -390,9 +390,9 @@ void Executor::CountAppFiles(GUEST<INTEGER> *messagep,
     if(LM(AppParmHandle))
     {
         if(messagep)
-            *messagep = STARH((finderinfohand)LM(AppParmHandle))->message;
+            *messagep = (*(finderinfohand)LM(AppParmHandle))->message;
         if(countp)
-            *countp = STARH((finderinfohand)LM(AppParmHandle))->count;
+            *countp = (*(finderinfohand)LM(AppParmHandle))->count;
     }
     else
         *countp = 0;
@@ -400,15 +400,15 @@ void Executor::CountAppFiles(GUEST<INTEGER> *messagep,
 
 void Executor::GetAppFiles(INTEGER index, AppFile *filep) /* IMII-58 */
 {
-    *filep = STARH((finderinfohand)LM(AppParmHandle))->files[index - 1];
+    *filep = (*(finderinfohand)LM(AppParmHandle))->files[index - 1];
 }
 
 void Executor::ClrAppFiles(INTEGER index) /* IMII-58 */
 {
-    if(STARH((finderinfohand)LM(AppParmHandle))->files[index - 1].fType)
+    if((*(finderinfohand)LM(AppParmHandle))->files[index - 1].fType)
     {
-        STARH((finderinfohand)LM(AppParmHandle))->files[index - 1].fType = 0;
-        STARH((finderinfohand)LM(AppParmHandle))->count = STARH((finderinfohand)LM(AppParmHandle))->count - 1;
+        (*(finderinfohand)LM(AppParmHandle))->files[index - 1].fType = 0;
+        (*(finderinfohand)LM(AppParmHandle))->count = (*(finderinfohand)LM(AppParmHandle))->count - 1;
     }
 }
 
@@ -577,7 +577,7 @@ void Executor::C_LoadSeg(INTEGER segno)
     LM(ResLoad) = -1; /* CricketDraw III's behaviour suggested this */
     newcode = GetResource(TICK("CODE"), segno);
     HLock(newcode);
-    taboff = ((GUEST<INTEGER> *)STARH(newcode))[0];
+    taboff = ((GUEST<INTEGER> *)*newcode)[0];
     if((uint16_t)taboff == 0xA89F) /* magic compressed resource signature */
     {
         /* We are totally dead here.  We almost certainly can't use
@@ -588,7 +588,7 @@ void Executor::C_LoadSeg(INTEGER segno)
         ROMlib_launch_failure = (system_version >= 0x700 ? launch_compressed_ge7 : launch_compressed_lt7);
         C_ExitToShell();
     }
-    savenentries = nentries = ((GUEST<INTEGER> *)STARH(newcode))[1];
+    savenentries = nentries = ((GUEST<INTEGER> *)*newcode)[1];
 
     saveptr = ptr = (GUEST<int16_t> *)((char *)SYN68K_TO_US(EM_A5) + taboff + LM(CurJTOffset));
     while(--nentries >= 0)
@@ -598,7 +598,7 @@ void Executor::C_LoadSeg(INTEGER segno)
             offbytes = *ptr;
             *ptr++ = segno;
             *ptr++ = JMPLINSTR;
-            *(GUEST<LONGINT> *)ptr = US_TO_SYN68K(STARH(newcode)) + offbytes + 4;
+            *(GUEST<LONGINT> *)ptr = US_TO_SYN68K(*newcode) + offbytes + 4;
             ptr += 2;
         }
         else
@@ -638,7 +638,7 @@ void Executor::C_UnloadSeg(Ptr addr)
         h = GetResource(TICK("CODE"), segno);
         if(!*h)
             LoadResource(h);
-        segstart = STARH(h);
+        segstart = *h;
         for(p = addr; SEGNOOFP(p) == segno; p += 8)
             unpatch(segstart, p);
 

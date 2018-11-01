@@ -121,7 +121,7 @@ get_phoney_name_resource(void)
         if(ROMlib_phoney_name_string)
         {
             HSetRBit((Handle)ROMlib_phoney_name_string);
-            str255_from_c_string(STARH(ROMlib_phoney_name_string), name.c_str());
+            str255_from_c_string(*ROMlib_phoney_name_string, name.c_str());
         }
     }
     return ROMlib_phoney_name_string;
@@ -144,12 +144,12 @@ void Executor::C_GetIndString(StringPtr s, INTEGER sid, INTEGER index)
 
     retval = GetResource(TICK("STR#"), sid);
     LoadResource(retval);
-    if(ResError() != noErr || *(INTEGER *)STARH(retval) < index)
+    if(ResError() != noErr || *(INTEGER *)*retval < index)
     {
         s[0] = 0;
         /*-->*/ return;
     }
-    p = (char *)STARH(retval) + 2;
+    p = (char *)*retval + 2;
     while(--index)
         p += 1 + U(*p);
     for(ep = p + 1 + U(*p), op = (char *)s; p != ep; *op++ = *p++)
@@ -193,8 +193,8 @@ LONGINT Executor::C_Munger(Handle h, LONGINT off, Ptr p1, LONGINT len1, Ptr p2,
     LONGINT retval;
 
     MM_SLAM("entry");
-    p = (char *)STARH(h) + off;
-    ep = (char *)STARH(h) + (hs = GetHandleSize(h));
+    p = (char *)*h + off;
+    ep = (char *)*h + (hs = GetHandleSize(h));
     if(p1 && len1)
     {
         while(!cmpstrings(p, ep, (char *)p1, len1))
@@ -203,12 +203,12 @@ LONGINT Executor::C_Munger(Handle h, LONGINT off, Ptr p1, LONGINT len1, Ptr p2,
             RETURN(-1);
         if(ep - p < len1)
         {
-            if(p != (char *)STARH(h) + off)
+            if(p != (char *)*h + off)
                 RETURN(-1);
             else
                 len1 = ep - p;
         }
-        off = p - (char *)STARH(h);
+        off = p - (char *)*h;
     }
     else if(len1 < 0)
         len1 = hs - off;
@@ -219,17 +219,17 @@ LONGINT Executor::C_Munger(Handle h, LONGINT off, Ptr p1, LONGINT len1, Ptr p2,
     {
         BlockMoveData((Ptr)p + len1, (Ptr)p + len2, tomove);
         SetHandleSize(h, hs + len2 - len1);
-        p = (char *)STARH(h) + off;
+        p = (char *)*h + off;
     }
     else if(len1 < len2)
     {
         SetHandleSize(h, hs + len2 - len1);
-        p = (char *)STARH(h) + off;
+        p = (char *)*h + off;
         BlockMoveData((Ptr)p + len1, (Ptr)p + len2, tomove);
     }
     while(len2--)
         *p++ = *p2++;
-    RETURN(p - (char *)STARH(h));
+    RETURN(p - (char *)*h);
 DONE:
     MM_SLAM("exit");
     EM_D0 &= 0xFFFF0000; /* for now ... we never have an error */
@@ -429,11 +429,11 @@ void Executor::GetIndPattern(Byte *op, INTEGER plistid, INTEGER index)
 
     retval = GetResource(TICK("PAT#"), plistid);
     LoadResource(retval);
-    if(ResError() != noErr || *(INTEGER *)STARH(retval) < index)
+    if(ResError() != noErr || *(INTEGER *)*retval < index)
     {
         return;
     }
-    p = (char *)STARH(retval) + 2 + 8 * (index - 1);
+    p = (char *)*retval + 2 + 8 * (index - 1);
     for(ep = p + 8; p != ep; *op++ = *p++)
         ;
 }

@@ -81,7 +81,7 @@ extern uintptr_t ROMlib_memtop;
 /* handle to block pointer */
 #define HANDLE_TO_BLOCK(handle)                          \
     (VALID_ADDRESS(handle) && VALID_ADDRESS(*handle) \
-         ? (block_header_t *)((char *)STARH(handle)      \
+         ? (block_header_t *)((char *)*(handle)      \
                               - HDRSIZE)                 \
          : nullptr)
 

@@ -270,12 +270,12 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
             blt_fancy_pat_mode_to_pixmap(rh, mode,                            \
                                          pixpat_accessor((CGrafPtr)           \
                                                              the_port),       \
-                                         nullptr, STARH(cport_pmap));            \
+                                         nullptr, *cport_pmap);            \
         }                                                                     \
         else if(active_screen_addr_p(&the_port->portBits))                    \
         {                                                                     \
             PixMap copy_of_screen;                                            \
-            copy_of_screen = *(STARH(GD_PMAP(LM(TheGDevice))));               \
+            copy_of_screen = **GD_PMAP(LM(TheGDevice));                       \
             copy_of_screen.bounds = the_port->portBits.bounds;                \
             blt_fancy_pat_mode_to_pixmap(rh, mode, nullptr,                      \
                                          pattern_accessor(the_port),          \
@@ -313,9 +313,9 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     /* ### is this if necessary? */
     if(screen_dst_p)
     {
-        dst_pixmap = *STARH(main_gd_pmap);
+        dst_pixmap = **main_gd_pmap;
         ROMlib_fg_bk(&fg_pixel, &bk_pixel, nullptr, nullptr,
-                     pixmap_rgb_spec(STARH(main_gd_pmap)),
+                     pixmap_rgb_spec(*main_gd_pmap),
                      true, false);
     }
     else
@@ -361,8 +361,8 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
 
     {
         HLockGuard guard1(srch), guard2(dsth);
-        PixPat *src = STARH(srch);
-        PixMap *dst = STARH(dsth);
+        PixPat *src = *srch;
+        PixMap *dst = *dsth;
         GrafPtr the_port = qdGlobals().thePort;
 
         screen_dst_p = active_screen_addr_p(dst);
@@ -439,7 +439,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
             }
 
             HLockGuard guard(xh);
-            xdata_t *x = STARH(xh);
+            xdata_t *x = *xh;
             update_dirty_p = (*x->blt_func)(rh, mode, -dst_left,
                                             -dst_top, x, dst);
         }
@@ -487,7 +487,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
     }
     else
     {
-        PixPat *pixpat = STARH(pixpat_handle);
+        PixPat *pixpat = *pixpat_handle;
         if(pixpat->patType == pixpat_type_orig)
         {
             xh = xdata_for_pattern(pixpat->pat1Data, pixmap);
@@ -502,7 +502,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
 
     /* Set up the pattern bitmap. */
     HLock((Handle)xh);
-    x = STARH(xh);
+    x = *xh;
     pattern_pm.bounds.top = 0;
     pattern_pm.bounds.left = 0;
     pattern_pm.bounds.bottom = x->height_minus_1 + 1;
@@ -682,7 +682,7 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
         ROMlib_drawingverbpicupdate(verb);
         PICOP(OP_frameRgn + (int)verb);
         HLockGuard guard(rgn);
-        RgnPtr rp = STARH(rgn);
+        RgnPtr rp = *rgn;
         PICWRITE(rp, rp->rgnSize);
     }
 

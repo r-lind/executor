@@ -70,7 +70,7 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
     if(VDRIVER_BYPASS_INTERNAL_FBUF_P())
     {
         int top, left;
-        RgnPtr rp = STARH(rh);
+        RgnPtr rp = *rh;
 
         if(active_screen_addr_p(src))
         {

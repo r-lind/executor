@@ -52,7 +52,7 @@ using namespace Executor;
     (HxX(palette, pmPrivate) &= ~PALETTE_MODIFIED_BIT_X)
 
 #define PALETTE_SEED_X(palette) \
-    (*(GUEST<LONGINT> *)STARH(HxP(palette, pmSeeds)))
+    (*(GUEST<LONGINT> *)*HxP(palette, pmSeeds))
 #define PALETTE_SEED(palette) (PALETTE_SEED_X(palette))
 
 #define ELT_FREE_P(elt)                    \
@@ -845,7 +845,7 @@ PaletteHandle Executor::C_NewPalette(INTEGER entries, CTabHandle src_colors,
 
     new_palette
         = (PaletteHandle)NewHandle(PALETTE_STORAGE_FOR_ENTRIES(entries));
-    memset(STARH(new_palette), 0, PALETTE_STORAGE_FOR_ENTRIES(entries));
+    memset(*new_palette, 0, PALETTE_STORAGE_FOR_ENTRIES(entries));
 
     /* initial contents don't matter */
     PALETTE_SEEDS_X(new_palette) = NewHandle(sizeof(int));
@@ -894,7 +894,7 @@ PaletteHandle Executor::C_GetNewPalette(INTEGER id)
     palette_size
         = PALETTE_STORAGE_FOR_ENTRIES(PALETTE_ENTRIES(palette_res_h));
     retval = (PaletteHandle)(NewHandle(palette_size));
-    BlockMoveData((Ptr)STARH(palette_res_h), (Ptr)STARH(retval),
+    BlockMoveData((Ptr)*palette_res_h, (Ptr)*retval,
                   palette_size);
 
     /* initial contents don't matter */
@@ -1292,7 +1292,7 @@ void Executor::C_AnimateEntry(WindowPtr dst_window, INTEGER dst_entry,
     dst_palette_h = GetPalette(dst_window);
     if(!dst_palette_h)
         dst_palette_h = GetPalette((WindowPtr)-1);
-    palette = STARH(dst_palette_h);
+    palette = *dst_palette_h;
     entry = &palette->pmInfo[dst_entry];
 
     /* do nothing if the entry is not animated */
@@ -1350,7 +1350,7 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
     if(dst_window_palette_h == nullptr)
         dst_window_palette_h = GetPalette((WindowPtr)-1);
 
-    palette = STARH(dst_window_palette_h);
+    palette = *dst_window_palette_h;
 
     /* Compute the number of entries in the table to modify. */
     dst_length = std::min<INTEGER>((CTAB_SIZE(src_ctab) + 1) - src_index, dst_length);

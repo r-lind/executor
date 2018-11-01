@@ -125,7 +125,7 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     tempdatah = (DataHandle)NewHandle(0);
     HxX(retval, cells) = tempdatah;
     HLock((Handle)retval);
-    lp = STARH(retval);
+    lp = *retval;
 
     lp->dataBounds = *bounds;
     lp->rView = *rview;
@@ -171,7 +171,7 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
         ROMlib_vminmax(&min, &max, lp);
         lp->vScroll = NewControl((WindowPtr)wind, &r, (StringPtr) "",
                                     draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0);
-        STARH(lp->vScroll)->contrlRfCon = guest_cast<LONGINT>(retval);
+        (*lp->vScroll)->contrlRfCon = guest_cast<LONGINT>(retval);
         lp->listFlags |= lDoVAutoscroll;
     }
 
@@ -185,7 +185,7 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
         ROMlib_hminmax(&min, &max, lp);
         lp->hScroll = NewControl((WindowPtr)wind, &r, (StringPtr) "",
                                     draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0);
-        STARH(lp->hScroll)->contrlRfCon = guest_cast<LONGINT>(retval);
+        (*lp->hScroll)->contrlRfCon = guest_cast<LONGINT>(retval);
         lp->listFlags |= lDoHAutoscroll;
     }
 

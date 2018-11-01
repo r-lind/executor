@@ -126,7 +126,7 @@ void Executor::C_ZoomWindow(WindowPtr wp, INTEGER part,
         /* Save userState if not in stdstate */
         if(!instdstate)
         {
-            u = &((WStateData *)STARH(WINDOW_DATA(wp)))->userState;
+            u = &((WStateData *)*WINDOW_DATA(wp))->userState;
             u->top
                 = PORT_RECT(wp).top - PORT_BOUNDS(wp).top;
             u->left

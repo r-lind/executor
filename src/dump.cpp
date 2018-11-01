@@ -28,7 +28,7 @@
 
 #include "rsys/print.h"
 
-#define deref(x) STARH(x)
+#define deref(x) (*(x))
 
 #define pmWindow(p) ((p)->pmWindow)
 #define pmPrivate(p) ((p)->pmPrivate)
@@ -918,7 +918,7 @@ void dump_dialog_items(DialogPeek dp)
     itmp items;
     int i;
 
-    item_data = (GUEST<int16_t> *)STARH(DIALOG_ITEMS(dp));
+    item_data = (GUEST<int16_t> *)*DIALOG_ITEMS(dp);
     n_items = *item_data;
     items = (itmp)&item_data[1];
     fprintf(o_fp, "%d items:\n", n_items);
@@ -1026,7 +1026,7 @@ void dump_menu_info(MenuHandle x)
             p += 4;
         }
         indent -= 2;
-        iprintf((o_fp, "total chars = %ld\n", p - (unsigned char *)STARH(x)));
+        iprintf((o_fp, "total chars = %ld\n", p - (unsigned char *)*x));
     }
     indent -= 2;
 }
@@ -1137,7 +1137,7 @@ void dump_te(TEHandle te)
         int16_t length;
 
         length = TE_LENGTH(te);
-        memcpy(buf, STARH(TE_HTEXT(te)), length);
+        memcpy(buf, *TE_HTEXT(te), length);
         buf[length] = '\0';
 
         fprintf(o_fp, "`%s'\n", buf);
@@ -1166,7 +1166,7 @@ void dump_te(TEHandle te)
         te_style = TE_GET_STYLE(te);
         lh_table = TE_STYLE_LH_TABLE(te_style);
         n_runs = TE_STYLE_N_RUNS(te_style);
-        lh = STARH(lh_table);
+        lh = *lh_table;
 
         n_styles = TE_STYLE_N_STYLES(te_style);
 

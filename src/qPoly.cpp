@@ -34,8 +34,8 @@ void Executor::C_ClosePoly()
     PolyHandle ph;
 
     ph = (PolyHandle)PORT_POLY_SAVE(qdGlobals().thePort);
-    for(ip = (GUEST<INTEGER> *)((char *)STARH(ph) + SMALLPOLY),
-    ep = (GUEST<INTEGER> *)((char *)STARH(ph) + Hx(ph, polySize));
+    for(ip = (GUEST<INTEGER> *)((char *)*ph + SMALLPOLY),
+    ep = (GUEST<INTEGER> *)((char *)*ph + Hx(ph, polySize));
         ip != ep;)
     {
         if((i = *ip) <= top)
@@ -74,7 +74,7 @@ void Executor::C_OffsetPoly(PolyHandle poly, INTEGER dh,
         HxX(poly, polyBBox.left) = Hx(poly, polyBBox.left) + dh;
         HxX(poly, polyBBox.right) = Hx(poly, polyBBox.right) + dh;
         pp = HxX(poly, polyPoints);
-        ep = (GUEST<Point> *)(((char *)STARH(poly)) + Hx(poly, polySize));
+        ep = (GUEST<Point> *)(((char *)*poly) + Hx(poly, polySize));
         while(pp != ep)
         {
             pp->h = pp->h + (dh);

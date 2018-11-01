@@ -422,11 +422,11 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
         /* Create a nice, sorted table for src1_ctab. */
         if(CTAB_FLAGS_X(src1_ctabh) & CTAB_GDEVICE_BIT_X)
         {
-            src1_ctab = STARH(src1_ctabh);
+            src1_ctab = *src1_ctabh;
         }
         else
         {
-            src1_ctab = sort_table(STARH(src1_ctabh),
+            src1_ctab = sort_table(*src1_ctabh,
                                    (CTabPtr)alloca(sizeof *src1_ctab
                                                    + (max_color
                                                       * sizeof(ColorSpec))),
@@ -440,11 +440,11 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
         {
             if(CTAB_FLAGS_X(src2_ctabh) & CTAB_GDEVICE_BIT_X)
             {
-                src2_ctab = STARH(src2_ctabh);
+                src2_ctab = *src2_ctabh;
             }
             else
             {
-                src2_ctab = sort_table(STARH(src2_ctabh),
+                src2_ctab = sort_table(*src2_ctabh,
                                        (CTabPtr)alloca(sizeof *src2_ctab
                                                        + (max_color
                                                           * sizeof(ColorSpec))),

@@ -76,7 +76,7 @@ void Executor::C_InitCPort(CGrafPtr p)
     // | /* color quickdraw version */ 0);
 
     gd = LM(TheGDevice);
-    *STARH(CPORT_PIXMAP(p)) = *STARH(GD_PMAP(gd));
+    **CPORT_PIXMAP(p) = **GD_PMAP(gd);
 
     PORT_DEVICE_X(p) = 0;
     PORT_RECT(p) = GD_RECT(gd);
@@ -331,14 +331,14 @@ PixMapHandle Executor::C_NewPixMap()
    */
     if(LM(TheGDevice))
     {
-        *STARH(pixmap) = *STARH(GD_PMAP(LM(TheGDevice)));
+        **pixmap = **GD_PMAP(LM(TheGDevice));
     }
     else
     {
         /* If LM(TheGDevice) is nullptr, we fill in some useful default values.
        * This is a hack to make Executor bootstrap properly.
        */
-        memset(STARH(pixmap), 0, sizeof(PixMap));
+        memset(*pixmap, 0, sizeof(PixMap));
         HxX(pixmap, rowBytes) = PIXMAP_DEFAULT_ROWBYTES_X;
         PIXMAP_HRES_X(pixmap) = PIXMAP_VRES_X(pixmap) = 72 << 16;
         PIXMAP_PIXEL_TYPE_X(pixmap) = chunky_pixel_type;
@@ -370,7 +370,7 @@ void Executor::C_CopyPixMap(PixMapHandle src, PixMapHandle dst)
     dst_ctab = PIXMAP_TABLE(dst);
 
     /* #warning "determine actual CopyPixMap behavior" */
-    *(STARH(dst)) = *(STARH(src));
+    **dst = **src;
 
     PIXMAP_TABLE_X(dst) = dst_ctab;
     ROMlib_copy_ctab(PIXMAP_TABLE(src), dst_ctab);
@@ -420,8 +420,8 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
 
     pixpat = (PixPatHandle)NewHandle(sizeof(PixPat));
     patmap = (PixMapHandle)NewHandle(sizeof(PixMap));
-    *STARH(pixpat) = HxX(pixpat_res, pixpat);
-    *STARH(patmap) = HxX(pixpat_res, patmap);
+    **pixpat = HxX(pixpat_res, pixpat);
+    **patmap = HxX(pixpat_res, patmap);
 
     {
         int pixpat_type;
@@ -447,7 +447,7 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     PIXPAT_XVALID_X(pixpat) = -1;
 
     xdata = NewHandle(sizeof(xdata_t));
-    memset(STARH(xdata), 0, sizeof(xdata_t));
+    memset(*xdata, 0, sizeof(xdata_t));
     PIXPAT_XDATA_X(pixpat) = xdata;
     PIXPAT_XMAP_X(pixpat) = nullptr;
 
@@ -459,14 +459,14 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     PIXPAT_DATA_X(pixpat) = NewHandle(pixpat_data_size);
     HUnlock((Handle)pixpat);
 
-    BlockMoveData((Ptr)((char *)STARH(pixpat_res) + pixpat_data_offset),
-                  STARH(PIXPAT_DATA(pixpat)),
+    BlockMoveData((Ptr)((char *)*pixpat_res + pixpat_data_offset),
+                  *PIXPAT_DATA(pixpat),
                   pixpat_data_size);
 
     HLockGuard guard(pixpat_res);
     /* ctab_ptr is a pointer into the pixpat_res_handle;
 	  make sure no allocations are done while it is in use */
-    ctab_ptr = (CTabPtr)((char *)STARH(pixpat_res)
+    ctab_ptr = (CTabPtr)((char *)*pixpat_res
                          + (int)PIXMAP_TABLE_AS_OFFSET(patmap));
     ctab_size = (sizeof(ColorTable)
                  + (sizeof(ColorSpec) * ctab_ptr->ctSize));
@@ -478,7 +478,7 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     HUnlock((Handle)patmap);
 
     BlockMoveData((Ptr)ctab_ptr,
-                  (Ptr)STARH(PIXMAP_TABLE(patmap)),
+                  (Ptr)*PIXMAP_TABLE(patmap),
                   ctab_size);
 
     /* ctab_ptr->ctSeed = GetCTSeed (); */
@@ -521,7 +521,7 @@ void Executor::C_CopyPixPat(PixPatHandle src, PixPatHandle dst)
 
     data_size = GetHandleSize(PIXPAT_DATA(src));
     SetHandleSize(PIXPAT_DATA(dst), data_size);
-    memcpy(STARH(PIXPAT_DATA(dst)), STARH(PIXPAT_DATA(src)), data_size);
+    memcpy(*PIXPAT_DATA(dst), *PIXPAT_DATA(src), data_size);
     PIXPAT_XVALID_X(dst) = -1;
     PATASSIGN(PIXPAT_1DATA(dst), PIXPAT_1DATA(src));
 }

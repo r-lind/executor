@@ -50,7 +50,7 @@ void Executor::C_SetResInfo(Handle res, INTEGER id, StringPtr name)
     if(name)
     {
         sl = U(name[0]);
-        if(U(*(sp = (char *)STARH(map) + Hx(map, namoff) + rr->noff)) < sl || rr->noff == -1)
+        if(U(*(sp = (char *)*map + Hx(map, namoff) + rr->noff)) < sl || rr->noff == -1)
         {
             SetHandleSize((Handle)map, Hx(map, rh.maplen) + sl + 1);
             err = MemError();
@@ -58,7 +58,7 @@ void Executor::C_SetResInfo(Handle res, INTEGER id, StringPtr name)
                 return;
             rr->noff = Hx(map, rh.maplen) - Hx(map, namoff);
             HxX(map, rh.maplen) = Hx(map, rh.maplen) + sl + 1;
-            sp = (char *)STARH(map) + Hx(map, namoff) + rr->noff;
+            sp = (char *)*map + Hx(map, namoff) + rr->noff;
             warning_unimplemented("we leak space here");
         }
         str255assign(sp, name);
@@ -114,13 +114,13 @@ static LONGINT addtype(resmaphand map, ResType typ)
 
     WALKTR(map, i, tr)
     if(tr->rtyp == typ)
-        return ((LONGINT)((char *)tr - (char *)STARH(map)));
+        return ((LONGINT)((char *)tr - (char *)*map));
     EWALKTR(tr)
     ROMlib_invalar();
     t.rtyp = typ;
     t.nres = -1;
     t.rloff = NAMEOFF(map) - TYPEOFF(map);
-    off = (LONGINT)((char *)tr - (char *)STARH(map));
+    off = (LONGINT)((char *)tr - (char *)*map);
     Munger((Handle)map, off, (Ptr) "", (LONGINT)0, (Ptr)&t, sizeof(t));
     NUMTMINUS1X(map) = NUMTMINUS1(map) + 1;
     MAPLENX(map) = MAPLEN(map) + sizeof(t);
@@ -186,16 +186,16 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
     HxX(map, resfatr) |= mapChanged;
     r.rhand = data;
     HSetRBit(data);
-    tr = (typref *)((char *)STARH(map) + toff);
+    tr = (typref *)((char *)*map + toff);
 #if 1
     WALKRR(map, tr, j, rr)
     if(rr->rid > id)
         break;
     EWALKRR(rr)
 #else /* 0 */
-    rr = (resref *)((char *)STARH(map) + Hx(map, typoff) + tr->rloff);
+    rr = (resref *)((char *)*map + Hx(map, typoff) + tr->rloff);
 #endif /* 0 */
-    roff = (LONGINT)((char *)rr - (char *)STARH(map));
+    roff = (LONGINT)((char *)rr - (char *)*map);
     /* roff is from the beginning of the map */
     Munger((Handle)map, roff, (Ptr) "", (LONGINT)0, (Ptr)&r,
            sizeof(resref));
@@ -203,7 +203,7 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
     /* roff is from the beginning of the typelist */
     MAPLENX(map) = MAPLEN(map) + sizeof(resref);
     NAMEOFFX(map) = NAMEOFF(map) + sizeof(resref);
-    tr2 = (typref *)((char *)STARH(map) + toff);
+    tr2 = (typref *)((char *)*map + toff);
     tr2->nres = tr2->nres + 1;
     WALKTR(map, i, tr)
     if(tr->rloff >= roff && tr != tr2)
@@ -245,12 +245,12 @@ void Executor::C_RemoveResource(Handle res)
         /*-->*/ return;
     }
     HSetState(res, HGetState(res) & ~RSRCBIT);
-    troff = (char *)tr - (char *)STARH(map);
-    rroff = (char *)rr - (char *)STARH(map);
+    troff = (char *)tr - (char *)*map;
+    rroff = (char *)rr - (char *)*map;
     if(rr->noff != -1)
     {
         nmoff = rr->noff + NAMEOFF(map);
-        nlen = U(*((char *)STARH(map) + nmoff)) + 1;
+        nlen = U(*((char *)*map + nmoff)) + 1;
         Munger((Handle)map, nmoff, (Ptr)0, nlen, (Ptr) "", (LONGINT)0);
         nmoff -= NAMEOFF(map);
         MAPLENX(map) = MAPLEN(map) - nlen;
@@ -263,7 +263,7 @@ void Executor::C_RemoveResource(Handle res)
     rroff -= TYPEOFF(map);
     MAPLENX(map) = MAPLEN(map) - sizeof(resref);
     NAMEOFFX(map) = NAMEOFF(map) - sizeof(resref);
-    tr = (typref *)((char *)STARH(map) + troff);
+    tr = (typref *)((char *)*map + troff);
     tr->nres = tr->nres - 1;
     if(tr->nres == -1)
     {
@@ -306,7 +306,7 @@ static OSErr writemap(resmaphand map)
     if(terr != noErr)
         return (terr);
     lc = Hx(map, rh.maplen);
-    terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)STARH(map));
+    terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)*map);
     if(terr == noErr)
         HxX(map, resfatr) &= ~(mapChanged);
     return (terr);
@@ -344,7 +344,7 @@ void Executor::ROMlib_wr(resmaphand map, resref *rr) /* INTERNAL */
         if(LM(ResErr) != noErr)
             return;
         lc = rsize;
-        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), STARH(res)));
+        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), *res));
         if(LM(ResErr) != noErr)
             return;
         rr->ratr &= ~resChanged;
@@ -355,7 +355,7 @@ void Executor::ROMlib_wr(resmaphand map, resref *rr) /* INTERNAL */
 
 static void fillst(sorttypehand st, resref *rp, resref *rep)
 {
-    res_sorttype_t *end = STARH(st), *sp;
+    res_sorttype_t *end = *st, *sp;
     LONGINT newoff;
 
     end++->diskoff = -1; /* real disk offsets are always > 0 */
@@ -393,7 +393,7 @@ static void getdat(INTEGER fn, LONGINT datoff, LONGINT doff, Handle *h)
     HSetState(*h, RSRCBIT);
     lc = size;
     HLock(*h);
-    FSReadAll(fn, guestref(lc), STARH(*h));
+    FSReadAll(fn, guestref(lc), **h);
     gui_assert(lc == size);
     HUnlock(*h);
 }
@@ -412,7 +412,7 @@ static void putdat(INTEGER fn, LONGINT datoff, LONGINT *doffp, Handle h)
     FSWriteAll(fn, guestref(lc), (Ptr)&swappedsize);
     lc = size;
     HLock(h);
-    FSWriteAll(fn, guestref(lc), STARH(h));
+    FSWriteAll(fn, guestref(lc), *h);
     HUnlock(h);
     *doffp += sizeof(LONGINT) + size;
 }
@@ -485,11 +485,11 @@ static void compactdata(resmaphand map)
     st = (sorttypehand)NewHandle((Size)sizeof(res_sorttype_t) * (nres + 1));
     mapstate = HGetState((Handle)map);
     HLock((Handle)map);
-    rr = (resref *)((char *)STARH(map) + resoff);
+    rr = (resref *)((char *)*map + resoff);
     fillst(st, rr, rr + nres);
     ststate = HGetState((Handle)st);
     HLock((Handle)st);
-    datlen = walkst(STARH(st) + 1, STARH(st) + nres + 1, Hx(map, resfn),
+    datlen = walkst(*st + 1, *st + nres + 1, Hx(map, resfn),
                     Hx(map, rh.rdatoff));
     HSetState((Handle)st, ststate);
     HSetState((Handle)map, mapstate);

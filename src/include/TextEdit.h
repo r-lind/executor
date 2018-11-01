@@ -226,19 +226,19 @@ typedef Byte Chars[1], *CharsPtr, **CharsHandle;
         int16_t retval;                                             \
                                                                     \
         HLockGuard guard(te);                                       \
-        retval = ROMlib_call_TEDoText(STARH(te), start, end, what); \
+        retval = ROMlib_call_TEDoText(*(te), start, end, what); \
         retval;                                                     \
     })
 #define TE_CHAR_TO_POINT(te, sel, pt)         \
     ({                                        \
         HLockGuard guard(te);                 \
-        te_char_to_point(STARH(te), sel, pt); \
+        te_char_to_point(*(te), sel, pt); \
     })
 
 /* no need to lock te, since `te_char_to_lineno' cannot move memory
    blocks */
 #define TE_CHAR_TO_LINENO(te, sel) \
-    te_char_to_lineno(STARH(te), sel)
+    te_char_to_lineno(*(te), sel)
 
 #define TE_DEST_RECT(te) (HxX((te), destRect))
 #define TE_VIEW_RECT(te) (HxX((te), viewRect))
@@ -386,7 +386,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
     (TEP_STYLIZED_P(tep) && TEP_LINE_HEIGHT_X(tep) == -1      \
          ? ({                                                      \
                TEStyleHandle te_style = TEP_GET_STYLE(tep);        \
-               LHElement *lh = STARH(TE_STYLE_LH_TABLE(te_style)); \
+               LHElement *lh = *TE_STYLE_LH_TABLE(te_style); \
                LH_HEIGHT(&lh[lineno]);                             \
            })                                                      \
          : TEP_LINE_HEIGHT(tep))
@@ -394,7 +394,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
     (TEP_STYLIZED_P(tep) && TEP_FONT_ASCENT_X(tep) == -1      \
          ? ({                                                      \
                TEStyleHandle te_style = TEP_GET_STYLE(tep);        \
-               LHElement *lh = STARH(TE_STYLE_LH_TABLE(te_style)); \
+               LHElement *lh = *TE_STYLE_LH_TABLE(te_style); \
                LH_ASCENT(&lh[lineno]);                             \
            })                                                      \
          : TEP_FONT_ASCENT(tep))
@@ -484,7 +484,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
     ((n_styles) * sizeof(STElement))
 
 #define ST_ELT(st, st_elt_i) \
-    (&STARH(st)[st_elt_i])
+    (&(*(st))[st_elt_i])
 
 #define ST_ELT_FACE(st_elt) ((st_elt)->stFace)
 

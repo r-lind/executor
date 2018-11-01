@@ -40,7 +40,7 @@ void Executor::C_StdComment(INTEGER kind, INTEGER size, Handle hand)
         PICWRITE(&swappedsize, sizeof(swappedsize));
         state = HGetState(hand);
         HLock(hand);
-        PICWRITE(STARH(hand), size);
+        PICWRITE(*hand, size);
         if(size & 1)
             PICWRITE("", 1);
         HSetState(hand, state);
@@ -85,6 +85,6 @@ void Executor::C_StdPutPic(const void  *sp, INTEGER bc)
             SetHandleSize((Handle)ph, newsize);
             HxX(pch, picsize) = newsize;
         }
-        memmove((char *)STARH(ph) + oldhowfar, sp, bc);
+        memmove((char *)*ph + oldhowfar, sp, bc);
     }
 }

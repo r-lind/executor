@@ -37,7 +37,7 @@ OSErr Executor::TEToScrap()
     HLockGuard guard(LM(TEScrpHandle));
 
     m = PutScrap(LM(TEScrpLength), TICK("TEXT"),
-                 STARH(LM(TEScrpHandle)));
+                 *LM(TEScrpHandle));
     return m < 0 ? m : 0;
 }
 

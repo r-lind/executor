@@ -24,7 +24,7 @@ INTEGER Executor::C_UniqueID(ResType typ)
     resref *rr;
 
     curmap = LM(CurMap);
-    LM(CurMap) = ((resmap *)STARH(LM(TopMapHndl)))->resfn;
+    LM(CurMap) = ((resmap *)*LM(TopMapHndl))->resfn;
     while(ROMlib_typidtop(typ, ++startid, &map, &rr) != resNotFound)
         ;
     LM(CurMap) = curmap;
@@ -80,7 +80,7 @@ void Executor::C_GetResInfo(Handle res, GUEST<INTEGER> *id,
     {
         if(rr->noff != -1)
             str255assign(name,
-                         (StringPtr)((char *)STARH(map) + Hx(map, namoff) + rr->noff));
+                         (StringPtr)((char *)*map + Hx(map, namoff) + rr->noff));
         else
             name[0] = 0;
     }
@@ -110,7 +110,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
     if(LM(ResErr) != noErr)
         /*-->*/ return -1;
 
-    if(usehandle && *res) /* STARH is overkill */
+    if(usehandle && *res)
         retval = GetHandleSize(res);
     else
     {

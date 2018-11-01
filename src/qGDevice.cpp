@@ -186,7 +186,7 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
                          : (fixed_p ? fixedType : clutType));
 
     gd_pixmap = GD_PMAP(gd);
-    pixmap_set_pixel_fields(STARH(gd_pixmap), bpp);
+    pixmap_set_pixel_fields(*gd_pixmap, bpp);
 
     if(bpp <= 8)
     {

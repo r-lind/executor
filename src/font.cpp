@@ -40,7 +40,7 @@ void Executor::C_InitFonts() /* IMI-222 */
         SetResLoad(true);
         LM(ROMFont0) = GetResource(TICK("FONT"), FONTRESID(systemFont, 12));
         LM(WidthListHand) = NewHandle(MAXTABLES * sizeof(GUEST<Handle>));
-        memset(STARH(LM(WidthListHand)), 0, MAXTABLES * sizeof(GUEST<Handle>));
+        memset(*LM(WidthListHand), 0, MAXTABLES * sizeof(GUEST<Handle>));
         LM(TheZone) = saveZone;
         beenhere = true;
     }
@@ -72,7 +72,7 @@ invalidate_all_widths(void)
     wlh = LM(WidthListHand);
     HLock(wlh);
     n_entries = GetHandleSize(wlh) / sizeof(GUEST<Handle>);
-    hp = (GUEST<Handle> *)STARH(wlh);
+    hp = (GUEST<Handle> *)*wlh;
     for(i = 0; i < n_entries; ++i)
     {
         DisposeHandle(hp[i]);
@@ -231,7 +231,7 @@ static BOOLEAN widthlistmatch(FMInput *fmip)
 
     GUEST<WHandle> *whp, *ewhp;
 
-    for(whp = STARH(WIDTHLISTHAND), ewhp = whp + MAXTABLES; whp != ewhp; whp++)
+    for(whp = *WIDTHLISTHAND, ewhp = whp + MAXTABLES; whp != ewhp; whp++)
     {
         if(*whp && (LONGINT)(*whp).raw() != (LONGINT)-1)
         {
@@ -296,7 +296,7 @@ static GUEST<INTEGER> *findfondwidths()
     INTEGER i;
 
     retval = 0;
-    if(STARH((FHandle)LM(LastFOND))->ffFamID == WIDTHPTR->aFID && (offset = STARH((FHandle)LM(LastFOND))->ffWTabOff))
+    if((*(FHandle)LM(LastFOND))->ffFamID == WIDTHPTR->aFID && (offset = (*(FHandle)LM(LastFOND))->ffWTabOff))
     {
         bitsmatched = -1;
         want = WIDTHPTR->aFace;
@@ -304,10 +304,10 @@ static GUEST<INTEGER> *findfondwidths()
  * NOTE: we add 3 to lastchar - firstchar to include the missing character
  *	 entry and what appears to be a zero entry located thereafter.
  */
-        tabsize = (STARH((FHandle)LM(LastFOND))->ffLastChar - STARH((FHandle)LM(LastFOND))->ffFirstChar + 3)
+        tabsize = ((*(FHandle)LM(LastFOND))->ffLastChar - (*(FHandle)LM(LastFOND))->ffFirstChar + 3)
                 * sizeof(INTEGER)
             + sizeof(INTEGER);
-        numentriesminusone = (GUEST<INTEGER> *)((char *)&STARH((FHandle)LM(LastFOND))->ffFlags + offset);
+        numentriesminusone = (GUEST<INTEGER> *)((char *)&(*(FHandle)LM(LastFOND))->ffFlags + offset);
         i = *numentriesminusone + 1;
         widp = (widentry_t *)(numentriesminusone + 1);
         for(; --i >= 0; widp = (widentry_t *)((char *)widp + tabsize))
@@ -524,7 +524,7 @@ static void findclosestfond(FHandle fh, INTEGER size, INTEGER *powerof2p,
     powerof2 = 0;
     lesser = 0;
     greater = 32767;
-    ip = &STARH(fh)->ffVersion + 1;
+    ip = &(*fh)->ffVersion + 1;
     for(p = (fatabentry *)(ip + 1), ep = p + *ip + 1; p < ep; p++)
     {
         newsize = p->size;
@@ -590,7 +590,7 @@ static INTEGER closestface() /* no args, uses WIDTHPTR */
 
     bestp = 0;
     size = WIDTHPTR->fSize;
-    ip = &STARH((FHandle)LM(LastFOND))->ffVersion + 1;
+    ip = &(*(FHandle)LM(LastFOND))->ffVersion + 1;
     nmatch = -1;
     want = WIDTHPTR->aFace;
     for(p = (fatabentry *)(ip + 1), ep = p + *ip + 1;
@@ -672,7 +672,7 @@ static void newwidthtable(FMInput *fmip)
                       sizeof(todelete), (Ptr) "", 0)
                < 0)
             {
-                DisposeHandle((Handle)STARH(WIDTHLISTHAND)[MAXTABLES]);
+                DisposeHandle((Handle)(*WIDTHLISTHAND)[MAXTABLES]);
                 SetHandleSize(LM(WidthListHand),
                               (Size)sizeof(GUEST<Handle>) * MAXTABLES);
             }
@@ -864,7 +864,7 @@ FMOutPtr Executor::C_FMSwapFont(FMInput *fmip) /* IMI-223 */
         LM(ROMlib_fmo).denom.v = 256;
         LM(ROMlib_fmo).fontHandle = WIDTHPTR->tabFont;
         LoadResource(LM(ROMlib_fmo).fontHandle);
-        fp = (FontRec *)STARH((LM(ROMlib_fmo).fontHandle));
+        fp = (FontRec *)*((LM(ROMlib_fmo).fontHandle));
         style = fmip->face ^ WIDTHPTR->face;
         if(style & (int)bold)
             mungfmo(ftstr.boldt, &LM(ROMlib_fmo));

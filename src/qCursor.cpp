@@ -243,8 +243,8 @@ CCrsrHandle Executor::C_GetCCursor(INTEGER crsr_id)
 
     GUEST<Handle> h;
 
-    resource = STARH(res_handle);
-    ccrsr = STARH(ccrsr_handle);
+    resource = *res_handle;
+    ccrsr = *ccrsr_handle;
 
     BlockMoveData((Ptr)&resource->crsr, (Ptr)ccrsr,
                   sizeof(CCrsr));
@@ -258,7 +258,7 @@ CCrsrHandle Executor::C_GetCCursor(INTEGER crsr_id)
     cursor_pixel_map = NewPixMap();
     ccrsr->crsrMap = cursor_pixel_map;
     BlockMoveData((Ptr)cursor_pixel_map_resource,
-                  (Ptr)STARH(cursor_pixel_map),
+                  (Ptr)*cursor_pixel_map,
                   sizeof *cursor_pixel_map_resource);
 
     ccrsr_data_offset = guest_cast<int32_t>(ccrsr->crsrData);
@@ -268,7 +268,7 @@ CCrsrHandle Executor::C_GetCCursor(INTEGER crsr_id)
 
     ccrsr->crsrData = NewHandle(ccrsr_data_size);
     BlockMoveData((Ptr)resource + ccrsr_data_offset,
-                  STARH(ccrsr->crsrData),
+                  (*ccrsr->crsrData),
                   ccrsr_data_size);
 
     tmp_ctab = (CTabPtr)((char *)resource + ccrsr_ctab_offset);
@@ -276,7 +276,7 @@ CCrsrHandle Executor::C_GetCCursor(INTEGER crsr_id)
     h = NewHandle(ccrsr_ctab_size);
     PIXMAP_TABLE_X(ccrsr->crsrMap) = guest_cast<CTabHandle>(h);
     BlockMoveData((Ptr)tmp_ctab,
-                  (Ptr)STARH(PIXMAP_TABLE(ccrsr->crsrMap)),
+                  (Ptr)*PIXMAP_TABLE(ccrsr->crsrMap),
                   ccrsr_ctab_size);
 
     return ccrsr_handle;
@@ -314,8 +314,8 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
         ccrsr_data_size = GetHandleSize(CCRSR_DATA(ccrsr));
 
         if(current_ccrsr_data_size == ccrsr_data_size
-           && !memcmp(STARH(CCRSR_DATA(current_ccrsr)),
-                      STARH(CCRSR_DATA(ccrsr)),
+           && !memcmp(*CCRSR_DATA(current_ccrsr),
+                      *CCRSR_DATA(ccrsr),
                       ccrsr_data_size)
            && CCRSR_TYPE_X(current_ccrsr) == CCRSR_TYPE_X(ccrsr)
            && !memcmp(CCRSR_1DATA(current_ccrsr),
@@ -371,7 +371,7 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
                 ccrsr_xmap.rowBytes = 2 * vdriver->cursorDepth();
                 ccrsr_xmap.pixelSize = vdriver->cursorDepth();
 
-                src = *STARH(CCRSR_MAP(ccrsr));
+                src = **CCRSR_MAP(ccrsr);
                 src.baseAddr = *CCRSR_DATA(ccrsr);
                 HLockGuard guard3(ccrsr_xdata);
                 ccrsr_xmap.baseAddr = *ccrsr_xdata;
@@ -384,7 +384,7 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
 
             /* Actually set the current cursor. */
             HLockGuard guard(ccrsr_xdata);
-            HOST_SET_CURSOR((char *)STARH(ccrsr_xdata),
+            HOST_SET_CURSOR((char *)*ccrsr_xdata,
                             (unsigned short *)CCRSR_MASK(ccrsr),
                             hot_spot->h, hot_spot->v);
         }
@@ -425,8 +425,8 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
         /* copy the cursor data */
         data_size = GetHandleSize(CCRSR_DATA(ccrsr));
         SetHandleSize(CCRSR_DATA(current_ccrsr), data_size);
-        memcpy(STARH(CCRSR_DATA(current_ccrsr)),
-               STARH(CCRSR_DATA(ccrsr)), data_size);
+        memcpy(*CCRSR_DATA(current_ccrsr),
+               *CCRSR_DATA(ccrsr), data_size);
 
         /* invalidate this cursor */
         CCRSR_XVALID_X(current_ccrsr) = 0;

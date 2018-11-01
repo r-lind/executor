@@ -103,7 +103,7 @@ public:
 #define HASSIGN_1(h, f1, v1)               \
     do {                                   \
         decltype(v1) _v1 = (v1);           \
-        decltype(STARH(h)) _hp = STARH(h); \
+        auto _hp = toHost(*h);             \
         _hp->f1 = _v1;                     \
     } while(0)
 
@@ -111,7 +111,7 @@ public:
     do {                                   \
         decltype(v1) _v1 = (v1);           \
         decltype(v2) _v2 = (v2);           \
-        decltype(STARH(h)) _hp = STARH(h); \
+        auto _hp = toHost(*h);             \
         _hp->f1 = _v1;                     \
         _hp->f2 = _v2;                     \
     } while(0)
@@ -121,7 +121,7 @@ public:
         decltype(v1) _v1 = (v1);             \
         decltype(v2) _v2 = (v2);             \
         decltype(v3) _v3 = (v3);             \
-        decltype(STARH(h)) _hp = STARH(h);   \
+        auto _hp = toHost(*h);               \
         _hp->f1 = _v1;                       \
         _hp->f2 = _v2;                       \
         _hp->f3 = _v3;                       \
@@ -133,7 +133,7 @@ public:
         decltype(v2) _v2 = (v2);                     \
         decltype(v3) _v3 = (v3);                     \
         decltype(v4) _v4 = (v4);                     \
-        decltype(STARH(h)) _hp = STARH(h);           \
+        auto _hp = toHost(*h);                       \
         _hp->f1 = _v1;                               \
         _hp->f2 = _v2;                               \
         _hp->f3 = _v3;                               \
@@ -147,7 +147,7 @@ public:
         decltype(v3) _v3 = (v3);                             \
         decltype(v4) _v4 = (v4);                             \
         decltype(v5) _v5 = (v5);                             \
-        decltype(STARH(h)) _hp = STARH(h);                   \
+        auto _hp = toHost(*h);                               \
         _hp->f1 = _v1;                                       \
         _hp->f2 = _v2;                                       \
         _hp->f3 = _v3;                                       \
@@ -163,7 +163,7 @@ public:
         decltype(v4) _v4 = (v4);                                     \
         decltype(v5) _v5 = (v5);                                     \
         decltype(v6) _v6 = (v6);                                     \
-        decltype(STARH(h)) _hp = STARH(h);                           \
+        auto _hp = toHost(*h);                                       \
         _hp->f1 = _v1;                                               \
         _hp->f2 = _v2;                                               \
         _hp->f3 = _v3;                                               \
@@ -182,7 +182,7 @@ public:
         decltype(v5) _v5 = (v5);                             \
         decltype(v6) _v6 = (v6);                             \
         decltype(v7) _v7 = (v7);                             \
-        decltype(STARH(h)) _hp = STARH(h);                   \
+        auto _hp = toHost(*h);                               \
         _hp->f1 = _v1;                                       \
         _hp->f2 = _v2;                                       \
         _hp->f3 = _v3;                                       \
@@ -205,7 +205,7 @@ public:
         decltype(v8) _v8 = (v8);                              \
         decltype(v9) _v9 = (v9);                              \
         decltype(v10) _v10 = (v10);                           \
-        decltype(STARH(h)) _hp = STARH(h);                    \
+        auto _hp = toHost(*h);                                \
         _hp->f1 = _v1;                                        \
         _hp->f2 = _v2;                                        \
         _hp->f3 = _v3;                                        \
@@ -233,7 +233,7 @@ public:
         decltype(v9) _v9 = (v9);                              \
         decltype(v10) _v10 = (v10);                           \
         decltype(v11) _v11 = (v11);                           \
-        decltype(STARH(h)) _hp = STARH(h);                    \
+        auto _hp = toHost(*h);                                \
         _hp->f1 = _v1;                                        \
         _hp->f2 = _v2;                                        \
         _hp->f3 = _v3;                                        \
@@ -263,7 +263,7 @@ public:
         decltype(v10) _v10 = (v10);                           \
         decltype(v11) _v11 = (v11);                           \
         decltype(v12) _v12 = (v12);                           \
-        decltype(STARH(h)) _hp = STARH(h);                    \
+        auto _hp = toHost(*h);                                \
         _hp->f1 = _v1;                                        \
         _hp->f2 = _v2;                                        \
         _hp->f3 = _v3;                                        \
@@ -295,7 +295,7 @@ public:
         decltype(v11) _v11 = (v11);                           \
         decltype(v12) _v12 = (v12);                           \
         decltype(v13) _v13 = (v13);                           \
-        decltype(STARH(h)) _hp = STARH(h);                    \
+        auto _hp = toHost(*h);                                \
         _hp->f1 = _v1;                                        \
         _hp->f2 = _v2;                                        \
         _hp->f3 = _v3;                                        \
@@ -329,7 +329,7 @@ public:
         decltype(v12) _v12 = (v12);                           \
         decltype(v13) _v13 = (v13);                           \
         decltype(v14) _v14 = (v14);                           \
-        decltype(STARH(h)) _hp = STARH(h);                    \
+        auto _hp = toHost(*h);                                \
         _hp->f1 = _v1;                                        \
         _hp->f2 = _v2;                                        \
         _hp->f3 = _v3;                                        \
@@ -366,7 +366,7 @@ public:
         decltype(v13) _v13 = (v13);                           \
         decltype(v14) _v14 = (v14);                           \
         decltype(v15) _v15 = (v15);                           \
-        decltype(STARH(h)) _hp = STARH(h);                    \
+        auto _hp = toHost(*h);                                \
         _hp->f1 = _v1;                                        \
         _hp->f2 = _v2;                                        \
         _hp->f3 = _v3;                                        \

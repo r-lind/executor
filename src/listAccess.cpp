@@ -138,7 +138,7 @@ BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
 		 and ep should be used! */
     while((C_LGetCellDataLocation(&offS, &lenS, cell, list), len = lenS, off = offS,
            len != -1)
-          && CALLCMP(dp, (Ptr)STARH(HxP(list, cells)) + off, dl, len, fp) != 0)
+          && CALLCMP(dp, (Ptr)*HxP(list, cells) + off, dl, len, fp) != 0)
         if(!C_LNextCell(true, true, &swappedcell, list))
         {
             cell.h = Hx(list, dataBounds.right);

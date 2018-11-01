@@ -97,7 +97,7 @@ AddResourceRN(INTEGER rn, Handle h, ResType type, INTEGER id, Str255 name)
                 warning_unexpected("err = %d", err);
             else
             {
-                memcpy(STARH(current_handle), STARH(h), new_size);
+                memcpy(*current_handle, *h, new_size);
 
                 /* NOTE: we don't call ChangedResource because we don't
 		 care if this change gets lost.  In fact, we will try

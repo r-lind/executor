@@ -34,7 +34,7 @@ tedoinserttext(TEHandle te, int16_t hlen, int16_t len,
     hText = TE_HTEXT(te);
     SetHandleSize(hText, hlen + len);
 
-    Text = (char *)STARH(hText);
+    Text = (char *)*hText;
 
     memmove(&Text[start + len], &Text[start], hlen - start);
     memmove(&Text[start], ptr, len);
@@ -128,13 +128,13 @@ tereplaceselection(TEHandle teh, int16_t start, int16_t stop, int16_t len,
         SetHandleSize(TE_HTEXT(teh), hlen + nchar);
     if(nchar != 0)
     {
-        BlockMoveData(STARH(hText) + stop,
-                      STARH(hText) + start + len,
+        BlockMoveData(*hText + stop,
+                      *hText + start + len,
                       n_to_move);
     }
     if(nchar < 0)
         SetHandleSize(hText, hlen + nchar);
-    BlockMoveData(ptr, STARH(hText) + start, len);
+    BlockMoveData(ptr, *hText + start, len);
 
     TE_SEL_END_X(teh) = TE_SEL_START_X(teh)
         = TE_SEL_START(teh) + len;
@@ -306,7 +306,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
        && TE_LINE_HEIGHT(teh) == -1)
     {
         lht = TE_STYLE_LH_TABLE(te_style);
-        oldlh = (STARH(lht) + Hx(teh, nLines) - 1)->lhHeight;
+        oldlh = (*lht + Hx(teh, nLines) - 1)->lhHeight;
     }
     else
     {
@@ -421,7 +421,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
     ROMlib_caltext(teh, start, nchar, &calstart, &calend);
     TE_CHAR_TO_POINT(teh, TE_LENGTH(teh), &newend);
     if(TE_STYLIZED_P(teh) && TE_LINE_HEIGHT(teh) == -1)
-        newlh = (STARH(lht) + TE_N_LINES(teh) - 1)->lhHeight;
+        newlh = (*lht + TE_N_LINES(teh) - 1)->lhHeight;
 
     if(oldend.v > newend.v)
     {
@@ -483,7 +483,7 @@ static void doarrow(TEHandle te, CharParameter thec)
 
     te_flags = HGetState((Handle)te);
     HLock((Handle)te);
-    tep = STARH(te);
+    tep = *te;
 
     c = thec;
     sel_start = TEP_SEL_START(tep);
@@ -592,7 +592,7 @@ void Executor::C_TECopy(TEHandle te)
     hText = TE_HTEXT(te);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = (char *)STARH(hText);
+    Text = (char *)*hText;
 
     PtrToXHand((Ptr)&Text[start], LM(TEScrpHandle), len);
     if(TE_STYLIZED_P(te))
@@ -651,7 +651,7 @@ void Executor::C_TECopy(TEHandle te)
         {
             HLockGuard guard(scrap);
             PutScrap(SCRAP_SIZE_FOR_N_STYLES(n_scrap_styles),
-                     TICK("styl"), (Ptr)STARH(scrap));
+                     TICK("styl"), (Ptr)*scrap);
         }
         DisposeHandle((Handle)scrap);
 
@@ -662,7 +662,7 @@ void Executor::C_TECopy(TEHandle te)
     // FIXME: I seem to dimly remember that the TE scrap was separate from the global scrap.
     /* ### should this lock `LM(TEScrpHandle)'? */
     vdriver->putScrap(TICK("TEXT"), LM(TEScrpLength),   
-                      (char *)STARH(LM(TEScrpHandle)), LM(ScrapCount));
+                      (char *)*LM(TEScrpHandle), LM(ScrapCount));
 
     HSetState(hText, hText_flags);
 }
@@ -682,7 +682,7 @@ void Executor::C_TEPaste(TEHandle teh)
         LM(TEScrpLength) = s;
 
     HLockGuard guard(LM(TEScrpHandle));
-    ROMlib_tedoitall(teh, STARH(LM(TEScrpHandle)), LM(TEScrpLength),
+    ROMlib_tedoitall(teh, *LM(TEScrpHandle), LM(TEScrpLength),
                      false, nullptr);
 }
 

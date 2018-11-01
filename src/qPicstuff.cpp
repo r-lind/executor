@@ -778,7 +778,7 @@ fontname(INTEGER hsize, Handle hand)
     INTEGER i;
     StringPtr sp;
 
-    p = (char *)STARH(hand);
+    p = (char *)*hand;
     i = *(GUEST<INTEGER> *)p;
     sp = (StringPtr)p + 2;
     add_assoc(i, sp);
@@ -789,7 +789,7 @@ glyphstate(INTEGER hsize, Handle hand)
 {
     char *p;
 
-    p = (char *)STARH(hand);
+    p = (char *)*hand;
 
     warning_unimplemented("partially implemented");
     SetFractEnable(!p[2]);
@@ -1077,12 +1077,12 @@ static void eatRegion(RgnHandle rh, Size hs)
     {
         state = HGetState((Handle)rh);
         HLock((Handle)rh);
-        procp((Ptr)STARH(rh) + sizeof(INTEGER),
+        procp((Ptr)*rh + sizeof(INTEGER),
                       hs - sizeof(INTEGER));
         HSetState((Handle)rh, state);
     }
     else
-        BlockMoveData((Ptr)nextbytep, (Ptr)STARH(rh) + sizeof(INTEGER),
+        BlockMoveData((Ptr)nextbytep, (Ptr)*rh + sizeof(INTEGER),
                       hs - sizeof(INTEGER));
     HxX(rh, rgnSize) = hs;
     nextbytep += hs - sizeof(INTEGER);
@@ -1177,9 +1177,9 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
             HLock(h);
 
             if(procp)
-                procp(STARH(h), pic_data_size);
+                procp(*h, pic_data_size);
             else if(pixmap->packType == 2)
-                memcpy(STARH(h), nextbytep, pic_data_size);
+                memcpy(*h, nextbytep, pic_data_size);
 
             pixmap->baseAddr = *h;
             *freep = true;
@@ -1205,8 +1205,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
             h = NewHandle(final_data_size);
         }
         HLock(h);
-        pixmap->baseAddr = *h; /* can't use STARH 'cause we don't */
-        /* want to byte swap the result */
+        pixmap->baseAddr = *h;
         temp_scanline = (uint8_t *)alloca(rowb);
         for(scanline = (uint8_t *)BITMAP_BASEADDR(pixmap),
         ep = scanline + final_data_size;
@@ -1220,8 +1219,8 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
             {
                 temph = NewHandle(length);
                 HLock(temph);
-                procp(STARH(temph), length);
-                inp = (Byte *)STARH(temph);
+                procp(*temph, length);
+                inp = (Byte *)*temph;
             }
             else
             {
@@ -1321,7 +1320,7 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
                 LM(TheZone) = savezone;
             }
             HLock(h);
-            procp(STARH(h), datasize);
+            procp(*h, datasize);
             bp->baseAddr = *h;
         }
         else
@@ -1341,7 +1340,7 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
             LM(TheZone) = savezone;
         }
         HLock(h);
-        bp->baseAddr = *h; /* can't use STARH */
+        bp->baseAddr = *h;
         for(dp = bp->baseAddr, ep = dp + datasize; dp < ep;)
         {
             length = rowb > 250 ? eatINTEGER() : eatByte();
@@ -1349,8 +1348,8 @@ static void eatbitdata(BitMap *bp, BOOLEAN packed)
             {
                 temph = NewHandle(length);
                 HLock(temph);
-                procp(STARH(temph), length);
-                inp = (Byte *)STARH(temph);
+                procp(*temph, length);
+                inp = (Byte *)*temph;
             }
             else
             {
@@ -1389,7 +1388,7 @@ static void eatColorTable(PixMapPtr pixmap)
     CTabHandle ch;
 
     ch = pixmap->pmTable;
-    cp = STARH(ch);
+    cp = *ch;
     /* cp->ctSeed = */ eatLONGINTX();
     cp->ctSeed = GetCTSeed();
     cp->ctFlags = eatINTEGERX();
@@ -1445,7 +1444,7 @@ static void eatPixPat(PixPatHandle pixpat)
         patmap = (PixMapHandle)NewHandle(sizeof(PixMap));
         PIXPAT_MAP_X(pixpat) = patmap;
         HLockGuard guard(patmap);
-        PixMapPtr patmap_ptr = STARH(patmap);
+        PixMapPtr patmap_ptr = *patmap;
 
         eatPixMap(patmap_ptr, 0);
         eatColorTable(patmap_ptr);
@@ -1753,11 +1752,11 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                             {
                                 state2 = HGetState(hand);
                                 HLock(hand);
-                                procp(STARH(hand), hsize);
+                                procp(*hand, hsize);
                                 HSetState(hand, state2);
                             }
                             else
-                                BlockMoveData((Ptr)nextbytep, STARH(hand), hsize);
+                                BlockMoveData((Ptr)nextbytep, *hand, hsize);
                             nextbytep += hsize;
                         }
                         else
@@ -1783,7 +1782,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                             hand = NewHandle(sizeof(PixPat));
                         else
                             ReallocateHandle(hand, sizeof(PixPat));
-                        memset(STARH(hand), 0, sizeof(PixPat));
+                        memset(*hand, 0, sizeof(PixPat));
                         eatPixPat((PixPatHandle)hand);
                         break;
 

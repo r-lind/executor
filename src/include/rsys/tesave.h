@@ -126,7 +126,7 @@ typedef GUEST<tehiddenp> *tehiddenh;
 #define TEAUTOVIEWBIT 1 /* found by dumping the handle \
                before and after calling TEAutoView */
 
-#define TEHIDDENH(teh) (STARH((GUEST<tehiddenh> *)&(*teh)->recalBack))
+#define TEHIDDENH(teh) ((*(GUEST<tehiddenh> *)&(*teh)->recalBack))
 #define TEHIDDENHX(teh) ((*(GUEST<tehiddenh> *)&(*teh)->recalBack))
 
 extern void ROMlib_recompute_caret(TEHandle te);

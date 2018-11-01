@@ -26,7 +26,7 @@ static void polyrgn(PolyHandle ph, RgnHandle rh)
     state = HGetState((Handle)ph);
     HLock((Handle)ph);
     pp = HxX(ph, polyPoints);
-    ep = (GUEST<Point> *)((char *)STARH(ph) + Hx(ph, polySize));
+    ep = (GUEST<Point> *)((char *)*ph + Hx(ph, polySize));
     firstp.h = Hx(ph, polyPoints[0].h);
     firstp.v = Hx(ph, polyPoints[0].v);
     if(ep[-1].h == firstp.h && ep[-1].v == firstp.v)
@@ -66,7 +66,7 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
     {
         ROMlib_drawingverbpicupdate(verb);
         PICOP(OP_framePoly + (int)verb);
-        PICWRITE(STARH(ph), Hx(ph, polySize));
+        PICWRITE(*ph, Hx(ph, polySize));
     }
 
     if(PORT_PEN_VIS(qdGlobals().thePort) < 0 && !PORT_REGION_SAVE_X(qdGlobals().thePort)
@@ -84,7 +84,7 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
 	   testing on the mac shows that is incorrect */
 
             pp = HxX(ph, polyPoints);
-            ep = (GUEST<Point> *)((char *)STARH(ph) + Hx(ph, polySize));
+            ep = (GUEST<Point> *)((char *)*ph + Hx(ph, polySize));
             firstp.h = pp[0].h;
             firstp.v = pp[0].v;
             MoveTo(firstp.h, firstp.v);

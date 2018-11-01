@@ -74,7 +74,7 @@ typedef struct
             {                                                         \
                 (name).status = TEMP_ALLOC_DISPOSHANDLE;              \
                 HLock((name).u.handle);                               \
-                ptr_var = (void *)STARH((name).u.handle);             \
+                ptr_var = (void *)*(name).u.handle;             \
             }                                                         \
             else                                                      \
             {                                                         \

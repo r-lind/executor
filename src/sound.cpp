@@ -263,7 +263,7 @@ int Executor::ROMlib_get_snd_cmds(Handle sndh, SndCommand **cmdsp)
     int num_formats;
     int retval;
 
-    p = STARH(sndh);
+    p = *sndh;
     format = *(GUEST<INTEGER> *)p;
     switch(format)
     {
@@ -312,7 +312,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
     bool need_allocate;
 
     if(sndh)
-        resp = STARH(sndh);
+        resp = *sndh;
     else
         resp = nullptr;
 
@@ -396,7 +396,7 @@ OSErr Executor::C_SndNewChannel(GUEST<SndChannelPtr> *chanpp, INTEGER synth,
     OSErr retval;
 
     warning_sound_log("chanp %p synth %d init 0x%x userroutine %p",
-                      chanpp ? STARH(chanpp) : nullptr, synth, init, userroutinep);
+                      chanpp ? *chanpp : nullptr, synth, init, userroutinep);
 
     switch(ROMlib_PretendSound)
     {
@@ -409,15 +409,15 @@ OSErr Executor::C_SndNewChannel(GUEST<SndChannelPtr> *chanpp, INTEGER synth,
             break;
 
         case soundon:
-            if(STARH(chanpp) == nullptr)
+            if(*chanpp == nullptr)
             {
                 *chanpp = (SndChannelPtr)NewPtr(sizeof(SndChannel));
-                chanp = STARH(chanpp);
+                chanp = *chanpp;
                 chanp->flags = CHAN_ALLOC_FLAG;
             }
             else
             {
-                chanp = STARH(chanpp);
+                chanp = *chanpp;
                 chanp->flags = 0;
             }
             chanp->nextChan = allchans;
@@ -478,7 +478,7 @@ OSErr Executor::C_SndAddModifier(SndChannelPtr chanp, ProcPtr mod, INTEGER id,
                 else
                 {
                     h = GetResource(TICK("snth"), id);
-                    if(STARH(h) != (Ptr)&snth5)
+                    if(*h != (Ptr)&snth5)
                     { /* ACK; phone handle stuff */
                         LoadResource(h);
                         modp->flags = MOD_SYNTH_FLAG;
@@ -970,14 +970,14 @@ OSErr Executor::C_SndControl(INTEGER id, SndCommand *cmdp)
             else
             {
                 LoadResource(h);
-                if(STARH(h) != (Ptr)&snth5)
+                if(*h != (Ptr)&snth5)
                     state = HGetState(h);
 #if !defined(LETGCCWAIL)
                 else
                     state = 0;
 #endif
                 callasynth((SndChannelPtr)0, cmdp, (ModifierStubPtr)0);
-                if(STARH(h) != (Ptr)&snth5)
+                if(*h != (Ptr)&snth5)
                     HSetState(h, state);
                 retval = noErr;
             }

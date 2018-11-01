@@ -742,7 +742,7 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
     ascent = fi.ascent;
     cloversize = CharWidth(commandMark);
 
-    for(sp = (char *)STARH(mh) + SIZEOFMINFO + Hx(mh, menuData[0]), count = 0;
+    for(sp = (char *)*mh + SIZEOFMINFO + Hx(mh, menuData[0]), count = 0;
         *sp;
         sp += (unsigned char)*sp + SIZEOFMEXT, count++)
         ;
@@ -752,7 +752,7 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
     tp->lasttick = TickCount();
     tp->count = count;
     v = 0;
-    for(sp = (char *)STARH(mh) + SIZEOFMINFO + Hx(mh, menuData[0]), tabp = tp->entry;
+    for(sp = (char *)*mh + SIZEOFMINFO + Hx(mh, menuData[0]), tabp = tp->entry;
         *sp;
         sp += (unsigned char)*sp + SIZEOFMEXT, tabp++)
     {

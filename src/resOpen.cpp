@@ -270,7 +270,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
             ReallocateHandle(retval, uncompressed_size + dcmp_offset);
         }
         err = MemError();
-        xxx = STARH(retval) + uncompressed_size + dcmp_offset - dlen;
+        xxx = *retval + uncompressed_size + dcmp_offset - dlen;
         if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll(Hx(map, resfn), guestref(dlen), xxx))))
         {
             if(dcmp_workspace)
@@ -287,9 +287,9 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
                 SignedByte state;
 
                 state = hlock_return_orig_state(dcmp_handle);
-                dcmp = (dcmpProcPtr)STARH(dcmp_handle);
+                dcmp = (dcmpProcPtr)*dcmp_handle;
                 HLock(retval);
-                dcmp(xxx, STARH(retval), dcmp_workspace, dlen);
+                dcmp(xxx, *retval, dcmp_workspace, dlen);
                 HUnlock(retval);
                 SetHandleSize(retval, uncompressed_size);
                 HSetState(dcmp_handle, state);
@@ -453,7 +453,7 @@ void Executor::C_CloseResFile(INTEGER rn)
         {
             //                printf("curmap %02x topmaphndl %08x\n", (int) LM(CurMap).raw(), (int)LM(TopMapHndl).raw());
             if(LM(TopMapHndl))
-                LM(CurMap) = STARH((resmaphand)LM(TopMapHndl))->resfn;
+                LM(CurMap) = (*(resmaphand)LM(TopMapHndl))->resfn;
             else
                 LM(CurMap) = 0;
         }
@@ -591,7 +591,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     }
     lc = hd.maplen;
-    ROMlib_setreserr(FSReadAll(f, guestref(lc), (Ptr)STARH(map)));
+    ROMlib_setreserr(FSReadAll(f, guestref(lc), (Ptr)*map));
     if(LM(ResErr) != noErr)
     {
         DisposeHandle((Handle)map);

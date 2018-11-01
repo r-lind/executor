@@ -52,7 +52,7 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
 
     if(dh == dv && dh < 10)
     { /* do small ones by hand */
-        ip = (INTEGER *)STARH(rh) + 5;
+        ip = (INTEGER *)*rh + 5;
         if(dh >= 4)
         {
             if(dh < 7)
@@ -74,7 +74,7 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
                 TERM;
             }
         }
-        HxX(rh, rgnSize) = (char *)ip - (char *)STARH(rh);
+        HxX(rh, rgnSize) = (char *)ip - (char *)*rh;
         SetHandleSize((Handle)rh, (Size)Hx(rh, rgnSize));
         /*-->*/ return rh;
     }
@@ -103,7 +103,7 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
     centt = top + dv / 2;
     first = true;
 
-    op = (INTEGER *)STARH(rh) + 5;
+    op = (INTEGER *)*rh + 5;
     x = 0;
     y = rad;
     oy = centt - top;
@@ -171,7 +171,7 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
         }
     }
     ip = op - 1;
-    ep = (INTEGER *)STARH(rh) + 4;
+    ep = (INTEGER *)*rh + 4;
     while(ip != ep)
     {
         ip -= 4;
@@ -184,12 +184,12 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
     }
     *op++ = RGN_STOP_X;
 
-    long_region_size = sizeof(INTEGER) * (op - (INTEGER *)STARH(rh));
+    long_region_size = sizeof(INTEGER) * (op - (INTEGER *)*rh);
     if(long_region_size >= 32768) /* test for overflow */
         SetEmptyRgn(rh);
     else
     {
-        HxX(rh, rgnSize) = sizeof(INTEGER) * (op - (INTEGER *)STARH(rh));
+        HxX(rh, rgnSize) = sizeof(INTEGER) * (op - (INTEGER *)*rh);
         SetHandleSize((Handle)rh, (Size)Hx(rh, rgnSize));
     }
 

@@ -138,7 +138,7 @@ realhilite(int16_t offset, highstate h)
     {
         if(offset > 0)
         {
-            mp = (muelem *)((char *)STARH(LM(MenuList)) + offset);
+            mp = (muelem *)((char *)*LM(MenuList) + offset);
 
             draw_menu_title(mp,
                             offset == Hx(MENULIST, muoff),
@@ -172,7 +172,7 @@ realhilite(int16_t offset, highstate h)
             LineTo(r.right - 1, mbar_height - 1);
 
             HLock(LM(MenuList));
-            menulistp = STARH(MENULIST);
+            menulistp = *MENULIST;
             mpend = menulistp->mulist + menulistp->muoff / sizeof(muelem);
             for(mp = menulistp->mulist; mp != mpend; mp++)
                 draw_menu_title(mp, mp == mpend - 1,
@@ -210,7 +210,7 @@ mbdf_draw(int32_t draw_p)
         PORT_TX_FONT_X(wmgr_port) = LM(SysFontFam);
 
         HLock(LM(MenuList));
-        menulistp = STARH(MENULIST);
+        menulistp = *MENULIST;
         mpend = menulistp->mulist + menulistp->muoff / sizeof(muelem);
         for(mp = menulistp->mulist; mp != mpend; mp++)
             draw_menu_title(mp, mp == mpend - 1, false, menulistp->muright);
@@ -256,11 +256,11 @@ static LONGINT hit(LONGINT mousept)
         if(mp == HxX(MENULIST, mulist) || p.h > Hx(MENULIST, muright))
             /*-->*/ return NOTHITINMBAR;
         else
-            /*-->*/ return (char *)(mp - 1) - (char *)STARH(LM(MenuList));
+            /*-->*/ return (char *)(mp - 1) - (char *)*LM(MenuList);
     }
     else
     {
-        mbdfep = (mbdfentry *)STARH(LM(MBSaveLoc));
+        mbdfep = (mbdfentry *)*LM(MBSaveLoc);
         for(mbdfp = (mbdfentry *)((char *)mbdfep + ((mbdfheader *)mbdfep)->lastMBSave);
             mbdfp != mbdfep && !PtInRect(p, &mbdfp->mbRectSave); mbdfp--)
             ;
@@ -282,7 +282,7 @@ static void calc(LONGINT offset)
     PORT_TX_FONT_X(wmgr_port) = LM(SysFontFam);
 
     HLock(LM(MenuList));
-    menulistp = STARH(MENULIST);
+    menulistp = *MENULIST;
     firstmp = menulistp->mulist;
     if(offset == 0)
         mp = firstmp;
@@ -372,7 +372,7 @@ save(int16_t offset, Rect *rect)
 
         current_mb_save = Hx(MBSAVELOC, lastMBSave) + sizeof(mbdfentry);
         HxX(MBSAVELOC, lastMBSave) = current_mb_save;
-        mep = (mbdfentry *)((char *)STARH(MBSAVELOC) + current_mb_save);
+        mep = (mbdfentry *)((char *)*MBSAVELOC + current_mb_save);
 
         mep->mbRectSave = *rect;
 
@@ -390,7 +390,7 @@ save(int16_t offset, Rect *rect)
 
         mep->mbMenuDir = MBRIGHTDIR;
         mep->mbMLOffset = offset;
-        mup = (muelem *)((char *)STARH(LM(MenuList)) + offset);
+        mup = (muelem *)((char *)*LM(MenuList) + offset);
         mep->mbMLHandle = mup->muhandle;
         mep->mbReserved = 0;
         save_rect.top = rect->top - 1;
@@ -414,7 +414,7 @@ save(int16_t offset, Rect *rect)
         ROMlib_copy_ctab(PIXMAP_TABLE(gd_pixmap),
                          PIXMAP_TABLE(save_pmh));
 
-        pixmap_set_pixel_fields(STARH(save_pmh), gd_bpp);
+        pixmap_set_pixel_fields(*save_pmh, gd_bpp);
 
         row_bytes = ((width * gd_bpp + 31) / 32) * 4;
         PIXMAP_SET_ROWBYTES_X(save_pmh, row_bytes);
@@ -474,7 +474,7 @@ restore(void)
     PixMapHandle save_pmh;
     Rect save_rect;
 
-    mep = (mbdfentry *)((char *)STARH(MBSAVELOC)
+    mep = (mbdfentry *)((char *)*MBSAVELOC
                         + Hx(MBSAVELOC, lastMBSave));
     save_rect = mep->mbRectSave;
     save_rect.top = save_rect.top - 1;
@@ -521,7 +521,7 @@ static Rect *getrect(LONGINT offset)
     INTEGER dh, dv;
 
     hiword = HiWord(offset);
-    mp = (muelem *)((char *)STARH(LM(MenuList)) + LoWord(offset));
+    mp = (muelem *)((char *)*LM(MenuList) + LoWord(offset));
     mh = mp->muhandle;
     if(Hx(mh, menuWidth) == -1 || Hx(mh, menuHeight) == -1)
         CalcMenuSize(mh);
@@ -554,7 +554,7 @@ static mbdfentry *offtomep(LONGINT offset)
 {
     mbdfentry *mbdfp, *mbdfep;
 
-    mbdfep = (mbdfentry *)STARH(LM(MBSaveLoc));
+    mbdfep = (mbdfentry *)*LM(MBSaveLoc);
     for(mbdfp = (mbdfentry *)((char *)mbdfep + ((mbdfheader *)mbdfep)->lastMBSave);
         mbdfp != mbdfep && mbdfp->mbMLOffset != offset; mbdfp--)
         ;

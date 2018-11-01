@@ -639,12 +639,12 @@ Ptr Executor::C_GetPixBaseAddr(PixMapHandle pixels)
            || gw_info->gw_gd == LM(MainDevice))
             return PIXMAP_BASEADDR(pixels);
         else
-            return STARH((Handle)PIXMAP_BASEADDR(pixels));
+            return *(Handle)PIXMAP_BASEADDR(pixels);
     }
     else if(gw_info->flags & pixelsLocked)
         return PIXMAP_BASEADDR(pixels);
     else
-        return STARH((Handle)PIXMAP_BASEADDR(pixels));
+        return *(Handle)PIXMAP_BASEADDR(pixels);
 }
 
 QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,

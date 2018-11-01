@@ -472,7 +472,7 @@ TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
     TE_STYLE_STYLE_TABLE_X(te_style) = style_table;
 
     lh_table = (LHHandle)NewHandle(sizeof(LHElement));
-    lh = STARH(lh_table);
+    lh = *lh_table;
     LH_HEIGHT_X(lh) = font_height;
     LH_ASCENT_X(lh) = font_info.ascent;
 
@@ -609,7 +609,7 @@ LONGINT Executor::C_TEGetPoint(INTEGER offset, TEHandle teh)
 
     TE_CHAR_TO_POINT(teh, offset, &p);
     HLockGuard guard(teh);
-    TEPtr tep = STARH(teh);
+    TEPtr tep = *teh;
     int lineno;
 
     lineno = TEP_CHAR_TO_LINENO(tep, offset);
@@ -654,7 +654,7 @@ int32_t Executor::C_TEGetHeight(LONGINT endLine, LONGINT startLine,
 
         te_style = TE_GET_STYLE(teh);
 
-        l = STARH(STARH(te_style)->lhTab) + startLine;
+        l = *(*te_style)->lhTab + startLine;
         le = l + endLine - startLine;
         for(; l <= le; l++)
             retval += l->lhHeight;
@@ -732,7 +732,7 @@ void Executor::C_TEStylePaste(TEHandle te)
     {
         HLockGuard guard(hText);
 
-        ROMlib_tedoitall(te, STARH(hText), length, false, scrap);
+        ROMlib_tedoitall(te, *hText, length, false, scrap);
     }
     if(scrap)
         DisposeHandle((Handle)scrap);

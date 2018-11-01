@@ -19,7 +19,7 @@ static void draw(BOOLEAN sel, Rect *rect, INTEGER doff, INTEGER dl,
     EraseRect(rect);
     MoveTo(rect->left + Hx(list, indent.h), rect->top + Hx(list, indent.v));
     HLock((Handle)HxP(list, cells));
-    DrawText((Ptr)STARH(HxP(list, cells)) + doff, 0, dl);
+    DrawText((Ptr)*HxP(list, cells) + doff, 0, dl);
     HUnlock((Handle)HxP(list, cells));
     if(sel)
         InvertRect(rect);

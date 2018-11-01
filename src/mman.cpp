@@ -944,7 +944,7 @@ THz HandleZone(Handle h)
     {
         Ptr p;
 
-        p = STARH(h);
+        p = *h;
         if(p && !PTR_IN_ZONE_P(p, LM(ApplZone)))
         {
             SET_MEM_ERR(memAZErr);
@@ -956,7 +956,7 @@ THz HandleZone(Handle h)
     {
         Ptr p;
 
-        p = STARH(h);
+        p = *h;
         if(p && !PTR_IN_ZONE_P(p, LM(SysZone)))
         {
             SET_MEM_ERR(memAZErr);
@@ -1029,7 +1029,7 @@ _RecoverHandle_flags(Ptr p, bool sys_p)
 
         if((Ptr)h > (Ptr)zones[i]
            && (Ptr)h < (Ptr)ZONE_BK_LIM(zones[i])
-           && STARH(h) == p)
+           && *h == p)
             break;
     }
 
@@ -1994,7 +1994,7 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         size = GetHandleSize(sh);
         SetHandleSize(dh, size);
         if(LM(MemErr) == noErr)
-            BlockMove(STARH(sh), STARH(dh), size);
+            BlockMove(*sh, *dh, size);
         DisposeHandle(sh);
     }
     else
@@ -2002,7 +2002,7 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         block_header_t *db = HANDLE_TO_BLOCK(dh);
         block_header_t *sb = HANDLE_TO_BLOCK(sh);
         ROMlib_freeblock(db);
-        SETMASTER(dh, STARH(sh));
+        SETMASTER(dh, *sh);
         BLOCK_LOCATION_OFFSET_X(sb) = (Ptr)dh - (Ptr)LM(TheZone);
         *sh = guest_cast<Ptr>(ZONE_HFST_FREE_X(LM(TheZone)));
         ZONE_HFST_FREE_X(LM(TheZone)) = (Ptr)sh;
@@ -2059,7 +2059,7 @@ _NewHandle_copy_ptr_flags(Size size, const void *data_to_copy,
 
     h = _NewHandle_flags(size, sys_p, false);
     if(LM(MemErr) == noErr)
-        memcpy(STARH(h), data_to_copy, size);
+        memcpy(*h, data_to_copy, size);
     return h;
 }
 
@@ -2076,7 +2076,7 @@ _NewHandle_copy_handle_flags(Size size, Handle data_to_copy, bool sys_p)
         warning_unexpected("Not enough bytes to copy!");
     h = _NewHandle_flags(size, sys_p, false);
     if(LM(MemErr) == noErr)
-        memcpy(STARH(h), STARH(data_to_copy), size);
+        memcpy(*h, *data_to_copy, size);
     return h;
 }
 
@@ -2107,7 +2107,7 @@ Ptr _NewPtr_copy_handle_flags(Size size, Handle data_to_copy, bool sys_p)
         warning_unexpected("Not enough bytes to copy!");
     p = _NewPtr_flags(size, sys_p, false);
     if(LM(MemErr) == noErr)
-        memcpy(p, STARH(data_to_copy), size);
+        memcpy(p, *data_to_copy, size);
     return p;
 }
 }

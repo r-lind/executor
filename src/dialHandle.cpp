@@ -295,7 +295,7 @@ bool Executor::get_item_style_info(DialogPtr dp, int item_no,
         item_color_info_t *items_color_info, *item_color_info;
 
         items_color_info_h = HxP(aux_win_h, dialogCItem);
-        items_color_info = (item_color_info_t *)STARH(items_color_info_h);
+        items_color_info = (item_color_info_t *)*items_color_info_h;
 
         item_color_info = &items_color_info[item_no - 1];
         if(item_color_info->data || item_color_info->offset)
@@ -379,13 +379,13 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
             {
                 for(l = 0; l >= 0;
                     l = Munger(nh, l,
-                               (Ptr)subsrc, (LONGINT)2, STARH(STARH(hp)) + 1,
-                               (LONGINT)(unsigned char)*STARH(STARH(hp))))
+                               (Ptr)subsrc, (LONGINT)2, **hp + 1,
+                               (LONGINT)(unsigned char)***hp))
                     ;
             }
         }
         HLock(nh);
-        TETextBox(STARH(nh), GetHandleSize(nh), &r, teFlushDefault);
+        TETextBox(*nh, GetHandleSize(nh), &r, teFlushDefault);
         HUnlock(nh);
         DisposeHandle(nh);
     }
@@ -396,7 +396,7 @@ void Executor::ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no)
         text_h = ip->itmhand;
         {
             HLockGuard guard(text_h);
-            TETextBox(STARH(text_h), GetHandleSize(text_h),
+            TETextBox(*text_h, GetHandleSize(text_h),
                       &r, teFlushDefault);
         }
 
@@ -472,7 +472,7 @@ void Executor::C_DrawDialog(DialogPtr dp) /* IMI-418 */
         DrawControls((WindowPtr)dp);
         state = HGetState(((DialogPeek)dp)->items);
         HSetState(((DialogPeek)dp)->items, state | LOCKBIT);
-        intp = (GUEST<INTEGER> *)STARH(((DialogPeek)dp)->items);
+        intp = (GUEST<INTEGER> *)*(((DialogPeek)dp)->items);
         ip = (itmp)(intp + 1);
         for(i = *intp, inum = 1; i-- >= 0; inum++, BUMPIP(ip))
         {
@@ -491,7 +491,7 @@ INTEGER Executor::C_FindDialogItem(DialogPtr dp, Point pt) /* IMIV-60 */
     INTEGER i, inum;
     itmp ip;
 
-    intp = (GUEST<INTEGER> *)STARH(((DialogPeek)dp)->items);
+    intp = (GUEST<INTEGER> *)*(((DialogPeek)dp)->items);
     ip = (itmp)(intp + 1);
     for(i = *intp, inum = 0; i-- >= 0; inum++, BUMPIP(ip))
         if(PtInRect(pt, &ip->itmr))
@@ -513,7 +513,7 @@ void Executor::C_UpdateDialog(DialogPtr dp, RgnHandle rgn) /* IMIV-60 */
     DrawControls((WindowPtr)dp);
     state = HGetState(((DialogPeek)dp)->items);
     HSetState(((DialogPeek)dp)->items, state | LOCKBIT);
-    intp = (GUEST<INTEGER> *)STARH(((DialogPeek)dp)->items);
+    intp = (GUEST<INTEGER> *)*(((DialogPeek)dp)->items);
     ip = (itmp)(intp + 1);
     for(i = *intp, inum = 1; i-- >= 0; inum++, BUMPIP(ip))
     {
@@ -552,7 +552,7 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
             GlobalToLocal(&glocalp);
             localp = glocalp.get();
             SetPort(gp);
-            intp = (GUEST<INTEGER> *)STARH(dp->items);
+            intp = (GUEST<INTEGER> *)(*dp->items);
             iend = *intp + 2;
             ip = (itmp)(intp + 1);
             for(i = 0;

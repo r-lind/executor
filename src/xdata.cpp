@@ -20,7 +20,7 @@ bool Executor::update_xdata_if_needed(xdata_handle_t xh, PixPat *pixpat,
 {
     xdata_t *x;
 
-    x = STARH(xh);
+    x = *xh;
 
     if(x->ctab_seed_x != CTAB_SEED_X(dest->pmTable)
        || (1 << x->log2_bpp) != dest->pixelSize
@@ -147,7 +147,7 @@ raw_bits_for_color_pattern(PixPatPtr pixpat, PixMap *target,
     Handle data;
     const Rect *bounds;
 
-    src = STARH(patmap);
+    src = *patmap;
     bounds = &src->bounds;
     target_depth = target->pixelSize;
     row_bytes = ((RECT_WIDTH(bounds) * target_depth) + 7) / 8;
@@ -443,7 +443,7 @@ Executor::xdata_for_pixpat_with_space(PixPat *pixpat, PixMap *target,
 
     HLockGuard guard(xh);
 
-    xdata_t *x = STARH(xh);
+    xdata_t *x = *xh;
 
     /* Compute the dimensions of the PixPat, and allocate scratch
 	* space for the biggest possible bitmap that might be required.
@@ -477,7 +477,7 @@ Executor::xdata_for_pattern(const Pattern pattern, PixMap *target)
     HLockGuard guard(xh);
     uint32_t raw_bits[8 * 8]; /* Maximum possible resultant pattern size. */
     int row_bytes;
-    xdata_t *x = STARH(xh);
+    xdata_t *x = *xh;
 
     /* Compute the raw bits for this pixpat and crank out the xdata. */
     raw_bits_for_pattern(pattern, target, raw_bits, &row_bytes);

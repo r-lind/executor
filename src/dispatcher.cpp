@@ -111,7 +111,7 @@ void trap_watch_handle(char *name, Handle x, int size)
     trap_watchpoint_next++;
     trap_watchpoint_next_data += size;
 
-    memcpy(trap_data, STARH((Handle)x), size);
+    memcpy(trap_data, *(Handle)x, size);
 }
 
 void trap_break_me(void)
@@ -143,7 +143,7 @@ void check_trap_watchpoints(const char *msg)
             void *x;
 
             x = (trap_watchpoints[i].handle_p
-                     ? (void *)STARH((Handle)trap_watchpoints[i].x)
+                     ? (void *)*(Handle)trap_watchpoints[i].x
                      : trap_watchpoints[i].x);
 
             size = trap_watchpoints[i].size;

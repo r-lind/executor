@@ -59,19 +59,19 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             switch(routine)
             {
                 case Open:
-                    retval = (HxP(h, dCtlDriver)->udrvrOpen)(p, STARH(h));
+                    retval = (HxP(h, dCtlDriver)->udrvrOpen)(p, *h);
                     break;
                 case Prime:
-                    retval = (HxP(h, dCtlDriver)->udrvrPrime)(p, STARH(h));
+                    retval = (HxP(h, dCtlDriver)->udrvrPrime)(p, *h);
                     break;
                 case Ctl:
-                    retval = (HxP(h, dCtlDriver)->udrvrCtl)(p, STARH(h));
+                    retval = (HxP(h, dCtlDriver)->udrvrCtl)(p, *h);
                     break;
                 case Stat:
-                    retval = (HxP(h, dCtlDriver)->udrvrStatus)(p, STARH(h));
+                    retval = (HxP(h, dCtlDriver)->udrvrStatus)(p, *h);
                     break;
                 case Close:
-                    retval = (HxP(h, dCtlDriver)->udrvrClose)(p, STARH(h));
+                    retval = (HxP(h, dCtlDriver)->udrvrClose)(p, *h);
                     break;
                 default:
                     retval = fsDSIntErr;
@@ -86,19 +86,19 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             switch(routine)
             {
                 case Open:
-                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrOpen));
+                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrOpen));
                     break;
                 case Prime:
-                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrPrime));
+                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrPrime));
                     break;
                 case Ctl:
-                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrCtl));
+                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrCtl));
                     break;
                 case Stat:
-                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrStatus));
+                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrStatus));
                     break;
                 case Close:
-                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrClose));
+                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrClose));
                     break;
                 default:
                     procp = 0;
@@ -111,7 +111,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
 
                 savea2 = EM_A2;
                 EM_A0 = US_TO_SYN68K(p);
-                EM_A1 = US_TO_SYN68K(STARH(h));
+                EM_A1 = US_TO_SYN68K(*h);
                 EM_A2 = US_TO_SYN68K((ProcPtr)procp); /* for compatibility with above */
                 saved1 = EM_D1;
                 saved2 = EM_D2;
@@ -318,7 +318,7 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
             err = MemError();
         else if(!alreadyopen)
         {
-            memset((char *)STARH(h), 0, sizeof(DCtlEntry));
+            memset((char *)*h, 0, sizeof(DCtlEntry));
             HxX(h, dCtlDriver) = (umacdriverptr)ramdh;
             HxX(h, dCtlFlags) = HxX(ramdh, drvrFlags) | RAMBASEDBIT;
             HxX(h, dCtlRefNum) = -(devicen + 1);
@@ -366,7 +366,7 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
                     err = MemError();
                 else
                 {
-                    memset((char *)STARH(h), 0, sizeof(DCtlEntry));
+                    memset((char *)*h, 0, sizeof(DCtlEntry));
                     up = (umacdriverptr)NewPtr(sizeof(umacdriver));
                     if(!(HxX(h, dCtlDriver) = up))
                         err = MemError();

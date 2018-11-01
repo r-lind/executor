@@ -50,7 +50,7 @@ void Executor::C_PrintDefault(THPrint hPrint)
        I've filled in the values by hand to be what I suspect the
        LaserWriter we're using wants */
 
-    memset((char *)STARH(hPrint), 0, sizeof(TPrint));
+    memset(*hPrint, 0, sizeof(TPrint));
     HxX(hPrint, iPrVersion) = ROMlib_PrDrvrVers;
 
     ROMlib_set_default_resolution(hPrint, 72, 72);

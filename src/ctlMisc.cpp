@@ -193,7 +193,7 @@ int32_t Executor::ROMlib_ctlcall(ControlHandle c, int16_t i, int32_t l)
     if(*defproc == nullptr)
         LoadResource(defproc);
 
-    cp = (ctlfuncp)STARH(defproc);
+    cp = (ctlfuncp)*defproc;
 
     if(cp == &cdef0)
         retval = cdef0(VAR(c), c, i, l);

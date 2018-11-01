@@ -202,7 +202,7 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define BITMAP_IS_THEPORT_P(bitmap)                         \
     (!memcmp(bitmap,                                        \
              (CGrafPort_p(qdGlobals().thePort)                          \
-                  ? (BitMap *)STARH(CPORT_PIXMAP(theCPort)) \
+                  ? (BitMap *)*CPORT_PIXMAP(theCPort) \
                   : &PORT_BITS(qdGlobals().thePort)),                   \
              sizeof(BitMap)))
 

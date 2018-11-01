@@ -52,7 +52,7 @@ get_subdesc_info(Handle aggr_desc_h, subdesc_info_t *info,
             info->count = ATTRIBUTE_COUNT(aggr_desc_h);
             info->count_p = &ATTRIBUTE_COUNT_X(aggr_desc_h);
 
-            aggr_desc_p = (char *)STARH(aggr_desc_h);
+            aggr_desc_p = (char *)*aggr_desc_h;
 
             inline_target_desc
                 = (inline_key_desc_t *)(aggr_desc_p
@@ -88,7 +88,7 @@ desc_offset(Handle aggr_desc_h, int index, subdesc_info_t *info,
     int count;
     char *t;
 
-    t = (char *)STARH(aggr_desc_h) + info->base_offset;
+    t = (char *)*aggr_desc_h + info->base_offset;
     for(count = 1; count < index && count <= info->count; count++)
     {
         inline_desc_t *desc;
@@ -103,7 +103,7 @@ desc_offset(Handle aggr_desc_h, int index, subdesc_info_t *info,
               + info->inline_desc_header_size);
     }
 
-    *offset_return = t - (char *)STARH(aggr_desc_h);
+    *offset_return = t - (char *)*aggr_desc_h;
 }
 
 /* return a pointer to the storage for the subdesc at index `index' in
@@ -124,7 +124,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
 
     inline_desc_t *inline_desc;
 
-    aggr_desc_p = (char *)STARH(aggr_desc_h);
+    aggr_desc_p = (char *)*aggr_desc_h;
 
     if(attribute_p
        && (ATTRIBUTE_COUNT(aggr_desc_h) == typeAEList
@@ -157,7 +157,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
         {
             GUEST<int16_t> *t;
 
-            aggr_desc_p = (char *)STARH(aggr_desc_h);
+            aggr_desc_p = (char *)*aggr_desc_h;
             t = (GUEST<int16_t> *)(aggr_desc_p + aggr_desc_size);
             /* ';;' */
             t[0] = 0x3b3b;
@@ -200,7 +200,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
             SetHandleSize(aggr_desc_h, aggr_desc_size + diff);
             if(LM(MemErr) != noErr)
                 AE_RETURN_ERROR(LM(MemErr));
-            aggr_desc_p = (char *)STARH(aggr_desc_h);
+            aggr_desc_p = (char *)*aggr_desc_h;
             if(aggr_desc_size < offset + old_size)
                 abort();
             memmove(aggr_desc_p + offset + old_size,
@@ -219,7 +219,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
             SetHandleSize(aggr_desc_h, aggr_desc_size - diff);
             if(LM(MemErr) != noErr)
                 AE_RETURN_ERROR(LM(MemErr));
-            aggr_desc_p = (char *)STARH(aggr_desc_h);
+            aggr_desc_p = (char *)*aggr_desc_h;
         }
         memset(aggr_desc_p + offset, '\000', new_size);
 
@@ -274,7 +274,7 @@ find_key_index(Handle aggr_desc_h, int32_t keyword, bool attribute_p,
 
     get_subdesc_info(aggr_desc_h, &info, attribute_p);
 
-    t = (char *)STARH(aggr_desc_h) + info.base_offset;
+    t = (char *)*aggr_desc_h + info.base_offset;
     for(count = 1; count <= info.count; count++)
     {
         inline_key_desc_t *inline_key_desc;
@@ -339,7 +339,7 @@ aggr_put_nth_desc(Handle aggr_handle,
     }
 
     inline_desc->type = in_desc_type;
-    memcpy(inline_desc->data, STARH(in_desc_data), size);
+    memcpy(inline_desc->data, *in_desc_data, size);
 
     *out_failcode = noErr;
     return true;
@@ -432,7 +432,7 @@ aggr_put_key_desc(Handle aggr_handle,
 
     inline_key_desc->key = keyword;
     inline_key_desc->type = in_desc_type;
-    memcpy(inline_key_desc->data, STARH(in_desc_data), size);
+    memcpy(inline_key_desc->data, *in_desc_data, size);
 
     return true;
 }
@@ -453,7 +453,7 @@ aggr_get_key_desc(Handle aggr_handle,
     {
         /* #### stinking apple special-case bullshit */
 
-        event_data = (ae_header_t *)STARH(aggr_handle);
+        event_data = (ae_header_t *)*aggr_handle;
 
         switch(keyword)
         {
@@ -567,7 +567,7 @@ ae_desc_to_ptr(descriptor_t *desc,
 
     copy_size = std::min(desc_size, max_size);
 
-    memcpy(data, STARH(desc_data), copy_size);
+    memcpy(data, *desc_data, copy_size);
 
     *size_out = copy_size;
 }
@@ -659,7 +659,7 @@ dump_desc (descriptor_t *desc)
       int i, offset;
       
       aggr_handle = (aggregate_descriptor_handle) DESC_DATA (desc);
-      aggr = STARH (aggr_handle);
+      aggr = *aggr_handle;
       
       for (offset = i = 0; i < aggr->n_params; i ++, offset ++)
 	dump_union_desc (&aggr->descs[offset], aggr->key_pair_p);
@@ -697,7 +697,7 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
 
     event_data->target.size = target_size;
     event_data->target.type = target_type;
-    memcpy(&event_data->target.data[0], STARH(target_data), target_size);
+    memcpy(&event_data->target.data[0], *target_data, target_size);
 
     {
         GUEST<int32_t> *t;
@@ -734,12 +734,12 @@ OSErr Executor::C_AECreateDesc(DescType type, Ptr data, Size data_size,
         AE_RETURN_ERROR(memFullErr);
 
     if(data)
-        memcpy(STARH(h), data, data_size);
+        memcpy(*h, data, data_size);
     else
     {
         if(data_size != 0)
             warning_unexpected("nullptr data, data_size = %d", data_size);
-        memset(STARH(h), 0, data_size);
+        memset(*h, 0, data_size);
     }
 
     DESC_TYPE_X(desc_out) = type;
@@ -765,7 +765,7 @@ OSErr Executor::C_AEDuplicateDesc(AEDesc *src, AEDesc *dst)
     {
         HLockGuard guard(src_data);
         err = AECreateDesc(DESC_TYPE(src),
-                           STARH(src_data), GetHandleSize(src_data),
+                           *src_data, GetHandleSize(src_data),
                            dst);
     }
     AE_RETURN_ERROR(err);

@@ -48,7 +48,7 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
     hText = NewHandle(0);
     GetFontInfo(&finfo);
     /* zero the te record */
-    memset(STARH(teh), 0, te_size);
+    memset(*teh, 0, te_size);
     /* ### find out what to assign to the `selRect', `selPoint'
      and `clikStuff' fields */
     HASSIGN_15(teh,
@@ -77,7 +77,7 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
     temptehiddenh = (tehiddenh)NewHandle(sizeof(tehidden));
     /* don't merge with line above */
     TEHIDDENHX(teh) = temptehiddenh;
-    memset(STARH(TEHIDDENH(teh)), 0, sizeof(tehidden));
+    memset(*TEHIDDENH(teh), 0, sizeof(tehidden));
 
     TE_SLAM(teh);
 

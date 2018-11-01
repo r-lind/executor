@@ -44,7 +44,7 @@ void Executor::ROMlib_sledgehammer_te(TEHandle te)
 
     line_starts = TE_LINE_STARTS(te);
     hText = TE_HTEXT(te);
-    Text = (char *)STARH(hText);
+    Text = (char *)*hText;
     length = TE_LENGTH(te);
     n_lines = TE_N_LINES(te);
     dest_rect = &TE_DEST_RECT(te);
@@ -192,7 +192,7 @@ int16_t nextbreak(TEHandle teh, int16_t off, int16_t len,
     hText = TE_HTEXT(teh);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = (char *)STARH(hText);
+    Text = (char *)*hText;
     sp = Text + off;
     ep = Text + len;
     if(off > len)
@@ -211,7 +211,7 @@ int16_t nextbreak(TEHandle teh, int16_t off, int16_t len,
             curpos = off;
             while(width <= max_width && curpos != len
                   && Text[curpos] != '\r')
-                width += ROMlib_StyleTextWidth(STARH(teh), curpos++, 1);
+                width += ROMlib_StyleTextWidth(*teh, curpos++, 1);
             sp = Text + curpos;
         }
         else
@@ -349,7 +349,7 @@ int16_t calclhtab(TEHandle teh)
     lh_table = TE_STYLE_LH_TABLE(sth);
     SetHandleSize((Handle)lh_table,
                   sizeof(LHElement) * (n_lines + 1));
-    lh = STARH(lh_table);
+    lh = *lh_table;
     first_changed = -1;
     clear_lh_p = true;
     for(current_run = TE_STYLE_RUNS(sth), linestarts = TE_LINE_STARTS(teh);
@@ -384,7 +384,7 @@ int16_t calclhtab(TEHandle teh)
             if(first_changed == -1
                && (LH_HEIGHT(lh) != orig_height
                    || LH_ASCENT(lh) != orig_ascent))
-                first_changed = lh - STARH(lh_table);
+                first_changed = lh - *lh_table;
             linestarts++;
             lh++;
             clear_lh_p = true;
@@ -396,7 +396,7 @@ int16_t calclhtab(TEHandle teh)
             if(first_changed == -1
                && (LH_HEIGHT(lh) != orig_height
                    || LH_ASCENT(lh) != orig_ascent))
-                first_changed = lh - STARH(lh_table);
+                first_changed = lh - *lh_table;
             linestarts++;
             lh++;
             clear_lh_p = true;

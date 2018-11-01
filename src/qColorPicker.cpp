@@ -823,7 +823,7 @@ text_box_set_te(struct text_box *box)
         int max;
 
         texth = TE_HTEXT(te);
-        text = (char *)STARH(texth);
+        text = (char *)*texth;
 
         str_if(text, TE_LENGTH(te), &integer, &fractional);
         max = orig_te_box->max;

@@ -261,7 +261,7 @@ Executor::ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type, Str255 name)
     uint8_t type_x;
     cfir_t *retval;
 
-    cfrgp = (cfrg_resource_t *)STARH(cfrg);
+    cfrgp = (cfrg_resource_t *)*cfrg;
     cfirp = (cfir_t *)((char *)cfrgp + sizeof *cfrgp);
     desired_arch_x = arch;
     type_x = type;
@@ -314,7 +314,7 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             id = CFIR_FRAGMENT_LENGTH(cfirp);
             h = GetResource(typ, id);
             HLock(h);
-            GetMemFragment(STARH(h), GetHandleSize(h), empty, kLoadLib,
+            GetMemFragment(*h, GetHandleSize(h), empty, kLoadLib,
                            &c_id, &mainAddr, errName);
 
             fprintf(stderr, "Memory leak from segmented fragment\n");
@@ -440,7 +440,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     ROMlib_version_long = 0;
     if(h)
     {
-        vp = (vers_t *)STARH(h);
+        vp = (vers_t *)*h;
         ROMlib_version_long = ((vp->c[0] << 24) | (vp->c[1] << 16) | (vp->c[2] << 8) | (vp->c[3] << 0));
     }
     
@@ -492,7 +492,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
         {
             SIZEResource *size_resource;
 
-            size_resource = (SIZEResource *)STARH(size_resource_h);
+            size_resource = (SIZEResource *)*size_resource_h;
             size_info.size_flags = size_resource->size_flags;
             size_info.preferred_size = size_resource->preferred_size;
             size_info.minimum_size = size_resource->minimum_size;
@@ -527,7 +527,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     {
         HLock(code0);
 
-        lp = (GUEST<LONGINT> *)STARH(code0);
+        lp = (GUEST<LONGINT> *)*code0;
         abovea5 = *lp++;
         belowa5 = *lp++;
         jumplen = *lp++;
@@ -568,7 +568,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
 							 jump table */
         ROMlib_destroy_blocks(0, ~0, false);
     }
-    SetCursor(STARH(GetCursor(watchCursor)));
+    SetCursor(*GetCursor(watchCursor));
 
     /* Call this routine in case the refresh value changed, either just
     * now or when the config file was parsed.  We want to do this
@@ -999,7 +999,7 @@ our_special_map(resmaphand map)
     bool retval;
     Handle h;
 
-    LM(CurMap) = STARH(map)->resfn;
+    LM(CurMap) = (*map)->resfn;
     h = Get1Resource(TICK("nUSE"), 0);
     retval = h ? true : false;
 
@@ -1079,7 +1079,7 @@ static void reinitialize_things(void)
             FSClose((char *)fcbp - (char *)LM(FCBSPtr));
     }
 
-    LM(CurMap) = STARH((resmaphand)LM(TopMapHndl))->resfn;
+    LM(CurMap) = (*(resmaphand)LM(TopMapHndl))->resfn;
 
     ROMlib_destroy_blocks(0, ~0, false);
 }

@@ -24,7 +24,7 @@ LONGINT Executor::C_GetMaxResourceSize(Handle h) /* IMIV-16 */
     if(LM(ResErr) != noErr)
         return (-1);
     if(!rr->rhand || !(*(Handle)rr->rhand))
-    { /* STARH is overkill */
+    {
         dl = B3TOLONG(rr->doff);
         mdl = Hx(map, rh.datlen);
         WALKTANDR(map, i, tr, j, rr)
@@ -46,7 +46,7 @@ LONGINT Executor::C_RsrcMapEntry(Handle h) /* IMIV-16 */
     ROMlib_setreserr(ROMlib_findres(h, &map, &tr, &rr));
     if(LM(ResErr) != noErr)
         return (0);
-    return ((char *)rr - (char *)STARH(map));
+    return ((char *)rr - (char *)*map);
 }
 
 /* OpenRFPerm is in resOpen.c */

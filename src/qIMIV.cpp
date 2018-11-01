@@ -284,7 +284,7 @@ create_scratch_bitmap_if_necessary(uint8_t **_fbuf,
         src_rect->right = (offset % screen_row_bytes) * 8
                              + word_width * 16;
 
-        *src_pm = *STARH(gd_pmap);
+        *src_pm = **gd_pmap;
 
         pixmap_copy(src_pm, src_rect, dst_pm, dst_rect);
         *_fbuf = BITMAP_BASEADDR(dst_pm);

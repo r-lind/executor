@@ -47,7 +47,7 @@ int16_t Executor::ROMlib_StyleTextWidth(TEPtr tep,
     hText = TEP_HTEXT(tep);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = STARH(hText);
+    Text = *hText;
 
     if(!TEP_STYLIZED_P(tep))
     {
@@ -64,7 +64,7 @@ int16_t Executor::ROMlib_StyleTextWidth(TEPtr tep,
 
     style_table = TE_STYLE_STYLE_TABLE(te_style);
     style_table_flags = HGetState((Handle)style_table);
-    styles = STARH(style_table);
+    styles = *style_table;
 
     save_size = PORT_TX_SIZE_X(qdGlobals().thePort);
     save_face = PORT_TX_FACE(qdGlobals().thePort);
@@ -127,7 +127,7 @@ void Executor::te_char_to_point(const TEPtr tep, int16_t sel, Point *p)
     hText = TEP_HTEXT(tep);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = STARH(hText);
+    Text = *hText;
     dest_rect = &TEP_DEST_RECT(tep);
 
     lineno = TEP_CHAR_TO_LINENO(tep, sel);
@@ -213,7 +213,7 @@ togglecaret(TEHandle teh, int16_t sel, bool paint_p)
         lineno = TE_CHAR_TO_LINENO(teh, sel);
         SetRect(&TE_SEL_RECT(teh), p.h, p.v,
                 p.h + 1, (p.v
-                          + LH_ASCENT(&(STARH(TE_STYLE_LH_TABLE(te_style)))[lineno])
+                          + LH_ASCENT(&(*TE_STYLE_LH_TABLE(te_style))[lineno])
                           + 1));
     }
     else
@@ -249,7 +249,7 @@ void Executor::ROMlib_tesave(tesave *t, TEHandle teh)
 {
     TEPtr tp;
 
-    tp = STARH(teh);
+    tp = *teh;
     t->_tport = qdGlobals().thePort;
     qdGlobals().thePort = tp->inPort;
 
@@ -454,7 +454,7 @@ void te_draw(TEPtr tep,
     hText = TEP_HTEXT(tep);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = STARH(hText);
+    Text = *hText;
 
     top = start_pt.v;
     bottom = (end == TEP_LENGTH(tep)
@@ -476,7 +476,7 @@ void te_draw(TEPtr tep,
         style_table = TE_STYLE_STYLE_TABLE(te_style);
         style_table_flags = HGetState((Handle)style_table);
         HLock((Handle)style_table);
-        styles = STARH(style_table);
+        styles = *style_table;
 
         start_run_index
             = te_char_to_run_index(te_style,
@@ -612,7 +612,7 @@ void te_hilite(TEPtr tep,
     hText = TEP_HTEXT(tep);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = STARH(hText);
+    Text = *hText;
 
     TEP_CHAR_TO_POINT(tep, start, &start_pt);
     TEP_CHAR_TO_POINT(tep, end, &end_pt);
@@ -695,7 +695,7 @@ int16_t te_find(TEPtr tep, int16_t start, int16_t end)
     hText = TEP_HTEXT(tep);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = STARH(hText);
+    Text = *hText;
 
     dest_rect = &TEP_DEST_RECT(tep);
     dest_rect_top = dest_rect->top;
@@ -909,7 +909,7 @@ tep_find_word_break(TEPtr tep, int start, word_break_dir_t dir)
     hText = TEP_HTEXT(tep);
     hText_flags = HGetState(hText);
     HLock(hText);
-    Text = STARH(hText);
+    Text = *hText;
 
     length = TEP_LENGTH(tep);
 
@@ -947,7 +947,7 @@ void Executor::C_TEClick(Point pt, BOOLEAN extend, TEHandle te)
     TESAVE(te);
     te_flags = HGetState((Handle)te);
     HLock((Handle)te);
-    tep = STARH(te);
+    tep = *te;
 
     length = TEP_LENGTH(tep);
     if(TEP_STYLIZED_P(tep))
@@ -1101,7 +1101,7 @@ void Executor::C_TEClick(Point pt, BOOLEAN extend, TEHandle te)
 
     while(Button() && CALLCLIKOK(te))
     {
-        if(STARH(TEHIDDENH(te))->flags & TEAUTOVIEWBIT)
+        if((*TEHIDDENH(te))->flags & TEAUTOVIEWBIT)
             ROMlib_teautoloop(te);
 
         GetOSEvent(0, &evt);

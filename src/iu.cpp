@@ -148,7 +148,7 @@ void Executor::C_IUDatePString(LONGINT date, DateForm form, StringPtr p,
     op = (char *)p + 1;
     if(form == shortDate)
     {
-        if(h && (int0p = (Intl0Ptr)STARH(h)))
+        if(h && (int0p = (Intl0Ptr)*h))
         {
             switch(int0p->dateOrder)
             {
@@ -172,7 +172,7 @@ void Executor::C_IUDatePString(LONGINT date, DateForm form, StringPtr p,
     }
     else
     {
-        if(h && (int1p = (Intl1Ptr)STARH(h)))
+        if(h && (int1p = (Intl1Ptr)*h))
         {
             abbrev = form == longDate ? 0 : int1p->abbrLen;
             outl(int1p->st0, &op);
@@ -228,7 +228,7 @@ Handle Executor::C_GetIntlResource(INTEGER id) /* IMI-505 */
     {
         Intl0Ptr int0p;
 
-        int0p = (Intl0Ptr)STARH(retval);
+        int0p = (Intl0Ptr)*retval;
         int0p->shrtDateFmt |= century;
     }
 
@@ -253,7 +253,7 @@ void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
         h = GetIntlResource(0);
 
     op = (char *)p + 1;
-    if(h && (int0p = (Intl0Ptr)STARH(h)))
+    if(h && (int0p = (Intl0Ptr)*h))
     {
         SecondsToDate(date, &dtr);
         if(int0p->timeCycle)
@@ -298,7 +298,7 @@ BOOLEAN Executor::C_IsMetric() /* IMI-505 */
     Handle h;
 
     h = GetIntlResource(0);
-    return h ? ((Intl0Ptr)STARH(h))->metricSys : false;
+    return h ? ((Intl0Ptr)*h)->metricSys : false;
 }
 
 void Executor::C_SetIntlResource(INTEGER rn, INTEGER id, Handle newh) /* IMI-506 */
@@ -314,9 +314,9 @@ void Executor::C_SetIntlResource(INTEGER rn, INTEGER id, Handle newh) /* IMI-506
         if(h && HomeResFile(h) == rn)
         {
             if(id == 0)
-                *(Intl0Ptr)STARH(h) = *(Intl0Ptr)STARH(newh);
+                *(Intl0Ptr)*h = *(Intl0Ptr)*newh;
             else
-                *(Intl1Ptr)STARH(h) = *(Intl1Ptr)STARH(newh);
+                *(Intl1Ptr)*h = *(Intl1Ptr)*newh;
             ChangedResource(h);
         }
         else

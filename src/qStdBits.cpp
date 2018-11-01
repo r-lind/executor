@@ -165,7 +165,7 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
                 gw = (CGrafPtr)((char *)bogo_map - 2);
                 pixmap = CPORT_PIXMAP(gw);
 
-                *canonical_addr = STARH(pixmap);
+                *canonical_addr = *pixmap;
                 info->cleanup_type = Executor::cleanup_info::cleanup_unlock_gworld_pixels;
                 info->data.pixmap_handle = pixmap;
 
@@ -176,7 +176,7 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
             {
                 PixMapHandle pixmap_handle = *(GUEST<PixMapHandle> *)bogo_map;
 
-                *canonical_addr = STARH(pixmap_handle);
+                *canonical_addr = *pixmap_handle;
 
                 info->cleanup_type = Executor::cleanup_info::cleanup_state;
                 info->data.pixmap_handle = pixmap_handle;
@@ -289,7 +289,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
         HLockGuard guard(src->pmTable);
         CTabPtr ctab;
 
-        ctab = STARH(src->pmTable);
+        ctab = (*src->pmTable);
 
         /* write out the src color table */
         PICWRITE(&zero, sizeof zero);
@@ -312,7 +312,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
     if(mask)
     {
         HLockGuard guard(mask);
-        PICWRITE(STARH(mask), Hx(mask, rgnSize));
+        PICWRITE(*mask, Hx(mask, rgnSize));
     }
     height = RECT_HEIGHT(&src->bounds);
     if(row_bytes < 8 || pack_type == 2)

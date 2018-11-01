@@ -240,7 +240,7 @@ static DCtlPtr otherdctl(ParmBlkPtr pbp)
             h = GetDCtlEntry(BINREFNUM);
             break;
     }
-    return h ? STARH(h) : 0;
+    return h ? *h : 0;
 }
 
 #if defined(LINUX) || defined(MACOSX)
@@ -308,7 +308,7 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
         otherp = otherdctl(pbp);
         if(otherp && (otherp->dCtlFlags & OPENBIT))
         {
-            *STARH(h) = *STARH((hiddenh)otherp->dCtlStorage);
+            **h = **(hiddenh)otherp->dCtlStorage;
             dcp->dCtlFlags |= OPENBIT;
         }
         else

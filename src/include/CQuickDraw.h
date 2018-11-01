@@ -9,8 +9,8 @@
 
 namespace Executor
 {
-#define theCPort (STARH(STARH((GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))))
-#define theCPortX ((*STARH((GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))))
+#define theCPort  (**(GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))
+#define theCPortX (**(GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))
 
 enum
 {

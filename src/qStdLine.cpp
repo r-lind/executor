@@ -368,7 +368,7 @@ void Executor::C_StdLine(Point p)
         if(psize == SMALLPOLY)
         {
             SetHandleSize((Handle)ph, psize + 2 * sizeof(Point));
-            oip = (INTEGER *)((char *)STARH(ph) + psize);
+            oip = (INTEGER *)((char *)*ph + psize);
             *oip++ = CW_RAW(y1);
             *oip++ = CW_RAW(x1);
             HxX(ph, polySize) = Hx(ph, polySize) + 2 * sizeof(Point);
@@ -376,7 +376,7 @@ void Executor::C_StdLine(Point p)
         else
         {
             SetHandleSize((Handle)ph, psize + sizeof(Point));
-            oip = (INTEGER *)((char *)STARH(ph) + psize);
+            oip = (INTEGER *)((char *)*ph + psize);
             HxX(ph, polySize) = Hx(ph, polySize) + sizeof(Point);
         }
         *oip++ = CW_RAW(y2);

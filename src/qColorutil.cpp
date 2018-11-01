@@ -145,7 +145,7 @@ void Executor::ROMlib_copy_ctab(CTabHandle src, CTabHandle dst)
     ctab_size /* = CTAB_STORAGE_FOR_SIZE (CTAB_SIZE (src)); */
         = GetHandleSize((Handle)src);
     SetHandleSize((Handle)dst, ctab_size);
-    BlockMoveData((Ptr)STARH(src), (Ptr)STARH(dst), ctab_size);
+    BlockMoveData((Ptr)*src, (Ptr)*dst, ctab_size);
 }
 
 void Executor::ROMlib_color_init(void)
@@ -194,7 +194,7 @@ Executor::ROMlib_copy_handle(Handle src)
 
     handle_size = GetHandleSize(src);
     retval = NewHandle(handle_size);
-    BlockMoveData(STARH(src), STARH(retval),
+    BlockMoveData(*src, *retval,
                   handle_size);
     return retval;
 }

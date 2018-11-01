@@ -95,7 +95,7 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
                 item_color_info_t *item_color_info;
 
                 item_color_info_h = HxP(aux_win_h, dialogCItem);
-                item_color_info = (item_color_info_t *)STARH(item_color_info_h);
+                item_color_info = (item_color_info_t *)*item_color_info_h;
 
                 if(item_color_info)
                 {
@@ -117,7 +117,7 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
                                             + color_table_offset);
 
                         color_table = (CCTabHandle)NewHandle(color_table_bytes);
-                        memcpy(STARH(color_table), color_table_base,
+                        memcpy(*color_table, color_table_base,
                                color_table_bytes);
 
                         SetControlColor(ctl, color_table);
@@ -257,7 +257,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
 
         int item_no;
 
-        ip = (GUEST<INTEGER> *)STARH(items);
+        ip = (GUEST<INTEGER> *)*items;
         itp = (itmp)(ip + 1);
         i = *ip;
         item_no = 1;
@@ -425,7 +425,7 @@ void Executor::C_CloseDialog(DialogPtr dp) /* IMI-413 */
     if(items)
     {
         /* #### should `items' be locked? */
-        ip = (GUEST<INTEGER> *)STARH(items);
+        ip = (GUEST<INTEGER> *)*items;
         i = *ip;
         itp = (itmp)(ip + 1);
         while(i-- >= 0)

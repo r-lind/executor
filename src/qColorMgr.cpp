@@ -166,7 +166,7 @@ ROMlib_search_proc(RGBColor *rgb)
                 uint32_t cur_diff, new_diff;
                 bool done_zero;
 
-                hash_table = ((uint8_t *)STARH(inverse_table)
+                hash_table = ((uint8_t *)*inverse_table
                               + itab_base_size(resolution));
                 i = itable_hash(rgb, resolution);
 
@@ -434,7 +434,7 @@ int Executor::average_color(GDHandle gd,
     {
         const rgb_spec_t *rgb_spec;
 
-        rgb_spec = pixmap_rgb_spec(STARH(gd_pmap));
+        rgb_spec = pixmap_rgb_spec(*gd_pmap);
         c1_index = (*rgb_spec->rgbcolor_to_pixel)(rgb_spec, c1, true);
         c2_index = (*rgb_spec->rgbcolor_to_pixel)(rgb_spec, c2, true);
         in_between_index = (*rgb_spec->rgbcolor_to_pixel)(rgb_spec, &in_between,
@@ -571,7 +571,7 @@ add_hash_table(CTabHandle color_table, ITabHandle inverse_table,
     uint8_t *hash_tablep;
     int i;
 
-    hash_tablep = ((uint8_t *)STARH(inverse_table)
+    hash_tablep = ((uint8_t *)*inverse_table
                    + itab_base_size(resolution));
     memset(hash_tablep, 0, ITABLE_HASH_SIZE);
     ctab_size = CTAB_SIZE(color_table);

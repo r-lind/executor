@@ -233,13 +233,13 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                 do_textcenter((TCenterRecHdl)hand);
                 break;
             case rotatebegin:
-                ip = (GUEST<INTEGER> *)STARH(hand);
+                ip = (GUEST<INTEGER> *)*hand;
                 flippage = ip[0];
                 angle = ip[1];
                 ROMlib_rotatebegin(flippage, angle);
                 break;
             case rotatecenter:
-                fp = (GUEST<Fixed> *)STARH(hand);
+                fp = (GUEST<Fixed> *)*hand;
                 yoffset = fp[0];
                 xoffset = fp[1];
                 ROMlib_rotatecenter(qdGlobals().thePort->pnLoc.v + (double)yoffset / (1L << 16),
@@ -283,7 +283,7 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
                 {
                     state = HGetState(hand);
                     HLock(hand);
-                    NeXTsendps(size, STARH(hand));
+                    NeXTsendps(size, *hand);
                     HSetState(hand, state);
                 }
                 break;
@@ -522,7 +522,7 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
             h = GetResource(TICK("PREC"), 103);
             if(h)
             {
-                p = STARH(h);
+                p = *h;
                 len = GetHandleSize(h);
             }
             else

@@ -104,7 +104,7 @@ void Executor::C_OpenRgn()
 static bool
 rgn_is_rect_p(const RgnHandle rgnh)
 {
-    const RgnPtr rgnp = STARH(rgnh);
+    const RgnPtr rgnp = *rgnh;
     const INTEGER *ip;
 
     ip = RGNP_DATA(rgnp);
@@ -160,7 +160,7 @@ void Executor::ROMlib_sizergn(RgnHandle rh, bool special_p) /* INTERNAL */
     }
     else
     {
-        rs = (char *)++ip - (char *)STARH(rh);
+        rs = (char *)++ip - (char *)*rh;
         RGN_SET_SIZE_AND_SPECIAL(rh, rs, false);
         if(rgn_is_rect_p(rh))
         {
@@ -193,7 +193,7 @@ void Executor::C_CopyRgn(RgnHandle s, RgnHandle d)
         return;
     size = RGN_SIZE(s);
     ReallocateHandle((Handle)d, size);
-    memcpy((Ptr)STARH(d), (Ptr)STARH(s), size);
+    memcpy((Ptr)*d, (Ptr)*s, size);
 }
 
 void Executor::C_CloseRgn(RgnHandle rh)
@@ -251,7 +251,7 @@ void Executor::C_OffsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv)
         INTEGER *ip, *ep;
         RgnPtr rp;
 
-        rp = STARH(rh);
+        rp = *rh;
         OffsetRect(&RGNP_BBOX(rp), dh, dv);
         for(ip = RGNP_DATA(rp),
         ep = (INTEGER *)((char *)ip + RGNP_SIZE(rp)) - 6;
@@ -953,7 +953,7 @@ static void binop(optype op, RgnHandle srcrgn1, RgnHandle srcrgn2,
     {
         INTEGER *ip, *op;
         ip = temppoints;
-        op = (INTEGER *)STARH(dstrgn) + 5;
+        op = (INTEGER *)*dstrgn + 5;
         while(ip != tptr)
             *op++ = *ip++;
         ROMlib_sizergn(dstrgn, false); /* could do this while copying... */
@@ -1216,7 +1216,7 @@ void Executor::C_InsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv)
         newsize = 4 * RGN_SIZE(rh);
         h = NewHandle(newsize);
         HLock(h);
-        p = (INTEGER *)STARH(h);
+        p = (INTEGER *)*h;
         rhtopandinseth(rh, p, dh); /* must be combined for efficiency */
         gui_assert(npairs * (int)sizeof(INTEGER) * 2 <= newsize);
         qsort(p, npairs, sizeof(INTEGER) * 2, comparex);
@@ -1256,8 +1256,8 @@ void Executor::C_SectRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     RGN_SLAM(s1);
     RGN_SLAM(s2);
 
-    rp1 = STARH(s1);
-    rp2 = STARH(s2);
+    rp1 = *s1;
+    rp2 = *s2;
 
     if(RGNP_SMALL_P(rp1))
     {
@@ -1353,7 +1353,7 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
 #if 0
 	BlockMoveData(*(Ptr *) s2, (Ptr) temp, RGN_SMALL_SIZE);
 #else
-        memcpy((Ptr)temp, STARH(s2), RGN_SMALL_SIZE);
+        memcpy((Ptr)temp, *s2, RGN_SMALL_SIZE);
 #endif
         op = (INTEGER *)((char *)temp + RGN_SMALL_SIZE);
         *op++ = HxX(s2, rgnBBox.top).raw();
@@ -1460,7 +1460,7 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
               rgnBBox.left, left,
               rgnBBox.bottom, bottom,
               rgnBBox.right, right,
-              rgnSize, (char *)op - (char *)STARH(dest));
+              rgnSize, (char *)op - (char *)*dest);
     if(rgn_is_rect_p(dest))
         RGN_SET_SMALL(dest);
     if(finalrestingplace)
@@ -1492,7 +1492,7 @@ BOOLEAN Executor::C_EqualRgn(RgnHandle r1, RgnHandle r2)
     /* Since the first field of the region is the size, this
    * will return false if the sizes differ, too.
    */
-    return !memcmp(STARH(r1), STARH(r2), RGN_SIZE(r1));
+    return !memcmp(*r1, *r2, RGN_SIZE(r1));
 }
 
 BOOLEAN Executor::C_EmptyRgn(RgnHandle rh)
@@ -1540,7 +1540,7 @@ void Executor::ROMlib_printrgn(RgnHandle h)
             printf(" 32767\n");
         }
         printf("32767\n");
-        newsize = ((char *)ip - (char *)STARH(h));
+        newsize = ((char *)ip - (char *)*h);
         if(newsize != size)
             printf("WARNING: computed size = %d\n", newsize);
     }

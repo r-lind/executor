@@ -494,7 +494,7 @@ void draw_title(GrafPtr w,
             HLockGuard guard(th);
             PORT_TX_MODE_X(qdGlobals().thePort) = srcCopy;
             MoveTo(title_start + 6, top - 5);
-            DrawString(STARH(th));
+            DrawString(*th);
         }
 
         if(saveclip)
@@ -896,7 +896,7 @@ void calc_doc(GrafPtr w)
     HxX(rh, rgnBBox.right) = right + 2;
     HxX(rh, rgnBBox.bottom) = bottom + 2;
     HxX(rh, rgnSize) = 44;
-    auto ip = (GUEST<INTEGER> *)STARH(rh) + 5;
+    auto ip = (GUEST<INTEGER> *)*rh + 5;
 
     *ip++ = top - 19;
     *ip++ = left - 1;
@@ -942,7 +942,7 @@ void calc_alt_dialog_box(GrafPtr w)
     HxX(rh, rgnBBox.right) = right + 3;
     HxX(rh, rgnBBox.bottom) = bottom + 3;
     HxX(rh, rgnSize) = 44;
-    auto ip = (GUEST<INTEGER> *)STARH(rh) + 5;
+    auto ip = (GUEST<INTEGER> *)*rh + 5;
 
     *ip++ = top - 1;
     *ip++ = left - 1;

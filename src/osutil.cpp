@@ -55,7 +55,7 @@ OSErr Executor::HandToHand(GUEST<Handle> *hp)
     if((err = MemError()))
         /*-->*/ return (err);
 
-    BlockMove(STARH(*hp), STARH(nh), s);
+    BlockMove(**hp, *nh, s);
     *hp = nh;
     return noErr;
 }
@@ -73,7 +73,7 @@ OSErr Executor::PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s)
     nh = NewHandle(s);
     if((err = MemError()))
         return (err);
-    BlockMove(p, STARH(nh), s);
+    BlockMove(p, *nh, s);
     if((err = MemError()))
         return (err);
     *h = nh;
@@ -90,7 +90,7 @@ OSErr Executor::PtrToXHand(Ptr p, Handle h, LONGINT s)
     SetHandleSize(h, s);
     if((err = MemError()))
         return (err);
-    BlockMove(p, STARH(h), s);
+    BlockMove(p, *h, s);
     if((err = MemError()))
         return (err);
     return (noErr);
@@ -104,7 +104,7 @@ OSErr Executor::HandAndHand(Handle h1, Handle h2)
     SetHandleSize(h2, s1 + s2);
     if((err = MemError()))
         return (err);
-    BlockMove(STARH(h1), STARH(h2) + s2, s1);
+    BlockMove(*h1, *h2 + s2, s1);
     if((err = MemError()))
         return (err);
     return (noErr);
@@ -118,7 +118,7 @@ OSErr Executor::PtrAndHand(Ptr p, Handle h, LONGINT s1)
     SetHandleSize(h, s1 + s2);
     if((err = MemError()))
         return (err);
-    BlockMove(p, STARH(h) + s2, s1);
+    BlockMove(p, *h + s2, s1);
     if((err = MemError()))
         return (err);
     return (noErr);

@@ -102,7 +102,7 @@ void Executor::menu_delete_entries(int16_t menu_id)
 
     menu_c_info = LM(MenuCInfo);
     menu_c_info_size = GetHandleSize((Handle)menu_c_info);
-    entries = STARH(menu_c_info);
+    entries = *menu_c_info;
     for(i = 0; MCENTRY_ID_X(&entries[i]) != -99;)
     {
         if(MCENTRY_ID(&entries[i]) == menu_id)
@@ -113,7 +113,7 @@ void Executor::menu_delete_entries(int16_t menu_id)
             SetHandleSize((Handle)menu_c_info,
                           (menu_c_info_size -= sizeof *entries));
             /* reassign `entries', because the handle could have moved */
-            entries = STARH(menu_c_info);
+            entries = *menu_c_info;
         }
         else
             i++;
@@ -129,7 +129,7 @@ void Executor::C_DeleteMCEntries(INTEGER menu_id, INTEGER menu_item)
 
     menu_c_info = LM(MenuCInfo);
     menu_c_info_size = GetHandleSize((Handle)menu_c_info);
-    entries = STARH(menu_c_info);
+    entries = *menu_c_info;
     for(i = 0; MCENTRY_ID_X(&entries[i]) != -99; i++)
     {
         if(MCENTRY_ID(&entries[i]) == menu_id
@@ -155,7 +155,7 @@ MCTableHandle Executor::C_GetMCInfo()
     menu_c_info_size = GetHandleSize((Handle)menu_c_info);
     retval = (MCTableHandle)NewHandle(menu_c_info_size);
     if(retval)
-        BlockMoveData((Ptr)STARH(menu_c_info), (Ptr)STARH(retval),
+        BlockMoveData((Ptr)*menu_c_info, (Ptr)*retval,
                       menu_c_info_size);
 
     return retval;
@@ -171,7 +171,7 @@ void Executor::C_SetMCInfo(MCTableHandle menu_ctab)
 
     size = GetHandleSize((Handle)menu_ctab);
     t = NewHandle(size);
-    BlockMoveData((Ptr)STARH(menu_ctab), (Ptr)STARH(t), size);
+    BlockMoveData((Ptr)*menu_ctab, (Ptr)*t, size);
     LM(MenuCInfo) = (MCTableHandle)t;
 }
 
@@ -186,7 +186,7 @@ MCEntryPtr Executor::C_GetMCEntry(INTEGER menu_id, INTEGER menu_item)
     MCEntryPtr t;
 
     menu_c_info = LM(MenuCInfo);
-    for(t = STARH(menu_c_info); MCENTRY_ID_X(t) != -99; t++)
+    for(t = *menu_c_info; MCENTRY_ID_X(t) != -99; t++)
     {
         if(MCENTRY_ID(t) == menu_id
            && MCENTRY_ITEM(t) == menu_item)
@@ -228,7 +228,7 @@ void Executor::C_SetMCEntries(INTEGER n_entries, MCTablePtr entries)
             SetHandleSize((Handle)menu_c_info,
                           (menu_c_info_size += sizeof(MCEntry)));
 
-            dst_entries = STARH(menu_c_info);
+            dst_entries = *menu_c_info;
             dst_entries[menu_c_info_n_entries]
                 = dst_entries[menu_c_info_n_entries - 1];
             dst_entries[menu_c_info_n_entries - 1]

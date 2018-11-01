@@ -74,6 +74,6 @@ Executor::stringhandle_from_c_string(const char *c_stringp)
 
     len = strlen(c_stringp) + 1;
     retval = (StringHandle)NewHandle(len);
-    str255_from_c_string(STARH(retval), c_stringp);
+    str255_from_c_string(*retval, c_stringp);
     return retval;
 }

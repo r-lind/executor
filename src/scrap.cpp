@@ -59,7 +59,7 @@ LONGINT Executor::C_UnloadScrap()
         if(retval != noErr)
             /*-->*/ return (retval);
         HLock(LM(ScrapHandle));
-        retval = FSWriteAll(f, guestref(l), STARH(LM(ScrapHandle)));
+        retval = FSWriteAll(f, guestref(l), *LM(ScrapHandle));
         HUnlock(LM(ScrapHandle));
         if(retval != noErr)
             /*-->*/ return (retval);
@@ -88,7 +88,7 @@ LONGINT Executor::C_LoadScrap()
         if(LM(MemErr) != noErr)
             /*-->*/ return LM(MemErr);
         HLock(LM(ScrapHandle));
-        retval = FSReadAll(f, guestref(l), STARH(LM(ScrapHandle)));
+        retval = FSReadAll(f, guestref(l), *LM(ScrapHandle));
         HUnlock(LM(ScrapHandle));
         if(retval != noErr)
             return (retval);
@@ -176,7 +176,7 @@ LONGINT Executor::C_PutScrap(LONGINT len, ResType rest, Ptr p)
         if(LM(MemErr) != noErr)
             /*-->*/ return LM(MemErr);
         /* alignment stuff */
-        lp = (GUEST<LONGINT> *)((char *)STARH(LM(ScrapHandle)) + LM(ScrapSize));
+        lp = (GUEST<LONGINT> *)((char *)*LM(ScrapHandle) + LM(ScrapSize));
         *lp++ = rest;
         *lp++ = len;
         len = (len + 1) & -2L;
@@ -230,9 +230,9 @@ get_scrap_helper(void *vh, void *lp, int len, bool convert_text)
     else
     {
         if(convert_text)
-            memcpy_but_delete_char(STARH(h), lp, len, '\n');
+            memcpy_but_delete_char(*h, lp, len, '\n');
         else
-            memcpy(STARH(h), lp, len);
+            memcpy(*h, lp, len);
         retval = new_len;
     }
     return retval;
@@ -305,7 +305,7 @@ LONGINT Executor::C_GetScrap(Handle h, ResType rest, GUEST<LONGINT> *off)
             /*-->*/ RETURN(LM(MemErr));
         HLock(h);
         ltoread = s;
-        FSReadAll(f, guestref(ltoread), STARH(h));
+        FSReadAll(f, guestref(ltoread), *h);
         HUnlock(h);
         FSClose(f);
     }
@@ -593,7 +593,7 @@ pict_from_gworld(GWorldPtr gp, int *lenp)
         {
             ClipRect(&pict_frame);
             HLock((Handle)pm);
-            CopyBits((BitMap *)STARH(pm), PORT_BITS_FOR_COPY(qdGlobals().thePort),
+            CopyBits((BitMap *)*pm, PORT_BITS_FOR_COPY(qdGlobals().thePort),
                      &pict_frame, &pict_frame, srcCopy, nullptr);
             HUnlock((Handle)pm);
             ClosePicture();
@@ -624,7 +624,7 @@ get_scrap_helper_dib(void *vh, void *lp)
         retval = -1;
     else
     {
-        memcpy(STARH(h), STARH(pich), len);
+        memcpy(*h, *pich, len);
         retval = len;
     }
     DisposeHandle((Handle)pich);
@@ -648,7 +648,7 @@ pict_from_lp(const void *lp)
         {
             char *p;
 
-            p = (char *)STARH(retval);
+            p = (char *)*retval;
             if(p)
                 memcpy(p, (char *)lp + sizeof(int), len);
             else

@@ -90,7 +90,7 @@ typedef struct menu_elt
 #define ML_MENU(ml, index) \
     (((menu_elt *)&HxX(ml, data))[index])
 #define ML_HMENU(ml, index)                          \
-    (((menu_elt *)((char *)STARH(ml)                 \
+    (((menu_elt *)((char *)*(ml)                 \
                    + ML_LAST_MENU_OFFSET(ml)         \
                    + sizeof(menu_list)               \
                    + sizeof(INTEGER) /* lastHMenu */ \
@@ -100,11 +100,11 @@ typedef struct menu_elt
 #define ML_LAST_RIGHT_X(ml) (HxX(ml, last_right))
 #define ML_RES_ID_X(ml) (HxX(ml, mb_res_id))
 #define ML_LAST_HMENU_OFFSET_X(ml)          \
-    (*(INTEGER *)((char *)STARH(ml)         \
+    (*(INTEGER *)((char *)*(ml)         \
                   + ML_LAST_MENU_OFFSET(ml) \
                   + sizeof(menu_elt)))
 #define ML_MENU_TITLE_SAVE_X(ml)                                   \
-    ((*(GUEST<PixMapHandle> *)((char *)STARH(ml)                   \
+    ((*(GUEST<PixMapHandle> *)((char *)*(ml)                   \
                                + ML_LAST_MENU_OFFSET(ml)           \
                                + sizeof(menu_elt)                  \
                                + sizeof(INTEGER) /* lastHMenu */)) \

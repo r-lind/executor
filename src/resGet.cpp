@@ -251,7 +251,7 @@ static void ROMlib_init_xdefs(void)
         warning_unexpected("Maelstrom hack didn't work");
 #endif
     HLock(newhandle);
-    ROMlib_defs = (GUEST<LONGINT> *)STARH(newhandle);
+    ROMlib_defs = (GUEST<LONGINT> *)*newhandle;
     ROMlib_defs[0] = guest_cast<LONGINT>(&cdef0);
     ROMlib_defs[1] = guest_cast<LONGINT>(&cdef16);
     ROMlib_defs[2] = guest_cast<LONGINT>(&wdef0);
@@ -362,7 +362,7 @@ Handle Executor::C_GetResource(ResType typ, INTEGER id)
 #if defined(ULTIMA_III_HACK)
     if(ROMlib_ultima_iii_hack && typ == TICK("PREF") && retval)
     {
-        *((char *)STARH(retval) + 1) = 0; /* turn off Music prefs */
+        *((char *)*retval + 1) = 0; /* turn off Music prefs */
     }
 #endif
     return retval;
@@ -405,7 +405,7 @@ static Handle getnamedmapresource(resmaphand map, ResType typ, StringPtr nam)
     {
         WALKRR(map, tr, j, rr)
         if(rr->noff != -1 && EqualString((StringPtr)(
-                                                 (char *)STARH(map) + Hx(map, namoff) + rr->noff),
+                                                 (char *)*map + Hx(map, namoff) + rr->noff),
                                              (StringPtr)nam, 0, 1))
             /*-->*/ return ROMlib_mgetres(map, rr);
         EWALKRR(rr)
@@ -483,7 +483,7 @@ void Executor::C_LoadResource(Handle volatile res)
     else
     {
         savemap = LM(CurMap);
-        LM(CurMap) = ((resmap *)STARH(LM(TopMapHndl)))->resfn;
+        LM(CurMap) = ((resmap *)*LM(TopMapHndl))->resfn;
         ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
         LM(CurMap) = savemap;
         if(LM(ResErr) == noErr)

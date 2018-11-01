@@ -165,17 +165,17 @@ void Executor::C_DisposeControl(ControlHandle c) /* IMI-321 */
     }
 
     for(t = (GUEST<ControlHandle> *)&(((WindowPeek)(HxP(c, contrlOwner)))->controlList);
-        (*t) && STARH(t) != c; t = (GUEST<ControlHandle> *)&((STARH(STARH(t)))->nextControl))
+        (*t) && *t != c; t = (GUEST<ControlHandle> *)&((**t)->nextControl))
         ;
     if((*t))
         (*t) = HxX(c, nextControl);
-    for(auxhp = (GUEST<AuxCtlHandle> *)&LM(AuxCtlHead); (*auxhp) && (STARH(STARH(auxhp)))->acOwner != c;
-        auxhp = (GUEST<AuxCtlHandle> *)&(STARH(STARH(auxhp)))->acNext)
+    for(auxhp = (GUEST<AuxCtlHandle> *)&LM(AuxCtlHead); (*auxhp) && (**auxhp)->acOwner != c;
+        auxhp = (GUEST<AuxCtlHandle> *)&(**auxhp)->acNext)
         ;
     if((*auxhp))
     {
-        saveauxh = STARH(auxhp);
-        (*auxhp) = STARH(STARH(auxhp))->acNext;
+        saveauxh = *auxhp;
+        (*auxhp) = (**auxhp)->acNext;
         DisposeHandle((Handle)saveauxh);
     }
 

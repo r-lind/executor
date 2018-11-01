@@ -148,7 +148,7 @@ static INTEGER movealert(INTEGER id)
     h = GetResource(TICK("ALRT"), id);
     if(!*h)
         LoadResource(h);
-    rp = (Rect *)STARH(h);
+    rp = (Rect *)*h;
     dh = rp->right - rp->left;
     dv = rp->bottom - rp->top;
     rp->left = 150;
@@ -170,7 +170,7 @@ static void drawminiicon(INTEGER icon)
     if(!h)
         /*-->*/ return; /* badness */
     HLock(h);
-    bm.baseAddr = (Ptr)STARH(h) + icon * 16 * 16 / 8;
+    bm.baseAddr = (Ptr)*h + icon * 16 * 16 / 8;
     bm.rowBytes = 2;
     bm.bounds.left = bm.bounds.top = 0;
     bm.bounds.right = bm.bounds.bottom = 16;
@@ -320,7 +320,7 @@ static void flscroll(fltype *f, INTEGER from, INTEGER to)
 }
 
 #define CTLFL(sh) \
-    (guest_cast<fltype *>(((WindowPeek)STARH((sh))->contrlOwner)->refCon))
+    (guest_cast<fltype *>(((WindowPeek)(*(sh))->contrlOwner)->refCon))
 
 /*
  * this hack is necessary because Excel 4 can bring up a dialog on top of
@@ -711,7 +711,7 @@ static void flfill(fltype *f)
     INTEGER errcount;
     INTEGER dirindex;
 
-    SetCursor(STARH((watchh = GetCursor(watchCursor))));
+    SetCursor(*(watchh = GetCursor(watchCursor)));
 
     pb.hFileInfo.ioNamePtr = &s[0];
     pb.hFileInfo.ioVRefNum = -LM(SFSaveDisk);
@@ -1671,13 +1671,13 @@ static void transformsfpdialog(DialogPtr dp, Point *offset, Rect *scrollrect,
     {
         extrasizeneeded = 110;
         SetRect(scrollrect, 16, 24, 231, 106);
-        tep = STARH(((DialogPeek)dp)->textH);
+        tep = *(((DialogPeek)dp)->textH);
         tep->destRect.top = tep->destRect.top + (extrasizeneeded);
         tep->destRect.bottom = tep->destRect.bottom + (extrasizeneeded);
         tep->viewRect.top = tep->viewRect.top + (extrasizeneeded);
         tep->viewRect.bottom = tep->viewRect.bottom + (extrasizeneeded);
     }
-    numitems = *(GUEST<INTEGER> *)STARH((((DialogPeek)dp)->items)) + 1;
+    numitems = *(GUEST<INTEGER> *)*((((DialogPeek)dp)->items)) + 1;
     for(j = 1; j <= numitems; j++)
     {
         GetDialogItem(dp, j, &swapped_itype, &tmpH, &r);

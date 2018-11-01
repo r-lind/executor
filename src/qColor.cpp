@@ -185,7 +185,7 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
                     = sizeof(ColorTable) + (sizeof(ColorSpec) * CTAB_SIZE(clut));
                 ctab = (CTabHandle)NewHandle(ctab_handle_size);
 
-                BlockMoveData((Ptr)STARH(clut), (Ptr)STARH(ctab),
+                BlockMoveData((Ptr)*clut, (Ptr)*ctab,
                               ctab_handle_size);
 
                 /* #### ctab_id or a new seed? */

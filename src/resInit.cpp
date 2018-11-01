@@ -34,7 +34,7 @@ extract_vers_num(Handle h)
     seen_left = false;
     seen_right = false;
     done = false;
-    for(p = (char *)STARH(h), ep = p + GetHandleSize(h);
+    for(p = (char *)*h, ep = p + GetHandleSize(h);
         !done && p < ep; ++p)
     {
         switch(*p)

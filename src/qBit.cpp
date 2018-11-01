@@ -40,7 +40,7 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
            || (IS_PIXMAP_PTR_P(dst_bitmap)
                && CGrafPort_p(qdGlobals().thePort)
                && !memcmp(dst_bitmap,
-                          STARH(CPORT_PIXMAP(theCPort)),
+                          *CPORT_PIXMAP(theCPort),
                           sizeof(BitMap))));
     if(dst_is_theport_p)
     {

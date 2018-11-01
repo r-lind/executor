@@ -86,7 +86,7 @@ void Executor::C_InitWindows()
             USE_DESKCPAT_VAR &= ~USE_DESKCPAT_BIT;
         InitPalettes();
         InitMenus();
-        PATASSIGN(LM(DeskPattern), STARH(ph));
+        PATASSIGN(LM(DeskPattern), *ph);
         LM(GrayRgn) = NewRgn();
 
         OpenRgn();
@@ -258,7 +258,7 @@ void Executor::C_SetDeskCPat(PixPatHandle ph)
     else
     {
         bw_ph = GetPattern(deskPatID);
-        PATASSIGN(LM(DeskPattern), STARH(bw_ph));
+        PATASSIGN(LM(DeskPattern), *bw_ph);
         USE_DESKCPAT_VAR &= ~USE_DESKCPAT_BIT;
     }
     PaintOne((WindowPeek)0, LM(GrayRgn));
@@ -378,7 +378,7 @@ ROMlib_new_window_common(WindowPeek w,
     OffsetRect(&PORT_RECT(w), -bounds->left, -bounds->top);
     {
         HLockGuard guard(WINDOW_TITLE(w));
-        WINDOW_TITLE_WIDTH_X(w) = StringWidth(STARH(WINDOW_TITLE(w)));
+        WINDOW_TITLE_WIDTH_X(w) = StringWidth(*WINDOW_TITLE(w));
     }
 
     TextFont(applFont);
@@ -601,13 +601,13 @@ void Executor::C_CloseWindow(WindowPtr w)
     DisposeRgn(WINDOW_UPDATE_REGION(w));
     DisposeHandle((Handle)WINDOW_TITLE(w));
     for(auxhp = (GUEST<AuxWinHandle> *)&LM(AuxWinHead);
-        *auxhp && STARH(STARH(auxhp))->awOwner != w;
-        auxhp = (GUEST<AuxWinHandle> *)&STARH(STARH(auxhp))->awNext)
+        *auxhp && (**auxhp)->awOwner != w;
+        auxhp = (GUEST<AuxWinHandle> *)&(**auxhp)->awNext)
         ;
     if(*auxhp)
     {
-        saveauxh = STARH(auxhp);
-        *auxhp = STARH(STARH(auxhp))->awNext;
+        saveauxh = *auxhp;
+        *auxhp = (**auxhp)->awNext;
         DisposeHandle((Handle)saveauxh);
     }
 

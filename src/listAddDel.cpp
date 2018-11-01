@@ -210,7 +210,7 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
         nbefore = (coln - Hx(list, dataBounds.left));
         nafter = ncols - nbefore;
         ip = op = (GUEST<uint16_t> *)HxX(list, cellArray);
-        dataip = dataop = (Ptr)STARH(HxP(list, cells));
+        dataip = dataop = (Ptr)*HxP(list, cells);
         delta = 0;
         /* SPEEDUP:  partial loop unrolling ... combine things and don't
 		     bother adding delta when we know that it's zero */
@@ -357,8 +357,8 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
         *op = *ip - delta; /* sentinel */
 
         ntomove = off3 - off2;
-        BlockMoveData((Ptr)STARH(HxP(list, cells)) + off2,
-                      (Ptr)STARH(HxP(list, cells)) + off1, ntomove);
+        BlockMoveData((Ptr)*HxP(list, cells) + off2,
+                      (Ptr)*HxP(list, cells) + off1, ntomove);
 
         SetHandleSize((Handle)list,
                       GetHandleSize((Handle)list) - noffsets * sizeof(INTEGER));

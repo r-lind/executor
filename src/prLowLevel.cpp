@@ -352,7 +352,7 @@ update_ROMlib_printer_vars(TPPrDlg dp)
             if(ROMlib_spool_file)
                 free(ROMlib_spool_file);
             ROMlib_spool_file = (char *)malloc(hs + 1);
-            memcpy(ROMlib_spool_file, STARH(h), hs);
+            memcpy(ROMlib_spool_file, *h, hs);
             ROMlib_spool_file[hs] = 0;
         }
     }
@@ -620,7 +620,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
         h = GetDIText(dlg, LAYOUT_FILENAME_NO);
         len = GetHandleSize(h);
         filename = (char *)alloca(len + 1);
-        memcpy(filename, STARH(h), len);
+        memcpy(filename, *h, len);
         filename[len] = 0;
 
         if(stat(filename, &sbuf) == 0)

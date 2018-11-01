@@ -64,7 +64,7 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
         HLockGuard guard(evt_data);
         err = AcceptHighLevelEvent(&dummy_target_id,
                                    &dummy_refcon,
-                                   STARH(evt_data), &evt_data_size);
+                                   *evt_data, &evt_data_size);
     }
 
     if(err != noErr)
@@ -224,7 +224,7 @@ OSErr Executor::C_AESend(AppleEvent *evt, AppleEvent *reply,
                     err = PostHighLevelEvent(&evt_rec,
                                              /* #### i dunno */
                                              nullptr, -1,
-                                             STARH(desc_data), desc_data_size,
+                                             *desc_data, desc_data_size,
                                              -1);
                 }
 
@@ -427,7 +427,7 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
             AppParametersPtr p;
 
             h = NewHandle(sizeof *p + n * sizeof(FSSpec));
-            if(!h || !(p = (decltype(p))STARH(h)))
+            if(!h || !(p = (decltype(p))*h))
                 retval = MemError();
             else
             {
@@ -521,7 +521,7 @@ OSErr Executor::C_AECoerceDesc(AEDesc *desc, DescType result_type,
         {
             HLockGuard guard(desc_data);
             CoercePtrProcPtr ptr_coercion_hdlr((void *)coercion_hdlr);
-            err = ptr_coercion_hdlr(desc_type, STARH(desc_data),
+            err = ptr_coercion_hdlr(desc_type, *desc_data,
                                     GetHandleSize(desc_data),
                                     result_type, refcon, desc_out);
         }

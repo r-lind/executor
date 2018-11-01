@@ -47,24 +47,24 @@
 
 #define RGNP_SIZE(rgnp) (RGNP_SIZE_X(rgnp))
 
-#define RGN_SIZE_X(rgn) (RGNP_SIZE_X(STARH(rgn)))
-#define RGN_SPECIAL_P(rgn) (RGNP_SPECIAL_P(STARH(rgn)))
-#define RGN_SMALL_P(rgn) (RGNP_SMALL_P(STARH(rgn)))
+#define RGN_SIZE_X(rgn) (RGNP_SIZE_X(*(rgn)))
+#define RGN_SPECIAL_P(rgn) (RGNP_SPECIAL_P(*(rgn)))
+#define RGN_SMALL_P(rgn) (RGNP_SMALL_P(*(rgn)))
 
 #define RGN_SET_SMALL(rgn) \
-    RGNP_SET_SMALL(STARH(rgn))
+    RGNP_SET_SMALL(*(rgn))
 
 #define RGN_SET_SIZE_AND_SPECIAL(rgn, size, special_p) \
-    (RGNP_SET_SIZE_AND_SPECIAL(STARH(rgn), size, special_p))
+    (RGNP_SET_SIZE_AND_SPECIAL(*rgn, size, special_p))
 #define RGN_SET_SIZE(rgn, size) \
-    RGNP_SET_SIZE(STARH(rgn), size)
+    RGNP_SET_SIZE(*rgn, size)
 #define RGN_SET_SPECIAL(rgn, special_p) \
-    RGNP_SET_SPECIAL(STARH(rgn), special_p)
+    RGNP_SET_SPECIAL(*rgn, special_p)
 
-#define RGN_BBOX(rgn) (RGNP_BBOX(STARH(rgn)))
+#define RGN_BBOX(rgn) (RGNP_BBOX(*(rgn)))
 
 #define RGN_SIZE(rgn) (RGN_SIZE_X(rgn))
 
-#define RGN_DATA(rgn) (RGNP_DATA(STARH(rgn)))
+#define RGN_DATA(rgn) (RGNP_DATA(*(rgn)))
 
 #endif /* !_REGION_H_ */

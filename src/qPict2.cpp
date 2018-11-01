@@ -148,7 +148,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
 
     pixmap_color_table = PIXMAP_TABLE(pixmap);
 
-    rgb_spec = pixmap_rgb_spec(STARH(pixmap));
+    rgb_spec = pixmap_rgb_spec(*pixmap);
 
     width = RECT_WIDTH(&PIXMAP_BOUNDS(pixmap));
     height = RECT_HEIGHT(&PIXMAP_BOUNDS(pixmap));
