@@ -40,18 +40,6 @@ void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 #endif
 
-namespace Executor
-{
-int vdriver_row_bytes;
-int vdriver_width = 1024;
-int vdriver_height = 768;
-int vdriver_bpp = 8;
-int vdriver_max_bpp;
-}
-
-#undef white
-
-
 using namespace Executor;
 
 namespace
