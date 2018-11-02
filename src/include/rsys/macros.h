@@ -1,17 +1,6 @@
 #if !defined(_MACROS_H_)
 #define _MACROS_H_
 
-#if 0 /* This should be defined by target-os-config.h */
-      /* if we define it here, then we get warning messages when we */
-      /* include target-os-config.h after this file has been included */
-      /* so it's better to just get it from there in the first place */
-
-#if !defined(offsetof)
-#define offsetof(t, f) ((int)&((t *)0)->f)
-#endif
-
-#endif
-
 #if !defined(NELEM)
 #define NELEM(s) (sizeof(s) / sizeof(s)[0])
 #endif
@@ -35,7 +24,7 @@
 #endif
 
 #define str255assign(d, s) \
-    (BlockMove((Ptr)(s), (Ptr)(d), (Size)((unsigned char)(s)[0]) + 1))
+    (memcpy(d, s, uint8_t((s)[0]) + 1))
 
 #define PATASSIGN(dest, src)                                 \
     (((uint32_t *)(dest))[0] = ((const uint32_t *)(src))[0], \
