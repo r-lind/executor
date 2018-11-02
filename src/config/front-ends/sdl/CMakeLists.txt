@@ -38,6 +38,8 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         sdlX.h
         syswm_map.h
         syswm_vars.h
+        paramline.h
+        paramline.c
         ${OS_SPECIFIC}
         )
 
