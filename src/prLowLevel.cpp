@@ -136,8 +136,8 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
             ch = GetDControl(dp, PRINT_ALL_RADIO_NO);
             if(GetControlValue(ch))
             {
-                HxX(hPrint, prJob.iFstPage) = 1;
-                HxX(hPrint, prJob.iLstPage) = 9999;
+                (*hPrint)->prJob.iFstPage = 1;
+                (*hPrint)->prJob.iLstPage = 9999;
             }
             else
             {
@@ -145,13 +145,13 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
 
                 first = GetDILong(dp, PRINT_FIRST_BOX_NO, 1);
                 last = GetDILong(dp, PRINT_LAST_BOX_NO, 9999);
-                HxX(hPrint, prJob.iFstPage) = first;
-                HxX(hPrint, prJob.iLstPage) = last;
+                (*hPrint)->prJob.iFstPage = first;
+                (*hPrint)->prJob.iLstPage = last;
             }
             {
 
                 num_copies = GetDILong(dp, PRINT_COPIES_BOX_NO, 1);
-                HxX(hPrint, prJob.iCopies) = num_copies;
+                (*hPrint)->prJob.iCopies = num_copies;
             }
 #if defined(CYGWIN32)
             // FIXME: #warning TODO use better x and y coords
@@ -167,7 +167,7 @@ void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
                     orient = WIN_PRINT_LANDSCAPE;
                 get_info(&ROMlib_wp, ROMlib_paper_x, ROMlib_paper_y, orient,
                          num_copies, nullptr);
-                HxX(hPrint, prJob.iCopies) = 1; /* Win32 driver handles
+                (*hPrint)->prJob.iCopies = 1; /* Win32 driver handles
 						     the multiple copies
 						     for us */
             }
@@ -686,7 +686,7 @@ adjust_num_copies(TPPrDlg dlg, THPrint hPrint)
 {
     Str255 text;
 
-    NumToString(Hx(hPrint, prJob.iCopies), text);
+    NumToString((*hPrint)->prJob.iCopies, text);
     SetDialogItemText(GetDIText((DialogPtr)dlg, PRINT_COPIES_BOX_NO), text);
     SelectDialogItemText((DialogPtr)dlg, PRINT_COPIES_BOX_NO, 0, 100);
 #if defined(CYGWIN32)

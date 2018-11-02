@@ -38,7 +38,7 @@ void Executor::C_InitProcMenu(INTEGER mbid)
      * the bits are not masked off.
      */
     LM(MBDFHndl) = GetResource(TICK("MBDF"), mbid);
-    HxX(MENULIST, mufu) = mbid;
+    (*MENULIST)->mufu = mbid;
     MBDFCALL(mbInit, 0, 0L);
 }
 
@@ -95,7 +95,7 @@ LONGINT Executor::C_PopUpMenuSelect(MenuHandle mh, INTEGER top, INTEGER left,
     /* if we blow off empty menus, then ClarisImpact custom
        pulldown/popup menus don't come up */
     if (! count)
-      return (int32_t) Hx (mh, menuID) << 16;
+      return (int32_t) (*mh)->menuID << 16;
 #endif
 
     /* if item is zero, it means no menu item was previously selected,
@@ -113,7 +113,7 @@ LONGINT Executor::C_PopUpMenuSelect(MenuHandle mh, INTEGER top, INTEGER left,
     MENUCALL(mPopUpRect, mh, &saver, p, &tempi);
     ROMlib_rootless_openmenu(saver);
     LM(TopMenuItem) = tempi;
-    where = ROMlib_mentosix(Hx(mh, menuID));
+    where = ROMlib_mentosix((*mh)->menuID);
 
     MBDFCALL(mbSave, where, ptr_to_longint(&saver));
 

@@ -23,7 +23,7 @@ void Executor::C_SetControlTitle(ControlHandle c, StringPtr t) /* IMI-321 */
         rh = NewRgn();
         CTLCALL(c, calcCntlRgn, ptr_to_longint(rh));
         EraseRgn(rh);
-        str255assign(HxX(c, contrlTitle), t);
+        str255assign((*c)->contrlTitle, t);
         CTLCALL(c, drawCntl, ENTIRECONTROL);
         DisposeRgn(rh);
     }
@@ -32,7 +32,7 @@ void Executor::C_SetControlTitle(ControlHandle c, StringPtr t) /* IMI-321 */
 void Executor::C_GetControlTitle(ControlHandle c, StringPtr t) /* IMI-321 */
 {
     if(c)
-        str255assign(t, HxX(c, contrlTitle));
+        str255assign(t, (*c)->contrlTitle);
 }
 
 void Executor::C_HideControl(ControlHandle c) /* IMI-322 */
@@ -94,7 +94,7 @@ void Executor::C_ShowControl(ControlHandle c) /* IMI-322 */
             /* #if SHOWCONTROL_ERASES
 		  rh = NewRgn(); */
 
-            HxX(c, contrlVis) = 255;
+            (*c)->contrlVis = 255;
 
             /* #if SHOWCONTROL_ERASES
 		  CTLCALL(c, calcCntlRgn, ptr_to_longint(rh));
@@ -118,7 +118,7 @@ void Executor::C_HiliteControl(ControlHandle c, INTEGER state) /* IMI-322 */
             if(oldh != state)
             {
                 CtlCallGuard guard(c);
-                HxX(c, contrlHilite) = state;
+                (*c)->contrlHilite = state;
                 if(oldh == INACTIVE || state == INACTIVE)
                     CTLCALL(c, drawCntl, 0);
                 else

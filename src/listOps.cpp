@@ -19,10 +19,10 @@ GUEST<INTEGER> *Executor::ROMlib_getoffp(Cell cell, /* INTERNAL */
     INTEGER ncols;
     GUEST<INTEGER> *retval;
 
-    if(list && PtInRect(cell, rp = &HxX(list, dataBounds)))
+    if(list && PtInRect(cell, rp = &(*list)->dataBounds))
     {
         ncols = rp->right - rp->left;
-        retval = HxX(list, cellArray) + ncols * (cell.v - rp->top) + (cell.h - rp->left);
+        retval = (*list)->cellArray + ncols * (cell.v - rp->top) + (cell.h - rp->left);
     }
     else
         retval = 0;
@@ -43,8 +43,8 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
 
     if((dl > 0 || (addorrep == Rep && dl == 0)) && (ip = ROMlib_getoffp(cell, list)))
     {
-        temp.h = Hx(list, dataBounds.right) - 1;
-        temp.v = Hx(list, dataBounds.bottom) - 1;
+        temp.h = (*list)->dataBounds.right - 1;
+        temp.v = (*list)->dataBounds.bottom - 1;
         ep = ROMlib_getoffp(temp, list) + 1;
         ip_offset = (char *)ip - (char *)*list;
         ep_offset = (char *)ep - (char *)*list;
@@ -67,9 +67,9 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
             OSErr err;
             Size current_size, new_size;
 
-            current_size = GetHandleSize((Handle)HxP(list, cells));
+            current_size = GetHandleSize((Handle)(*list)->cells);
             new_size = current_size + delta;
-            SetHandleSize((Handle)HxP(list, cells), new_size);
+            SetHandleSize((Handle)(*list)->cells, new_size);
             err = MemError();
             if(err != noErr)
             {
@@ -78,7 +78,7 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
             }
         }
 
-        sp = (Ptr)*HxP(list, cells) + off1;
+        sp = (Ptr)*(*list)->cells + off1;
         BlockMoveData(sp, sp + delta, (Size)off2 - off1);
 
         if(delta < 0)
@@ -86,15 +86,15 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
             Size current_size, new_size;
             OSErr err;
 
-            current_size = GetHandleSize((Handle)HxP(list, cells));
+            current_size = GetHandleSize((Handle)(*list)->cells);
             new_size = current_size + delta;
-            SetHandleSize((Handle)HxP(list, cells), new_size);
+            SetHandleSize((Handle)(*list)->cells, new_size);
             err = MemError();
             if(err != noErr)
                 warning_unexpected("err = %d, delta = %d", err, delta);
         }
 
-        BlockMoveData(dp, (Ptr)*HxP(list, cells) + off0 + (addorrep == Add ? len : 0), (Size)dl);
+        BlockMoveData(dp, (Ptr)*(*list)->cells + off0 + (addorrep == Add ? len : 0), (Size)dl);
 
         ip = (GUEST<INTEGER> *)((char *)*list + ip_offset);
         ep = (GUEST<INTEGER> *)((char *)*list + ep_offset);
@@ -104,7 +104,7 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
             while(++ip <= ep)
                 *ip = *ip + (delta);
         }
-        if(Hx(list, listFlags) & DODRAW)
+        if((*list)->listFlags & DODRAW)
             C_LDraw(cell, list);
     }
 }
@@ -134,7 +134,7 @@ void Executor::C_LGetCell(Ptr dp, GUEST<INTEGER> *dlp, Cell cell,
         ntomove = off2 - off1;
         if(ntomove > *dlp)
             ntomove = *dlp;
-        BlockMoveData((Ptr)*HxP(list, cells) + off1, dp, (Size)ntomove);
+        BlockMoveData((Ptr)*(*list)->cells + off1, dp, (Size)ntomove);
         *dlp = ntomove;
     }
 }
@@ -177,7 +177,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
     {
         ControlHandle control;
 
-        if((control = HxP(list, hScroll)))
+        if((control = (*list)->hScroll))
         {
             INTEGER min, max;
 
@@ -188,7 +188,7 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
     {
         ControlHandle control;
 
-        if((control = HxP(list, vScroll)))
+        if((control = (*list)->vScroll))
         {
             INTEGER min, max;
 
@@ -223,8 +223,8 @@ BOOLEAN Executor::C_LGetSelect(BOOLEAN next, GUEST<Cell> *cellp,
             retval = false;
         else
         {
-            temp.h = Hx(list, dataBounds.right) - 1;
-            temp.v = Hx(list, dataBounds.bottom) - 1;
+            temp.h = (*list)->dataBounds.right - 1;
+            temp.v = (*list)->dataBounds.bottom - 1;
             ep = ROMlib_getoffp(temp, list) + 1;
             while(ip != ep && !(*ip & 0x8000))
                 ip++;
@@ -232,12 +232,12 @@ BOOLEAN Executor::C_LGetSelect(BOOLEAN next, GUEST<Cell> *cellp,
                 retval = false;
             else
             {
-                nint = ip - HxX(list, cellArray);
-                ncols = Hx(list, dataBounds.right) - Hx(list, dataBounds.left);
+                nint = ip - (*list)->cellArray;
+                ncols = (*list)->dataBounds.right - (*list)->dataBounds.left;
                 rown = nint / ncols;
                 coln = nint % ncols;
-                cellp->v = Hx(list, dataBounds.top) + rown;
-                cellp->h = Hx(list, dataBounds.left) + coln;
+                cellp->v = (*list)->dataBounds.top + rown;
+                cellp->h = (*list)->dataBounds.left + coln;
                 retval = true;
             }
         }

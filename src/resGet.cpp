@@ -405,7 +405,7 @@ static Handle getnamedmapresource(resmaphand map, ResType typ, StringPtr nam)
     {
         WALKRR(map, tr, j, rr)
         if(rr->noff != -1 && EqualString((StringPtr)(
-                                                 (char *)*map + Hx(map, namoff) + rr->noff),
+                                                 (char *)*map + (*map)->namoff + rr->noff),
                                              (StringPtr)nam, 0, 1))
             /*-->*/ return ROMlib_mgetres(map, rr);
         EWALKRR(rr)

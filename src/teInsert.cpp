@@ -281,7 +281,7 @@ void Executor::ROMlib_tesave(tesave *t, TEHandle teh)
 
     t->_tsaveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
     PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
-    HxX(PORT_CLIP_REGION(qdGlobals().thePort), rgnBBox) = HxX(teh, viewRect);
+    (*PORT_CLIP_REGION(qdGlobals().thePort))->rgnBBox = (*teh)->viewRect;
     SectRgn(PORT_CLIP_REGION(qdGlobals().thePort), t->_tsaveclip,
             PORT_CLIP_REGION(qdGlobals().thePort));
 }
@@ -318,14 +318,14 @@ void Executor::C_TEIdle(TEHandle teh)
 
     TESAVE(teh);
     TE_SLAM(teh);
-    if((ticks = TickCount()) > Hx(teh, caretTime) + LM(CaretTime)
-       && Hx(teh, active)
-       && (sel = Hx(teh, selStart)) == Hx(teh, selEnd)
-       && (state = Hx(teh, caretState)))
+    if((ticks = TickCount()) > (*teh)->caretTime + LM(CaretTime)
+       && (*teh)->active
+       && (sel = (*teh)->selStart) == (*teh)->selEnd
+       && (state = (*teh)->caretState))
     {
         togglecaret(teh, sel, true);
-        HxX(teh, caretState) = state ^ 0xFF00;
-        HxX(teh, caretTime) = ticks;
+        (*teh)->caretState = state ^ 0xFF00;
+        (*teh)->caretTime = ticks;
     }
     TE_SLAM(teh);
     TERESTORE();
@@ -852,7 +852,7 @@ static inline BOOLEAN Executor::CALLCLIKOK(TEHandle teh)
     BOOLEAN retval;
     cliklooptype cp;
 
-    if((cp = (cliklooptype)HxP(teh, clikLoop)))
+    if((cp = (cliklooptype)(*teh)->clikLoop))
     {
         ROMlib_hook(te_clikloopnumber);
         {

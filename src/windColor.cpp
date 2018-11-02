@@ -85,14 +85,14 @@ void Executor::wind_color_init(void)
     TheZoneGuard guard(LM(SysZone));
 
     default_aux_win = (AuxWinHandle)NewHandle(sizeof(AuxWinRec));
-    HxX(default_aux_win, awNext) = 0;
-    HxX(default_aux_win, awOwner) = 0;
-    HxX(default_aux_win, awCTable)
+    (*default_aux_win)->awNext = 0;
+    (*default_aux_win)->awOwner = 0;
+    (*default_aux_win)->awCTable
         = (CTabHandle)GetResource(TICK("wctb"), 0);
-    HxX(default_aux_win, dialogCItem) = 0;
-    HxX(default_aux_win, awFlags) = 0;
-    HxX(default_aux_win, awReserved) = 0;
-    HxX(default_aux_win, awRefCon) = 0;
+    (*default_aux_win)->dialogCItem = 0;
+    (*default_aux_win)->awFlags = 0;
+    (*default_aux_win)->awReserved = 0;
+    (*default_aux_win)->awRefCon = 0;
 }
 
 GUEST<AuxWinHandle> *
@@ -101,8 +101,8 @@ Executor::lookup_aux_win(WindowPtr w)
     GUEST<AuxWinHandle> *t;
 
     for(t = &LM(AuxWinHead);
-        *t && HxP(*t, awOwner) != w;
-        t = &HxX(*t, awNext))
+        *t && (**t)->awOwner != w;
+        t = &(**t)->awNext)
         ;
     return t;
 }
@@ -122,17 +122,17 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
             t_aux_w = LM(AuxWinHead);
             aux_w = (AuxWinHandle)NewHandle(sizeof(AuxWinRec));
             LM(AuxWinHead) = aux_w;
-            HxX(aux_w, awNext) = t_aux_w;
-            HxX(aux_w, awOwner) = (WindowPtr)w;
+            (*aux_w)->awNext = t_aux_w;
+            (*aux_w)->awOwner = (WindowPtr)w;
             /* FIXME: copy? */
-            HxX(aux_w, awCTable) = new_w_ctab;
-            HxX(aux_w, dialogCItem) = 0;
-            HxX(aux_w, awFlags) = /* (proc_id & 0x0F) */ 0;
-            HxX(aux_w, awReserved) = 0;
-            HxX(aux_w, awRefCon) = 0;
+            (*aux_w)->awCTable = new_w_ctab;
+            (*aux_w)->dialogCItem = 0;
+            (*aux_w)->awFlags = /* (proc_id & 0x0F) */ 0;
+            (*aux_w)->awReserved = 0;
+            (*aux_w)->awRefCon = 0;
         }
         else
-            HxX(aux_w, awCTable) = new_w_ctab;
+            (*aux_w)->awCTable = new_w_ctab;
 
         if(CGrafPort_p(w))
         {

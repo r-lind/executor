@@ -220,10 +220,10 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
         BOOLEAN(*search_fn)
         ();
 
-        search_fn = (BOOLEAN(*)())HxP(t, srchProc);
+        search_fn = (BOOLEAN(*)())(*t)->srchProc;
         /* fetch the next before calling the searchproc,
 	 since it can relocate the current `t' */
-        t = HxP(t, nxtSrch);
+        t = (*t)->nxtSrch;
 
         {
             M68kReg save_regs[16];
@@ -987,8 +987,8 @@ void Executor::C_AddSearch(ProcPtr searchProc)
     gdev = LM(TheGDevice);
 
     search_list_elt = (SProcHndl)NewHandle(sizeof(SProcRec));
-    HxX(search_list_elt, srchProc) = searchProc;
-    HxX(search_list_elt, nxtSrch) = GD_SEARCH_PROC_X(gdev);
+    (*search_list_elt)->srchProc = searchProc;
+    (*search_list_elt)->nxtSrch = GD_SEARCH_PROC_X(gdev);
 
     GD_SEARCH_PROC_X(gdev) = search_list_elt;
 
@@ -1009,14 +1009,14 @@ void Executor::C_DelSearch(ProcPtr searchProc)
     gdev = LM(TheGDevice);
 
     prev = nullptr;
-    for(s = GD_SEARCH_PROC(gdev); s != nullptr; s = HxP(s, nxtSrch))
+    for(s = GD_SEARCH_PROC(gdev); s != nullptr; s = (*s)->nxtSrch)
     {
-        if(HxX(s, srchProc) == searchProc)
+        if((*s)->srchProc == searchProc)
         {
             if(prev == nullptr)
-                GD_SEARCH_PROC_X(gdev) = HxX(s, nxtSrch);
+                GD_SEARCH_PROC_X(gdev) = (*s)->nxtSrch;
             else
-                HxX(prev, nxtSrch) = HxX(s, nxtSrch);
+                (*prev)->nxtSrch = (*s)->nxtSrch;
             DisposeHandle((Handle)s);
             /* Invalidate all color conversion tables. */
             ROMlib_invalidate_conversion_tables();

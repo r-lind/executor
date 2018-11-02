@@ -365,8 +365,8 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv)
     LM(TheZone) = saveZone;
 
     LM(AppParmHandle) = (Handle)fh;
-    HxX(fh, count) = 0;
-    HxX(fh, message) = ROMlib_print ? appPrint : appOpen;
+    (*fh)->count = 0;
+    (*fh)->message = ROMlib_print ? appPrint : appOpen;
     if(fullpathname && fullpathname != argv[0])
         DisposePtr((Ptr)fullpathname);
     while(--argc > 0)
@@ -375,11 +375,11 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv)
         if(argv_to_appfile(argv[0], &app))
         {
             ROMlib_exit = true;
-            newcount = Hx(fh, count) + 1;
-            HxX(fh, count) = newcount;
+            newcount = (*fh)->count + 1;
+            (*fh)->count = newcount;
             SetHandleSize((Handle)fh,
-                            (char *)&HxX(fh, files)[newcount] - (char *)*fh);
-            HxX(fh, files)[Hx(fh, count) - 1] = app;
+                            (char *)&(*fh)->files[newcount] - (char *)*fh);
+            (*fh)->files[(*fh)->count - 1] = app;
         }
     }
 }

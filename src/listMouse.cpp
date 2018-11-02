@@ -31,12 +31,12 @@ static void rectvalue(Rect *rp, INTEGER value, ListHandle list,
 
 static void findcell(GUEST<Cell> *cp, ListHandle list)
 {
-    cp->h = (cp->h - Hx(list, rView.left)) / Hx(list, cellSize.h) + Hx(list, visible.left);
-    cp->v = (cp->v - Hx(list, rView.top)) / Hx(list, cellSize.v) + Hx(list, visible.top);
+    cp->h = (cp->h - (*list)->rView.left) / (*list)->cellSize.h + (*list)->visible.left;
+    cp->v = (cp->v - (*list)->rView.top) / (*list)->cellSize.v + (*list)->visible.top;
 
-    if(cp->h >= Hx(list, visible.right))
+    if(cp->h >= (*list)->visible.right)
         cp->h = 32767;
-    if(cp->v >= Hx(list, visible.bottom))
+    if(cp->v >= (*list)->visible.bottom)
         cp->v = 32767;
 }
 
@@ -57,7 +57,7 @@ static void setselectnilflag(BOOLEAN setit, Cell cell, ListHandle list,
             *ip = off0wbit | 0x8000;
         else
             *ip = off0wbit & 0x7FFF;
-        if(PtInRect(cell, &HxX(list, visible)) && (!(off0wbit & 0x8000) ^ !setit))
+        if(PtInRect(cell, &(*list)->visible) && (!(off0wbit & 0x8000) ^ !setit))
         {
             off0 = off0wbit & 0x7FFF;
             off1 = ip[1] & 0x7FFF;
@@ -67,7 +67,7 @@ static void setselectnilflag(BOOLEAN setit, Cell cell, ListHandle list,
                 C_LRect(&r, cell, list);
 
                 saveport = qdGlobals().thePort;
-                SetPort(HxP(list, port));
+                SetPort((*list)->port);
                 saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
                 PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
                 ClipRect(&r);
@@ -131,13 +131,13 @@ static void scrollbyvalues(ListHandle list)
     ControlHandle ch;
     Point p;
 
-    h = (ch = HxP(list, hScroll)) ? GetControlValue(ch) : toHost(Hx(list, visible.left));
-    v = (ch = HxP(list, vScroll)) ? GetControlValue(ch) : toHost(Hx(list, visible.top));
-    C_LScroll(h - Hx(list, visible.left), v - Hx(list, visible.top), list);
-    HxX(list, visible.left) = h;
-    HxX(list, visible.top) = v;
-    p.h = Hx(list, cellSize.h);
-    p.v = Hx(list, cellSize.v);
+    h = (ch = (*list)->hScroll) ? GetControlValue(ch) : toHost((*list)->visible.left);
+    v = (ch = (*list)->vScroll) ? GetControlValue(ch) : toHost((*list)->visible.top);
+    C_LScroll(h - (*list)->visible.left, v - (*list)->visible.top, list);
+    (*list)->visible.left = h;
+    (*list)->visible.top = v;
+    p.h = (*list)->cellSize.h;
+    p.v = (*list)->cellSize.v;
     C_LCellSize(p, list);
 }
 
@@ -146,7 +146,7 @@ void Executor::C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
     INTEGER quant, page;
     ListPtr lp;
 
-    lp = *guest_cast<ListHandle>(HxX(ch, contrlRfCon));
+    lp = *guest_cast<ListHandle>((*ch)->contrlRfCon);
 
     page = ch == lp->hScroll ? lp->visible.right - lp->visible.left - 1
                                  : lp->visible.bottom - lp->visible.top - 1;
@@ -171,7 +171,7 @@ void Executor::C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
             break;
     }
     SetControlValue(ch, GetControlValue(ch) + quant);
-    scrollbyvalues(guest_cast<ListHandle>(HxX(ch, contrlRfCon)));
+    scrollbyvalues(guest_cast<ListHandle>((*ch)->contrlRfCon));
 }
 
 static inline BOOLEAN CALLCLICK(ListClickLoopUPP fp)
@@ -212,16 +212,16 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
     Point p;
 
     doubleclick = false;
-    if(PtInRect(pt, &HxX(list, rView)))
+    if(PtInRect(pt, &(*list)->rView))
     {
 
-        flags = Hx(list, selFlags);
+        flags = (*list)->selFlags;
         newcell.h = pt.h;
         newcell.v = pt.v;
         findcell(&newcell, list);
-        if(newcell.h == HxX(list, lastClick.h) && newcell.v == HxX(list, lastClick.v) && TickCount() < Hx(list, clikTime) + LM(DoubleTime))
+        if(newcell.h == (*list)->lastClick.h && newcell.v == (*list)->lastClick.v && TickCount() < (*list)->clikTime + LM(DoubleTime))
             doubleclick = true;
-        HxX(list, lastClick) = newcell;
+        (*list)->lastClick = newcell;
         hiliteempty = !(flags & lNoNilHilite);
         if(((mods & shiftKey) || (flags & lExtendDrag)) && !(flags & lOnlyOne))
         {
@@ -251,14 +251,14 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
         if(cellvalue == UseSense)
             cellvalue = initial ? Off : On;
         if(!disjoint && !initial)
-            rectvalue(&HxX(list, dataBounds), Off, list, hiliteempty);
+            rectvalue(&(*list)->dataBounds, Off, list, hiliteempty);
 
         if(userects)
         {
             anchor.top = anchor.bottom = 0;
             if(extend)
             {
-                rswapped = HxX(list, dataBounds);
+                rswapped = (*list)->dataBounds;
                 r.top = rswapped.top;
                 r.left = rswapped.left;
                 r.bottom = rswapped.bottom;
@@ -328,35 +328,35 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                 anchor.bottom = anchor.top + 1;
                 anchor.right = anchor.left + 1;
             }
-            oldselrect = (flags & lUseSense) ? anchor : HxX(list, dataBounds);
+            oldselrect = (flags & lUseSense) ? anchor : (*list)->dataBounds;
         }
 
-        HxX(list, clikTime) = TickCount();
-        HxX(list, clikLoc.h) = pt.h;
-        HxX(list, clikLoc.v) = pt.v;
+        (*list)->clikTime = TickCount();
+        (*list)->clikLoc.h = pt.h;
+        (*list)->clikLoc.v = pt.v;
         oldcell.h = 32767;
 
         evt.where.h = pt.h;
         evt.where.v = pt.v;
-        pinrect = HxX(list, rView);
+        pinrect = (*list)->rView;
         pinrect.left = pinrect.left - 1;
         pinrect.bottom = pinrect.bottom - 1;
         do
         {
-            HxX(list, mouseLoc) = evt.where;
-            if(HxP(list, lClikLoop))
-                if(CALLCLICK(HxP(list, lClikLoop)))
+            (*list)->mouseLoc = evt.where;
+            if((*list)->lClikLoop)
+                if(CALLCLICK((*list)->lClikLoop))
                     /*-->*/ break;
             p.h = evt.where.h;
             p.v = evt.where.v;
-            if(!PtInRect(p, &HxX(list, rView)))
+            if(!PtInRect(p, &(*list)->rView))
             {
                 ctlchanged = false;
-                scrollh = HxP(list, hScroll);
-                scrollv = HxP(list, vScroll);
+                scrollh = (*list)->hScroll;
+                scrollv = (*list)->vScroll;
                 dh = 0;
                 dv = 0;
-                if(evt.where.h < Hx(list, rView.left))
+                if(evt.where.h < (*list)->rView.left)
                 {
                     if(scrollh)
                     {
@@ -366,7 +366,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                     else
                         dh = -1;
                 }
-                else if(evt.where.h > Hx(list, rView.right))
+                else if(evt.where.h > (*list)->rView.right)
                 {
                     if(scrollh)
                     {
@@ -376,7 +376,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                     else
                         dh = 1;
                 }
-                if(evt.where.v < Hx(list, rView.top))
+                if(evt.where.v < (*list)->rView.top)
                 {
                     if(scrollv)
                     {
@@ -386,7 +386,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                     else
                         dv = -1;
                 }
-                else if(evt.where.v > Hx(list, rView.bottom))
+                else if(evt.where.v > (*list)->rView.bottom)
                 {
                     if(scrollv)
                     {
@@ -439,7 +439,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
             }
         } while(!OSEventAvail(mUpMask, &evt) && (GlobalToLocal(&evt.where), true));
     }
-    else if(((ch = HxP(list, hScroll)) && PtInRect(pt, &HxX(ch, contrlRect))) || ((ch = HxP(list, vScroll)) && PtInRect(pt, &HxX(ch, contrlRect))))
+    else if(((ch = (*list)->hScroll) && PtInRect(pt, &(*ch)->contrlRect)) || ((ch = (*list)->vScroll) && PtInRect(pt, &(*ch)->contrlRect)))
     {
         if(TestControl(ch, pt) == inThumb)
         {
@@ -455,7 +455,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
 
 LONGINT Executor::C_LLastClick(ListHandle list) /* IMIV-273 */
 {
-    return ((LONGINT)Hx(list, lastClick.v) << 16) | (unsigned short)Hx(list, lastClick.h);
+    return ((LONGINT)(*list)->lastClick.v << 16) | (unsigned short)(*list)->lastClick.h;
 }
 
 void Executor::C_LSetSelect(BOOLEAN setit, Cell cell,

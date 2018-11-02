@@ -178,8 +178,8 @@ void Executor::C_ScrollRect(Rect *rp, INTEGER dh, INTEGER dv,
     RGBForeColor(&ROMlib_black_rgb_color);
     RGBBackColor(&ROMlib_white_rgb_color);
 
-    SectRect(rp, &HxX(PORT_VIS_REGION(qdGlobals().thePort), rgnBBox), rp);
-    SectRect(rp, &HxX(PORT_CLIP_REGION(qdGlobals().thePort), rgnBBox), rp);
+    SectRect(rp, &(*PORT_VIS_REGION(qdGlobals().thePort))->rgnBBox, rp);
+    SectRect(rp, &(*PORT_CLIP_REGION(qdGlobals().thePort))->rgnBBox, rp);
     SectRect(rp, &PORT_RECT(qdGlobals().thePort), rp);
     SectRect(rp, &PORT_BOUNDS(qdGlobals().thePort), rp);
     srcregion = NewRgn();

@@ -1048,16 +1048,16 @@ static void reinitialize_things(void)
     special_fn = 0;
     for(map = (resmaphand)LM(TopMapHndl); map; map = nextmap)
     {
-        nextmap = (resmaphand)HxP(map, nextmap);
-        if(HxX(map, resfn) == LM(SysMap))
-            UpdateResFile(Hx(map, resfn));
+        nextmap = (resmaphand)(*map)->nextmap;
+        if((*map)->resfn == LM(SysMap))
+            UpdateResFile((*map)->resfn);
         else
         {
             if(!our_special_map(map))
-                CloseResFile(Hx(map, resfn));
+                CloseResFile((*map)->resfn);
             else
             {
-                special_fn = Hx(map, resfn);
+                special_fn = (*map)->resfn;
                 UpdateResFile(special_fn);
             }
         }

@@ -48,16 +48,16 @@ typedef resmap *resmapptr;
 
 typedef GUEST<resmapptr> *resmaphand;
 
-#define NAMEOFF(map) Hx(map, namoff)
+#define NAMEOFF(map) (*map)->namoff
 #define NAMEOFFX(map) ((*(map))->namoff)
 
-#define TYPEOFF(map) Hx(map, typoff)
+#define TYPEOFF(map) (*map)->typoff
 #define TYPEOFFX(map) ((*(map))->typoff)
 
-#define NUMTMINUS1(map) (*(GUEST<INTEGER> *)((char *)*(map) + Hx(map, typoff)))
-#define NUMTMINUS1X(map) (*(GUEST<INTEGER> *)((char *)*(map) + Hx(map, typoff)))
+#define NUMTMINUS1(map) (*(GUEST<INTEGER> *)((char *)*(map) + (*map)->typoff))
+#define NUMTMINUS1X(map) (*(GUEST<INTEGER> *)((char *)*(map) + (*map)->typoff))
 
-#define MAPLEN(map) Hx(map, rh.maplen)
+#define MAPLEN(map) (*map)->rh.maplen
 #define MAPLENX(map) ((*(map))->rh.maplen)
 
 struct typref
@@ -109,12 +109,12 @@ extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
 
 #define WALKMAPCUR(map)                                       \
     for(map = ROMlib_rntohandl(LM(CurMap), (Handle *)0); map; \
-        map = (resmaphand)HxP(map, nextmap))                  \
+        map = (resmaphand)(*map)->nextmap)                  \
     {
 
 #define WALKMAPTOP(map)                        \
     for(map = (resmaphand)LM(TopMapHndl); map; \
-        map = (resmaphand)HxP(map, nextmap))   \
+        map = (resmaphand)(*map)->nextmap)   \
     {
 
 #define EWALKMAP() \
@@ -122,7 +122,7 @@ extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
 
 #define WALKTR(map, i, tr)                                                   \
     i = NUMTMINUS1(map);                                                     \
-    tr = (typref *)((char *)*(map) + Hx(map, typoff) + sizeof(INTEGER)); \
+    tr = (typref *)((char *)*(map) + (*map)->typoff + sizeof(INTEGER)); \
     while(i-- >= 0)                                                          \
     {
 
@@ -131,7 +131,7 @@ extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
     }
 
 #define WALKRR(map, tr, j, rr)                                             \
-    rr = (resref *)((char *)*(map) + Hx(map, typoff) + tr->rloff); \
+    rr = (resref *)((char *)*(map) + (*map)->typoff + tr->rloff); \
     j = tr->nres;                                                      \
     while(j-- >= 0)                                                        \
     {

@@ -139,13 +139,13 @@ Executor::validate_colors_for_window(GrafPtr w)
         color_window_colors[i] = default_color_win_ctab[i].rgb;
 
     t_aux_w = *lookup_aux_win(w);
-    if(t_aux_w && HxX(t_aux_w, awCTable))
+    if(t_aux_w && (*t_aux_w)->awCTable)
     {
         CTabHandle w_ctab;
         ColorSpec *w_ctab_table;
         int w_ctab_size;
 
-        w_ctab = HxP(t_aux_w, awCTable);
+        w_ctab = (*t_aux_w)->awCTable;
         w_ctab_table = CTAB_TABLE(w_ctab);
         /* this window definition function uses only the first 12
 	 entries in the window color table */
@@ -891,11 +891,11 @@ void calc_doc(GrafPtr w)
 
     rh = WINDOW_STRUCT_REGION(w);
     ReallocateHandle((Handle)rh, (Size)44);
-    HxX(rh, rgnBBox.left) = left - 1;
-    HxX(rh, rgnBBox.top) = top - 19;
-    HxX(rh, rgnBBox.right) = right + 2;
-    HxX(rh, rgnBBox.bottom) = bottom + 2;
-    HxX(rh, rgnSize) = 44;
+    (*rh)->rgnBBox.left = left - 1;
+    (*rh)->rgnBBox.top = top - 19;
+    (*rh)->rgnBBox.right = right + 2;
+    (*rh)->rgnBBox.bottom = bottom + 2;
+    (*rh)->rgnSize = 44;
     auto ip = (GUEST<INTEGER> *)*rh + 5;
 
     *ip++ = top - 19;
@@ -937,11 +937,11 @@ void calc_alt_dialog_box(GrafPtr w)
     rh = WINDOW_STRUCT_REGION(w);
 
     ReallocateHandle((Handle)rh, (Size)44);
-    HxX(rh, rgnBBox.left) = left - 1;
-    HxX(rh, rgnBBox.top) = top - 1;
-    HxX(rh, rgnBBox.right) = right + 3;
-    HxX(rh, rgnBBox.bottom) = bottom + 3;
-    HxX(rh, rgnSize) = 44;
+    (*rh)->rgnBBox.left = left - 1;
+    (*rh)->rgnBBox.top = top - 1;
+    (*rh)->rgnBBox.right = right + 3;
+    (*rh)->rgnBBox.bottom = bottom + 3;
+    (*rh)->rgnSize = 44;
     auto ip = (GUEST<INTEGER> *)*rh + 5;
 
     *ip++ = top - 1;

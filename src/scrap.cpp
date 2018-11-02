@@ -679,7 +679,7 @@ gworld_from_pict(PicHandle ph)
         GetGWorld(&save_port, &save_device);
         save_port = save_port;
         save_device = save_device;
-        r = HxX(ph, picFrame);
+        r = (*ph)->picFrame;
         err = NewGWorld(&retval, 32, &r, nullptr, nullptr, keepLocal);
         if(retval)
         {

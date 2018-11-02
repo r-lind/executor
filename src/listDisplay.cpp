@@ -28,9 +28,9 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
     {
         off0 = ip[0] & 0x7FFF;
         off1 = ip[1] & 0x7FFF;
-        setit = (ip[0] & 0x8000) && Hx(list, lActive);
+        setit = (ip[0] & 0x8000) && (*list)->lActive;
         saveport = qdGlobals().thePort;
-        SetPort(HxP(list, port));
+        SetPort((*list)->port);
         saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
         PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
 
@@ -50,17 +50,17 @@ void Executor::C_LSetDrawingMode(BOOLEAN draw, ListHandle list) /* IMIV-275 */
 {
     if(draw)
     {
-        HxX(list, listFlags) |= DODRAW;
-        if(Hx(list, lActive))
+        (*list)->listFlags |= DODRAW;
+        if((*list)->lActive)
         {
-            if(HxP(list, vScroll))
-                ShowControl(HxP(list, vScroll));
-            if(HxP(list, hScroll))
-                ShowControl(HxP(list, hScroll));
+            if((*list)->vScroll)
+                ShowControl((*list)->vScroll);
+            if((*list)->hScroll)
+                ShowControl((*list)->hScroll);
         }
     }
     else
-        HxX(list, listFlags) &= ~DODRAW;
+        (*list)->listFlags &= ~DODRAW;
 }
 
 void Executor::C_LScroll(INTEGER ncol, INTEGER nrow,
@@ -72,7 +72,7 @@ void Executor::C_LScroll(INTEGER ncol, INTEGER nrow,
     INTEGER tmpi;
     Point p;
 
-    r = HxX(list, rView);
+    r = (*list)->rView;
 
     /*
  * TODO:  if either the horizontal or vertical component of a view rectangle
@@ -83,47 +83,47 @@ void Executor::C_LScroll(INTEGER ncol, INTEGER nrow,
 
     if(nrow < 0)
     {
-        tmpi = Hx(list, dataBounds.top) - Hx(list, visible.top);
+        tmpi = (*list)->dataBounds.top - (*list)->visible.top;
         if(tmpi > nrow)
             nrow = tmpi;
     }
     else if(nrow > 0)
     {
-        tmpi = Hx(list, dataBounds.bottom) - Hx(list, visible.bottom) + 1;
+        tmpi = (*list)->dataBounds.bottom - (*list)->visible.bottom + 1;
         if(tmpi < nrow)
             nrow = tmpi;
     }
 
     if(ncol < 0)
     {
-        tmpi = Hx(list, dataBounds.left) - Hx(list, visible.left);
+        tmpi = (*list)->dataBounds.left - (*list)->visible.left;
         if(tmpi > ncol)
             ncol = tmpi;
     }
     else if(ncol > 0)
     {
-        tmpi = Hx(list, dataBounds.right) - Hx(list, visible.right) + 1;
+        tmpi = (*list)->dataBounds.right - (*list)->visible.right + 1;
         if(tmpi < ncol)
             ncol = tmpi;
     }
 
-    HxX(list, visible.top) = Hx(list, visible.top) + nrow;
-    HxX(list, visible.left) = Hx(list, visible.left) + ncol;
+    (*list)->visible.top = (*list)->visible.top + nrow;
+    (*list)->visible.left = (*list)->visible.left + ncol;
 
-    p.h = Hx(list, cellSize.h);
-    p.v = Hx(list, cellSize.v);
+    p.h = (*list)->cellSize.h;
+    p.v = (*list)->cellSize.v;
     C_LCellSize(p, list); /*  recalculates visible */
 
-    if(ncol && (ch = HxP(list, hScroll)))
-        SetControlValue(ch, Hx(list, visible.left));
-    if(nrow && (ch = HxP(list, vScroll)))
-        SetControlValue(ch, Hx(list, visible.top));
+    if(ncol && (ch = (*list)->hScroll))
+        SetControlValue(ch, (*list)->visible.left);
+    if(nrow && (ch = (*list)->vScroll))
+        SetControlValue(ch, (*list)->visible.top);
 
-    if(Hx(list, listFlags) & DODRAW)
+    if((*list)->listFlags & DODRAW)
     {
         rh = NewRgn();
-        ScrollRect(&r, -ncol * Hx(list, cellSize.h),
-                   -nrow * Hx(list, cellSize.v), rh);
+        ScrollRect(&r, -ncol * (*list)->cellSize.h,
+                   -nrow * (*list)->cellSize.v, rh);
         C_LUpdate(rh, list);
         DisposeRgn(rh);
     }
@@ -134,15 +134,15 @@ void Executor::C_LAutoScroll(ListHandle list) /* IMIV-275 */
     GUEST<Cell> gcell;
     Cell cell;
 
-    gcell.h = HxX(list, dataBounds.left);
-    gcell.v = HxX(list, dataBounds.top);
+    gcell.h = (*list)->dataBounds.left;
+    gcell.v = (*list)->dataBounds.top;
     if(C_LGetSelect(true, &gcell, list))
     {
         cell = gcell.get();
-        if(!PtInRect(cell, &HxX(list, visible)))
+        if(!PtInRect(cell, &(*list)->visible))
         {
-            C_LScroll(cell.h - Hx(list, visible.left),
-                      cell.v - Hx(list, visible.top), list);
+            C_LScroll(cell.h - (*list)->visible.left,
+                      cell.v - (*list)->visible.top, list);
         }
     }
 }
@@ -155,15 +155,15 @@ void Executor::C_LUpdate(RgnHandle rgn, ListHandle list) /* IMIV-275 */
     INTEGER top, left, bottom, right;
     ControlHandle ch;
 
-    cleft = c.h = Hx(list, visible.left);
-    c.v = Hx(list, visible.top);
-    csize.h = Hx(list, cellSize.h);
-    csize.v = Hx(list, cellSize.v);
+    cleft = c.h = (*list)->visible.left;
+    c.v = (*list)->visible.top;
+    csize.h = (*list)->cellSize.h;
+    csize.v = (*list)->cellSize.v;
     C_LRect(&r, c, list);
     top = r.top;
     left = r.left;
-    bottom = top + (Hx(list, visible.bottom) - Hx(list, visible.top)) * csize.v;
-    right = left + (Hx(list, visible.right) - Hx(list, visible.left)) * csize.h;
+    bottom = top + ((*list)->visible.bottom - (*list)->visible.top) * csize.v;
+    right = left + ((*list)->visible.right - (*list)->visible.left) * csize.h;
     while(r.top < bottom)
     {
         while(r.left < right)
@@ -181,14 +181,14 @@ void Executor::C_LUpdate(RgnHandle rgn, ListHandle list) /* IMIV-275 */
         r.left = left;
         r.right = left + csize.h;
     }
-    if((ch = HxP(list, hScroll)))
+    if((ch = (*list)->hScroll))
     {
-        if(RectInRgn(&HxX(ch, contrlRect), rgn))
+        if(RectInRgn(&(*ch)->contrlRect, rgn))
             Draw1Control(ch);
     }
-    if((ch = HxP(list, vScroll)))
+    if((ch = (*list)->vScroll))
     {
-        if(RectInRgn(&HxX(ch, contrlRect), rgn))
+        if(RectInRgn(&(*ch)->contrlRect, rgn))
             Draw1Control(ch);
     }
 }
@@ -204,30 +204,30 @@ void Executor::C_LActivate(BOOLEAN act, ListHandle list) /* IMIV-276 */
     GUEST<RgnHandle> saveclip;
     LISTDECL();
 
-    if(!act ^ !Hx(list, lActive))
+    if(!act ^ !(*list)->lActive)
     {
 
         if(act)
         {
             sel = true;
-            if((ch = HxP(list, hScroll)))
+            if((ch = (*list)->hScroll))
                 ShowControl(ch);
-            if((ch = HxP(list, vScroll)))
+            if((ch = (*list)->vScroll))
                 ShowControl(ch);
         }
         else
         {
             sel = false;
-            if((ch = HxP(list, hScroll)))
+            if((ch = (*list)->hScroll))
                 HideControl(ch);
-            if((ch = HxP(list, vScroll)))
+            if((ch = (*list)->vScroll))
                 HideControl(ch);
         }
         LISTBEGIN(list);
-        for(c.v = Hx(list, visible.top); c.v < Hx(list, visible.bottom);
+        for(c.v = (*list)->visible.top; c.v < (*list)->visible.bottom;
             c.v++)
         {
-            for(c.h = Hx(list, visible.left); c.h < Hx(list, visible.right);
+            for(c.h = (*list)->visible.left; c.h < (*list)->visible.right;
                 c.h++)
             {
                 if((ip = ROMlib_getoffp(c, list)) && (*ip & 0x8000))
@@ -245,7 +245,7 @@ void Executor::C_LActivate(BOOLEAN act, ListHandle list) /* IMIV-276 */
             }
         }
         LISTEND(list);
-        HxX(list, lActive) = !!act;
+        (*list)->lActive = !!act;
     }
 }
 
@@ -254,7 +254,7 @@ void Executor::ROMlib_listcall(INTEGER mess, BOOLEAN sel, Rect *rp, Cell cell, I
 {
     Handle listdefhand;
 
-    listdefhand = HxP(lhand, listDefProc);
+    listdefhand = (*lhand)->listDefProc;
     if(listdefhand)
     {
         listprocp lp;
@@ -262,8 +262,8 @@ void Executor::ROMlib_listcall(INTEGER mess, BOOLEAN sel, Rect *rp, Cell cell, I
         lp = *(GUEST<listprocp> *)listdefhand;
         if(!lp)
         {
-            LoadResource(HxP(lhand, listDefProc));
-            lp = *(GUEST<listprocp> *)HxP(lhand, listDefProc);
+            LoadResource((*lhand)->listDefProc);
+            lp = *(GUEST<listprocp> *)(*lhand)->listDefProc;
         }
         if(lp == &ldef0)
             ldef0(mess, sel, rp, cell, off, len, lhand);

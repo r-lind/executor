@@ -18,12 +18,12 @@
 
 namespace Executor
 {
-#define MI_ID_X(mi) (HxX(mi, menuID))
-#define MI_WIDTH_X(mi) (HxX(mi, menuWidth))
-#define MI_HEIGHT_X(mi) (HxX(mi, menuHeight))
-#define MI_PROC_X(mi) (HxX(mi, menuProc))
-#define MI_ENABLE_FLAGS_X(mi) (HxX(mi, enableFlags))
-#define MI_DATA(mi) (HxX(mi, menuData))
+#define MI_ID_X(mi) ((*mi)->menuID)
+#define MI_WIDTH_X(mi) ((*mi)->menuWidth)
+#define MI_HEIGHT_X(mi) ((*mi)->menuHeight)
+#define MI_PROC_X(mi) ((*mi)->menuProc)
+#define MI_ENABLE_FLAGS_X(mi) ((*mi)->enableFlags)
+#define MI_DATA(mi) ((*mi)->menuData)
 
 #define MI_ID(mi) (MI_ID_X(mi))
 #define MI_WIDTH(mi) (MI_WIDTH_X(mi))
@@ -31,7 +31,7 @@ namespace Executor
 #define MI_PROC(mi) (MI_PROC_X(mi))
 #define MI_ENABLE_FLAGS(mi) (MI_ENABLE_FLAGS_X(mi))
 
-#define MI_TITLE(mi) (HxX(mi, menuTitle))
+#define MI_TITLE(mi) ((*mi)->menuTitle)
 
 typedef struct mext
 {
@@ -88,7 +88,7 @@ typedef struct menu_elt
 } menu_elt;
 
 #define ML_MENU(ml, index) \
-    (((menu_elt *)&HxX(ml, data))[index])
+    (((menu_elt *)&(*ml)->data)[index])
 #define ML_HMENU(ml, index)                          \
     (((menu_elt *)((char *)*(ml)                 \
                    + ML_LAST_MENU_OFFSET(ml)         \
@@ -96,9 +96,9 @@ typedef struct menu_elt
                    + sizeof(INTEGER) /* lastHMenu */ \
                    + sizeof(PixMapHandle) /* menuTitleSave */))[index])
 
-#define ML_LAST_MENU_OFFSET_X(ml) (HxX(ml, last_menu_offset))
-#define ML_LAST_RIGHT_X(ml) (HxX(ml, last_right))
-#define ML_RES_ID_X(ml) (HxX(ml, mb_res_id))
+#define ML_LAST_MENU_OFFSET_X(ml) ((*ml)->last_menu_offset)
+#define ML_LAST_RIGHT_X(ml) ((*ml)->last_right)
+#define ML_RES_ID_X(ml) ((*ml)->mb_res_id)
 #define ML_LAST_HMENU_OFFSET_X(ml)          \
     (*(INTEGER *)((char *)*(ml)         \
                   + ML_LAST_MENU_OFFSET(ml) \

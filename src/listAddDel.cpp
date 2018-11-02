@@ -22,26 +22,26 @@ INTEGER Executor::C_LAddColumn(INTEGER count, INTEGER coln,
     int i;
     Point p;
 
-    nrows = Hx(list, dataBounds.bottom) - Hx(list, dataBounds.top);
+    nrows = (*list)->dataBounds.bottom - (*list)->dataBounds.top;
     noffsets = count * nrows;
-    if(coln > Hx(list, dataBounds.right))
-        coln = Hx(list, dataBounds.right);
+    if(coln > (*list)->dataBounds.right)
+        coln = (*list)->dataBounds.right;
 
-    if(coln < Hx(list, dataBounds.left))
-        coln = Hx(list, dataBounds.left);
+    if(coln < (*list)->dataBounds.left)
+        coln = (*list)->dataBounds.left;
 
-    HxX(list, dataBounds.right) = Hx(list, dataBounds.right) + count;
+    (*list)->dataBounds.right = (*list)->dataBounds.right + count;
 
     if(noffsets)
     {
 
         SetHandleSize((Handle)list,
                       GetHandleSize((Handle)list) + noffsets * sizeof(INTEGER));
-        ncols = Hx(list, dataBounds.right) - Hx(list, dataBounds.left);
-        nbefore = (coln - Hx(list, dataBounds.left)) * sizeof(INTEGER);
+        ncols = (*list)->dataBounds.right - (*list)->dataBounds.left;
+        nbefore = (coln - (*list)->dataBounds.left) * sizeof(INTEGER);
         nafter = (ncols - count) * sizeof(INTEGER) - nbefore;
-        ip = (Ptr)(HxX(list, cellArray) + nrows * (ncols - count) + 1);
-        op = (Ptr)(HxX(list, cellArray) + nrows * ncols + 1);
+        ip = (Ptr)((*list)->cellArray + nrows * (ncols - count) + 1);
+        op = (Ptr)((*list)->cellArray + nrows * ncols + 1);
         op -= sizeof(INTEGER);
         ip -= sizeof(INTEGER);
         *(INTEGER *)op = *(INTEGER *)ip; /* sentinel */
@@ -62,15 +62,15 @@ INTEGER Executor::C_LAddColumn(INTEGER count, INTEGER coln,
             BlockMoveData(ip, op, nbefore);
         }
 
-        p.h = Hx(list, cellSize.h);
-        p.v = Hx(list, cellSize.v);
+        p.h = (*list)->cellSize.h;
+        p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
 
-        if(Hx(list, listFlags) & DODRAW)
+        if((*list)->listFlags & DODRAW)
         {
-            todraw = HxX(list, dataBounds);
+            todraw = (*list)->dataBounds;
             todraw.left = coln;
-            SectRect(&todraw, &HxX(list, visible), &todraw);
+            SectRect(&todraw, &(*list)->visible, &todraw);
             for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
                 for(c.h = todraw.left; c.h < todraw.right; c.h++)
                     C_LDraw(c, list);
@@ -89,26 +89,26 @@ INTEGER Executor::C_LAddRow(INTEGER count, INTEGER rown,
     GUEST<INTEGER> *ip, *op;
     Point p;
 
-    ncols = Hx(list, dataBounds.right) - Hx(list, dataBounds.left);
+    ncols = (*list)->dataBounds.right - (*list)->dataBounds.left;
     noffsets = count * ncols;
-    if(rown > Hx(list, dataBounds.bottom))
-        rown = Hx(list, dataBounds.bottom);
+    if(rown > (*list)->dataBounds.bottom)
+        rown = (*list)->dataBounds.bottom;
 
-    if(rown < Hx(list, dataBounds.top))
-        rown = Hx(list, dataBounds.top);
+    if(rown < (*list)->dataBounds.top)
+        rown = (*list)->dataBounds.top;
 
-    HxX(list, dataBounds.bottom) = Hx(list, dataBounds.bottom) + count;
+    (*list)->dataBounds.bottom = (*list)->dataBounds.bottom + count;
 
     if(noffsets)
     {
 
         SetHandleSize((Handle)list,
                       GetHandleSize((Handle)list) + noffsets * sizeof(INTEGER));
-        nrows = Hx(list, dataBounds.bottom) - Hx(list, dataBounds.top);
-        nbefore = (rown - Hx(list, dataBounds.top));
+        nrows = (*list)->dataBounds.bottom - (*list)->dataBounds.top;
+        nbefore = (rown - (*list)->dataBounds.top);
         nafter = ((nrows - count) - nbefore) * ncols;
-        ip = HxX(list, cellArray) + (nrows - count) * ncols + 1;
-        op = HxX(list, cellArray) + nrows * ncols + 1;
+        ip = (*list)->cellArray + (nrows - count) * ncols + 1;
+        op = (*list)->cellArray + nrows * ncols + 1;
         *--op = *--ip; /* sentinel */
         ip -= nafter;
         op -= nafter;
@@ -118,15 +118,15 @@ INTEGER Executor::C_LAddRow(INTEGER count, INTEGER rown,
         while(--noffsets >= 0)
             *--op = offset;
 
-        p.h = Hx(list, cellSize.h);
-        p.v = Hx(list, cellSize.v);
+        p.h = (*list)->cellSize.h;
+        p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
 
-        if(Hx(list, listFlags) & DODRAW)
+        if((*list)->listFlags & DODRAW)
         {
-            todraw = HxX(list, dataBounds);
+            todraw = (*list)->dataBounds;
             todraw.top = rown;
-            SectRect(&todraw, &HxX(list, visible), &todraw);
+            SectRect(&todraw, &(*list)->visible, &todraw);
             for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
                 for(c.h = todraw.left; c.h < todraw.right; c.h++)
                     C_LDraw(c, list);
@@ -142,11 +142,11 @@ compute_visible_rect(Rect *rp, ListHandle list, INTEGER top, INTEGER left,
     INTEGER h, v;
     INTEGER new_top, new_left, new_bottom, new_right;
 
-    h = Hx(list, cellSize.h);
-    v = Hx(list, cellSize.v);
+    h = (*list)->cellSize.h;
+    v = (*list)->cellSize.v;
 
-    new_top = Hx(list, rView.top) + (top - Hx(list, visible.top)) * v;
-    new_left = Hx(list, rView.left) + (left - Hx(list, visible.left)) * h;
+    new_top = (*list)->rView.top + (top - (*list)->visible.top) * v;
+    new_left = (*list)->rView.left + (left - (*list)->visible.left) * h;
     new_bottom = new_top + (bottom - top) * v;
     new_right = new_left + (right - left) * h;
 
@@ -155,7 +155,7 @@ compute_visible_rect(Rect *rp, ListHandle list, INTEGER top, INTEGER left,
     rp->bottom = new_bottom;
     rp->right = new_right;
 
-    SectRect(rp, &HxX(list, rView), rp);
+    SectRect(rp, &(*list)->rView, rp);
 }
 
 void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
@@ -172,45 +172,45 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
     ControlHandle control;
     Point p;
 
-    if(!list || coln >= Hx(list, dataBounds.right))
+    if(!list || coln >= (*list)->dataBounds.right)
         /*-->*/ return; /* invalid */
 
-    if(count == 0 || (coln == Hx(list, dataBounds.left) && count >= Hx(list, dataBounds.right) - Hx(list, dataBounds.left)))
+    if(count == 0 || (coln == (*list)->dataBounds.left && count >= (*list)->dataBounds.right - (*list)->dataBounds.left))
     {
-        SetHandleSize((Handle)HxP(list, cells), (Size)0);
+        SetHandleSize((Handle)(*list)->cells, (Size)0);
         SetHandleSize((Handle)list, sizeof(ListRec));
-        HxX(list, cellArray)[0] = 0;
-        HxX(list, dataBounds.right) = HxX(list, dataBounds.left);
-        HxX(list, visible.left) = HxX(list, dataBounds.left);
-        p.h = Hx(list, cellSize.h);
-        p.v = Hx(list, cellSize.v);
+        (*list)->cellArray[0] = 0;
+        (*list)->dataBounds.right = (*list)->dataBounds.left;
+        (*list)->visible.left = (*list)->dataBounds.left;
+        p.h = (*list)->cellSize.h;
+        p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
-        if(Hx(list, listFlags) & DODRAW)
-            EraseRect(&HxX(list, rView));
-        if((control = HxP(list, hScroll)))
-            SetControlMaximum(control, Hx(control, contrlMin));
+        if((*list)->listFlags & DODRAW)
+            EraseRect(&(*list)->rView);
+        if((control = (*list)->hScroll))
+            SetControlMaximum(control, (*control)->contrlMin);
         /*-->*/ return; /* quick delete of everything */
     }
 
-    if(coln + count > Hx(list, dataBounds.right))
-        count = Hx(list, dataBounds.right) - coln;
+    if(coln + count > (*list)->dataBounds.right)
+        count = (*list)->dataBounds.right - coln;
 
-    nrows = Hx(list, dataBounds.bottom) - Hx(list, dataBounds.top);
+    nrows = (*list)->dataBounds.bottom - (*list)->dataBounds.top;
     noffsets = count * nrows;
-    if(coln > Hx(list, dataBounds.right))
-        coln = Hx(list, dataBounds.right);
+    if(coln > (*list)->dataBounds.right)
+        coln = (*list)->dataBounds.right;
 
-    HxX(list, dataBounds.right) = Hx(list, dataBounds.right) - count;
+    (*list)->dataBounds.right = (*list)->dataBounds.right - count;
 
     if(noffsets)
     {
         INTEGER visible_right, bounds_right;
 
-        ncols = Hx(list, dataBounds.right) - Hx(list, dataBounds.left);
-        nbefore = (coln - Hx(list, dataBounds.left));
+        ncols = (*list)->dataBounds.right - (*list)->dataBounds.left;
+        nbefore = (coln - (*list)->dataBounds.left);
         nafter = ncols - nbefore;
-        ip = op = (GUEST<uint16_t> *)HxX(list, cellArray);
-        dataip = dataop = (Ptr)*HxP(list, cells);
+        ip = op = (GUEST<uint16_t> *)(*list)->cellArray;
+        dataip = dataop = (Ptr)*(*list)->cells;
         delta = 0;
         /* SPEEDUP:  partial loop unrolling ... combine things and don't
 		     bother adding delta when we know that it's zero */
@@ -246,24 +246,24 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
         *op++ = *ip++ - delta; /* sentinel */
         SetHandleSize((Handle)list,
                       GetHandleSize((Handle)list) - noffsets * sizeof(INTEGER));
-        SetHandleSize((Handle)HxP(list, cells),
-                      GetHandleSize((Handle)HxP(list, cells)) - delta);
+        SetHandleSize((Handle)(*list)->cells,
+                      GetHandleSize((Handle)(*list)->cells) - delta);
 
-        p.h = Hx(list, cellSize.h);
-        p.v = Hx(list, cellSize.v);
+        p.h = (*list)->cellSize.h;
+        p.v = (*list)->cellSize.v;
 
         /* save visible_right and bounds_right now, because LCellSize
 	   will adjust them and we won't be able to figure out if we
 	   needed to force a scroll */
 
-        visible_right = Hx(list, visible.right);
-        bounds_right = Hx(list, dataBounds.right);
+        visible_right = (*list)->visible.right;
+        bounds_right = (*list)->dataBounds.right;
         C_LCellSize(p, list); /* recalcs visible */
-        if((control = HxP(list, hScroll)))
+        if((control = (*list)->hScroll))
         {
             INTEGER visible_left;
 
-            visible_left = Hx(list, visible.left);
+            visible_left = (*list)->visible.left;
 
             /* Determine whether or not we need to scroll up one location
 	       (because we were maximally scrolled down and we deleted
@@ -272,24 +272,24 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
             if(visible_left > 0 && visible_right > bounds_right)
             {
                 --visible_left;
-                HxX(list, visible.left) = visible_left;
+                (*list)->visible.left = visible_left;
                 coln = visible_left;
             }
         }
 
-        if(Hx(list, listFlags) & DODRAW)
+        if((*list)->listFlags & DODRAW)
         {
             Rect eraser;
 
-            compute_visible_rect(&eraser, list, Hx(list, visible.top),
-                                 Hx(list, visible.right),
-                                 Hx(list, visible.bottom),
+            compute_visible_rect(&eraser, list, (*list)->visible.top,
+                                 (*list)->visible.right,
+                                 (*list)->visible.bottom,
                                  visible_right);
             EraseRect(&eraser);
 
-            todraw = HxX(list, dataBounds);
+            todraw = (*list)->dataBounds;
             todraw.left = coln;
-            SectRect(&todraw, &HxX(list, visible), &todraw);
+            SectRect(&todraw, &(*list)->visible, &todraw);
             for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
                 for(c.h = todraw.left; c.h < todraw.right; c.h++)
                     C_LDraw(c, list);
@@ -310,42 +310,42 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
     Size delta, ntomove;
     Point p;
 
-    if(!list || rown >= Hx(list, dataBounds.bottom))
+    if(!list || rown >= (*list)->dataBounds.bottom)
         /*-->*/ return; /* invalid */
 
-    if(count == 0 || (rown == Hx(list, dataBounds.top) && count >= Hx(list, dataBounds.bottom) - Hx(list, dataBounds.top)))
+    if(count == 0 || (rown == (*list)->dataBounds.top && count >= (*list)->dataBounds.bottom - (*list)->dataBounds.top))
     {
-        SetHandleSize((Handle)HxP(list, cells), (Size)0);
+        SetHandleSize((Handle)(*list)->cells, (Size)0);
         SetHandleSize((Handle)list, sizeof(ListRec));
-        HxX(list, cellArray)[0] = 0;
-        HxX(list, dataBounds.bottom) = HxX(list, dataBounds.top);
-        HxX(list, visible.top) = HxX(list, dataBounds.top);
-        p.h = Hx(list, cellSize.h);
-        p.v = Hx(list, cellSize.v);
+        (*list)->cellArray[0] = 0;
+        (*list)->dataBounds.bottom = (*list)->dataBounds.top;
+        (*list)->visible.top = (*list)->dataBounds.top;
+        p.h = (*list)->cellSize.h;
+        p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
-        if(Hx(list, listFlags) & DODRAW)
-            EraseRect(&HxX(list, rView));
-        if((control = HxP(list, vScroll)))
-            SetControlMaximum(control, Hx(control, contrlMin));
+        if((*list)->listFlags & DODRAW)
+            EraseRect(&(*list)->rView);
+        if((control = (*list)->vScroll))
+            SetControlMaximum(control, (*control)->contrlMin);
         /*-->*/ return; /* quick delete of all */
     }
 
-    if(rown + count > Hx(list, dataBounds.bottom))
-        count = Hx(list, dataBounds.bottom) - rown;
+    if(rown + count > (*list)->dataBounds.bottom)
+        count = (*list)->dataBounds.bottom - rown;
 
-    ncols = Hx(list, dataBounds.right) - Hx(list, dataBounds.left);
+    ncols = (*list)->dataBounds.right - (*list)->dataBounds.left;
     noffsets = count * ncols;
 
-    HxX(list, dataBounds.bottom) = Hx(list, dataBounds.bottom) - count;
+    (*list)->dataBounds.bottom = (*list)->dataBounds.bottom - count;
 
     if(noffsets)
     {
         INTEGER visible_bottom, bounds_bottom;
 
-        nrows = Hx(list, dataBounds.bottom) - Hx(list, dataBounds.top);
-        nbefore = (rown - Hx(list, dataBounds.top)) * ncols;
+        nrows = (*list)->dataBounds.bottom - (*list)->dataBounds.top;
+        nbefore = (rown - (*list)->dataBounds.top) * ncols;
         nafter = nrows * ncols - nbefore;
-        ip = op = (GUEST<uint16_t> *)HxX(list, cellArray) + nbefore;
+        ip = op = (GUEST<uint16_t> *)(*list)->cellArray + nbefore;
         ip += noffsets;
         off1 = *op & 0x7FFF;
         off2 = *ip & 0x7FFF;
@@ -357,29 +357,29 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
         *op = *ip - delta; /* sentinel */
 
         ntomove = off3 - off2;
-        BlockMoveData((Ptr)*HxP(list, cells) + off2,
-                      (Ptr)*HxP(list, cells) + off1, ntomove);
+        BlockMoveData((Ptr)*(*list)->cells + off2,
+                      (Ptr)*(*list)->cells + off1, ntomove);
 
         SetHandleSize((Handle)list,
                       GetHandleSize((Handle)list) - noffsets * sizeof(INTEGER));
-        SetHandleSize((Handle)HxP(list, cells),
-                      GetHandleSize((Handle)HxP(list, cells)) - delta);
+        SetHandleSize((Handle)(*list)->cells,
+                      GetHandleSize((Handle)(*list)->cells) - delta);
 
-        p.h = Hx(list, cellSize.h);
-        p.v = Hx(list, cellSize.v);
+        p.h = (*list)->cellSize.h;
+        p.v = (*list)->cellSize.v;
 
         /* save visible_bottom and bounds_bottom now, because LCellSize
 	   will adjust them and we won't be able to figure out if we
 	   needed to force a scroll */
 
-        visible_bottom = Hx(list, visible.bottom);
-        bounds_bottom = Hx(list, dataBounds.bottom);
+        visible_bottom = (*list)->visible.bottom;
+        bounds_bottom = (*list)->dataBounds.bottom;
         C_LCellSize(p, list); /* recalcs visible */
-        if((control = HxP(list, vScroll)))
+        if((control = (*list)->vScroll))
         {
             INTEGER visible_top;
 
-            visible_top = Hx(list, visible.top);
+            visible_top = (*list)->visible.top;
 
             /* Determine whether or not we need to scroll up one location
 	       (because we were maximally scrolled down and we deleted
@@ -388,23 +388,23 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
             if(visible_top > 0 && visible_bottom > bounds_bottom)
             {
                 --visible_top;
-                HxX(list, visible.top) = visible_top;
+                (*list)->visible.top = visible_top;
                 rown = visible_top;
             }
         }
 
-        if(Hx(list, listFlags) & DODRAW)
+        if((*list)->listFlags & DODRAW)
         {
             Rect eraser;
 
-            compute_visible_rect(&eraser, list, Hx(list, visible.bottom),
-                                 Hx(list, visible.left), visible_bottom,
-                                 Hx(list, visible.right));
+            compute_visible_rect(&eraser, list, (*list)->visible.bottom,
+                                 (*list)->visible.left, visible_bottom,
+                                 (*list)->visible.right);
             EraseRect(&eraser);
 
-            todraw = HxX(list, dataBounds);
+            todraw = (*list)->dataBounds;
             todraw.top = rown;
-            SectRect(&todraw, &HxX(list, visible), &todraw);
+            SectRect(&todraw, &(*list)->visible, &todraw);
 
             for(c.v = todraw.top; c.v < todraw.bottom; c.v++)
                 for(c.h = todraw.left; c.h < todraw.right; c.h++)

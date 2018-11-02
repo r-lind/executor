@@ -147,7 +147,7 @@ void Executor::ROMlib_sledgehammer_te(TEHandle te)
 void Executor::TESetWordBreak(ProcPtr wb, TEHandle teh)
 {
     TE_SLAM(teh);
-    HxX(teh, wordBreak) = wb;
+    (*teh)->wordBreak = wb;
     TE_SLAM(teh);
 }
 
@@ -165,7 +165,7 @@ void Executor::TESetWordBreak(ProcPtr wb, TEHandle teh)
 void Executor::TESetClickLoop(ProcPtr cp, TEHandle teh)
 {
     TE_SLAM(teh);
-    HxX(teh, clikLoop) = cp;
+    (*teh)->clikLoop = cp;
     TE_SLAM(teh);
 }
 
@@ -198,7 +198,7 @@ int16_t nextbreak(TEHandle teh, int16_t off, int16_t len,
     if(off > len)
         warning_unexpected("off > len");
     minsp = sp;
-    if(Hx(teh, crOnly) < 0)
+    if((*teh)->crOnly < 0)
     {
         while(sp != ep && *sp++ != '\r')
             ;

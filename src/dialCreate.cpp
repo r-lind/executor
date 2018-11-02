@@ -89,12 +89,12 @@ void Executor::dialog_create_item(DialogPeek dp, itmp dst, itmp src,
             AuxWinHandle aux_win_h;
 
             aux_win_h = *lookup_aux_win((WindowPtr)dp);
-            if(aux_win_h && HxX(aux_win_h, dialogCItem))
+            if(aux_win_h && (*aux_win_h)->dialogCItem)
             {
                 Handle item_color_info_h;
                 item_color_info_t *item_color_info;
 
-                item_color_info_h = HxP(aux_win_h, dialogCItem);
+                item_color_info_h = (*aux_win_h)->dialogCItem;
                 item_color_info = (item_color_info_t *)*item_color_info_h;
 
                 if(item_color_info)
@@ -205,7 +205,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
         aux_win_h = *lookup_aux_win(dp);
         gui_assert(aux_win_h);
 
-        HxX(aux_win_h, dialogCItem) = item_color_table_h;
+        (*aux_win_h)->dialogCItem = item_color_table_h;
     }
 
     // FIXME: #warning We no longer call TEStyleNew, this helps LB password
@@ -376,7 +376,7 @@ DialogPtr Executor::C_GetNewDialog(INTEGER id, Ptr dst,
     dialog_res_h = (dlogh)ROMlib_getrestid(TICK("DLOG"), id);
 
     dialog_item_list_res_h = ROMlib_getrestid(TICK("DITL"),
-                                              Hx(dialog_res_h, dlgditl));
+                                              (*dialog_res_h)->dlgditl);
     dialog_item_list_res_h = ROMlib_copy_handle(dialog_item_list_res_h);
 
     if(!dialog_res_h || !dialog_item_list_res_h)
@@ -390,7 +390,7 @@ DialogPtr Executor::C_GetNewDialog(INTEGER id, Ptr dst,
     HLockGuard guard(dialog_res_h);
     Rect adjusted_rect;
 
-    dialog_compute_rect(&HxX(dialog_res_h, dlgr),
+    dialog_compute_rect(&(*dialog_res_h)->dlgr,
                         &adjusted_rect,
                         (DIALOG_RES_HAS_POSITION_P(dialog_res_h)
                              ? DIALOG_RES_POSITION(dialog_res_h)
@@ -403,12 +403,12 @@ DialogPtr Executor::C_GetNewDialog(INTEGER id, Ptr dst,
                                    (CTabHandle)dialog_ctab_res_h,
                                    item_ctab_res_h,
                                    &adjusted_rect,
-                                   (StringPtr)(&HxX(dialog_res_h, dlglen)),
-                                   Hx(dialog_res_h, dlgvis),
-                                   Hx(dialog_res_h, dlgprocid),
+                                   (StringPtr)(&(*dialog_res_h)->dlglen),
+                                   (*dialog_res_h)->dlgvis,
+                                   (*dialog_res_h)->dlgprocid,
                                    behind,
-                                   Hx(dialog_res_h, dlggaflag),
-                                   Hx(dialog_res_h, dlgrc),
+                                   (*dialog_res_h)->dlggaflag,
+                                   (*dialog_res_h)->dlgrc,
                                    dialog_item_list_res_h);
 
     return retval;

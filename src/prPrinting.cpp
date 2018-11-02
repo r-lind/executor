@@ -365,7 +365,7 @@ ourinit(TPPrPort port, BOOLEAN preserve_font)
             ROMlib_paper_y - (ROMlib_resolution_y / 2));
     SetRect(&port->gPort.portRect, 0, 0,
             ROMlib_paper_x - 72, ROMlib_paper_y - 72);
-    HxX(port->gPort.visRgn, rgnBBox) = port->gPort.portRect;
+    (*port->gPort.visRgn)->rgnBBox = port->gPort.portRect;
 
     if(preserve_font)
         port->gPort.txFont = saved_font;
@@ -497,8 +497,8 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
     ourinit(port, false);
 
 #if !defined(MACOSX_)
-    pagewanted = Hx(hPrint, prJob.iFstPage);
-    lastpagewanted = Hx(hPrint, prJob.iLstPage);
+    pagewanted = (*hPrint)->prJob.iFstPage;
+    lastpagewanted = (*hPrint)->prJob.iLstPage;
 #else
     lastpagewanted = 9999;
 #endif
@@ -538,7 +538,7 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
             fprintf(ROMlib_printfile, ROMlib_doc_end_prolog,
                     ROMlib_paper_size.c_str(), ROMlib_paper_size_name.c_str(),
                     ROMlib_paper_size_name_terminator.c_str(),
-                    Hx(hPrint, prJob.iCopies), len, p);
+                    (*hPrint)->prJob.iCopies, len, p);
         }
         pageno = 0;
     }

@@ -18,7 +18,7 @@ inline AE_zone_tables_h get_zone_tables(bool system_p)
     auto info = LM(AE_info);
     return system_p ? info->system_zone_tables : info->appl_zone_tables;
 }
-#define hdlr_table(system_p, class) HxP(get_zone_tables(system_p), class##_hdlr_table)
+#define hdlr_table(system_p, class) (*get_zone_tables(system_p))->class##_hdlr_table
 
 void Executor::AE_init(void)
 {
@@ -37,15 +37,15 @@ void Executor::AE_init(void)
     err = _AE_hdlr_table_alloc(16, 0x80008, 0,
                                /* #### */
                                false,
-                               &HxX(zone_tables, event_hdlr_table));
+                               &(*zone_tables)->event_hdlr_table);
     err = _AE_hdlr_table_alloc(16, 0x80008, 0,
                                /* #### */
                                false,
-                               &HxX(zone_tables, coercion_hdlr_table));
+                               &(*zone_tables)->coercion_hdlr_table);
     err = _AE_hdlr_table_alloc(16, 0x80008, 0,
                                /* #### */
                                false,
-                               &HxX(zone_tables, special_hdlr_table));
+                               &(*zone_tables)->special_hdlr_table);
     info->system_zone_tables = zone_tables;
 
     LM(AE_info) = info;
@@ -68,15 +68,15 @@ void Executor::AE_reinit(void)
     err = _AE_hdlr_table_alloc(16, 0x80008, 0,
                                /* #### */
                                false,
-                               &HxX(zone_tables, event_hdlr_table));
+                               &(*zone_tables)->event_hdlr_table);
     err = _AE_hdlr_table_alloc(16, 0x80008, 0,
                                /* #### */
                                false,
-                               &HxX(zone_tables, coercion_hdlr_table));
+                               &(*zone_tables)->coercion_hdlr_table);
     err = _AE_hdlr_table_alloc(16, 0x80008, 0,
                                /* #### */
                                false,
-                               &HxX(zone_tables, special_hdlr_table));
+                               &(*zone_tables)->special_hdlr_table);
     info->appl_zone_tables = zone_tables;
 }
 

@@ -446,13 +446,13 @@ TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
 
     te_style = (TEStyleHandle)NewHandle(TE_STYLE_SIZE_FOR_N_RUNS(1));
 
-    HxX(te_style, nRuns) = 1;
-    HxX(te_style, runs[0].startChar) = 0;
-    HxX(te_style, runs[0].styleIndex) = 0;
-    HxX(te_style, runs[1].startChar) = 1;
-    HxX(te_style, runs[1].styleIndex) = -1;
+    (*te_style)->nRuns = 1;
+    (*te_style)->runs[0].startChar = 0;
+    (*te_style)->runs[0].styleIndex = 0;
+    (*te_style)->runs[1].startChar = 1;
+    (*te_style)->runs[1].styleIndex = -1;
 
-    HxX(te_style, nStyles) = 1;
+    (*te_style)->nStyles = 1;
 
     /* font info used to fill in the fisrt style element */
     GetFontInfo(&font_info);
@@ -478,16 +478,16 @@ TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
 
     TE_STYLE_LH_TABLE_X(te_style) = lh_table;
 
-    HxX(te_style, teRefCon) = 0;
+    (*te_style)->teRefCon = 0;
 
     tempnullsth = (NullSTHandle)NewHandle(sizeof(NullSTRec));
-    HxX(te_style, nullStyle) = tempnullsth;
+    (*te_style)->nullStyle = tempnullsth;
     stsh = (StScrpHandle)NewHandle(sizeof(StScrpRec));
-    HxX(tempnullsth, nullScrap) = (StScrpHandle)stsh;
-    HxX(tempnullsth, TEReserved) = 0;
-    HxX(stsh, scrpNStyles) = 0;
+    (*tempnullsth)->nullScrap = (StScrpHandle)stsh;
+    (*tempnullsth)->TEReserved = 0;
+    (*stsh)->scrpNStyles = 0;
 
-    stp = HxX(stsh, scrpStyleTab);
+    stp = (*stsh)->scrpStyleTab;
     stp->scrpFont = PORT_TX_FONT_X(qdGlobals().thePort);
     stp->scrpFace = PORT_TX_FACE_X(qdGlobals().thePort);
     stp->scrpSize = PORT_TX_SIZE_X(qdGlobals().thePort);
@@ -510,7 +510,7 @@ void Executor::C_TESetStyleHandle(TEStyleHandle theHandle, TEHandle teh)
 {
     if(!TE_STYLIZED_P(teh))
         return;
-    *(GUEST<TEStyleHandle> *)&HxX(teh, txFont) = theHandle;
+    *(GUEST<TEStyleHandle> *)&(*teh)->txFont = theHandle;
 }
 
 TEStyleHandle Executor::C_TEGetStyleHandle(TEHandle teh)

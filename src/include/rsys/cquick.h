@@ -180,9 +180,9 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define CPORT_GRAFVARS(cport) ((GrafVarsHandle)CPORT_GRAFVARS_X(cport))
 
 #define CPORT_OP_COLOR(cport) \
-    (HxX((GrafVarsHandle)CPORT_GRAFVARS(cport), rgbOpColor))
+    ((*(GrafVarsHandle)CPORT_GRAFVARS(cport))->rgbOpColor)
 #define CPORT_HILITE_COLOR(cport) \
-    (HxX((GrafVarsHandle)CPORT_GRAFVARS(cport), rgbHiliteColor))
+    ((*(GrafVarsHandle)CPORT_GRAFVARS(cport))->rgbHiliteColor)
 
 /* general purpose accessor functions */
 /* return the bounds of a port, whether it is a GrafPort or CGrafPort */
@@ -217,10 +217,10 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
      && !(((BitMap *)ptr)->rowBytes & (1 << 14)))
 
 /* PixMap accessors */
-#define PIXMAP_BOUNDS(pixmap) (HxX(pixmap, bounds))
+#define PIXMAP_BOUNDS(pixmap) ((*pixmap)->bounds)
 
 /* big endian byte order */
-#define PIXMAP_BASEADDR_X(pixmap) (HxX(pixmap, baseAddr))
+#define PIXMAP_BASEADDR_X(pixmap) ((*pixmap)->baseAddr)
 
 #define ROWBYTES_VALUE_BITS (0x3FFF)
 #define ROWBYTES_VALUE_BITS_X (ROWBYTES_VALUE_BITS)
@@ -228,7 +228,7 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define ROWBYTES_FLAG_BITS (3 << 14)
 #define ROWBYTES_FLAG_BITS_X (ROWBYTES_FLAG_BITS)
 #define PIXMAP_FLAGS_X(pixmap) \
-    (HxX(pixmap, rowBytes) & ROWBYTES_FLAG_BITS_X)
+    ((*pixmap)->rowBytes & ROWBYTES_FLAG_BITS_X)
 #define PIXMAP_FLAGS(pixmap) (PIXMAP_FLAGS_X(pixmap))
 
 /* ### phase out; eventually i'd like to see consistent use of
@@ -253,30 +253,30 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
      && (CPORT_VERSION_X(port) & GW_FLAG_BIT_X))
 
 #define PIXMAP_ROWBYTES_X(pixmap) \
-    (HxX(pixmap, rowBytes) & ROWBYTES_VALUE_BITS_X)
+    ((*pixmap)->rowBytes & ROWBYTES_VALUE_BITS_X)
 #define PIXMAP_ROWBYTES(pixmap) (PIXMAP_ROWBYTES_X(pixmap))
 
 #define PIXMAP_SET_ROWBYTES_X(pixmap, value) \
-    (HxX(pixmap, rowBytes) = ((value) & ROWBYTES_VALUE_BITS_X) | PIXMAP_FLAGS_X(pixmap))
+    ((*pixmap)->rowBytes = ((value) & ROWBYTES_VALUE_BITS_X) | PIXMAP_FLAGS_X(pixmap))
 
-#define PIXMAP_VERSION_X(pixmap) (HxX(pixmap, pmVersion))
-#define PIXMAP_PACK_TYPE_X(pixmap) (HxX(pixmap, packType))
-#define PIXMAP_PACK_SIZE_X(pixmap) (HxX(pixmap, packSize))
-#define PIXMAP_HRES_X(pixmap) (HxX(pixmap, hRes))
-#define PIXMAP_VRES_X(pixmap) (HxX(pixmap, vRes))
-#define PIXMAP_PIXEL_TYPE_X(pixmap) (HxX(pixmap, pixelType))
-#define PIXMAP_PIXEL_SIZE_X(pixmap) (HxX(pixmap, pixelSize))
-#define PIXMAP_CMP_COUNT_X(pixmap) (HxX(pixmap, cmpCount))
-#define PIXMAP_CMP_SIZE_X(pixmap) (HxX(pixmap, cmpSize))
-#define PIXMAP_PLANE_BYTES_X(pixmap) (HxX(pixmap, planeBytes))
-#define PIXMAP_TABLE_X(pixmap) (HxX(pixmap, pmTable))
+#define PIXMAP_VERSION_X(pixmap) ((*pixmap)->pmVersion)
+#define PIXMAP_PACK_TYPE_X(pixmap) ((*pixmap)->packType)
+#define PIXMAP_PACK_SIZE_X(pixmap) ((*pixmap)->packSize)
+#define PIXMAP_HRES_X(pixmap) ((*pixmap)->hRes)
+#define PIXMAP_VRES_X(pixmap) ((*pixmap)->vRes)
+#define PIXMAP_PIXEL_TYPE_X(pixmap) ((*pixmap)->pixelType)
+#define PIXMAP_PIXEL_SIZE_X(pixmap) ((*pixmap)->pixelSize)
+#define PIXMAP_CMP_COUNT_X(pixmap) ((*pixmap)->cmpCount)
+#define PIXMAP_CMP_SIZE_X(pixmap) ((*pixmap)->cmpSize)
+#define PIXMAP_PLANE_BYTES_X(pixmap) ((*pixmap)->planeBytes)
+#define PIXMAP_TABLE_X(pixmap) ((*pixmap)->pmTable)
 
 #define PIXMAP_ASSERT_NOT_SCREEN(pixmap) \
     gui_assert(!active_screen_addr_p(pixmap))
 
 /* used for initializing this field to zero for future
    compatibility */
-#define PIXMAP_RESERVED_X(pixmap) (HxX(pixmap, pmReserved))
+#define PIXMAP_RESERVED_X(pixmap) ((*pixmap)->pmReserved)
 /* native byte order */
 #define PIXMAP_BASEADDR(pixmap) (PIXMAP_BASEADDR_X(pixmap))
 
@@ -314,16 +314,16 @@ enum pixpat_pattern_types
     pixpat_color_pattern = 1,
     pixpat_rgb_pattern = 2,
 };
-#define PIXPAT_1DATA(pixpat) (HxX(pixpat, pat1Data))
+#define PIXPAT_1DATA(pixpat) ((*pixpat)->pat1Data)
 
 /* big endian byte order */
 #if 0
-#define PIXPAT_TYPE_X(pixpat) (HxX(pixpat, patType))
-#define PIXPAT_MAP_X(pixpat) (HxX(pixpat, patMap))
-#define PIXPAT_DATA_X(pixpat) (HxX(pixpat, patData))
-#define PIXPAT_XDATA_X(pixpat) (HxX(pixpat, patXData))
-#define PIXPAT_XVALID_X(pixpat) (HxX(pixpat, patXValid))
-#define PIXPAT_XMAP_X(pixpat) (HxX(pixpat, patXMap))
+#define PIXPAT_TYPE_X(pixpat) ((*pixpat)->patType)
+#define PIXPAT_MAP_X(pixpat) ((*pixpat)->patMap)
+#define PIXPAT_DATA_X(pixpat) ((*pixpat)->patData)
+#define PIXPAT_XDATA_X(pixpat) ((*pixpat)->patXData)
+#define PIXPAT_XVALID_X(pixpat) ((*pixpat)->patXValid)
+#define PIXPAT_XMAP_X(pixpat) ((*pixpat)->patXMap)
 #else
 #define PIXPAT_TYPE_X(pixpat) ((*pixpat)->patType)
 #define PIXPAT_MAP_X(pixpat) ((*pixpat)->patMap)
@@ -376,11 +376,11 @@ typedef BitMap blt_bitmap_t;
 #define CTAB_GDEVICE_BIT_X (1 << 15)
 #define CTAB_GDEVICE_BIT (1 << 15)
 
-#define CTAB_TABLE(ctab) (HxX((ctab), ctTable))
+#define CTAB_TABLE(ctab) ((*(ctab))->ctTable)
 
-#define CTAB_SEED_X(ctab) (HxX((ctab), ctSeed))
-#define CTAB_FLAGS_X(ctab) (HxX((ctab), ctFlags))
-#define CTAB_SIZE_X(ctab) (HxX((ctab), ctSize))
+#define CTAB_SEED_X(ctab) ((*(ctab))->ctSeed)
+#define CTAB_FLAGS_X(ctab) ((*(ctab))->ctFlags)
+#define CTAB_SIZE_X(ctab) ((*(ctab))->ctSize)
 
 #define CTAB_SEED(ctab) (CTAB_SEED_X(ctab))
 #define CTAB_FLAGS(ctab) (CTAB_FLAGS_X(ctab))
@@ -407,37 +407,37 @@ typedef BitMap blt_bitmap_t;
 #define COLORSPEC_VALUE_LOW_BYTE(cspec) (((uint8_t *)&((cspec)->value))[1])
 
 /* inverse color table accessors */
-#define ITAB_TABLE(itab) (HxX((itab), iTTable))
+#define ITAB_TABLE(itab) ((*(itab))->iTTable)
 
-#define ITAB_SEED_X(itab) (HxX((itab), iTabSeed))
-#define ITAB_RES_X(itab) (HxX((itab), iTabRes))
+#define ITAB_SEED_X(itab) ((*(itab))->iTabSeed)
+#define ITAB_RES_X(itab) ((*(itab))->iTabRes)
 
 #define ITAB_SEED(itab) (ITAB_SEED_X(itab))
 #define ITAB_RES(itab) (ITAB_RES_X(itab))
 
 /* graphics device accessors */
-#define GD_RECT(gdhandle) (HxX(gdhandle, gdRect))
+#define GD_RECT(gdhandle) ((*gdhandle)->gdRect)
 #define GD_BOUNDS(gdhandle) PIXMAP_BOUNDS(GD_PMAP(gdhandle))
 
-#define GD_REF_NUM_X(gdhandle) (HxX(gdhandle, gdRefNum))
-#define GD_ID_X(gdhandle) (HxX(gdhandle, gdID))
-#define GD_TYPE_X(gdhandle) (HxX(gdhandle, gdType))
-#define GD_ITABLE_X(gdhandle) (HxX(gdhandle, gdITable))
-#define GD_RES_PREF_X(gdhandle) (HxX(gdhandle, gdResPref))
-#define GD_SEARCH_PROC_X(gdhandle) (HxX(gdhandle, gdSearchProc))
-#define GD_COMP_PROC_X(gdhandle) (HxX(gdhandle, gdCompProc))
-#define GD_FLAGS_X(gdhandle) (HxX(gdhandle, gdFlags))
-#define GD_PMAP_X(gdhandle) (HxX(gdhandle, gdPMap))
-#define GD_REF_CON_X(gdhandle) (HxX(gdhandle, gdRefCon))
-#define GD_NEXT_GD_X(gdhandle) (HxX(gdhandle, gdNextGD))
-#define GD_MODE_X(gdhandle) (HxX(gdhandle, gdMode))
+#define GD_REF_NUM_X(gdhandle) ((*gdhandle)->gdRefNum)
+#define GD_ID_X(gdhandle) ((*gdhandle)->gdID)
+#define GD_TYPE_X(gdhandle) ((*gdhandle)->gdType)
+#define GD_ITABLE_X(gdhandle) ((*gdhandle)->gdITable)
+#define GD_RES_PREF_X(gdhandle) ((*gdhandle)->gdResPref)
+#define GD_SEARCH_PROC_X(gdhandle) ((*gdhandle)->gdSearchProc)
+#define GD_COMP_PROC_X(gdhandle) ((*gdhandle)->gdCompProc)
+#define GD_FLAGS_X(gdhandle) ((*gdhandle)->gdFlags)
+#define GD_PMAP_X(gdhandle) ((*gdhandle)->gdPMap)
+#define GD_REF_CON_X(gdhandle) ((*gdhandle)->gdRefCon)
+#define GD_NEXT_GD_X(gdhandle) ((*gdhandle)->gdNextGD)
+#define GD_MODE_X(gdhandle) ((*gdhandle)->gdMode)
 
-#define GD_CCBYTES_X(gdhandle) (HxX(gdhandle, gdCCBytes))
-#define GD_CCDEPTH_X(gdhandle) (HxX(gdhandle, gdCCDepth))
-#define GD_CCXDATA_X(gdhandle) (HxX(gdhandle, gdCCXData))
-#define GD_CCXMASK_X(gdhandle) (HxX(gdhandle, gdCCXMask))
+#define GD_CCBYTES_X(gdhandle) ((*gdhandle)->gdCCBytes)
+#define GD_CCDEPTH_X(gdhandle) ((*gdhandle)->gdCCDepth)
+#define GD_CCXDATA_X(gdhandle) ((*gdhandle)->gdCCXData)
+#define GD_CCXMASK_X(gdhandle) ((*gdhandle)->gdCCXMask)
 
-#define GD_RESERVED_X(gdhandle) (HxX(gdhandle, gdReserved))
+#define GD_RESERVED_X(gdhandle) ((*gdhandle)->gdReserved)
 
 #define GD_REF_NUM(gdhandle) (GD_REF_NUM_X(gdhandle))
 #define GD_ID(gdhandle) (GD_ID_X(gdhandle))
@@ -458,12 +458,12 @@ typedef BitMap blt_bitmap_t;
 #define GD_CCXMASK(gdhandle) (GD_CCXMASK_X(gdhandle))
 
 /* color icon accessors */
-#define CICON_PMAP(cicon) (HxX(cicon, iconPMap))
-#define CICON_MASK(cicon) (HxX(cicon, iconMask))
-#define CICON_BMAP(cicon) (HxX(cicon, iconBMap))
-#define CICON_MASK_DATA(cicon) (HxX(cicon, iconMaskData))
+#define CICON_PMAP(cicon) ((*cicon)->iconPMap)
+#define CICON_MASK(cicon) ((*cicon)->iconMask)
+#define CICON_BMAP(cicon) ((*cicon)->iconBMap)
+#define CICON_MASK_DATA(cicon) ((*cicon)->iconMaskData)
 
-#define CICON_DATA_X(cicon) (HxX(cicon, iconData))
+#define CICON_DATA_X(cicon) ((*cicon)->iconData)
 #define CICON_DATA(cicon) (CICON_DATA_X(cicon))
 
 inline bool CICON_P(Handle _icon)
@@ -489,14 +489,14 @@ inline bool CICON_P(Handle _icon)
 #define PALETTE_STORAGE_FOR_ENTRIES(n_entries) \
     (sizeof(Palette) + ((n_entries - 1) * sizeof(ColorInfo)))
 
-#define PALETTE_DATA_FIELDS(palette) (HxX(palette, pmDataFields))
-#define PALETTE_INFO(palette) (HxX(palette, pmInfo))
+#define PALETTE_DATA_FIELDS(palette) ((*palette)->pmDataFields)
+#define PALETTE_INFO(palette) ((*palette)->pmInfo)
 
-#define PALETTE_ENTRIES_X(palette) (HxX(palette, pmEntries))
-#define PALETTE_WINDOW_X(palette) (HxX(palette, pmWindow))
-#define PALETTE_PRIVATE_X(palette) (HxX(palette, pmPrivate))
-#define PALETTE_DEVICES_X(palette) (HxX(palette, pmDevices))
-#define PALETTE_SEEDS_X(palette) (HxX(palette, pmSeeds))
+#define PALETTE_ENTRIES_X(palette) ((*palette)->pmEntries)
+#define PALETTE_WINDOW_X(palette) ((*palette)->pmWindow)
+#define PALETTE_PRIVATE_X(palette) ((*palette)->pmPrivate)
+#define PALETTE_DEVICES_X(palette) ((*palette)->pmDevices)
+#define PALETTE_SEEDS_X(palette) ((*palette)->pmSeeds)
 
 #define PALETTE_ENTRIES(palette) (PALETTE_ENTRIES_X(palette))
 #define PALETTE_WINDOW(palette) (PALETTE_WINDOW_X(palette))
@@ -511,18 +511,18 @@ inline bool CICON_P(Handle _icon)
 #define CINFO_RESERVED_INDEX_BIT (0x8000)
 
 /* color cursor accessors */
-#define CCRSR_1DATA(ccrsr) (HxX(ccrsr, crsr1Data))
-#define CCRSR_MASK(ccrsr) (HxX(ccrsr, crsrMask))
-#define CCRSR_HOT_SPOT(ccrsr) (HxX(ccrsr, crsrHotSpot))
+#define CCRSR_1DATA(ccrsr) ((*ccrsr)->crsr1Data)
+#define CCRSR_MASK(ccrsr) ((*ccrsr)->crsrMask)
+#define CCRSR_HOT_SPOT(ccrsr) ((*ccrsr)->crsrHotSpot)
 
-#define CCRSR_TYPE_X(ccrsr) (HxX(ccrsr, crsrType))
-#define CCRSR_MAP_X(ccrsr) (HxX(ccrsr, crsrMap))
-#define CCRSR_DATA_X(ccrsr) (HxX(ccrsr, crsrData))
-#define CCRSR_XDATA_X(ccrsr) (HxX(ccrsr, crsrXData))
-#define CCRSR_XVALID_X(ccrsr) (HxX(ccrsr, crsrXValid))
-#define CCRSR_XHANDLE_X(ccrsr) (HxX(ccrsr, crsrXHandle))
-#define CCRSR_XTABLE_X(ccrsr) (HxX(ccrsr, crsrXTable))
-#define CCRSR_ID_X(ccrsr) (HxX(ccrsr, crsrID))
+#define CCRSR_TYPE_X(ccrsr) ((*ccrsr)->crsrType)
+#define CCRSR_MAP_X(ccrsr) ((*ccrsr)->crsrMap)
+#define CCRSR_DATA_X(ccrsr) ((*ccrsr)->crsrData)
+#define CCRSR_XDATA_X(ccrsr) ((*ccrsr)->crsrXData)
+#define CCRSR_XVALID_X(ccrsr) ((*ccrsr)->crsrXValid)
+#define CCRSR_XHANDLE_X(ccrsr) ((*ccrsr)->crsrXHandle)
+#define CCRSR_XTABLE_X(ccrsr) ((*ccrsr)->crsrXTable)
+#define CCRSR_ID_X(ccrsr) ((*ccrsr)->crsrID)
 
 #define CCRSR_TYPE(ccrsr) (CCRSR_TYPE_X(ccrsr))
 #define CCRSR_MAP(ccrsr) (CCRSR_MAP_X(ccrsr))

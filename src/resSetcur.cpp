@@ -69,7 +69,7 @@ INTEGER Executor::C_HomeResFile(Handle res)
     if(LM(ResErr) != noErr)
         return (-1);
     else
-        return (Hx(map, resfn));
+        return ((*map)->resfn);
 }
 
 void Executor::C_UseResFile(INTEGER rn)

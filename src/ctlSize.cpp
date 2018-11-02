@@ -17,23 +17,23 @@ using namespace Executor;
 
 void Executor::C_MoveControl(ControlHandle c, INTEGER h, INTEGER v) /* IMI-325 */
 {
-    if(Hx(c, contrlVis))
+    if((*c)->contrlVis)
     {
         HideControl(c);
-        HxX(c, contrlRect.right) = Hx(c, contrlRect.right)
-                                      + h - Hx(c, contrlRect.left);
-        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.bottom)
-                                       + v - Hx(c, contrlRect.top);
-        HxX(c, contrlRect.left) = h;
-        HxX(c, contrlRect.top) = v;
+        (*c)->contrlRect.right = (*c)->contrlRect.right
+                                      + h - (*c)->contrlRect.left;
+        (*c)->contrlRect.bottom = (*c)->contrlRect.bottom
+                                       + v - (*c)->contrlRect.top;
+        (*c)->contrlRect.left = h;
+        (*c)->contrlRect.top = v;
         ShowControl(c);
     }
     else
     {
-        HxX(c, contrlRect.right) = Hx(c, contrlRect.right) + h - Hx(c, contrlRect.left);
-        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.bottom) + v - Hx(c, contrlRect.top);
-        HxX(c, contrlRect.left) = h;
-        HxX(c, contrlRect.top) = v;
+        (*c)->contrlRect.right = (*c)->contrlRect.right + h - (*c)->contrlRect.left;
+        (*c)->contrlRect.bottom = (*c)->contrlRect.bottom + v - (*c)->contrlRect.top;
+        (*c)->contrlRect.left = h;
+        (*c)->contrlRect.top = v;
     }
 }
 
@@ -51,8 +51,8 @@ void Executor::C_DragControl(ControlHandle c, Point p, Rect *limit, Rect *slop,
         CTLCALL(c, calcCntlRgn, ptr_to_longint(rh));
         l = DragGrayRgn(rh, p, limit, slop, axis, (ProcPtr)0);
         if((uint32_t)l != 0x80008000)
-            MoveControl(c, Hx(c, contrlRect.left) + LoWord(l),
-                        Hx(c, contrlRect.top) + HiWord(l));
+            MoveControl(c, (*c)->contrlRect.left + LoWord(l),
+                        (*c)->contrlRect.top + HiWord(l));
 
         DisposeRgn(rh);
     }
@@ -61,16 +61,16 @@ void Executor::C_DragControl(ControlHandle c, Point p, Rect *limit, Rect *slop,
 void Executor::C_SizeControl(ControlHandle c, INTEGER width,
                              INTEGER height) /* IMI-326 */
 {
-    if(Hx(c, contrlVis))
+    if((*c)->contrlVis)
     {
         HideControl(c);
-        HxX(c, contrlRect.right) = Hx(c, contrlRect.left) + width;
-        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.top) + height;
+        (*c)->contrlRect.right = (*c)->contrlRect.left + width;
+        (*c)->contrlRect.bottom = (*c)->contrlRect.top + height;
         ShowControl(c);
     }
     else
     {
-        HxX(c, contrlRect.right) = Hx(c, contrlRect.left) + width;
-        HxX(c, contrlRect.bottom) = Hx(c, contrlRect.top) + height;
+        (*c)->contrlRect.right = (*c)->contrlRect.left + width;
+        (*c)->contrlRect.bottom = (*c)->contrlRect.top + height;
     }
 }

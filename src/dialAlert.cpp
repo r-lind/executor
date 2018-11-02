@@ -61,7 +61,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
     }
 
     LoadResource((Handle)ah);
-    n = (Hx(ah, altstag) >> (4 * LM(ACount))) & 0xF;
+    n = ((*ah)->altstag >> (4 * LM(ACount))) & 0xF;
     LM(ACount) = LM(ACount) + 1;
     if(LM(ACount) > 3)
         LM(ACount) = 3;
@@ -69,12 +69,12 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
     if(!(n & 4))
         return -1;
 
-    ih = GetResource(TICK("DITL"), Hx(ah, altiid));
+    ih = GetResource(TICK("DITL"), (*ah)->altiid);
     if(!ih)
         return -1;
     LoadResource(ih);
-    alert_ctab_res_h = ROMlib_getrestid(TICK("actb"), Hx(ah, altiid));
-    item_ctab_res_h = ROMlib_getrestid(TICK("ictb"), Hx(ah, altiid));
+    alert_ctab_res_h = ROMlib_getrestid(TICK("actb"), (*ah)->altiid);
+    item_ctab_res_h = ROMlib_getrestid(TICK("ictb"), (*ah)->altiid);
     GUEST<Handle> h = ih;
     HandToHand(&h);
 
@@ -88,7 +88,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
 
     {
         HLockGuard hGuard(ah);
-        dialog_compute_rect(&HxX(ah, altr),
+        dialog_compute_rect(&(*ah)->altr,
                             &adjusted_rect,
                             (ALERT_RES_HAS_POSITION_P(ah)
                                  ? ALERT_RES_POSITION(ah)
@@ -124,7 +124,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
             aux_win_h = *lookup_aux_win(DIALOG_WINDOW(dp));
             gui_assert(aux_win_h);
 
-            HxX(aux_win_h, dialogCItem) = item_ctab_res_h;
+            (*aux_win_h)->dialogCItem = item_ctab_res_h;
         }
     }
 
@@ -240,7 +240,7 @@ static void lockalert(INTEGER id, BOOLEAN flag)
 
     if((ah = (alth)lockres(TICK("ALRT"), id, flag)))
     {
-        lockditl(Hx(ah, altiid), flag);
+        lockditl((*ah)->altiid, flag);
         lockres(TICK("WDEF"), dBoxProc >> 4, flag);
         lockres(TICK("ICON"), stopIcon, flag);
         lockres(TICK("ICON"), noteIcon, flag);
@@ -264,8 +264,8 @@ static void lockdialog(INTEGER id, BOOLEAN flag)
 
     if((dh = (dlogh)lockres(TICK("DLOG"), id, flag)))
     {
-        lockditl(Hx(dh, dlgditl), flag);
-        lockres(TICK("WDEF"), Hx(dh, dlgprocid) >> 4, flag);
+        lockditl((*dh)->dlgditl, flag);
+        lockres(TICK("WDEF"), (*dh)->dlgprocid >> 4, flag);
     }
 }
 

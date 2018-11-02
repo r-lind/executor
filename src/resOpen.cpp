@@ -233,7 +233,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
 
     if(compressed_p)
     {
-        if(!decompress_setup(Hx(map, resfn), &dlen, &uncompressed_size,
+        if(!decompress_setup((*map)->resfn, &dlen, &uncompressed_size,
                              &dcmp_offset, &dcmp_handle, &dcmp_workspace))
         {
             if(LM(ResErr) == noErr)
@@ -271,7 +271,7 @@ static Handle mgetres_helper(resmaphand map, resref *rr, int32_t dlen,
         }
         err = MemError();
         xxx = *retval + uncompressed_size + dcmp_offset - dlen;
-        if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll(Hx(map, resfn), guestref(dlen), xxx))))
+        if((ROMlib_setreserr(err)) || (ROMlib_setreserr(err = FSReadAll((*map)->resfn, guestref(dlen), xxx))))
         {
             if(dcmp_workspace)
                 DisposePtr(dcmp_workspace);
@@ -327,8 +327,8 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
 
         savezone = LM(TheZone);
         state = hlock_return_orig_state((Handle)map);
-        loc = Hx(map, rh.rdatoff) + B3TOLONG(rr->doff);
-        ROMlib_setreserr(SetFPos(Hx(map, resfn), fsFromStart, loc));
+        loc = (*map)->rh.rdatoff + B3TOLONG(rr->doff);
+        ROMlib_setreserr(SetFPos((*map)->resfn, fsFromStart, loc));
         if(LM(ResErr) != noErr)
             retval = nullptr;
         else
@@ -338,7 +338,7 @@ Executor::ROMlib_mgetres2(resmaphand map, resref *rr)
             GUEST<int32_t> dlen_s; /* length on disk (remaining) */
 
             lc = sizeof(Size);
-            err = FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)&dlen_s);
+            err = FSReadAll((*map)->resfn, guestref(lc), (Ptr)&dlen_s);
             ROMlib_setreserr(err);
             if(LM(ResErr) != noErr)
                 retval = nullptr;
@@ -385,7 +385,7 @@ resmaphand Executor::ROMlib_rntohandl(INTEGER rn, Handle *pph) /* INTERNAL */
 
     ph = 0;
     WALKMAPTOP(map)
-    if(Hx(map, resfn) == rn)
+    if((*map)->resfn == rn)
         break;
     ph = map;
     EWALKMAP()
@@ -423,8 +423,8 @@ void Executor::C_CloseResFile(INTEGER rn)
     {
         for(map = (resmaphand)LM(TopMapHndl); map; map = nextmap)
         {
-            nextmap = (resmaphand)HxP(map, nextmap);
-            CloseResFile(Hx(map, resfn));
+            nextmap = (resmaphand)(*map)->nextmap;
+            CloseResFile((*map)->resfn);
         }
         /*-->*/ return;
     }
@@ -445,9 +445,9 @@ void Executor::C_CloseResFile(INTEGER rn)
         /* update linked list */
 
         if(map == (resmaphand)LM(TopMapHndl))
-            LM(TopMapHndl) = HxX(map, nextmap);
+            LM(TopMapHndl) = (*map)->nextmap;
         else
-            HxX(ph, nextmap) = HxX(map, nextmap);
+            (*ph)->nextmap = (*map)->nextmap;
 
         if(LM(CurMap) == rn)
         {
@@ -489,13 +489,13 @@ already_open_res_file(GUEST<INTEGER> swapped_vref, GUEST<LONGINT> swapped_file_n
 
     retval = -1;
     WALKMAPTOP(map)
-    fcbp = PRNTOFPERR(Hx(map, resfn), &err);
+    fcbp = PRNTOFPERR((*map)->resfn, &err);
     if(err == noErr && fcbp->fdfnum == swapped_file_num)
     {
         VCB *vptr;
         vptr = fcbp->fcvptr;
         if(vptr->vcbVRefNum == swapped_vref && (fcbp->fcflags & fcfisres))
-            retval = Hx(map, resfn);
+            retval = (*map)->resfn;
     }
     EWALKMAP()
     return retval;
@@ -599,18 +599,18 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     }
 
-    HxX(map, rh) = hd;
+    (*map)->rh = hd;
 
     /* IMIV: consistency checks */
 
     if(
 #if 0 /* See NOTE below */
-	Hx(map, rh.rdatoff) != sizeof(reshead) + sizeof(rsrvrec) ||
-        Hx(map, rh.rmapoff) < Hx(map, rh.rdatoff) + Hx(map, rh.datlen) ||
+	(*map)->rh.rdatoff != sizeof(reshead) + sizeof(rsrvrec) ||
+        (*map)->rh.rmapoff < (*map)->rh.rdatoff + (*map)->rh.datlen ||
 #else
-        Hx(map, rh.rdatoff) < (int)sizeof(reshead) + (int)sizeof(rsrvrec) ||
+        (*map)->rh.rdatoff < (int)sizeof(reshead) + (int)sizeof(rsrvrec) ||
 #endif
-        Hx(map, rh.datlen) < 0 || Hx(map, rh.maplen) < (int)sizeof(resmap) + (int)sizeof(INTEGER) || Hx(map, typoff) < (int)sizeof(resmap)
+        (*map)->rh.datlen < 0 || (*map)->rh.maplen < (int)sizeof(resmap) + (int)sizeof(INTEGER) || (*map)->typoff < (int)sizeof(resmap)
 #if 0
 /*
  * NOTE:  I used to have the following test in here, but when I ran
@@ -620,7 +620,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
  *	  presumably, the Mac doesn't make this test.
  */
 	||
-        Hx(map, namoff) < sizeof(resmap) +
+        (*map)->namoff < sizeof(resmap) +
                 (NUMTMINUS1(map)+1) * (sizeof(resref) + sizeof(typref))
 #endif
             )
@@ -631,8 +631,8 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         return (-1);
     }
 
-    HxX(map, nextmap) = LM(TopMapHndl);
-    HxX(map, resfn) = f;
+    (*map)->nextmap = LM(TopMapHndl);
+    (*map)->resfn = f;
     LM(TopMapHndl) = (Handle)map;
     LM(CurMap) = f;
 

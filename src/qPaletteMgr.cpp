@@ -45,14 +45,14 @@ using namespace Executor;
 #define PALETTE_MODIFIED_BIT (0x8000)
 #define PALETTE_MODIFIED_BIT_X (0x8000)
 #define PALETTE_MODIFIED_P(palette) \
-    (HxX(palette, pmPrivate) & PALETTE_MODIFIED_BIT_X)
+    ((*palette)->pmPrivate & PALETTE_MODIFIED_BIT_X)
 #define PALETTE_SET_MODIFIED(palette) \
-    (HxX(palette, pmPrivate) |= PALETTE_MODIFIED_BIT_X)
+    ((*palette)->pmPrivate |= PALETTE_MODIFIED_BIT_X)
 #define PALETTE_CLEAR_MODIFIED(palette) \
-    (HxX(palette, pmPrivate) &= ~PALETTE_MODIFIED_BIT_X)
+    ((*palette)->pmPrivate &= ~PALETTE_MODIFIED_BIT_X)
 
 #define PALETTE_SEED_X(palette) \
-    (*(GUEST<LONGINT> *)*HxP(palette, pmSeeds))
+    (*(GUEST<LONGINT> *)*(*palette)->pmSeeds)
 #define PALETTE_SEED(palette) (PALETTE_SEED_X(palette))
 
 #define ELT_FREE_P(elt)                    \

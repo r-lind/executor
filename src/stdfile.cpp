@@ -1102,7 +1102,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
                 case '\r':
                     GetDialogItem((DialogPtr)dp, dp->aDefItem, &i, &tmpH, &r);
                     h = (ControlHandle)tmpH;
-                    if(Hx(h, contrlVis) && U(Hx(h, contrlHilite)) != 255)
+                    if((*h)->contrlVis && U((*h)->contrlHilite) != 255)
                     {
                         prefix[0] = 0;
                         oldticks = -1000;

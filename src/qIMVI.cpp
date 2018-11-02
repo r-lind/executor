@@ -133,17 +133,17 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
             break;
         case RGN_SMALL_SIZE + 9 * sizeof(INTEGER):
             outp = RGN_DATA(rh);
-            HxX(rh, rgnBBox.top) = GUEST<int16_t>::fromRaw(outp[0]);
-            HxX(rh, rgnBBox.left) = GUEST<int16_t>::fromRaw(outp[1]);
-            HxX(rh, rgnBBox.bottom) = GUEST<int16_t>::fromRaw(outp[4]);
-            HxX(rh, rgnBBox.right) = GUEST<int16_t>::fromRaw(outp[2]);
+            (*rh)->rgnBBox.top = GUEST<int16_t>::fromRaw(outp[0]);
+            (*rh)->rgnBBox.left = GUEST<int16_t>::fromRaw(outp[1]);
+            (*rh)->rgnBBox.bottom = GUEST<int16_t>::fromRaw(outp[4]);
+            (*rh)->rgnBBox.right = GUEST<int16_t>::fromRaw(outp[2]);
             RGN_SET_SMALL(rh);
             break;
         default:
-            HxX(rh, rgnBBox) = bmp->bounds;
+            (*rh)->rgnBBox = bmp->bounds;
 /* #warning we are not setting the bounding box properly */
 #if 1
-            HxX(rh, rgnSize) = rgnsize;
+            (*rh)->rgnSize = rgnsize;
 #else
             RGN_SET_SMALL(rh);
 #endif

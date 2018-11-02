@@ -20,7 +20,7 @@ PolyHandle Executor::C_OpenPoly()
     PolyHandle ph;
 
     ph = (PolyHandle)NewHandle((Size)SMALLPOLY);
-    HxX(ph, polySize) = SMALLPOLY;
+    (*ph)->polySize = SMALLPOLY;
     PORT_POLY_SAVE_X(qdGlobals().thePort) = (Handle)ph;
     HidePen();
     return (ph);
@@ -35,7 +35,7 @@ void Executor::C_ClosePoly()
 
     ph = (PolyHandle)PORT_POLY_SAVE(qdGlobals().thePort);
     for(ip = (GUEST<INTEGER> *)((char *)*ph + SMALLPOLY),
-    ep = (GUEST<INTEGER> *)((char *)*ph + Hx(ph, polySize));
+    ep = (GUEST<INTEGER> *)((char *)*ph + (*ph)->polySize);
         ip != ep;)
     {
         if((i = *ip) <= top)
@@ -49,10 +49,10 @@ void Executor::C_ClosePoly()
         if(i >= right)
             right = i;
     }
-    HxX(ph, polyBBox.top) = top;
-    HxX(ph, polyBBox.left) = left;
-    HxX(ph, polyBBox.bottom) = bottom;
-    HxX(ph, polyBBox.right) = right;
+    (*ph)->polyBBox.top = top;
+    (*ph)->polyBBox.left = left;
+    (*ph)->polyBBox.bottom = bottom;
+    (*ph)->polyBBox.right = right;
     PORT_POLY_SAVE_X(qdGlobals().thePort) = nullptr;
     ShowPen();
 }
@@ -69,12 +69,12 @@ void Executor::C_OffsetPoly(PolyHandle poly, INTEGER dh,
 
     if(dh || dv)
     {
-        HxX(poly, polyBBox.top) = Hx(poly, polyBBox.top) + dv;
-        HxX(poly, polyBBox.bottom) = Hx(poly, polyBBox.bottom) + dv;
-        HxX(poly, polyBBox.left) = Hx(poly, polyBBox.left) + dh;
-        HxX(poly, polyBBox.right) = Hx(poly, polyBBox.right) + dh;
-        pp = HxX(poly, polyPoints);
-        ep = (GUEST<Point> *)(((char *)*poly) + Hx(poly, polySize));
+        (*poly)->polyBBox.top = (*poly)->polyBBox.top + dv;
+        (*poly)->polyBBox.bottom = (*poly)->polyBBox.bottom + dv;
+        (*poly)->polyBBox.left = (*poly)->polyBBox.left + dh;
+        (*poly)->polyBBox.right = (*poly)->polyBBox.right + dh;
+        pp = (*poly)->polyPoints;
+        ep = (GUEST<Point> *)(((char *)*poly) + (*poly)->polySize);
         while(pp != ep)
         {
             pp->h = pp->h + (dh);

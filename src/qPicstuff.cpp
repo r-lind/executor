@@ -1084,7 +1084,7 @@ static void eatRegion(RgnHandle rh, Size hs)
     else
         BlockMoveData((Ptr)nextbytep, (Ptr)*rh + sizeof(INTEGER),
                       hs - sizeof(INTEGER));
-    HxX(rh, rgnSize) = hs;
+    (*rh)->rgnSize = hs;
     nextbytep += hs - sizeof(INTEGER);
 }
 
@@ -1394,7 +1394,7 @@ static void eatColorTable(PixMapPtr pixmap)
     cp->ctFlags = eatINTEGERX();
     cp->ctSize = eatINTEGERX();
     SetHandleSize((Handle)ch, (Size)sizeof(ColorTable) - sizeof(cp->ctTable) + (cp->ctSize + 1) * 4 * sizeof(INTEGER));
-    for(cspecp = HxX(ch, ctTable), cspecep = cspecp + Hx(ch, ctSize) + 1;
+    for(cspecp = (*ch)->ctTable, cspecep = cspecp + (*ch)->ctSize + 1;
         cspecp != cspecep; cspecp++)
     {
         cspecp->value = eatINTEGERX();
@@ -1544,7 +1544,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
  *	 picSize 0 pictures should be printed (Word5 creates 'em sometimes).
  *	 --ctm
  */
-    if (Hx(pic, picSize) <= 10)
+    if ((*pic)->picSize <= 10)
 /*-->*/	return;
 #endif
 #if !defined(LETGCCWAIL)
@@ -1559,7 +1559,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
 		 && destrp->left == destrp->right))
       return;
 #else
-    if(!pic || !*pic || EmptyRect(destrp) || EmptyRect(&HxX(pic, picFrame)))
+    if(!pic || !*pic || EmptyRect(destrp) || EmptyRect(&(*pic)->picFrame))
         return;
 #endif
 
@@ -1655,11 +1655,11 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     }
     else
         procp = 0;
-    nextbytep = (unsigned char *)(&HxX(pic, picSize) + 5);
+    nextbytep = (unsigned char *)(&(*pic)->picSize + 5);
     hand = 0;
 
     dstpicframe = *destrp;
-    srcpicframe = HxX(pic, picFrame);
+    srcpicframe = (*pic)->picFrame;
 
     picnumh = RECT_WIDTH(&dstpicframe);
     picnumv = RECT_HEIGHT(&dstpicframe);

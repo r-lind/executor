@@ -66,7 +66,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
 #endif
 
         CopyRgn(movepart, behindpart);
-        r = HxX(WINDOW_STRUCT_REGION(w), rgnBBox);
+        r = (*WINDOW_STRUCT_REGION(w))->rgnBBox;
     }
 #if !defined(LETGCCWAIL)
     else
@@ -113,7 +113,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
         {
             Rect srcr, dstr;
 
-            SectRect(&HxX(WINDOW_STRUCT_REGION(w), rgnBBox),
+            SectRect(&(*WINDOW_STRUCT_REGION(w))->rgnBBox,
                      &GD_BOUNDS(LM(TheGDevice)), &srcr);
 
             dstr = GD_BOUNDS(LM(TheGDevice));
@@ -123,7 +123,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
         }
 #else
         CopyBits(wrapper, wrapper,
-                 &HxX(WINDOW_STRUCT_REGION(w), rgnBBox), &r,
+                 &(*WINDOW_STRUCT_REGION(w))->rgnBBox, &r,
                  srcCopy, movepart);
 #endif
     }

@@ -48,7 +48,7 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
 
     maxsize = 10 + (6 * dv + 1) * sizeof(INTEGER);
     rh = (RgnHandle)NewHandle(maxsize);
-    HxX(rh, rgnBBox) = *r;
+    (*rh)->rgnBBox = *r;
 
     if(dh == dv && dh < 10)
     { /* do small ones by hand */
@@ -74,8 +74,8 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
                 TERM;
             }
         }
-        HxX(rh, rgnSize) = (char *)ip - (char *)*rh;
-        SetHandleSize((Handle)rh, (Size)Hx(rh, rgnSize));
+        (*rh)->rgnSize = (char *)ip - (char *)*rh;
+        SetHandleSize((Handle)rh, (Size)(*rh)->rgnSize);
         /*-->*/ return rh;
     }
 
@@ -189,8 +189,8 @@ RgnHandle Executor::ROMlib_circrgn(Rect *r) /* INTERNAL */
         SetEmptyRgn(rh);
     else
     {
-        HxX(rh, rgnSize) = sizeof(INTEGER) * (op - (INTEGER *)*rh);
-        SetHandleSize((Handle)rh, (Size)Hx(rh, rgnSize));
+        (*rh)->rgnSize = sizeof(INTEGER) * (op - (INTEGER *)*rh);
+        SetHandleSize((Handle)rh, (Size)(*rh)->rgnSize);
     }
 
     return rh;

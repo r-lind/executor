@@ -353,13 +353,13 @@ ROMlib_new_window_common(WindowPeek w,
     }
 
     t_aux_w = (AuxWinHandle)NewHandle(sizeof(AuxWinRec));
-    HxX(t_aux_w, awNext) = LM(AuxWinHead);
-    HxX(t_aux_w, awOwner) = (WindowPtr)w;
-    HxX(t_aux_w, awCTable) = (CTabHandle)GetResource(TICK("wctb"), 0);
-    HxX(t_aux_w, dialogCItem) = 0;
-    HxX(t_aux_w, awFlags) = (proc_id & 0xF) << 24;
-    HxX(t_aux_w, awReserved) = 0;
-    HxX(t_aux_w, awRefCon) = 0;
+    (*t_aux_w)->awNext = LM(AuxWinHead);
+    (*t_aux_w)->awOwner = (WindowPtr)w;
+    (*t_aux_w)->awCTable = (CTabHandle)GetResource(TICK("wctb"), 0);
+    (*t_aux_w)->dialogCItem = 0;
+    (*t_aux_w)->awFlags = (proc_id & 0xF) << 24;
+    (*t_aux_w)->awReserved = 0;
+    (*t_aux_w)->awRefCon = 0;
     LM(AuxWinHead) = t_aux_w;
 
     {
@@ -497,12 +497,12 @@ CWindowPtr Executor::C_GetNewCWindow(INTEGER window_id, Ptr window_storage,
     if(win_res == nullptr)
         return (CWindowPtr)nullptr;
 
-    new_cwin = NewCWindow(window_storage, &HxX(win_res, _wrect),
-                          (StringPtr)((char *)&HxX(win_res, _wrect) + 18),
-                          Hx(win_res, _wvisible) != 0,
-                          Hx(win_res, _wprocid),
-                          behind, Hx(win_res, _wgoaway) != 0,
-                          *(GUEST<LONGINT> *)((char *)&HxX(win_res, _wrect) + 14));
+    new_cwin = NewCWindow(window_storage, &(*win_res)->_wrect,
+                          (StringPtr)((char *)&(*win_res)->_wrect + 18),
+                          (*win_res)->_wvisible != 0,
+                          (*win_res)->_wprocid,
+                          behind, (*win_res)->_wgoaway != 0,
+                          *(GUEST<LONGINT> *)((char *)&(*win_res)->_wrect + 14));
 
     win_ctab_res = ROMlib_getrestid(TICK("wctb"), window_id);
     if(win_ctab_res != nullptr)
@@ -531,11 +531,11 @@ WindowPtr Executor::C_GetNewWindow(INTEGER wid, Ptr wst, WindowPtr behind)
         return (0);
     if(!*wh)
         LoadResource((Handle)wh);
-    tp = NewWindow(wst, &(HxX(wh, _wrect)),
-                   (StringPtr)((char *)&HxX(wh, _wrect) + 18),
-                   Hx(wh, _wvisible) != 0, Hx(wh, _wprocid), (WindowPtr)behind,
-                   Hx(wh, _wgoaway) != 0,
-                   *(GUEST<LONGINT> *)((char *)&HxX(wh, _wrect) + 14));
+    tp = NewWindow(wst, &((*wh)->_wrect),
+                   (StringPtr)((char *)&(*wh)->_wrect + 18),
+                   (*wh)->_wvisible != 0, (*wh)->_wprocid, (WindowPtr)behind,
+                   (*wh)->_wgoaway != 0,
+                   *(GUEST<LONGINT> *)((char *)&(*wh)->_wrect + 14));
     return (tp);
 }
 
@@ -628,9 +628,9 @@ void Executor::C_CloseWindow(WindowPtr w)
     for(c = WINDOW_CONTROL_LIST(w); c;)
     {
         t = c;
-        c = HxP(c, nextControl);
+        c = (*c)->nextControl;
 #if 0
-	DisposeHandle(Hx(t, contrlDefProc));
+	DisposeHandle((*t)->contrlDefProc);
 #endif /* 0 */
         DisposeHandle((Handle)t);
     }

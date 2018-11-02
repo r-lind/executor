@@ -203,10 +203,10 @@ settexth(DialogPeek dp, itmp ip, int item_no)
 
             SetHandleSize((Handle)te_style,
                           TE_STYLE_SIZE_FOR_N_RUNS(1));
-            HxX(te_style, runs[0].startChar) = 0;
-            HxX(te_style, runs[0].styleIndex) = 0;
-            HxX(te_style, runs[1].startChar) = length + 1;
-            HxX(te_style, runs[1].styleIndex) = -1;
+            (*te_style)->runs[0].startChar = 0;
+            (*te_style)->runs[0].styleIndex = 0;
+            (*te_style)->runs[1].startChar = length + 1;
+            (*te_style)->runs[1].styleIndex = -1;
             style_table = TE_STYLE_STYLE_TABLE(te_style);
             SetHandleSize((Handle)style_table,
                           STYLE_TABLE_SIZE_FOR_N_STYLES(1));

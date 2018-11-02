@@ -528,7 +528,7 @@ static INTEGER iuhelper(Ptr ptr1, Ptr ptr2, INTEGER len1, INTEGER len2,
 
     if((h = (Intl0Hndl)GetIntlResource(0)) && *h)
     {
-        switch((Hx(h, intl0Vers) >> 8) & 0xFF)
+        switch(((*h)->intl0Vers >> 8) & 0xFF)
         {
             case verBritain:
                 locp = (locptype)britainlocalization;

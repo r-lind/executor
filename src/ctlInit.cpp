@@ -32,7 +32,7 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
 
     retval = (ControlHandle)NewHandle((Size)sizeof(ControlRecord));
     temph = GetResource(TICK("CDEF"), procid >> 4);
-    if(!(HxX(retval, contrlDefProc) = temph))
+    if(!((*retval)->contrlDefProc = temph))
     {
         DisposeHandle((Handle)retval);
         return 0;
@@ -56,10 +56,10 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
               acRefCon, 0);
     str255assign(CTL_TITLE(retval), title);
 
-    if(!HxX(auxctlhead, acCTable))
+    if(!(*auxctlhead)->acCTable)
     {
         warning_unexpected("no 'cctb', 0, probably old system file ");
-        HxX(auxctlhead, acCTable) = (CCTabHandle)default_ctl_ctab;
+        (*auxctlhead)->acCTable = (CCTabHandle)default_ctl_ctab;
     }
 
     HASSIGN_11(retval,
@@ -103,11 +103,11 @@ ControlHandle Executor::C_GetNewControl(INTEGER cid, WindowPtr wst) /* IMI-321 *
     if(!(*wh))
         LoadResource((Handle)wh);
     ctab_res_h = ROMlib_getrestid(TICK("cctb"), cid);
-    retval = NewControl(wst, &(HxX(wh, _crect)),
-                        (StringPtr)((char *)&HxX(wh, _crect) + 22), /* _ctitle */
-                        Hx(wh, _cvisible) != 0, Hx(wh, _cvalue), Hx(wh, _cmin),
-                        Hx(wh, _cmax), Hx(wh, _cprocid),
-                        *(GUEST<LONGINT> *)((char *)&HxX(wh, _crect) + 18)); /* _crefcon */
+    retval = NewControl(wst, &((*wh)->_crect),
+                        (StringPtr)((char *)&(*wh)->_crect + 22), /* _ctitle */
+                        (*wh)->_cvisible != 0, (*wh)->_cvalue, (*wh)->_cmin,
+                        (*wh)->_cmax, (*wh)->_cprocid,
+                        *(GUEST<LONGINT> *)((char *)&(*wh)->_crect + 18)); /* _crefcon */
     if(ctab_res_h)
         SetControlColor(retval, (CCTabHandle)ctab_res_h);
     return retval;
@@ -128,17 +128,17 @@ void Executor::C_SetControlColor(ControlHandle ctl, CCTabHandle ctab)
             t_aux_c = LM(AuxCtlHead);
             aux_c = (AuxCtlHandle)NewHandle(sizeof(AuxCtlRec));
             LM(AuxCtlHead) = aux_c;
-            HxX(aux_c, acNext) = t_aux_c;
-            HxX(aux_c, acOwner) = ctl;
+            (*aux_c)->acNext = t_aux_c;
+            (*aux_c)->acOwner = ctl;
 
-            HxX(aux_c, acCTable) = ctab;
+            (*aux_c)->acCTable = ctab;
 
-            HxX(aux_c, acFlags) = 0;
-            HxX(aux_c, acReserved) = 0;
-            HxX(aux_c, acRefCon) = 0;
+            (*aux_c)->acFlags = 0;
+            (*aux_c)->acReserved = 0;
+            (*aux_c)->acRefCon = 0;
         }
         else
-            HxX(aux_c, acCTable) = ctab;
+            (*aux_c)->acCTable = ctab;
 
         if(CTL_VIS(ctl))
             Draw1Control(ctl);
@@ -164,11 +164,11 @@ void Executor::C_DisposeControl(ControlHandle c) /* IMI-321 */
         CTLCALL(c, dispCntl, 0);
     }
 
-    for(t = (GUEST<ControlHandle> *)&(((WindowPeek)(HxP(c, contrlOwner)))->controlList);
+    for(t = (GUEST<ControlHandle> *)&(((WindowPeek)((*c)->contrlOwner))->controlList);
         (*t) && *t != c; t = (GUEST<ControlHandle> *)&((**t)->nextControl))
         ;
     if((*t))
-        (*t) = HxX(c, nextControl);
+        (*t) = (*c)->nextControl;
     for(auxhp = (GUEST<AuxCtlHandle> *)&LM(AuxCtlHead); (*auxhp) && (**auxhp)->acOwner != c;
         auxhp = (GUEST<AuxCtlHandle> *)&(**auxhp)->acNext)
         ;
@@ -189,7 +189,7 @@ void Executor::C_KillControls(WindowPtr w) /* IMI-321 */
     for(c = ((WindowPeek)w)->controlList; c;)
     {
         t = c;
-        c = HxP(c, nextControl);
+        c = (*c)->nextControl;
         DisposeControl(t);
     }
 }

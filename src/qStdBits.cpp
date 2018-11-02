@@ -312,7 +312,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
     if(mask)
     {
         HLockGuard guard(mask);
-        PICWRITE(*mask, Hx(mask, rgnSize));
+        PICWRITE(*mask, (*mask)->rgnSize);
     }
     height = RECT_HEIGHT(&src->bounds);
     if(row_bytes < 8 || pack_type == 2)
@@ -400,7 +400,7 @@ void Executor::ROMlib_bogo_stdbits(BitMap *src_bogo_map, BitMap *dst_bogo_map,
 
     if(dst_rect->bottom <= dst_rect->top
        || dst_rect->right <= dst_rect->left
-       || (mask && !SectRect(dst_rect, &HxX(mask, rgnBBox), &dummy_rect)))
+       || (mask && !SectRect(dst_rect, &(*mask)->rgnBBox, &dummy_rect)))
         return;
 
     /* the incoming source and destinations can be any one of the
@@ -451,7 +451,7 @@ void Executor::StdBitsPicSaveFlag(const BitMap *src_bogo_map,
 
     if(dst_rect->bottom <= dst_rect->top
        || dst_rect->right <= dst_rect->left
-       || (mask && !SectRect(dst_rect, &HxX(mask, rgnBBox), &dummy_rect)))
+       || (mask && !SectRect(dst_rect, &(*mask)->rgnBBox, &dummy_rect)))
         return;
 
     /* the incoming source and destinations can be any one of the

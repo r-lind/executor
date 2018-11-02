@@ -494,7 +494,7 @@ void Executor::xdata_free(xdata_handle_t xh)
 
     if(xdata_valid_p)
     {
-        Ptr p = HxX(xh, raw_pat_bits_mem);
+        Ptr p = (*xh)->raw_pat_bits_mem;
         if(p)
             DisposePtr(p);
     }

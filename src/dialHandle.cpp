@@ -49,7 +49,7 @@ BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
         if(ip && (ip->itmtype & ctrlItem))
         {
             c = (ControlHandle)ip->itmhand;
-            if(Hx(c, contrlVis) && U(Hx(c, contrlHilite)) != INACTIVE)
+            if((*c)->contrlVis && U((*c)->contrlHilite) != INACTIVE)
             {
                 if((when = ROMlib_when) != WriteNever)
                     ROMlib_WriteWhen(WriteInBltrgn);
@@ -289,12 +289,12 @@ bool Executor::get_item_style_info(DialogPtr dp, int item_no,
     AuxWinHandle aux_win_h;
 
     aux_win_h = *lookup_aux_win(dp);
-    if(aux_win_h && HxX(aux_win_h, dialogCItem))
+    if(aux_win_h && (*aux_win_h)->dialogCItem)
     {
         Handle items_color_info_h;
         item_color_info_t *items_color_info, *item_color_info;
 
-        items_color_info_h = HxP(aux_win_h, dialogCItem);
+        items_color_info_h = (*aux_win_h)->dialogCItem;
         items_color_info = (item_color_info_t *)*items_color_info_h;
 
         item_color_info = &items_color_info[item_no - 1];

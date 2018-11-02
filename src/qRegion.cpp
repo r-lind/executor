@@ -828,7 +828,7 @@ static void sectbinop(RgnHandle srcrgn1, RgnHandle srcrgn2, RgnHandle dstrgn)
             break;
     }
     *tptr++ = RGN_STOP_X;
-    gui_assert(sizeof(INTEGER) * (tptr - temppoints) <= 2 * ((Hx(srcrgn1, rgnSize) & 0x7FFF) + (Hx(srcrgn2, rgnSize) & 0x7FFF) + 18 * sizeof(INTEGER)));
+    gui_assert(sizeof(INTEGER) * (tptr - temppoints) <= 2 * (((*srcrgn1)->rgnSize & 0x7FFF) + ((*srcrgn2)->rgnSize & 0x7FFF) + 18 * sizeof(INTEGER)));
 
     {
         int dst_rgn_size = (RGN_SMALL_SIZE
@@ -870,7 +870,7 @@ static void binop(optype op, RgnHandle srcrgn1, RgnHandle srcrgn2,
      * Some performance enhancements could be put here...
      * if we are secting and the rgnBox's don't sect ... etc.
      */
-    tptr = temppoints = (INTEGER *)ALLOCA((Size)2 * (Hx(srcrgn1, rgnSize) + Hx(srcrgn2, rgnSize) + 18 * sizeof(INTEGER)));
+    tptr = temppoints = (INTEGER *)ALLOCA((Size)2 * ((*srcrgn1)->rgnSize + (*srcrgn2)->rgnSize + 18 * sizeof(INTEGER)));
     /* todo ... look over these */
     if(RGN_SMALL_P(srcrgn1))
     {
@@ -945,8 +945,8 @@ static void binop(optype op, RgnHandle srcrgn1, RgnHandle srcrgn2,
         outputrgn(vx, sectcurep, sectsegep, tptr);
     }
     *tptr++ = RGN_STOP_X;
-    gui_assert(sizeof(INTEGER) * (tptr - temppoints) <= 2 * (Hx(srcrgn1, rgnSize) + Hx(srcrgn2, rgnSize) + 18 * sizeof(INTEGER)));
-    HxX(dstrgn, rgnSize) = RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints);
+    gui_assert(sizeof(INTEGER) * (tptr - temppoints) <= 2 * ((*srcrgn1)->rgnSize + (*srcrgn2)->rgnSize + 18 * sizeof(INTEGER)));
+    (*dstrgn)->rgnSize = RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints);
     /* TODO fix rgnBBox here */
     ReallocateHandle((Handle)dstrgn,
                   RGN_SMALL_SIZE + sizeof(INTEGER) * (tptr - temppoints));
@@ -1225,7 +1225,7 @@ void Executor::C_InsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv)
         ReallocateHandle((Handle)rh, newsize);
         ptorh(p, rh);
         ROMlib_sizergn(rh, false);
-        gui_assert(Hx(rh, rgnSize) <= newsize);
+        gui_assert((*rh)->rgnSize <= newsize);
         HUnlock(h);
         DisposeHandle(h);
     }
@@ -1316,12 +1316,12 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     if(s1 == dest || s2 == dest)
     {
         finalrestingplace = dest;
-        dest = (RgnHandle)NewHandle((Size)Hx(s1, rgnSize) + Hx(s2, rgnSize) + 36);
+        dest = (RgnHandle)NewHandle((Size)(*s1)->rgnSize + (*s2)->rgnSize + 36);
     }
     else
     {
         finalrestingplace = 0;
-        ReallocateHandle((Handle)dest, Hx(s1, rgnSize) + Hx(s2, rgnSize) + 36);
+        ReallocateHandle((Handle)dest, (*s1)->rgnSize + (*s2)->rgnSize + 36);
     }
 
     if(RGN_SMALL_P(s1))
@@ -1333,13 +1333,13 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
         memcpy((Ptr)temp, *s1, RGN_SMALL_SIZE);
 #endif
         op = (INTEGER *)((char *)temp + RGN_SMALL_SIZE);
-        *op++ = HxX(s1, rgnBBox.top).raw();
-        *op++ = HxX(s1, rgnBBox.left).raw();
-        *op++ = HxX(s1, rgnBBox.right).raw();
+        *op++ = (*s1)->rgnBBox.top.raw();
+        *op++ = (*s1)->rgnBBox.left.raw();
+        *op++ = (*s1)->rgnBBox.right.raw();
         *op++ = RGN_STOP_X;
-        *op++ = HxX(s1, rgnBBox.bottom).raw();
-        *op++ = HxX(s1, rgnBBox.left).raw();
-        *op++ = HxX(s1, rgnBBox.right).raw();
+        *op++ = (*s1)->rgnBBox.bottom.raw();
+        *op++ = (*s1)->rgnBBox.left.raw();
+        *op++ = (*s1)->rgnBBox.right.raw();
         *op++ = RGN_STOP_X;
         *op++ = RGN_STOP_X;
         ASSERT_SAFE(temp);
@@ -1356,13 +1356,13 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
         memcpy((Ptr)temp, *s2, RGN_SMALL_SIZE);
 #endif
         op = (INTEGER *)((char *)temp + RGN_SMALL_SIZE);
-        *op++ = HxX(s2, rgnBBox.top).raw();
-        *op++ = HxX(s2, rgnBBox.left).raw();
-        *op++ = HxX(s2, rgnBBox.right).raw();
+        *op++ = (*s2)->rgnBBox.top.raw();
+        *op++ = (*s2)->rgnBBox.left.raw();
+        *op++ = (*s2)->rgnBBox.right.raw();
         *op++ = RGN_STOP_X;
-        *op++ = HxX(s2, rgnBBox.bottom).raw();
-        *op++ = HxX(s2, rgnBBox.left).raw();
-        *op++ = HxX(s2, rgnBBox.right).raw();
+        *op++ = (*s2)->rgnBBox.bottom.raw();
+        *op++ = (*s2)->rgnBBox.left.raw();
+        *op++ = (*s2)->rgnBBox.right.raw();
         *op++ = RGN_STOP_X;
         *op++ = RGN_STOP_X;
         ASSERT_SAFE(temp);
@@ -1510,15 +1510,15 @@ void Executor::ROMlib_printrgn(RgnHandle h)
     INTEGER *ip, x, y;
     INTEGER special, size, newsize;
 
-    size = Hx(h, rgnSize);
+    size = (*h)->rgnSize;
     special = size & 0x8000;
     size &= ~0x8000;
     if(special)
         printf("SPECIAL, ");
     printf("size = %ld, l = %ld, t = %ld, r = %ld, b = %ld\n",
-           (long)size, (long)Hx(h, rgnBBox.left),
-           (long)Hx(h, rgnBBox.top),
-           (long)Hx(h, rgnBBox.right), (long)Hx(h, rgnBBox.bottom));
+           (long)size, (long)(*h)->rgnBBox.left,
+           (long)(*h)->rgnBBox.top,
+           (long)(*h)->rgnBBox.right, (long)(*h)->rgnBBox.bottom);
 
     HLockGuard guard(h);
     if(!RGN_SMALL_P(h))

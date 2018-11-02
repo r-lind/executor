@@ -47,7 +47,7 @@ INTEGER Executor::C_OpenDeskAcc(Str255 acc) /* IMI-440 */
         dctlh = GetDCtlEntry(retval);
         if(dctlh)
         {
-            wp = HxP(dctlh, dCtlWindow);
+            wp = (*dctlh)->dCtlWindow;
             if(wp)
             {
                 ShowWindow(wp);
@@ -143,10 +143,10 @@ void Executor::C_SystemTask()
     for(i = 0; i < LM(UnitNtryCnt); ++i)
     {
         dctlh = LM(UTableBase)[i];
-        if((HxX(dctlh, dCtlFlags) & NEEDTIMEBIT) && TickCount() >= Hx(dctlh, dCtlCurTicks))
+        if(((*dctlh)->dCtlFlags & NEEDTIMEBIT) && TickCount() >= (*dctlh)->dCtlCurTicks)
         {
             Control(itorn(i), accRun, (Ptr)0);
-            HxX(dctlh, dCtlCurTicks) = Hx(dctlh, dCtlCurTicks) + Hx(dctlh, dCtlDelay);
+            (*dctlh)->dCtlCurTicks = (*dctlh)->dCtlCurTicks + (*dctlh)->dCtlDelay;
         }
     }
 }
@@ -196,7 +196,7 @@ BOOLEAN Executor::C_SystemEvent(EventRecord *evp)
             if((retval = rn < 0))
             {
                 dctlh = rntodctlh(rn);
-                if(Hx(dctlh, dCtlEMask) & (1 << evp->what))
+                if((*dctlh)->dCtlEMask & (1 << evp->what))
                 {
                     templ = guest_cast<LONGINT>(evp);
                     Control(rn, accEvent, (Ptr)&templ);
@@ -220,7 +220,7 @@ void Executor::C_SystemMenu(LONGINT menu)
     for(i = 0; i < LM(UnitNtryCnt); ++i)
     {
         dctlh = LM(UTableBase)[i];
-        if(HxX(dctlh, dCtlMenu) == LM(MBarEnable))
+        if((*dctlh)->dCtlMenu == LM(MBarEnable))
         {
             menu_s = menu;
             Control(itorn(i), accMenu, (Ptr)&menu_s);

@@ -37,8 +37,8 @@ void Executor::C_ReadPartialResource(Handle res, int32_t offset, Ptr buffer,
             {
                 INTEGER rn;
 
-                rn = Hx(map, resfn);
-                loc = (Hx(map, rh.rdatoff) + B3TOLONG(rr->doff)
+                rn = (*map)->resfn;
+                loc = ((*map)->rh.rdatoff + B3TOLONG(rr->doff)
                        + sizeof(Size) + (uint32_t)offset);
                 err = SetFPos(rn, fsFromStart, loc);
                 if(err == noErr)

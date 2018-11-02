@@ -444,9 +444,9 @@ INTEGER Executor::C_GetWVariant(WindowPtr w) /* IMV-208 */
     AuxWinHandle h;
     INTEGER retval;
 
-    for(h = LM(AuxWinHead); h != 0 && HxP(h, awOwner) != w; h = HxP(h, awNext))
+    for(h = LM(AuxWinHead); h != 0 && (*h)->awOwner != w; h = (*h)->awNext)
         ;
-    retval = h != 0 ? (Hx(h, awFlags) >> 24) & 0xFF : 0;
+    retval = h != 0 ? ((*h)->awFlags >> 24) & 0xFF : 0;
     return retval;
 }
 

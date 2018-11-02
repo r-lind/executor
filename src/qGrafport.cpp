@@ -118,9 +118,9 @@ void Executor::C_InitPort(GrafPtr p)
     ROMlib_initport(p);
     SetEmptyRgn(PORT_VIS_REGION(p));
     SetEmptyRgn(PORT_CLIP_REGION(p));
-    HxX(PORT_VIS_REGION(p), rgnBBox) = qdGlobals().screenBits.bounds;
+    (*PORT_VIS_REGION(p))->rgnBBox = qdGlobals().screenBits.bounds;
 
-    SetRect(&HxX(PORT_CLIP_REGION(p), rgnBBox), -32767, -32767, 32767, 32767);
+    SetRect(&(*PORT_CLIP_REGION(p))->rgnBBox, -32767, -32767, 32767, 32767);
     SetPort(p);
 }
 

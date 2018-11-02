@@ -70,7 +70,7 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
                txSize, PORT_TX_SIZE_X(qdGlobals().thePort),
                hText, hText);
 
-    tehlinestarts = HxX(teh, lineStarts);
+    tehlinestarts = (*teh)->lineStarts;
     tehlinestarts[0] = 0;
     tehlinestarts[1] = 0; /* this one is only for mix & match w/mac */
 

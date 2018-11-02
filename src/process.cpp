@@ -20,7 +20,7 @@ using namespace Executor;
 
 declare_handle_type(size_resource);
 
-#define SIZE_FLAGS_X(size) (HxX(size, flags))
+#define SIZE_FLAGS_X(size) ((*size)->flags)
 #define SIZE_FLAGS(size) (toHost(SIZE_FLAGS_X(size)))
 
 static size_resource_handle

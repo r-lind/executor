@@ -15,12 +15,12 @@ static void draw(BOOLEAN sel, Rect *rect, INTEGER doff, INTEGER dl,
     GrafPtr savePort;
 
     savePort = qdGlobals().thePort;
-    SetPort(HxP(list, port));
+    SetPort((*list)->port);
     EraseRect(rect);
-    MoveTo(rect->left + Hx(list, indent.h), rect->top + Hx(list, indent.v));
-    HLock((Handle)HxP(list, cells));
-    DrawText((Ptr)*HxP(list, cells) + doff, 0, dl);
-    HUnlock((Handle)HxP(list, cells));
+    MoveTo(rect->left + (*list)->indent.h, rect->top + (*list)->indent.v);
+    HLock((Handle)(*list)->cells);
+    DrawText((Ptr)*(*list)->cells + doff, 0, dl);
+    HUnlock((Handle)(*list)->cells);
     if(sel)
         InvertRect(rect);
     SetPort(savePort);
@@ -36,10 +36,10 @@ void Executor::C_ldef0(INTEGER msg, BOOLEAN sel, Rect *rect, Cell cell,
     {
         case lInitMsg:
             savePort = qdGlobals().thePort;
-            SetPort(HxP(list, port));
+            SetPort((*list)->port);
             GetFontInfo(&fi);
-            HxX(list, indent.h) = 5;
-            HxX(list, indent.v) = fi.ascent;
+            (*list)->indent.h = 5;
+            (*list)->indent.v = fi.ascent;
             SetPort(savePort);
             break;
         case lDrawMsg:
@@ -47,7 +47,7 @@ void Executor::C_ldef0(INTEGER msg, BOOLEAN sel, Rect *rect, Cell cell,
             break;
         case lHiliteMsg:
             savePort = qdGlobals().thePort;
-            SetPort(HxP(list, port));
+            SetPort((*list)->port);
             InvertRect(rect);
             SetPort(savePort);
             break;

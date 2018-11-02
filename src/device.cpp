@@ -54,24 +54,24 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             p->ioParam.ioTrap |= asyncTrpBit;
         else
             p->ioParam.ioTrap |= noQueueBit;
-        if(!(HxX(h, dCtlFlags) & RAMBASEDBIT))
+        if(!((*h)->dCtlFlags & RAMBASEDBIT))
         {
             switch(routine)
             {
                 case Open:
-                    retval = (HxP(h, dCtlDriver)->udrvrOpen)(p, *h);
+                    retval = ((*h)->dCtlDriver->udrvrOpen)(p, *h);
                     break;
                 case Prime:
-                    retval = (HxP(h, dCtlDriver)->udrvrPrime)(p, *h);
+                    retval = ((*h)->dCtlDriver->udrvrPrime)(p, *h);
                     break;
                 case Ctl:
-                    retval = (HxP(h, dCtlDriver)->udrvrCtl)(p, *h);
+                    retval = ((*h)->dCtlDriver->udrvrCtl)(p, *h);
                     break;
                 case Stat:
-                    retval = (HxP(h, dCtlDriver)->udrvrStatus)(p, *h);
+                    retval = ((*h)->dCtlDriver->udrvrStatus)(p, *h);
                     break;
                 case Close:
-                    retval = (HxP(h, dCtlDriver)->udrvrClose)(p, *h);
+                    retval = ((*h)->dCtlDriver->udrvrClose)(p, *h);
                     break;
                 default:
                     retval = fsDSIntErr;
@@ -80,25 +80,25 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
         }
         else
         {
-            ramdh = (ramdriverhand)HxP(h, dCtlDriver);
+            ramdh = (ramdriverhand)(*h)->dCtlDriver;
             LoadResource((Handle)ramdh);
             HLock((Handle)ramdh);
             switch(routine)
             {
                 case Open:
-                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrOpen));
+                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrOpen);
                     break;
                 case Prime:
-                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrPrime));
+                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrPrime);
                     break;
                 case Ctl:
-                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrCtl));
+                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrCtl);
                     break;
                 case Stat:
-                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrStatus));
+                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrStatus);
                     break;
                 case Close:
-                    procp = (DriverProcPtr)(*ramdh + Hx(ramdh, drvrClose));
+                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrClose);
                     break;
                 default:
                     procp = 0;
@@ -142,10 +142,10 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             else
                 retval = fsDSIntErr;
             if(routine == Open)
-                HxX(h, dCtlFlags) |= DRIVEROPENBIT;
+                (*h)->dCtlFlags |= DRIVEROPENBIT;
             else if(routine == Close)
             {
-                HxX(h, dCtlFlags) &= ~DRIVEROPENBIT;
+                (*h)->dCtlFlags &= ~DRIVEROPENBIT;
                 HUnlock((Handle)h);
                 HUnlock((Handle)ramdh);
                 LM(MBarEnable) = 0;
@@ -313,32 +313,32 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
         GetResInfo((Handle)ramdh, &resid, &typ, (StringPtr)0);
         devicen = resid;
         h = LM(UTableBase)[devicen];
-        alreadyopen = h && (HxX(h, dCtlFlags) & DRIVEROPENBIT);
+        alreadyopen = h && ((*h)->dCtlFlags & DRIVEROPENBIT);
         if(!h && !(h = LM(UTableBase)[devicen] = (DCtlHandle)NewHandle(sizeof(DCtlEntry))))
             err = MemError();
         else if(!alreadyopen)
         {
             memset((char *)*h, 0, sizeof(DCtlEntry));
-            HxX(h, dCtlDriver) = (umacdriverptr)ramdh;
-            HxX(h, dCtlFlags) = HxX(ramdh, drvrFlags) | RAMBASEDBIT;
-            HxX(h, dCtlRefNum) = -(devicen + 1);
-            HxX(h, dCtlDelay) = HxX(ramdh, drvrDelay);
-            HxX(h, dCtlEMask) = HxX(ramdh, drvrEMask);
-            HxX(h, dCtlMenu) = HxX(ramdh, drvrMenu);
-            if(HxX(h, dCtlFlags) & NEEDTIMEBIT)
-                HxX(h, dCtlCurTicks) = TickCount() + Hx(h, dCtlDelay);
+            (*h)->dCtlDriver = (umacdriverptr)ramdh;
+            (*h)->dCtlFlags = (*ramdh)->drvrFlags | RAMBASEDBIT;
+            (*h)->dCtlRefNum = -(devicen + 1);
+            (*h)->dCtlDelay = (*ramdh)->drvrDelay;
+            (*h)->dCtlEMask = (*ramdh)->drvrEMask;
+            (*h)->dCtlMenu = (*ramdh)->drvrMenu;
+            if((*h)->dCtlFlags & NEEDTIMEBIT)
+                (*h)->dCtlCurTicks = TickCount() + (*h)->dCtlDelay;
             else
-                HxX(h, dCtlCurTicks) = 0x7FFFFFFF;
+                (*h)->dCtlCurTicks = 0x7FFFFFFF;
             /*
 	    * NOTE: this code doesn't check to see if something is already open.
 	    *	 TODO:  fix this
 	    */
-            pbp->cntrlParam.ioCRefNum = HxX(h, dCtlRefNum);
+            pbp->cntrlParam.ioCRefNum = (*h)->dCtlRefNum;
             err = ROMlib_dispatch(pbp, a, Open, 0);
         }
         else
         {
-            pbp->cntrlParam.ioCRefNum = HxX(h, dCtlRefNum);
+            pbp->cntrlParam.ioCRefNum = (*h)->dCtlRefNum;
             err = noErr;
         }
     }
@@ -368,7 +368,7 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
                 {
                     memset((char *)*h, 0, sizeof(DCtlEntry));
                     up = (umacdriverptr)NewPtr(sizeof(umacdriver));
-                    if(!(HxX(h, dCtlDriver) = up))
+                    if(!((*h)->dCtlDriver = up))
                         err = MemError();
                     else
                     {

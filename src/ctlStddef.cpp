@@ -64,13 +64,13 @@ void validate_colors_for_control(ControlHandle ctl)
 #endif
 
     t_aux_c = *lookup_aux_ctl(ctl);
-    if(t_aux_c && HxX(t_aux_c, acCTable))
+    if(t_aux_c && (*t_aux_c)->acCTable)
     {
         CTabHandle c_ctab;
         ColorSpec *c_ctab_table;
         int c_ctab_size;
 
-        c_ctab = (CTabHandle)HxP(t_aux_c, acCTable);
+        c_ctab = (CTabHandle)(*t_aux_c)->acCTable;
         c_ctab_table = CTAB_TABLE(c_ctab);
         c_ctab_size = CTAB_SIZE(c_ctab);
 
@@ -374,8 +374,8 @@ LONGINT Executor::C_cdef0(INTEGER var, ControlHandle c, INTEGER mess,
     switch(mess)
     {
         case drawCntl:
-            if(Hx(c, contrlVis) && SectRect(&HxX(PORT_VIS_REGION(qdGlobals().thePort), rgnBBox),
-                                            &HxX(c, contrlRect), &r))
+            if((*c)->contrlVis && SectRect(&(*PORT_VIS_REGION(qdGlobals().thePort))->rgnBBox,
+                                            &(*c)->contrlRect, &r))
             {
                 PenNormal();
                 if(!(var & useWFont))

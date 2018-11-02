@@ -700,9 +700,9 @@ void Executor::dump_gdevice(GDHandle gdev)
   dump_field (dump_handle, x->gdSearchProc, "gdSearchProc");
 #else
     iprintf((o_fp, "gdSearchProc %p;\n", x->gdSearchProc));
-    for(proc = x->gdSearchProc; proc; proc = HxP(proc, nxtSrch))
+    for(proc = x->gdSearchProc; proc; proc = (*proc)->nxtSrch)
         iprintf((o_fp, "  proc [%p, %p]; %p\n",
-                 proc, HxP(proc, nxtSrch), HxP(proc, srchProc)));
+                 proc, (*proc)->nxtSrch, (*proc)->srchProc));
 #endif
     dump_field(dump_handle, x->gdCompProc, "gdCompProc");
     iprintf((o_fp, "gdFlags 0x%hx;\n", (unsigned short)x->gdFlags));

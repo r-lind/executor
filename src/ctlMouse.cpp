@@ -170,7 +170,7 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
     else
     {
         /* not an indicator */
-        HxX(c, contrlHilite) = partstart;
+        (*c)->contrlHilite = partstart;
         CTLCALL(c, drawCntl, partstart);
         /* CALLACTION can remove mouse up events which is why the
 	      following line is not a GetOSEvent call. */
@@ -182,9 +182,9 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
             inpart = TestControl(c, whereunswapped);
             if(inpart && inpart != partstart)
                 inpart = 0;
-            if(inpart != U(HxX(c, contrlHilite)))
+            if(inpart != U((*c)->contrlHilite))
             {
-                HxX(c, contrlHilite) = inpart;
+                (*c)->contrlHilite = inpart;
                 CTLCALL(c, drawCntl, partstart);
             }
             if(a && inpart)
@@ -194,9 +194,9 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
         GlobalToLocal(&ev.where);
         whereunswapped.h = ev.where.h;
         whereunswapped.v = ev.where.v;
-        if(HxX(c, contrlHilite))
+        if((*c)->contrlHilite)
         {
-            HxX(c, contrlHilite) = 0;
+            (*c)->contrlHilite = 0;
             CTLCALL(c, drawCntl, partstart);
         }
         inpart = TestControl(c, whereunswapped);
@@ -214,7 +214,7 @@ INTEGER Executor::C_TestControl(ControlHandle c, Point p) /* IMI-325 */
     int16_t retval;
 
     CtlCallGuard guard(c);
-    if(Hx(c, contrlVis) && U(Hx(c, contrlHilite)) != 255)
+    if((*c)->contrlVis && U((*c)->contrlHilite) != 255)
         retval = CTLCALL(c, testCntl, ((LONGINT)p.v << 16) | (unsigned short)p.h);
     else
         retval = 0;

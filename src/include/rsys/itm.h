@@ -25,12 +25,12 @@ typedef GUEST<itmp> *itmh;
 
 #define DIALOG_RES_HAS_POSITION_P(dlogh) \
     ((20                                 \
-      + ((HxX(dlogh, dlglen) + 2) & ~1)  \
+      + (((*dlogh)->dlglen + 2) & ~1)  \
       + 2)                               \
      == GetHandleSize((Handle)(dlogh)))
 #define DIALOG_RES_POSITION_X(dlogh)                 \
-    (*(GUEST<int16_t> *)((char *)&HxX(dlogh, dlglen) \
-                         + ((HxX(dlogh, dlglen) + 2) & ~1)))
+    (*(GUEST<int16_t> *)((char *)&(*dlogh)->dlglen \
+                         + (((*dlogh)->dlglen + 2) & ~1)))
 
 #define DIALOG_RES_POSITION(dlog) \
     (DIALOG_RES_POSITION_X(dlog).get())
@@ -39,7 +39,7 @@ typedef GUEST<itmp> *itmh;
     ((sizeof(altstr) + 2) == GetHandleSize((Handle)(alerth)))
 
 #define ALERT_RES_POSITION_X(alerth) \
-    (*(GUEST<int16_t> *)((char *)&HxX(alerth, altstag) + 2))
+    (*(GUEST<int16_t> *)((char *)&(*alerth)->altstag + 2))
 #define ALERT_RES_POSITION(alerth) \
     (ALERT_RES_POSITION_X(alerth).get())
 

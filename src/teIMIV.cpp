@@ -103,10 +103,10 @@ void Executor::ROMlib_teautoloop(TEHandle teh)
     GUEST<Point> pt;
 
     GetMouse(&pt);
-    if(pt.v < Hx(teh, viewRect.top))
-        TEPinScroll(0, Hx(teh, lineHeight), teh);
-    else if(pt.v > Hx(teh, viewRect.bottom))
-        TEPinScroll(0, -Hx(teh, lineHeight), teh);
+    if(pt.v < (*teh)->viewRect.top)
+        TEPinScroll(0, (*teh)->lineHeight, teh);
+    else if(pt.v > (*teh)->viewRect.bottom)
+        TEPinScroll(0, -(*teh)->lineHeight, teh);
 }
 
 static int16_t
@@ -139,11 +139,11 @@ void Executor::C_TESelView(TEHandle teh) /* IMIV-57 */
     {
         TE_CHAR_TO_POINT(teh, TE_SEL_START(teh), &start);
         TE_CHAR_TO_POINT(teh, TE_SEL_END(teh), &stop);
-        stop.v += Hx(teh, lineHeight);
-        dv = getdelta(start.v, stop.v + Hx(teh, lineHeight),
-                      Hx(teh, viewRect.top), Hx(teh, viewRect.bottom));
+        stop.v += (*teh)->lineHeight;
+        dv = getdelta(start.v, stop.v + (*teh)->lineHeight,
+                      (*teh)->viewRect.top, (*teh)->viewRect.bottom);
         dh = getdelta(start.h, stop.h,
-                      Hx(teh, viewRect.left), Hx(teh, viewRect.right));
+                      (*teh)->viewRect.left, (*teh)->viewRect.right);
         TEPinScroll(dh, dv, teh);
     }
 }

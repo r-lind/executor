@@ -51,7 +51,7 @@ add_list(ListHandle list)
 
     new_elemp = malloc(sizeof *new_elemp);
     new_elemp->list = list;
-    new_elemp->orig_port = HxP(list, port);
+    new_elemp->orig_port = (*list)->port;
     new_elemp->next = ll_head;
     ll_head = new_elemp;
 }
@@ -82,7 +82,7 @@ check_lists(void)
     {
         GrafPtr gp;
 
-        gp = HxP((*pp)->list, port);
+        gp = (*(*pp)->list)->port;
         if(gp != (*pp)->orig_port)
             (*pp)->lastTextProc = gp->grafProcs->textProc;
     }
@@ -111,19 +111,19 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     LISTDECL();
 
     noffs = (bounds->right - bounds->left) * (bounds->bottom - bounds->top) + 1;
-    retval = (ListHandle)NewHandle(sizeof(ListRec) - sizeof(HxX(retval, cellArray)) + (noffs + 1) * sizeof(INTEGER));
+    retval = (ListHandle)NewHandle(sizeof(ListRec) - sizeof((*retval)->cellArray) + (noffs + 1) * sizeof(INTEGER));
     if(!retval)
         /*-->*/ return 0; /* couldn't allocate memory */
 
     temph = GetResource(TICK("LDEF"), proc);
-    if(!(HxX(retval, listDefProc) = temph))
+    if(!((*retval)->listDefProc = temph))
     {
         DisposeHandle((Handle)retval);
         /*-->*/ return 0; /* spooey list definition proc */
     }
 
     tempdatah = (DataHandle)NewHandle(0);
-    HxX(retval, cells) = tempdatah;
+    (*retval)->cells = tempdatah;
     HLock((Handle)retval);
     lp = *retval;
 
@@ -206,15 +206,15 @@ void Executor::C_LDispose(ListHandle list) /* IMIV-271 */
     {
         LISTDECL();
         LISTBEGIN(list);
-        LISTCALL(lCloseMsg, false, (Rect *)0, *(Cell *)&HxX(list, clikLoc), 0,
+        LISTCALL(lCloseMsg, false, (Rect *)0, *(Cell *)&(*list)->clikLoc, 0,
                  0, list);
         LISTEND(list);
 
-        DisposeHandle((Handle)HxP(list, cells));
-        if(HxP(list, hScroll))
-            DisposeControl(HxP(list, hScroll));
-        if(HxP(list, vScroll))
-            DisposeControl(HxP(list, vScroll));
+        DisposeHandle((Handle)(*list)->cells);
+        if((*list)->hScroll)
+            DisposeControl((*list)->hScroll);
+        if((*list)->vScroll)
+            DisposeControl((*list)->vScroll);
     }
 #if defined(LIST_DEBUG)
     delete_list(list);

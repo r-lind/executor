@@ -174,8 +174,8 @@ void size_menu(MenuHandle mh, tablePtr tablep)
             width = w;
     }
     TextFace(0);
-    HxX(mh, menuWidth) = width;
-    HxX(mh, menuHeight) = actual_height;
+    (*mh)->menuWidth = width;
+    (*mh)->menuHeight = actual_height;
 }
 
 static void
@@ -509,7 +509,7 @@ draw_menu(MenuHandle mh, Rect *rp, tablePtr tablep)
         draw_arrow(rp, mh, uparrow);
     if(rp->bottom < LM(AtMenuBottom))
         draw_arrow(rp, mh, downarrow);
-    HxX(MBSAVELOC, mbUglyScroll) = 0;
+    (*MBSAVELOC)->mbUglyScroll = 0;
 }
 
 static void
@@ -541,7 +541,7 @@ doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, BOOLEAN upordown,
                   *itemp, mh, false);
         *itemp = 0;
     }
-    if(HxX(MBSAVELOC, mbUglyScroll))
+    if((*MBSAVELOC)->mbUglyScroll)
     {
         /* don't sroll the scroll arrows */
         scrollr = *rp;
@@ -600,7 +600,7 @@ doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, BOOLEAN upordown,
         ClipRect(&rtmp);
     }
     else
-        HxX(MBSAVELOC, mbUglyScroll) = 1;
+        (*MBSAVELOC)->mbUglyScroll = 1;
     if(upordown == DOWN)
     {
         if(LM(AtMenuBottom) >= rp->bottom)
@@ -671,7 +671,7 @@ void choose_menu(MenuHandle mh, Rect *rp, Point p, GUEST<int16_t> *itemp, tableP
                 *itemp = nitem;
             }
             if(nitem)
-                fliprect(rp, nitem, tablep, &HxX(MBSAVELOC, mbItemRect));
+                fliprect(rp, nitem, tablep, &(*MBSAVELOC)->mbItemRect);
         }
     }
     else if(*itemp)
@@ -691,22 +691,22 @@ static void popuprect(MenuHandle mh, Rect *rp, Point p, GUEST<INTEGER> *itemp,
     struct table::tableentry *tp;
     INTEGER vmax;
 
-    if(Hx(mh, menuWidth) == -1 || Hx(mh, menuHeight) == -1)
+    if((*mh)->menuWidth == -1 || (*mh)->menuHeight == -1)
         CalcMenuSize(mh);
     rp->top = p.v - tablep->entry[*itemp - 1].top;
     rp->left = p.h;
-    rp->right = rp->left + Hx(mh, menuWidth);
+    rp->right = rp->left + (*mh)->menuWidth;
     *itemp = rp->top;
 
     for(tp = tablep->entry; rp->top < LM(MBarHeight); tp++)
         rp->top = rp->top + (tp[1].top - tp[0].top);
 
-    rp->bottom = rp->top + Hx(mh, menuHeight);
+    rp->bottom = rp->top + (*mh)->menuHeight;
 
     vmax = qdGlobals().screenBits.bounds.bottom - 2; /* subtract 2 for frame */
     for(tp = tablep->entry + tablep->count - 1; rp->bottom > vmax; --tp)
         rp->bottom = rp->bottom - (tp[1].top - tp[0].top);
-    rp->top = rp->bottom - Hx(mh, menuHeight);
+    rp->top = rp->bottom - (*mh)->menuHeight;
     for(tp = tablep->entry; rp->top < LM(MBarHeight); tp++)
         rp->top = rp->top + (tp[1].top - tp[0].top);
 }
@@ -742,7 +742,7 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
     ascent = fi.ascent;
     cloversize = CharWidth(commandMark);
 
-    for(sp = (char *)*mh + SIZEOFMINFO + Hx(mh, menuData[0]), count = 0;
+    for(sp = (char *)*mh + SIZEOFMINFO + (*mh)->menuData[0], count = 0;
         *sp;
         sp += (unsigned char)*sp + SIZEOFMEXT, count++)
         ;
@@ -752,7 +752,7 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
     tp->lasttick = TickCount();
     tp->count = count;
     v = 0;
-    for(sp = (char *)*mh + SIZEOFMINFO + Hx(mh, menuData[0]), tabp = tp->entry;
+    for(sp = (char *)*mh + SIZEOFMINFO + (*mh)->menuData[0], tabp = tp->entry;
         *sp;
         sp += (unsigned char)*sp + SIZEOFMEXT, tabp++)
     {

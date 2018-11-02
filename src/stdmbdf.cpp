@@ -141,9 +141,9 @@ realhilite(int16_t offset, highstate h)
             mp = (muelem *)((char *)*LM(MenuList) + offset);
 
             draw_menu_title(mp,
-                            offset == Hx(MENULIST, muoff),
+                            offset == (*MENULIST)->muoff,
                             h == HILITE,
-                            Hx(MENULIST, muright));
+                            (*MENULIST)->muright);
         }
         else
         {
@@ -250,10 +250,10 @@ static LONGINT hit(LONGINT mousept)
 
     if(p.v < LM(MBarHeight))
     {
-        mpend = HxX(MENULIST, mulist) + Hx(MENULIST, muoff) / sizeof(muelem);
-        for(mp = HxX(MENULIST, mulist); mp != mpend && mp->muleft <= p.h; mp++)
+        mpend = (*MENULIST)->mulist + (*MENULIST)->muoff / sizeof(muelem);
+        for(mp = (*MENULIST)->mulist; mp != mpend && mp->muleft <= p.h; mp++)
             ;
-        if(mp == HxX(MENULIST, mulist) || p.h > Hx(MENULIST, muright))
+        if(mp == (*MENULIST)->mulist || p.h > (*MENULIST)->muright)
             /*-->*/ return NOTHITINMBAR;
         else
             /*-->*/ return (char *)(mp - 1) - (char *)*LM(MenuList);
@@ -294,7 +294,7 @@ static void calc(LONGINT offset)
     {
         mh = mp[-1].muhandle;
         HLock((Handle)mh);
-        titsize = StringWidth(HxX(mh, menuData)) + SLOP;
+        titsize = StringWidth((*mh)->menuData) + SLOP;
         HUnlock((Handle)mh);
         left = mp[-1].muleft + titsize;
     }
@@ -304,7 +304,7 @@ static void calc(LONGINT offset)
         mp->muleft = left;
         mh = mp->muhandle;
         HLock((Handle)mh);
-        titsize = StringWidth(HxX(mh, menuData)) + SLOP;
+        titsize = StringWidth((*mh)->menuData) + SLOP;
         HUnlock((Handle)mh);
         left += titsize;
     }
@@ -318,9 +318,9 @@ init()
     if(!LM(MBSaveLoc))
     {
         LM(MBSaveLoc) = NewHandle((Size)MBDFSTRUCTBYTES);
-        HxX(MBSAVELOC, mbCustomStorage) = nullptr;
+        (*MBSAVELOC)->mbCustomStorage = nullptr;
     }
-    HxX(MBSAVELOC, lastMBSave) = 0;
+    (*MBSAVELOC)->lastMBSave = 0;
 }
 
 static void dispose()
@@ -370,8 +370,8 @@ save(int16_t offset, Rect *rect)
 
         int current_mb_save;
 
-        current_mb_save = Hx(MBSAVELOC, lastMBSave) + sizeof(mbdfentry);
-        HxX(MBSAVELOC, lastMBSave) = current_mb_save;
+        current_mb_save = (*MBSAVELOC)->lastMBSave + sizeof(mbdfentry);
+        (*MBSAVELOC)->lastMBSave = current_mb_save;
         mep = (mbdfentry *)((char *)*MBSAVELOC + current_mb_save);
 
         mep->mbRectSave = *rect;
@@ -475,7 +475,7 @@ restore(void)
     Rect save_rect;
 
     mep = (mbdfentry *)((char *)*MBSAVELOC
-                        + Hx(MBSAVELOC, lastMBSave));
+                        + (*MBSAVELOC)->lastMBSave);
     save_rect = mep->mbRectSave;
     save_rect.top = save_rect.top - 1;
     save_rect.left = save_rect.left - 1;
@@ -508,8 +508,8 @@ restore(void)
     }
 
     mep->mbBitsSave = nullptr;
-    HxX(MBSAVELOC, lastMBSave)
-        = Hx(MBSAVELOC, lastMBSave) - sizeof(mbdfentry);
+    (*MBSAVELOC)->lastMBSave
+        = (*MBSAVELOC)->lastMBSave - sizeof(mbdfentry);
 }
 
 static Rect *getrect(LONGINT offset)
@@ -523,22 +523,22 @@ static Rect *getrect(LONGINT offset)
     hiword = HiWord(offset);
     mp = (muelem *)((char *)*LM(MenuList) + LoWord(offset));
     mh = mp->muhandle;
-    if(Hx(mh, menuWidth) == -1 || Hx(mh, menuHeight) == -1)
+    if((*mh)->menuWidth == -1 || (*mh)->menuHeight == -1)
         CalcMenuSize(mh);
     if(hiword)
     { /* hierarchical */
         /* note 7 and 5 below are guesses */
-        r.top = std::max<INTEGER>(Hx(MBSAVELOC, mbItemRect.top), LM(MBarHeight) + 7);
-        r.left = Hx(MBSAVELOC, mbItemRect.right) - 5;
-        r.bottom = r.top + Hx(mh, menuHeight);
-        r.right = r.left + Hx(mh, menuWidth);
+        r.top = std::max<INTEGER>((*MBSAVELOC)->mbItemRect.top, LM(MBarHeight) + 7);
+        r.left = (*MBSAVELOC)->mbItemRect.right - 5;
+        r.bottom = r.top + (*mh)->menuHeight;
+        r.right = r.left + (*mh)->menuWidth;
     }
     else
     { /* regular */
         r.top = LM(MBarHeight);
         r.left = mp->muleft;
-        r.bottom = r.top + Hx(mh, menuHeight);
-        r.right = r.left + Hx(mh, menuWidth);
+        r.bottom = r.top + (*mh)->menuHeight;
+        r.right = r.left + (*mh)->menuWidth;
     }
     dh = qdGlobals().screenBits.bounds.right - 10 - r.right;
     if(dh > 0)

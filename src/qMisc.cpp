@@ -166,7 +166,7 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
     else
     {
         if(RGN_SMALL_P(rh))
-            MapRect(&HxX(rh, rgnBBox), srcr, dstr);
+            MapRect(&(*rh)->rgnBBox, srcr, dstr);
         else
         {
             srcdh = srcr->right - (xoff1 = srcr->left);
@@ -262,10 +262,10 @@ void Executor::C_MapPoly(PolyHandle poly, Rect *srcr, Rect *dstr)
                    dstr->top - srcr->top);
     else
     {
-        MapPt((GUEST<Point> *)&HxX(poly, polyBBox.top), srcr, dstr);
-        MapPt((GUEST<Point> *)&HxX(poly, polyBBox.bottom), srcr, dstr);
-        for(ip = HxX(poly, polyPoints),
-        ep = ip + (Hx(poly, polySize) - SMALLPOLY) / sizeof(Point);
+        MapPt((GUEST<Point> *)&(*poly)->polyBBox.top, srcr, dstr);
+        MapPt((GUEST<Point> *)&(*poly)->polyBBox.bottom, srcr, dstr);
+        for(ip = (*poly)->polyPoints,
+        ep = ip + ((*poly)->polySize - SMALLPOLY) / sizeof(Point);
             ip != ep;)
             MapPt(ip++, srcr, dstr);
     }

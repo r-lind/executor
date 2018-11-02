@@ -42,7 +42,7 @@ INTEGER Executor::C_GetResFileAttrs(INTEGER rn)
         return (0);
     }
     else
-        return (Hx(map, resfatr));
+        return ((*map)->resfatr);
 }
 
 void Executor::C_SetResFileAttrs(INTEGER rn, INTEGER attrs)
@@ -54,5 +54,5 @@ void Executor::C_SetResFileAttrs(INTEGER rn, INTEGER attrs)
     if(!map)
         return; /* don't set reserr.  I kid you not, see I-127 */
     else
-        HxX(map, resfatr) = attrs;
+        (*map)->resfatr = attrs;
 }

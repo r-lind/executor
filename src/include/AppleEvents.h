@@ -161,11 +161,11 @@ typedef struct AE_hdlr_table_elt
     GUEST<int32_t> pad_2;
 } AE_hdlr_table_elt_t;
 
-#define AE_TABLE_ELTS(table) (HxX(table, elts))
+#define AE_TABLE_ELTS(table) ((*table)->elts)
 
-#define AE_TABLE_N_ELTS_X(table) (HxX(table, n_elts))
+#define AE_TABLE_N_ELTS_X(table) ((*table)->n_elts)
 #define AE_TABLE_N_ALLOCATED_BYTES_X(table) \
-    (HxX(table, n_allocated_bytes))
+    ((*table)->n_allocated_bytes)
 
 #define AE_TABLE_N_ELTS(table) \
     (AE_TABLE_N_ELTS_X(table))

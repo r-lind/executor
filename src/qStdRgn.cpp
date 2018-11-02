@@ -397,7 +397,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
             {
                 warning_unexpected("xdata handle NULL_STRING");
                 xh = (xdata_handle_t)NewHandle(sizeof(xdata_t));
-                HxX(xh, raw_pat_bits_mem) = nullptr;
+                (*xh)->raw_pat_bits_mem = nullptr;
                 src->patXData = (Handle)xh;
                 xdata_valid_p = false;
                 handle_size_wrong_p = false;
@@ -407,7 +407,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
                 handle_size_wrong_p = (GetHandleSize((Handle)xh)
                                        != sizeof(xdata_t));
                 xdata_valid_p = (!handle_size_wrong_p
-                                 && (HxX(xh, magic_cookie)
+                                 && ((*xh)->magic_cookie
                                      == XDATA_MAGIC_COOKIE));
             }
 
@@ -416,11 +416,11 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
             {
                 if(xdata_valid_p)
                 {
-                    Ptr raw = HxX(xh, raw_pat_bits_mem);
+                    Ptr raw = (*xh)->raw_pat_bits_mem;
                     if(raw)
                     {
                         DisposePtr(raw);
-                        HxX(xh, raw_pat_bits_mem) = nullptr;
+                        (*xh)->raw_pat_bits_mem = nullptr;
                     }
                 }
                 else if(handle_size_wrong_p)
@@ -671,9 +671,9 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
     if(!rgn || EmptyRgn(rgn))
         return;
 
-    if(HxX(rgn, rgnSize) & 0x8000)
+    if((*rgn)->rgnSize & 0x8000)
     {
-        warning_unexpected("negative rgnSize = 0x%x\n", Hx(rgn, rgnSize));
+        warning_unexpected("negative rgnSize = 0x%x\n", (*rgn)->rgnSize);
         return;
     }
 

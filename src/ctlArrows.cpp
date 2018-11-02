@@ -151,13 +151,13 @@ validate_colors_for_control(ControlHandle ctl)
         ctl_ctab_colors[i] = default_ctl_colors[i].rgb;
 
     t_aux_c = *lookup_aux_ctl(ctl);
-    if(t_aux_c && HxZ(t_aux_c, acCTable))
+    if(t_aux_c && (*t_aux_c)->acCTable)
     {
         CTabHandle c_ctab;
         ColorSpec *c_ctab_table;
         int c_ctab_size;
 
-        c_ctab = (CTabHandle)HxP(t_aux_c, acCTable);
+        c_ctab = (CTabHandle)(*t_aux_c)->acCTable;
         c_ctab_table = CTAB_TABLE(c_ctab);
         c_ctab_size = CTAB_SIZE(c_ctab);
 
@@ -352,7 +352,7 @@ void draw_page(ControlHandle ctl)
     RGBBackColor(&current_ctl_colors[page_fg]);
     FillRect(&r, qdGlobals().ltGray);
 
-    rp = &HxX(CTL_DATA(ctl), rgnBBox);
+    rp = &(*CTL_DATA(ctl))->rgnBBox;
     rp->top = rp->bottom = 0;
 }
 
@@ -429,7 +429,7 @@ void draw_thumb(ControlHandle ctl)
     Rect old_thumb, new_thumb;
     Rect dst_rect, *ctl_rect;
 
-    old_thumb = HxX(CTL_DATA(ctl), rgnBBox);
+    old_thumb = (*CTL_DATA(ctl))->rgnBBox;
     GlobalToLocalRect(&old_thumb);
 
     thumb_rect(ctl, &new_thumb);
@@ -535,7 +535,7 @@ where(ControlHandle ctl, Point p)
     Rect r;
     Rect thumbr;
 
-    thumbr = HxX(CTL_DATA(ctl), rgnBBox);
+    thumbr = (*CTL_DATA(ctl))->rgnBBox;
     GlobalToLocalRect(&thumbr);
     if(PtInRect(p, &thumbr))
         return inThumb;
@@ -598,7 +598,7 @@ void Executor::C_new_pos_ctl(INTEGER depth, INTEGER flags, GDHandle target,
     if(max < min)
         max = min;
 
-    thumbr = HxX(CTL_DATA(ctl), rgnBBox);
+    thumbr = (*CTL_DATA(ctl))->rgnBBox;
     GlobalToLocalRect(&thumbr);
 
     if(SB_VERT_P(height, width))
@@ -714,9 +714,9 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
     switch(mess)
     {
         case drawCntl:
-            if(Hx(c, contrlVis)
-               && SectRect(&HxX(PORT_VIS_REGION(qdGlobals().thePort), rgnBBox),
-                           &HxX(c, contrlRect), &r))
+            if((*c)->contrlVis
+               && SectRect(&(*PORT_VIS_REGION(qdGlobals().thePort))->rgnBBox,
+                           &(*c)->contrlRect, &r))
             {
                 validate_colors_for_control(c);
 
@@ -727,7 +727,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
                     device_loop_param dlp;
 
                     rh = NewRgn();
-                    RectRgn(rh, &HxX(c, contrlRect));
+                    RectRgn(rh, &(*c)->contrlRect);
                     dlp.ctl = c;
                     dlp.param = param;
                     DeviceLoop(rh, &new_draw_scroll, ptr_to_longint(&dlp), 0);
@@ -740,9 +740,9 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
         case testCntl:
             p.v = HiWord(param);
             p.h = LoWord(param);
-            if(U(Hx(c, contrlHilite)) != 255
-               && Hx(c, contrlMin) < Hx(c, contrlMax)
-               && PtInRect(p, &(HxX(c, contrlRect))))
+            if(U((*c)->contrlHilite) != 255
+               && (*c)->contrlMin < (*c)->contrlMax
+               && PtInRect(p, &((*c)->contrlRect)))
                 return where(c, p);
             else
                 return 0;
@@ -751,7 +751,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
             {
                 param &= 0x7FFFFFFF; /* IMI-331 */
                 case calcThumbRgn:
-                    CopyRgn((RgnHandle)HxP(c, contrlData),
+                    CopyRgn((RgnHandle)(*c)->contrlData,
                             ptr_from_longint<RgnHandle>(param));
                     GlobalToLocalRgn(ptr_from_longint<RgnHandle>(param));
                     break;
@@ -759,24 +759,24 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
             else
             {
                 case calcCntlRgn:
-                    r = HxX(c, contrlRect);
+                    r = (*c)->contrlRect;
                     RectRgn(ptr_from_longint<RgnHandle>(param), &r);
                     break;
             }
             break;
         case initCntl:
             temph = (Handle)NewRgn();
-            HxX(c, contrlData) = temph;
+            (*c)->contrlData = temph;
             thumb_rect(c, &tempr);
             LocalToGlobalRect(&tempr);
 #if 1
             /* MacBreadboard's behaviour suggests the following line is needed */
             tempr.top = tempr.bottom = 0;
 #endif
-            RectRgn((RgnHandle)HxP(c, contrlData), &tempr);
+            RectRgn((RgnHandle)(*c)->contrlData, &tempr);
             break;
         case dispCntl:
-            DisposeHandle((Handle)HxP(c, contrlData));
+            DisposeHandle((Handle)(*c)->contrlData);
             break;
         case posCntl:
             validate_colors_for_control(c);
@@ -785,7 +785,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
                 device_loop_param dlp;
 
                 rh = NewRgn();
-                RectRgn(rh, &HxX(c, contrlRect));
+                RectRgn(rh, &(*c)->contrlRect);
                 dlp.ctl = c;
                 dlp.param = param;
                 DeviceLoop(rh, &new_pos_ctl, ptr_to_longint(&dlp), 0);
@@ -797,7 +797,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
             p.v = pl->limitRect.top;
             p.h = pl->limitRect.left;
             pl->slopRect = pl->limitRect = CTL_RECT(c);
-            thumbr = HxX(CTL_DATA(c), rgnBBox);
+            thumbr = (*CTL_DATA(c))->rgnBBox;
             GlobalToLocalRect(&thumbr);
             rp = &thumbr;
             height = pl->slopRect.bottom - pl->slopRect.top;

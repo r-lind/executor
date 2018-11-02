@@ -297,7 +297,7 @@ void Executor::C_OpColor(RGBColor *color)
     if(!CGrafPort_p(qdGlobals().thePort))
         return;
 
-    HxX(CPORT_GRAFVARS(theCPort), rgbOpColor) = *color;
+    (*CPORT_GRAFVARS(theCPort))->rgbOpColor = *color;
 }
 
 void Executor::C_HiliteColor(RGBColor *color)
@@ -305,7 +305,7 @@ void Executor::C_HiliteColor(RGBColor *color)
     if(!CGrafPort_p(qdGlobals().thePort))
         return;
 
-    HxX(CPORT_GRAFVARS(theCPort), rgbHiliteColor) = *color;
+    (*CPORT_GRAFVARS(theCPort))->rgbHiliteColor = *color;
 }
 
 /* PixMap operations */
@@ -339,7 +339,7 @@ PixMapHandle Executor::C_NewPixMap()
        * This is a hack to make Executor bootstrap properly.
        */
         memset(*pixmap, 0, sizeof(PixMap));
-        HxX(pixmap, rowBytes) = PIXMAP_DEFAULT_ROWBYTES_X;
+        (*pixmap)->rowBytes = PIXMAP_DEFAULT_ROWBYTES_X;
         PIXMAP_HRES_X(pixmap) = PIXMAP_VRES_X(pixmap) = 72 << 16;
         PIXMAP_PIXEL_TYPE_X(pixmap) = chunky_pixel_type;
         PIXMAP_CMP_COUNT_X(pixmap) = 1;
@@ -420,8 +420,8 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
 
     pixpat = (PixPatHandle)NewHandle(sizeof(PixPat));
     patmap = (PixMapHandle)NewHandle(sizeof(PixMap));
-    **pixpat = HxX(pixpat_res, pixpat);
-    **patmap = HxX(pixpat_res, patmap);
+    **pixpat = (*pixpat_res)->pixpat;
+    **patmap = (*pixpat_res)->patmap;
 
     {
         int pixpat_type;

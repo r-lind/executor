@@ -306,7 +306,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
        && TE_LINE_HEIGHT(teh) == -1)
     {
         lht = TE_STYLE_LH_TABLE(te_style);
-        oldlh = (*lht + Hx(teh, nLines) - 1)->lhHeight;
+        oldlh = (*lht + (*teh)->nLines - 1)->lhHeight;
     }
     else
     {
@@ -396,16 +396,16 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
                 {
                     if(start > 0)
                     {
-                        HxX(teh, selStart) = Hx(teh, selStart) - 1;
-                        start = Hx(teh, selStart);
+                        (*teh)->selStart = (*teh)->selStart - 1;
+                        start = (*teh)->selStart;
                     }
                 }
                 else
                 {
                     if(stop < hlen)
                     {
-                        HxX(teh, selEnd) = Hx(teh, selEnd) + 1;
-                        stop = Hx(teh, selEnd);
+                        (*teh)->selEnd = (*teh)->selEnd + 1;
+                        stop = (*teh)->selEnd;
                     }
                 }
             }
@@ -428,22 +428,22 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
         eraser.top = newend.v;
         eraser.left = newend.h;
         eraser.bottom = newend.v + newlh;
-        eraser.right = HxX(teh, viewRect.right);
-        SectRect(&HxX(teh, viewRect), &eraser, &eraser);
+        eraser.right = (*teh)->viewRect.right;
+        SectRect(&(*teh)->viewRect, &eraser, &eraser);
         EraseRect(&eraser);
         eraser.top = eraser.bottom;
-        eraser.left = HxX(teh, viewRect.left);
+        eraser.left = (*teh)->viewRect.left;
         if(eraser.top != oldend.v)
         {
             eraser.bottom = oldend.v;
-            eraser.right = HxX(teh, viewRect.right);
-            SectRect(&HxX(teh, viewRect), &eraser, &eraser);
+            eraser.right = (*teh)->viewRect.right;
+            SectRect(&(*teh)->viewRect, &eraser, &eraser);
             EraseRect(&eraser);
             eraser.top = oldend.v;
         }
         eraser.bottom = oldend.v + oldlh;
         eraser.right = oldend.h;
-        SectRect(&HxX(teh, viewRect), &eraser, &eraser);
+        SectRect(&(*teh)->viewRect, &eraser, &eraser);
         EraseRect(&eraser);
     }
     else if(oldend.v == newend.v && oldend.h > newend.h)
@@ -452,7 +452,7 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
         eraser.left = newend.h;
         eraser.bottom = oldend.v + oldlh;
         eraser.right = oldend.h;
-        SectRect(&HxX(teh, viewRect), &eraser, &eraser);
+        SectRect(&(*teh)->viewRect, &eraser, &eraser);
         EraseRect(&eraser);
     }
     if(TE_STYLIZED_P(teh))

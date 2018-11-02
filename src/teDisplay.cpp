@@ -20,7 +20,7 @@ using namespace Executor;
 void Executor::C_TESetAlignment(INTEGER j, TEHandle teh)
 {
     TE_SLAM(teh);
-    HxX(teh, just) = j;
+    (*teh)->just = j;
     TECalText(teh);
     TE_SLAM(teh);
 }

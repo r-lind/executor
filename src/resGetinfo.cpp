@@ -80,7 +80,7 @@ void Executor::C_GetResInfo(Handle res, GUEST<INTEGER> *id,
     {
         if(rr->noff != -1)
             str255assign(name,
-                         (StringPtr)((char *)*map + Hx(map, namoff) + rr->noff));
+                         (StringPtr)((char *)*map + (*map)->namoff + rr->noff));
         else
             name[0] = 0;
     }
@@ -114,8 +114,8 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
         retval = GetHandleSize(res);
     else
     {
-        loc = Hx(map, rh.rdatoff) + B3TOLONG(rr->doff);
-        ROMlib_setreserr(SetFPos(Hx(map, resfn), fsFromStart, loc));
+        loc = (*map)->rh.rdatoff + B3TOLONG(rr->doff);
+        ROMlib_setreserr(SetFPos((*map)->resfn, fsFromStart, loc));
         if(LM(ResErr) != noErr)
             /*-->*/ return -1;
 
@@ -132,11 +132,11 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
             GUEST<LONGINT> master_save_pos;
 
             lc = sizeof(l);
-            GetFPos(Hx(map, resfn), &master_save_pos);
-            ROMlib_setreserr(FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)l));
+            GetFPos((*map)->resfn, &master_save_pos);
+            ROMlib_setreserr(FSReadAll((*map)->resfn, guestref(lc), (Ptr)l));
             if(LM(ResErr) != noErr || l[1] != COMPRESSED_TAG)
             {
-                SetFPos(Hx(map, resfn), fsFromStart, master_save_pos);
+                SetFPos((*map)->resfn, fsFromStart, master_save_pos);
                 goto not_compressed_after_all;
             }
             else
@@ -155,7 +155,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
         not_compressed_after_all:
             lc = sizeof(retval);
             GUEST<Size> tmpRet;
-            ROMlib_setreserr(FSReadAll(Hx(map, resfn), guestref(lc), (Ptr)&tmpRet));
+            ROMlib_setreserr(FSReadAll((*map)->resfn, guestref(lc), (Ptr)&tmpRet));
             retval = tmpRet;
             if(LM(ResErr) != noErr)
                 /*-->*/ return -1;

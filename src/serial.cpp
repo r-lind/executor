@@ -323,19 +323,19 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
             if(err == noErr)
             {
 #if defined(LINUX) || defined(MACOSX)
-                HxX(h, fd) = ROMlib_priv_open(devname, O_BINARY | O_RDWR);
-                if(HxX(h, fd) < 0)
-                    err = HxX(h, fd); /* error return piggybacked */
+                (*h)->fd = ROMlib_priv_open(devname, O_BINARY | O_RDWR);
+                if((*h)->fd < 0)
+                    err = (*h)->fd; /* error return piggybacked */
                 else
                 {
 #if defined(TERMIO)
-                    err = ioctl(HxX(h, fd), TCGETA, &HxX(h, state)) < 0 ? ROMlib_maperrno() : noErr;
+                    err = ioctl((*h)->fd, TCGETA, &(*h)->state) < 0 ? ROMlib_maperrno() : noErr;
 #else
-                    if(ioctl(HxX(h, fd), TIOCGETP, &HxX(h, sgttyb)) < 0 || ioctl(HxX(h, fd), TIOCGETC, &HxX(h, tchars)) < 0 || ioctl(HxX(h, fd), TIOCLGET, &HxX(h, lclmode)) < 0)
+                    if(ioctl((*h)->fd, TIOCGETP, &(*h)->sgttyb) < 0 || ioctl((*h)->fd, TIOCGETC, &(*h)->tchars) < 0 || ioctl((*h)->fd, TIOCLGET, &(*h)->lclmode) < 0)
                         err = ROMlib_maperrno();
 #endif
 #else
-                HxX(h, fd) = (pbp->cntrlParam.ioCRefNum == AINREFNUM || pbp->cntrlParam.ioCRefNum == AOUTREFNUM) ? 0 : 1;
+                (*h)->fd = (pbp->cntrlParam.ioCRefNum == AINREFNUM || pbp->cntrlParam.ioCRefNum == AOUTREFNUM) ? 0 : 1;
 #endif
                     dcp->dCtlFlags |= OPENBIT;
                     SerReset(pbp->cntrlParam.ioCRefNum,
@@ -381,9 +381,9 @@ OSErr Executor::C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 /* this may have to be changed since we aren't looking for
 		   parity and framing errors */
 #if defined(LINUX) || defined(MACOSX)
-                    pbp->ioParam.ioActCount = read(HxX(h, fd), buf, req_count);
+                    pbp->ioParam.ioActCount = read((*h)->fd, buf, req_count);
 #elif defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
-                    pbp->ioParam.ioActCount = serial_bios_read(HxX(h, fd), buf,
+                    pbp->ioParam.ioActCount = serial_bios_read((*h)->fd, buf,
                                                                   req_count);
 #else
 // FIXME: #warning not sure what to do here
@@ -406,10 +406,10 @@ OSErr Executor::C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                                        (LONGINT)(unsigned char)buf[0]);
 #endif
 #if defined(LINUX) || defined(MACOSX)
-                    pbp->ioParam.ioActCount = write(HxX(h, fd),
+                    pbp->ioParam.ioActCount = write((*h)->fd,
                                                        buf, req_count);
 #elif defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
-                    pbp->ioParam.ioActCount = serial_bios_write(HxX(h, fd),
+                    pbp->ioParam.ioActCount = serial_bios_write((*h)->fd,
                                                                    buf, req_count);
 #else
 // FIXME: #warning not sure what to do here
@@ -823,34 +823,34 @@ OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 err = noErr; /* All I/O done synchronously */
                 break;
             case SERSET:
-                err = serset(HxX(h, fd), pbp->cntrlParam.csParam[0]);
+                err = serset((*h)->fd, pbp->cntrlParam.csParam[0]);
                 break;
             case SERSETBUF:
                 err = noErr; /* ignored */
                 break;
             case SERHSHAKE:
             case SERXHSHAKE: /* NOTE:  DTR handshake isn't supported  */
-                err = serxhshake(HxX(h, fd), (SerShk *)pbp->cntrlParam.csParam);
+                err = serxhshake((*h)->fd, (SerShk *)pbp->cntrlParam.csParam);
                 break;
             case SERSETBRK:
-                err = ctlbrk(HxX(h, fd), SER_START);
+                err = ctlbrk((*h)->fd, SER_START);
                 break;
             case SERCLRBRK:
-                err = ctlbrk(HxX(h, fd), SER_STOP);
+                err = ctlbrk((*h)->fd, SER_STOP);
                 break;
             case SERBAUDRATE:
-                err = setbaud(HxX(h, fd), pbp->cntrlParam.csParam[0]);
+                err = setbaud((*h)->fd, pbp->cntrlParam.csParam[0]);
                 break;
             case SERMISC:
 #if defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
-                err = serial_bios_setdtr(HxX(h, fd));
+                err = serial_bios_setdtr((*h)->fd);
 #else
                 err = controlErr; /* not supported */
 #endif
                 break;
             case SERSETDTR:
 #if defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
-                err = serial_bios_clrdtr(HxX(h, fd));
+                err = serial_bios_clrdtr((*h)->fd);
 #else
                 err = controlErr; /* not supported */
 #endif
@@ -865,24 +865,24 @@ OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 err = controlErr; /* not supported */
                 break;
             case SERUSETXOFF:
-                err = flow(HxX(h, fd), SER_STOP);
+                err = flow((*h)->fd, SER_STOP);
                 break;
             case SERUCLRXOFF:
-                err = flow(HxX(h, fd), SER_START);
+                err = flow((*h)->fd, SER_START);
                 break;
             case SERCXMITXON:
                 err = controlErr; /* not supported */
                 break;
             case SERUXMITXON:
                 c = XONC;
-                err = write(HxX(h, fd), &c, 1) != 1 ? ROMlib_maperrno() : noErr;
+                err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
                 break;
             case SERCXMITXOFF:
                 err = controlErr; /* not supported */
                 break;
             case SERUXMITXOFF:
                 c = XOFFC;
-                err = write(HxX(h, fd), &c, 1) != 1 ? ROMlib_maperrno() : noErr;
+                err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
                 break;
             case SERRESET:
                 err = controlErr; /* not supported */
@@ -920,9 +920,9 @@ OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL *
         {
             case SERGETBUF:
 #if defined(LINUX) || defined(MACOSX)
-                if(ioctl(HxX(h, fd), FIONREAD, &n) < 0)
+                if(ioctl((*h)->fd, FIONREAD, &n) < 0)
 #else
-                if(serial_bios_fionread(HxX(h, fd), &n) < 0)
+                if(serial_bios_fionread((*h)->fd, &n) < 0)
 #endif
                     err = ROMlib_maperrno();
                 else
@@ -936,9 +936,9 @@ OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL *
                 break;
             case SERSTATUS:
 #if defined(LINUX) || defined(MACOSX)
-                if(ioctl(HxX(h, fd), FIONREAD, &n) < 0)
+                if(ioctl((*h)->fd, FIONREAD, &n) < 0)
 #else
-                if(serial_bios_fionread(HxX(h, fd), &n) < 0)
+                if(serial_bios_fionread((*h)->fd, &n) < 0)
 #endif
                     err = ROMlib_maperrno();
                 else
@@ -967,13 +967,13 @@ static void restorecloseanddispose(hiddenh h)
 {
 #if defined(LINUX) || defined(MACOSX)
 #if defined(TERMIO)
-    ioctl(HxX(h, fd), TCSETAW, &HxX(h, state));
+    ioctl((*h)->fd, TCSETAW, &(*h)->state);
 #else
-    ioctl(HxX(h, fd), TIOCSETP, &HxX(h, sgttyb));
-    ioctl(HxX(h, fd), TIOCSETC, &HxX(h, tchars));
-    ioctl(HxX(h, fd), TIOCLSET, &HxX(h, lclmode));
+    ioctl((*h)->fd, TIOCSETP, &(*h)->sgttyb);
+    ioctl((*h)->fd, TIOCSETC, &(*h)->tchars);
+    ioctl((*h)->fd, TIOCLSET, &(*h)->lclmode);
 #endif
-    close(HxX(h, fd));
+    close((*h)->fd);
 #endif
     DisposeHandle((Handle)h);
 }

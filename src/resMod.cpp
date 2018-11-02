@@ -50,15 +50,15 @@ void Executor::C_SetResInfo(Handle res, INTEGER id, StringPtr name)
     if(name)
     {
         sl = U(name[0]);
-        if(U(*(sp = (char *)*map + Hx(map, namoff) + rr->noff)) < sl || rr->noff == -1)
+        if(U(*(sp = (char *)*map + (*map)->namoff + rr->noff)) < sl || rr->noff == -1)
         {
-            SetHandleSize((Handle)map, Hx(map, rh.maplen) + sl + 1);
+            SetHandleSize((Handle)map, (*map)->rh.maplen + sl + 1);
             err = MemError();
             if(ROMlib_setreserr(err))
                 return;
-            rr->noff = Hx(map, rh.maplen) - Hx(map, namoff);
-            HxX(map, rh.maplen) = Hx(map, rh.maplen) + sl + 1;
-            sp = (char *)*map + Hx(map, namoff) + rr->noff;
+            rr->noff = (*map)->rh.maplen - (*map)->namoff;
+            (*map)->rh.maplen = (*map)->rh.maplen + sl + 1;
+            sp = (char *)*map + (*map)->namoff + rr->noff;
             warning_unimplemented("we leak space here");
         }
         str255assign(sp, name);
@@ -93,14 +93,14 @@ void Executor::C_ChangedResource(Handle res)
         return;
     }
     rr->ratr |= resChanged;
-    HxX(map, resfatr) |= mapChanged;
+    (*map)->resfatr |= mapChanged;
     if(rr->doff[0] != 0xff || rr->doff[1] != 0xff || rr->doff[2] != 0xff)
     {
         oldsize = ROMlib_SizeResource(res, false);
         newsize = GetHandleSize((Handle)rr->rhand);
         if(newsize > oldsize)
         {
-            HxX(map, resfatr) |= mapCompact;
+            (*map)->resfatr |= mapCompact;
             rr->doff[0] = rr->doff[1] = rr->doff[2] = 0xff;
         }
     }
@@ -183,7 +183,7 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
     r.noff = addname(map, name);
     r.ratr = resChanged;
     r.doff[0] = r.doff[1] = r.doff[2] = 0xff;
-    HxX(map, resfatr) |= mapChanged;
+    (*map)->resfatr |= mapChanged;
     r.rhand = data;
     HSetRBit(data);
     tr = (typref *)((char *)*map + toff);
@@ -193,7 +193,7 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
         break;
     EWALKRR(rr)
 #else /* 0 */
-    rr = (resref *)((char *)*map + Hx(map, typoff) + tr->rloff);
+    rr = (resref *)((char *)*map + (*map)->typoff + tr->rloff);
 #endif /* 0 */
     roff = (LONGINT)((char *)rr - (char *)*map);
     /* roff is from the beginning of the map */
@@ -257,7 +257,7 @@ void Executor::C_RemoveResource(Handle res)
     }
     else
         nmoff = 0x7fff;
-    HxX(map, resfatr) |= mapChanged | mapCompact;
+    (*map)->resfatr |= mapChanged | mapCompact;
     Munger((Handle)map, rroff, (Ptr)0, (LONGINT)sizeof(resref),
            (Ptr) "", (LONGINT)0);
     rroff -= TYPEOFF(map);
@@ -295,20 +295,20 @@ static OSErr writemap(resmaphand map)
     OSErr terr;
     LONGINT lc;
 
-    terr = SetFPos(Hx(map, resfn), fsFromStart, 0L);
+    terr = SetFPos((*map)->resfn, fsFromStart, 0L);
     if(terr != noErr)
         return (terr);
     lc = sizeof(reshead);
-    terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr) & (HxX(map, rh)));
+    terr = FSWriteAll((*map)->resfn, guestref(lc), (Ptr) & ((*map)->rh));
     if(terr != noErr)
         return (terr);
-    terr = SetFPos(Hx(map, resfn), fsFromStart, Hx(map, rh.rmapoff));
+    terr = SetFPos((*map)->resfn, fsFromStart, (*map)->rh.rmapoff);
     if(terr != noErr)
         return (terr);
-    lc = Hx(map, rh.maplen);
-    terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)*map);
+    lc = (*map)->rh.maplen;
+    terr = FSWriteAll((*map)->resfn, guestref(lc), (Ptr)*map);
     if(terr == noErr)
-        HxX(map, resfatr) &= ~(mapChanged);
+        (*map)->resfatr &= ~(mapChanged);
     return (terr);
 }
 
@@ -328,23 +328,23 @@ void Executor::ROMlib_wr(resmaphand map, resref *rr) /* INTERNAL */
         rsize = GetHandleSize(res);
         if(rr->doff[0] == 0xFF && rr->doff[1] == 0xFF && rr->doff[2] == 0xFF)
         {
-            newloc = Hx(map, rh.rmapoff) - Hx(map, rh.rdatoff);
-            HxX(map, rh.rmapoff) = Hx(map, rh.rmapoff) + rsize + sizeof(LONGINT);
-            HxX(map, rh.datlen) = Hx(map, rh.datlen) + rsize + sizeof(LONGINT);
+            newloc = (*map)->rh.rmapoff - (*map)->rh.rdatoff;
+            (*map)->rh.rmapoff = (*map)->rh.rmapoff + rsize + sizeof(LONGINT);
+            (*map)->rh.datlen = (*map)->rh.datlen + rsize + sizeof(LONGINT);
             B3ASSIGN(rr->doff, newloc);
         }
         else
             newloc = B3TOLONG(rr->doff);
-        ROMlib_setreserr(SetFPos(Hx(map, resfn), fsFromStart, Hx(map, rh.rdatoff) + newloc));
+        ROMlib_setreserr(SetFPos((*map)->resfn, fsFromStart, (*map)->rh.rdatoff + newloc));
         if(LM(ResErr) != noErr)
             return;
         lc = sizeof(LONGINT);
         swappedrsize = rsize;
-        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)&swappedrsize));
+        ROMlib_setreserr(FSWriteAll((*map)->resfn, guestref(lc), (Ptr)&swappedrsize));
         if(LM(ResErr) != noErr)
             return;
         lc = rsize;
-        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), *res));
+        ROMlib_setreserr(FSWriteAll((*map)->resfn, guestref(lc), *res));
         if(LM(ResErr) != noErr)
             return;
         rr->ratr &= ~resChanged;
@@ -489,14 +489,14 @@ static void compactdata(resmaphand map)
     fillst(st, rr, rr + nres);
     ststate = HGetState((Handle)st);
     HLock((Handle)st);
-    datlen = walkst(*st + 1, *st + nres + 1, Hx(map, resfn),
-                    Hx(map, rh.rdatoff));
+    datlen = walkst(*st + 1, *st + nres + 1, (*map)->resfn,
+                    (*map)->rh.rdatoff);
     HSetState((Handle)st, ststate);
     HSetState((Handle)map, mapstate);
-    HxX(map, resfatr) |= mapChanged;
-    HxX(map, resfatr) |= ~mapCompact;
-    HxX(map, rh.rmapoff) = sizeof(reshead) + sizeof(rsrvrec) + datlen;
-    HxX(map, rh.datlen) = datlen;
+    (*map)->resfatr |= mapChanged;
+    (*map)->resfatr |= ~mapCompact;
+    (*map)->rh.rmapoff = sizeof(reshead) + sizeof(rsrvrec) + datlen;
+    (*map)->rh.datlen = datlen;
     DisposeHandle((Handle)st);
 }
 
@@ -522,16 +522,16 @@ void Executor::C_UpdateResFile(INTEGER rn)
  * NOTE:  This implementation looks more true to what IMI-125 implies than
  *	  the one (above) it replaces.
  */
-    fp = PRNTOFPERR(Hx(map, resfn), &err);
+    fp = PRNTOFPERR((*map)->resfn, &err);
     if(err == noErr && (fp->fcflags & fcwriteperm))
     {
         needtowalk = true;
-        if(HxX(map, resfatr) & (mapCompact))
+        if((*map)->resfatr & (mapCompact))
         {
             compactdata(map);
             needtowalk = false;
         }
-        if(HxX(map, resfatr) & (mapChanged))
+        if((*map)->resfatr & (mapChanged))
         {
             if(needtowalk)
             {
@@ -545,7 +545,7 @@ void Executor::C_UpdateResFile(INTEGER rn)
             if(LM(ResErr) != noErr)
                 return;
         }
-        iopb.ioRefNum = HxX(map, resfn);
+        iopb.ioRefNum = (*map)->resfn;
         PBFlushFile((ParmBlkPtr)&iopb, false);
     }
 }

@@ -476,9 +476,9 @@ static void mod_item_enableness(DialogPtr dp, INTEGER item,
         SetDialogItem(dp, item, type, h, &r);
     }
     ch = (ControlHandle)h;
-    if(Hx(ch, contrlHilite) == 255 && enableness_wanted == enable)
+    if((*ch)->contrlHilite == 255 && enableness_wanted == enable)
         HiliteControl(ch, 0);
-    else if(Hx(ch, contrlHilite) != 255 && enableness_wanted == disable)
+    else if((*ch)->contrlHilite != 255 && enableness_wanted == disable)
         HiliteControl(ch, 255);
 }
 

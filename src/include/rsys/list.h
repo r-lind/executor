@@ -37,10 +37,10 @@ extern void ROMlib_listcall(INTEGER mess, BOOLEAN sel, Rect *rp, Cell cell,
 
 #define LISTDECL() INTEGER liststate
 
-#define LISTBEGIN(l) (liststate = HGetState(HxP(l, listDefProc)), \
-                      HSetState(HxP(l, listDefProc), liststate | LOCKBIT))
+#define LISTBEGIN(l) (liststate = HGetState((*l)->listDefProc), \
+                      HSetState((*l)->listDefProc, liststate | LOCKBIT))
 
-#define LISTEND(l) HSetState(HxP(l, listDefProc), liststate)
+#define LISTEND(l) HSetState((*l)->listDefProc, liststate)
 
 extern void ROMlib_vminmax(INTEGER *minp, INTEGER *maxp, ListPtr lp);
 extern void ROMlib_hminmax(INTEGER *minp, INTEGER *maxp, ListPtr lp);

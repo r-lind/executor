@@ -160,7 +160,7 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
         CopyRgn(WINDOW_CONT_REGION(w), WINDOW_UPDATE_REGION(w));
 
         aux_w = *lookup_aux_win(w);
-        w_ctab = HxP(aux_w, awCTable);
+        w_ctab = (*aux_w)->awCTable;
         if(w_ctab)
         {
             int i;
@@ -312,7 +312,7 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
     if(oldfront == (WindowPeek)w && LM(WindowList) != (WindowPeek)w)
     {
         ThePortGuard guard(w);
-        r = HxX(PORT_VIS_REGION(w), rgnBBox);
+        r = (*PORT_VIS_REGION(w))->rgnBBox;
         EraseRect(&r); /* ick! The bad Mac made me do it */
         InvalRect(&r);
     }

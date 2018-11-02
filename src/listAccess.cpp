@@ -38,8 +38,8 @@ BOOLEAN Executor::C_LNextCell(BOOLEAN hnext, BOOLEAN vnext, GUEST<Cell> *cellp,
 
     scratch.v = cellp->v;
     scratch.h = cellp->h;
-    right = Hx(list, dataBounds.right);
-    bottom = Hx(list, dataBounds.bottom);
+    right = (*list)->dataBounds.right;
+    bottom = (*list)->dataBounds.bottom;
     if(hnext)
     {
         if(++scratch.h >= right)
@@ -73,13 +73,13 @@ void Executor::C_LRect(Rect *cellrect, Cell cell, ListHandle list) /* IMIV-274 *
     Point csize;
     INTEGER temp;
 
-    if(PtInRect(cell, &HxX(list, visible)))
+    if(PtInRect(cell, &(*list)->visible))
     {
-        csize.h = Hx(list, cellSize.h);
-        csize.v = Hx(list, cellSize.v);
-        *cellrect = HxX(list, rView);
-        cellrect->top = cellrect->top + ((cell.v - Hx(list, visible.top)) * csize.v);
-        cellrect->left = cellrect->left + ((cell.h - Hx(list, visible.left)) * csize.h);
+        csize.h = (*list)->cellSize.h;
+        csize.v = (*list)->cellSize.v;
+        *cellrect = (*list)->rView;
+        cellrect->top = cellrect->top + ((cell.v - (*list)->visible.top) * csize.v);
+        cellrect->left = cellrect->left + ((cell.h - (*list)->visible.left) * csize.h);
         if((temp = cellrect->top + csize.v) < cellrect->bottom)
             cellrect->bottom = temp;
         if((temp = cellrect->left + csize.h) < cellrect->right)
@@ -128,7 +128,7 @@ BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
     cmpf fp;
 
     HLock((Handle)list);
-    HLock((Handle)HxP(list, cells));
+    HLock((Handle)(*list)->cells);
 
     fp = proc ? (cmpf)proc : &IUMagString;
     cell.h = cellp->h;
@@ -138,11 +138,11 @@ BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
 		 and ep should be used! */
     while((C_LGetCellDataLocation(&offS, &lenS, cell, list), len = lenS, off = offS,
            len != -1)
-          && CALLCMP(dp, (Ptr)*HxP(list, cells) + off, dl, len, fp) != 0)
+          && CALLCMP(dp, (Ptr)*(*list)->cells + off, dl, len, fp) != 0)
         if(!C_LNextCell(true, true, &swappedcell, list))
         {
-            cell.h = Hx(list, dataBounds.right);
-            cell.v = Hx(list, dataBounds.bottom);
+            cell.h = (*list)->dataBounds.right;
+            cell.v = (*list)->dataBounds.bottom;
         }
         else
         {
@@ -150,7 +150,7 @@ BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
             cell.v = swappedcell.v;
         }
 
-    HUnlock((Handle)HxP(list, cells));
+    HUnlock((Handle)(*list)->cells);
     HUnlock((Handle)list);
     if(len != -1)
     {
@@ -171,17 +171,17 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
     Rect r;
     Point p;
 
-    oldright = Hx(list, rView.right);
-    oldbottom = Hx(list, rView.bottom);
-    newright = Hx(list, rView.left) + width;
-    HxX(list, rView.right) = newright;
-    newbottom = Hx(list, rView.top) + height;
-    HxX(list, rView.bottom) = newbottom;
-    ch = HxP(list, hScroll);
-    cv = HxP(list, vScroll);
+    oldright = (*list)->rView.right;
+    oldbottom = (*list)->rView.bottom;
+    newright = (*list)->rView.left + width;
+    (*list)->rView.right = newright;
+    newbottom = (*list)->rView.top + height;
+    (*list)->rView.bottom = newbottom;
+    ch = (*list)->hScroll;
+    cv = (*list)->vScroll;
 
-    p.h = Hx(list, cellSize.h);
-    p.v = Hx(list, cellSize.v);
+    p.h = (*list)->cellSize.h;
+    p.v = (*list)->cellSize.v;
     C_LCellSize(p, list); /* sets visible */
 
     updatergn = NewRgn();
@@ -192,17 +192,17 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
         { /* both are different */
             if(ch)
             {
-                MoveControl(ch, Hx(list, rView.left) - 1, newbottom);
-                SizeControl(ch, newright - Hx(list, rView.left) + 2, 16);
+                MoveControl(ch, (*list)->rView.left - 1, newbottom);
+                SizeControl(ch, newright - (*list)->rView.left + 2, 16);
             }
             if(cv)
             {
-                MoveControl(cv, newright, Hx(list, rView.top) - 1);
-                SizeControl(cv, 16, newbottom - Hx(list, rView.top) + 2);
+                MoveControl(cv, newright, (*list)->rView.top - 1);
+                SizeControl(cv, 16, newbottom - (*list)->rView.top + 2);
             }
             r.top = std::min(oldbottom, newbottom);
             r.bottom = std::max(oldbottom, newbottom);
-            r.left = Hx(list, rView.left) - 1;
+            r.left = (*list)->rView.left - 1;
             r.right = std::max(oldright, newright);
             if(ch)
                 r.bottom = r.bottom + (16);
@@ -213,14 +213,14 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
         { /* just right different */
             if(ch)
             {
-                SizeControl(ch, newright - Hx(list, rView.left) + 2, 16);
+                SizeControl(ch, newright - (*list)->rView.left + 2, 16);
             }
             if(cv)
-                MoveControl(cv, newright, Hx(list, rView.top) - 1);
+                MoveControl(cv, newright, (*list)->rView.top - 1);
         }
         r.left = std::min(oldright, newright);
         r.right = std::max(oldright, newright);
-        r.top = Hx(list, rView.top) - 1;
+        r.top = (*list)->rView.top - 1;
         r.bottom = std::max(oldbottom, newbottom);
         if(cv)
             r.right = r.right + (16);
@@ -230,14 +230,14 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
     else if(newbottom != oldbottom)
     { /* just bottom different */
         if(ch)
-            MoveControl(ch, Hx(list, rView.left) - 1, newbottom);
+            MoveControl(ch, (*list)->rView.left - 1, newbottom);
         if(cv)
         {
-            SizeControl(cv, 16, newbottom - Hx(list, rView.top) + 2);
+            SizeControl(cv, 16, newbottom - (*list)->rView.top + 2);
         }
         r.top = std::min(oldbottom, newbottom);
         r.bottom = std::max(oldbottom, newbottom);
-        r.left = Hx(list, rView.left) - 1;
+        r.left = (*list)->rView.left - 1;
         r.right = std::max(oldright, newright);
         if(ch)
             r.bottom = r.bottom + (16);

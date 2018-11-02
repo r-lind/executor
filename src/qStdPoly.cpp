@@ -25,10 +25,10 @@ static void polyrgn(PolyHandle ph, RgnHandle rh)
 
     state = HGetState((Handle)ph);
     HLock((Handle)ph);
-    pp = HxX(ph, polyPoints);
-    ep = (GUEST<Point> *)((char *)*ph + Hx(ph, polySize));
-    firstp.h = Hx(ph, polyPoints[0].h);
-    firstp.v = Hx(ph, polyPoints[0].v);
+    pp = (*ph)->polyPoints;
+    ep = (GUEST<Point> *)((char *)*ph + (*ph)->polySize);
+    firstp.h = (*ph)->polyPoints[0].h;
+    firstp.v = (*ph)->polyPoints[0].v;
     if(ep[-1].h == firstp.h && ep[-1].v == firstp.v)
         ep--;
 
@@ -57,7 +57,7 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
     INTEGER state;
     PAUSEDECL;
 
-    if(!ph || !*ph || HxX(ph, polySize) == 10 || EmptyRect(&HxX(ph, polyBBox)))
+    if(!ph || !*ph || (*ph)->polySize == 10 || EmptyRect(&(*ph)->polyBBox))
         /*-->*/ return;
 
     state = HGetState((Handle)ph);
@@ -66,7 +66,7 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
     {
         ROMlib_drawingverbpicupdate(verb);
         PICOP(OP_framePoly + (int)verb);
-        PICWRITE(*ph, Hx(ph, polySize));
+        PICWRITE(*ph, (*ph)->polySize);
     }
 
     if(PORT_PEN_VIS(qdGlobals().thePort) < 0 && !PORT_REGION_SAVE_X(qdGlobals().thePort)
@@ -83,8 +83,8 @@ void Executor::C_StdPoly(GrafVerb verb, PolyHandle ph)
             /* we used to unconditionally close the polygon here, but
 	   testing on the mac shows that is incorrect */
 
-            pp = HxX(ph, polyPoints);
-            ep = (GUEST<Point> *)((char *)*ph + Hx(ph, polySize));
+            pp = (*ph)->polyPoints;
+            ep = (GUEST<Point> *)((char *)*ph + (*ph)->polySize);
             firstp.h = pp[0].h;
             firstp.v = pp[0].v;
             MoveTo(firstp.h, firstp.v);

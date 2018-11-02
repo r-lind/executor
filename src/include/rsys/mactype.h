@@ -647,16 +647,6 @@ public:
 template<class T>
 GuestRef<T> guestref(T& x) { return GuestRef<T>(x); }
 
-// HxZ is a handle dereference where the member selected is itself some form
-// of packed pointer, but we're only checking to see if it's zero or non-zero
-// (e.g. if (HxZ(hand)) )
-
-#define Hx(handle, field) (*handle)->field
-#define HxX(handle, field) ((*handle)->field)
-
-#define HxP(handle, field) Hx(handle, field)
-#define HxZ(handle, field) HxX(handle, field)
-
 }
 
 #endif /* _MACTYPE_H_ */

@@ -96,12 +96,12 @@ void Executor::ctl_color_init(void)
     }
 #endif
 
-    HxX(default_aux_ctl, acNext) = nullptr;
-    HxX(default_aux_ctl, acOwner) = nullptr;
-    HxX(default_aux_ctl, acCTable) = (CCTabHandle)GetResource(TICK("cctb"), 0);
-    HxX(default_aux_ctl, acFlags) = 0;
-    HxX(default_aux_ctl, acReserved) = 0;
-    HxX(default_aux_ctl, acRefCon) = 0;
+    (*default_aux_ctl)->acNext = nullptr;
+    (*default_aux_ctl)->acOwner = nullptr;
+    (*default_aux_ctl)->acCTable = (CCTabHandle)GetResource(TICK("cctb"), 0);
+    (*default_aux_ctl)->acFlags = 0;
+    (*default_aux_ctl)->acReserved = 0;
+    (*default_aux_ctl)->acRefCon = 0;
 }
 
 GUEST<AuxCtlHandle> *
@@ -110,42 +110,42 @@ Executor::lookup_aux_ctl(ControlHandle ctl)
     GUEST<AuxCtlHandle> *t;
 
     for(t = &LM(AuxCtlHead);
-        *t && HxP(*t, acOwner) != ctl;
-        t = &HxX(*t, acNext))
+        *t && (**t)->acOwner != ctl;
+        t = &(**t)->acNext)
         ;
     return t;
 }
 
 void Executor::C_SetControlReference(ControlHandle c, LONGINT data) /* IMI-327 */
 {
-    HxX(c, contrlRfCon) = data;
+    (*c)->contrlRfCon = data;
 }
 
 LONGINT Executor::C_GetControlReference(ControlHandle c) /* IMI-327 */
 {
-    return Hx(c, contrlRfCon);
+    return (*c)->contrlRfCon;
 }
 
 void Executor::C_SetControlAction(ControlHandle c, ControlActionUPP a) /* IMI-328 */
 {
     if(a != (ControlActionUPP)-1)
-        HxX(c, contrlAction) = a;
+        (*c)->contrlAction = a;
     else
-        HxX(c, contrlAction) = guest_cast<ControlActionUPP>(-1);
+        (*c)->contrlAction = guest_cast<ControlActionUPP>(-1);
 }
 
 ControlActionUPP Executor::C_GetControlAction(ControlHandle c) /* IMI-328 */
 {
-    return HxP(c, contrlAction);
+    return (*c)->contrlAction;
 }
 
 INTEGER Executor::C_GetControlVariant(ControlHandle c) /* IMV-222 */
 {
     AuxCtlHandle h;
 
-    for(h = LM(AuxCtlHead); h != 0 && HxP(h, acOwner) != c; h = HxP(h, acNext))
+    for(h = LM(AuxCtlHead); h != 0 && (*h)->acOwner != c; h = (*h)->acNext)
         ;
-    return h != 0 ? Hx(h, acFlags).get() : (INTEGER)0;
+    return h != 0 ? (*h)->acFlags.get() : (INTEGER)0;
 }
 
 /* according to IM-MTE; this has been renamed

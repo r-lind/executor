@@ -26,7 +26,7 @@ LONGINT Executor::C_GetMaxResourceSize(Handle h) /* IMIV-16 */
     if(!rr->rhand || !(*(Handle)rr->rhand))
     {
         dl = B3TOLONG(rr->doff);
-        mdl = Hx(map, rh.datlen);
+        mdl = (*map)->rh.datlen;
         WALKTANDR(map, i, tr, j, rr)
         if((nl = B3TOLONG(rr->doff)) > dl && nl < mdl)
             mdl = nl;

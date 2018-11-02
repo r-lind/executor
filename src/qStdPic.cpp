@@ -70,20 +70,20 @@ void Executor::C_StdPutPic(const void  *sp, INTEGER bc)
 
     if(pch)
     {
-        oldhowfar = Hx(pch, pichowfar);
-        ph = HxP(pch, pichandle);
-        newhowfar = Hx(pch, pichowfar) + bc;
-        HxX(pch, pichowfar) = newhowfar;
+        oldhowfar = (*pch)->pichowfar;
+        ph = (*pch)->pichandle;
+        newhowfar = (*pch)->pichowfar + bc;
+        (*pch)->pichowfar = newhowfar;
         if(newhowfar > 32766)
-            HxX(ph, picSize) = 32766;
+            (*ph)->picSize = 32766;
         else
-            HxX(ph, picSize) = newhowfar;
+            (*ph)->picSize = newhowfar;
 
-        if(Hx(pch, pichowfar) > Hx(pch, picsize))
+        if((*pch)->pichowfar > (*pch)->picsize)
         {
-            newsize = (Hx(pch, pichowfar) + 0xFF) & ~(LONGINT)0xFF;
+            newsize = ((*pch)->pichowfar + 0xFF) & ~(LONGINT)0xFF;
             SetHandleSize((Handle)ph, newsize);
-            HxX(pch, picsize) = newsize;
+            (*pch)->picsize = newsize;
         }
         memmove((char *)*ph + oldhowfar, sp, bc);
     }
