@@ -280,14 +280,14 @@ ROMlib_new_window_common(WindowPeek w,
         title = (StringPtr) ""; /* thank MS Word for pointing this out */
     if(!behind)
     {
-        WINDOW_NEXT_WINDOW_X(w) = nullptr;
+        WINDOW_NEXT_WINDOW(w) = nullptr;
         if(LM(WindowList))
         {
             for(t_w = LM(WindowList);
-                WINDOW_NEXT_WINDOW_X(t_w);
+                WINDOW_NEXT_WINDOW(t_w);
                 t_w = WINDOW_NEXT_WINDOW(t_w))
                 ;
-            WINDOW_NEXT_WINDOW_X(t_w) = w;
+            WINDOW_NEXT_WINDOW(t_w) = w;
         }
         else
         {
@@ -302,7 +302,7 @@ ROMlib_new_window_common(WindowPeek w,
     }
     else if(behind == (WindowPtr)-1L)
     {
-        WINDOW_NEXT_WINDOW_X(w) = LM(WindowList);
+        WINDOW_NEXT_WINDOW(w) = LM(WindowList);
         LM(WindowList) = (WindowPeek)w;
         if(visible_p)
         {
@@ -313,37 +313,37 @@ ROMlib_new_window_common(WindowPeek w,
     }
     else
     {
-        WINDOW_NEXT_WINDOW_X(w) = WINDOW_NEXT_WINDOW_X(behind);
-        WINDOW_NEXT_WINDOW_X(behind) = (WindowPeek)w;
+        WINDOW_NEXT_WINDOW(w) = WINDOW_NEXT_WINDOW(behind);
+        WINDOW_NEXT_WINDOW(behind) = (WindowPeek)w;
     }
-    WINDOW_KIND_X(w) = userKind;
-    WINDOW_VISIBLE_X(w) = visible_p;
+    WINDOW_KIND(w) = userKind;
+    WINDOW_VISIBLE(w) = visible_p;
     for(t_w = LM(WindowList);
         t_w && !WINDOW_VISIBLE(t_w);
         t_w = WINDOW_NEXT_WINDOW(t_w))
         ;
-    WINDOW_HILITED_X(w) = visible_p && (t_w == w);
-    if(WINDOW_HILITED_X(w))
+    WINDOW_HILITED(w) = visible_p && (t_w == w);
+    if(WINDOW_HILITED(w))
     {
         LM(CurActivate) = (WindowPtr)w;
         for(t_w = WINDOW_NEXT_WINDOW(t_w);
-            t_w && !WINDOW_HILITED_X(t_w);
+            t_w && !WINDOW_HILITED(t_w);
             t_w = WINDOW_NEXT_WINDOW(t_w))
             ;
     }
     else
         t_w = 0; /* t_w will be used later */
-    WINDOW_GO_AWAY_FLAG_X(w) = go_away_flag;
-    WINDOW_SPARE_FLAG_X(w) = 0; /* will be used zoombox (wNew) */
-    WINDOW_DATA_X(w) = 0;
-    WINDOW_STRUCT_REGION_X(w) = NewRgn();
-    WINDOW_CONT_REGION_X(w) = NewRgn();
-    WINDOW_UPDATE_REGION_X(w) = NewRgn();
-    WINDOW_DEF_PROC_X(w) = GetResource(TICK("WDEF"), proc_id >> 4);
-    if(!WINDOW_DEF_PROC_X(w))
+    WINDOW_GO_AWAY_FLAG(w) = go_away_flag;
+    WINDOW_SPARE_FLAG(w) = 0; /* will be used zoombox (wNew) */
+    WINDOW_DATA(w) = 0;
+    WINDOW_STRUCT_REGION(w) = NewRgn();
+    WINDOW_CONT_REGION(w) = NewRgn();
+    WINDOW_UPDATE_REGION(w) = NewRgn();
+    WINDOW_DEF_PROC(w) = GetResource(TICK("WDEF"), proc_id >> 4);
+    if(!WINDOW_DEF_PROC(w))
     {
-        WINDOW_DEF_PROC_X(w) = GetResource(TICK("WDEF"), 0);
-        if(!WINDOW_DEF_PROC_X(w))
+        WINDOW_DEF_PROC(w) = GetResource(TICK("WDEF"), 0);
+        if(!WINDOW_DEF_PROC(w))
         {
             if(allocated_p)
                 DisposePtr((Ptr)w);
@@ -366,7 +366,7 @@ ROMlib_new_window_common(WindowPeek w,
         GUEST<Handle> t;
 
         PtrToHand((Ptr)title, &t, (LONGINT)title[0] + 1);
-        WINDOW_TITLE_X(w) = guest_cast<StringHandle>(t);
+        WINDOW_TITLE(w) = guest_cast<StringHandle>(t);
     }
 
     if(cwindow_p)
@@ -378,15 +378,15 @@ ROMlib_new_window_common(WindowPeek w,
     OffsetRect(&PORT_RECT(w), -bounds->left, -bounds->top);
     {
         HLockGuard guard(WINDOW_TITLE(w));
-        WINDOW_TITLE_WIDTH_X(w) = StringWidth(*WINDOW_TITLE(w));
+        WINDOW_TITLE_WIDTH(w) = StringWidth(*WINDOW_TITLE(w));
     }
 
     TextFont(applFont);
-    WINDOW_CONTROL_LIST_X(w) = nullptr;
-    WINDOW_PIC_X(w) = nullptr;
-    WINDOW_REF_CON_X(w) = ref_con;
+    WINDOW_CONTROL_LIST(w) = nullptr;
+    WINDOW_PIC(w) = nullptr;
+    WINDOW_REF_CON(w) = ref_con;
     WINDCALL((WindowPtr)w, wNew, 0);
-    if(WINDOW_VISIBLE_X(w))
+    if(WINDOW_VISIBLE(w))
     {
         ThePortGuard guard(wmgr_port);
         WINDCALL((WindowPtr)w, wCalcRgns, 0);
@@ -397,7 +397,7 @@ ROMlib_new_window_common(WindowPeek w,
         CalcVis(w);
         EraseRgn(WINDOW_CONT_REGION(w));
         CopyRgn(WINDOW_CONT_REGION(w), WINDOW_UPDATE_REGION(w));
-        if(WINDOW_NEXT_WINDOW_X(w))
+        if(WINDOW_NEXT_WINDOW(w))
             CalcVisBehind(WINDOW_NEXT_WINDOW(w), WINDOW_STRUCT_REGION(w));
 
         ROMlib_rootless_update();
@@ -564,7 +564,7 @@ void Executor::C_CloseWindow(WindowPtr w)
     }
     if(LM(WindowList) == (WindowPeek)w)
     {
-        LM(WindowList) = WINDOW_NEXT_WINDOW_X(w);
+        LM(WindowList) = WINDOW_NEXT_WINDOW(w);
         wptmp = LM(WindowList);
     }
     else
@@ -574,7 +574,7 @@ void Executor::C_CloseWindow(WindowPtr w)
             wptmp = WINDOW_NEXT_WINDOW(wptmp))
             ;
         if(wptmp)
-            WINDOW_NEXT_WINDOW_X(wptmp) = WINDOW_NEXT_WINDOW_X(w);
+            WINDOW_NEXT_WINDOW(wptmp) = WINDOW_NEXT_WINDOW(w);
     }
 
     /* notify the palette manager this window has been deleted */
@@ -593,7 +593,7 @@ void Executor::C_CloseWindow(WindowPtr w)
     SetPort(wmgr_port);
     SetClip(LM(GrayRgn));
     PaintBehind(WINDOW_NEXT_WINDOW(w), WINDOW_STRUCT_REGION(w));
-    if(WINDOW_NEXT_WINDOW_X(w))
+    if(WINDOW_NEXT_WINDOW(w))
         CalcVisBehind(WINDOW_NEXT_WINDOW(w), WINDOW_STRUCT_REGION(w));
 
     DisposeRgn(WINDOW_STRUCT_REGION(w));
@@ -638,7 +638,7 @@ void Executor::C_CloseWindow(WindowPtr w)
     KillControls(w);
 #endif /* 0 */
 
-    if(WINDOW_PIC_X(w))
+    if(WINDOW_PIC(w))
         KillPicture(WINDOW_PIC(w));
     ClosePort((GrafPtr)w);
     SetPort(savgp);

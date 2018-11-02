@@ -24,7 +24,7 @@ PicHandle Executor::ROMlib_OpenPicture_helper(
 
     HidePen();
     pch = (piccachehand)NewHandle(sizeof(piccache));
-    PORT_PIC_SAVE_X(qdGlobals().thePort) = (Handle)pch;
+    PORT_PIC_SAVE(qdGlobals().thePort) = (Handle)pch;
     ph = (PicHandle)NewHandle((Size)INITIALPICSIZE);
     (*pch)->pichandle = ph;
 
@@ -256,7 +256,7 @@ static void updateforeColor(void)
                  sizeof CPORT_RGB_FG_COLOR(qdGlobals().thePort));
     }
     else
-        updatealongint(&PORT_FG_COLOR_X(qdGlobals().thePort), &(*pch)->picforeColor,
+        updatealongint(&PORT_FG_COLOR(qdGlobals().thePort), &(*pch)->picforeColor,
                        OP_FgColor);
 }
 
@@ -273,7 +273,7 @@ static void updatebackColor(void)
                  sizeof CPORT_RGB_BK_COLOR(qdGlobals().thePort));
     }
     else
-        updatealongint(&PORT_BK_COLOR_X(qdGlobals().thePort),
+        updatealongint(&PORT_BK_COLOR(qdGlobals().thePort),
                        &(*pch)->picbackColor,
                        OP_BkColor);
 }
@@ -283,7 +283,7 @@ static void updatespextra(void)
     piccachehand pch;
 
     pch = (piccachehand)PORT_PIC_SAVE(qdGlobals().thePort);
-    updatealongint(&PORT_SP_EXTRA_X(qdGlobals().thePort), &(*pch)->picspextra, OP_SpExtra);
+    updatealongint(&PORT_SP_EXTRA(qdGlobals().thePort), &(*pch)->picspextra, OP_SpExtra);
 }
 
 static void updatetxnumtxden(Point num, Point den)
@@ -321,9 +321,9 @@ static void updatetxface(void)
     Style f;
 
     pch = (piccachehand)PORT_PIC_SAVE(qdGlobals().thePort);
-    if((*pch)->picface != PORT_TX_FACE_X(qdGlobals().thePort))
+    if((*pch)->picface != PORT_TX_FACE(qdGlobals().thePort))
     {
-        (*pch)->picface = PORT_TX_FACE_X(qdGlobals().thePort);
+        (*pch)->picface = PORT_TX_FACE(qdGlobals().thePort);
         f = PORT_TX_FACE(qdGlobals().thePort);
         PICOP(OP_TxFace);
         PICWRITE(&f, sizeof(f));
@@ -421,7 +421,7 @@ void Executor::C_ClosePicture()
         SetHandleSize((Handle)ph, (*pch)->pichowfar);
         DisposeRgn((*pch)->picclip);
         DisposeHandle((Handle)pch);
-        PORT_PIC_SAVE_X(qdGlobals().thePort) = nullptr;
+        PORT_PIC_SAVE(qdGlobals().thePort) = nullptr;
         ShowPen();
     }
 }

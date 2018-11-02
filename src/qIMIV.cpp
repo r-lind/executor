@@ -365,16 +365,16 @@ copy_mask_1(BitMap *src_bm, BitMap *mask_bm, BitMap *dst_bm,
 
         MapRgn(mask_rgn, mask_rect, dst_rect);
 
-        save_pic_handle = PORT_PIC_SAVE_X(qdGlobals().thePort);
-        save_graf_procs = PORT_GRAF_PROCS_X(qdGlobals().thePort);
+        save_pic_handle = PORT_PIC_SAVE(qdGlobals().thePort);
+        save_graf_procs = PORT_GRAF_PROCS(qdGlobals().thePort);
 
-        PORT_PIC_SAVE_X(qdGlobals().thePort) = nullptr;
-        PORT_GRAF_PROCS_X(qdGlobals().thePort) = nullptr;
+        PORT_PIC_SAVE(qdGlobals().thePort) = nullptr;
+        PORT_GRAF_PROCS(qdGlobals().thePort) = nullptr;
 
         CopyBits(src_bm, dst_bm, src_rect, dst_rect, srcCopy, mask_rgn);
 
-        PORT_PIC_SAVE_X(qdGlobals().thePort) = save_pic_handle;
-        PORT_GRAF_PROCS_X(qdGlobals().thePort) = save_graf_procs;
+        PORT_PIC_SAVE(qdGlobals().thePort) = save_pic_handle;
+        PORT_GRAF_PROCS(qdGlobals().thePort) = save_graf_procs;
 
         DisposeRgn(mask_rect_rgn);
         DisposeRgn(mask_rgn);

@@ -21,11 +21,11 @@ using namespace Executor;
             GUEST<PixPatHandle> orig_fill_pixpat_x;                  \
                                                                      \
             PenMode(patCopy);                                        \
-            orig_fill_pixpat_x = CPORT_FILL_PIXPAT_X(qdGlobals().thePort);       \
+            orig_fill_pixpat_x = CPORT_FILL_PIXPAT(qdGlobals().thePort);       \
             /* ROMlib_fill_pixpat (pixpat); */                       \
-            CPORT_FILL_PIXPAT_X(qdGlobals().thePort) = pixpat;               \
+            CPORT_FILL_PIXPAT(qdGlobals().thePort) = pixpat;               \
             CALLxxx;                                                 \
-            CPORT_FILL_PIXPAT_X(qdGlobals().thePort) = orig_fill_pixpat_x;       \
+            CPORT_FILL_PIXPAT(qdGlobals().thePort) = orig_fill_pixpat_x;       \
         }                                                            \
         else                                                         \
         {                                                            \

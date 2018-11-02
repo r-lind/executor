@@ -339,7 +339,7 @@ sort_color_table(CTabHandle dsth, const CTabHandle srch)
 
     src_ct_size = std::min(src->ctSize, dst->ctSize);
 
-    if(src->ctFlags & CTAB_GDEVICE_BIT_X)
+    if(src->ctFlags & CTAB_GDEVICE_BIT)
     {
         dst->ctSeed = src->ctSeed;
         memcpy(dst->ctTable, src->ctTable,
@@ -401,8 +401,8 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
     {
         case MUNGE(Indirect, Indirect):
         {
-            src_seed_x = CTAB_SEED_X(src->pmTable); /* big endian */
-            dst_seed_x = CTAB_SEED_X(PIXMAP_TABLE(GD_PMAP(the_gd)));
+            src_seed_x = CTAB_SEED(src->pmTable); /* big endian */
+            dst_seed_x = CTAB_SEED(PIXMAP_TABLE(GD_PMAP(the_gd)));
 
             if(src_bpp != cached_src_bpp || dst_bpp != cached_dst_bpp
                || src_seed_x != cached_src_seed_x || dst_seed_x != cached_dst_seed_x
@@ -429,8 +429,8 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                     max_mapping_elt = (1 << src_bpp) - 1;
                     mapping
                         = (CTabHandle)(NewHandle(CTAB_STORAGE_FOR_SIZE(max_mapping_elt)));
-                    CTAB_SIZE_X(mapping) = max_mapping_elt;
-                    CTAB_FLAGS_X(mapping) = 0;
+                    CTAB_SIZE(mapping) = max_mapping_elt;
+                    CTAB_FLAGS(mapping) = 0;
                     /* the source color table may not specify all  possible
  		   colors, so set unspecified colors to some sane value
  		   
@@ -470,7 +470,7 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
             CTabHandle src_table;
 
             src_table = src->pmTable;
-            src_seed_x = CTAB_SEED_X(src_table);
+            src_seed_x = CTAB_SEED(src_table);
 
             dst_rgb_spec = pixmap_rgb_spec(dst);
             dst_seed_x.raw(dst_rgb_spec->seed_x);
@@ -503,15 +503,15 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
                 TheZoneGuard guard(LM(SysZone));
 
                 target_itab = (ITabHandle)NewHandle(sizeof(ITab));
-                ITAB_SEED_X(target_itab) = -1;
+                ITAB_SEED(target_itab) = -1;
             }
             // FIXME: #warning ctm added questionable caching here
-            if(target_table != cached_target_table || ITAB_SEED_X(target_itab) != CTAB_SEED_X(target_table))
+            if(target_table != cached_target_table || ITAB_SEED(target_itab) != CTAB_SEED(target_table))
             {
                 MakeITable(target_table, target_itab, DEFAULT_ITABLE_RESOLUTION);
                 cached_target_table = target_table;
             }
-            dst_seed_x = CTAB_SEED_X(target_table);
+            dst_seed_x = CTAB_SEED(target_table);
 
             if(src_bpp != cached_src_bpp || dst_bpp != cached_dst_bpp
                || src_seed_x != cached_src_seed_x || dst_seed_x != cached_dst_seed_x)

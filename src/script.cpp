@@ -353,17 +353,17 @@ void Executor::C_DrawJust(Ptr textbufp, int16_t length, int16_t slop)
     GUEST<Fixed> save_sp_extra_x;
     int n_spaces;
 
-    save_sp_extra_x = PORT_SP_EXTRA_X(qdGlobals().thePort);
+    save_sp_extra_x = PORT_SP_EXTRA(qdGlobals().thePort);
     n_spaces = count_spaces(textbufp, length);
     if(n_spaces)
     {
         Fixed extra;
 
         extra = save_sp_extra_x + FixRatio(slop, n_spaces);
-        PORT_SP_EXTRA_X(qdGlobals().thePort) = extra;
+        PORT_SP_EXTRA(qdGlobals().thePort) = extra;
     }
     DrawText(textbufp, 0, length);
-    PORT_SP_EXTRA_X(qdGlobals().thePort) = save_sp_extra_x;
+    PORT_SP_EXTRA(qdGlobals().thePort) = save_sp_extra_x;
 }
 
 static int

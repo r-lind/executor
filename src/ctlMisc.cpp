@@ -87,9 +87,9 @@ void Executor::ctl_color_init(void)
     {
         default_ctl_ctab
             = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(14));
-        CTAB_SIZE_X(default_ctl_ctab) = 14;
-        CTAB_SEED_X(default_ctl_ctab) = 0;
-        CTAB_FLAGS_X(default_ctl_ctab) = 0;
+        CTAB_SIZE(default_ctl_ctab) = 14;
+        CTAB_SEED(default_ctl_ctab) = 0;
+        CTAB_FLAGS(default_ctl_ctab) = 0;
         memcpy(&CTAB_TABLE(default_ctl_ctab)[0],
                &default_ctl_colors[0],
                15 * sizeof default_ctl_colors[0]);

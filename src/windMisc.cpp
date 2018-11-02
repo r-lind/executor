@@ -46,7 +46,7 @@ is_window_ptr(WindowPeek w)
 void Executor::C_SetWRefCon(WindowPtr w, LONGINT data)
 {
     if(is_window_ptr((WindowPeek)w))
-        WINDOW_REF_CON_X(w) = data;
+        WINDOW_REF_CON(w) = data;
 }
 
 /*
@@ -80,7 +80,7 @@ LONGINT Executor::C_GetWRefCon(WindowPtr w)
 void Executor::C_SetWindowPic(WindowPtr w, PicHandle p)
 {
     if(is_window_ptr((WindowPeek)w))
-        WINDOW_PIC_X(w) = p;
+        WINDOW_PIC(w) = p;
 }
 
 PicHandle Executor::C_GetWindowPic(WindowPtr w)
@@ -232,7 +232,7 @@ void Executor::C_ClipAbove(WindowPeek w)
     SectRgn(PORT_CLIP_REGION(wmgr_port), LM(GrayRgn),
             PORT_CLIP_REGION(wmgr_port));
     for(wp = LM(WindowList); wp != w; wp = WINDOW_NEXT_WINDOW(wp))
-        if(WINDOW_VISIBLE_X(wp))
+        if(WINDOW_VISIBLE(wp))
             DiffRgn(PORT_CLIP_REGION(wmgr_port), WINDOW_STRUCT_REGION(wp),
                     PORT_CLIP_REGION(wmgr_port));
 }
@@ -243,7 +243,7 @@ BOOLEAN Executor::C_CheckUpdate(EventRecord *ev)
     Rect picr;
 
     for(wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
-        if(WINDOW_VISIBLE_X(wp) && !EmptyRgn(WINDOW_UPDATE_REGION(wp)))
+        if(WINDOW_VISIBLE(wp) && !EmptyRgn(WINDOW_UPDATE_REGION(wp)))
         {
             if(WINDOW_PIC(wp))
             {
@@ -348,7 +348,7 @@ void Executor::C_PaintBehind(WindowPeek w, RgnHandle clobbered)
     LM(SaveUpdate) = -1;
     for(wp = w; wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
-        if(WINDOW_VISIBLE_X(wp))
+        if(WINDOW_VISIBLE(wp))
         {
             SectRgn(rh, WINDOW_STRUCT_REGION(wp), testrgn);
             if(!EmptyRgn(testrgn))
@@ -370,11 +370,11 @@ void Executor::C_CalcVis(WindowPeek w)
 {
     WindowPeek wp;
 
-    if(w && WINDOW_VISIBLE_X(w))
+    if(w && WINDOW_VISIBLE(w))
     {
         SectRgn(LM(GrayRgn), WINDOW_CONT_REGION(w), PORT_VIS_REGION(w));
         for(wp = LM(WindowList); wp != w; wp = WINDOW_NEXT_WINDOW(wp))
-            if(WINDOW_VISIBLE_X(wp))
+            if(WINDOW_VISIBLE(wp))
                 DiffRgn(PORT_VIS_REGION(w), WINDOW_STRUCT_REGION(wp),
                         PORT_VIS_REGION(w));
         OffsetRgn(PORT_VIS_REGION(w),
@@ -395,7 +395,7 @@ void Executor::C_CalcVisBehind(WindowPeek w, RgnHandle clobbered)
     CalcVis((WindowPeek)w);
     for(wp = w->nextWindow; wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
-        if(WINDOW_VISIBLE_X(wp))
+        if(WINDOW_VISIBLE(wp))
         {
             SectRgn(rh, WINDOW_STRUCT_REGION(wp), testrgn);
             if(!EmptyRgn(testrgn))

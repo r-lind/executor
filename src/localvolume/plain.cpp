@@ -108,8 +108,8 @@ ItemInfo PlainFileItem::getInfo()
 {
     ItemInfo info = {0};
     info.file.info = {
-        TICKX("TEXT"),
-        TICKX("ttxt"),
+        TICK("TEXT"),
+        TICK("ttxt"),
         0, // fdFlags
         { 0, 0 }, // fdLocation
         0 // fdFldr
@@ -119,6 +119,6 @@ ItemInfo PlainFileItem::getInfo()
 
 void PlainFileItem::setInfo(ItemInfo info)
 {
-    if(info.file.info.fdType != TICKX("TEXT"))
+    if(info.file.info.fdType != TICK("TEXT"))
         throw UpgradeRequiredException();
 }

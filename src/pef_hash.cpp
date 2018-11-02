@@ -193,18 +193,18 @@ Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
         int previous_index_of_first_element;
         uint32_t name_offset;
 
-        PEFLIH_MAIN_SECTION_X(retval) = -1;
-        PEFLIH_MAIN_OFFSET_X(retval) = -1;
-        PEFLIH_INIT_SECTION_X(retval) = -1;
-        PEFLIH_INIT_OFFSET_X(retval) = -1;
-        PEFLIH_TERM_SECTION_X(retval) = -1;
-        PEFLIH_TERM_OFFSET_X(retval) = -1;
+        PEFLIH_MAIN_SECTION(retval) = -1;
+        PEFLIH_MAIN_OFFSET(retval) = -1;
+        PEFLIH_INIT_SECTION(retval) = -1;
+        PEFLIH_INIT_OFFSET(retval) = -1;
+        PEFLIH_TERM_SECTION(retval) = -1;
+        PEFLIH_TERM_OFFSET(retval) = -1;
         /* totalImportedSymbolCount, relocSectionCount, relocInstrOffset
 	 are all already 0 */
-        PEFLIH_STRINGS_OFFSET_X(retval) = string_table_offset;
-        PEFLIH_HASH_OFFSET_X(retval) = hash_offset;
-        PEFLIH_HASH_TABLE_POWER_X(retval) = hash_power;
-        PEFLIH_SYMBOL_COUNT_X(retval) = count;
+        PEFLIH_STRINGS_OFFSET(retval) = string_table_offset;
+        PEFLIH_HASH_OFFSET(retval) = hash_offset;
+        PEFLIH_HASH_TABLE_POWER(retval) = hash_power;
+        PEFLIH_SYMBOL_COUNT(retval) = count;
 
         hashp = (decltype(hashp))((char *)retval + hash_offset);
         exportp = (decltype(exportp))((char *)retval + export_offset);
@@ -247,9 +247,9 @@ Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
                 previous_index_of_first_element = i;
             }
             exportp[i] = sorted[i].hash_word;
-            PEFEXS_CLASS_AND_NAME_X(&symbol_tablep[i]) = sorted[i].class_and_name_x;
-            PEFEXS_SYMBOL_VALUE_X(&symbol_tablep[i]) = guest_cast<uint32_t>(sorted[i].value);
-            PEFEXS_SECTION_INDEX_X(&symbol_tablep[i]) = -2;
+            PEFEXS_CLASS_AND_NAME(&symbol_tablep[i]) = sorted[i].class_and_name_x;
+            PEFEXS_SYMBOL_VALUE(&symbol_tablep[i]) = guest_cast<uint32_t>(sorted[i].value);
+            PEFEXS_SECTION_INDEX(&symbol_tablep[i]) = -2;
         }
         update_export_hash_table(hashp, previous_hash_index,
                                  previous_index_of_first_element,
@@ -386,7 +386,7 @@ OSErr Executor::C_FindSymbol(ConnectionID connID, Str255 symName,
         uint32_t val;
 
         if(symClass)
-            *symClass = *(SymClass *)&PEFEXS_CLASS_AND_NAME_X(pefs);
+            *symClass = *(SymClass *)&PEFEXS_CLASS_AND_NAME(pefs);
         section_index = PEFEXS_SECTION_INDEX(pefs);
         val = PEFEXS_SYMBOL_VALUE(pefs);
         switch(section_index)

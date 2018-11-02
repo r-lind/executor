@@ -41,6 +41,8 @@ enum
 
 typedef UPP<LONGINT(Size)> GrowZoneProcPtr;
 
+struct block_header_t;
+
 struct Zone
 {
     GUEST_STRUCT;
@@ -60,7 +62,7 @@ struct Zone
     GUEST<LONGINT> minCBFree;
     GUEST<ProcPtr> purgeProc;
     GUEST<Ptr> sparePtr;
-    GUEST<Ptr> allocPtr;
+    GUEST<block_header_t*> allocPtr;
     GUEST<INTEGER> heapData;
 };
 typedef Zone *THz;

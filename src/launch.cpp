@@ -246,7 +246,7 @@ cfrg_match(const cfir_t *cfirp, GUEST<OSType> arch_x, uint8_t type_x, Str255 nam
 {
     bool retval;
 
-    retval = (CFIR_ISA_X(cfirp) == arch_x && CFIR_TYPE_X(cfirp) == type_x && (!name[0] || EqualString(name, (StringPtr)CFIR_NAME(cfirp),
+    retval = (CFIR_ISA(cfirp) == arch_x && CFIR_TYPE(cfirp) == type_x && (!name[0] || EqualString(name, (StringPtr)CFIR_NAME(cfirp),
                                                                                                       false, true)));
     return retval;
 }
@@ -401,7 +401,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
         wdpb.ioWDDirID = fsp->parID;
     }
     /* Do not do this -- Loser does it SFSaveDisk_Update (vRefNum, fName); */
-    wdpb.ioWDProcID = TICKX("Xctr");
+    wdpb.ioWDProcID = TICK("Xctr");
     wdpb.ioNamePtr = 0;
     PBOpenWD(&wdpb, false);
     ROMlib_exevrefnum = wdpb.ioVRefNum;

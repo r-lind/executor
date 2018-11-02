@@ -62,17 +62,17 @@ typedef WindowPtr DialogPtr;
 /* dialog record accessors */
 #define DIALOG_WINDOW(dialog) ((WindowPtr) & ((DialogPeek)dialog)->window)
 
-#define DIALOG_ITEMS_X(dialog) (((DialogPeek)(dialog))->items)
-#define DIALOG_TEXTH_X(dialog) (((DialogPeek)(dialog))->textH)
-#define DIALOG_EDIT_FIELD_X(dialog) (((DialogPeek)(dialog))->editField)
-#define DIALOG_EDIT_OPEN_X(dialog) (((DialogPeek)(dialog))->editOpen)
-#define DIALOG_ADEF_ITEM_X(dialog) (((DialogPeek)(dialog))->aDefItem)
+#define DIALOG_ITEMS(dialog) (((DialogPeek)(dialog))->items)
+#define DIALOG_TEXTH(dialog) (((DialogPeek)(dialog))->textH)
+#define DIALOG_EDIT_FIELD(dialog) (((DialogPeek)(dialog))->editField)
+#define DIALOG_EDIT_OPEN(dialog) (((DialogPeek)(dialog))->editOpen)
+#define DIALOG_ADEF_ITEM(dialog) (((DialogPeek)(dialog))->aDefItem)
 
-#define DIALOG_ITEMS(dialog) (DIALOG_ITEMS_X(dialog))
-#define DIALOG_TEXTH(dialog) (DIALOG_TEXTH_X(dialog))
-#define DIALOG_EDIT_FIELD(dialog) (DIALOG_EDIT_FIELD_X(dialog))
-#define DIALOG_EDIT_OPEN(dialog) (DIALOG_EDIT_OPEN_X(dialog))
-#define DIALOG_ADEF_ITEM(dialog) (DIALOG_ADEF_ITEM_X(dialog))
+
+
+
+
+
 
 struct DialogTemplate
 {

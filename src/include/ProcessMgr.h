@@ -106,27 +106,27 @@ typedef ProcessInfoRec *ProcessInfoPtr;
 #define PROCESS_INFO_SERIAL_NUMBER(info) ((info)->processNumber)
 #define PROCESS_INFO_LAUNCHER(info) ((info)->processLauncher)
 
-#define PROCESS_INFO_LENGTH_X(info) ((info)->processInfoLength)
-#define PROCESS_INFO_NAME_X(info) ((info)->processName)
-#define PROCESS_INFO_TYPE_X(info) ((info)->processType)
-#define PROCESS_INFO_SIGNATURE_X(info) ((info)->processSignature)
-#define PROCESS_INFO_MODE_X(info) ((info)->processMode)
-#define PROCESS_INFO_LOCATION_X(info) ((info)->processLocation)
-#define PROCESS_INFO_SIZE_X(info) ((info)->processSize)
-#define PROCESS_INFO_FREE_MEM_X(info) ((info)->processFreeMem)
-#define PROCESS_INFO_LAUNCH_DATE_X(info) ((info)->processLaunchDate)
-#define PROCESS_INFO_ACTIVE_TIME_X(info) ((info)->processActiveTime)
+#define PROCESS_INFO_LENGTH(info) ((info)->processInfoLength)
+#define PROCESS_INFO_NAME(info) ((info)->processName)
+#define PROCESS_INFO_TYPE(info) ((info)->processType)
+#define PROCESS_INFO_SIGNATURE(info) ((info)->processSignature)
+#define PROCESS_INFO_MODE(info) ((info)->processMode)
+#define PROCESS_INFO_LOCATION(info) ((info)->processLocation)
+#define PROCESS_INFO_SIZE(info) ((info)->processSize)
+#define PROCESS_INFO_FREE_MEM(info) ((info)->processFreeMem)
+#define PROCESS_INFO_LAUNCH_DATE(info) ((info)->processLaunchDate)
+#define PROCESS_INFO_ACTIVE_TIME(info) ((info)->processActiveTime)
 
-#define PROCESS_INFO_LENGTH(info) (PROCESS_INFO_LENGTH_X(info))
-#define PROCESS_INFO_NAME(info) (PROCESS_INFO_NAME_X(info))
-#define PROCESS_INFO_TYPE(info) (PROCESS_INFO_TYPE_X(info))
-#define PROCESS_INFO_SIGNATURE(info) (PROCESS_INFO_SIGNATURE_X(info))
-#define PROCESS_INFO_MODE(info) (PROCESS_INFO_MODE_X(info))
-#define PROCESS_INFO_LOCATION(info) (PROCESS_INFO_LOCATION_X(info))
-#define PROCESS_INFO_SIZE(info) (PROCESS_INFO_SIZE_X(info))
-#define PROCESS_INFO_FREE_MEM(info) (PROCESS_INFO_FREE_MEM_X(info))
-#define PROCESS_INFO_LAUNCH_DATE(info) (PROCESS_INFO_LAUNCH_DATE_X(info))
-#define PROCESS_INFO_ACTIVE_TIME(info) (PROCESS_INFO_ACTIVE_TIME_X(info))
+
+
+
+
+
+
+
+
+
+
 
 /* flags for the `processMode' field of the `ProcessInformationRec'
    record */

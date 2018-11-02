@@ -55,8 +55,8 @@ typedef struct SndChannel
     GUEST<SndCommand[stdQLength]> queue;
 } * SndChannelPtr;
 
-#define SND_CHAN_FLAGS_X(c) (c->flags)
-#define SND_CHAN_FLAGS(c) (SND_CHAN_FLAGS_X(c))
+#define SND_CHAN_FLAGS(c) (c->flags)
+
 
 enum
 {

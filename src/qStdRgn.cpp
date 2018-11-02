@@ -323,7 +323,7 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
         dst_pixmap.pixelType = Indirect;
         dst_pixmap.pixelSize = 1;
         dst_pixmap.baseAddr = dst->baseAddr;
-        dst_pixmap.rowBytes = dst->rowBytes | PIXMAP_DEFAULT_ROWBYTES_X;
+        dst_pixmap.rowBytes = dst->rowBytes | PIXMAP_DEFAULT_ROWBYTES;
         dst_pixmap.pmTable = ROMlib_bw_ctab;
 
         ROMlib_fg_bk(&fg_pixel, &bk_pixel, nullptr, nullptr, nullptr, false, false);

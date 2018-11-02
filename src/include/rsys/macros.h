@@ -50,20 +50,6 @@
                        | (((uint32_t)(uint8_t)(c)) << 8)  \
                        | (((uint32_t)(uint8_t)(d)) << 0))
 
-#define TICK(str) (((LONGINT)(unsigned char)str[0] << 24) | ((LONGINT)(unsigned char)str[1] << 16) | ((LONGINT)(unsigned char)str[2] << 8) | ((LONGINT)(unsigned char)str[3] << 0))
-
-#if 0
-#if !defined(LITTLEENDIAN)
-
-#define TICKX(str) (TICK(str))
-
-#else /* defined(LITTLEENDIAN) */
-
-#define TICKX(str) (((LONGINT)(unsigned char)str[0] << 0) | ((LONGINT)(unsigned char)str[1] << 8) | ((LONGINT)(unsigned char)str[2] << 16) | ((LONGINT)(unsigned char)str[3] << 24))
-
-#endif /* defined(LITTLEENDIAN) */
-#else
-#define TICKX(str) TICK(str)
-#endif
+#define TICK(str) FOURCC(str[0], str[1], str[2], str[3])
 
 #endif /* !_MACROS_H_ */

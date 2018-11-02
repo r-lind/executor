@@ -176,7 +176,7 @@ void dump_image(BitMap *bogo_bitmap, Rect *rect)
     else
     {
         map_row_bytes = pixmap->rowBytes
-                           & ~ROWBYTES_FLAG_BITS_X;
+                           & ROWBYTES_VALUE_BITS;
         base_addr = (char *)pixmap->baseAddr;
     }
 

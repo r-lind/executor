@@ -18,31 +18,31 @@ using namespace Executor;
 void Executor::C_TextFont(INTEGER f)
 {
     if(qdGlobals().thePort)
-        PORT_TX_FONT_X(qdGlobals().thePort) = f;
+        PORT_TX_FONT(qdGlobals().thePort) = f;
 }
 
 void Executor::C_TextFace(INTEGER thef)
 {
     if(qdGlobals().thePort)
-        PORT_TX_FACE_X(qdGlobals().thePort) = thef;
+        PORT_TX_FACE(qdGlobals().thePort) = thef;
 }
 
 void Executor::C_TextMode(INTEGER m)
 {
     if(qdGlobals().thePort)
-        PORT_TX_MODE_X(qdGlobals().thePort) = m;
+        PORT_TX_MODE(qdGlobals().thePort) = m;
 }
 
 void Executor::C_TextSize(INTEGER s)
 {
     if(qdGlobals().thePort)
-        PORT_TX_SIZE_X(qdGlobals().thePort) = s;
+        PORT_TX_SIZE(qdGlobals().thePort) = s;
 }
 
 void Executor::C_SpaceExtra(Fixed e)
 {
     if(qdGlobals().thePort)
-        PORT_SP_EXTRA_X(qdGlobals().thePort) = e;
+        PORT_SP_EXTRA(qdGlobals().thePort) = e;
 }
 
 void Executor::C_DrawChar(CharParameter thec)

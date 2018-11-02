@@ -28,20 +28,15 @@ typedef GUEST<itmp> *itmh;
       + (((*dlogh)->dlglen + 2) & ~1)  \
       + 2)                               \
      == GetHandleSize((Handle)(dlogh)))
-#define DIALOG_RES_POSITION_X(dlogh)                 \
+#define DIALOG_RES_POSITION(dlogh)                 \
     (*(GUEST<int16_t> *)((char *)&(*dlogh)->dlglen \
                          + (((*dlogh)->dlglen + 2) & ~1)))
-
-#define DIALOG_RES_POSITION(dlog) \
-    (DIALOG_RES_POSITION_X(dlog).get())
 
 #define ALERT_RES_HAS_POSITION_P(alerth) \
     ((sizeof(altstr) + 2) == GetHandleSize((Handle)(alerth)))
 
-#define ALERT_RES_POSITION_X(alerth) \
-    (*(GUEST<int16_t> *)((char *)&(*alerth)->altstag + 2))
 #define ALERT_RES_POSITION(alerth) \
-    (ALERT_RES_POSITION_X(alerth).get())
+    (*(GUEST<int16_t> *)((char *)&(*alerth)->altstag + 2))
 
 #define noAutoCenter (0)
 #define alertPositionParentWindow (0xB00A)
@@ -118,9 +113,9 @@ extern void dialog_draw_item(DialogPtr dp, itmp itemp, int itemno);
 #define ITEM_RECT(itemp) \
     ((itemp)->itmr)
 
-#define ITEM_H_X(itemp) \
+#define ITEM_H(itemp) \
     ((itemp)->itmhand)
-#define ITEM_H(itemp) (ITEM_H_X(itemp))
+
 
 #define ITEM_TYPE(itemp) \
     ((itemp)->itmtype)

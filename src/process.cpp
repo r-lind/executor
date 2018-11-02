@@ -20,8 +20,7 @@ using namespace Executor;
 
 declare_handle_type(size_resource);
 
-#define SIZE_FLAGS_X(size) ((*size)->flags)
-#define SIZE_FLAGS(size) (toHost(SIZE_FLAGS_X(size)))
+#define SIZE_FLAGS(size) ((*size)->flags)
 
 static size_resource_handle
 get_size_resource()
@@ -79,7 +78,7 @@ void Executor::process_create(bool desk_accessory_p,
         gui_fatal("unable to allocate process info record");
 
     info->mode = ((size
-                       ? SIZE_FLAGS(size)
+                       ? toHost(SIZE_FLAGS(size))
                        : default_process_mode_flags)
                   | (desk_accessory_p
                          ? modeDeskAccessory
@@ -167,20 +166,20 @@ OSErr Executor::C_GetProcessInformation(ProcessSerialNumber *serial_number,
         return paramErr;
 
     PROCESS_INFO_SERIAL_NUMBER(process_info) = info->serial_number;
-    PROCESS_INFO_TYPE_X(process_info) = info->type;
-    PROCESS_INFO_SIGNATURE_X(process_info) = info->signature;
-    PROCESS_INFO_MODE_X(process_info) = info->mode;
-    PROCESS_INFO_LOCATION_X(process_info) = guest_cast<Ptr>(LM(ApplZone));
-    PROCESS_INFO_SIZE_X(process_info) = info->size;
+    PROCESS_INFO_TYPE(process_info) = info->type;
+    PROCESS_INFO_SIGNATURE(process_info) = info->signature;
+    PROCESS_INFO_MODE(process_info) = info->mode;
+    PROCESS_INFO_LOCATION(process_info) = guest_cast<Ptr>(LM(ApplZone));
+    PROCESS_INFO_SIZE(process_info) = info->size;
 
     /* ### set current zone to applzone? */
-    PROCESS_INFO_FREE_MEM_X(process_info) = FreeMem();
+    PROCESS_INFO_FREE_MEM(process_info) = FreeMem();
 
     PROCESS_INFO_LAUNCHER(process_info) = no_process;
 
-    PROCESS_INFO_LAUNCH_DATE_X(process_info) = info->launch_ticks;
+    PROCESS_INFO_LAUNCH_DATE(process_info) = info->launch_ticks;
     current_ticks = TickCount();
-    PROCESS_INFO_ACTIVE_TIME_X(process_info)
+    PROCESS_INFO_ACTIVE_TIME(process_info)
         = current_ticks - info->launch_ticks;
 
     return noErr;

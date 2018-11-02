@@ -211,7 +211,7 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
     gdev = LM(TheGDevice);
     gd_ctab = PIXMAP_TABLE(GD_PMAP(gdev));
     gd_itab = GD_ITABLE(gdev);
-    if(CTAB_SEED_X(gd_ctab) != ITAB_SEED_X(gd_itab))
+    if(CTAB_SEED(gd_ctab) != ITAB_SEED(gd_itab))
         MakeITable(gd_ctab, gd_itab, GD_RES_PREF(gdev));
 
     for(t = GD_SEARCH_PROC(LM(TheGDevice)), success_p = false;
@@ -280,7 +280,7 @@ BOOLEAN Executor::C_RealColor(RGBColor *rgb)
     gdev = LM(TheGDevice);
     table = PIXMAP_TABLE(GD_PMAP(gdev));
     inverse_table = GD_ITABLE(gdev);
-    if(CTAB_SEED_X(table) != ITAB_SEED_X(inverse_table))
+    if(CTAB_SEED(table) != ITAB_SEED(inverse_table))
         MakeITable(table, inverse_table, GD_RES_PREF(gdev));
 
     resolution = ITAB_RES(inverse_table);
@@ -321,7 +321,7 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
         {
             /* rebuild the inverse table for the current graphics device
 	     if the color table is newer than the inverse table */
-            if(CTAB_SEED_X(target_ctab) != ITAB_SEED_X(t))
+            if(CTAB_SEED(target_ctab) != ITAB_SEED(t))
                 MakeITable(target_ctab, t, GD_RES_PREF(gdev));
 
             itab = t;
@@ -331,7 +331,7 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
     if(!itab)
     {
         if(cached_itab
-           && ITAB_SEED_X(cached_itab) == CTAB_SEED_X(target_ctab)
+           && ITAB_SEED(cached_itab) == CTAB_SEED(target_ctab)
            && resolution == ITAB_RES(cached_itab))
             itab = cached_itab;
         else
@@ -352,17 +352,17 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
     }
     HLockGuard guard1(in_ctab), guard2(target_ctab);
 
-    GUEST<CTabHandle> gdev_ctab_save = PIXMAP_TABLE_X(gd_pmap);
-    GUEST<ITabHandle> gdev_itab_save = GD_ITABLE_X(gdev);
+    GUEST<CTabHandle> gdev_ctab_save = PIXMAP_TABLE(gd_pmap);
+    GUEST<ITabHandle> gdev_itab_save = GD_ITABLE(gdev);
 
     /* pull tables into locals for easy access */
     ColorSpec *in_ctab_table = CTAB_TABLE(in_ctab);
 
     /* ColorSpec *target_ctab_table = CTAB_TABLE (target_ctab); */
-    /* int gd_ctab_p = CTAB_FLAGS_X (target_ctab) & CTAB_GDEVICE_BIT_X; */
+    /* int gd_ctab_p = CTAB_FLAGS (target_ctab) & CTAB_GDEVICE_BIT; */
 
-    PIXMAP_TABLE_X(gd_pmap) = target_ctab;
-    GD_ITABLE_X(gdev) = itab;
+    PIXMAP_TABLE(gd_pmap) = target_ctab;
+    GD_ITABLE(gdev) = itab;
 
     for(i = CTAB_SIZE(in_ctab); i >= 0; i--)
     {
@@ -384,8 +384,8 @@ void Executor::C_GetSubTable(CTabHandle in_ctab, INTEGER resolution,
         color->value = ctab_index;
     }
 
-    PIXMAP_TABLE_X(gd_pmap) = gdev_ctab_save;
-    GD_ITABLE_X(gdev) = gdev_itab_save;
+    PIXMAP_TABLE(gd_pmap) = gdev_ctab_save;
+    GD_ITABLE(gdev) = gdev_itab_save;
 }
 
 int Executor::average_color(GDHandle gd,
@@ -420,7 +420,7 @@ int Executor::average_color(GDHandle gd,
         gd_ctab = PIXMAP_TABLE(gd_pmap);
         gd_itab = GD_ITABLE(gd);
 
-        if(CTAB_SEED_X(gd_ctab) != ITAB_SEED_X(gd_itab))
+        if(CTAB_SEED(gd_ctab) != ITAB_SEED(gd_itab))
             MakeITable(gd_ctab, gd_itab, GD_RES_PREF(gd));
 
         itab_res = ITAB_RES(gd_itab);
@@ -642,7 +642,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
         if(!inverse_table)
         {
             inverse_table = (ITabHandle)NewHandle(0);
-            GD_ITABLE_X(LM(TheGDevice)) = inverse_table;
+            GD_ITABLE(LM(TheGDevice)) = inverse_table;
         }
     }
 
@@ -672,7 +672,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
 #endif
         SetHandleSize((Handle)inverse_table, new_size);
     }
-    ITAB_RES_X(inverse_table) = resolution;
+    ITAB_RES(inverse_table) = resolution;
 
     itab_table = ITAB_TABLE(inverse_table);
 
@@ -699,7 +699,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
         unsigned char new_value;
 
         /* don't include reserved colors in the inverse table */
-        if(color->value & CTAB_RESERVED_BIT_X)
+        if(color->value & CTAB_RESERVED_BIT)
             continue;
 
         /* We always want to enqueue this color, even if it isn't the
@@ -711,7 +711,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
         queue_starts_empty_p = false;
 
         /* Figure out what the color index is. */
-        if(CTAB_FLAGS_X(color_table) & CTAB_GDEVICE_BIT_X)
+        if(CTAB_FLAGS(color_table) & CTAB_GDEVICE_BIT)
             new_value = i;
         else
             new_value = color->value;
@@ -822,7 +822,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
     add_hash_table(color_table, inverse_table, resolution);
 #endif
 
-    ITAB_SEED_X(inverse_table) = CTAB_SEED_X(color_table);
+    ITAB_SEED(inverse_table) = CTAB_SEED(color_table);
 }
 
 void Executor::C_ProtectEntry(INTEGER index, BOOLEAN protect)
@@ -834,14 +834,14 @@ void Executor::C_ProtectEntry(INTEGER index, BOOLEAN protect)
     entry = &CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(gdev)))[index];
     if(protect)
     {
-        if(entry->value & CTAB_PROTECTED_BIT_X)
+        if(entry->value & CTAB_PROTECTED_BIT)
             /* #warning "set error bit here" */
             return;
 
         /* mark this entry as protected; and set the
 	 low byte of the value field with the current
          device id */
-        entry->value = CTAB_PROTECTED_BIT_X | (GD_ID_X(gdev) & 0xFF);
+        entry->value = CTAB_PROTECTED_BIT | (GD_ID(gdev) & 0xFF);
     }
     else
     {
@@ -866,7 +866,7 @@ void Executor::C_ReserveEntry(INTEGER index, BOOLEAN reserve)
     old_value = entry->value;
     if(reserve)
     {
-        if(entry->value & CTAB_RESERVED_BIT_X)
+        if(entry->value & CTAB_RESERVED_BIT)
         {
             ROMlib_qd_error = cProtectErr;
             return;
@@ -875,12 +875,12 @@ void Executor::C_ReserveEntry(INTEGER index, BOOLEAN reserve)
         /* mark this entry as reserved; and set the
 	 low byte of the value field with the current
 	 device id */
-        entry->value = CTAB_RESERVED_BIT_X | (GD_ID_X(gdev) & 0xFF);
+        entry->value = CTAB_RESERVED_BIT | (GD_ID(gdev) & 0xFF);
     }
     else
     {
         /* clear the entry */
-        entry->value = entry->value & ~CTAB_RESERVED_BIT_X;
+        entry->value = entry->value & ~CTAB_RESERVED_BIT;
     }
 
     /* success */
@@ -888,7 +888,7 @@ void Executor::C_ReserveEntry(INTEGER index, BOOLEAN reserve)
 
     /* Only change the seed when necessary. */
     if(old_value != entry->value)
-        CTAB_SEED_X(ctab) = GetCTSeed();
+        CTAB_SEED(ctab) = GetCTSeed();
 }
 
 void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
@@ -905,7 +905,7 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
 
     gd = LM(TheGDevice);
 
-    if(GD_TYPE_X(gd) != clutType)
+    if(GD_TYPE(gd) != clutType)
         /* #### return error code? */
         return;
 
@@ -966,7 +966,7 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
 
     if(ctab_changed_p)
     {
-        CTAB_SEED_X(ctab) = GetCTSeed();
+        CTAB_SEED(ctab) = GetCTSeed();
         if(gd == LM(MainDevice))
         {
             if(num_colors > 0)
@@ -988,9 +988,9 @@ void Executor::C_AddSearch(ProcPtr searchProc)
 
     search_list_elt = (SProcHndl)NewHandle(sizeof(SProcRec));
     (*search_list_elt)->srchProc = searchProc;
-    (*search_list_elt)->nxtSrch = GD_SEARCH_PROC_X(gdev);
+    (*search_list_elt)->nxtSrch = GD_SEARCH_PROC(gdev);
 
-    GD_SEARCH_PROC_X(gdev) = search_list_elt;
+    GD_SEARCH_PROC(gdev) = search_list_elt;
 
     /* Invalidate all color conversion tables. */
     ROMlib_invalidate_conversion_tables();
@@ -1014,7 +1014,7 @@ void Executor::C_DelSearch(ProcPtr searchProc)
         if((*s)->srchProc == searchProc)
         {
             if(prev == nullptr)
-                GD_SEARCH_PROC_X(gdev) = (*s)->nxtSrch;
+                GD_SEARCH_PROC(gdev) = (*s)->nxtSrch;
             else
                 (*prev)->nxtSrch = (*s)->nxtSrch;
             DisposeHandle((Handle)s);
@@ -1037,7 +1037,7 @@ void Executor::C_DelComp(ProcPtr compProc)
 
 void Executor::C_SetClientID(INTEGER id)
 {
-    GD_ID_X(LM(TheGDevice)) = id;
+    GD_ID(LM(TheGDevice)) = id;
 }
 
 void Executor::C_SaveEntries(CTabHandle src, CTabHandle result,
@@ -1055,10 +1055,10 @@ void Executor::C_SaveEntries(CTabHandle src, CTabHandle result,
 
     SetHandleSize((Handle)result,
                   CTAB_STORAGE_FOR_SIZE(req_size));
-    CTAB_SIZE_X(result) = req_size;
+    CTAB_SIZE(result) = req_size;
     /* #### should this set the color table seed? */
-    CTAB_SEED_X(result) = GetCTSeed();
-    CTAB_FLAGS_X(result) = 0;
+    CTAB_SEED(result) = GetCTSeed();
+    CTAB_FLAGS(result) = 0;
 
     for(i = 0; i <= req_size; i++)
     {

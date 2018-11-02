@@ -65,7 +65,7 @@ void Executor::ROMlib_teremovestyleinfo(TEStyleHandle te_style,
     start_run = &runs[start_run_index];
     prev_run = &runs[start_run_index - 1];
     if(start_run_index
-       && (RUN_STYLE_INDEX(start_run) != RUN_STYLE_INDEX(prev_run)))
+       && (STYLE_RUN_STYLE_INDEX(start_run) != STYLE_RUN_STYLE_INDEX(prev_run)))
     {
         StScrpHandle null_scrap;
         ScrpSTElement *scrap_elt;
@@ -73,15 +73,15 @@ void Executor::ROMlib_teremovestyleinfo(TEStyleHandle te_style,
 
         null_scrap = TE_STYLE_NULL_SCRAP(te_style);
 
-        SCRAP_N_STYLES_X(null_scrap) = 1;
+        SCRAP_N_STYLES(null_scrap) = 1;
         SetHandleSize((Handle)null_scrap, SCRAP_SIZE_FOR_N_STYLES(1));
         scrap_elt = SCRAP_ST_ELT(null_scrap, 0);
         st_elt = ST_ELT(TE_STYLE_STYLE_TABLE(te_style),
-                        RUN_STYLE_INDEX(start_run));
+                        STYLE_RUN_STYLE_INDEX(start_run));
 
         generic_elt_copy(SCRAP_ELT_TO_GENERIC_ELT(scrap_elt),
                          ST_ELT_TO_GENERIC_ELT(st_elt));
-        SCRAP_ELT_START_CHAR_X(scrap_elt) = 0;
+        SCRAP_ELT_START_CHAR(scrap_elt) = 0;
     }
 
     shift = end - start;
@@ -99,14 +99,14 @@ void Executor::ROMlib_teremovestyleinfo(TEStyleHandle te_style,
         StyleRun *current_run;
 
         current_run = &runs[current_run_index];
-        STYLE_RUN_START_CHAR_X(current_run)
+        STYLE_RUN_START_CHAR(current_run)
             = STYLE_RUN_START_CHAR(current_run) - shift;
     }
 
     memmove(&runs[start_run_index], &runs[end_run_index],
             (n_runs - end_run_index + 1) * sizeof *runs);
     n_runs -= end_run_index - start_run_index;
-    TE_STYLE_N_RUNS_X(te_style) = n_runs;
+    TE_STYLE_N_RUNS(te_style) = n_runs;
     SetHandleSize((Handle)te_style,
                   TE_STYLE_SIZE_FOR_N_RUNS(n_runs));
 
@@ -136,10 +136,10 @@ tereplaceselection(TEHandle teh, int16_t start, int16_t stop, int16_t len,
         SetHandleSize(hText, hlen + nchar);
     BlockMoveData(ptr, *hText + start, len);
 
-    TE_SEL_END_X(teh) = TE_SEL_START_X(teh)
+    TE_SEL_END(teh) = TE_SEL_START(teh)
         = TE_SEL_START(teh) + len;
-    TE_LENGTH_X(teh) = hlen + nchar;
-    TE_CARET_STATE_X(teh) = -1; /* will be highlit below */
+    TE_LENGTH(teh) = hlen + nchar;
+    TE_CARET_STATE(teh) = -1; /* will be highlit below */
 }
 
 void te_style_insert_runs(TEStyleHandle te_style,
@@ -159,7 +159,7 @@ void te_style_insert_runs(TEStyleHandle te_style,
     {
         StyleRun *run = &runs[run_i];
 
-        STYLE_RUN_START_CHAR_X(run)
+        STYLE_RUN_START_CHAR(run)
             = STYLE_RUN_START_CHAR(run) + len;
     }
 
@@ -192,10 +192,10 @@ void te_style_insert_runs(TEStyleHandle te_style,
 
             new_style = ST_ELT(style_table, new_style_index);
 
-            ST_ELT_COUNT_X(new_style) = ST_ELT_COUNT(new_style) + 1;
+            ST_ELT_COUNT(new_style) = ST_ELT_COUNT(new_style) + 1;
             release_style_index(te_style, style_index);
 
-            STYLE_RUN_STYLE_INDEX_X(run) = new_style_index;
+            STYLE_RUN_STYLE_INDEX(run) = new_style_index;
         }
     }
     stabilize_style_info(te_style);
@@ -233,7 +233,7 @@ void Executor::ROMlib_teinsertstyleinfo(TEHandle te,
             scrap = (StScrpHandle)NewHandle(sizeof(StScrpRec));
             cleanup_scrap_p = true;
 
-            SCRAP_N_STYLES_X(scrap) = 1;
+            SCRAP_N_STYLES(scrap) = 1;
             scrap_elt = SCRAP_ST_ELT(scrap, 0);
 
             start_run_index = te_char_to_run_index(te_style, (start
@@ -245,7 +245,7 @@ void Executor::ROMlib_teinsertstyleinfo(TEHandle te,
 
             generic_elt_copy(SCRAP_ELT_TO_GENERIC_ELT(scrap_elt),
                              ST_ELT_TO_GENERIC_ELT(start_st_elt));
-            SCRAP_ELT_START_CHAR_X(scrap_elt) = 0;
+            SCRAP_ELT_START_CHAR(scrap_elt) = 0;
         }
     }
 
@@ -264,15 +264,15 @@ void Executor::ROMlib_teinsertstyleinfo(TEHandle te,
                                       false);
 
         /* must swap here, the elt start char is a `int32_t' */
-        STYLE_RUN_START_CHAR_X(new_run) = SCRAP_ELT_START_CHAR(scrap_elt);
-        STYLE_RUN_STYLE_INDEX_X(new_run) = style_index;
+        STYLE_RUN_START_CHAR(new_run) = SCRAP_ELT_START_CHAR(scrap_elt);
+        STYLE_RUN_STYLE_INDEX(new_run) = style_index;
     }
     {
         StyleRun *new_run;
 
         new_run = &new_runs[scrap_n_styles];
-        STYLE_RUN_START_CHAR_X(new_run) = len;
-        STYLE_RUN_STYLE_INDEX_X(new_run) = -1;
+        STYLE_RUN_START_CHAR(new_run) = len;
+        STYLE_RUN_STYLE_INDEX(new_run) = -1;
     }
 
     te_style_insert_runs(te_style, start, len, new_runs, scrap_n_styles);
@@ -321,9 +321,9 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
      what is going on.  PhysTCL points this out. */
 
     if(TE_SEL_START(teh) < 0)
-        TE_SEL_START_X(teh) = 32767;
+        TE_SEL_START(teh) = 32767;
     if(TE_SEL_END(teh) < 0)
-        TE_SEL_END_X(teh) = 32767;
+        TE_SEL_END(teh) = 32767;
 #endif
 
     start = TE_SEL_START(teh);
@@ -333,42 +333,42 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
     if(start < 0)
     {
         warning_unexpected("start = %d", start);
-        TE_SEL_START_X(teh) = 0;
+        TE_SEL_START(teh) = 0;
         start = 0;
     }
 
     if(stop < 0)
     {
         warning_unexpected("stop = %d", stop);
-        TE_SEL_END_X(teh) = 0;
+        TE_SEL_END(teh) = 0;
         stop = 0;
     }
 
     if(hlen < 0)
     {
         warning_unexpected("nlen = %d", hlen);
-        TE_LENGTH_X(teh) = 0;
+        TE_LENGTH(teh) = 0;
         hlen = 0;
     }
 
     if(start > hlen)
     {
         warning_unexpected("start = %d, hlen = %d", start, hlen);
-        TE_SEL_START_X(teh) = hlen;
+        TE_SEL_START(teh) = hlen;
         start = hlen;
     }
 
     if(stop > hlen)
     {
         warning_unexpected("stop = %d, hlen = %d", stop, hlen);
-        TE_SEL_END_X(teh) = hlen;
+        TE_SEL_END(teh) = hlen;
         stop = hlen;
     }
 
     if(start > stop)
     {
         warning_unexpected("start = %d, stop = %d", start, stop);
-        TE_SEL_START_X(teh) = stop;
+        TE_SEL_START(teh) = stop;
         start = stop;
     }
 
@@ -456,15 +456,15 @@ void Executor::ROMlib_tedoitall(TEHandle teh, Ptr ptr, /* INTERNAL */
         EraseRect(&eraser);
     }
     if(TE_STYLIZED_P(teh))
-        SCRAP_N_STYLES_X(TE_STYLE_NULL_SCRAP(te_style)) = 0;
+        SCRAP_N_STYLES(TE_STYLE_NULL_SCRAP(te_style)) = 0;
 
     TE_DO_TEXT(teh, calstart, calend, teDraw);
 
-    if(TE_SEL_START_X(teh) != TE_SEL_END_X(teh))
+    if(TE_SEL_START(teh) != TE_SEL_END(teh))
         /* turn on any highliting */
         ROMlib_togglelite(teh);
     else
-        TE_CARET_STATE_X(teh) = 255;
+        TE_CARET_STATE(teh) = 255;
 
     TERESTORE();
 }
@@ -490,10 +490,10 @@ static void doarrow(TEHandle te, CharParameter thec)
     sel_end = TEP_SEL_END(tep);
     length = TEP_LENGTH(tep);
 
-    if(TEP_CARET_STATE_X(tep) != caret_invis)
+    if(TEP_CARET_STATE(tep) != caret_invis)
     {
         ROMlib_togglelite(te);
-        TEP_CARET_STATE_X(tep) = caret_invis;
+        TEP_CARET_STATE(tep) = caret_invis;
     }
 
     switch(c)
@@ -533,10 +533,10 @@ static void doarrow(TEHandle te, CharParameter thec)
         }
     }
 
-    TEP_SEL_START_X(tep) = sel_start;
-    TEP_SEL_END_X(tep) = sel_start;
+    TEP_SEL_START(tep) = sel_start;
+    TEP_SEL_END(tep) = sel_start;
     if(TEP_CARET_STATE(tep))
-        TEP_CARET_STATE_X(tep) = caret_vis;
+        TEP_CARET_STATE(tep) = caret_vis;
     ROMlib_togglelite(te);
     HSetState((Handle)te, te_flags);
 
@@ -562,7 +562,7 @@ void Executor::C_TEKey(CharParameter thec, TEHandle te)
                 TEStyleHandle te_style;
 
                 te_style = TE_GET_STYLE(te);
-                SCRAP_N_STYLES_X(TE_STYLE_NULL_SCRAP(te_style)) = 0;
+                SCRAP_N_STYLES(TE_STYLE_NULL_SCRAP(te_style)) = 0;
             }
             break;
         case NUMPAD_ENTER:
@@ -636,17 +636,17 @@ void Executor::C_TECopy(TEHandle te)
                           SCRAP_SIZE_FOR_N_STYLES(n_scrap_styles));
 
             current_run = &runs[current_run_index];
-            style = ST_ELT(style_table, RUN_STYLE_INDEX(current_run));
+            style = ST_ELT(style_table, STYLE_RUN_STYLE_INDEX(current_run));
             scrap_elt = SCRAP_ST_ELT(scrap, n_scrap_styles - 1);
 
             generic_elt_copy(SCRAP_ELT_TO_GENERIC_ELT(scrap_elt),
                              ST_ELT_TO_GENERIC_ELT(style));
-            run_start = RUN_START_CHAR(current_run);
-            SCRAP_ELT_START_CHAR_X(scrap_elt) = (run_start < start
+            run_start = STYLE_RUN_START_CHAR(current_run);
+            SCRAP_ELT_START_CHAR(scrap_elt) = (run_start < start
                                                      ? 0
                                                      : run_start - start);
         }
-        SCRAP_N_STYLES_X(scrap) = n_scrap_styles;
+        SCRAP_N_STYLES(scrap) = n_scrap_styles;
 
         {
             HLockGuard guard(scrap);

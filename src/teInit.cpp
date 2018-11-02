@@ -64,10 +64,10 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
                crOnly, 1,
                clikLoop, (ProcPtr)&default_clik_loop[0],
                inPort, qdGlobals().thePort,
-               txFont, PORT_TX_FONT_X(qdGlobals().thePort),
+               txFont, PORT_TX_FONT(qdGlobals().thePort),
                txFace, PORT_TX_FACE(qdGlobals().thePort),
-               txMode, PORT_TX_MODE_X(qdGlobals().thePort),
-               txSize, PORT_TX_SIZE_X(qdGlobals().thePort),
+               txMode, PORT_TX_MODE(qdGlobals().thePort),
+               txSize, PORT_TX_SIZE(qdGlobals().thePort),
                hText, hText);
 
     tehlinestarts = (*teh)->lineStarts;
@@ -76,7 +76,7 @@ TEHandle Executor::C_TENew(Rect *dst, Rect *view)
 
     temptehiddenh = (tehiddenh)NewHandle(sizeof(tehidden));
     /* don't merge with line above */
-    TEHIDDENHX(teh) = temptehiddenh;
+    TEHIDDENH(teh) = temptehiddenh;
     memset(*TEHIDDENH(teh), 0, sizeof(tehidden));
 
     TE_SLAM(teh);

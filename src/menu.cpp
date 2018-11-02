@@ -141,7 +141,7 @@ append_end_marker_if_necessary(MCTableHandle h)
     size = GetHandleSize((Handle)h);
     entries = *h;
     nelem = size / sizeof *entries;
-    for(i = 0; i < nelem && MCENTRY_ID_X(&entries[i]) != -99;)
+    for(i = 0; i < nelem && MCENTRY_ID(&entries[i]) != -99;)
         ++i;
     if(i == nelem)
     {
@@ -222,8 +222,8 @@ void Executor::C_CalcMenuSize(MenuHandle mh)
         i = -1;
         ThePortGuard guard(wmgr_port);
 
-        PORT_TX_FACE_X(wmgr_port) = (Style)0;
-        PORT_TX_FONT_X(wmgr_port) = 0;
+        PORT_TX_FACE(wmgr_port) = (Style)0;
+        PORT_TX_FONT(wmgr_port) = 0;
 
         /* initialize the unused point to a known value */
         memset(&dummy_pt, 0xFF, sizeof dummy_pt);
@@ -285,7 +285,7 @@ MenuHandle Executor::C_GetMenu(int16_t rid)
             if(SIZEOFMINFO != 15)
                 Munger((Handle)retval, (int32_t)6, (Ptr)0, (int32_t)0,
                        (Ptr) "x", (int32_t)2);
-            MI_PROC_X(retval) = temph;
+            MI_PROC(retval) = temph;
             CalcMenuSize(retval);
         }
     }
@@ -1052,8 +1052,8 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
         {
             if(mh)
             {
-                PORT_TX_FACE_X(wmgr_port) = (Style)0;
-                PORT_TX_FONT_X(wmgr_port) = 0;
+                PORT_TX_FACE(wmgr_port) = (Style)0;
+                PORT_TX_FONT(wmgr_port) = 0;
                 item_swapped = item;
                 MENUCALL(mChooseMsg, mh, &r, pt, &item_swapped);
                 item = item_swapped;
@@ -1066,9 +1066,9 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                     {
                         restoren(i, restoredrgn, &r);
                         nmenusdisplayed -= i;
-                        saveclip = PORT_CLIP_REGION_X(wmgr_port);
+                        saveclip = PORT_CLIP_REGION(wmgr_port);
 
-                        PORT_CLIP_REGION_X(wmgr_port) = NewRgn();
+                        PORT_CLIP_REGION(wmgr_port) = NewRgn();
                         RectRgn(PORT_CLIP_REGION(wmgr_port), &r);
 
                         if(item == 0)
@@ -1078,13 +1078,13 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                             /* a messed clip region */
                         }
                         item = olditem;
-                        PORT_TX_FACE_X(wmgr_port) = (Style)0;
-                        PORT_TX_FONT_X(wmgr_port) = 0;
+                        PORT_TX_FACE(wmgr_port) = (Style)0;
+                        PORT_TX_FONT(wmgr_port) = 0;
                         item_swapped = item;
                         MENUCALL(mChooseMsg, mh, &r, pt, &item_swapped);
                         item = item_swapped;
                         DisposeRgn(PORT_CLIP_REGION(wmgr_port));
-                        PORT_CLIP_REGION_X(wmgr_port) = saveclip;
+                        PORT_CLIP_REGION(wmgr_port) = saveclip;
                     }
                     if((newmh = itemishierarchical(mh, item, &tempi)))
                     {
@@ -1106,14 +1106,14 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                         auto oldtopmenuitem = LM(TopMenuItem);
                         auto saveatmenubottom = LM(AtMenuBottom);
                         LM(TopMenuItem) = r2.top;
-                        PORT_TX_FACE_X(wmgr_port) = (Style)0;
-                        PORT_TX_FONT_X(wmgr_port) = 0;
-                        saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
-                        PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
+                        PORT_TX_FACE(wmgr_port) = (Style)0;
+                        PORT_TX_FONT(wmgr_port) = 0;
+                        saveclip = PORT_CLIP_REGION(qdGlobals().thePort);
+                        PORT_CLIP_REGION(qdGlobals().thePort) = NewRgn();
                         RectRgn(PORT_CLIP_REGION(qdGlobals().thePort), &r2);
                         MENUCALL(mDrawMsg, newmh, &r2, dummy_pt, nullptr);
                         DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
-                        PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
+                        PORT_CLIP_REGION(qdGlobals().thePort) = saveclip;
                         nmenusdisplayed++;
                         MBDFCALL(mbSaveAlt, 0, tempi);
                         LM(TopMenuItem) = oldtopmenuitem;
@@ -1153,14 +1153,14 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                     ROMlib_rootless_openmenu(r);                    
                     olditem = item = 0;
                     LM(TopMenuItem) = LM(MBarHeight);
-                    PORT_TX_FACE_X(wmgr_port) = (Style)0;
-                    PORT_TX_FONT_X(wmgr_port) = 0;
-                    saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort); /* ick */
-                    PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
+                    PORT_TX_FACE(wmgr_port) = (Style)0;
+                    PORT_TX_FONT(wmgr_port) = 0;
+                    saveclip = PORT_CLIP_REGION(qdGlobals().thePort); /* ick */
+                    PORT_CLIP_REGION(qdGlobals().thePort) = NewRgn();
                     RectRgn(PORT_CLIP_REGION(qdGlobals().thePort), &r);
                     MENUCALL(mDrawMsg, mh, &r, dummy_pt, nullptr);
                     DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
-                    PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
+                    PORT_CLIP_REGION(qdGlobals().thePort) = saveclip;
                     nmenusdisplayed++;
                     whichmenuhit = wheretowhich(where);
                 }
@@ -1242,8 +1242,8 @@ out:
             tempi = item;
             tempp.v = 0;
             tempp.h = 0;
-            PORT_TX_FACE_X(wmgr_port) = (Style)0;
-            PORT_TX_FONT_X(wmgr_port) = 0;
+            PORT_TX_FACE(wmgr_port) = (Style)0;
+            PORT_TX_FONT(wmgr_port) = 0;
             item_swapped = tempi;
             MENUCALL(mChooseMsg, mh, &r, tempp, &item_swapped);
             tempi = item_swapped;
@@ -1252,14 +1252,14 @@ out:
                 for(i = 0; i < LM(MenuFlash); i++)
                 {
                     Delay(3L, nullptr);
-                    PORT_TX_FACE_X(wmgr_port) = (Style)0;
-                    PORT_TX_FONT_X(wmgr_port) = 0;
+                    PORT_TX_FACE(wmgr_port) = (Style)0;
+                    PORT_TX_FONT(wmgr_port) = 0;
                     item_swapped = tempi;
                     MENUCALL(mChooseMsg, mh, &r, pt, &item_swapped);
                     tempi = item_swapped;
                     Delay(3L, nullptr);
-                    PORT_TX_FACE_X(wmgr_port) = (Style)0;
-                    PORT_TX_FONT_X(wmgr_port) = 0;
+                    PORT_TX_FACE(wmgr_port) = (Style)0;
+                    PORT_TX_FONT(wmgr_port) = 0;
                     item_swapped = tempi;
                     MENUCALL(mChooseMsg, mh, &r, tempp, &item_swapped);
                     tempi = item_swapped;

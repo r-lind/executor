@@ -37,7 +37,7 @@ INTEGER Executor::C_FindWindow(Point p, GUEST<WindowPtr> *wpp)
         return inMenuBar;
     for(wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
-        if(WINDOW_VISIBLE_X(wp) && PtInRgn(p, WINDOW_STRUCT_REGION(wp)))
+        if(WINDOW_VISIBLE(wp) && PtInRgn(p, WINDOW_STRUCT_REGION(wp)))
         {
             *wpp = (WindowPtr)wp;
             if(WINDOW_KIND(wp) < 0)
@@ -170,7 +170,7 @@ void Executor::C_ZoomWindow(WindowPtr wp, INTEGER part,
 
 #if !defined(No_STEF_zoommods)
 #else
-        WINDOW_SPARE_FLAG_X(wp) = part;
+        WINDOW_SPARE_FLAG(wp) = part;
 #endif /* No_STEF_zoommods */
         DisposeRgn(behind);
         if(front)

@@ -198,8 +198,8 @@ void Executor::ShortenDITL(DialogPtr dp, int16_t n_items)
 			  fields will be set up with sane values */
                         TEDeactivate(te);
 
-                        DIALOG_EDIT_FIELD_X(dp) = -1;
-                        DIALOG_EDIT_OPEN_X(dp) = 0;
+                        DIALOG_EDIT_FIELD(dp) = -1;
+                        DIALOG_EDIT_OPEN(dp) = 0;
                     }
 
                     DisposeHandle((Handle)itemp->itmhand);

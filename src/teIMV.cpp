@@ -35,15 +35,15 @@ void Executor::generic_elt_calc_height_ascent(generic_elt_t *elt)
 
     savesize = PORT_TX_SIZE(qdGlobals().thePort);
     savefont = PORT_TX_FONT(qdGlobals().thePort);
-    saveface = PORT_TX_FACE_X(qdGlobals().thePort);
+    saveface = PORT_TX_FACE(qdGlobals().thePort);
     TextSize(GENERIC_ELT_SIZE(elt));
     TextFont(GENERIC_ELT_FONT(elt));
     TextFace(GENERIC_ELT_FACE(elt));
     GetFontInfo(&font_info);
-    GENERIC_ELT_HEIGHT_X(elt) = font_info.ascent
+    GENERIC_ELT_HEIGHT(elt) = font_info.ascent
                                    + font_info.descent
                                    + font_info.leading;
-    GENERIC_ELT_ASCENT_X(elt) = font_info.ascent;
+    GENERIC_ELT_ASCENT(elt) = font_info.ascent;
     TextSize(savesize);
     TextFace(saveface);
     TextFont(savefont);
@@ -55,14 +55,14 @@ bool Executor::adjust_attrs(TextStyle *orig_attrs, TextStyle *new_attrs,
 {
     GUEST<int16_t> orig_font, orig_size;
 
-    orig_font = TS_FONT_X(orig_attrs);
-    orig_size = TS_SIZE_X(orig_attrs);
+    orig_font = TS_FONT(orig_attrs);
+    orig_size = TS_SIZE(orig_attrs);
 
     /* compute the new style for this run */
     if(mode & doFont)
-        TS_FONT_X(dst_attrs) = TS_FONT_X(new_attrs);
+        TS_FONT(dst_attrs) = TS_FONT(new_attrs);
     else
-        TS_FONT_X(dst_attrs) = TS_FONT_X(orig_attrs);
+        TS_FONT(dst_attrs) = TS_FONT(orig_attrs);
 
     /* ### we don't handle doToggle correctly */
     if(mode & doFace)
@@ -78,19 +78,19 @@ bool Executor::adjust_attrs(TextStyle *orig_attrs, TextStyle *new_attrs,
         TS_FACE(dst_attrs) = TS_FACE(orig_attrs);
 
     if(mode & addSize)
-        TS_SIZE_X(dst_attrs) = TS_SIZE(new_attrs) + TS_SIZE(orig_attrs);
+        TS_SIZE(dst_attrs) = TS_SIZE(new_attrs) + TS_SIZE(orig_attrs);
     else if(mode & doSize)
-        TS_SIZE_X(dst_attrs) = TS_SIZE_X(new_attrs);
+        TS_SIZE(dst_attrs) = TS_SIZE(new_attrs);
     else
-        TS_SIZE_X(dst_attrs) = TS_SIZE_X(orig_attrs);
+        TS_SIZE(dst_attrs) = TS_SIZE(orig_attrs);
 
     if(mode & doColor)
         TS_COLOR(dst_attrs) = TS_COLOR(new_attrs);
     else
         TS_COLOR(dst_attrs) = TS_COLOR(orig_attrs);
 
-    return (orig_font != TS_FONT_X(dst_attrs)
-            || orig_size != TS_SIZE_X(dst_attrs));
+    return (orig_font != TS_FONT(dst_attrs)
+            || orig_size != TS_SIZE(dst_attrs));
 }
 
 /* return the index into `runs' that has a starting char `sel'.  if no
@@ -117,7 +117,7 @@ int16_t Executor::make_style_run_at(TEStyleHandle te_style, int16_t sel)
 
         /* split the current style into two */
         n_runs = TE_STYLE_N_RUNS(te_style) + 1;
-        TE_STYLE_N_RUNS_X(te_style) = n_runs;
+        TE_STYLE_N_RUNS(te_style) = n_runs;
         SetHandleSize((Handle)te_style,
                       TE_STYLE_SIZE_FOR_N_RUNS(n_runs));
         runs = TE_STYLE_RUNS(te_style);
@@ -132,10 +132,10 @@ int16_t Executor::make_style_run_at(TEStyleHandle te_style, int16_t sel)
         style_table = TE_STYLE_STYLE_TABLE(te_style);
         style = ST_ELT(style_table, style_index);
 
-        ST_ELT_COUNT_X(style) = ST_ELT_COUNT(style) + 1;
+        ST_ELT_COUNT(style) = ST_ELT_COUNT(style) + 1;
 
-        STYLE_RUN_START_CHAR_X(&runs[run_index + 1]) = sel;
-        STYLE_RUN_STYLE_INDEX_X(&runs[run_index + 1]) = style_index;
+        STYLE_RUN_START_CHAR(&runs[run_index + 1]) = sel;
+        STYLE_RUN_STYLE_INDEX(&runs[run_index + 1]) = style_index;
 
         return run_index + 1;
     }
@@ -167,8 +167,8 @@ int16_t Executor::get_style_index(TEStyleHandle te_style, TextStyle *attrs, int 
     {
         st_elt = ST_ELT(style_table, st_i);
 
-        if(TS_FONT_X(attrs) == ST_ELT_FONT_X(st_elt)
-           && TS_SIZE_X(attrs) == ST_ELT_SIZE_X(st_elt))
+        if(TS_FONT(attrs) == ST_ELT_FONT(st_elt)
+           && TS_SIZE(attrs) == ST_ELT_SIZE(st_elt))
         {
             if(TS_FACE(attrs) == ST_ELT_FACE(st_elt)
                && (TS_COLOR(attrs).red == ST_ELT_COLOR(st_elt).red
@@ -176,13 +176,13 @@ int16_t Executor::get_style_index(TEStyleHandle te_style, TextStyle *attrs, int 
                    && TS_COLOR(attrs).blue == ST_ELT_COLOR(st_elt).blue))
             {
                 if(incr_count_p)
-                    ST_ELT_COUNT_X(st_elt) = ST_ELT_COUNT(st_elt) + 1;
+                    ST_ELT_COUNT(st_elt) = ST_ELT_COUNT(st_elt) + 1;
                 return st_i;
             }
             else if(!cache_filled_p)
             {
-                cached_height = ST_ELT_HEIGHT_X(st_elt);
-                cached_ascent = ST_ELT_ASCENT_X(st_elt);
+                cached_height = ST_ELT_HEIGHT(st_elt);
+                cached_ascent = ST_ELT_ASCENT(st_elt);
                 cache_filled_p = true;
             }
         }
@@ -190,22 +190,22 @@ int16_t Executor::get_style_index(TEStyleHandle te_style, TextStyle *attrs, int 
 
     /* a style not already in the style table was asked for.  create it */
     n_styles++;
-    TE_STYLE_N_STYLES_X(te_style) = n_styles;
+    TE_STYLE_N_STYLES(te_style) = n_styles;
     SetHandleSize((Handle)style_table,
                   STYLE_TABLE_SIZE_FOR_N_STYLES(n_styles));
     st_elt = ST_ELT(style_table, n_styles - 1);
 
-    ST_ELT_COUNT_X(st_elt) = incr_count_p ? 1 : 0;
+    ST_ELT_COUNT(st_elt) = incr_count_p ? 1 : 0;
 
-    ST_ELT_FONT_X(st_elt) = TS_FONT_X(attrs);
+    ST_ELT_FONT(st_elt) = TS_FONT(attrs);
     ST_ELT_FACE(st_elt) = TS_FACE(attrs);
-    ST_ELT_SIZE_X(st_elt) = TS_SIZE_X(attrs);
+    ST_ELT_SIZE(st_elt) = TS_SIZE(attrs);
     ST_ELT_COLOR(st_elt) = TS_COLOR(attrs);
 
     if(cache_filled_p)
     {
-        ST_ELT_HEIGHT_X(st_elt) = cached_height;
-        ST_ELT_ASCENT_X(st_elt) = cached_ascent;
+        ST_ELT_HEIGHT(st_elt) = cached_height;
+        ST_ELT_ASCENT(st_elt) = cached_ascent;
     }
     else
         generic_elt_calc_height_ascent(ST_ELT_TO_GENERIC_ELT(st_elt));
@@ -223,7 +223,7 @@ void Executor::release_style_index(TEStyleHandle te_style, int16_t style_index)
     style_table = TE_STYLE_STYLE_TABLE(te_style);
     st_elt = ST_ELT(style_table, style_index);
     gui_assert(ST_ELT_COUNT(st_elt) > 0);
-    ST_ELT_COUNT_X(st_elt) = ST_ELT_COUNT(st_elt) - 1;
+    ST_ELT_COUNT(st_elt) = ST_ELT_COUNT(st_elt) - 1;
 }
 
 /* `release_style_index ()' only decreases the reference count, so
@@ -251,7 +251,7 @@ void Executor::stabilize_style_info(TEStyleHandle te_style)
     {
         st_elt = ST_ELT(style_table, i);
 
-        if(!ST_ELT_COUNT_X(st_elt))
+        if(!ST_ELT_COUNT(st_elt))
         {
             /* make sure that the last style element in the table is
 	     used */
@@ -260,7 +260,7 @@ void Executor::stabilize_style_info(TEStyleHandle te_style)
                 STElement *last_st_elt;
 
                 last_st_elt = ST_ELT(style_table, n_styles - 1);
-                if(ST_ELT_COUNT_X(last_st_elt))
+                if(ST_ELT_COUNT(last_st_elt))
                     break;
 
                 n_styles--;
@@ -284,7 +284,7 @@ void Executor::stabilize_style_info(TEStyleHandle te_style)
     }
 done:
 
-    TE_STYLE_N_STYLES_X(te_style) = n_styles;
+    TE_STYLE_N_STYLES(te_style) = n_styles;
     SetHandleSize((Handle)style_table,
                   STYLE_TABLE_SIZE_FOR_N_STYLES(n_styles));
 
@@ -297,9 +297,9 @@ done:
         StyleRun *run;
 
         run = TE_STYLE_RUN(te_style, i);
-        STYLE_RUN_STYLE_INDEX_X(run)
+        STYLE_RUN_STYLE_INDEX(run)
             = index_map[STYLE_RUN_STYLE_INDEX(run)];
-        gui_assert(STYLE_RUN_STYLE_INDEX_X(run) != -1);
+        gui_assert(STYLE_RUN_STYLE_INDEX(run) != -1);
     }
 }
 
@@ -319,14 +319,14 @@ combine_run_with_next(TEStyleHandle te_style, int16_t run_index)
             (n_runs - run_index - 1) * sizeof *runs);
 
     n_runs--;
-    TE_STYLE_N_RUNS_X(te_style) = n_runs;
+    TE_STYLE_N_RUNS(te_style) = n_runs;
     SetHandleSize((Handle)te_style,
                   TE_STYLE_SIZE_FOR_N_RUNS(n_runs));
 
     style_index = STYLE_RUN_STYLE_INDEX(&runs[run_index]);
     style_table = TE_STYLE_STYLE_TABLE(te_style);
     style = ST_ELT(style_table, style_index);
-    ST_ELT_COUNT_X(style) = ST_ELT_COUNT(style) - 1;
+    ST_ELT_COUNT(style) = ST_ELT_COUNT(style) - 1;
 }
 
 void Executor::te_style_combine_runs(TEStyleHandle te_style)
@@ -416,7 +416,7 @@ te_add_attrs_to_range(TEHandle te,
             new_style_index = get_style_index(te_style, &new_attrs, true);
             release_style_index(te_style, orig_style_index);
 
-            STYLE_RUN_STYLE_INDEX_X(current_run) = new_style_index;
+            STYLE_RUN_STYLE_INDEX(current_run) = new_style_index;
         }
     }
 
@@ -462,21 +462,21 @@ TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
     style_table = (STHandle)NewHandle(sizeof(STElement));
     HASSIGN_7(style_table,
               stCount, 1,
-              stFont, PORT_TX_FONT_X(qdGlobals().thePort),
+              stFont, PORT_TX_FONT(qdGlobals().thePort),
               stFace, PORT_TX_FACE(qdGlobals().thePort),
-              stSize, PORT_TX_SIZE_X(qdGlobals().thePort),
+              stSize, PORT_TX_SIZE(qdGlobals().thePort),
               stColor, ROMlib_black_rgb_color,
               stHeight, font_height,
               stAscent, font_info.ascent);
 
-    TE_STYLE_STYLE_TABLE_X(te_style) = style_table;
+    TE_STYLE_STYLE_TABLE(te_style) = style_table;
 
     lh_table = (LHHandle)NewHandle(sizeof(LHElement));
     lh = *lh_table;
-    LH_HEIGHT_X(lh) = font_height;
-    LH_ASCENT_X(lh) = font_info.ascent;
+    LH_HEIGHT(lh) = font_height;
+    LH_ASCENT(lh) = font_info.ascent;
 
-    TE_STYLE_LH_TABLE_X(te_style) = lh_table;
+    TE_STYLE_LH_TABLE(te_style) = lh_table;
 
     (*te_style)->teRefCon = 0;
 
@@ -488,9 +488,9 @@ TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
     (*stsh)->scrpNStyles = 0;
 
     stp = (*stsh)->scrpStyleTab;
-    stp->scrpFont = PORT_TX_FONT_X(qdGlobals().thePort);
-    stp->scrpFace = PORT_TX_FACE_X(qdGlobals().thePort);
-    stp->scrpSize = PORT_TX_SIZE_X(qdGlobals().thePort);
+    stp->scrpFont = PORT_TX_FONT(qdGlobals().thePort);
+    stp->scrpFace = PORT_TX_FACE(qdGlobals().thePort);
+    stp->scrpSize = PORT_TX_SIZE(qdGlobals().thePort);
     stp->scrpColor.red = 0; /* black ? */
     stp->scrpColor.green = 0; /* black ? */
     stp->scrpColor.blue = 0; /* black ? */
@@ -553,7 +553,7 @@ StScrpHandle Executor::C_TEGetStyleScrapHandle(TEHandle te)
 
     scrap_n_styles = std::max(end_run_index - start_run_index, 1);
     scrap = (StScrpHandle)NewHandle(SCRAP_SIZE_FOR_N_STYLES(scrap_n_styles));
-    SCRAP_N_STYLES_X(scrap) = scrap_n_styles;
+    SCRAP_N_STYLES(scrap) = scrap_n_styles;
 
     if(start == end)
         warning_unimplemented("should check null scrap, first");
@@ -567,13 +567,13 @@ StScrpHandle Executor::C_TEGetStyleScrapHandle(TEHandle te)
         STElement *style;
 
         current_run = &runs[start_run_index + i];
-        style = ST_ELT(style_table, RUN_STYLE_INDEX(current_run));
+        style = ST_ELT(style_table, STYLE_RUN_STYLE_INDEX(current_run));
         scrap_elt = SCRAP_ST_ELT(scrap, i);
 
         generic_elt_copy(SCRAP_ELT_TO_GENERIC_ELT(scrap_elt),
                          ST_ELT_TO_GENERIC_ELT(style));
-        SCRAP_ELT_START_CHAR_X(scrap_elt)
-            = RUN_START_CHAR(current_run) - start;
+        SCRAP_ELT_START_CHAR(scrap_elt)
+            = STYLE_RUN_START_CHAR(current_run) - start;
     }
     te_style_combine_runs(te_style);
 
@@ -680,24 +680,24 @@ void Executor::C_TEGetStyle(int16_t sel, TextStyle *attrs,
         runs = TE_STYLE_RUNS(te_style);
         run_index = te_char_to_run_index(te_style, sel);
         style = ST_ELT(TE_STYLE_STYLE_TABLE(te_style),
-                       RUN_STYLE_INDEX(&runs[run_index]));
+                       STYLE_RUN_STYLE_INDEX(&runs[run_index]));
 
-        TS_FONT_X(attrs) = ST_ELT_FONT_X(style);
+        TS_FONT(attrs) = ST_ELT_FONT(style);
         TS_FACE(attrs) = ST_ELT_FACE(style);
-        TS_SIZE_X(attrs) = ST_ELT_SIZE_X(style);
+        TS_SIZE(attrs) = ST_ELT_SIZE(style);
         TS_COLOR(attrs) = ST_ELT_COLOR(style);
 
-        *line_height = ST_ELT_HEIGHT_X(style);
-        *font_ascent = ST_ELT_ASCENT_X(style);
+        *line_height = ST_ELT_HEIGHT(style);
+        *font_ascent = ST_ELT_ASCENT(style);
     }
     else
     {
-        TS_FONT_X(attrs) = TE_TX_FONT_X(te);
+        TS_FONT(attrs) = TE_TX_FONT(te);
         TS_FACE(attrs) = TE_TX_FACE(te);
-        TS_SIZE_X(attrs) = TE_TX_SIZE_X(te);
+        TS_SIZE(attrs) = TE_TX_SIZE(te);
         TS_COLOR(attrs) = ROMlib_black_rgb_color;
-        *line_height = TE_LINE_HEIGHT_X(te);
-        *font_ascent = TE_FONT_ASCENT_X(te);
+        *line_height = TE_LINE_HEIGHT(te);
+        *font_ascent = TE_FONT_ASCENT(te);
     }
 }
 
@@ -794,7 +794,7 @@ void Executor::C_TESetStyle(int16_t mode, TextStyle *new_attrs, BOOLEAN redraw,
             style_table = TE_STYLE_STYLE_TABLE(te_style);
             runs = TE_STYLE_RUNS(te_style);
             start_run_index = te_char_to_run_index(te_style, start);
-            start_style_index = RUN_STYLE_INDEX(&runs[start_run_index]);
+            start_style_index = STYLE_RUN_STYLE_INDEX(&runs[start_run_index]);
 
             /* ### if the scrap has no styles, the old TESetStyle code
 	     copied the style from the insertion point.  although this
@@ -804,7 +804,7 @@ void Executor::C_TESetStyle(int16_t mode, TextStyle *new_attrs, BOOLEAN redraw,
                                                           start_style_index)),
                              SCRAP_ELT_TO_GENERIC_ELT(scrap_st_elt));
 
-            SCRAP_N_STYLES_X(null_scrap) = 1;
+            SCRAP_N_STYLES(null_scrap) = 1;
         }
         if(adjust_attrs(SCRAP_ELT_TO_ATTR(scrap_st_elt), new_attrs,
                         SCRAP_ELT_TO_ATTR(scrap_st_elt),
@@ -862,7 +862,7 @@ void Executor::C_TEReplaceStyle(int16_t mode, TextStyle *attrs_to_replace,
         STElement *style;
 
         run = &runs[run_i];
-        orig_style_index = RUN_STYLE_INDEX(run);
+        orig_style_index = STYLE_RUN_STYLE_INDEX(run);
         style = ST_ELT(style_table, orig_style_index);
 
         /* ### from the IM documentation, it isn't clear if
@@ -870,11 +870,11 @@ void Executor::C_TEReplaceStyle(int16_t mode, TextStyle *attrs_to_replace,
 	 or if all attributes need to match */
 
         if((!(mode & doFont)
-            || ST_ELT_FONT_X(style) == TS_FONT_X(attrs_to_replace))
+            || ST_ELT_FONT(style) == TS_FONT(attrs_to_replace))
            && (!(mode & doFace)
                || ST_ELT_FACE(style) == TS_FACE(attrs_to_replace))
            && (!(mode & (doSize | addSize))
-               || ST_ELT_SIZE_X(style) == TS_SIZE_X(attrs_to_replace))
+               || ST_ELT_SIZE(style) == TS_SIZE(attrs_to_replace))
            && (!(mode & doColor)
                || !memcmp(&ST_ELT_COLOR(style),
                           &TS_COLOR(attrs_to_replace),
@@ -892,7 +892,7 @@ void Executor::C_TEReplaceStyle(int16_t mode, TextStyle *attrs_to_replace,
             new_style_index = get_style_index(te_style, new_attrs, true);
             release_style_index(te_style, orig_style_index);
 
-            RUN_STYLE_INDEX_X(run) = new_style_index;
+            STYLE_RUN_STYLE_INDEX(run) = new_style_index;
         }
     }
     HSetState((Handle)te_style, te_style_flags);
@@ -921,11 +921,11 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
     {
         warning_unimplemented(NULL_STRING);
         if(*modep & doFont)
-            TS_FONT_X(ts_out) = PORT_TX_FONT_X(qdGlobals().thePort);
+            TS_FONT(ts_out) = PORT_TX_FONT(qdGlobals().thePort);
         if(*modep & doFace)
-            TS_FACE(ts_out) = PORT_TX_FACE_X(qdGlobals().thePort);
+            TS_FACE(ts_out) = PORT_TX_FACE(qdGlobals().thePort);
         if(*modep & doSize)
-            TS_SIZE_X(ts_out) = PORT_TX_SIZE_X(qdGlobals().thePort);
+            TS_SIZE(ts_out) = PORT_TX_SIZE(qdGlobals().thePort);
         if(*modep & doColor)
             TS_COLOR(ts_out) = ROMlib_black_rgb_color;
         return true;
@@ -955,7 +955,7 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
         int insertion_point;
 
         null_scrap = TE_STYLE_NULL_SCRAP(te_style);
-        if(SCRAP_N_STYLES_X(null_scrap))
+        if(SCRAP_N_STYLES(null_scrap))
         {
             ScrpSTElement *scrap_elt;
 
@@ -984,11 +984,11 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
         }
 
         if(*modep & doFont)
-            TS_FONT_X(ts_out) = TS_FONT_X(attr);
+            TS_FONT(ts_out) = TS_FONT(attr);
         if(*modep & doFace)
             TS_FACE(ts_out) = TS_FACE(attr);
         if(*modep & doSize)
-            TS_SIZE_X(ts_out) = TS_SIZE_X(attr);
+            TS_SIZE(ts_out) = TS_SIZE(attr);
         if(*modep & doColor)
             TS_COLOR(ts_out) = TS_COLOR(attr);
         return true;
@@ -1017,11 +1017,11 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
                    && style_index < TE_STYLE_N_STYLES(te_style));
         style = ST_ELT(style_table, style_index);
         if(*modep & doFont)
-            font = ST_ELT_FONT_X(style);
+            font = ST_ELT_FONT(style);
         if(*modep & doFace)
             face = ST_ELT_FACE(style);
         if(*modep & doSize)
-            size = ST_ELT_SIZE_X(style);
+            size = ST_ELT_SIZE(style);
         if(*modep & doColor)
             color = ST_ELT_COLOR(style);
 
@@ -1034,7 +1034,7 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
             gui_assert(style_index < TE_STYLE_N_STYLES(te_style));
             style = ST_ELT(style_table, style_index);
             if(*modep & doFont
-               && font != ST_ELT_FONT_X(style))
+               && font != ST_ELT_FONT(style))
                 *modep &= ~doFont;
 
             face &= ST_ELT_FACE(style);
@@ -1046,7 +1046,7 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
             }
 
             if(*modep & doSize
-               && size != ST_ELT_SIZE_X(style))
+               && size != ST_ELT_SIZE(style))
                 *modep &= ~doSize;
             if(*modep & doColor
                && !!memcmp(&color, &ST_ELT_COLOR(style), sizeof color))
@@ -1054,11 +1054,11 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
         }
 
         if(*modep & doFont)
-            TS_FONT_X(ts_out) = font;
+            TS_FONT(ts_out) = font;
         if(*modep & doFace)
             TS_FACE(ts_out) = face;
         if(*modep & doSize)
-            TS_SIZE_X(ts_out) = size;
+            TS_SIZE(ts_out) = size;
         if(*modep & doColor)
             TS_COLOR(ts_out) = color;
 

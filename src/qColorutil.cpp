@@ -87,7 +87,7 @@ Executor::validate_fg_bk_ctab(void)
 
     if(memcmp(&old_fg, fg, sizeof old_fg)
        || memcmp(&old_bk, bk, sizeof old_bk))
-        CTAB_SEED_X(ROMlib_fg_bk_ctab) = GetCTSeed();
+        CTAB_SEED(ROMlib_fg_bk_ctab) = GetCTSeed();
 
     return ROMlib_fg_bk_ctab;
 }
@@ -131,7 +131,7 @@ Executor::validate_relative_bw_ctab(void)
 
     if(memcmp(&old_entry0, entry0, sizeof old_entry0)
        || memcmp(&old_entry1, entry1, sizeof old_entry1))
-        CTAB_SEED_X(ROMlib_relative_bw_ctab) = GetCTSeed();
+        CTAB_SEED(ROMlib_relative_bw_ctab) = GetCTSeed();
 
     return ROMlib_relative_bw_ctab;
 }
@@ -155,9 +155,9 @@ void Executor::ROMlib_color_init(void)
     TheZoneGuard guard(LM(SysZone));
     /* allocate and initialize ROMlib_bw_ctab */
     ROMlib_bw_ctab = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(1));
-    CTAB_SIZE_X(ROMlib_bw_ctab) = 1;
-    CTAB_SEED_X(ROMlib_bw_ctab) = GetCTSeed();
-    CTAB_FLAGS_X(ROMlib_bw_ctab) = 0;
+    CTAB_SIZE(ROMlib_bw_ctab) = 1;
+    CTAB_SEED(ROMlib_bw_ctab) = GetCTSeed();
+    CTAB_FLAGS(ROMlib_bw_ctab) = 0;
 
     bw_ctab_table = CTAB_TABLE(ROMlib_bw_ctab);
     bw_ctab_table[0].value = 0;
@@ -177,13 +177,13 @@ void Executor::ROMlib_color_init(void)
 
     ROMlib_dont_depthconv_ctab
         = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(0));
-    CTAB_SIZE_X(ROMlib_dont_depthconv_ctab) = 0;
-    CTAB_SEED_X(ROMlib_dont_depthconv_ctab) = 0;
-    CTAB_FLAGS_X(ROMlib_dont_depthconv_ctab) = 0;
+    CTAB_SIZE(ROMlib_dont_depthconv_ctab) = 0;
+    CTAB_SEED(ROMlib_dont_depthconv_ctab) = 0;
+    CTAB_FLAGS(ROMlib_dont_depthconv_ctab) = 0;
 
     no_stdbits_color_conversion_color_table
         = (CTabHandle)NewHandle(sizeof(ColorTable));
-    CTAB_SEED_X(no_stdbits_color_conversion_color_table) = 0;
+    CTAB_SEED(no_stdbits_color_conversion_color_table) = 0;
 }
 
 Handle

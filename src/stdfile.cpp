@@ -335,7 +335,7 @@ WINDFL(void *dp)
     GUEST<LONGINT> retval;
 
     retval = ((WindowPeek)dp)->refCon;
-    if(retval == TICKX("stdf"))
+    if(retval == TICK("stdf"))
         return (fltype *)SYN68K_TO_US(emergency_save_ref_con);
     else
         return guest_cast<fltype *>(retval);
@@ -740,7 +740,7 @@ static void flfill(fltype *f)
                 {
                     if(pb.hFileInfo.ioFlAttrib & ATTRIB_ISADIR)
                         micon = MICONCFOLDER;
-                    else if(pb.hFileInfo.ioFlFndrInfo.fdType == TICKX("APPL"))
+                    else if(pb.hFileInfo.ioFlFndrInfo.fdType == TICK("APPL"))
                         micon = MICONAPP | f->flgraynondirs;
                     else
                         micon = MICONLETTER | f->flgraynondirs;
@@ -1379,18 +1379,18 @@ static BOOLEAN trackdirs(DialogPeek dp)
             bounds->left = 0;
             bounds->bottom = RECT_HEIGHT(&therect);
             bounds->right = RECT_WIDTH(&therect);
-            PIXMAP_PIXEL_SIZE_X(save_bits) = save_bpp_x
-                = PIXMAP_PIXEL_SIZE_X(port_pixmap);
+            PIXMAP_PIXEL_SIZE(save_bits) = save_bpp_x
+                = PIXMAP_PIXEL_SIZE(port_pixmap);
             ROMlib_copy_ctab(PIXMAP_TABLE(port_pixmap),
                              PIXMAP_TABLE(save_bits));
             row_bytes = ((bounds->right * save_bpp_x + 31) / 32) * 4;
-            PIXMAP_SET_ROWBYTES_X(save_bits, row_bytes);
+            PIXMAP_SET_ROWBYTES(save_bits, row_bytes);
 
             /* Allocate potentially large temporary pixmap space. */
             TEMP_ALLOC_ALLOCATE(save_bits_mem, temp_save_bits,
                                 bounds->bottom * row_bytes);
-            PIXMAP_BASEADDR_X(save_bits) = (Ptr)save_bits_mem;
-            WRAPPER_SET_PIXMAP_X(wrapper, save_bits);
+            PIXMAP_BASEADDR(save_bits) = (Ptr)save_bits_mem;
+            WRAPPER_SET_PIXMAP(wrapper, save_bits);
 
             CopyBits(PORT_BITS_FOR_COPY(qdGlobals().thePort), wrapper,
                      &therect, bounds, srcCopy, nullptr);
@@ -1512,7 +1512,7 @@ makeworking(fltype *f)
 
             wdpb.ioVRefNum = -LM(SFSaveDisk);
             wdpb.ioWDDirID = LM(CurDirStore);
-            wdpb.ioWDProcID = TICKX("STDF");
+            wdpb.ioWDProcID = TICK("STDF");
             wdpb.ioNamePtr = 0;
             err = PBOpenWD(&wdpb, false);
             if(err != noErr)
@@ -1880,17 +1880,13 @@ destroy_new_folder_button(DialogPtr dp, ControlHandle ch)
                              ? &(fp)->flreplyp.oreplyp->fType \
                              : &(fp)->flreplyp.nreplyp->sfType)
 
-#define SF_VREFNUM_X(fp) ((fp)->flavor == original_sf           \
+#define SF_VREFNUM(fp) ((fp)->flavor == original_sf           \
                               ? (fp)->flreplyp.oreplyp->vRefNum \
                               : (fp)->flreplyp.nreplyp->sfFile.vRefNum)
 
-#define SF_VREFNUM(fp) (SF_VREFNUM_X(fp))
-
-#define SF_DIRID_X(fp) ((fp)->flavor == original_sf \
+#define SF_DIRID(fp) ((fp)->flavor == original_sf \
                             ? (GUEST<LONGINT>)0     \
                             : (fp)->flreplyp.nreplyp->sfFile.parID)
-
-#define SF_DIRID(fp) (SF_DIRID_X(fp))
 
 static void
 getditext(DialogPtr dp, INTEGER item, StringPtr text)
@@ -2293,7 +2289,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
                     GetDialogItemText(pnhand, SF_NAME(&f));
                     hpb.dirInfo.ioCompletion = 0;
                     hpb.dirInfo.ioNamePtr = (StringPtr)SF_NAME(&f);
-                    hpb.dirInfo.ioVRefNum = SF_VREFNUM_X(&f);
+                    hpb.dirInfo.ioVRefNum = SF_VREFNUM(&f);
                     hpb.dirInfo.ioFDirIndex = 0;
                     hpb.dirInfo.ioDrDirID = 0;
                     err = PBGetCatInfo(&hpb, false);

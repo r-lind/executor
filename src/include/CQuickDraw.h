@@ -112,7 +112,6 @@ typedef struct Palette
     GUEST<ColorInfo[1]> pmInfo;
 } * PalettePtr;
 
-#define CI_USAGE_TYPE_BITS_X (0xF)
 enum
 {
     CI_USAGE_TYPE_BITS = (0xF),
@@ -146,7 +145,7 @@ typedef GUEST<PalettePtr> *PaletteHandle;
    and not a graf port or cgraf port */
 #define GRAPHICS_WORLD_P(maybe_graphics_world) \
     (CGrafPort_p(maybe_graphics_world)         \
-     && CPORT_VERSION_X(maybe_graphics_world) & GW_FLAG_BIT_X)
+     && CPORT_VERSION(maybe_graphics_world) & GW_FLAG_BIT)
 
 #define GW_CPORT(graphics_world) ((CGrafPtr)(graphics_world))
 

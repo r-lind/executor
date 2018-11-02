@@ -48,16 +48,12 @@ typedef list_header_t *list_header_ptr;
 
 typedef GUEST<list_header_ptr> *list_header_h;
 
-#define PARAM_OFFSET_X(aggr_desc_h) \
+#define PARAM_OFFSET(aggr_desc_h) \
     ((*(list_header_h)aggr_desc_h)->param_offset)
-#define PARAM_COUNT_X(aggr_desc_h) \
+#define PARAM_COUNT(aggr_desc_h) \
     ((*(list_header_h)aggr_desc_h)->param_count)
-#define ATTRIBUTE_COUNT_X(aggr_desc_h) \
+#define ATTRIBUTE_COUNT(aggr_desc_h) \
     ((*(list_header_h)aggr_desc_h)->attribute_count)
-
-#define PARAM_COUNT(aggr_desc_h) (PARAM_COUNT_X(aggr_desc_h))
-#define PARAM_OFFSET(aggr_desc_h) (PARAM_OFFSET_X(aggr_desc_h))
-#define ATTRIBUTE_COUNT(aggr_desc_h) (ATTRIBUTE_COUNT_X(aggr_desc_h))
 
 /* #### always zero (?) */
 

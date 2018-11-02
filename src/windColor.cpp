@@ -146,9 +146,9 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
 
             /* pick the best color and store it into window's port's
 	     bkColor field */
-            PORT_BK_COLOR_X(w) = Color2Index(color);
+            PORT_BK_COLOR(w) = Color2Index(color);
 
-            if(WINDOW_VISIBLE_X(w))
+            if(WINDOW_VISIBLE(w))
             {
                 ThePortGuard guard(w);
                 RgnHandle t;
@@ -163,7 +163,7 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
             }
         }
 
-        if(WINDOW_VISIBLE_X(w))
+        if(WINDOW_VISIBLE(w))
         {
             /* set the port here, don't just save it while drawing the
 	     window

@@ -27,7 +27,7 @@ void Executor::C_InitGraf(Ptr gp)
     main_gd_pixmap = GD_PMAP(LM(MainDevice));
 
     /* qdGlobals().screenBits flag bits must not be set */
-    qdGlobals().screenBits.baseAddr = PIXMAP_BASEADDR_X(main_gd_pixmap);
+    qdGlobals().screenBits.baseAddr = PIXMAP_BASEADDR(main_gd_pixmap);
     qdGlobals().screenBits.rowBytes = PIXMAP_ROWBYTES(main_gd_pixmap) / PIXMAP_PIXEL_SIZE(main_gd_pixmap);
     qdGlobals().screenBits.bounds = PIXMAP_BOUNDS(main_gd_pixmap);
 
@@ -79,7 +79,7 @@ void Executor::ROMlib_initport(GrafPtr p) /* INTERNAL */
      so initialize them before using any accesssor macros */
     p->portBits.rowBytes = 0;
 
-    PORT_DEVICE_X(p) = 0;
+    PORT_DEVICE(p) = 0;
     PORT_BITS(p) = qdGlobals().screenBits;
     PORT_RECT(p) = qdGlobals().screenBits.bounds;
     PATASSIGN(PORT_BK_PAT(p), qdGlobals().white);
@@ -87,23 +87,23 @@ void Executor::ROMlib_initport(GrafPtr p) /* INTERNAL */
     PATASSIGN(PORT_PEN_PAT(p), qdGlobals().black);
     PORT_PEN_LOC(p).h = PORT_PEN_LOC(p).v = 0;
     PORT_PEN_SIZE(p).h = PORT_PEN_SIZE(p).v = 1;
-    PORT_PEN_MODE_X(p) = patCopy;
-    PORT_PEN_VIS_X(p) = 0;
-    PORT_TX_FONT_X(p) = 0;
+    PORT_PEN_MODE(p) = patCopy;
+    PORT_PEN_VIS(p) = 0;
+    PORT_TX_FONT(p) = 0;
     /* txFace is a Style (signed char); don't swap */
-    PORT_TX_FACE_X(p) = 0;
+    PORT_TX_FACE(p) = 0;
     *((char *)&p->txFace + 1) = 0; /* Excel & tests show we need to do this. */
-    PORT_TX_MODE_X(p) = srcOr;
-    PORT_TX_SIZE_X(p) = 0;
-    PORT_SP_EXTRA_X(p) = 0;
-    PORT_FG_COLOR_X(p) = blackColor;
-    PORT_BK_COLOR_X(p) = whiteColor;
-    PORT_COLR_BIT_X(p) = 0;
-    PORT_PAT_STRETCH_X(p) = 0;
-    PORT_PIC_SAVE_X(p) = nullptr;
-    PORT_REGION_SAVE_X(p) = nullptr;
-    PORT_POLY_SAVE_X(p) = nullptr;
-    PORT_GRAF_PROCS_X(p) = nullptr;
+    PORT_TX_MODE(p) = srcOr;
+    PORT_TX_SIZE(p) = 0;
+    PORT_SP_EXTRA(p) = 0;
+    PORT_FG_COLOR(p) = blackColor;
+    PORT_BK_COLOR(p) = whiteColor;
+    PORT_COLR_BIT(p) = 0;
+    PORT_PAT_STRETCH(p) = 0;
+    PORT_PIC_SAVE(p) = nullptr;
+    PORT_REGION_SAVE(p) = nullptr;
+    PORT_POLY_SAVE(p) = nullptr;
+    PORT_GRAF_PROCS(p) = nullptr;
 }
 
 void Executor::C_SetPort(GrafPtr p)
@@ -126,8 +126,8 @@ void Executor::C_InitPort(GrafPtr p)
 
 void Executor::C_OpenPort(GrafPtr p)
 {
-    PORT_VIS_REGION_X(p) = NewRgn();
-    PORT_CLIP_REGION_X(p) = NewRgn();
+    PORT_VIS_REGION(p) = NewRgn();
+    PORT_CLIP_REGION(p) = NewRgn();
     InitPort(p);
 }
 
@@ -166,7 +166,7 @@ void Executor::C_GetPort(GUEST<GrafPtr> *pp)
 
 void Executor::C_GrafDevice(INTEGER d)
 {
-    PORT_DEVICE_X(qdGlobals().thePort) = d;
+    PORT_DEVICE(qdGlobals().thePort) = d;
 }
 
 void Executor::C_SetPortBits(BitMap *bm)
@@ -250,13 +250,13 @@ void Executor::C_BackPat(Pattern pp)
         PixPatHandle old_bk;
 
         old_bk = CPORT_BK_PIXPAT(theCPort);
-        if(old_bk && PIXPAT_TYPE_X(old_bk) == pixpat_type_orig)
+        if(old_bk && PIXPAT_TYPE(old_bk) == pixpat_type_orig)
             PATASSIGN(PIXPAT_1DATA(old_bk), pp);
         else
         {
             PixPatHandle new_bk = NewPixPat();
 
-            PIXPAT_TYPE_X(new_bk) = 0;
+            PIXPAT_TYPE(new_bk) = 0;
             PATASSIGN(PIXPAT_1DATA(new_bk), pp);
             BackPixPat(new_bk);
         }
@@ -278,13 +278,13 @@ void Executor::ROMlib_fill_pat(Pattern pp) /* INTERNAL */
         PixPatHandle old_fill;
 
         old_fill = CPORT_FILL_PIXPAT(theCPort);
-        if(PIXPAT_TYPE_X(old_fill) == pixpat_type_orig)
+        if(PIXPAT_TYPE(old_fill) == pixpat_type_orig)
             PATASSIGN(PIXPAT_1DATA(old_fill), pp);
         else
         {
             PixPatHandle new_fill = NewPixPat();
 
-            PIXPAT_TYPE_X(new_fill) = 0;
+            PIXPAT_TYPE(new_fill) = 0;
             PATASSIGN(PIXPAT_1DATA(new_fill), pp);
 
             ROMlib_fill_pixpat(new_fill);

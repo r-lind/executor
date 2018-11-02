@@ -23,9 +23,9 @@ void Executor::C_SetWTitle(WindowPtr w, StringPtr t)
     PtrToXHand((Ptr)t, (Handle)WINDOW_TITLE(w), (LONGINT)t[0] + 1);
 
     ThePortGuard guard(wmgr_port);
-    WINDOW_TITLE_WIDTH_X(w) = StringWidth(t);
+    WINDOW_TITLE_WIDTH(w) = StringWidth(t);
 
-    if(WINDOW_VISIBLE_X(w))
+    if(WINDOW_VISIBLE(w))
     {
         SetClip(WINDOW_STRUCT_REGION(w));
         ClipAbove((WindowPeek)w);
@@ -45,7 +45,7 @@ WindowPeek Executor::ROMlib_firstvisible(WindowPtr w) /* INTERNAL */
     WindowPeek wp;
 
     for(wp = (WindowPeek)w;
-        wp && (!WINDOW_VISIBLE_X(wp)
+        wp && (!WINDOW_VISIBLE(wp)
                || wp == (WindowPeek)LM(GhostWindow));
         wp = WINDOW_NEXT_WINDOW(wp))
         ;
@@ -67,14 +67,14 @@ void Executor::C_HiliteWindow(WindowPtr w, BOOLEAN flag)
     ThePortGuard guard(wmgr_port);
     SetClip(WINDOW_STRUCT_REGION(w));
     ClipAbove((WindowPeek)w);
-    if(flag && !WINDOW_HILITED_X(w))
+    if(flag && !WINDOW_HILITED(w))
     {
-        WINDOW_HILITED_X(w) = true;
+        WINDOW_HILITED(w) = true;
         WINDCALL(w, wDraw, 0);
     }
-    else if(!flag && WINDOW_HILITED_X(w))
+    else if(!flag && WINDOW_HILITED(w))
     {
-        WINDOW_HILITED_X(w) = false;
+        WINDOW_HILITED(w) = false;
         WINDCALL(w, wDraw, 0);
     }
 }
@@ -94,10 +94,10 @@ void Executor::C_BringToFront(WindowPtr w)
             ;
         if(wp)
         {
-            WINDOW_NEXT_WINDOW_X(wp) = WINDOW_NEXT_WINDOW_X(w);
-            WINDOW_NEXT_WINDOW_X(w) = LM(WindowList);
+            WINDOW_NEXT_WINDOW(wp) = WINDOW_NEXT_WINDOW(w);
+            WINDOW_NEXT_WINDOW(w) = LM(WindowList);
             LM(WindowList) = (WindowPeek)w;
-            if(WINDOW_VISIBLE_X(w))
+            if(WINDOW_VISIBLE(w))
             {
                 /* notify the palette manager that the `FrontWindow ()'
 		    may have changed */
@@ -134,9 +134,9 @@ void Executor::C_SelectWindow(WindowPtr w)
 
 void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
 {
-    if(flag && !WINDOW_VISIBLE_X(w))
+    if(flag && !WINDOW_VISIBLE(w))
     {
-        WINDOW_VISIBLE_X(w) = true;
+        WINDOW_VISIBLE(w) = true;
         /* notify the palette manager that the `FrontWindow ()' may have
 	 changed */
         pm_front_window_maybe_changed_hook();
@@ -180,9 +180,9 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
 
         ROMlib_rootless_update();
     }
-    else if(!flag && WINDOW_VISIBLE_X(w))
+    else if(!flag && WINDOW_VISIBLE(w))
     {
-        WINDOW_VISIBLE_X(w) = false;
+        WINDOW_VISIBLE(w) = false;
         /* notify the palette manager that the `FrontWindow ()' may have
 	 changed */
         pm_front_window_maybe_changed_hook();
@@ -202,7 +202,7 @@ void Executor::C_HideWindow(WindowPtr w)
 
     if(!w)
         return;
-    if(WINDOW_VISIBLE_X(w))
+    if(WINDOW_VISIBLE(w))
     {
         if(w == FrontWindow())
         {
@@ -211,7 +211,7 @@ void Executor::C_HideWindow(WindowPtr w)
                 SelectWindow((WindowPtr)nextvis);
             else
                 LM(CurDeactive) = w;
-            WINDOW_HILITED_X(w) = false;
+            WINDOW_HILITED(w) = false;
         }
         ShowHide(w, false);
     }
@@ -223,16 +223,16 @@ void Executor::C_ShowWindow(WindowPtr w)
 
     if(!w)
         /*-->*/ return;
-    if(!WINDOW_VISIBLE_X(w))
+    if(!WINDOW_VISIBLE(w))
     {
 
         ShowHide(w, true);
-        if(FrontWindow() == w && !WINDOW_HILITED_X(w))
+        if(FrontWindow() == w && !WINDOW_HILITED(w))
         {
             HiliteWindow(w, true);
             LM(CurActivate) = w;
             for(t = WINDOW_NEXT_WINDOW(w);
-                t && !WINDOW_HILITED_X(t);
+                t && !WINDOW_HILITED(t);
                 t = WINDOW_NEXT_WINDOW(t))
                 ;
             HiliteWindow((WindowPtr)t, false);
@@ -265,16 +265,16 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
         /*-->*/ return;
     for(wpp = (GUEST<WindowPeek> *)&LM(WindowList);
         *wpp && *wpp != (WindowPeek)w;
-        wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW_X(*wpp))
+        wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW(*wpp))
         ;
     if(!*wpp)
         /*-->*/ return;
-    *wpp = WINDOW_NEXT_WINDOW_X(w);
+    *wpp = WINDOW_NEXT_WINDOW(w);
     oldbehind = *wpp;
     if(behind)
     {
-        WINDOW_NEXT_WINDOW_X(w) = WINDOW_NEXT_WINDOW_X(behind);
-        WINDOW_NEXT_WINDOW_X(behind) = (WindowPeek)w;
+        WINDOW_NEXT_WINDOW(w) = WINDOW_NEXT_WINDOW(behind);
+        WINDOW_NEXT_WINDOW(behind) = (WindowPeek)w;
     }
     else
     {
@@ -282,13 +282,13 @@ void Executor::C_SendBehind(WindowPtr w, WindowPtr behind)
 #if defined(SEND_BEHIND)
         if(!*wpp) /* what if 'w' is the only window? */
             wpp = (GUEST<WindowPeek> *)&LM(WindowList);
-        for(; WINDOW_NEXT_WINDOW_X(*wpp);
-            wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW_X(*wpp))
+        for(; WINDOW_NEXT_WINDOW(*wpp);
+            wpp = (GUEST<WindowPeek> *)&WINDOW_NEXT_WINDOW(*wpp))
             ;
         if(*wpp != (WindowPeek)w)
-            WINDOW_NEXT_WINDOW_X(*wpp) = (WindowPeek)w;
+            WINDOW_NEXT_WINDOW(*wpp) = (WindowPeek)w;
 #endif /* SEND_BEHIND */
-        WINDOW_NEXT_WINDOW_X(w) = 0;
+        WINDOW_NEXT_WINDOW(w) = 0;
     }
     CalcVis((WindowPeek)w);
     temprgn = NewRgn();

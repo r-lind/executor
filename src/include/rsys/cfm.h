@@ -30,11 +30,11 @@ struct cfrg_resource_t
     GUEST<int32_t> n_descripts;
 };
 
-#define CFRG_VERSION_X(cfrg) ((cfgr)->version)
-#define CFRG_VERSION(cfrg) (CFRG_VERSION_X(cfgr))
+#define CFRG_VERSION(cfrg) ((cfgr)->version)
 
-#define CFRG_N_DESCRIPTS_X(cfrg) ((cfrg)->n_descripts)
-#define CFRG_N_DESCRIPTS(cfrg) (CFRG_N_DESCRIPTS_X(cfrg))
+
+#define CFRG_N_DESCRIPTS(cfrg) ((cfrg)->n_descripts)
+
 
 struct cfir_t
 {
@@ -55,23 +55,22 @@ struct cfir_t
     GUEST<unsigned char[1]> name;
 };
 
-#define CFIR_ISA_X(cfir) ((cfir)->isa)
-#define CFIR_ISA(cfir) (CFIR_ISA_X(cfir))
+#define CFIR_ISA(cfir) ((cfir)->isa)
 
-#define CFIR_TYPE_X(cfir) ((cfir)->fragment_type)
-#define CFIR_TYPE(cfir) (CFIR_TYPE_X(cfir))
 
-#define CFIR_LOCATION_X(cfir) ((cfir)->fragment_location)
-#define CFIR_LOCATION(cfir) CFIR_LOCATION_X(cfir)
+#define CFIR_TYPE(cfir) ((cfir)->fragment_type)
 
-#define CFIR_LENGTH_X(cfir) ((cfir)->cfir_length)
-#define CFIR_LENGTH(cfir) (CFIR_LENGTH_X(cfir))
 
-#define CFIR_OFFSET_TO_FRAGMENT_X(cfir) ((cfir)->offset_to_fragment)
-#define CFIR_OFFSET_TO_FRAGMENT(cfir) (CFIR_OFFSET_TO_FRAGMENT_X(cfir))
+#define CFIR_LOCATION(cfir) ((cfir)->fragment_location)
 
-#define CFIR_FRAGMENT_LENGTH_X(cfir) ((cfir)->fragment_length)
-#define CFIR_FRAGMENT_LENGTH(cfir) (CFIR_FRAGMENT_LENGTH_X(cfir))
+#define CFIR_LENGTH(cfir) ((cfir)->cfir_length)
+
+
+#define CFIR_OFFSET_TO_FRAGMENT(cfir) ((cfir)->offset_to_fragment)
+
+
+#define CFIR_FRAGMENT_LENGTH(cfir) ((cfir)->fragment_length)
+
 
 #define CFIR_NAME(cfir) ((cfir)->name)
 
@@ -217,14 +216,14 @@ struct lib_t
     GUEST<int32_t> first_symbol;
 };
 
-#define LIB_CID_X(l) ((l)->cid)
-#define LIB_CID(l) (LIB_CID_X(l))
+#define LIB_CID(l) ((l)->cid)
 
-#define LIB_N_SYMBOLS_X(l) ((l)->n_symbols)
-#define LIB_N_SYMBOLS(l) (LIB_N_SYMBOLS_X(l))
 
-#define LIB_FIRST_SYMBOL_X(l) ((l)->first_symbol)
-#define LIB_FIRST_SYMBOL(l) (LIB_FIRST_SYMBOL_X(l))
+#define LIB_N_SYMBOLS(l) ((l)->n_symbols)
+
+
+#define LIB_FIRST_SYMBOL(l) ((l)->first_symbol)
+
 
 struct CFragClosure_t
 {
@@ -233,8 +232,8 @@ struct CFragClosure_t
     GUEST<lib_t> libs[0];
 };
 
-#define N_LIBS_X(c) ((c)->n_libs)
-#define N_LIBS(c) (N_LIBS_X(c))
+#define N_LIBS(c) ((c)->n_libs)
+
 
 typedef CFragClosure_t *CFragClosureID;
 

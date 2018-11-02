@@ -825,18 +825,18 @@ CONVERT_FUNC(depthconv_32_32, CONVERT_32_32, 0, 0, COMPUTE_ADD_32_32,
     {                                                  \
         gdev = LM(TheGDevice);                         \
         gd_pmap = GD_PMAP(gdev);                       \
-        gdev_ctab_save = PIXMAP_TABLE_X(gd_pmap);      \
-        gdev_itab_save = GD_ITABLE_X(gdev);            \
-        PIXMAP_TABLE_X(gd_pmap) = table->swapped_ctab; \
-        GD_ITABLE_X(gdev) = table->swapped_itab;       \
+        gdev_ctab_save = PIXMAP_TABLE(gd_pmap);      \
+        gdev_itab_save = GD_ITABLE(gdev);            \
+        PIXMAP_TABLE(gd_pmap) = table->swapped_ctab; \
+        GD_ITABLE(gdev) = table->swapped_itab;       \
         src_rgb_spec = table->src_rgb_spec;            \
     } while(0)
 
 #define EXTRA_CLEANUP()                           \
     do                                            \
     {                                             \
-        PIXMAP_TABLE_X(gd_pmap) = gdev_ctab_save; \
-        GD_ITABLE_X(gdev) = gdev_itab_save;       \
+        PIXMAP_TABLE(gd_pmap) = gdev_ctab_save; \
+        GD_ITABLE(gdev) = gdev_itab_save;       \
     } while(0)
 
 CONVERT_FUNC(depthconv_16_1, CONVERT_16_1, -4, 4, COMPUTE_ADD_16_1,

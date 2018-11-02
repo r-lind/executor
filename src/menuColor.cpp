@@ -103,7 +103,7 @@ void Executor::menu_delete_entries(int16_t menu_id)
     menu_c_info = LM(MenuCInfo);
     menu_c_info_size = GetHandleSize((Handle)menu_c_info);
     entries = *menu_c_info;
-    for(i = 0; MCENTRY_ID_X(&entries[i]) != -99;)
+    for(i = 0; MCENTRY_ID(&entries[i]) != -99;)
     {
         if(MCENTRY_ID(&entries[i]) == menu_id)
         {
@@ -130,7 +130,7 @@ void Executor::C_DeleteMCEntries(INTEGER menu_id, INTEGER menu_item)
     menu_c_info = LM(MenuCInfo);
     menu_c_info_size = GetHandleSize((Handle)menu_c_info);
     entries = *menu_c_info;
-    for(i = 0; MCENTRY_ID_X(&entries[i]) != -99; i++)
+    for(i = 0; MCENTRY_ID(&entries[i]) != -99; i++)
     {
         if(MCENTRY_ID(&entries[i]) == menu_id
            && MCENTRY_ITEM(&entries[i]) == menu_item)
@@ -186,7 +186,7 @@ MCEntryPtr Executor::C_GetMCEntry(INTEGER menu_id, INTEGER menu_item)
     MCEntryPtr t;
 
     menu_c_info = LM(MenuCInfo);
-    for(t = *menu_c_info; MCENTRY_ID_X(t) != -99; t++)
+    for(t = *menu_c_info; MCENTRY_ID(t) != -99; t++)
     {
         if(MCENTRY_ID(t) == menu_id
            && MCENTRY_ITEM(t) == menu_item)

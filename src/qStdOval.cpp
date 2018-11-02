@@ -37,7 +37,7 @@ void Executor::C_StdOval(GrafVerb v, Rect *rp)
             switch(v)
             {
                 case frame:
-                    if(PORT_REGION_SAVE_X(qdGlobals().thePort))
+                    if(PORT_REGION_SAVE(qdGlobals().thePort))
                         XorRgn(rh,
                                (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort),
                                (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort));

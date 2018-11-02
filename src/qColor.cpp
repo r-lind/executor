@@ -80,7 +80,7 @@ void Executor::C_ForeColor(LONGINT c)
         if(CGrafPort_p(the_port))
             RGBForeColor(ROMlib_qd_color_to_rgb(c));
         else
-            PORT_FG_COLOR_X(the_port) = c;
+            PORT_FG_COLOR(the_port) = c;
     }
 }
 
@@ -94,13 +94,13 @@ void Executor::C_BackColor(LONGINT c)
         if(CGrafPort_p(the_port))
             RGBBackColor(ROMlib_qd_color_to_rgb(c));
         else
-            PORT_BK_COLOR_X(the_port) = c;
+            PORT_BK_COLOR(the_port) = c;
     }
 }
 
 void Executor::C_ColorBit(INTEGER b)
 {
-    PORT_COLR_BIT_X(qdGlobals().thePort) = b;
+    PORT_COLR_BIT(qdGlobals().thePort) = b;
 }
 
 typedef CTabHandle clut_res_handle;
@@ -144,9 +144,9 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
             /* if the color table is b/w, set the seed to be the b/w clut
 	   seed */
             /* #### ctab_id or a new seed? */
-            CTAB_SEED_X(ctab) = ctab_id == 33 ? 1 : ctab_id;
-            CTAB_SIZE_X(ctab) = ctab_size;
-            CTAB_FLAGS_X(ctab) = CTAB_GDEVICE_BIT_X;
+            CTAB_SEED(ctab) = ctab_id == 33 ? 1 : ctab_id;
+            CTAB_SIZE(ctab) = ctab_size;
+            CTAB_FLAGS(ctab) = CTAB_GDEVICE_BIT;
 
             table = CTAB_TABLE(ctab);
 
@@ -189,7 +189,7 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
                               ctab_handle_size);
 
                 /* #### ctab_id or a new seed? */
-                CTAB_SEED_X(ctab) = ctab_id;
+                CTAB_SEED(ctab) = ctab_id;
             }
             else if(ctab_id >= 0 && ctab_id <= 8)
             {
@@ -200,9 +200,9 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
                 ctab_size = (1 << ctab_id) - 1;
                 ctab = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(ctab_size));
 
-                CTAB_SIZE_X(ctab) = ctab_size;
-                CTAB_FLAGS_X(ctab) = CTAB_GDEVICE_BIT_X;
-                CTAB_SEED_X(ctab) = ctab_id;
+                CTAB_SIZE(ctab) = ctab_size;
+                CTAB_FLAGS(ctab) = CTAB_GDEVICE_BIT;
+                CTAB_SEED(ctab) = ctab_id;
 
                 ctab_table = CTAB_TABLE(ctab);
                 memcpy(ctab_table, default_ctab_colors[ROMlib_log2[ctab_id]],

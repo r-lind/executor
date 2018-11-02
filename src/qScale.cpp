@@ -180,6 +180,6 @@ void Executor::scale_blt_bitmap(const blt_bitmap_t *src_bitmap, blt_bitmap_t *ds
                       (1 << log2_bits_per_pixel));
     }
 
-    BITMAP_SET_ROWBYTES_X(dst_bitmap, dst_rowbytes);
+    BITMAP_SET_ROWBYTES(dst_bitmap, dst_rowbytes);
     dst_bitmap->bounds = *new_rect;
 }

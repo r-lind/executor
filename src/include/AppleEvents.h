@@ -31,11 +31,11 @@ typedef struct AEDesc
 /* ### hack, delete */
 typedef AEDesc descriptor_t;
 
-#define DESC_TYPE_X(desc) ((desc)->descriptorType)
-#define DESC_DATA_X(desc) ((desc)->dataHandle)
+#define DESC_TYPE(desc) ((desc)->descriptorType)
+#define DESC_DATA(desc) ((desc)->dataHandle)
 
-#define DESC_TYPE(desc) (DESC_TYPE_X(desc))
-#define DESC_DATA(desc) (DESC_DATA_X(desc))
+
+
 
 typedef struct AEKeyDesc
 {
@@ -45,9 +45,9 @@ typedef struct AEKeyDesc
 
 typedef AEKeyDesc key_desc_t;
 
-#define KEY_DESC_KEYWORD_X(keydesc) ((keydesc)->descKey)
+#define KEY_DESC_KEYWORD(keydesc) ((keydesc)->descKey)
 
-#define KEY_DESC_KEYWORD(keydesc) (KEY_DESC_KEYWORD_X(keydesc))
+
 #define KEY_DESC_CONTENT(keydesc) ((keydesc)->descContent)
 
 typedef AEDesc AEAddressDesc;
@@ -163,14 +163,9 @@ typedef struct AE_hdlr_table_elt
 
 #define AE_TABLE_ELTS(table) ((*table)->elts)
 
-#define AE_TABLE_N_ELTS_X(table) ((*table)->n_elts)
-#define AE_TABLE_N_ALLOCATED_BYTES_X(table) \
-    ((*table)->n_allocated_bytes)
-
-#define AE_TABLE_N_ELTS(table) \
-    (AE_TABLE_N_ELTS_X(table))
+#define AE_TABLE_N_ELTS(table) ((*table)->n_elts)
 #define AE_TABLE_N_ALLOCATED_BYTES(table) \
-    (AE_TABLE_N_ALLOCATED_BYTES_X(table))
+    ((*table)->n_allocated_bytes)
 
 typedef struct AE_hdlr_table
 {

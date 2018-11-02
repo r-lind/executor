@@ -261,44 +261,44 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TE_TX_FACE(te) ((*(te))->txFace)
 
 #define TE_STYLIZED_P(te) ((*(te))->txSize == -1)
-#define TE_LINE_HEIGHT_X(te) ((*(te))->lineHeight)
-#define TE_FONT_ASCENT_X(te) ((*(te))->fontAscent)
-#define TE_LENGTH_X(te) ((*(te))->teLength)
-#define TE_ACTIVE_X(te) ((*(te))->active)
-#define TE_CARET_STATE_X(te) ((*(te))->caretState)
-#define TE_SEL_START_X(te) ((*(te))->selStart)
-#define TE_SEL_END_X(te) ((*(te))->selEnd)
-#define TE_N_LINES_X(te) ((*(te))->nLines)
-#define TE_HTEXT_X(te) ((*(te))->hText)
-#define TE_CLICK_STUFF_X(te) ((*(te))->clikStuff)
-#define TE_CLICK_LOC_X(te) ((*(te))->clickLoc)
-#define TE_CLICK_TIME_X(te) ((*(te))->clickTime)
-#define TE_JUST_X(te) ((*(te))->just)
-#define TE_TX_FONT_X(te) ((*(te))->txFont)
-#define TE_TX_SIZE_X(te) ((*(te))->txSize)
-#define TE_TX_MODE_X(te) ((*(te))->txMode)
-#define TE_IN_PORT_X(te) ((*(te))->inPort)
+#define TE_LINE_HEIGHT(te) ((*(te))->lineHeight)
+#define TE_FONT_ASCENT(te) ((*(te))->fontAscent)
+#define TE_LENGTH(te) ((*(te))->teLength)
+#define TE_ACTIVE(te) ((*(te))->active)
+#define TE_CARET_STATE(te) ((*(te))->caretState)
+#define TE_SEL_START(te) ((*(te))->selStart)
+#define TE_SEL_END(te) ((*(te))->selEnd)
+#define TE_N_LINES(te) ((*(te))->nLines)
+#define TE_HTEXT(te) ((*(te))->hText)
+#define TE_CLICK_STUFF(te) ((*(te))->clikStuff)
+#define TE_CLICK_LOC(te) ((*(te))->clickLoc)
+#define TE_CLICK_TIME(te) ((*(te))->clickTime)
+#define TE_JUST(te) ((*(te))->just)
+#define TE_TX_FONT(te) ((*(te))->txFont)
+#define TE_TX_SIZE(te) ((*(te))->txSize)
+#define TE_TX_MODE(te) ((*(te))->txMode)
+#define TE_IN_PORT(te) ((*(te))->inPort)
 
-#define TE_LINE_HEIGHT(te) (TE_LINE_HEIGHT_X(te))
-#define TE_FONT_ASCENT(te) (TE_FONT_ASCENT_X(te))
-#define TE_LENGTH(te) (TE_LENGTH_X(te))
-#define TE_ACTIVE(te) (TE_ACTIVE_X(te))
-#define TE_CARET_STATE(te) (TE_CARET_STATE_X(te))
-#define TE_SEL_START(te) (TE_SEL_START_X(te))
-#define TE_SEL_END(te) (TE_SEL_END_X(te))
-#define TE_N_LINES(te) (TE_N_LINES_X(te))
-#define TE_CLICK_STUFF(te) (TE_CLICK_STUFF_X(te))
-#define TE_CLICK_LOC(te) (TE_CLICK_LOC_X(te))
-#define TE_CLICK_TIME(te) (TE_CLICK_TIME_X(te))
-#define TE_HTEXT(te) (TE_HTEXT_X(te))
-#define TE_JUST(te) (TE_JUST_X(te))
-#define TE_TX_FONT(te) (TE_TX_FONT_X(te))
-#define TE_TX_SIZE(te) (TE_TX_SIZE_X(te))
-#define TE_TX_MODE(te) (TE_TX_MODE_X(te))
-#define TE_IN_PORT(te) (TE_IN_PORT_X(te))
 
-#define TE_FLAGS_X(te) ((*TEHIDDENH(te))->flags)
-#define TE_FLAGS(te) (TE_FLAGS_X(te))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define TE_FLAGS(te) ((*TEHIDDENH(te))->flags)
+
 
 
 #define TEP_DO_TEXT(tep, start, end, what) \
@@ -336,54 +336,54 @@ extern void ROMlib_sledgehammer_te(TEHandle te);
 #define TEP_TX_FACE(tep) ((tep)->txFace)
 
 #define TEP_STYLIZED_P(tep) ((tep)->txSize == -1)
-#define TEP_LINE_HEIGHT_X(tep) ((tep)->lineHeight)
-#define TEP_FONT_ASCENT_X(tep) ((tep)->fontAscent)
-#define TEP_LENGTH_X(tep) ((tep)->teLength)
-#define TEP_ACTIVE_X(tep) ((tep)->active)
-#define TEP_CARET_STATE_X(tep) ((tep)->caretState)
-#define TEP_SEL_START_X(tep) ((tep)->selStart)
-#define TEP_SEL_END_X(tep) ((tep)->selEnd)
-#define TEP_N_LINES_X(tep) ((tep)->nLines)
-#define TEP_HTEXT_X(tep) ((tep)->hText)
-#define TEP_CLICK_STUFF_X(tep) ((tep)->clikStuff)
-#define TEP_CLICK_LOC_X(tep) ((tep)->clickLoc)
-#define TEP_JUST_X(tep) ((tep)->just)
-#define TEP_TX_FONT_X(tep) ((tep)->txFont)
-#define TEP_TX_SIZE_X(tep) ((tep)->txSize)
-#define TEP_IN_PORT_X(tep) ((tep)->inPort)
+#define TEP_LINE_HEIGHT(tep) ((tep)->lineHeight)
+#define TEP_FONT_ASCENT(tep) ((tep)->fontAscent)
+#define TEP_LENGTH(tep) ((tep)->teLength)
+#define TEP_ACTIVE(tep) ((tep)->active)
+#define TEP_CARET_STATE(tep) ((tep)->caretState)
+#define TEP_SEL_START(tep) ((tep)->selStart)
+#define TEP_SEL_END(tep) ((tep)->selEnd)
+#define TEP_N_LINES(tep) ((tep)->nLines)
+#define TEP_HTEXT(tep) ((tep)->hText)
+#define TEP_CLICK_STUFF(tep) ((tep)->clikStuff)
+#define TEP_CLICK_LOC(tep) ((tep)->clickLoc)
+#define TEP_JUST(tep) ((tep)->just)
+#define TEP_TX_FONT(tep) ((tep)->txFont)
+#define TEP_TX_SIZE(tep) ((tep)->txSize)
+#define TEP_IN_PORT(tep) ((tep)->inPort)
 
-#define TEP_LINE_HEIGHT(tep) (TEP_LINE_HEIGHT_X(tep))
-#define TEP_FONT_ASCENT(tep) (TEP_FONT_ASCENT_X(tep))
-#define TEP_LENGTH(tep) (TEP_LENGTH_X(tep))
-#define TEP_ACTIVE(tep) (TEP_ACTIVE_X(tep))
-#define TEP_CARET_STATE(tep) (TEP_CARET_STATE_X(tep))
-#define TEP_SEL_START(tep) (TEP_SEL_START_X(tep))
-#define TEP_SEL_END(tep) (TEP_SEL_END_X(tep))
-#define TEP_N_LINES(tep) (TEP_N_LINES_X(tep))
-#define TEP_CLICK_STUFF(tep) (TEP_CLICK_STUFF_X(tep))
-#define TEP_CLICK_LOC(tep) (TEP_CLICK_LOC_X(tep))
-#define TEP_HTEXT(tep) (TEP_HTEXT_X(tep))
-#define TEP_JUST(tep) (TEP_JUST_X(tep))
-#define TEP_TX_FONT(tep) (TEP_TX_FONT_X(tep))
-#define TEP_TX_SIZE(tep) (TEP_TX_SIZE_X(tep))
-#define TEP_IN_PORT(tep) (TEP_IN_PORT_X(tep))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 inline TEStyleHandle TE_GET_STYLE(TEHandle te)
 {
     if(!TE_STYLIZED_P(te))
         return nullptr;
-    return *(GUEST<TEStyleHandle> *)&TE_TX_FONT_X(te);
+    return *(GUEST<TEStyleHandle> *)&TE_TX_FONT(te);
 }
 inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 {
     if(!TEP_STYLIZED_P(tep))
         return nullptr;
-    return *(GUEST<TEStyleHandle> *)&TEP_TX_FONT_X(tep);
+    return *(GUEST<TEStyleHandle> *)&TEP_TX_FONT(tep);
 }
 
 
 #define TEP_HEIGHT_FOR_LINE(tep, lineno)                           \
-    (TEP_STYLIZED_P(tep) && TEP_LINE_HEIGHT_X(tep) == -1      \
+    (TEP_STYLIZED_P(tep) && TEP_LINE_HEIGHT(tep) == -1      \
          ? ({                                                      \
                TEStyleHandle te_style = TEP_GET_STYLE(tep);        \
                LHElement *lh = *TE_STYLE_LH_TABLE(te_style); \
@@ -391,7 +391,7 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
            })                                                      \
          : TEP_LINE_HEIGHT(tep))
 #define TEP_ASCENT_FOR_LINE(tep, lineno)                           \
-    (TEP_STYLIZED_P(tep) && TEP_FONT_ASCENT_X(tep) == -1      \
+    (TEP_STYLIZED_P(tep) && TEP_FONT_ASCENT(tep) == -1      \
          ? ({                                                      \
                TEStyleHandle te_style = TEP_GET_STYLE(tep);        \
                LHElement *lh = *TE_STYLE_LH_TABLE(te_style); \
@@ -404,81 +404,60 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
          ? ROMlib_StyleTextWidth(tep, start, len) \
          : TextWidth(text, start, len))
 
-#define LINE_START_X(line_starts, index) \
-    ((line_starts)[index])
 #define LINE_START(line_starts, index) \
-    (LINE_START_X(line_starts, index))
+    ((line_starts)[index])
 
 #define TE_STYLE_SIZE_FOR_N_RUNS(n_runs)         \
     (sizeof(TEStyleRec)                          \
      - sizeof TE_STYLE_RUNS((TEStyleHandle)nullptr) \
      + (n_runs + 1) * sizeof *TE_STYLE_RUNS((TEStyleHandle)nullptr))
 
-#define TE_STYLE_N_RUNS_X(te_style) ((*(te_style))->nRuns)
-#define TE_STYLE_N_STYLES_X(te_style) ((*(te_style))->nStyles)
+#define TE_STYLE_N_RUNS(te_style) ((*(te_style))->nRuns)
+#define TE_STYLE_N_STYLES(te_style) ((*(te_style))->nStyles)
 #define TE_STYLE_RUNS(te_style) ((*(te_style))->runs)
 #define TE_STYLE_RUN(te_style, run_i) \
     (&TE_STYLE_RUNS(te_style)[run_i])
-#define TE_STYLE_STYLE_TABLE_X(te_style) \
-    ((*(te_style))->styleTab)
-#define TE_STYLE_LH_TABLE_X(te_style) \
-    ((*(te_style))->lhTab)
-#define TE_STYLE_NULL_STYLE_X(te_style) \
-    ((*(te_style))->nullStyle)
-
-#define TE_STYLE_N_RUNS(te_style) (TE_STYLE_N_RUNS_X(te_style))
-#define TE_STYLE_N_STYLES(te_style) (TE_STYLE_N_STYLES_X(te_style))
 #define TE_STYLE_STYLE_TABLE(te_style) \
-    (TE_STYLE_STYLE_TABLE_X(te_style))
+    ((*(te_style))->styleTab)
 #define TE_STYLE_LH_TABLE(te_style) \
-    (TE_STYLE_LH_TABLE_X(te_style))
+    ((*(te_style))->lhTab)
 #define TE_STYLE_NULL_STYLE(te_style) \
-    (TE_STYLE_NULL_STYLE_X(te_style))
+    ((*(te_style))->nullStyle)
 
 #define TE_STYLE_NULL_SCRAP(te_style) \
     (NULL_STYLE_NULL_SCRAP(TE_STYLE_NULL_STYLE(te_style)))
 
-#define NULL_STYLE_NULL_SCRAP_X(null_style) \
-    ((*(null_style))->nullScrap)
 #define NULL_STYLE_NULL_SCRAP(null_style) \
-    (NULL_STYLE_NULL_SCRAP_X(null_style))
+    ((*(null_style))->nullScrap)
 
-#define SCRAP_N_STYLES_X(scrap) \
+#define SCRAP_N_STYLES(scrap) \
     ((*(scrap))->scrpNStyles)
 
 #define SCRAP_ST_ELT(scrap, elt_i) \
     (&((*(scrap))->scrpStyleTab)[elt_i])
-#define SCRAP_N_STYLES(scrap) \
-    (SCRAP_N_STYLES_X(scrap))
 
 #define SCRAP_SIZE_FOR_N_STYLES(n_styles) \
     (sizeof(StScrpRec) + ((n_styles)-1) * sizeof(ScrpSTElement))
 
-#define RUN_START_CHAR_X(run) (STYLE_RUN_START_CHAR_X(run))
-#define RUN_STYLE_INDEX_X(run) (STYLE_RUN_STYLE_INDEX_X(run))
+#define STYLE_RUN_START_CHAR(run) ((run)->startChar)
+#define STYLE_RUN_STYLE_INDEX(run) ((run)->styleIndex)
 
-#define RUN_START_CHAR(run) (STYLE_RUN_START_CHAR(run))
-#define RUN_STYLE_INDEX(run) (STYLE_RUN_STYLE_INDEX(run))
 
-#define STYLE_RUN_START_CHAR_X(run) ((run)->startChar)
-#define STYLE_RUN_STYLE_INDEX_X(run) ((run)->styleIndex)
 
-#define STYLE_RUN_START_CHAR(run) (STYLE_RUN_START_CHAR_X(run))
-#define STYLE_RUN_STYLE_INDEX(run) (STYLE_RUN_STYLE_INDEX_X(run))
 
 #define TS_FACE(ts) ((ts)->tsFace)
 
-#define TS_FONT_X(ts) ((ts)->tsFont)
-#define TS_SIZE_X(ts) ((ts)->tsSize)
+#define TS_FONT(ts) ((ts)->tsFont)
+#define TS_SIZE(ts) ((ts)->tsSize)
 #define TS_COLOR(ts) ((ts)->tsColor)
 
-#define TS_FONT(ts) (TS_FONT_X(ts))
-#define TS_SIZE(ts) (TS_SIZE_X(ts))
 
-#define LH_HEIGHT_X(lh) ((lh)->lhHeight)
-#define LH_HEIGHT(lh) (LH_HEIGHT_X(lh))
-#define LH_ASCENT_X(lh) ((lh)->lhAscent)
-#define LH_ASCENT(lh) (LH_ASCENT_X(lh))
+
+
+#define LH_HEIGHT(lh) ((lh)->lhHeight)
+
+#define LH_ASCENT(lh) ((lh)->lhAscent)
+
 
 #define STYLE_TABLE_SIZE_FOR_N_STYLES(n_styles) \
     ((n_styles) * sizeof(STElement))
@@ -488,23 +467,15 @@ inline TEStyleHandle TEP_GET_STYLE(TERec *tep)
 
 #define ST_ELT_FACE(st_elt) ((st_elt)->stFace)
 
-#define ST_ELT_COUNT_X(st_elt) ((st_elt)->stCount)
-#define ST_ELT_HEIGHT_X(st_elt) ((st_elt)->stHeight)
-#define ST_ELT_ASCENT_X(st_elt) ((st_elt)->stAscent)
-#define ST_ELT_FONT_X(st_elt) ((st_elt)->stFont)
-#define ST_ELT_SIZE_X(st_elt) ((st_elt)->stSize)
+#define ST_ELT_COUNT(st_elt) ((st_elt)->stCount)
+#define ST_ELT_HEIGHT(st_elt) ((st_elt)->stHeight)
+#define ST_ELT_ASCENT(st_elt) ((st_elt)->stAscent)
+#define ST_ELT_FONT(st_elt) ((st_elt)->stFont)
+#define ST_ELT_SIZE(st_elt) ((st_elt)->stSize)
 #define ST_ELT_COLOR(st_elt) ((st_elt)->stColor)
 
-#define ST_ELT_COUNT(st_elt) (ST_ELT_COUNT_X(st_elt))
-#define ST_ELT_HEIGHT(st_elt) (ST_ELT_HEIGHT_X(st_elt))
-#define ST_ELT_ASCENT(st_elt) (ST_ELT_ASCENT_X(st_elt))
-#define ST_ELT_FONT(st_elt) (ST_ELT_FONT_X(st_elt))
-#define ST_ELT_SIZE(st_elt) (ST_ELT_SIZE_X(st_elt))
-
-#define SCRAP_ELT_START_CHAR_X(scrap_elt) \
-    ((scrap_elt)->scrpStartChar)
 #define SCRAP_ELT_START_CHAR(scrap_elt) \
-    (SCRAP_ELT_START_CHAR_X(scrap_elt))
+    ((scrap_elt)->scrpStartChar)
 
 extern bool adjust_attrs(TextStyle *orig_attrs, TextStyle *new_attrs,
                          TextStyle *dst_attrs, TextStyle *continuous_attrs,

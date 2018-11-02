@@ -64,7 +64,7 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
 
     HASSIGN_11(retval,
                contrlRect, *r,
-               nextControl, WINDOW_CONTROL_LIST_X(wst),
+               nextControl, WINDOW_CONTROL_LIST(wst),
                contrlOwner, wst,
                contrlVis, vis ? 255 : 0,
                contrlHilite, 0,
@@ -75,13 +75,13 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, Rect *r, StringPtr title,
                contrlAction, nullptr,
                contrlRfCon, rc);
 
-    WINDOW_CONTROL_LIST_X(wst) = retval;
+    WINDOW_CONTROL_LIST(wst) = retval;
 
     {
         CtlCallGuard guard(retval);
 
         CTLCALL(retval, initCntl, 0);
-        if(WINDOW_VISIBLE_X(wst) && vis)
+        if(WINDOW_VISIBLE(wst) && vis)
             CTLCALL(retval, drawCntl, 0);
     }
 

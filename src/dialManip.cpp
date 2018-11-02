@@ -66,7 +66,7 @@ static itmp htoip(Handle h, WindowPeek *wp_return, int16_t *nop_return,
 
     for(wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
     {
-        if(WINDOW_KIND_X(wp) == dialogKind
+        if(WINDOW_KIND(wp) == dialogKind
            || WINDOW_KIND(wp) < 0)
         {
             Handle items;
@@ -146,9 +146,9 @@ settexth(DialogPeek dp, itmp ip, int item_no)
 
     item_text_h = ITEM_H(ip);
     length = GetHandleSize(item_text_h);
-    TEP_LENGTH_X(tep) = length;
+    TEP_LENGTH(tep) = length;
     /* this is not a leak, always a duplicate */
-    TEP_HTEXT_X(tep) = item_text_h;
+    TEP_HTEXT(tep) = item_text_h;
 
     /* set up the text styles */
     {
@@ -211,18 +211,18 @@ settexth(DialogPeek dp, itmp ip, int item_no)
             SetHandleSize((Handle)style_table,
                           STYLE_TABLE_SIZE_FOR_N_STYLES(1));
 
-            tx_font_save_x = PORT_TX_FONT_X(current_port);
-            tx_size_save_x = PORT_TX_SIZE_X(current_port);
+            tx_font_save_x = PORT_TX_FONT(current_port);
+            tx_size_save_x = PORT_TX_SIZE(current_port);
             tx_face_save = PORT_TX_FACE(current_port);
 
-            PORT_TX_FONT_X(current_port) = te_style_font;
-            PORT_TX_SIZE_X(current_port) = te_style_size;
+            PORT_TX_FONT(current_port) = te_style_font;
+            PORT_TX_SIZE(current_port) = te_style_size;
             PORT_TX_FACE(current_port) = te_style_face;
 
             GetFontInfo(&finfo);
 
-            PORT_TX_FONT_X(current_port) = tx_font_save_x;
-            PORT_TX_SIZE_X(current_port) = tx_size_save_x;
+            PORT_TX_FONT(current_port) = tx_font_save_x;
+            PORT_TX_SIZE(current_port) = tx_size_save_x;
             PORT_TX_FACE(current_port) = tx_face_save;
 
             HASSIGN_7(style_table,
@@ -238,20 +238,20 @@ settexth(DialogPeek dp, itmp ip, int item_no)
         }
         else
         {
-            TEP_TX_FONT_X(tep) = te_style_font;
-            TEP_TX_SIZE_X(tep) = te_style_size;
+            TEP_TX_FONT(tep) = te_style_font;
+            TEP_TX_SIZE(tep) = te_style_size;
             TEP_TX_FACE(tep) = te_style_face;
         }
     }
 
-    TEP_SEL_START_X(tep) = TEP_SEL_END_X(tep) = 0;
+    TEP_SEL_START(tep) = TEP_SEL_END(tep) = 0;
 
     TECalText(te);
-    if(WINDOW_VISIBLE_X(dp))
+    if(WINDOW_VISIBLE(dp))
         TEActivate(te);
 
-    DIALOG_EDIT_FIELD_X(dp) = item_no - 1;
-    DIALOG_EDIT_OPEN_X(dp) = !(ITEM_TYPE(ip) & itemDisable);
+    DIALOG_EDIT_FIELD(dp) = item_no - 1;
+    DIALOG_EDIT_OPEN(dp) = !(ITEM_TYPE(ip) & itemDisable);
 }
 
 void Executor::C_SetDialogItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
@@ -328,7 +328,7 @@ void Executor::C_SetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
 
                 text_h = DIALOG_TEXTH(wp);
 
-                TE_CARET_STATE_X(text_h) = 255;
+                TE_CARET_STATE(text_h) = 255;
                 TESetText((Ptr)&text[1], text[0],
                           text_h);
             }
@@ -416,7 +416,7 @@ void Executor::C_HideDialogItem(DialogPtr dp, INTEGER item) /* IMIV-59 */
             if(item - 1 == DIALOG_EDIT_FIELD(dp))
             {
                 TEDeactivate(DIALOG_TEXTH(dp));
-                DIALOG_EDIT_FIELD_X(dp) = -1;
+                DIALOG_EDIT_FIELD(dp) = -1;
             }
         }
         else if(ip->itmtype & ctrlItem)

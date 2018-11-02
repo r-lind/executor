@@ -138,7 +138,7 @@ validate_colors_for_control(ControlHandle ctl)
     /* FIXME: tmp hack */
     current_ctl_color_p = (CGrafPort_p(qdGlobals().thePort) != 0);
 
-    hilited_p = (CTL_HILITE_X(ctl) != 255
+    hilited_p = (CTL_HILITE(ctl) != 255
                  && CTL_MIN(ctl) < CTL_MAX(ctl));
 
     /*
@@ -352,7 +352,7 @@ void draw_page(ControlHandle ctl)
     RGBBackColor(&current_ctl_colors[page_fg]);
     FillRect(&r, qdGlobals().ltGray);
 
-    rp = &(*CTL_DATA(ctl))->rgnBBox;
+    rp = &(*static_cast<RgnHandle>(CTL_DATA(ctl)))->rgnBBox;
     rp->top = rp->bottom = 0;
 }
 
@@ -429,7 +429,7 @@ void draw_thumb(ControlHandle ctl)
     Rect old_thumb, new_thumb;
     Rect dst_rect, *ctl_rect;
 
-    old_thumb = (*CTL_DATA(ctl))->rgnBBox;
+    old_thumb = (*static_cast<RgnHandle>(CTL_DATA(ctl)))->rgnBBox;
     GlobalToLocalRect(&old_thumb);
 
     thumb_rect(ctl, &new_thumb);
@@ -483,7 +483,7 @@ void draw_thumb(ControlHandle ctl)
         else
             draw_page(ctl);
         LocalToGlobalRect(&new_thumb);
-        RectRgn(CTL_DATA(ctl), &new_thumb);
+        RectRgn((RgnHandle)CTL_DATA(ctl), &new_thumb);
     }
 }
 
@@ -499,7 +499,7 @@ void Executor::C_new_draw_scroll(INTEGER depth, INTEGER flags, GDHandle target,
     ctl = dlp->ctl;
     part = dlp->param;
 
-    if(CTL_VIS_X(ctl) == 0)
+    if(CTL_VIS(ctl) == 0)
         return;
     switch(part)
     {
@@ -510,7 +510,7 @@ void Executor::C_new_draw_scroll(INTEGER depth, INTEGER flags, GDHandle target,
             draw_arrow(ctl, inUpButton);
             draw_page(ctl);
             draw_arrow(ctl, inDownButton);
-            if(CTL_HILITE_X(ctl) != 255)
+            if(CTL_HILITE(ctl) != 255)
                 draw_thumb(ctl);
             break;
         case inUpButton:
@@ -535,7 +535,7 @@ where(ControlHandle ctl, Point p)
     Rect r;
     Rect thumbr;
 
-    thumbr = (*CTL_DATA(ctl))->rgnBBox;
+    thumbr = (*static_cast<RgnHandle>(CTL_DATA(ctl)))->rgnBBox;
     GlobalToLocalRect(&thumbr);
     if(PtInRect(p, &thumbr))
         return inThumb;
@@ -598,27 +598,27 @@ void Executor::C_new_pos_ctl(INTEGER depth, INTEGER flags, GDHandle target,
     if(max < min)
         max = min;
 
-    thumbr = (*CTL_DATA(ctl))->rgnBBox;
+    thumbr = (*static_cast<RgnHandle>(CTL_DATA(ctl)))->rgnBBox;
     GlobalToLocalRect(&thumbr);
 
     if(SB_VERT_P(height, width))
     {
         a = top + width;
         thumb_top = thumbr.top + HiWord(p) - a;
-        CTL_VALUE_X(ctl) = min + (thumb_top
+        CTL_VALUE(ctl) = min + (thumb_top
                                      * ((LONGINT)max - min + 1)
                                      / (bottom - a - (2 * width) + 1));
-        if(CTL_VIS_X(ctl) == 255)
+        if(CTL_VIS(ctl) == 255)
             draw_thumb(ctl);
     }
     else
     {
         a = left + height;
         thumb_left = thumbr.left + LoWord(p) - a;
-        CTL_VALUE_X(ctl) = min + (thumb_left
+        CTL_VALUE(ctl) = min + (thumb_left
                                      * ((LONGINT)max - min + 1)
                                      / (right - a - (2 * height) + 1));
-        if(CTL_VIS_X(ctl) == 255)
+        if(CTL_VIS(ctl) == 255)
             draw_thumb(ctl);
     }
 }
@@ -797,7 +797,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
             p.v = pl->limitRect.top;
             p.h = pl->limitRect.left;
             pl->slopRect = pl->limitRect = CTL_RECT(c);
-            thumbr = (*CTL_DATA(c))->rgnBBox;
+            thumbr = (*static_cast<RgnHandle>(CTL_DATA(c)))->rgnBBox;
             GlobalToLocalRect(&thumbr);
             rp = &thumbr;
             height = pl->slopRect.bottom - pl->slopRect.top;

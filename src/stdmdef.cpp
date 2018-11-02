@@ -731,9 +731,9 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
 
 #define MSWTEST
 #if defined(MSWTEST)
-    PORT_TX_FONT_X(qdGlobals().thePort) = LM(SysFontFam);
-    PORT_TX_FACE_X(qdGlobals().thePort) = 0;
-    PORT_TX_MODE_X(qdGlobals().thePort) = srcOr;
+    PORT_TX_FONT(qdGlobals().thePort) = LM(SysFontFam);
+    PORT_TX_FACE(qdGlobals().thePort) = 0;
+    PORT_TX_MODE(qdGlobals().thePort) = srcOr;
 #endif /* MSWTEST */
 
     GetFontInfo(&fi);

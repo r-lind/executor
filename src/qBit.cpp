@@ -63,13 +63,13 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
         /* this saves the port bits (in the case of a GrafPort), and
 	      the portPixMap in the case of a CGrafPort (among other
 	      things */
-        savevisr = PORT_VIS_REGION_X(qdGlobals().thePort);
-        saveclipr = PORT_CLIP_REGION_X(qdGlobals().thePort);
+        savevisr = PORT_VIS_REGION(qdGlobals().thePort);
+        saveclipr = PORT_CLIP_REGION(qdGlobals().thePort);
 
         big_region = NewRgn();
         SetRectRgn(big_region, -32767, -32767, 32767, 32767);
-        PORT_VIS_REGION_X(qdGlobals().thePort) = big_region;
-        PORT_CLIP_REGION_X(qdGlobals().thePort) = big_region;
+        PORT_VIS_REGION(qdGlobals().thePort) = big_region;
+        PORT_CLIP_REGION(qdGlobals().thePort) = big_region;
 
         /* give a warning of _StdBits or qdGlobals().thePort's bitsProc has
 	      been patched out */
@@ -85,8 +85,8 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
                             src_rect, dst_rect, mode, mask);
 
         /* restore fields */
-        PORT_VIS_REGION_X(qdGlobals().thePort) = savevisr;
-        PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclipr;
+        PORT_VIS_REGION(qdGlobals().thePort) = savevisr;
+        PORT_CLIP_REGION(qdGlobals().thePort) = saveclipr;
         DisposeRgn(big_region);
     }
 
@@ -114,8 +114,8 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
 	 the portPixMap in the case of a CGrafPort (among other
 	 things */
       savemap = qdGlobals().thePort->portBits;
-      savevisr = PORT_VIS_REGION_X (qdGlobals().thePort);
-      saveclipr = PORT_CLIP_REGION_X (qdGlobals().thePort);
+      savevisr = PORT_VIS_REGION (qdGlobals().thePort);
+      saveclipr = PORT_CLIP_REGION (qdGlobals().thePort);
       saverect = PORT_RECT (qdGlobals().thePort);
       
       if ((dst_bitmap->rowBytes & 1 << 15)
@@ -126,15 +126,15 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
 	  PtrToHand ((Ptr) dst_bitmap, &t, sizeof (PixMap));
 	  bogo_port_pixmap = (PixMapHandle) t;
 	  CPORT_PIXMAP_X_NO_ASSERT (theCPort) = bogo_port_pixmap;
-	  CPORT_VERSION_X_NO_ASSERT (theCPort) = CPORT_FLAG_BITS_X;
+	  CPORT_VERSION_X_NO_ASSERT (theCPort) = CPORT_FLAG_BITS;
 	}
       else
 	qdGlobals().thePort->portBits = *dst_bitmap;
       
       big_region = NewRgn ();
       SetRectRgn (big_region, -32767, -32767, 32767, 32767);
-      PORT_VIS_REGION_X (qdGlobals().thePort) = big_region;
-      PORT_CLIP_REGION_X (qdGlobals().thePort) = big_region;
+      PORT_VIS_REGION (qdGlobals().thePort) = big_region;
+      PORT_CLIP_REGION (qdGlobals().thePort) = big_region;
       SetRect (&PORT_RECT (qdGlobals().thePort), -32767, -32767, 32767, 32767);
       
       if (src_bitmap == &qdGlobals().thePort->portBits)
@@ -143,8 +143,8 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
       CALLBITS (src_bitmap, &tmp_rect, dst_rect, mode, mask);
       
       /* restore fields */
-      PORT_VIS_REGION_X (qdGlobals().thePort) = savevisr;
-      PORT_CLIP_REGION_X (qdGlobals().thePort) = saveclipr;
+      PORT_VIS_REGION (qdGlobals().thePort) = savevisr;
+      PORT_CLIP_REGION (qdGlobals().thePort) = saveclipr;
       PORT_RECT (qdGlobals().thePort) = saverect;
       qdGlobals().thePort->portBits = savemap;
       if (bogo_port_pixmap)
@@ -172,8 +172,8 @@ void Executor::C_ScrollRect(Rect *rp, INTEGER dh, INTEGER dv,
         fg_rgb = CPORT_RGB_FG_COLOR(qdGlobals().thePort);
         bk_rgb = CPORT_RGB_BK_COLOR(qdGlobals().thePort);
     }
-    fg_color = PORT_FG_COLOR_X(qdGlobals().thePort);
-    bk_color = PORT_BK_COLOR_X(qdGlobals().thePort);
+    fg_color = PORT_FG_COLOR(qdGlobals().thePort);
+    bk_color = PORT_BK_COLOR(qdGlobals().thePort);
 
     RGBForeColor(&ROMlib_black_rgb_color);
     RGBBackColor(&ROMlib_white_rgb_color);
@@ -240,8 +240,8 @@ void Executor::C_ScrollRect(Rect *rp, INTEGER dh, INTEGER dv,
         CPORT_RGB_FG_COLOR(qdGlobals().thePort) = fg_rgb;
         CPORT_RGB_BK_COLOR(qdGlobals().thePort) = bk_rgb;
     }
-    PORT_FG_COLOR_X(qdGlobals().thePort) = fg_color;
-    PORT_BK_COLOR_X(qdGlobals().thePort) = bk_color;
+    PORT_FG_COLOR(qdGlobals().thePort) = fg_color;
+    PORT_BK_COLOR(qdGlobals().thePort) = bk_color;
 
     EraseRgn(updatergn2);
     if(updatergn)

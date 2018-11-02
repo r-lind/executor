@@ -2128,14 +2128,14 @@ Executor::do_textbegin(TTxtPicHdl h)
     disable_copybits();
     rotation.angle = Executor::GetHandleSize((Handle)h) >= 10
         ? FIX_TO_FLOAT(TEXTPIC_ANGLE_FIXED(h))
-        : TEXTPIC_ANGLE(h);
+        : toHost(TEXTPIC_ANGLE(h));
     rotation.rotated_p = true;
 }
 
 void
 Executor::do_textcenter(TCenterRecHdl h)
 {
-    rotation.center_x = FIX_TO_FLOAT(TEXTCENTER_X(h));
+    rotation.center_x = FIX_TO_FLOAT(TEXTCENTER(h));
     rotation.center_y = FIX_TO_FLOAT(TEXTCENTER_Y(h));
 }
 

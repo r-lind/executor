@@ -21,7 +21,7 @@ PolyHandle Executor::C_OpenPoly()
 
     ph = (PolyHandle)NewHandle((Size)SMALLPOLY);
     (*ph)->polySize = SMALLPOLY;
-    PORT_POLY_SAVE_X(qdGlobals().thePort) = (Handle)ph;
+    PORT_POLY_SAVE(qdGlobals().thePort) = (Handle)ph;
     HidePen();
     return (ph);
 }
@@ -53,7 +53,7 @@ void Executor::C_ClosePoly()
     (*ph)->polyBBox.left = left;
     (*ph)->polyBBox.bottom = bottom;
     (*ph)->polyBBox.right = right;
-    PORT_POLY_SAVE_X(qdGlobals().thePort) = nullptr;
+    PORT_POLY_SAVE(qdGlobals().thePort) = nullptr;
     ShowPen();
 }
 

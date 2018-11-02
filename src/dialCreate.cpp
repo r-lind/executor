@@ -219,7 +219,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
     newr.bottom = bounds->bottom - bounds->top;
     newr.right = bounds->right - bounds->left;
     InvalRect(&newr);
-    WINDOW_KIND_X(dp) = dialogKind;
+    WINDOW_KIND(dp) = dialogKind;
 
     {
         Rect emptyrect;
@@ -234,17 +234,17 @@ ROMlib_new_dialog_common(DialogPtr dp,
 	 ***************************************************************/
         te = TENew(&emptyrect, &emptyrect);
 
-        DIALOG_TEXTH_X(dp) = te;
+        DIALOG_TEXTH(dp) = te;
         TEAutoView(true, te);
         DisposeHandle(TE_HTEXT(te));
-        TE_HTEXT_X(te) = nullptr;
+        TE_HTEXT(te) = nullptr;
     }
 
-    DIALOG_EDIT_FIELD_X(dp) = -1;
-    DIALOG_EDIT_OPEN_X(dp) = 0;
-    DIALOG_ADEF_ITEM_X(dp) = 1;
+    DIALOG_EDIT_FIELD(dp) = -1;
+    DIALOG_EDIT_OPEN(dp) = 0;
+    DIALOG_ADEF_ITEM(dp) = 1;
 
-    DIALOG_ITEMS_X(dp) = items;
+    DIALOG_ITEMS(dp) = items;
     if(items)
     {
         Point zero_pt;
@@ -393,7 +393,7 @@ DialogPtr Executor::C_GetNewDialog(INTEGER id, Ptr dst,
     dialog_compute_rect(&(*dialog_res_h)->dlgr,
                         &adjusted_rect,
                         (DIALOG_RES_HAS_POSITION_P(dialog_res_h)
-                             ? DIALOG_RES_POSITION(dialog_res_h)
+                             ? toHost(DIALOG_RES_POSITION(dialog_res_h))
                              : noAutoCenter));
 
     /* if there is a dialog color table resource make this a color
@@ -447,7 +447,7 @@ void Executor::C_DisposeDialog(DialogPtr dp) /* IMI-415 */
     teh = DIALOG_TEXTH(dp);
 
     /* accounted for elsewhere */
-    TE_HTEXT_X(teh) = nullptr;
+    TE_HTEXT(teh) = nullptr;
     TEDispose(teh);
 
     DisposePtr((Ptr)dp);

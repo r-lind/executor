@@ -110,7 +110,7 @@ hdlr_table_elt(AE_hdlr_table_h table,
     {
         n_elts++;
 
-        AE_TABLE_N_ELTS_X(table) = n_elts;
+        AE_TABLE_N_ELTS(table) = n_elts;
 
         SetHandleSize((Handle)table,
                       (sizeof(AE_hdlr_table_t)
@@ -151,8 +151,8 @@ OSErr Executor::C__AE_hdlr_table_alloc(int32_t unknown_1, int32_t unknown_2,
     if(LM(MemErr) != noErr)
         AE_RETURN_ERROR(LM(MemErr));
 
-    AE_TABLE_N_ALLOCATED_BYTES_X(table) = 52;
-    AE_TABLE_N_ELTS_X(table) = 0;
+    AE_TABLE_N_ALLOCATED_BYTES(table) = 52;
+    AE_TABLE_N_ELTS(table) = 0;
 
     *table_return = table;
     AE_RETURN_ERROR(noErr);
@@ -178,7 +178,7 @@ OSErr Executor::C__AE_hdlr_delete(AE_hdlr_table_h table, int32_t unknown_1,
     memmove(&elts[elt_offset + 1], &elts[elt_offset],
             (n_elts - elt_offset - 1) * sizeof *elts);
 
-    AE_TABLE_N_ELTS_X(table) = n_elts - 1;
+    AE_TABLE_N_ELTS(table) = n_elts - 1;
 
     AE_RETURN_ERROR(noErr);
 }

@@ -73,8 +73,8 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
         AE_RETURN_ERROR(errAEEventNotHandled);
     }
 
-    DESC_TYPE_X(evt) = typeAppleEvent;
-    DESC_DATA_X(evt) = evt_data;
+    DESC_TYPE(evt) = typeAppleEvent;
+    DESC_DATA(evt) = evt_data;
 
     err = AEGetAttributePtr(evt, keyEventClassAttr,
                             typeType, &dummy_type,

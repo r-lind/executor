@@ -22,7 +22,7 @@ bool Executor::update_xdata_if_needed(xdata_handle_t xh, PixPat *pixpat,
 
     x = *xh;
 
-    if(x->ctab_seed_x != CTAB_SEED_X(dest->pmTable)
+    if(x->ctab_seed_x != CTAB_SEED(dest->pmTable)
        || (1 << x->log2_bpp) != dest->pixelSize
        || (x->log2_bpp >= 4 && x->rgb_spec != pixmap_rgb_spec(dest)))
     {
@@ -101,7 +101,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     fg_bk_ctab = validate_fg_bk_ctab();
     pattern_pixmap_tmpl.pmTable = ROMlib_bw_ctab;
     conv_table = (CTabPtr)alloca(CTAB_STORAGE_FOR_SIZE(1));
-    conv_table->ctSeed = CTAB_SEED_X(fg_bk_ctab);
+    conv_table->ctSeed = CTAB_SEED(fg_bk_ctab);
     conv_table->ctFlags = 0;
     conv_table->ctSize = 1;
 
@@ -112,8 +112,8 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     dst_row_bytes = target_depth; /* old-style Patterns always 8 pixels wide. */
     *row_bytes = dst_row_bytes;
     dst_pixmap_tmpl.rowBytes = (dst_row_bytes
-                                | (target->rowBytes & ROWBYTES_FLAG_BITS_X)
-                                | PIXMAP_DEFAULT_ROWBYTES_X);
+                                | (target->rowBytes & ROWBYTES_FLAG_BITS)
+                                | PIXMAP_DEFAULT_ROWBYTES);
     pixmap_set_pixel_fields(&dst_pixmap_tmpl, target_depth);
     if(target_depth > 8)
     {
@@ -125,7 +125,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     else
         dst_pixmap_tmpl.pixelType = Indirect;
 
-    dst_pixmap_tmpl.pmTable = PIXMAP_TABLE_X(GD_PMAP(LM(TheGDevice)));
+    dst_pixmap_tmpl.pmTable = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
     dst_pixmap_tmpl.baseAddr = (Ptr)bits;
 
     convert_pixmap(&pattern_pixmap_tmpl, &dst_pixmap_tmpl,
@@ -156,8 +156,8 @@ raw_bits_for_color_pattern(PixPatPtr pixpat, PixMap *target,
     dst = *target;
     dst.bounds = *bounds;
     dst.rowBytes = (row_bytes
-                    | (target->rowBytes & ROWBYTES_FLAG_BITS_X)
-                    | PIXMAP_DEFAULT_ROWBYTES_X);
+                    | (target->rowBytes & ROWBYTES_FLAG_BITS)
+                    | PIXMAP_DEFAULT_ROWBYTES);
     dst.baseAddr = (Ptr)bits;
 
     data = pixpat->patData;
@@ -301,7 +301,7 @@ xdata_for_raw_data(PixMap *target, xdata_t *x, uint32_t *raw_bits,
 
     x->magic_cookie = XDATA_MAGIC_COOKIE;
     x->log2_bpp = ROMlib_log2[target->pixelSize];
-    x->ctab_seed_x = CTAB_SEED_X(target->pmTable);
+    x->ctab_seed_x = CTAB_SEED(target->pmTable);
     x->rgb_spec = pixmap_rgb_spec(target);
 
     /* See if it's not a full long wide. */

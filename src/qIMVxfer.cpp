@@ -420,7 +420,7 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
         max_color = (1 << bits_per_pixel) - 1;
 
         /* Create a nice, sorted table for src1_ctab. */
-        if(CTAB_FLAGS_X(src1_ctabh) & CTAB_GDEVICE_BIT_X)
+        if(CTAB_FLAGS(src1_ctabh) & CTAB_GDEVICE_BIT)
         {
             src1_ctab = *src1_ctabh;
         }
@@ -434,11 +434,11 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
         }
 
         /* Create a nice, sorted table for src2_ctab. */
-        if(CTAB_SEED_X(src1_ctabh) == CTAB_SEED_X(src2_ctabh))
+        if(CTAB_SEED(src1_ctabh) == CTAB_SEED(src2_ctabh))
             src2_ctab = src1_ctab;
         else
         {
-            if(CTAB_FLAGS_X(src2_ctabh) & CTAB_GDEVICE_BIT_X)
+            if(CTAB_FLAGS(src2_ctabh) & CTAB_GDEVICE_BIT)
             {
                 src2_ctab = *src2_ctabh;
             }

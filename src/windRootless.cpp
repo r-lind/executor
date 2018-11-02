@@ -23,7 +23,7 @@ void Executor::ROMlib_rootless_update(RgnHandle extra)
 
         for(WindowPeek wp = LM(WindowList); wp; wp = WINDOW_NEXT_WINDOW(wp))
         {
-            if(WINDOW_VISIBLE_X(wp))
+            if(WINDOW_VISIBLE(wp))
             {
                 UnionRgn(rgn, WINDOW_STRUCT_REGION(wp), rgn);
             }

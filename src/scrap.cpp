@@ -452,9 +452,9 @@ ctab_from_surface(SDL_Surface *surfp)
 
     n_colors = SDL_n_colors(surfp);
     retval = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(n_colors - 1));
-    CTAB_SIZE_X(retval) = n_colors - 1;
-    CTAB_SEED_X(retval) = GetCTSeed();
-    CTAB_FLAGS_X(retval) = CTAB_GDEVICE_BIT_X;
+    CTAB_SIZE(retval) = n_colors - 1;
+    CTAB_SEED(retval) = GetCTSeed();
+    CTAB_FLAGS(retval) = CTAB_GDEVICE_BIT;
 
     for(i = 0, ip = SDL_colors(surfp), op = CTAB_TABLE(retval);
         i < n_colors;

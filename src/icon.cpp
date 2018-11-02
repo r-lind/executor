@@ -128,8 +128,8 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         fg_rgb = CPORT_RGB_FG_COLOR(current_port);
         bk_rgb = CPORT_RGB_BK_COLOR(current_port);
     }
-    fg_color = PORT_FG_COLOR_X(current_port);
-    bk_color = PORT_BK_COLOR_X(current_port);
+    fg_color = PORT_FG_COLOR(current_port);
+    bk_color = PORT_BK_COLOR(current_port);
 
     RGBForeColor(&ROMlib_black_rgb_color);
     RGBBackColor(&ROMlib_white_rgb_color);
@@ -143,15 +143,15 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
     icon_bm = &CICON_BMAP(icon);
 
     mask_bm = &CICON_MASK(icon);
-    BITMAP_BASEADDR_X(mask_bm) = (Ptr)CICON_MASK_DATA(icon);
+    BITMAP_BASEADDR(mask_bm) = (Ptr)CICON_MASK_DATA(icon);
 
     gd_pixmap = GD_PMAP(LM(MainDevice));
 
-    if((PORT_BASEADDR_X(current_port) == PIXMAP_BASEADDR_X(gd_pixmap)
+    if((PORT_BASEADDR(current_port) == PIXMAP_BASEADDR(gd_pixmap)
         && PIXMAP_PIXEL_SIZE(gd_pixmap) > 2)
        || (CGrafPort_p(current_port)
            && PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(current_port)) > 2)
-       || !BITMAP_ROWBYTES_X(icon_bm))
+       || !BITMAP_ROWBYTES(icon_bm))
     {
         Handle icon_data;
 
@@ -161,7 +161,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         PixMap *icon_pm;
 
         icon_pm = &CICON_PMAP(icon);
-        BITMAP_BASEADDR_X(icon_pm) = *icon_data;
+        BITMAP_BASEADDR(icon_pm) = *icon_data;
 
         CopyMask((BitMap *)icon_pm,
                  mask_bm,
@@ -185,7 +185,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         bm_baseaddr = (Ptr)((char *)CICON_MASK_DATA(icon)
                             + mask_data_size);
 
-        BITMAP_BASEADDR_X(icon_bm) = bm_baseaddr;
+        BITMAP_BASEADDR(icon_bm) = bm_baseaddr;
         CopyMask(icon_bm,
                  mask_bm,
                  PORT_BITS_FOR_COPY(current_port),
@@ -200,8 +200,8 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         CPORT_RGB_FG_COLOR(current_port) = fg_rgb;
         CPORT_RGB_BK_COLOR(current_port) = bk_rgb;
     }
-    PORT_FG_COLOR_X(current_port) = fg_color;
-    PORT_BK_COLOR_X(current_port) = bk_color;
+    PORT_FG_COLOR(current_port) = fg_color;
+    PORT_BK_COLOR(current_port) = bk_color;
 }
 
 OSErr Executor::C_PlotCIconHandle(const Rect *rect, IconAlignmentType align,
@@ -300,7 +300,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_ctab_offset,
                       (Ptr)*color_table,
                       pmap_ctab_size);
-        CTAB_SEED_X(color_table) = GetCTSeed();
+        CTAB_SEED(color_table) = GetCTSeed();
         cicon->iconPMap.pmTable = color_table;
 
         cicon->iconPMap.baseAddr = nullptr;
@@ -504,7 +504,7 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
     little_rect_p = (RECT_WIDTH(rect) < 32
                      && RECT_HEIGHT(rect) < 32);
     port_bpp = (CGrafPort_p(current_port)
-                    ? PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(current_port))
+                    ? toHost(PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(current_port)))
                     : 1);
 
     err = find_best_icon(little_rect_p, port_bpp, icon_suite,

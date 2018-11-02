@@ -68,8 +68,8 @@ void Executor::canonicalize_bogo_map_cleanup(const BitMap *bogo_map,
             gw_info = info->data.gw_info;
 
             UnlockPixels(gw_info->gw_pixmap);
-            BITMAP_BASEADDR_X((PixMap *)bogo_map)
-                = PIXMAP_BASEADDR_X(gw_info->gw_pixmap);
+            BITMAP_BASEADDR((PixMap *)bogo_map)
+                = PIXMAP_BASEADDR(gw_info->gw_pixmap);
             break;
         }
         case Executor::cleanup_info::cleanup_none:
@@ -105,12 +105,12 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
             canonical->vRes = canonical->hRes = 72 << 16;
 
             gd_pmap = GD_PMAP(LM(TheGDevice));
-            if(canonical->baseAddr == PIXMAP_BASEADDR_X(gd_pmap))
+            if(canonical->baseAddr == PIXMAP_BASEADDR(gd_pmap))
             {
                 pixmap_set_pixel_fields(canonical, PIXMAP_PIXEL_SIZE(gd_pmap));
-                canonical->rowBytes = (PIXMAP_ROWBYTES_X(gd_pmap)
-                                       | PIXMAP_DEFAULT_ROW_BYTES_X);
-                canonical->pmTable = PIXMAP_TABLE_X(gd_pmap);
+                canonical->rowBytes = (PIXMAP_ROWBYTES(gd_pmap)
+                                       | PIXMAP_DEFAULT_ROW_BYTES);
+                canonical->pmTable = PIXMAP_TABLE(gd_pmap);
 
                 info->cleanup_type = Executor::cleanup_info::cleanup_none;
             }
@@ -119,7 +119,7 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
                 pixmap_set_pixel_fields(canonical, 1);
 
                 canonical->rowBytes = (bogo_map->rowBytes
-                                       | PIXMAP_DEFAULT_ROW_BYTES_X);
+                                       | PIXMAP_DEFAULT_ROW_BYTES);
                 info->cleanup_type = Executor::cleanup_info::cleanup_none;
                 canonical->pmTable = validate_relative_bw_ctab();
             }
@@ -142,8 +142,8 @@ void Executor::canonicalize_bogo_map(const BitMap *bogo_map, PixMap **canonical_
             if(gw_info)
             {
                 LockPixels(gw_info->gw_pixmap);
-                BITMAP_BASEADDR_X((PixMap *)bogo_map)
-                    = PIXMAP_BASEADDR_X(gw_info->gw_pixmap);
+                BITMAP_BASEADDR((PixMap *)bogo_map)
+                    = PIXMAP_BASEADDR(gw_info->gw_pixmap);
 
                 info->cleanup_type = Executor::cleanup_info::cleanup_unlock_gworld_pixels_update;
                 info->data.gw_info = gw_info;
@@ -263,7 +263,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
         PICWRITE(&swapped_bogo_baseaddr, sizeof swapped_bogo_baseaddr);
     }
 
-    temp_pixmap_row_bytes = src->rowBytes | PIXMAP_DEFAULT_ROWBYTES_X;
+    temp_pixmap_row_bytes = src->rowBytes | PIXMAP_DEFAULT_ROWBYTES;
     PICWRITE(&temp_pixmap_row_bytes, sizeof temp_pixmap_row_bytes);
 
     PICWRITE(&src->bounds, sizeof src->bounds);
@@ -570,11 +570,11 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
      conversion on the src, so it matches that of the depth */
     if(src->pixelSize != dst->pixelSize
        || (src->pmTable != dst->pmTable && (src->pixelSize < 16
-                                            && (CTAB_SEED_X(src->pmTable)
+                                            && (CTAB_SEED(src->pmTable)
                                                     /* we assume the destination has the same color table as
 		  the current graphics device */
-                                                    != CTAB_SEED_X(PIXMAP_TABLE(GD_PMAP(the_gd)))
-                                                && CTAB_SEED_X(src->pmTable) != 0))))
+                                                    != CTAB_SEED(PIXMAP_TABLE(GD_PMAP(the_gd)))
+                                                && CTAB_SEED(src->pmTable) != 0))))
     {
         PixMap *new_src = (PixMap *)alloca(sizeof(PixMap));
         /* convert_pixmap expects the src rect to be aligned to byte
@@ -629,7 +629,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         /* the new_src should `be a pixmap' (have the pixmap bits set in
          the rowBytes) only if the dst is a pixmap; convert_pixmap
          does different things if the destination is a bitmap */
-        new_src->rowBytes = (PIXMAP_DEFAULT_ROW_BYTES_X
+        new_src->rowBytes = (PIXMAP_DEFAULT_ROW_BYTES
                              | ((((RECT_WIDTH(widened_src_rect)
                                      * dst_depth)
                                     + 31)
@@ -645,7 +645,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         new_src->baseAddr = (Ptr)new_src_bits;
 
         pixmap_set_pixel_fields(new_src, dst_depth);
-        new_src->pmTable = PIXMAP_TABLE_X(the_gd_pmap);
+        new_src->pmTable = PIXMAP_TABLE(the_gd_pmap);
 
         /* don't initialize the color table of new_src; we assume that
 	 it has the same color space as the current graphics device */
@@ -680,7 +680,7 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
                 / 8)
                + 3)
             & ~3;
-        new_src->rowBytes = new_src_row_bytes | PIXMAP_DEFAULT_ROW_BYTES_X;
+        new_src->rowBytes = new_src_row_bytes | PIXMAP_DEFAULT_ROW_BYTES;
 
         TEMP_ALLOC_ALLOCATE(scale_base, temp_scale_bits,
                             new_src_row_bytes * RECT_HEIGHT(dst_rect));

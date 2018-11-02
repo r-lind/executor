@@ -100,7 +100,7 @@ draw_menu_title(muelem *elt,
                                             &title_color);
             RGBForeColor(&title_color);
         }
-        PORT_TX_MODE_X(qdGlobals().thePort) = srcCopy;
+        PORT_TX_MODE(qdGlobals().thePort) = srcCopy;
         MoveTo(elt->muleft + MENULEFT - 3, 14);
         if(ROMlib_AppleChar && title[0] == 1 && title[1] == APPLE_CHAR)
         {
@@ -206,8 +206,8 @@ mbdf_draw(int32_t draw_p)
         /* draw titles */
         r.bottom = r.bottom - 1;
 
-        PORT_TX_FACE_X(wmgr_port) = (Style)0;
-        PORT_TX_FONT_X(wmgr_port) = LM(SysFontFam);
+        PORT_TX_FACE(wmgr_port) = (Style)0;
+        PORT_TX_FONT(wmgr_port) = LM(SysFontFam);
 
         HLock(LM(MenuList));
         menulistp = *MENULIST;
@@ -278,8 +278,8 @@ static void calc(LONGINT offset)
     muelem *mp, *mep, *firstmp;
     menulist *menulistp;
 
-    PORT_TX_FACE_X(wmgr_port) = (Style)0;
-    PORT_TX_FONT_X(wmgr_port) = LM(SysFontFam);
+    PORT_TX_FACE(wmgr_port) = (Style)0;
+    PORT_TX_FONT(wmgr_port) = LM(SysFontFam);
 
     HLock(LM(MenuList));
     menulistp = *MENULIST;
@@ -417,7 +417,7 @@ save(int16_t offset, Rect *rect)
         pixmap_set_pixel_fields(*save_pmh, gd_bpp);
 
         row_bytes = ((width * gd_bpp + 31) / 32) * 4;
-        PIXMAP_SET_ROWBYTES_X(save_pmh, row_bytes);
+        PIXMAP_SET_ROWBYTES(save_pmh, row_bytes);
 
         p = NewPtr(height * row_bytes);
         if(LM(MemErr) != noErr)
@@ -425,12 +425,12 @@ save(int16_t offset, Rect *rect)
             DisposePixMap(save_pmh);
             goto failure;
         }
-        PIXMAP_BASEADDR_X(save_pmh) = p;
+        PIXMAP_BASEADDR(save_pmh) = p;
 
         {
             WRAPPER_PIXMAP_FOR_COPY(wrapper);
 
-            WRAPPER_SET_PIXMAP_X(wrapper, save_pmh);
+            WRAPPER_SET_PIXMAP(wrapper, save_pmh);
 
             CopyBits(PORT_BITS_FOR_COPY(qdGlobals().thePort), wrapper,
                      &save_rect, &save_rect, srcCopy, nullptr);
@@ -498,7 +498,7 @@ restore(void)
         {
             WRAPPER_PIXMAP_FOR_COPY(wrapper);
 
-            WRAPPER_SET_PIXMAP_X(wrapper, save_pmh);
+            WRAPPER_SET_PIXMAP(wrapper, save_pmh);
             CopyBits(wrapper, PORT_BITS_FOR_COPY(qdGlobals().thePort),
                      &save_rect, &save_rect, srcCopy, nullptr);
         }

@@ -333,10 +333,10 @@ Executor::text_helper(LONGINT n, Ptr textbufp, GUEST<Point> *nump, GUEST<Point> 
     }
 
     fmi.needBits = true;
-    fmi.family = PORT_TX_FONT_X(qdGlobals().thePort);
-    fmi.size = PORT_TX_SIZE_X(qdGlobals().thePort);
-    fmi.face = PORT_TX_FACE_X(qdGlobals().thePort);
-    fmi.device = PORT_DEVICE_X(qdGlobals().thePort);
+    fmi.family = PORT_TX_FONT(qdGlobals().thePort);
+    fmi.size = PORT_TX_SIZE(qdGlobals().thePort);
+    fmi.face = PORT_TX_FACE(qdGlobals().thePort);
+    fmi.device = PORT_DEVICE(qdGlobals().thePort);
     fmi.numer.h = num.h;
     fmi.numer.v = num.v;
     fmi.denom.h = den.h;

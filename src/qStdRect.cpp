@@ -22,7 +22,7 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
 
 #define MOREINSANECOMPATIBILITY
 #if defined(MOREINSANECOMPATIBILITY)
-    if(v == frame && PORT_REGION_SAVE_X(qdGlobals().thePort))
+    if(v == frame && PORT_REGION_SAVE(qdGlobals().thePort))
     {
         if(rp->left > rp->right)
         {
@@ -72,7 +72,7 @@ void Executor::C_StdRect(GrafVerb v, Rect *rp)
     switch(v)
     {
         case frame:
-            if(PORT_REGION_SAVE_X(qdGlobals().thePort))
+            if(PORT_REGION_SAVE(qdGlobals().thePort))
                 XorRgn(rh,
                        (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort),
                        (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort));

@@ -38,8 +38,8 @@ void validate_colors_for_control(ControlHandle ctl)
     int hilited_p, active_p;
     int i;
 
-    hilited_p = (CTL_HILITE_X(ctl) != 255);
-    active_p = (CTL_HILITE_X(ctl) == inButton);
+    hilited_p = (CTL_HILITE(ctl) != 255);
+    active_p = (CTL_HILITE(ctl) == inButton);
 
     for(i = 0; i < n_ctl_colors; i++)
         ctl_ctab_colors[i] = default_ctl_colors[i].rgb;
@@ -245,8 +245,8 @@ draw_push(ControlHandle c, int16_t part)
     v = (r.bottom - r.top) / 2;
     if(h > v)
         h = v;
-    save = PORT_CLIP_REGION_X(CTL_OWNER(c));
-    PORT_CLIP_REGION_X(CTL_OWNER(c)) = NewRgn();
+    save = PORT_CLIP_REGION(CTL_OWNER(c));
+    PORT_CLIP_REGION(CTL_OWNER(c)) = NewRgn();
     OpenRgn();
     FrameRoundRect(&r, h, v);
     CloseRgn(PORT_CLIP_REGION(CTL_OWNER(c)));
@@ -270,7 +270,7 @@ draw_push(ControlHandle c, int16_t part)
     drawlabel(CTL_TITLE(c), &r, justmiddle);
     DisposeRgn(PORT_CLIP_REGION(CTL_OWNER(c)));
 
-    PORT_CLIP_REGION_X(CTL_OWNER(c)) = save;
+    PORT_CLIP_REGION(CTL_OWNER(c)) = save;
 }
 
 static void
@@ -281,14 +281,14 @@ add_title(ControlHandle c)
     Rect r;
 
     control_owner = CTL_OWNER(c);
-    save = PORT_CLIP_REGION_X(control_owner);
-    PORT_CLIP_REGION_X(control_owner) = NewRgn();
+    save = PORT_CLIP_REGION(control_owner);
+    PORT_CLIP_REGION(control_owner) = NewRgn();
     r = CTL_RECT(c);
     RectRgn(PORT_CLIP_REGION(control_owner), &r);
     r.left = r.left + 16;
     drawlabel(CTL_TITLE(c), &r, justleft);
     DisposeRgn(PORT_CLIP_REGION(control_owner));
-    PORT_CLIP_REGION_X(control_owner) = save;
+    PORT_CLIP_REGION(control_owner) = save;
 }
 
 static void

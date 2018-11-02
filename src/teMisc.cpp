@@ -219,9 +219,9 @@ int16_t nextbreak(TEHandle teh, int16_t off, int16_t len,
             /* Only the size face and font need to be saved so this is
              overkill. */
             TESAVE(teh);
-            PORT_TX_SIZE_X(qdGlobals().thePort) = TE_TX_SIZE_X(teh);
+            PORT_TX_SIZE(qdGlobals().thePort) = TE_TX_SIZE(teh);
             PORT_TX_FACE(qdGlobals().thePort) = TE_TX_FACE(teh);
-            PORT_TX_FONT_X(qdGlobals().thePort) = TE_TX_FONT_X(teh);
+            PORT_TX_FONT(qdGlobals().thePort) = TE_TX_FONT(teh);
             while(width <= max_width && sp != ep && *sp != '\r')
                 width += CharWidth(*sp++);
             TERESTORE();
@@ -367,14 +367,14 @@ int16_t calclhtab(TEHandle teh)
                 orig_height = LH_HEIGHT(lh);
                 orig_ascent = LH_ASCENT(lh);
             }
-            LH_HEIGHT_X(lh) = 0;
-            LH_ASCENT_X(lh) = 0;
+            LH_HEIGHT(lh) = 0;
+            LH_ASCENT(lh) = 0;
         }
 
         if(ST_ELT_HEIGHT(current_style) > LH_HEIGHT(lh))
-            LH_HEIGHT_X(lh) = ST_ELT_HEIGHT_X(current_style);
+            LH_HEIGHT(lh) = ST_ELT_HEIGHT(current_style);
         if(ST_ELT_ASCENT(current_style) > LH_ASCENT(lh))
-            LH_ASCENT_X(lh) = ST_ELT_ASCENT_X(current_style);
+            LH_ASCENT(lh) = ST_ELT_ASCENT(current_style);
 
         if(*linestarts == TE_LENGTH(teh))
             break;
@@ -467,7 +467,7 @@ void Executor::ROMlib_caltext(TEHandle te,
         int line_start = LINE_START(line_starts, t);
         int new_line_start = line_start + n_added;
 
-        LINE_START_X(line_starts, t) = new_line_start;
+        LINE_START(line_starts, t) = new_line_start;
     }
 
     /* starting from the first line, recompute all the end lines.  we
@@ -500,7 +500,7 @@ void Executor::ROMlib_caltext(TEHandle te,
 	   been relocated */
             line_starts = TE_LINE_STARTS(te);
             orig_current_line_break = LINE_START(line_starts, current_lineno + 1);
-            LINE_START_X(line_starts, current_lineno + 1) = current_line_break;
+            LINE_START(line_starts, current_lineno + 1) = current_line_break;
 
             if(first_changed == -1
                && orig_current_line_break != current_line_break)
@@ -513,10 +513,10 @@ void Executor::ROMlib_caltext(TEHandle te,
                 else
                     n_lines = current_lineno + 1;
 
-                TE_N_LINES_X(te) = n_lines;
+                TE_N_LINES(te) = n_lines;
                 te_set_line_starts_allocation(te, n_lines);
                 line_starts = TE_LINE_STARTS(te);
-                LINE_START_X(line_starts, n_lines + 1) = 0;
+                LINE_START(line_starts, n_lines + 1) = 0;
 
                 last_changed = length;
                 break;
@@ -534,7 +534,7 @@ void Executor::ROMlib_caltext(TEHandle te,
         int16_t lh_first_changed = -1;
 
         if(TE_STYLIZED_P(te)
-           && TE_TX_SIZE_X(te) == -1)
+           && TE_TX_SIZE(te) == -1)
             lh_first_changed = calclhtab(te);
 
         if(lh_first_changed != -1)
@@ -565,7 +565,7 @@ void Executor::C_TECalText(TEHandle te)
     /* don't do this check because people call this caltext when the TE
      has been frobbed and is in a wacky state */
     /* TE_SLAM (te); */
-    TE_LENGTH_X(te) = GetHandleSize(TE_HTEXT(te));
+    TE_LENGTH(te) = GetHandleSize(TE_HTEXT(te));
     ROMlib_caltext(te, 0, 32767, nullptr, nullptr);
     TE_SLAM(te);
 }

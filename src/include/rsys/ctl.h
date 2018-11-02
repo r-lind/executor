@@ -29,31 +29,27 @@ extern AuxCtlHandle default_aux_ctl;
 #define CTL_RECT(ctl) ((*ctl)->contrlRect)
 #define CTL_TITLE(ctl) ((*ctl)->contrlTitle)
 
-#define CTL_NEXT_CONTROL_X(ctl) ((*ctl)->nextControl)
-#define CTL_OWNER_X(ctl) ((*ctl)->contrlOwner)
-#define CTL_VIS_X(ctl) ((*ctl)->contrlVis)
-#define CTL_HILITE_X(ctl) ((*ctl)->contrlHilite)
-#define CTL_VALUE_X(ctl) ((*ctl)->contrlValue)
-#define CTL_MIN_X(ctl) ((*ctl)->contrlMin)
-#define CTL_MAX_X(ctl) ((*ctl)->contrlMax)
+#define CTL_NEXT_CONTROL(ctl) ((*ctl)->nextControl)
+#define CTL_OWNER(ctl) ((*ctl)->contrlOwner)
+#define CTL_VIS(ctl) ((*ctl)->contrlVis)
+#define CTL_HILITE(ctl) ((*ctl)->contrlHilite)
+#define CTL_VALUE(ctl) ((*ctl)->contrlValue)
+#define CTL_MIN(ctl) ((*ctl)->contrlMin)
+#define CTL_MAX(ctl) ((*ctl)->contrlMax)
 
-#define CTL_DEFPROC_X(ctl) ((*ctl)->contrlDefProc)
-#define CTL_DATA_X(ctl) ((*ctl)->contrlData)
-#define CTL_ACTION_X(ctl) ((*ctl)->contrlAction)
-#define CTL_REF_CON_X(ctl) ((*ctl)->contrlRfCon)
+#define CTL_DEFPROC(ctl) ((*ctl)->contrlDefProc)
+#define CTL_DATA(ctl) ((*ctl)->contrlData)
+#define CTL_ACTION(ctl) ((*ctl)->contrlAction)
+#define CTL_REF_CON(ctl) ((*ctl)->contrlRfCon)
 
-#define CTL_NEXT_CONTROL(ctl) (CTL_NEXT_CONTROL_X(ctl))
-#define CTL_OWNER(ctl) (CTL_OWNER_X(ctl))
-#define CTL_VIS(ctl) (CTL_VIS_X(ctl))
-#define CTL_HILITE(ctl) ((uint8_t)CTL_HILITE_X(ctl))
-#define CTL_VALUE(ctl) (CTL_VALUE_X(ctl))
-#define CTL_MIN(ctl) (CTL_MIN_X(ctl))
-#define CTL_MAX(ctl) (CTL_MAX_X(ctl))
-#define CTL_DEFPROC(ctl) (CTL_DEFPROC_X(ctl))
-#define CTL_DATA(ctl) ((RgnHandle)CTL_DATA_X(ctl))
-#define CTL_ACTION(ctl) (CTL_ACTION_X(ctl))
-#define CTL_ACTION_AS_LONG(ctl) (guest_cast<LONGINT>(CTL_ACTION_X(ctl)))
-#define CTL_REF_CON(ctl) (CTL_REF_CON_X(ctl))
+
+
+
+//#define CTL_HILITE(ctl) ((uint8_t)CTL_HILITE(ctl))
+//#define CTL_DATA(ctl) (CTL_DATA(ctl))
+
+#define CTL_ACTION_AS_LONG(ctl) (guest_cast<LONGINT>(CTL_ACTION(ctl)))
+
 
 extern CTabHandle default_ctl_ctab;
 extern GUEST<AuxCtlHandle> *lookup_aux_ctl(ControlHandle ctl);
@@ -91,11 +87,11 @@ public:
 #define INACTIVE 255
 #define ALLINDICATORS 129
 
-#define POPUP_MENU_X(popup) ((*popup)->menu)
-#define POPUP_MENU_ID_X(popup) ((*popup)->menu_id)
+#define POPUP_MENU(popup) ((*popup)->menu)
+#define POPUP_MENU_ID(popup) ((*popup)->menu_id)
 
-#define POPUP_MENU_ID(popup) (POPUP_MENU_ID_X(popup))
-#define POPUP_MENU(popup) (POPUP_MENU_X(popup))
+
+
 
 #define POPUP_TITLE_WIDTH(popup) ((*popup)->title_width)
 #define POPUP_FLAGS(popup) ((*popup)->flags)

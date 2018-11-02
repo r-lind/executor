@@ -85,7 +85,7 @@ void Executor::C_SystemClick(EventRecord *evp, WindowPtr wp)
             switch(val)
             {
                 case wInContent:
-                    if(WINDOW_HILITED_X(wp))
+                    if(WINDOW_HILITED(wp))
                     {
                         templ = guest_cast<LONGINT>(evp);
                         Control(WINDOW_KIND(wp), accEvent, (Ptr)&templ);

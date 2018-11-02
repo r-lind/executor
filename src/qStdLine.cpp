@@ -361,7 +361,7 @@ void Executor::C_StdLine(Point p)
     px = PORT_PEN_SIZE(qdGlobals().thePort).h;
     py = PORT_PEN_SIZE(qdGlobals().thePort).v;
 
-    if(PORT_POLY_SAVE_X(qdGlobals().thePort) && (x1 != x2 || y1 != y2))
+    if(PORT_POLY_SAVE(qdGlobals().thePort) && (x1 != x2 || y1 != y2))
     {
         ph = (PolyHandle)PORT_POLY_SAVE(qdGlobals().thePort);
         psize = GetHandleSize((Handle)ph);
@@ -415,7 +415,7 @@ void Executor::C_StdLine(Point p)
             StdRect(paint, &r);
             RESUMERECORDING;
         }
-        if(PORT_REGION_SAVE_X(qdGlobals().thePort) && y1 == y2 && x1 != x2)
+        if(PORT_REGION_SAVE(qdGlobals().thePort) && y1 == y2 && x1 != x2)
         {
             RgnPtr tmpRP;
             tmpRP = (RgnPtr)ALLOCA(RGN_SMALL_SIZE + 5 * sizeof(INTEGER));
@@ -447,7 +447,7 @@ void Executor::C_StdLine(Point p)
     dy = y2 - y1;
     dx = std::abs(x2 - x1);
 
-    if(PORT_REGION_SAVE_X(qdGlobals().thePort))
+    if(PORT_REGION_SAVE(qdGlobals().thePort))
     {
         /* size allocated below is overkill */
         RgnPtr tmpRP;

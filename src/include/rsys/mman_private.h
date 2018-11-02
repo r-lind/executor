@@ -24,7 +24,7 @@ namespace Executor
 /* various flags */
 
 /* data contained in the block */
-typedef struct block_header
+struct block_header_t
 {
     GUEST_STRUCT;
 #if defined(MM_BLOCK_HEADER_SENTINEL)
@@ -45,14 +45,13 @@ typedef struct block_header
     GUEST<uint8_t[SENTINEL_SIZE]> post_sentinel;
 #endif
     GUEST<uint32_t> data[0];
-} block_header_t;
+};
 
-#define BLOCK_LOCATION_OFFSET_X(block) ((block)->location_u)
-#define BLOCK_LOCATION_ZONE_X(block) ((block)->location_u)
-#define BLOCK_DATA_X(block) ((Ptr)(block)->data)
+#define BLOCK_LOCATION_OFFSET(block) ((block)->location_u)
+#define BLOCK_DATA(block) ((Ptr)(block)->data)
 
-#define BLOCK_LOCATION_OFFSET(block) (BLOCK_LOCATION_OFFSET_X(block))
-#define BLOCK_LOCATION_ZONE(block) (guest_cast<THz>(BLOCK_LOCATION_ZONE_X(block)))
+
+#define BLOCK_LOCATION_ZONE(block) (guest_cast<THz>((block)->location_u))
 #define BLOCK_DATA(block) ((Ptr)(block)->data)
 
 #define USE(block) (((block)->flags >> 6) & 0x3)
@@ -135,23 +134,15 @@ extern uintptr_t ROMlib_memtop;
 /* Zone record accessor macros */
 #define ZONE_HEAP_DATA(zone) ((block_header_t *)&(zone)->heapData)
 
-#define ZONE_BK_LIM_X(zone) (guest_cast<block_header_t *>((zone)->bkLim))
-#define ZONE_PURGE_PTR_X(zone) ((zone)->purgePtr)
-#define ZONE_HFST_FREE_X(zone) ((zone)->hFstFree)
-#define ZONE_ZCB_FREE_X(zone) ((zone)->zcbFree)
-#define ZONE_GZ_PROC_X(zone) ((zone)->gzProc)
-#define ZONE_MORE_MAST_X(zone) ((zone)->moreMast)
-#define ZONE_PURGE_PROC_X(zone) ((zone)->purgeProc)
-#define ZONE_ALLOC_PTR_X(zone) ((zone)->allocPtr)
+#define ZONE_BK_LIM(zone) (guest_cast<block_header_t *>((zone)->bkLim))
+#define ZONE_PURGE_PTR(zone) ((zone)->purgePtr)
+#define ZONE_HFST_FREE(zone) ((zone)->hFstFree)
+#define ZONE_ZCB_FREE(zone) ((zone)->zcbFree)
+#define ZONE_GZ_PROC(zone) ((zone)->gzProc)
+#define ZONE_MORE_MAST(zone) ((zone)->moreMast)
+#define ZONE_PURGE_PROC(zone) ((zone)->purgeProc)
+#define ZONE_ALLOC_PTR(zone) ((zone)->allocPtr)
 
-#define ZONE_BK_LIM(zone) (ZONE_BK_LIM_X(zone))
-#define ZONE_PURGE_PTR(zone) (ZONE_PURGE_PTR_X(zone))
-#define ZONE_HFST_FREE(zone) (ZONE_HFST_FREE_X(zone))
-#define ZONE_ZCB_FREE(zone) (ZONE_ZCB_FREE_X(zone))
-#define ZONE_GZ_PROC(zone) (ZONE_GZ_PROC_X(zone))
-#define ZONE_MORE_MAST(zone) (ZONE_MORE_MAST_X(zone))
-#define ZONE_PURGE_PROC(zone) (ZONE_PURGE_PROC_X(zone))
-#define ZONE_ALLOC_PTR(zone) ((block_header_t *)ZONE_ALLOC_PTR_X(zone))
 
 #define MEM_DEBUG_P() ERROR_ENABLED_P(ERROR_TRAP_FAILURE)
 

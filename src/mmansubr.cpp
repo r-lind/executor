@@ -549,7 +549,7 @@ void Executor::ROMlib_setupblock(block_header_t *block,
     }
 
     if((char *)ZONE_ALLOC_PTR(current_zone) < (char *)block + oldsize)
-        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)newfree;
+        ZONE_ALLOC_PTR(current_zone) = newfree;
 
 #if 0
   mm_set_block_fields (block,
@@ -588,10 +588,10 @@ void Executor::ROMlib_setupblock(block_header_t *block,
 #endif
 
     if(olduse == FREE)
-        ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+        ZONE_ZCB_FREE(current_zone) = ZONE_ZCB_FREE(current_zone)
                                            - PSIZE(block);
     else
-        ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+        ZONE_ZCB_FREE(current_zone) = ZONE_ZCB_FREE(current_zone)
                                            + oldsize - asize;
 }
 
@@ -617,7 +617,7 @@ void Executor::ROMlib_coalesce(block_header_t *block)
 
     if(ZONE_ALLOC_PTR(current_zone) >= block
        && (char *)ZONE_ALLOC_PTR(current_zone) <= (char *)block + total_free)
-        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)block;
+        ZONE_ALLOC_PTR(current_zone) = block;
 }
 
 /* Mark a block free.  If relocatable, the master must have already
@@ -627,7 +627,7 @@ void Executor::ROMlib_freeblock(block_header_t *block)
     THz current_zone;
 
     current_zone = LM(TheZone);
-    ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+    ZONE_ZCB_FREE(current_zone) = ZONE_ZCB_FREE(current_zone)
                                        + PSIZE(block);
 
     mm_set_block_fields_offset(block, FREE_BLOCK_STATE, FREE, 0, PSIZE(block),
@@ -749,7 +749,7 @@ bool Executor::ROMlib_makespace(block_header_t **block_out, uint32_t size)
 
     if(ZONE_ALLOC_PTR(current_zone) > block
        && ZONE_ALLOC_PTR(current_zone) <= b)
-        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)block;
+        ZONE_ALLOC_PTR(current_zone) = block;
 
     /* Finally, coalesce the space into one big free block */
     gui_assert(USE(block) == FREE);
@@ -794,7 +794,7 @@ int32_t Executor::ROMlib_amtfree(block_header_t *block)
         SETPSIZE(block, total);
         if(ZONE_ALLOC_PTR(current_zone) > block
            && ZONE_ALLOC_PTR(current_zone) <= b)
-            ZONE_ALLOC_PTR_X(current_zone) = (Ptr)block;
+            ZONE_ALLOC_PTR(current_zone) = block;
     }
     return total;
 }
@@ -807,7 +807,7 @@ void Executor::checkallocptr(void)
 
     current_zone = LM(TheZone);
 
-    if(ZONE_ALLOC_PTR_X(current_zone) == nullptr)
+    if(ZONE_ALLOC_PTR(current_zone) == nullptr)
         return;
     for(b = ZONE_HEAP_DATA(current_zone);
         b != ZONE_BK_LIM(current_zone);
@@ -948,7 +948,7 @@ retry:
             *newblk = b;
 
             /* The new trailer */
-            ZONE_BK_LIM_X(current_zone) = (block_header_t *)((uint32_t)ZONE_BK_LIM(current_zone) + newsize);
+            ZONE_BK_LIM(current_zone) = (block_header_t *)((uint32_t)ZONE_BK_LIM(current_zone) + newsize);
             b = ZONE_BK_LIM(current_zone);
             SETZERO(b);
             SETUSE(b, FREE);
@@ -956,7 +956,7 @@ retry:
             SETSIZEC(b, 0);
             SET_BLOCK_STATE(b, FREE_BLOCK_STATE);
 
-            ZONE_ZCB_FREE_X(current_zone) = ZONE_ZCB_FREE(current_zone)
+            ZONE_ZCB_FREE(current_zone) = ZONE_ZCB_FREE(current_zone)
                                                + newsize;
             LM(HeapEnd) = (Ptr)ZONE_BK_LIM(current_zone);
             return noErr;
@@ -965,16 +965,16 @@ retry:
     }
 
     /* Try growing the heap */
-    if(ZONE_GZ_PROC_X(current_zone))
+    if(ZONE_GZ_PROC(current_zone))
     {
         LONGINT retval;
 
-        ZONE_ALLOC_PTR_X(current_zone) = nullptr;
+        ZONE_ALLOC_PTR(current_zone) = nullptr;
         ROMlib_hook(memory_gznumber);
         retval = current_zone->gzProc(size);
 
         if(retval)
-            ZONE_ALLOC_PTR_X(current_zone) = nullptr;
+            ZONE_ALLOC_PTR(current_zone) = nullptr;
         if(biggest_block != old_biggest_block)
         {
             old_biggest_block = biggest_block;

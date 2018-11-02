@@ -68,8 +68,8 @@ static void setselectnilflag(BOOLEAN setit, Cell cell, ListHandle list,
 
                 saveport = qdGlobals().thePort;
                 SetPort((*list)->port);
-                saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
-                PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
+                saveclip = PORT_CLIP_REGION(qdGlobals().thePort);
+                PORT_CLIP_REGION(qdGlobals().thePort) = NewRgn();
                 ClipRect(&r);
 
                 LISTBEGIN(list);
@@ -80,7 +80,7 @@ static void setselectnilflag(BOOLEAN setit, Cell cell, ListHandle list,
                 LISTEND(list);
 
                 DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
-                PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
+                PORT_CLIP_REGION(qdGlobals().thePort) = saveclip;
                 SetPort(saveport);
             }
         }

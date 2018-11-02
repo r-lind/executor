@@ -164,8 +164,8 @@ LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, LONGINT *state)
     virt = code & VIRT_MASK;
 
     table_num_index = (code >> MODIFIER_SHIFT) & MODIFIER_MASK;
-    table_num = (KCHR_MODIFIER_TABLE_X(p))[table_num_index];
-    ascii = (unsigned char)(KCHR_TABLE_X(p)[table_num][virt]);
+    table_num = (KCHR_MODIFIER_TABLE(p))[table_num_index];
+    ascii = (unsigned char)(KCHR_TABLE(p)[table_num][virt]);
 
     if(*state == 0)
     {
@@ -177,13 +177,13 @@ LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, LONGINT *state)
             dead_key_rec_t *deadp;
 
             n_dead = KCHR_N_DEAD_KEY_RECS(p);
-            deadp = KCHR_DEAD_KEY_RECS_X(p);
+            deadp = KCHR_DEAD_KEY_RECS(p);
             while(--n_dead >= 0
                   && (DEAD_KEY_TABLE_NUMBER(deadp) != table_num
                       || DEAD_KEY_VIRT_KEY(deadp) != virt))
-                deadp = (dead_key_rec_t *)(&DEAD_KEY_NO_MATCH_X(deadp) + 1);
+                deadp = (dead_key_rec_t *)(&DEAD_KEY_NO_MATCH(deadp) + 1);
             if(n_dead >= 0)
-                *state = (char *)deadp - (char *)&KCHR_N_TABLES_X(p);
+                *state = (char *)deadp - (char *)&KCHR_N_TABLES(p);
             else
                 *state = 0;
         }
@@ -194,19 +194,19 @@ LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, LONGINT *state)
         completer_t *completep;
         int n_recs, i;
 
-        deadp = (dead_key_rec_t *)((char *)&KCHR_N_TABLES_X(p) + *state);
+        deadp = (dead_key_rec_t *)((char *)&KCHR_N_TABLES(p) + *state);
         *state = 0;
-        completep = &DEAD_KEY_COMPLETER_X(deadp);
+        completep = &DEAD_KEY_COMPLETER(deadp);
         n_recs = COMPLETER_N_RECS(completep);
         for(i = 0;
             (i < n_recs
-             && ((COMPLETER_COMPLETER_RECS_X(completep))[i].to_look_for
+             && ((COMPLETER_COMPLETER_RECS(completep))[i].to_look_for
                  != ascii));
             ++i)
             ;
         if(i < n_recs)
             ascii = (unsigned char)
-                (COMPLETER_COMPLETER_RECS_X(completep)[i]).replacement;
+                (COMPLETER_COMPLETER_RECS(completep)[i]).replacement;
         else
             ascii = (ascii << 16) | (unsigned short)DEAD_KEY_NO_MATCH(deadp);
     }

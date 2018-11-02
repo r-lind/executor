@@ -213,7 +213,7 @@ bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
 
     if(active_screen_p
        && mode == (patCopy & 3) /* patCopy or notPatCopy */
-       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE_X))
+       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE))
     {
         int top, left;
 
@@ -635,7 +635,7 @@ do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
 
     if(v == tv
        && raw_mode == XDBLT_COPY
-       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE_X)
+       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE)
        && active_screen_addr_p(dst))
     {
         int top, left;

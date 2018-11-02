@@ -35,7 +35,7 @@ BOOLEAN ROMlib_window_zoomed(WindowPeek wp)
     staterp = &(*(GUEST<WStateData *> *)WINDOW_DATA(wp))->stdState;
     boundsrp = &PORT_BOUNDS(wp);
 
-    retval = (WINDOW_SPARE_FLAG_X(wp)
+    retval = (WINDOW_SPARE_FLAG(wp)
               && portrp->top - boundsrp->top == staterp->top
               && portrp->left - boundsrp->left == staterp->left
               && RECT_WIDTH(portrp) == RECT_WIDTH(staterp)
@@ -220,7 +220,7 @@ Executor::validate_colors_for_window(GrafPtr w)
       
       if (rounded_window_p)
 	{
-	  if (WINDOW_HILITED_X (w))
+	  if (WINDOW_HILITED (w))
 	    {
 	      *title_bar_bk = *frame;
 	      *title = *title_bar;	      
@@ -243,7 +243,7 @@ Executor::validate_colors_for_window(GrafPtr w)
 			  &temp3))
 	FAIL;
       
-      if (WINDOW_HILITED_X (w))
+      if (WINDOW_HILITED (w))
 	{
 	  *title_bar_bk = temp1;
 	  *title = *text;
@@ -326,9 +326,9 @@ void toggle_box_active(enum box_flag which_box, Point origin)
     if(rounded_window_p)
     {
         /* invert the set bits of the box */
-        PORT_FG_COLOR_X(qdGlobals().thePort)
+        PORT_FG_COLOR(qdGlobals().thePort)
             = (1 << PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(qdGlobals().thePort))) - 1;
-        PORT_FG_COLOR_X(qdGlobals().thePort) = 0;
+        PORT_FG_COLOR(qdGlobals().thePort) = 0;
     }
     else
     {
@@ -357,7 +357,7 @@ void toggle_box_active(enum box_flag which_box, Point origin)
         else
             target_color = &ROMlib_white_rgb_color;
 
-        PORT_FG_COLOR_X(qdGlobals().thePort)
+        PORT_FG_COLOR(qdGlobals().thePort)
             = Color2Index(target_color) ^ Color2Index(frame);
     }
 
@@ -458,7 +458,7 @@ void draw_title(GrafPtr w,
     {
         title_start = left + (right - left - title_width) / 2 - 6;
         saveclip = PORT_CLIP_REGION(tp);
-        PORT_CLIP_REGION_X(tp) = NewRgn();
+        PORT_CLIP_REGION(tp) = NewRgn();
         if(title_start >= left_bound)
             CopyRgn(saveclip, PORT_CLIP_REGION(tp));
         else
@@ -492,7 +492,7 @@ void draw_title(GrafPtr w,
         th = WINDOW_TITLE(w);
         {
             HLockGuard guard(th);
-            PORT_TX_MODE_X(qdGlobals().thePort) = srcCopy;
+            PORT_TX_MODE(qdGlobals().thePort) = srcCopy;
             MoveTo(title_start + 6, top - 5);
             DrawString(*th);
         }
@@ -500,7 +500,7 @@ void draw_title(GrafPtr w,
         if(saveclip)
         {
             DisposeRgn(PORT_CLIP_REGION(tp));
-            PORT_CLIP_REGION_X(tp) = saveclip;
+            PORT_CLIP_REGION(tp) = saveclip;
         }
     }
 }
@@ -586,7 +586,7 @@ void draw_frame(GrafPtr w, int draw_zoom_p, bool goaway_override)
     MoveTo(right + 1, top - 18);
     LineTo(right + 1, bottom);
 
-    if(WINDOW_HILITED_X(w))
+    if(WINDOW_HILITED(w))
     {
         int draw_go_away_p = WINDOW_GO_AWAY_FLAG(w) && !goaway_override;
 
@@ -826,7 +826,7 @@ hit_doc(WindowPeek w, LONGINT parm, int growable_p,
 
     p.v = HiWord(parm);
     p.h = LoWord(parm);
-    if(WINDOW_HILITED_X(w))
+    if(WINDOW_HILITED(w))
     {
         if(PtInRgn(p, WINDOW_CONT_REGION(w)))
         {
@@ -838,11 +838,11 @@ hit_doc(WindowPeek w, LONGINT parm, int growable_p,
         if((p.h >= left - 1) && (p.h < right + 1)
            && (p.v >= top - 19) && (p.v < top))
         {
-            if(WINDOW_GO_AWAY_FLAG_X(w) && !goaway_override
+            if(WINDOW_GO_AWAY_FLAG(w) && !goaway_override
                && (p.h > left + 8) && (p.h < left + 20)
                && (p.v > top - 16) && (p.v < top - 4))
                 return wInGoAway;
-            else if(WINDOW_SPARE_FLAG_X(w)
+            else if(WINDOW_SPARE_FLAG(w)
                     && (p.h > right - 20) && (p.h < right - 8)
                     && (p.v > top - 16) && (p.v < top - 4))
                 return WINDOW_ZOOMED((WindowPeek)w) ? wInZoomIn : wInZoomOut;
@@ -1021,7 +1021,7 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
     switch(message)
     {
         case wDraw:
-            if(!WINDOW_VISIBLE_X(w))
+            if(!WINDOW_VISIBLE(w))
                 return 0;
             PenNormal();
 
@@ -1094,7 +1094,7 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
             {
                 WStateData *wsp;
 
-                WINDOW_DATA_X(w) = NewHandle((Size)sizeof(WStateData));
+                WINDOW_DATA(w) = NewHandle((Size)sizeof(WStateData));
                 wsp = *(GUEST<WStateData *> *)WINDOW_DATA(w);
 
                 wsp->stdState = GD_BOUNDS(LM(TheGDevice));
@@ -1106,13 +1106,13 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
                 OffsetRect(&wsp->userState, -PORT_BOUNDS(w).left,
                            -PORT_BOUNDS(w).top);
 
-                WINDOW_SPARE_FLAG_X(w) = true;
+                WINDOW_SPARE_FLAG(w) = true;
             }
             else
-                WINDOW_SPARE_FLAG_X(w) = false;
+                WINDOW_SPARE_FLAG(w) = false;
             break;
         case wDispose:
-            if(WINDOW_SPARE_FLAG_X(w))
+            if(WINDOW_SPARE_FLAG(w))
                 DisposeHandle(WINDOW_DATA(w));
             break;
         case wGrow:
@@ -1142,7 +1142,7 @@ LONGINT Executor::C_wdef0(INTEGER varcode, WindowPtr window, INTEGER message,
 
             if(varcode == documentProc)
             {
-                if(WINDOW_HILITED_X(w))
+                if(WINDOW_HILITED(w))
                     draw_grow_icon((GrafPtr)w);
                 else
                     erase_grow_icon((GrafPtr)w);
@@ -1207,7 +1207,7 @@ void draw_rounded_doc(GrafPtr w)
     LineTo(right, top - 1);
 
     hilite_rounded_window((WindowPeek)w, left, top, right, bottom);
-    if(WINDOW_HILITED_X(w))
+    if(WINDOW_HILITED(w))
     {
         draw_go_away_p = WINDOW_GO_AWAY_FLAG(w);
         if(draw_go_away_p)
@@ -1231,7 +1231,7 @@ hit_rounded_doc(GrafPtr w, LONGINT param)
 
     p.v = HiWord(param);
     p.h = LoWord(param);
-    if(WINDOW_HILITED_X(w))
+    if(WINDOW_HILITED(w))
     {
         if(PtInRgn(p, WINDOW_CONT_REGION(w)))
             return wInContent;
@@ -1320,7 +1320,7 @@ LONGINT Executor::C_wdef16(INTEGER varcode, WindowPtr wp, INTEGER message,
     switch(message)
     {
         case wDraw:
-            if(!WINDOW_VISIBLE_X(w))
+            if(!WINDOW_VISIBLE(w))
                 break;
 
             switch(param)
@@ -1345,7 +1345,7 @@ LONGINT Executor::C_wdef16(INTEGER varcode, WindowPtr wp, INTEGER message,
             break;
 
         case wNew:
-            WINDOW_SPARE_FLAG_X(w) = false;
+            WINDOW_SPARE_FLAG(w) = false;
             break;
 
         case wDispose:

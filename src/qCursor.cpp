@@ -274,7 +274,7 @@ CCrsrHandle Executor::C_GetCCursor(INTEGER crsr_id)
     tmp_ctab = (CTabPtr)((char *)resource + ccrsr_ctab_offset);
     ccrsr_ctab_size = CTAB_STORAGE_FOR_SIZE(tmp_ctab->ctSize);
     h = NewHandle(ccrsr_ctab_size);
-    PIXMAP_TABLE_X(ccrsr->crsrMap) = guest_cast<CTabHandle>(h);
+    PIXMAP_TABLE(ccrsr->crsrMap) = guest_cast<CTabHandle>(h);
     BlockMoveData((Ptr)tmp_ctab,
                   (Ptr)*PIXMAP_TABLE(ccrsr->crsrMap),
                   ccrsr_ctab_size);
@@ -293,11 +293,11 @@ Rect Executor::ROMlib_cursor_rect = {
 static bool
 pixmap_eq_p(PixMapHandle pm0, PixMapHandle pm1)
 {
-    return (PIXMAP_PIXEL_SIZE_X(pm0) == PIXMAP_PIXEL_SIZE_X(pm1)
-            && PIXMAP_PIXEL_TYPE_X(pm0) == PIXMAP_PIXEL_TYPE_X(pm1)
-            && PIXMAP_CMP_COUNT_X(pm0) == PIXMAP_CMP_COUNT_X(pm1)
-            && PIXMAP_CMP_SIZE_X(pm0) == PIXMAP_CMP_SIZE_X(pm1)
-            && (CTAB_SEED_X(PIXMAP_TABLE(pm0)) == CTAB_SEED_X(PIXMAP_TABLE(pm1)))
+    return (PIXMAP_PIXEL_SIZE(pm0) == PIXMAP_PIXEL_SIZE(pm1)
+            && PIXMAP_PIXEL_TYPE(pm0) == PIXMAP_PIXEL_TYPE(pm1)
+            && PIXMAP_CMP_COUNT(pm0) == PIXMAP_CMP_COUNT(pm1)
+            && PIXMAP_CMP_SIZE(pm0) == PIXMAP_CMP_SIZE(pm1)
+            && (CTAB_SEED(PIXMAP_TABLE(pm0)) == CTAB_SEED(PIXMAP_TABLE(pm1)))
             && !memcmp(&PIXMAP_BOUNDS(pm0),
                        &PIXMAP_BOUNDS(pm1),
                        sizeof(Rect)));
@@ -317,7 +317,7 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
            && !memcmp(*CCRSR_DATA(current_ccrsr),
                       *CCRSR_DATA(ccrsr),
                       ccrsr_data_size)
-           && CCRSR_TYPE_X(current_ccrsr) == CCRSR_TYPE_X(ccrsr)
+           && CCRSR_TYPE(current_ccrsr) == CCRSR_TYPE(ccrsr)
            && !memcmp(CCRSR_1DATA(current_ccrsr),
                       CCRSR_1DATA(ccrsr),
                       sizeof(Bits16))
@@ -351,12 +351,12 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
             if(!ccrsr_xdata)
             {
                 ccrsr_xdata = NewHandle(32 * vdriver->cursorDepth());
-                CCRSR_XDATA_X(ccrsr) = ccrsr_xdata;
+                CCRSR_XDATA(ccrsr) = ccrsr_xdata;
             }
 
-            if(CCRSR_XVALID_X(ccrsr) == 0
+            if(CCRSR_XVALID(ccrsr) == 0
                || (CCRSR_XVALID(ccrsr) != vdriver->cursorDepth())
-               || (CCRSR_ID_X(ccrsr) != CTAB_SEED_X(PIXMAP_TABLE(gd_pmap))))
+               || (CCRSR_ID(ccrsr) != CTAB_SEED(PIXMAP_TABLE(gd_pmap))))
             {
                 SetHandleSize(ccrsr_xdata, 32 * vdriver->cursorDepth());
 
@@ -378,8 +378,8 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
                 convert_pixmap(&src, &ccrsr_xmap,
                                &ROMlib_cursor_rect, nullptr);
 
-                CCRSR_XVALID_X(ccrsr) = vdriver->cursorDepth();
-                CCRSR_ID_X(ccrsr) = CTAB_SEED_X(PIXMAP_TABLE(gd_pmap));
+                CCRSR_XVALID(ccrsr) = vdriver->cursorDepth();
+                CCRSR_ID(ccrsr) = CTAB_SEED(PIXMAP_TABLE(gd_pmap));
             }
 
             /* Actually set the current cursor. */
@@ -406,13 +406,13 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
         {
             TheZoneGuard guard(LM(SysZone));
             current_ccrsr = (CCrsrHandle)NewHandle(sizeof(CCrsr));
-            CCRSR_DATA_X(current_ccrsr) = NewHandle(0);
-            CCRSR_XDATA_X(current_ccrsr) = nullptr;
-            CCRSR_MAP_X(current_ccrsr) = NewPixMap();
+            CCRSR_DATA(current_ccrsr) = NewHandle(0);
+            CCRSR_XDATA(current_ccrsr) = nullptr;
+            CCRSR_MAP(current_ccrsr) = NewPixMap();
         }
 
         /* copy the cursor structure */
-        CCRSR_TYPE_X(current_ccrsr) = CCRSR_TYPE_X(ccrsr);
+        CCRSR_TYPE(current_ccrsr) = CCRSR_TYPE(ccrsr);
         memcpy(CCRSR_1DATA(current_ccrsr), CCRSR_1DATA(ccrsr),
                sizeof(Bits16));
         memcpy(CCRSR_MASK(current_ccrsr), CCRSR_MASK(ccrsr),
@@ -429,8 +429,8 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
                *CCRSR_DATA(ccrsr), data_size);
 
         /* invalidate this cursor */
-        CCRSR_XVALID_X(current_ccrsr) = 0;
-        CCRSR_ID_X(current_ccrsr) = -1;
+        CCRSR_XVALID(current_ccrsr) = 0;
+        CCRSR_ID(current_ccrsr) = -1;
 
         current_cursor_valid_p = true;
         current_cursor_color_p = true;

@@ -27,10 +27,10 @@ struct completer_t
     GUEST<completer_pair_t> completer_recs[0]; /* VARIABLE LENGTH */
 };
 
-#define COMPLETER_N_RECS_X(p) ((p)->n_recs)
-#define COMPLETER_COMPLETER_RECS_X(p) ((p)->completer_recs)
+#define COMPLETER_N_RECS(p) ((p)->n_recs)
+#define COMPLETER_COMPLETER_RECS(p) ((p)->completer_recs)
 
-#define COMPLETER_N_RECS(p) (COMPLETER_N_RECS_X(p))
+
 
 struct dead_key_rec_t
 {
@@ -42,19 +42,19 @@ struct dead_key_rec_t
     //GUEST<unsigned char> no_match;
 };
 
-#define DEAD_KEY_TABLE_NUMBER_X(p) ((p)->table_number)
-#define DEAD_KEY_VIRT_KEY_X(p) ((p)->virt_key)
-#define DEAD_KEY_COMPLETER_X(p) ((p)->completer)
+#define DEAD_KEY_TABLE_NUMBER(p) ((p)->table_number)
+#define DEAD_KEY_VIRT_KEY(p) ((p)->virt_key)
+#define DEAD_KEY_COMPLETER(p) ((p)->completer)
 
-#define DEAD_KEY_NO_MATCH_X(p) (*((unsigned char *)&DEAD_KEY_COMPLETER_X(p)    \
-                                  + sizeof(DEAD_KEY_COMPLETER_X(p))            \
-                                  + COMPLETER_N_RECS(&DEAD_KEY_COMPLETER_X(p)) \
+#define DEAD_KEY_NO_MATCH(p) (*((unsigned char *)&DEAD_KEY_COMPLETER(p)    \
+                                  + sizeof(DEAD_KEY_COMPLETER(p))            \
+                                  + COMPLETER_N_RECS(&DEAD_KEY_COMPLETER(p)) \
                                       * sizeof(completer_pair_t)               \
                                   + 1))
 
-#define DEAD_KEY_TABLE_NUMBER(p) (DEAD_KEY_TABLE_NUMBER_X(p))
-#define DEAD_KEY_VIRT_KEY(p) (DEAD_KEY_VIRT_KEY_X(p))
-#define DEAD_KEY_NO_MATCH(p) (DEAD_KEY_NO_MATCH_X(p))
+
+
+
 
 typedef struct kchr_str
 {
@@ -69,19 +69,19 @@ typedef struct kchr_str
 
 typedef GUEST<kchr_ptr_t> *kchr_hand;
 
-#define KCHR_VERSION_X(p) ((p)->version)
-#define KCHR_MODIFIER_TABLE_X(p) ((p)->modifier_table)
-#define KCHR_N_TABLES_X(p) ((p)->n_tables)
-#define KCHR_TABLE_X(p) ((p)->table)
+#define KCHR_VERSION(p) ((p)->version)
+#define KCHR_MODIFIER_TABLE(p) ((p)->modifier_table)
+#define KCHR_N_TABLES(p) ((p)->n_tables)
+#define KCHR_TABLE(p) ((p)->table)
 
-#define KCHR_N_DEAD_KEY_RECS_X(p) (*(GUEST<INTEGER> *)(KCHR_TABLE_X(p) \
+#define KCHR_N_DEAD_KEY_RECS(p) (*(GUEST<INTEGER> *)(KCHR_TABLE(p) \
                                                        + KCHR_N_TABLES(p)))
 
-#define KCHR_DEAD_KEY_RECS_X(p) ((dead_key_rec_t *)(&KCHR_N_DEAD_KEY_RECS_X(p) + 1))
+#define KCHR_DEAD_KEY_RECS(p) ((dead_key_rec_t *)(&KCHR_N_DEAD_KEY_RECS(p) + 1))
 
-#define KCHR_VERSION(p) (KCHR_VERSION_X(p))
-#define KCHR_N_TABLES(p) (KCHR_N_TABLES_X(p))
-#define KCHR_N_DEAD_KEY_RECS(p) (KCHR_N_DEAD_KEY_RECS_X(p))
+
+
+
 
 /* MKV prefix denotes a true mac virtual key code (as opposed to the
    ones I made up) */

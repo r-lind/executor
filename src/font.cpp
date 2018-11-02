@@ -681,7 +681,7 @@ static void newwidthtable(FMInput *fmip)
     HLock((Handle)LM(WidthTabHandle));
     LM(WidthPtr) = *LM(WidthTabHandle);
 
-    WIDTHPTR->sExtra = PORT_SP_EXTRA_X(qdGlobals().thePort);
+    WIDTHPTR->sExtra = PORT_SP_EXTRA(qdGlobals().thePort);
     WIDTHPTR->inNumer = fmip->numer;
     WIDTHPTR->inDenom = fmip->denom;
     WIDTHPTR->aFID = fmip->family;
@@ -916,11 +916,11 @@ void Executor::C_FontMetrics(FMetricRec *metrp) /* IMIV-32 */
     FMInput fmi;
     FMOutPtr fmop;
 
-    fmi.family = PORT_TX_FONT_X(qdGlobals().thePort);
-    fmi.size = PORT_TX_SIZE_X(qdGlobals().thePort);
-    fmi.face = PORT_TX_FACE_X(qdGlobals().thePort);
+    fmi.family = PORT_TX_FONT(qdGlobals().thePort);
+    fmi.size = PORT_TX_SIZE(qdGlobals().thePort);
+    fmi.face = PORT_TX_FACE(qdGlobals().thePort);
     fmi.needBits = false;
-    fmi.device = PORT_DEVICE_X(qdGlobals().thePort);
+    fmi.device = PORT_DEVICE(qdGlobals().thePort);
     fmi.numer.v = 1;
     fmi.numer.h = 1;
     fmi.denom.v = 1;

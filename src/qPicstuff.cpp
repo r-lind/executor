@@ -409,7 +409,7 @@ static void fillpixpat(PixPatHandle ph)
         GUEST<Handle> tmp = (Handle)ph;
         HandToHand(&tmp);
 
-        CPORT_FILL_PIXPAT_X(theCPort) = guest_cast<PixPatHandle>(tmp);
+        CPORT_FILL_PIXPAT(theCPort) = guest_cast<PixPatHandle>(tmp);
     }
 }
 
@@ -1421,8 +1421,8 @@ static void eatPixPat(PixPatHandle pixpat)
     Handle temph;
 
     HLockGuard guard(pixpat);
-    PIXPAT_TYPE_X(pixpat) = eatINTEGERX();
-    if(PIXPAT_TYPE_X(pixpat) == RGBPat)
+    PIXPAT_TYPE(pixpat) = eatINTEGERX();
+    if(PIXPAT_TYPE(pixpat) == RGBPat)
     {
         eatPattern(PIXPAT_1DATA(pixpat));
         eatRGBColor(&rgb);
@@ -1430,8 +1430,8 @@ static void eatPixPat(PixPatHandle pixpat)
             PixMapHandle patmap;
 
             patmap = (PixMapHandle)NewHandleClear(sizeof(PixMap));
-            PIXMAP_TABLE_X(patmap) = (CTabHandle)NewHandle(0);
-            PIXPAT_MAP_X(pixpat) = patmap;
+            PIXMAP_TABLE(patmap) = (CTabHandle)NewHandle(0);
+            PIXPAT_MAP(pixpat) = patmap;
         }
         MakeRGBPat(pixpat, &rgb);
     }
@@ -1442,7 +1442,7 @@ static void eatPixPat(PixPatHandle pixpat)
 
         eatPattern(PIXPAT_1DATA(pixpat));
         patmap = (PixMapHandle)NewHandle(sizeof(PixMap));
-        PIXPAT_MAP_X(pixpat) = patmap;
+        PIXPAT_MAP(pixpat) = patmap;
         HLockGuard guard(patmap);
         PixMapPtr patmap_ptr = *patmap;
 
@@ -1454,7 +1454,7 @@ static void eatPixPat(PixPatHandle pixpat)
 					  the call to PtrToXHand below will
 					  fail, with a nilHandleErr as per
 					  IM Memory 2-62 */
-        PIXPAT_DATA_X(pixpat) = temph;
+        PIXPAT_DATA(pixpat) = temph;
         PtrToXHand(BITMAP_BASEADDR(patmap_ptr), temph, datasize);
         if(free)
             DisposeHandle(RecoverHandle(BITMAP_BASEADDR(patmap_ptr)));
@@ -1576,11 +1576,11 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
 
     saveport = *the_port;
     saveportbounds = PORT_BOUNDS(the_port);
-    PORT_CLIP_REGION_X(the_port) = NewRgn();
+    PORT_CLIP_REGION(the_port) = NewRgn();
 
     SetRectRgn(PORT_CLIP_REGION(the_port), -32768, -32768, 32767, 32767);
 
-    PORT_VIS_REGION_X(the_port) = NewRgn();
+    PORT_VIS_REGION(the_port) = NewRgn();
     CopyRgn(PORT_VIS_REGION(&saveport),
             PORT_VIS_REGION(the_port));
 
@@ -1592,9 +1592,9 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
         junk_pen_pixpat = NewPixPat();
         junk_bk_pixpat = NewPixPat();
         junk_fill_pixpat = NewPixPat();
-        CPORT_PEN_PIXPAT_X(the_cport) = junk_pen_pixpat;
-        CPORT_BK_PIXPAT_X(the_cport) = junk_bk_pixpat;
-        CPORT_FILL_PIXPAT_X(the_cport) = junk_fill_pixpat;
+        CPORT_PEN_PIXPAT(the_cport) = junk_pen_pixpat;
+        CPORT_BK_PIXPAT(the_cport) = junk_bk_pixpat;
+        CPORT_FILL_PIXPAT(the_cport) = junk_fill_pixpat;
     }
     else
     {
@@ -1617,11 +1617,11 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     PORT_PEN_LOC(the_port).h = destrp->left; /* This is a guess, based on */
     PORT_PEN_LOC(the_port).v = destrp->top; /* Word's EPS handling */
     PORT_PEN_SIZE(the_port).h = PORT_PEN_SIZE(the_port).v = 1;
-    PORT_PEN_MODE_X(the_port) = patCopy;
-    PORT_TX_FONT_X(the_port) = 0;
-    PORT_TX_FACE_X(the_port) = 0;
-    PORT_TX_SIZE_X(the_port) = 0;
-    PORT_SP_EXTRA_X(the_port) = 0;
+    PORT_PEN_MODE(the_port) = patCopy;
+    PORT_TX_FONT(the_port) = 0;
+    PORT_TX_FACE(the_port) = 0;
+    PORT_TX_SIZE(the_port) = 0;
+    PORT_SP_EXTRA(the_port) = 0;
 
 #if 0
     /* this will fail if we are actually drawing to a
@@ -1633,8 +1633,8 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     ForeColor(blackColor);
     BackColor(whiteColor);
 #endif
-    PORT_COLR_BIT_X(the_port) = 0;
-    PORT_PAT_STRETCH_X(the_port) = 0;
+    PORT_COLR_BIT(the_port) = 0;
+    PORT_PAT_STRETCH(the_port) = 0;
 
     /*
      * NOTE:  I used to start pics out with srcXor because of a PICT

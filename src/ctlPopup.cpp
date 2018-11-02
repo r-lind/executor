@@ -54,19 +54,19 @@ init(ControlHandle ctl)
         HandToHand(&hh);
         flags = CTL_VALUE(ctl);
 
-        POPUP_MENU_ID_X(data) = mid;
-        POPUP_MENU_X(data) = guest_cast<MenuHandle>(hh);
+        POPUP_MENU_ID(data) = mid;
+        POPUP_MENU(data) = guest_cast<MenuHandle>(hh);
     }
     /* private fields */
     POPUP_TITLE_WIDTH(data) = CTL_MAX(ctl);
     POPUP_FLAGS(data) = flags;
 
-    CTL_DATA_X(ctl) = (Handle)data;
+    CTL_DATA(ctl) = (Handle)data;
 
-    CTL_ACTION_X(ctl) = guest_cast<ControlActionUPP>(-1);
-    CTL_VALUE_X(ctl) = 1;
-    CTL_MIN_X(ctl) = 1;
-    CTL_MAX_X(ctl) = CountMItems(mh);
+    CTL_ACTION(ctl) = guest_cast<ControlActionUPP>(-1);
+    CTL_VALUE(ctl) = 1;
+    CTL_MIN(ctl) = 1;
+    CTL_MAX(ctl) = CountMItems(mh);
     CheckItem(mh, 1, true);
 }
 
@@ -92,7 +92,7 @@ restore_bk_color(ControlHandle ctl, draw_state_t draw_state)
     ctl_owner = CTL_OWNER(ctl);
     if(CGrafPort_p(ctl_owner))
         CPORT_RGB_BK_COLOR(ctl_owner) = draw_state.bk_color;
-    PORT_BK_COLOR_X(ctl_owner) = draw_state.bk;
+    PORT_BK_COLOR(ctl_owner) = draw_state.bk;
 }
 
 static void
@@ -515,7 +515,7 @@ int32_t Executor::C_cdef1008(int16_t var, ControlHandle ctl, int16_t message,
             value = PopUpMenuSelect(mh, top, left, orig_value);
 
             if(value)
-                CTL_VALUE_X(ctl) = value;
+                CTL_VALUE(ctl) = value;
             draw(ctl, draw_state, window_font, window_size, window_font_p,
                  false, false, nullptr, nullptr);
 

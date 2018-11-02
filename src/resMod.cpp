@@ -122,9 +122,9 @@ static LONGINT addtype(resmaphand map, ResType typ)
     t.rloff = NAMEOFF(map) - TYPEOFF(map);
     off = (LONGINT)((char *)tr - (char *)*map);
     Munger((Handle)map, off, (Ptr) "", (LONGINT)0, (Ptr)&t, sizeof(t));
-    NUMTMINUS1X(map) = NUMTMINUS1(map) + 1;
-    MAPLENX(map) = MAPLEN(map) + sizeof(t);
-    NAMEOFFX(map) = NAMEOFF(map) + sizeof(t);
+    NUMTMINUS1(map) += 1;
+    MAPLEN(map) += sizeof(t);
+    NAMEOFF(map) += sizeof(t);
     WALKTR(map, i, tr)
     tr->rloff = tr->rloff + sizeof(t);
     EWALKTR(tr)
@@ -146,7 +146,7 @@ static LONGINT addname(resmaphand map, StringPtr name)
         Munger((Handle)map, MAPLEN(map), (Ptr) "", (LONGINT)0, (Ptr)name,
                namelen);
         retval = MAPLEN(map) - NAMEOFF(map);
-        MAPLENX(map) = MAPLEN(map) + namelen;
+        MAPLEN(map) += namelen;
     }
     return retval;
 }
@@ -201,8 +201,8 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
            sizeof(resref));
     roff -= TYPEOFF(map);
     /* roff is from the beginning of the typelist */
-    MAPLENX(map) = MAPLEN(map) + sizeof(resref);
-    NAMEOFFX(map) = NAMEOFF(map) + sizeof(resref);
+    MAPLEN(map) += sizeof(resref);
+    NAMEOFF(map) += sizeof(resref);
     tr2 = (typref *)((char *)*map + toff);
     tr2->nres = tr2->nres + 1;
     WALKTR(map, i, tr)
@@ -253,7 +253,7 @@ void Executor::C_RemoveResource(Handle res)
         nlen = U(*((char *)*map + nmoff)) + 1;
         Munger((Handle)map, nmoff, (Ptr)0, nlen, (Ptr) "", (LONGINT)0);
         nmoff -= NAMEOFF(map);
-        MAPLENX(map) = MAPLEN(map) - nlen;
+        MAPLEN(map) -= nlen;
     }
     else
         nmoff = 0x7fff;
@@ -261,19 +261,19 @@ void Executor::C_RemoveResource(Handle res)
     Munger((Handle)map, rroff, (Ptr)0, (LONGINT)sizeof(resref),
            (Ptr) "", (LONGINT)0);
     rroff -= TYPEOFF(map);
-    MAPLENX(map) = MAPLEN(map) - sizeof(resref);
-    NAMEOFFX(map) = NAMEOFF(map) - sizeof(resref);
+    MAPLEN(map) -= sizeof(resref);
+    NAMEOFF(map) -= sizeof(resref);
     tr = (typref *)((char *)*map + troff);
     tr->nres = tr->nres - 1;
     if(tr->nres == -1)
     {
         ROMlib_invalar();
-        NUMTMINUS1X(map) = NUMTMINUS1(map) - 1;
+        NUMTMINUS1(map) -= 1;
         Munger((Handle)map, troff, (Ptr)0, (LONGINT)sizeof(typref), (Ptr) "",
                (LONGINT)0);
         tloss = sizeof(typref);
-        MAPLENX(map) = MAPLEN(map) - sizeof(typref);
-        NAMEOFFX(map) = NAMEOFF(map) - sizeof(typref);
+        MAPLEN(map) -= sizeof(typref);
+        NAMEOFF(map) -= sizeof(typref);
     }
     else
         tloss = 0;

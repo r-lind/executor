@@ -18,18 +18,18 @@
 
 namespace Executor
 {
-#define MI_ID_X(mi) ((*mi)->menuID)
-#define MI_WIDTH_X(mi) ((*mi)->menuWidth)
-#define MI_HEIGHT_X(mi) ((*mi)->menuHeight)
-#define MI_PROC_X(mi) ((*mi)->menuProc)
-#define MI_ENABLE_FLAGS_X(mi) ((*mi)->enableFlags)
+#define MI_ID(mi) ((*mi)->menuID)
+#define MI_WIDTH(mi) ((*mi)->menuWidth)
+#define MI_HEIGHT(mi) ((*mi)->menuHeight)
+#define MI_PROC(mi) ((*mi)->menuProc)
+#define MI_ENABLE_FLAGS(mi) ((*mi)->enableFlags)
 #define MI_DATA(mi) ((*mi)->menuData)
 
-#define MI_ID(mi) (MI_ID_X(mi))
-#define MI_WIDTH(mi) (MI_WIDTH_X(mi))
-#define MI_HEIGHT(mi) (MI_HEIGHT_X(mi))
-#define MI_PROC(mi) (MI_PROC_X(mi))
-#define MI_ENABLE_FLAGS(mi) (MI_ENABLE_FLAGS_X(mi))
+
+
+
+
+
 
 #define MI_TITLE(mi) ((*mi)->menuTitle)
 
@@ -96,25 +96,25 @@ typedef struct menu_elt
                    + sizeof(INTEGER) /* lastHMenu */ \
                    + sizeof(PixMapHandle) /* menuTitleSave */))[index])
 
-#define ML_LAST_MENU_OFFSET_X(ml) ((*ml)->last_menu_offset)
-#define ML_LAST_RIGHT_X(ml) ((*ml)->last_right)
-#define ML_RES_ID_X(ml) ((*ml)->mb_res_id)
-#define ML_LAST_HMENU_OFFSET_X(ml)          \
+#define ML_LAST_MENU_OFFSET(ml) ((*ml)->last_menu_offset)
+#define ML_LAST_RIGHT(ml) ((*ml)->last_right)
+#define ML_RES_ID(ml) ((*ml)->mb_res_id)
+#define ML_LAST_HMENU_OFFSET(ml)          \
     (*(INTEGER *)((char *)*(ml)         \
                   + ML_LAST_MENU_OFFSET(ml) \
                   + sizeof(menu_elt)))
-#define ML_MENU_TITLE_SAVE_X(ml)                                   \
+#define ML_MENU_TITLE_SAVE(ml)                                   \
     ((*(GUEST<PixMapHandle> *)((char *)*(ml)                   \
                                + ML_LAST_MENU_OFFSET(ml)           \
                                + sizeof(menu_elt)                  \
                                + sizeof(INTEGER) /* lastHMenu */)) \
          .p)
 
-#define ML_LAST_MENU_OFFSET(ml) (ML_LAST_MENU_OFFSET_X(ml))
-#define ML_LAST_RIGHT(ml) (ML_LAST_RIGHT_X(ml))
-#define ML_RES_ID(ml) (ML_RES_ID_X(ml))
-#define ML_LAST_HMENU_OFFSET(ml) (ML_LAST_HMENU_OFFSET_X(ml))
-#define ML_MENU_TITLE_SAVE(ml) (ML_MENU_TITLE_SAVE_X(ml))
+
+
+
+
+
 
 struct menu_list
 {
@@ -149,12 +149,12 @@ typedef GUEST<menulistp> *mlhandle;
 #define MCENTRY_RGB3(entry) ((entry)->mctRGB3)
 #define MCENTRY_RGB4(entry) ((entry)->mctRGB4)
 
-#define MCENTRY_ID_X(entry) ((entry)->mctID)
-#define MCENTRY_ITEM_X(entry) ((entry)->mctItem)
-#define MCENTRY_RESERVED_X(entry) ((entry)->mctReserved)
+#define MCENTRY_ID(entry) ((entry)->mctID)
+#define MCENTRY_ITEM(entry) ((entry)->mctItem)
+#define MCENTRY_RESERVED(entry) ((entry)->mctReserved)
 
-#define MCENTRY_ID(entry) (MCENTRY_ID_X(entry))
-#define MCENTRY_ITEM(entry) (MCENTRY_ITEM_X(entry))
+
+
 
 #define MENULIST ((mlhandle)LM(MenuList))
 

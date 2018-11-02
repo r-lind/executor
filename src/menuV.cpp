@@ -117,12 +117,12 @@ LONGINT Executor::C_PopUpMenuSelect(MenuHandle mh, INTEGER top, INTEGER left,
 
     MBDFCALL(mbSave, where, ptr_to_longint(&saver));
 
-    auto saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort); /* ick */
-    PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
+    auto saveclip = PORT_CLIP_REGION(qdGlobals().thePort); /* ick */
+    PORT_CLIP_REGION(qdGlobals().thePort) = NewRgn();
     RectRgn(PORT_CLIP_REGION(qdGlobals().thePort), &saver);
     MENUCALL(mDrawMsg, mh, &saver, p, nullptr);
     DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
-    PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
+    PORT_CLIP_REGION(qdGlobals().thePort) = saveclip;
     MBDFCALL(mbSaveAlt, 0, where);
     
     return ROMlib_menuhelper(mh, &saver, where, true, 1);

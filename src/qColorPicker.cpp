@@ -1381,7 +1381,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
     {
         HLockGuard guard(color_wheel_color_table);
 
-        CTAB_SIZE_X(color_wheel_color_table) = 23;
+        CTAB_SIZE(color_wheel_color_table) = 23;
         color_wheel_colors = CTAB_TABLE(color_wheel_color_table);
 
         color_wheel_notice_lightness_change();

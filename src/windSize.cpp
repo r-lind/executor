@@ -32,7 +32,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
 
     w = (WindowPeek)wp;
     gp = qdGlobals().thePort;
-    if(WINDOW_VISIBLE_X(w))
+    if(WINDOW_VISIBLE(w))
     {
         SetPort(wmgr_port);
         ClipRect(&GD_BOUNDS(LM(TheGDevice)));
@@ -90,7 +90,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
     h += PORT_BOUNDS(w).left;
     v += PORT_BOUNDS(w).top;
 #endif
-    if(WINDOW_VISIBLE_X(w))
+    if(WINDOW_VISIBLE(w))
     {
         WRAPPER_PIXMAP_FOR_COPY(wrapper);
 
@@ -99,7 +99,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
         SectRgn(movepart, PORT_CLIP_REGION(wmgr_port), movepart);
         ClipRect(&GD_BOUNDS(LM(TheGDevice)));
 
-        WRAPPER_SET_PIXMAP_X(wrapper, GD_PMAP_X(LM(TheGDevice)));
+        WRAPPER_SET_PIXMAP(wrapper, GD_PMAP(LM(TheGDevice)));
 
 #define NEW_CLIP_HACK
 #if defined(NEW_CLIP_HACK)
@@ -131,7 +131,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
     OffsetRgn(WINDOW_CONT_REGION(w), h, v);
     OffsetRgn(WINDOW_UPDATE_REGION(w), h, v);
     OffsetRect(&PORT_BOUNDS(w), -h, -v);
-    if(WINDOW_VISIBLE_X(w))
+    if(WINDOW_VISIBLE(w))
     {
         ClipRect(&GD_BOUNDS(LM(TheGDevice)));
         ClipAbove(w);
@@ -153,7 +153,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
         SelectWindow((WindowPtr)w);
     SetPort(gp);
 
-    if(WINDOW_VISIBLE_X(w))
+    if(WINDOW_VISIBLE(w))
     {
         ROMlib_rootless_update();
     }
@@ -284,7 +284,7 @@ void Executor::C_SizeWindow(WindowPtr w, INTEGER width, INTEGER height,
 {
     if(width || height)
     {
-        if(WINDOW_VISIBLE_X(w))
+        if(WINDOW_VISIBLE(w))
             SaveOld((WindowPeek)w);
 
         PORT_RECT(w).right = PORT_RECT(w).left + width;
@@ -292,7 +292,7 @@ void Executor::C_SizeWindow(WindowPtr w, INTEGER width, INTEGER height,
 
         ThePortGuard guard(wmgr_port);
         WINDCALL(w, wCalcRgns, 0);
-        if(WINDOW_VISIBLE_X(w))
+        if(WINDOW_VISIBLE(w))
         {
             DrawNew((WindowPeek)w, flag);
 

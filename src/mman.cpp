@@ -550,8 +550,8 @@ void MoreMasters(void)
         return;
     }
 
-    handles[0] = ZONE_HFST_FREE_X(current_zone);
-    ZONE_HFST_FREE_X(current_zone)
+    handles[0] = ZONE_HFST_FREE(current_zone);
+    ZONE_HFST_FREE(current_zone)
         = (Ptr)&handles[ZONE_MORE_MAST(current_zone) - 1];
 
     for(i = ZONE_MORE_MAST(current_zone) - 1; i > 0; i--)
@@ -611,7 +611,7 @@ void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
     zone->sparePtr = nullptr; /* Better safe than sorry */
 #endif
 
-    zone->allocPtr = (Ptr)first_block;
+    zone->allocPtr = first_block;
 
     mm_set_block_fields_offset(first_block,
                                FREE_BLOCK_STATE, FREE, 0,
@@ -663,7 +663,7 @@ _NewEmptyHandle_flags(bool sys_p)
         h = (Handle)ZONE_HFST_FREE(current_zone);
         if(h)
         {
-            ZONE_HFST_FREE_X(current_zone) = *h;
+            ZONE_HFST_FREE(current_zone) = *h;
             *h = nullptr;
             SET_MEM_ERR(noErr);
             break;
@@ -718,7 +718,7 @@ _NewHandle_flags(Size size, bool sys_p, bool clear_p)
     gui_assert(block < ZONE_BK_LIM(current_zone));
 
     ROMlib_setupblock(block, size, REL, newh, 0);
-    *newh = BLOCK_DATA_X(block);
+    *newh = BLOCK_DATA(block);
 
     if(clear_p)
         memset(BLOCK_DATA(block), 0, size - HDRSIZE);
@@ -788,8 +788,8 @@ void DisposeHandle(Handle h)
             ROMlib_freeblock(block);
         }
 
-        *h = ZONE_HFST_FREE_X(current_zone);
-        ZONE_HFST_FREE_X(current_zone) = (Ptr)h;
+        *h = ZONE_HFST_FREE(current_zone);
+        ZONE_HFST_FREE(current_zone) = (Ptr)h;
 
         LM(TheZone) = save_zone;
     }
@@ -876,7 +876,7 @@ void SetHandleSize(Handle h, Size newsize)
         if(ROMlib_makespace(&nextblock, newsize - oldpsize))
         {
             ROMlib_memnomove_p = save_memnomove_p;
-            ZONE_ZCB_FREE_X(current_zone)
+            ZONE_ZCB_FREE(current_zone)
 
                 = ZONE_ZCB_FREE(current_zone) - PSIZE(nextblock);
 
@@ -1098,7 +1098,7 @@ void ReallocateHandle(Handle h, Size size)
             if(newsize >= size)
             {
                 SETPSIZE(oldb, newsize);
-                ZONE_ZCB_FREE_X(current_zone)
+                ZONE_ZCB_FREE(current_zone)
                     = ZONE_ZCB_FREE(current_zone) - PSIZE(newb);
                 ROMlib_setupblock(oldb, size, REL, h, state);
                 goto done;
@@ -1147,16 +1147,16 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
     size += HDRSIZE;
 
 #if 1
-    auto save_alloc_ptr = ZONE_ALLOC_PTR_X(current_zone);
+    auto save_alloc_ptr = ZONE_ALLOC_PTR(current_zone);
 #endif
 
-    ZONE_ALLOC_PTR_X(current_zone) = nullptr;
+    ZONE_ALLOC_PTR(current_zone) = nullptr;
 
     ReserveMem(size);
     if(ROMlib_relalloc(size, &b))
     {
 #if 0
-      ZONE_ALLOC_PTR_X (current_zone) = save_alloc_ptr;
+      ZONE_ALLOC_PTR (current_zone) = save_alloc_ptr;
 #endif
         LM(TheZone) = save_zone;
         SET_MEM_ERR(memFullErr);
@@ -1166,7 +1166,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
 
 #if 1 && !defined(NDEBUG)
     if(do_save_alloc)
-        ZONE_ALLOC_PTR_X(current_zone)
+        ZONE_ALLOC_PTR(current_zone)
             = save_alloc_ptr;
     else
         checkallocptr();
@@ -1284,7 +1284,7 @@ void SetPtrSize(Ptr p, Size newsize)
             if(ROMlib_makespace(&nextblock, newsize - oldpsize))
             {
                 // FIXME: #warning original code was endian-inconsistent
-                ZONE_ZCB_FREE_X(current_zone)
+                ZONE_ZCB_FREE(current_zone)
                     = ZONE_ZCB_FREE(current_zone) - PSIZE(nextblock);
 
                 SETPSIZE(block, oldpsize + PSIZE(nextblock));
@@ -1454,7 +1454,7 @@ Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
                 if(ZONE_ALLOC_PTR(current_zone) > startb
                    && ((char *)ZONE_ALLOC_PTR(current_zone)
                        < (char *)startb + sizesofar))
-                    ZONE_ALLOC_PTR_X(current_zone) = (Ptr)startb;
+                    ZONE_ALLOC_PTR(current_zone) = startb;
                 if(sizesofar > biggestfree)
                     biggestfree = sizesofar;
                 state = SEARCHING;
@@ -1467,7 +1467,7 @@ Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
         if(ZONE_ALLOC_PTR(current_zone) > startb
            && ((char *)ZONE_ALLOC_PTR(current_zone)
                < (char *)startb + sizesofar))
-            ZONE_ALLOC_PTR_X(current_zone) = (Ptr)startb;
+            ZONE_ALLOC_PTR(current_zone) = startb;
 
         if(sizesofar > biggestfree)
             biggestfree = sizesofar;
@@ -1514,7 +1514,7 @@ Size _CompactMem_flags(Size sizeneeded, bool sys_p)
     startfront_p = (src == ZONE_HEAP_DATA(current_zone));
 
 repeat:
-    ZONE_ALLOC_PTR_X(current_zone) = nullptr;
+    ZONE_ALLOC_PTR(current_zone) = nullptr;
     amtfree = 0;
 
     while(src != ZONE_BK_LIM(current_zone)
@@ -1554,8 +1554,8 @@ repeat:
                 if(src_target_diff > amtfree)
                 {
                     amtfree = src_target_diff;
-                    if(!ZONE_ALLOC_PTR_X(current_zone))
-                        ZONE_ALLOC_PTR_X(current_zone) = (Ptr)target;
+                    if(!ZONE_ALLOC_PTR(current_zone))
+                        ZONE_ALLOC_PTR(current_zone) = target;
                 }
             }
             src = target = BLOCK_NEXT(src);
@@ -1575,8 +1575,8 @@ repeat:
         if(src_target_diff > amtfree)
         {
             amtfree = src_target_diff;
-            if(!ZONE_ALLOC_PTR_X(current_zone))
-                ZONE_ALLOC_PTR_X(current_zone) = (Ptr)target;
+            if(!ZONE_ALLOC_PTR(current_zone))
+                ZONE_ALLOC_PTR(current_zone) = target;
         }
     }
 
@@ -1913,7 +1913,7 @@ void SetGrowZone(GrowZoneProcPtr newgz)
 {
     MM_SLAM("entry");
 
-    ZONE_GZ_PROC_X(LM(TheZone)) = newgz;
+    ZONE_GZ_PROC(LM(TheZone)) = newgz;
     SET_MEM_ERR(noErr);
 }
 
@@ -1949,7 +1949,7 @@ void EmptyHandle(Handle h)
         return;
     }
 
-    if(ZONE_PURGE_PROC_X(current_zone))
+    if(ZONE_PURGE_PROC(current_zone))
     {
         uint32_t saved0, saved1, saved2, savea0, savea1;
         ROMlib_hook(memory_purgeprocnumber);
@@ -2003,9 +2003,9 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         block_header_t *sb = HANDLE_TO_BLOCK(sh);
         ROMlib_freeblock(db);
         SETMASTER(dh, *sh);
-        BLOCK_LOCATION_OFFSET_X(sb) = (Ptr)dh - (Ptr)LM(TheZone);
-        *sh = guest_cast<Ptr>(ZONE_HFST_FREE_X(LM(TheZone)));
-        ZONE_HFST_FREE_X(LM(TheZone)) = (Ptr)sh;
+        BLOCK_LOCATION_OFFSET(sb) = (Ptr)dh - (Ptr)LM(TheZone);
+        *sh = guest_cast<Ptr>(ZONE_HFST_FREE(LM(TheZone)));
+        ZONE_HFST_FREE(LM(TheZone)) = (Ptr)sh;
     }
     LM(TheZone) = save_zone;
     MM_SLAM("exit");

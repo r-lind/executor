@@ -492,7 +492,7 @@ check_vanddir(INTEGER vref, LONGINT dirid, int descend_count, Str63 library,
                                            errName);
                 }
             }
-            else if(pb.hFileInfo.ioFlFndrInfo.fdType == TICKX("shlb"))
+            else if(pb.hFileInfo.ioFlFndrInfo.fdType == TICK("shlb"))
                 retval = check_file(vref, dirid, s, false, library, arch,
                                     loadflags, cidp, mainaddrp, errName);
         }
@@ -881,7 +881,7 @@ begin_closure(uint32_t n_libs, PEFImportedLibrary_t *libs,
     OSErr err;
 
     retval = (decltype(retval))NewPtr(sizeof *retval + n_libs * sizeof(lib_t));
-    N_LIBS_X(retval) = n_libs;
+    N_LIBS(retval) = n_libs;
 
     // FIXME: #warning eventually need to worry about errors
 
@@ -898,15 +898,15 @@ begin_closure(uint32_t n_libs, PEFImportedLibrary_t *libs,
         libName[0] = std::min<int>(strlen(cname), 63);
         memcpy(libName + 1, cname, libName[0]);
         err = GetSharedLibrary(libName, arch, kReferenceCFrag,
-                               &LIB_CID_X(&retval->libs[i]),
+                               &LIB_CID(&retval->libs[i]),
                                &mainAddr, errName);
         if(err != noErr)
         {
             warning_unexpected("%.*s", libName[0], libName + 1);
-            LIB_CID_X(&retval->libs[i]) = nullptr;//### v(void *)0x12348765;
+            LIB_CID(&retval->libs[i]) = nullptr;//### v(void *)0x12348765;
         }
-        LIB_N_SYMBOLS_X(&retval->libs[i]) = PEFIL_SYMBOL_COUNT_X(&libs[i]);
-        LIB_FIRST_SYMBOL_X(&retval->libs[i]) = PEFIL_FIRST_SYMBOL_X(&libs[i]);
+        LIB_N_SYMBOLS(&retval->libs[i]) = PEFIL_SYMBOL_COUNT(&libs[i]);
+        LIB_FIRST_SYMBOL(&retval->libs[i]) = PEFIL_FIRST_SYMBOL(&libs[i]);
     }
     return retval;
 }
@@ -1172,12 +1172,12 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
     if(PEF_CONTAINER_TAG2_X(headp) != FOURCC('p', 'e', 'f', 'f'))
         warning_unexpected("0x%x", PEF_CONTAINER_TAG2(headp));
 
-    if(PEF_CONTAINER_ARCHITECTURE_X(headp)
+    if(PEF_CONTAINER_ARCHITECTURE(headp)
        != FOURCC('p', 'w', 'p', 'c'))
         warning_unexpected("0x%x",
                            PEF_CONTAINER_ARCHITECTURE(headp));
 
-    if(PEF_CONTAINER_FORMAT_VERSION_X(headp) != 1)
+    if(PEF_CONTAINER_FORMAT_VERSION(headp) != 1)
         warning_unexpected("0x%x",
                            PEF_CONTAINER_FORMAT_VERSION(headp));
 

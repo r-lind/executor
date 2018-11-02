@@ -132,8 +132,8 @@ void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
         /*-->*/ return;
     saveloc = PORT_PEN_LOC(qdGlobals().thePort);
     PAUSERECORDING;
-    tmpvis = PORT_PEN_VIS_X(qdGlobals().thePort);
-    PORT_PEN_VIS_X(qdGlobals().thePort) = 0;
+    tmpvis = PORT_PEN_VIS(qdGlobals().thePort);
+    PORT_PEN_VIS(qdGlobals().thePort) = 0;
     OpenRgn();
     enda = starta + arca;
     if(arca < 0)
@@ -197,12 +197,12 @@ void Executor::C_StdArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
     LineTo(left + (right - left) / 2, top + (bottom - top) / 2);
     rh = NewRgn();
     CloseRgn(rh);
-    PORT_PEN_VIS_X(qdGlobals().thePort) = tmpvis;
-    saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
+    PORT_PEN_VIS(qdGlobals().thePort) = tmpvis;
+    saveclip = PORT_CLIP_REGION(qdGlobals().thePort);
     SectRgn(saveclip, rh, rh);
-    PORT_CLIP_REGION_X(qdGlobals().thePort) = rh;
+    PORT_CLIP_REGION(qdGlobals().thePort) = rh;
     StdOval(verb, r);
-    PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
+    PORT_CLIP_REGION(qdGlobals().thePort) = saveclip;
     DisposeRgn(rh);
     RESUMERECORDING;
     PORT_PEN_LOC(qdGlobals().thePort) = saveloc;

@@ -177,26 +177,26 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
         gd_pixmap = GD_PMAP(gw_gd);
 
         row_bytes = ((RECT_WIDTH(bounds) * depth + 31) / 32) * 4;
-        PIXMAP_SET_ROWBYTES_X(gd_pixmap, row_bytes);
+        PIXMAP_SET_ROWBYTES(gd_pixmap, row_bytes);
 
         gd_pixmap_baseaddr = NewHandle(row_bytes * RECT_HEIGHT(bounds));
         if(MemError() != noErr)
             return MemError();
 
-        PIXMAP_BASEADDR_X(gd_pixmap) = (Ptr)gd_pixmap_baseaddr;
+        PIXMAP_BASEADDR(gd_pixmap) = (Ptr)gd_pixmap_baseaddr;
 
         PIXMAP_BOUNDS(gd_pixmap) = *bounds;
         if(depth > 8)
         {
-            PIXMAP_PIXEL_TYPE_X(gd_pixmap) = RGBDirect;
-            PIXMAP_CMP_COUNT_X(gd_pixmap) = 3;
+            PIXMAP_PIXEL_TYPE(gd_pixmap) = RGBDirect;
+            PIXMAP_CMP_COUNT(gd_pixmap) = 3;
             switch(depth)
             {
                 case 16:
-                    PIXMAP_CMP_SIZE_X(gd_pixmap) = 5;
+                    PIXMAP_CMP_SIZE(gd_pixmap) = 5;
                     break;
                 case 32:
-                    PIXMAP_CMP_SIZE_X(gd_pixmap) = 8;
+                    PIXMAP_CMP_SIZE(gd_pixmap) = 8;
                     break;
                 default:
                     gui_fatal("unknown pixel size");
@@ -204,11 +204,11 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
         }
         else
         {
-            PIXMAP_PIXEL_TYPE_X(gd_pixmap) = 0;
-            PIXMAP_CMP_COUNT_X(gd_pixmap) = 1;
-            PIXMAP_CMP_SIZE_X(gd_pixmap) = depth;
+            PIXMAP_PIXEL_TYPE(gd_pixmap) = 0;
+            PIXMAP_CMP_COUNT(gd_pixmap) = 1;
+            PIXMAP_CMP_SIZE(gd_pixmap) = depth;
         }
-        PIXMAP_PIXEL_SIZE_X(gd_pixmap) = depth;
+        PIXMAP_PIXEL_SIZE(gd_pixmap) = depth;
         if(ctab == nullptr && depth <= 8)
         {
             int ctab_max_elt = (1 << depth) - 1;
@@ -217,9 +217,9 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
 
             SetHandleSize((Handle)ctab,
                           CTAB_STORAGE_FOR_SIZE(ctab_max_elt));
-            CTAB_SIZE_X(ctab) = ctab_max_elt;
-            CTAB_SEED_X(ctab) = (int32_t)depth;
-            CTAB_FLAGS_X(ctab) = CTAB_GDEVICE_BIT_X;
+            CTAB_SIZE(ctab) = ctab_max_elt;
+            CTAB_SEED(ctab) = (int32_t)depth;
+            CTAB_FLAGS(ctab) = CTAB_GDEVICE_BIT;
             memcpy(CTAB_TABLE(ctab),
                    default_ctab_colors[ROMlib_log2[depth]],
                    sizeof(ColorSpec) << depth);
@@ -260,21 +260,21 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
 	      which may not match `depth' */
         row_bytes = ((RECT_WIDTH(bounds) * depth + 31) / 32) * 4;
 
-        PIXMAP_SET_ROWBYTES_X(gw_pixmap, row_bytes);
+        PIXMAP_SET_ROWBYTES(gw_pixmap, row_bytes);
 
         gw_pixmap_baseaddr = NewHandle(row_bytes * RECT_HEIGHT(bounds));
         if(MemError() != noErr)
             /* ### err, i'm not sure what the mac does when this
 		allocation fails */
             gw_pixmap_baseaddr = NewHandle(0);
-        PIXMAP_BASEADDR_X(gw_pixmap)
+        PIXMAP_BASEADDR(gw_pixmap)
             = (Ptr)gw_pixmap_baseaddr;
 
         PORT_RECT(graphics_world) = PIXMAP_BOUNDS(gw_pixmap) = *bounds;
     }
 
     /* mark as a GWorld and not a CGrafPort */
-    CPORT_VERSION_X(graphics_world) |= GW_FLAG_BIT_X;
+    CPORT_VERSION(graphics_world) |= GW_FLAG_BIT;
 
     install_new_gw_info(graphics_world, gw_gd, 0, gd_allocated_p);
 
@@ -307,7 +307,7 @@ Boolean Executor::C_LockPixels(PixMapHandle pixels)
         pixels_baseaddr_h = (Handle)PIXMAP_BASEADDR(pixels);
         /* lock the baseaddr handle memory */
         HSetState(pixels_baseaddr_h, HGetState(pixels_baseaddr_h) | LOCKBIT);
-        PIXMAP_BASEADDR_X(pixels) = *pixels_baseaddr_h;
+        PIXMAP_BASEADDR(pixels) = *pixels_baseaddr_h;
 
         HSetState((Handle)pixels, HGetState((Handle)pixels) | LOCKBIT);
     }
@@ -339,7 +339,7 @@ void Executor::C_UnlockPixels(PixMapHandle pixels)
             pixels_baseaddr_h = RecoverHandle(pixels_baseaddr);
             HSetState(pixels_baseaddr_h,
                       HGetState(pixels_baseaddr_h) & ~LOCKBIT);
-            PIXMAP_BASEADDR_X(pixels) = (Ptr)pixels_baseaddr_h;
+            PIXMAP_BASEADDR(pixels) = (Ptr)pixels_baseaddr_h;
 
             HSetState((Handle)pixels, HGetState((Handle)pixels) & ~LOCKBIT);
         }
@@ -395,7 +395,7 @@ GWorldFlags Executor::C_UpdateGWorld(GUEST<GWorldPtr> *graphics_world,
     }
 
     if(ctab
-       && CTAB_SEED_X(ctab) != CTAB_SEED_X(gw_pmap_ctab))
+       && CTAB_SEED(ctab) != CTAB_SEED(gw_pmap_ctab))
         retval |= mapPix;
 
     if(depth != PIXMAP_PIXEL_SIZE(gw_pmap))
@@ -427,7 +427,7 @@ GWorldFlags Executor::C_UpdateGWorld(GUEST<GWorldPtr> *graphics_world,
         gw_info_ret = lookup_gw_info_by_gw(gw_ret);
         gw_pmap_ret = CPORT_PIXMAP(gw_ret);
 
-        if(PIXMAP_ROWBYTES_X(gw_pmap_ret) != PIXMAP_ROWBYTES_X(gw_pmap))
+        if(PIXMAP_ROWBYTES(gw_pmap_ret) != PIXMAP_ROWBYTES(gw_pmap))
             retval |= newRowBytes;
 
         LockPixels(gw_pmap_ret);
@@ -551,7 +551,7 @@ void Executor::C_SetGWorld(CGrafPtr port, GDHandle graphics_device)
             gd_pixmap = GD_PMAP(LM(MainDevice));
 
             if(port
-               && (PIXMAP_BASEADDR_X(gd_pixmap) == PORT_BASEADDR_X(port)))
+               && (PIXMAP_BASEADDR(gd_pixmap) == PORT_BASEADDR(port)))
                 LM(TheGDevice) = LM(MainDevice);
         }
     }
@@ -666,9 +666,9 @@ QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,
         return cNoMemErr;
 
     bpp = PIXMAP_PIXEL_SIZE(gd_pixmap);
-    PIXMAP_PIXEL_SIZE_X(pixels) = PIXMAP_PIXEL_SIZE_X(gd_pixmap);
-    PIXMAP_CMP_COUNT_X(pixels) = PIXMAP_CMP_COUNT_X(gd_pixmap);
-    PIXMAP_CMP_SIZE_X(pixels) = PIXMAP_CMP_SIZE_X(gd_pixmap);
+    PIXMAP_PIXEL_SIZE(pixels) = PIXMAP_PIXEL_SIZE(gd_pixmap);
+    PIXMAP_CMP_COUNT(pixels) = PIXMAP_CMP_COUNT(gd_pixmap);
+    PIXMAP_CMP_SIZE(pixels) = PIXMAP_CMP_SIZE(gd_pixmap);
 
     ROMlib_copy_ctab(PIXMAP_TABLE(gd_pixmap), PIXMAP_TABLE(pixels));
 
@@ -678,7 +678,7 @@ QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,
 
     rowbytes = ((width * bpp + 31) / 32) * 4;
 
-    PIXMAP_SET_ROWBYTES_X(pixels, rowbytes);
+    PIXMAP_SET_ROWBYTES(pixels, rowbytes);
 
     /* not clear if we should be allocating a ptr or a handle for the
      pixmap baseaddr */
@@ -698,7 +698,7 @@ QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,
         AllowPurgePixels(pixels);
     else
         NoPurgePixels(pixels);
-    PIXMAP_BASEADDR_X(pixels) = p;
+    PIXMAP_BASEADDR(pixels) = p;
 
     *graphics_device = max_graphics_device;
     *offscreen_pixmap = pixels;

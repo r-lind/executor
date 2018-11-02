@@ -17,13 +17,13 @@ using namespace Executor;
 void Executor::C_HidePen()
 {
     if(qdGlobals().thePort)
-        PORT_PEN_VIS_X(qdGlobals().thePort) = PORT_PEN_VIS(qdGlobals().thePort) - 1;
+        PORT_PEN_VIS(qdGlobals().thePort) = PORT_PEN_VIS(qdGlobals().thePort) - 1;
 }
 
 void Executor::C_ShowPen()
 {
     if(qdGlobals().thePort)
-        PORT_PEN_VIS_X(qdGlobals().thePort) = PORT_PEN_VIS(qdGlobals().thePort) + 1;
+        PORT_PEN_VIS(qdGlobals().thePort) = PORT_PEN_VIS(qdGlobals().thePort) + 1;
 }
 
 void Executor::C_GetPen(GUEST<Point> *ptp)
@@ -43,14 +43,14 @@ void Executor::C_GetPenState(PenState *ps)
 
         ps->pnLoc = PORT_PEN_LOC(qdGlobals().thePort);
         ps->pnSize = PORT_PEN_SIZE(qdGlobals().thePort);
-        ps->pnMode = PORT_PEN_MODE_X(qdGlobals().thePort);
+        ps->pnMode = PORT_PEN_MODE(qdGlobals().thePort);
 
         pen_pixpat = CPORT_PEN_PIXPAT(theCPort);
         /*
  * NOTE: it's not clear what the Mac does here.  Cotton has been
  *	 wrong about this stuff before.
  */
-        if(PIXPAT_TYPE_X(pen_pixpat) == pixpat_type_orig)
+        if(PIXPAT_TYPE(pen_pixpat) == pixpat_type_orig)
             /* #warning GetPenState not necessarily implemented correctly... */
             PATASSIGN(ps->pnPat, PIXPAT_1DATA(pen_pixpat));
         else
@@ -75,12 +75,12 @@ void Executor::C_SetPenState(PenState *ps)
 
     if(ps->pnMode & 0x8000)
     {
-        PORT_PEN_MODE_X(qdGlobals().thePort) = ps->pnMode & ~0x8000;
+        PORT_PEN_MODE(qdGlobals().thePort) = ps->pnMode & ~0x8000;
         PenPixPat(*(PixPatHandle *)&ps->pnPat[0]);
     }
     else
     {
-        PORT_PEN_MODE_X(qdGlobals().thePort) = ps->pnMode;
+        PORT_PEN_MODE(qdGlobals().thePort) = ps->pnMode;
         PenPat(ps->pnPat);
     }
 }
@@ -97,13 +97,13 @@ void Executor::draw_state_save(draw_state_t *draw_state)
         draw_state->fg_color = CPORT_RGB_FG_COLOR(current_port);
         draw_state->bk_color = CPORT_RGB_BK_COLOR(current_port);
     }
-    draw_state->fg = PORT_FG_COLOR_X(current_port);
-    draw_state->bk = PORT_BK_COLOR_X(current_port);
+    draw_state->fg = PORT_FG_COLOR(current_port);
+    draw_state->bk = PORT_BK_COLOR(current_port);
 
-    draw_state->tx_font = PORT_TX_FONT_X(current_port);
-    draw_state->tx_face = PORT_TX_FACE_X(current_port);
-    draw_state->tx_size = PORT_TX_SIZE_X(current_port);
-    draw_state->tx_mode = PORT_TX_MODE_X(current_port);
+    draw_state->tx_font = PORT_TX_FONT(current_port);
+    draw_state->tx_face = PORT_TX_FACE(current_port);
+    draw_state->tx_size = PORT_TX_SIZE(current_port);
+    draw_state->tx_mode = PORT_TX_MODE(current_port);
 }
 
 void Executor::draw_state_restore(draw_state_t *draw_state)
@@ -118,13 +118,13 @@ void Executor::draw_state_restore(draw_state_t *draw_state)
         CPORT_RGB_FG_COLOR(current_port) = draw_state->fg_color;
         CPORT_RGB_BK_COLOR(current_port) = draw_state->bk_color;
     }
-    PORT_FG_COLOR_X(current_port) = draw_state->fg;
-    PORT_BK_COLOR_X(current_port) = draw_state->bk;
+    PORT_FG_COLOR(current_port) = draw_state->fg;
+    PORT_BK_COLOR(current_port) = draw_state->bk;
 
-    PORT_TX_FONT_X(current_port) = draw_state->tx_font;
-    PORT_TX_FACE_X(current_port) = draw_state->tx_face;
-    PORT_TX_SIZE_X(current_port) = draw_state->tx_size;
-    PORT_TX_MODE_X(current_port) = draw_state->tx_mode;
+    PORT_TX_FONT(current_port) = draw_state->tx_font;
+    PORT_TX_FACE(current_port) = draw_state->tx_face;
+    PORT_TX_SIZE(current_port) = draw_state->tx_size;
+    PORT_TX_MODE(current_port) = draw_state->tx_mode;
 }
 
 void Executor::C_PenSize(INTEGER w, INTEGER h)
@@ -139,7 +139,7 @@ void Executor::C_PenSize(INTEGER w, INTEGER h)
 void Executor::C_PenMode(INTEGER m)
 {
     if(qdGlobals().thePort)
-        PORT_PEN_MODE_X(qdGlobals().thePort) = m;
+        PORT_PEN_MODE(qdGlobals().thePort) = m;
 }
 
 void Executor::C_PenPat(Pattern pp)
@@ -151,13 +151,13 @@ void Executor::C_PenPat(Pattern pp)
             PixPatHandle old_pen;
 
             old_pen = CPORT_PEN_PIXPAT(theCPort);
-            if(PIXPAT_TYPE_X(old_pen) == pixpat_type_orig)
+            if(PIXPAT_TYPE(old_pen) == pixpat_type_orig)
                 PATASSIGN(PIXPAT_1DATA(old_pen), pp);
             else
             {
                 PixPatHandle new_pen = NewPixPat();
 
-                PIXPAT_TYPE_X(new_pen) = 0;
+                PIXPAT_TYPE(new_pen) = 0;
                 PATASSIGN(PIXPAT_1DATA(new_pen), pp);
 
                 PenPixPat(new_pen);

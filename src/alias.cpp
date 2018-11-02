@@ -22,8 +22,6 @@
 
 #include <algorithm>
 
-#define paramErr (-50)
-
 using namespace Executor;
 
 /* NOTE: if we want to be more like the Mac, we should have a 'fld#',0

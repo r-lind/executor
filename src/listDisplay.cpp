@@ -31,8 +31,8 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
         setit = (ip[0] & 0x8000) && (*list)->lActive;
         saveport = qdGlobals().thePort;
         SetPort((*list)->port);
-        saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
-        PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
+        saveclip = PORT_CLIP_REGION(qdGlobals().thePort);
+        PORT_CLIP_REGION(qdGlobals().thePort) = NewRgn();
 
         C_LRect(&r, cell, list);
         ClipRect(&r);
@@ -41,7 +41,7 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
         LISTEND(list);
 
         DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
-        PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
+        PORT_CLIP_REGION(qdGlobals().thePort) = saveclip;
         SetPort(saveport);
     }
 }
@@ -234,13 +234,13 @@ void Executor::C_LActivate(BOOLEAN act, ListHandle list) /* IMIV-276 */
                 {
                     off0 = ip[0] & 0x7FFF;
                     off1 = ip[1] & 0x7FFF;
-                    saveclip = PORT_CLIP_REGION_X(qdGlobals().thePort);
-                    PORT_CLIP_REGION_X(qdGlobals().thePort) = NewRgn();
+                    saveclip = PORT_CLIP_REGION(qdGlobals().thePort);
+                    PORT_CLIP_REGION(qdGlobals().thePort) = NewRgn();
                     C_LRect(&r, c, list);
                     ClipRect(&r);
                     LISTCALL(lHiliteMsg, sel, &r, c, off0, off1 - off0, list);
                     DisposeRgn(PORT_CLIP_REGION(qdGlobals().thePort));
-                    PORT_CLIP_REGION_X(qdGlobals().thePort) = saveclip;
+                    PORT_CLIP_REGION(qdGlobals().thePort) = saveclip;
                 }
             }
         }

@@ -97,7 +97,7 @@ void Executor::C_OpenRgn()
     /* sentinel */
     (RGN_DATA(rh))[0] = RGN_STOP_X;
 
-    PORT_REGION_SAVE_X(qdGlobals().thePort) = (Handle)rh;
+    PORT_REGION_SAVE(qdGlobals().thePort) = (Handle)rh;
     HidePen();
 }
 
@@ -109,7 +109,7 @@ rgn_is_rect_p(const RgnHandle rgnh)
 
     ip = RGNP_DATA(rgnp);
     return (!RGNP_SPECIAL_P(rgnp)
-            && RGNP_SIZE_X(rgnp) == RGN_SMALL_SIZE + 9 * sizeof *ip
+            && RGNP_SIZE(rgnp) == RGN_SMALL_SIZE + 9 * sizeof *ip
             && ip[1] == ip[5]
             && ip[2] == ip[6]);
 }
@@ -200,13 +200,13 @@ void Executor::C_CloseRgn(RgnHandle rh)
 {
     RgnHandle rgn_save = (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort);
 
-    if(RGN_SIZE_X(rgn_save) == RGN_SMALL_SIZE + sizeof(INTEGER)
+    if(RGN_SIZE(rgn_save) == RGN_SMALL_SIZE + sizeof(INTEGER)
        || rgn_is_rect_p(rgn_save))
         RGN_SET_SMALL(rgn_save);
 
     ROMlib_installhandle(PORT_REGION_SAVE(qdGlobals().thePort), (Handle)rh);
     SetHandleSize((Handle)rh, RGN_SIZE(rh));
-    PORT_REGION_SAVE_X(qdGlobals().thePort) = nullptr;
+    PORT_REGION_SAVE(qdGlobals().thePort) = nullptr;
     ShowPen();
 }
 

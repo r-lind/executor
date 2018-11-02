@@ -84,52 +84,52 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define PORT_PEN_SIZE(port) PORT_FIELD(port, pnSize)
 
 /* big endian byte order */
-#define PORT_VIS_REGION_X(port) PORT_FIELD(port, visRgn)
-#define PORT_CLIP_REGION_X(port) PORT_FIELD(port, clipRgn)
-#define PORT_PEN_MODE_X(port) PORT_FIELD(port, pnMode)
+#define PORT_VIS_REGION(port) PORT_FIELD(port, visRgn)
+#define PORT_CLIP_REGION(port) PORT_FIELD(port, clipRgn)
+#define PORT_PEN_MODE(port) PORT_FIELD(port, pnMode)
 /* native byte order */
-#define PORT_VIS_REGION(port) (PORT_VIS_REGION_X(port))
-#define PORT_CLIP_REGION(port) (PORT_CLIP_REGION_X(port))
-#define PORT_PEN_MODE(port) (PORT_PEN_MODE_X(port))
+
+
+
 
 /* field accessors for members which exist in both types and are in
    the same location */
 /* big endian byte order */
-#define PORT_DEVICE_X(port) (((GrafPtr)(port))->device)
-#define PORT_PEN_VIS_X(port) (((GrafPtr)(port))->pnVis)
-#define PORT_TX_FONT_X(port) (((GrafPtr)(port))->txFont)
-#define PORT_TX_FACE_X(port) (((GrafPtr)(port))->txFace)
-#define PORT_TX_MODE_X(port) (((GrafPtr)(port))->txMode)
-#define PORT_TX_SIZE_X(port) (((GrafPtr)(port))->txSize)
-#define PORT_SP_EXTRA_X(port) (((GrafPtr)(port))->spExtra)
-#define PORT_FG_COLOR_X(port) (((GrafPtr)(port))->fgColor)
-#define PORT_BK_COLOR_X(port) (((GrafPtr)(port))->bkColor)
-#define PORT_COLR_BIT_X(port) (((GrafPtr)(port))->colrBit)
-#define PORT_PAT_STRETCH_X(port) (((GrafPtr)(port))->patStretch)
-#define PORT_PIC_SAVE_X(port) (((GrafPtr)(port))->picSave)
-#define PORT_REGION_SAVE_X(port) (((GrafPtr)(port))->rgnSave)
-#define PORT_POLY_SAVE_X(port) (((GrafPtr)(port))->polySave)
+#define PORT_DEVICE(port) (((GrafPtr)(port))->device)
+#define PORT_PEN_VIS(port) (((GrafPtr)(port))->pnVis)
+#define PORT_TX_FONT(port) (((GrafPtr)(port))->txFont)
+#define PORT_TX_FACE(port) (((GrafPtr)(port))->txFace)
+#define PORT_TX_MODE(port) (((GrafPtr)(port))->txMode)
+#define PORT_TX_SIZE(port) (((GrafPtr)(port))->txSize)
+#define PORT_SP_EXTRA(port) (((GrafPtr)(port))->spExtra)
+#define PORT_FG_COLOR(port) (((GrafPtr)(port))->fgColor)
+#define PORT_BK_COLOR(port) (((GrafPtr)(port))->bkColor)
+#define PORT_COLR_BIT(port) (((GrafPtr)(port))->colrBit)
+#define PORT_PAT_STRETCH(port) (((GrafPtr)(port))->patStretch)
+#define PORT_PIC_SAVE(port) (((GrafPtr)(port))->picSave)
+#define PORT_REGION_SAVE(port) (((GrafPtr)(port))->rgnSave)
+#define PORT_POLY_SAVE(port) (((GrafPtr)(port))->polySave)
 /* NOTE: this returns a different type depending if
    the argument is a CGrafPort or not */
-#define PORT_GRAF_PROCS_X(port) (((GrafPtr)(port))->grafProcs)
+#define PORT_GRAF_PROCS(port) (((GrafPtr)(port))->grafProcs)
 /* native byte order */
-#define PORT_DEVICE(port) (PORT_DEVICE_X(port))
-#define PORT_PEN_VIS(port) (PORT_PEN_VIS_X(port))
-#define PORT_TX_FONT(port) (PORT_TX_FONT_X(port))
-#define PORT_TX_FACE(port) (PORT_TX_FACE_X(port))
-#define PORT_TX_MODE(port) (PORT_TX_MODE_X(port))
-#define PORT_TX_SIZE(port) (PORT_TX_SIZE_X(port))
-#define PORT_SP_EXTRA(port) (PORT_SP_EXTRA_X(port))
-#define PORT_FG_COLOR(port) (PORT_FG_COLOR_X(port))
-#define PORT_BK_COLOR(port) (PORT_BK_COLOR_X(port))
-#define PORT_COLR_BIT(port) (PORT_COLR_BIT_X(port))
-#define PORT_PAT_STRETCH(port) (PORT_PAT_STRETCH_X(port))
-#define PORT_PIC_SAVE(port) (PORT_PIC_SAVE_X(port))
-#define PORT_REGION_SAVE(port) (PORT_REGION_SAVE_X(port))
-#define PORT_POLY_SAVE(port) (PORT_POLY_SAVE_X(port))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 /* NOTE: this returns a different type depending if
    the argument is a CGrafPort or not */
-#define PORT_GRAF_PROCS(port) (PORT_GRAF_PROCS_X(port))
+
 
 /* accessors for fields which exist only in basic quickdraw graphics
    ports */
@@ -149,35 +149,25 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 
 #define CPORT_RGB_BK_COLOR(cport) (ASSERT_CPORT(cport)->rgbBkColor)
 /* big endian byte order */
-#define CPORT_PIXMAP_X(cport) (ASSERT_CPORT(cport)->portPixMap)
+#define CPORT_PIXMAP(cport) (ASSERT_CPORT(cport)->portPixMap)
 
 #define CPORT_PIXMAP_X_NO_ASSERT(cport) (((CGrafPtr)(cport))->portPixMap)
 
-#define CPORT_VERSION_X(cport) (ASSERT_CPORT(cport)->portVersion)
+#define CPORT_VERSION(cport) (ASSERT_CPORT(cport)->portVersion)
 
 #define CPORT_VERSION_X_NO_ASSERT(cport) (((CGrafPtr)(cport))->portVersion)
 
-#define CPORT_CH_EXTRA_X(cport) (ASSERT_CPORT(cport)->chExtra)
+#define CPORT_CH_EXTRA(cport) (ASSERT_CPORT(cport)->chExtra)
 
-#define CPORT_PENLOC_HFRAC_X(cport) (ASSERT_CPORT(cport)->pnLocHFrac)
+#define CPORT_PENLOC_HFRAC(cport) (ASSERT_CPORT(cport)->pnLocHFrac)
 
-#define CPORT_BK_PIXPAT_X(cport) (ASSERT_CPORT(cport)->bkPixPat)
+#define CPORT_BK_PIXPAT(cport) (ASSERT_CPORT(cport)->bkPixPat)
 
-#define CPORT_FILL_PIXPAT_X(cport) (ASSERT_CPORT(cport)->fillPixPat)
+#define CPORT_FILL_PIXPAT(cport) (ASSERT_CPORT(cport)->fillPixPat)
 
-#define CPORT_PEN_PIXPAT_X(cport) (ASSERT_CPORT(cport)->pnPixPat)
+#define CPORT_PEN_PIXPAT(cport) (ASSERT_CPORT(cport)->pnPixPat)
 
-#define CPORT_GRAFVARS_X(cport) (ASSERT_CPORT(cport)->grafVars)
-
-/* native byte order */
-#define CPORT_PIXMAP(cport) (CPORT_PIXMAP_X(cport))
-#define CPORT_VERSION(cport) (CPORT_VERSION_X(cport))
-#define CPORT_CH_EXTRA(cport) (CPORT_CH_EXTRA_X(cport))
-#define CPORT_PENLOC_HFRAC(cport) (CPORT_PENLOC_HFRAC_X(cport))
-#define CPORT_BK_PIXPAT(cport) (CPORT_BK_PIXPAT_X(cport))
-#define CPORT_FILL_PIXPAT(cport) (CPORT_FILL_PIXPAT_X(cport))
-#define CPORT_PEN_PIXPAT(cport) (CPORT_PEN_PIXPAT_X(cport))
-#define CPORT_GRAFVARS(cport) ((GrafVarsHandle)CPORT_GRAFVARS_X(cport))
+#define CPORT_GRAFVARS(cport) (ASSERT_CPORT(cport)->grafVars)
 
 #define CPORT_OP_COLOR(cport) \
     ((*(GrafVarsHandle)CPORT_GRAFVARS(cport))->rgbOpColor)
@@ -191,11 +181,11 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
                    ? &PIXMAP_BOUNDS(CPORT_PIXMAP((CGrafPtr)port)) \
                    : &(PORT_BITS((GrafPtr)port).bounds)))
 
-#define PORT_BASEADDR_X(port)                              \
+#define PORT_BASEADDR(port)                              \
     (CGrafPort_p(port)                                     \
-         ? PIXMAP_BASEADDR_X(CPORT_PIXMAP((CGrafPtr)port)) \
+         ? PIXMAP_BASEADDR(CPORT_PIXMAP((CGrafPtr)port)) \
          : PORT_BITS((GrafPtr)port).baseAddr)
-#define PORT_BASEADDR(port) (PORT_BASEADDR_X(port))
+
 
 /* return true if the given bitmap has the same baseAddr, rowBytes and
    bounds as thePort's bits (portBits or portPixMap) */
@@ -220,83 +210,66 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define PIXMAP_BOUNDS(pixmap) ((*pixmap)->bounds)
 
 /* big endian byte order */
-#define PIXMAP_BASEADDR_X(pixmap) ((*pixmap)->baseAddr)
+#define PIXMAP_BASEADDR(pixmap) ((*pixmap)->baseAddr)
 
 #define ROWBYTES_VALUE_BITS (0x3FFF)
-#define ROWBYTES_VALUE_BITS_X (ROWBYTES_VALUE_BITS)
 
 #define ROWBYTES_FLAG_BITS (3 << 14)
-#define ROWBYTES_FLAG_BITS_X (ROWBYTES_FLAG_BITS)
-#define PIXMAP_FLAGS_X(pixmap) \
-    ((*pixmap)->rowBytes & ROWBYTES_FLAG_BITS_X)
-#define PIXMAP_FLAGS(pixmap) (PIXMAP_FLAGS_X(pixmap))
+#define PIXMAP_FLAGS(pixmap) \
+    ((*pixmap)->rowBytes & ROWBYTES_FLAG_BITS)
+
 
 /* ### phase out; eventually i'd like to see consistent use of
    `row_bytes', not `rowbytes' */
-#define PIXMAP_DEFAULT_ROWBYTES_X (1 << 15)
 #define PIXMAP_DEFAULT_ROWBYTES (1 << 15)
 
-#define PIXMAP_DEFAULT_ROW_BYTES_X (1 << 15)
 #define PIXMAP_DEFAULT_ROW_BYTES (1 << 15)
 
 /* the high two bits of the rowbytes field of a {c}grafport/pixmap
    is reserved; and has the following meaning(s): */
-#define PIXMAP_FLAG_BITS_X (2 << 14)
-#define CPORT_FLAG_BITS_X (3 << 14)
+#define PIXMAP_FLAG_BITS (2 << 14)
+#define CPORT_FLAG_BITS (3 << 14)
 
 /* this bit of the port version field of a cgrafport indicates
    the cgrafptr is really a gworldptr */
-#define GW_FLAG_BIT_X (1)
+#define GW_FLAG_BIT (1)
 
 #define GWorld_p(port) \
     (CGrafPort_p(port) \
-     && (CPORT_VERSION_X(port) & GW_FLAG_BIT_X))
+     && (CPORT_VERSION(port) & GW_FLAG_BIT))
 
-#define PIXMAP_ROWBYTES_X(pixmap) \
-    ((*pixmap)->rowBytes & ROWBYTES_VALUE_BITS_X)
-#define PIXMAP_ROWBYTES(pixmap) (PIXMAP_ROWBYTES_X(pixmap))
+#define PIXMAP_ROWBYTES(pixmap) \
+    ((*pixmap)->rowBytes & ROWBYTES_VALUE_BITS)
 
-#define PIXMAP_SET_ROWBYTES_X(pixmap, value) \
-    ((*pixmap)->rowBytes = ((value) & ROWBYTES_VALUE_BITS_X) | PIXMAP_FLAGS_X(pixmap))
 
-#define PIXMAP_VERSION_X(pixmap) ((*pixmap)->pmVersion)
-#define PIXMAP_PACK_TYPE_X(pixmap) ((*pixmap)->packType)
-#define PIXMAP_PACK_SIZE_X(pixmap) ((*pixmap)->packSize)
-#define PIXMAP_HRES_X(pixmap) ((*pixmap)->hRes)
-#define PIXMAP_VRES_X(pixmap) ((*pixmap)->vRes)
-#define PIXMAP_PIXEL_TYPE_X(pixmap) ((*pixmap)->pixelType)
-#define PIXMAP_PIXEL_SIZE_X(pixmap) ((*pixmap)->pixelSize)
-#define PIXMAP_CMP_COUNT_X(pixmap) ((*pixmap)->cmpCount)
-#define PIXMAP_CMP_SIZE_X(pixmap) ((*pixmap)->cmpSize)
-#define PIXMAP_PLANE_BYTES_X(pixmap) ((*pixmap)->planeBytes)
-#define PIXMAP_TABLE_X(pixmap) ((*pixmap)->pmTable)
+#define PIXMAP_SET_ROWBYTES(pixmap, value) \
+    ((*pixmap)->rowBytes = ((value) & ROWBYTES_VALUE_BITS) | PIXMAP_FLAGS(pixmap))
+
+#define PIXMAP_VERSION(pixmap) ((*pixmap)->pmVersion)
+#define PIXMAP_PACK_TYPE(pixmap) ((*pixmap)->packType)
+#define PIXMAP_PACK_SIZE(pixmap) ((*pixmap)->packSize)
+#define PIXMAP_HRES(pixmap) ((*pixmap)->hRes)
+#define PIXMAP_VRES(pixmap) ((*pixmap)->vRes)
+#define PIXMAP_PIXEL_TYPE(pixmap) ((*pixmap)->pixelType)
+#define PIXMAP_PIXEL_SIZE(pixmap) ((*pixmap)->pixelSize)
+#define PIXMAP_CMP_COUNT(pixmap) ((*pixmap)->cmpCount)
+#define PIXMAP_CMP_SIZE(pixmap) ((*pixmap)->cmpSize)
+#define PIXMAP_PLANE_BYTES(pixmap) ((*pixmap)->planeBytes)
+#define PIXMAP_TABLE(pixmap) ((*pixmap)->pmTable)
 
 #define PIXMAP_ASSERT_NOT_SCREEN(pixmap) \
     gui_assert(!active_screen_addr_p(pixmap))
 
 /* used for initializing this field to zero for future
    compatibility */
-#define PIXMAP_RESERVED_X(pixmap) ((*pixmap)->pmReserved)
-/* native byte order */
-#define PIXMAP_BASEADDR(pixmap) (PIXMAP_BASEADDR_X(pixmap))
+#define PIXMAP_RESERVED(pixmap) ((*pixmap)->pmReserved)
 
-#define PIXMAP_VERSION(pixmap) (PIXMAP_VERSION_X(pixmap))
-#define PIXMAP_PACK_TYPE(pixmap) (PIXMAP_PACK_TYPE_X(pixmap))
-#define PIXMAP_PACK_SIZE(pixmap) (PIXMAP_PACK_SIZE_X(pixmap))
-#define PIXMAP_HRES(pixmap) (PIXMAP_HRES_X(pixmap))
-#define PIXMAP_VRES(pixmap) (PIXMAP_VRES_X(pixmap))
-#define PIXMAP_PIXEL_TYPE(pixmap) (PIXMAP_PIXEL_TYPE_X(pixmap))
-#define PIXMAP_PIXEL_SIZE(pixmap) (PIXMAP_PIXEL_SIZE_X(pixmap).get())
-#define PIXMAP_CMP_COUNT(pixmap) (PIXMAP_CMP_COUNT_X(pixmap))
-#define PIXMAP_CMP_SIZE(pixmap) (PIXMAP_CMP_SIZE_X(pixmap))
-#define PIXMAP_PLANE_BYTES(pixmap) (PIXMAP_PLANE_BYTES_X(pixmap))
-#define PIXMAP_TABLE(pixmap) (PIXMAP_TABLE_X(pixmap))
-#define PIXMAP_TABLE_AS_OFFSET(pixmap) (guest_cast<int32_t>(PIXMAP_TABLE_X(pixmap)))
+#define PIXMAP_TABLE_AS_OFFSET(pixmap) (guest_cast<int32_t>(PIXMAP_TABLE(pixmap)))
 
 #define WRAPPER_PIXMAP_FOR_COPY(wrapper_decl_name) \
     BitMap *wrapper_decl_name = (BitMap *)alloca(sizeof(BitMap))
 
-#define WRAPPER_SET_PIXMAP_X(wrapper, pixmap_h)          \
+#define WRAPPER_SET_PIXMAP(wrapper, pixmap_h)          \
     do                                                   \
     {                                                    \
         (wrapper)->rowBytes = 3 << 14;              \
@@ -316,53 +289,36 @@ enum pixpat_pattern_types
 };
 #define PIXPAT_1DATA(pixpat) ((*pixpat)->pat1Data)
 
-/* big endian byte order */
-#if 0
-#define PIXPAT_TYPE_X(pixpat) ((*pixpat)->patType)
-#define PIXPAT_MAP_X(pixpat) ((*pixpat)->patMap)
-#define PIXPAT_DATA_X(pixpat) ((*pixpat)->patData)
-#define PIXPAT_XDATA_X(pixpat) ((*pixpat)->patXData)
-#define PIXPAT_XVALID_X(pixpat) ((*pixpat)->patXValid)
-#define PIXPAT_XMAP_X(pixpat) ((*pixpat)->patXMap)
-#else
-#define PIXPAT_TYPE_X(pixpat) ((*pixpat)->patType)
-#define PIXPAT_MAP_X(pixpat) ((*pixpat)->patMap)
-#define PIXPAT_DATA_X(pixpat) ((*pixpat)->patData)
-#define PIXPAT_XDATA_X(pixpat) ((*pixpat)->patXData)
-#define PIXPAT_XVALID_X(pixpat) ((*pixpat)->patXValid)
-#define PIXPAT_XMAP_X(pixpat) ((*pixpat)->patXMap)
-#endif
-/* native byte order */
-#define PIXPAT_TYPE(pixpat) (PIXPAT_TYPE_X(pixpat))
-#define PIXPAT_MAP(pixpat) (PIXPAT_MAP_X(pixpat))
-#define PIXPAT_DATA(pixpat) (PIXPAT_DATA_X(pixpat))
-#define PIXPAT_DATA_AS_OFFSET(pixpat) (guest_cast<int32_t>(PIXPAT_DATA_X(pixpat)))
-#define PIXPAT_XDATA(pixpat) (PIXPAT_XDATA_X(pixpat))
-#define PIXPAT_XVALID(pixpat) (PIXPAT_XVALID_X(pixpat))
-#define PIXPAT_XMAP(pixpat) ((PixMapHandle)PIXPAT_XMAP_X(pixpat))
+#define PIXPAT_TYPE(pixpat) ((*pixpat)->patType)
+#define PIXPAT_MAP(pixpat) ((*pixpat)->patMap)
+#define PIXPAT_DATA(pixpat) ((*pixpat)->patData)
+#define PIXPAT_XDATA(pixpat) ((*pixpat)->patXData)
+#define PIXPAT_XVALID(pixpat) ((*pixpat)->patXValid)
+#define PIXPAT_XMAP(pixpat) ((*pixpat)->patXMap)
+
+
+#define PIXPAT_DATA_AS_OFFSET(pixpat) (guest_cast<int32_t>(PIXPAT_DATA(pixpat)))
 
 /* BitMap accessors
    NOTE: these take `BitMap *'s, not BitMap handles */
 #define BITMAP_BOUNDS(bitmap) ((bitmap)->bounds)
 
-#define BITMAP_FLAGS_X(bitmap) \
-    (((bitmap)->rowBytes & ROWBYTES_FLAG_BITS_X))
-#define BITMAP_FLAGS(bitmap)		((bitmap)->rowBytes).get() & ROWBYTES_FLAG_BITS)
+#define BITMAP_FLAGS(bitmap) \
+    (((bitmap)->rowBytes & ROWBYTES_FLAG_BITS))
 
-#define BITMAP_DEFAULT_ROWBYTES_X (0)
+#define BITMAP_DEFAULT_ROWBYTES (0)
 
-#define BITMAP_ROWBYTES_X(bitmap) \
-    ((bitmap)->rowBytes & ~ROWBYTES_FLAG_BITS_X)
-#define BITMAP_ROWBYTES(bitmap) ((uint16_t)(bitmap)->rowBytes.get() & ~ROWBYTES_FLAG_BITS)
+#define BITMAP_ROWBYTES(bitmap) \
+    ((bitmap)->rowBytes & ROWBYTES_VALUE_BITS)
 
-#define BITMAP_SET_ROWBYTES_X(bitmap, value)                               \
-    ((bitmap)->rowBytes = (((value) & ~ROWBYTES_FLAG_BITS_X) \
-                             | BITMAP_FLAGS_X(bitmap)))
+#define BITMAP_SET_ROWBYTES(bitmap, value)                               \
+    ((bitmap)->rowBytes = (((value) & ROWBYTES_VALUE_BITS) \
+                             | BITMAP_FLAGS(bitmap)))
 
-#define BITMAP_BASEADDR_X(bitmap) ((bitmap)->baseAddr)
-#define BITMAP_BASEADDR(bitmap) (BITMAP_BASEADDR_X(bitmap))
+#define BITMAP_BASEADDR(bitmap) ((bitmap)->baseAddr)
 
-#define BITMAP_P(bitmap) (!((bitmap)->rowBytes & PIXMAP_FLAG_BITS_X))
+
+#define BITMAP_P(bitmap) (!((bitmap)->rowBytes & PIXMAP_FLAG_BITS))
 
 typedef BitMap blt_bitmap_t;
 
@@ -373,34 +329,24 @@ typedef BitMap blt_bitmap_t;
     (sizeof(ColorTable) + ((max_elt) * sizeof(ColorSpec)))
 
 /* color table flags */
-#define CTAB_GDEVICE_BIT_X (1 << 15)
 #define CTAB_GDEVICE_BIT (1 << 15)
 
 #define CTAB_TABLE(ctab) ((*(ctab))->ctTable)
 
-#define CTAB_SEED_X(ctab) ((*(ctab))->ctSeed)
-#define CTAB_FLAGS_X(ctab) ((*(ctab))->ctFlags)
-#define CTAB_SIZE_X(ctab) ((*(ctab))->ctSize)
+#define CTAB_SEED(ctab) ((*(ctab))->ctSeed)
+#define CTAB_FLAGS(ctab) ((*(ctab))->ctFlags)
+#define CTAB_SIZE(ctab) ((*(ctab))->ctSize)
 
-#define CTAB_SEED(ctab) (CTAB_SEED_X(ctab))
-#define CTAB_FLAGS(ctab) (CTAB_FLAGS_X(ctab))
-#define CTAB_SIZE(ctab) (CTAB_SIZE_X(ctab))
+
+
+
 
 /* flags for the value bits of device-type color
    tables */
-#define CTAB_VALUE_ID_BITS_X 0xFF
-#define CTAB_VALUE_ID_BITS (0xFF)
-
-#define CTAB_RESERVED_BIT_X (0x4000)
+#define CTAB_VALUE_ID_BITS 0xFF
 #define CTAB_RESERVED_BIT (0x4000)
-
-#define CTAB_PROTECTED_BIT_X (0x8000)
 #define CTAB_PROTECTED_BIT (0x8000)
-
-#define CTAB_TOLERANT_BIT_X (0x2000)
 #define CTAB_TOLERANT_BIT (0x2000)
-
-#define CTAB_PENDING_BIT_X (0x1000)
 #define CTAB_PENDING_BIT (0x1000)
 
 /* accessor macro to avoid byte swap. */
@@ -409,53 +355,53 @@ typedef BitMap blt_bitmap_t;
 /* inverse color table accessors */
 #define ITAB_TABLE(itab) ((*(itab))->iTTable)
 
-#define ITAB_SEED_X(itab) ((*(itab))->iTabSeed)
-#define ITAB_RES_X(itab) ((*(itab))->iTabRes)
+#define ITAB_SEED(itab) ((*(itab))->iTabSeed)
+#define ITAB_RES(itab) ((*(itab))->iTabRes)
 
-#define ITAB_SEED(itab) (ITAB_SEED_X(itab))
-#define ITAB_RES(itab) (ITAB_RES_X(itab))
+
+
 
 /* graphics device accessors */
 #define GD_RECT(gdhandle) ((*gdhandle)->gdRect)
 #define GD_BOUNDS(gdhandle) PIXMAP_BOUNDS(GD_PMAP(gdhandle))
 
-#define GD_REF_NUM_X(gdhandle) ((*gdhandle)->gdRefNum)
-#define GD_ID_X(gdhandle) ((*gdhandle)->gdID)
-#define GD_TYPE_X(gdhandle) ((*gdhandle)->gdType)
-#define GD_ITABLE_X(gdhandle) ((*gdhandle)->gdITable)
-#define GD_RES_PREF_X(gdhandle) ((*gdhandle)->gdResPref)
-#define GD_SEARCH_PROC_X(gdhandle) ((*gdhandle)->gdSearchProc)
-#define GD_COMP_PROC_X(gdhandle) ((*gdhandle)->gdCompProc)
-#define GD_FLAGS_X(gdhandle) ((*gdhandle)->gdFlags)
-#define GD_PMAP_X(gdhandle) ((*gdhandle)->gdPMap)
-#define GD_REF_CON_X(gdhandle) ((*gdhandle)->gdRefCon)
-#define GD_NEXT_GD_X(gdhandle) ((*gdhandle)->gdNextGD)
-#define GD_MODE_X(gdhandle) ((*gdhandle)->gdMode)
+#define GD_REF_NUM(gdhandle) ((*gdhandle)->gdRefNum)
+#define GD_ID(gdhandle) ((*gdhandle)->gdID)
+#define GD_TYPE(gdhandle) ((*gdhandle)->gdType)
+#define GD_ITABLE(gdhandle) ((*gdhandle)->gdITable)
+#define GD_RES_PREF(gdhandle) ((*gdhandle)->gdResPref)
+#define GD_SEARCH_PROC(gdhandle) ((*gdhandle)->gdSearchProc)
+#define GD_COMP_PROC(gdhandle) ((*gdhandle)->gdCompProc)
+#define GD_FLAGS(gdhandle) ((*gdhandle)->gdFlags)
+#define GD_PMAP(gdhandle) ((*gdhandle)->gdPMap)
+#define GD_REF_CON(gdhandle) ((*gdhandle)->gdRefCon)
+#define GD_NEXT_GD(gdhandle) ((*gdhandle)->gdNextGD)
+#define GD_MODE(gdhandle) ((*gdhandle)->gdMode)
 
-#define GD_CCBYTES_X(gdhandle) ((*gdhandle)->gdCCBytes)
-#define GD_CCDEPTH_X(gdhandle) ((*gdhandle)->gdCCDepth)
-#define GD_CCXDATA_X(gdhandle) ((*gdhandle)->gdCCXData)
-#define GD_CCXMASK_X(gdhandle) ((*gdhandle)->gdCCXMask)
+#define GD_CCBYTES(gdhandle) ((*gdhandle)->gdCCBytes)
+#define GD_CCDEPTH(gdhandle) ((*gdhandle)->gdCCDepth)
+#define GD_CCXDATA(gdhandle) ((*gdhandle)->gdCCXData)
+#define GD_CCXMASK(gdhandle) ((*gdhandle)->gdCCXMask)
 
-#define GD_RESERVED_X(gdhandle) ((*gdhandle)->gdReserved)
+#define GD_RESERVED(gdhandle) ((*gdhandle)->gdReserved)
 
-#define GD_REF_NUM(gdhandle) (GD_REF_NUM_X(gdhandle))
-#define GD_ID(gdhandle) (GD_ID_X(gdhandle))
-#define GD_TYPE(gdhandle) (GD_TYPE_X(gdhandle))
-#define GD_ITABLE(gdhandle) (GD_ITABLE_X(gdhandle))
-#define GD_RES_PREF(gdhandle) (GD_RES_PREF_X(gdhandle))
-#define GD_SEARCH_PROC(gdhandle) (GD_SEARCH_PROC_X(gdhandle))
-#define GD_COMP_PROC(gdhandle) (GD_COMP_PROC_X(gdhandle))
-#define GD_FLAGS(gdhandle) (GD_FLAGS_X(gdhandle))
-#define GD_PMAP(gdhandle) (GD_PMAP_X(gdhandle))
-#define GD_REF_CON(gdhandle) (GD_REF_CON_X(gdhandle))
-#define GD_NEXT_GD(gdhandle) (GD_NEXT_GD_X(gdhandle))
-#define GD_MODE(gdhandle) (GD_MODE_X(gdhandle))
 
-#define GD_CCBYTES(gdhandle) (GD_CCBYTES_X(gdhandle))
-#define GD_CCDEPTH(gdhandle) (GD_CCDEPTH_X(gdhandle))
-#define GD_CCXDATA(gdhandle) (GD_CCXDATA_X(gdhandle))
-#define GD_CCXMASK(gdhandle) (GD_CCXMASK_X(gdhandle))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /* color icon accessors */
 #define CICON_PMAP(cicon) ((*cicon)->iconPMap)
@@ -463,8 +409,8 @@ typedef BitMap blt_bitmap_t;
 #define CICON_BMAP(cicon) ((*cicon)->iconBMap)
 #define CICON_MASK_DATA(cicon) ((*cicon)->iconMaskData)
 
-#define CICON_DATA_X(cicon) ((*cicon)->iconData)
-#define CICON_DATA(cicon) (CICON_DATA_X(cicon))
+#define CICON_DATA(cicon) ((*cicon)->iconData)
+
 
 inline bool CICON_P(Handle _icon)
 {
@@ -492,22 +438,22 @@ inline bool CICON_P(Handle _icon)
 #define PALETTE_DATA_FIELDS(palette) ((*palette)->pmDataFields)
 #define PALETTE_INFO(palette) ((*palette)->pmInfo)
 
-#define PALETTE_ENTRIES_X(palette) ((*palette)->pmEntries)
-#define PALETTE_WINDOW_X(palette) ((*palette)->pmWindow)
-#define PALETTE_PRIVATE_X(palette) ((*palette)->pmPrivate)
-#define PALETTE_DEVICES_X(palette) ((*palette)->pmDevices)
-#define PALETTE_SEEDS_X(palette) ((*palette)->pmSeeds)
+#define PALETTE_ENTRIES(palette) ((*palette)->pmEntries)
+#define PALETTE_WINDOW(palette) ((*palette)->pmWindow)
+#define PALETTE_PRIVATE(palette) ((*palette)->pmPrivate)
+#define PALETTE_DEVICES(palette) ((*palette)->pmDevices)
+#define PALETTE_SEEDS(palette) ((*palette)->pmSeeds)
 
-#define PALETTE_ENTRIES(palette) (PALETTE_ENTRIES_X(palette))
-#define PALETTE_WINDOW(palette) (PALETTE_WINDOW_X(palette))
-#define PALETTE_PRIVATE(palette) (PALETTE_PRIVATE_X(palette))
-#define PALETTE_DEVICES(palette) (PALETTE_DEVICES_X(palette))
-#define PALETTE_SEEDS(palette) (PALETTE_SEEDS_X(palette))
 
-#define PALETTE_UPDATE_FLAG_BITS_X (0xE000)
+
+
+
+
+
+#define PALETTE_UPDATE_FLAG_BITS (0xE000)
 #define PALETTE_UPDATE_FLAG_BITS (0xE000)
 
-#define CINFO_RESERVED_INDEX_BIT_X (0x8000)
+#define CINFO_RESERVED_INDEX_BIT (0x8000)
 #define CINFO_RESERVED_INDEX_BIT (0x8000)
 
 /* color cursor accessors */
@@ -515,29 +461,29 @@ inline bool CICON_P(Handle _icon)
 #define CCRSR_MASK(ccrsr) ((*ccrsr)->crsrMask)
 #define CCRSR_HOT_SPOT(ccrsr) ((*ccrsr)->crsrHotSpot)
 
-#define CCRSR_TYPE_X(ccrsr) ((*ccrsr)->crsrType)
-#define CCRSR_MAP_X(ccrsr) ((*ccrsr)->crsrMap)
-#define CCRSR_DATA_X(ccrsr) ((*ccrsr)->crsrData)
-#define CCRSR_XDATA_X(ccrsr) ((*ccrsr)->crsrXData)
-#define CCRSR_XVALID_X(ccrsr) ((*ccrsr)->crsrXValid)
-#define CCRSR_XHANDLE_X(ccrsr) ((*ccrsr)->crsrXHandle)
-#define CCRSR_XTABLE_X(ccrsr) ((*ccrsr)->crsrXTable)
-#define CCRSR_ID_X(ccrsr) ((*ccrsr)->crsrID)
+#define CCRSR_TYPE(ccrsr) ((*ccrsr)->crsrType)
+#define CCRSR_MAP(ccrsr) ((*ccrsr)->crsrMap)
+#define CCRSR_DATA(ccrsr) ((*ccrsr)->crsrData)
+#define CCRSR_XDATA(ccrsr) ((*ccrsr)->crsrXData)
+#define CCRSR_XVALID(ccrsr) ((*ccrsr)->crsrXValid)
+#define CCRSR_XHANDLE(ccrsr) ((*ccrsr)->crsrXHandle)
+#define CCRSR_XTABLE(ccrsr) ((*ccrsr)->crsrXTable)
+#define CCRSR_ID(ccrsr) ((*ccrsr)->crsrID)
 
-#define CCRSR_TYPE(ccrsr) (CCRSR_TYPE_X(ccrsr))
-#define CCRSR_MAP(ccrsr) (CCRSR_MAP_X(ccrsr))
-#define CCRSR_DATA(ccrsr) (CCRSR_DATA_X(ccrsr))
-#define CCRSR_XDATA(ccrsr) (CCRSR_XDATA_X(ccrsr))
-#define CCRSR_XVALID(ccrsr) (CCRSR_XVALID_X(ccrsr))
-#define CCRSR_XHANDLE(ccrsr) (CCRSR_XHANDLE_X(ccrsr))
-#define CCRSR_XTABLE(ccrsr) (CCRSR_XTABLE_X(ccrsr))
-#define CCRSR_ID(ccrsr) (CCRSR_ID_X(ccrsr))
+
+
+
+
+
+
+
+
 
 extern void cursor_reset_current_cursor(void);
 
 #define IMV_XFER_MODE_P(mode) ((mode) >= blend && (mode) <= adMin)
 #define active_screen_addr_p(bitmap) \
-    ((bitmap)->baseAddr == PIXMAP_BASEADDR_X(GD_PMAP(LM(MainDevice))))
+    ((bitmap)->baseAddr == PIXMAP_BASEADDR(GD_PMAP(LM(MainDevice))))
 
 /* gd flags */
 #define gdDevType 0

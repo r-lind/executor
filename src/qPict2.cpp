@@ -292,9 +292,9 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
             color_table
                 = (CTabHandle)NewHandle(CTAB_STORAGE_FOR_SIZE(colors_requested));
 
-            CTAB_SEED_X(color_table) = GetCTSeed();
-            CTAB_FLAGS_X(color_table) = 0;
-            CTAB_SIZE_X(color_table) = colors_requested;
+            CTAB_SEED(color_table) = GetCTSeed();
+            CTAB_FLAGS(color_table) = 0;
+            CTAB_SIZE(color_table) = colors_requested;
 
             table = CTAB_TABLE(color_table);
 

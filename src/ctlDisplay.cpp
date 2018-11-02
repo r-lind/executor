@@ -126,7 +126,7 @@ void Executor::C_HiliteControl(ControlHandle c, INTEGER state) /* IMI-322 */
             }
         }
         else
-            CTL_HILITE_X(c) = state;
+            CTL_HILITE(c) = state;
     }
 }
 

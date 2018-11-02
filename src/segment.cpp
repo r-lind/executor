@@ -270,7 +270,7 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
         ap->versNum = 0;
         wpb.ioNamePtr = path;
         wpb.ioVRefNum = cinfo.hFileInfo.ioVRefNum;
-        wpb.ioWDProcID = TICKX("unix");
+        wpb.ioWDProcID = TICK("unix");
         wpb.ioWDDirID = cinfo.hFileInfo.ioFlParID;
         if(PBOpenWD(&wpb, false) == noErr)
         {
@@ -429,7 +429,7 @@ static BOOLEAN valid_browser(void)
     FInfo finfo;
 
     err = GetFInfo(LM(FinderName), LM(BootDrive), &finfo);
-    return !ROMlib_nobrowser && err == noErr && finfo.fdType == TICKX("APPL");
+    return !ROMlib_nobrowser && err == noErr && finfo.fdType == TICK("APPL");
 }
 
 static void launch_browser(void)

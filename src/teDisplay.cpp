@@ -85,12 +85,12 @@ void Executor::C_TEScroll(int16_t dh, int16_t dv, TEHandle te)
 
     save_vis = PORT_VIS_REGION(qdGlobals().thePort);
     SectRgn(rh, save_vis, rh);
-    PORT_VIS_REGION_X(qdGlobals().thePort) = rh;
+    PORT_VIS_REGION(qdGlobals().thePort) = rh;
 
     vis_rgn_bbox = RGN_BBOX(PORT_VIS_REGION(qdGlobals().thePort));
     TEUpdate(&vis_rgn_bbox, te);
 
-    PORT_VIS_REGION_X(qdGlobals().thePort) = save_vis;
+    PORT_VIS_REGION(qdGlobals().thePort) = save_vis;
     DisposeRgn(rh);
 
     TE_SLAM(te);

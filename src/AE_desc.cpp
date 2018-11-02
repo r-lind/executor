@@ -14,14 +14,14 @@
 using namespace Executor;
 
 #define LIST_CLASS_P(desc)                     \
-    (DESC_TYPE_X(desc) == typeAEList      \
-     || DESC_TYPE_X(desc) == typeAERecord \
-     || DESC_TYPE_X(desc) == typeAppleEvent)
+    (DESC_TYPE(desc) == typeAEList      \
+     || DESC_TYPE(desc) == typeAERecord \
+     || DESC_TYPE(desc) == typeAppleEvent)
 #define RECORD_CLASS_P(desc)                \
-    (DESC_TYPE_X(desc) == typeAERecord \
-     || DESC_TYPE_X(desc) == typeAppleEvent)
+    (DESC_TYPE(desc) == typeAERecord \
+     || DESC_TYPE(desc) == typeAppleEvent)
 #define APPLE_EVENT_CLASS_P(desc) \
-    (DESC_TYPE_X(desc) == typeAppleEvent)
+    (DESC_TYPE(desc) == typeAppleEvent)
 
 static OSErr
 get_subdesc_info(Handle aggr_desc_h, subdesc_info_t *info,
@@ -36,7 +36,7 @@ get_subdesc_info(Handle aggr_desc_h, subdesc_info_t *info,
         info->key_p = (ATTRIBUTE_COUNT(aggr_desc_h) == typeAERecord);
 
         info->count = PARAM_COUNT(aggr_desc_h);
-        info->count_p = &PARAM_COUNT_X(aggr_desc_h);
+        info->count_p = &PARAM_COUNT(aggr_desc_h);
 
         info->base_offset = 0x18;
     }
@@ -50,7 +50,7 @@ get_subdesc_info(Handle aggr_desc_h, subdesc_info_t *info,
             char *aggr_desc_p;
 
             info->count = ATTRIBUTE_COUNT(aggr_desc_h);
-            info->count_p = &ATTRIBUTE_COUNT_X(aggr_desc_h);
+            info->count_p = &ATTRIBUTE_COUNT(aggr_desc_h);
 
             aggr_desc_p = (char *)*aggr_desc_h;
 
@@ -68,7 +68,7 @@ get_subdesc_info(Handle aggr_desc_h, subdesc_info_t *info,
         else
         {
             info->count = PARAM_COUNT(aggr_desc_h);
-            info->count_p = &PARAM_COUNT_X(aggr_desc_h);
+            info->count_p = &PARAM_COUNT(aggr_desc_h);
             info->base_offset = PARAM_OFFSET(aggr_desc_h);
         }
     }
@@ -234,7 +234,7 @@ OSErr aggr_desc_get_addr(Handle aggr_desc_h,
 
         if(attribute_p)
         {
-            PARAM_OFFSET_X(aggr_desc_h)
+            PARAM_OFFSET(aggr_desc_h)
                 = PARAM_OFFSET(aggr_desc_h) - old_size + new_size;
         }
 
@@ -704,7 +704,7 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
 
         t = (GUEST<int32_t> *)((char *)event_data + sizeof *event_data + target_size);
 
-        t[0] = TICKX("aevt");
+        t[0] = TICK("aevt");
         t[1] = 0x00010001;
     }
 
@@ -742,8 +742,8 @@ OSErr Executor::C_AECreateDesc(DescType type, Ptr data, Size data_size,
         memset(*h, 0, data_size);
     }
 
-    DESC_TYPE_X(desc_out) = type;
-    DESC_DATA_X(desc_out) = h;
+    DESC_TYPE(desc_out) = type;
+    DESC_DATA(desc_out) = h;
 
     AE_RETURN_ERROR(noErr);
 }
@@ -845,7 +845,7 @@ OSErr Executor::C_AEGetNthPtr(AEDescList *list, int32_t index,
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
-    *type_out = DESC_TYPE_X(coerced_desc);
+    *type_out = DESC_TYPE(coerced_desc);
     ae_desc_to_ptr(desc,
                    data, max_size, size_out);
     AE_RETURN_ERROR(AEDisposeDesc(coerced_desc));
@@ -904,7 +904,7 @@ OSErr Executor::C_AESizeOfNthItem(AEDescList *list, int32_t index,
     if(!aggr_get_nth_desc(DESC_DATA(list), index, nullptr, desc))
         AE_RETURN_ERROR(errAEIllegalIndex);
 
-    *type_out = DESC_TYPE_X(desc);
+    *type_out = DESC_TYPE(desc);
     *size_out = GetHandleSize((Handle)DESC_DATA(desc));
 
     AE_RETURN_ERROR(noErr);
@@ -958,7 +958,7 @@ OSErr Executor::C_AEGetParamPtr(AERecord *record, AEKeyword keyword,
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
-    *type_out = DESC_TYPE_X(coerced_desc);
+    *type_out = DESC_TYPE(coerced_desc);
     ae_desc_to_ptr(desc,
                    data, max_size, size_out);
     AE_RETURN_ERROR(AEDisposeDesc(coerced_desc));
@@ -1009,7 +1009,7 @@ OSErr Executor::C_AESizeOfParam(AERecord *record, AEKeyword keyword,
     if(!aggr_get_key_desc(DESC_DATA(record), keyword, false, desc))
         AE_RETURN_ERROR(errAEDescNotFound);
 
-    *type_out = DESC_TYPE_X(desc);
+    *type_out = DESC_TYPE(desc);
     *size_out = GetHandleSize((Handle)DESC_DATA(desc));
 
     AE_RETURN_ERROR(noErr);
@@ -1088,7 +1088,7 @@ OSErr Executor::C_AEGetAttributePtr(AppleEvent *evt, AEKeyword keyword,
     if(err != noErr)
         AE_RETURN_ERROR(err);
 
-    *type_out = DESC_TYPE_X(coerced_desc);
+    *type_out = DESC_TYPE(coerced_desc);
     ae_desc_to_ptr(desc,
                    data, max_size, size_out);
     AE_RETURN_ERROR(AEDisposeDesc(coerced_desc));
@@ -1119,7 +1119,7 @@ OSErr Executor::C_AESizeOfAttribute(AppleEvent *evt, AEKeyword keyword,
     if(desc == nullptr)
         AE_RETURN_ERROR(errAEDescNotFound);
 
-    *type_out = DESC_TYPE_X(desc);
+    *type_out = DESC_TYPE(desc);
     *size_out = GetHandleSize((Handle)DESC_DATA(desc));
 
     AE_RETURN_ERROR(noErr);

@@ -91,7 +91,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
         dialog_compute_rect(&(*ah)->altr,
                             &adjusted_rect,
                             (ALERT_RES_HAS_POSITION_P(ah)
-                                 ? ALERT_RES_POSITION(ah)
+                                 ? toHost(ALERT_RES_POSITION(ah))
                                  : noAutoCenter));
     }
 

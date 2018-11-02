@@ -43,9 +43,9 @@ my version:
 #define TILE(x) CW(((uint32_t) (x & 0x1F) * 0x8421UL) >> 4)
 
 teIMV.cpp:491:
-  LH_HEIGHT_X (lh) = font_height;
+  LH_HEIGHT (lh) = font_height;
 should be
-  LH_HEIGHT_X (lh) = font_height;
+  LH_HEIGHT (lh) = font_height;
 
 osutil.cpp:772
 #if !defined (BIGENDIAN)

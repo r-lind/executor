@@ -59,57 +59,57 @@
 #define CWINDOW_PORT(wp) (&((WindowPeek)(wp))->port)
 
 /* big endian byte order */
-#define WINDOW_KIND_X(wp) (((WindowPeek)(wp))->windowKind)
-#define WINDOW_VISIBLE_X(wp) (((WindowPeek)(wp))->visible)
-#define WINDOW_HILITED_X(wp) (((WindowPeek)(wp))->hilited)
-#define WINDOW_GO_AWAY_FLAG_X(wp) (((WindowPeek)(wp))->goAwayFlag)
-#define WINDOW_SPARE_FLAG_X(wp) (((WindowPeek)(wp))->spareFlag)
+#define WINDOW_KIND(wp) (((WindowPeek)(wp))->windowKind)
+#define WINDOW_VISIBLE(wp) (((WindowPeek)(wp))->visible)
+#define WINDOW_HILITED(wp) (((WindowPeek)(wp))->hilited)
+#define WINDOW_GO_AWAY_FLAG(wp) (((WindowPeek)(wp))->goAwayFlag)
+#define WINDOW_SPARE_FLAG(wp) (((WindowPeek)(wp))->spareFlag)
 
-#define WINDOW_STRUCT_REGION_X(wp) (((WindowPeek)(wp))->strucRgn)
-#define WINDOW_CONT_REGION_X(wp) (((WindowPeek)(wp))->contRgn)
-#define WINDOW_UPDATE_REGION_X(wp) (((WindowPeek)(wp))->updateRgn)
-#define WINDOW_DEF_PROC_X(wp) (((WindowPeek)(wp))->windowDefProc)
-#define WINDOW_DATA_X(wp) (((WindowPeek)(wp))->dataHandle)
-#define WINDOW_TITLE_X(wp) (((WindowPeek)(wp))->titleHandle)
-#define WINDOW_TITLE_WIDTH_X(wp) (((WindowPeek)(wp))->titleWidth)
-#define WINDOW_CONTROL_LIST_X(wp) (((WindowPeek)(wp))->controlList)
-#define WINDOW_NEXT_WINDOW_X(wp) (((WindowPeek)(wp))->nextWindow)
-#define WINDOW_PIC_X(wp) (((WindowPeek)(wp))->windowPic)
-#define WINDOW_REF_CON_X(wp) (((WindowPeek)(wp))->refCon)
+#define WINDOW_STRUCT_REGION(wp) (((WindowPeek)(wp))->strucRgn)
+#define WINDOW_CONT_REGION(wp) (((WindowPeek)(wp))->contRgn)
+#define WINDOW_UPDATE_REGION(wp) (((WindowPeek)(wp))->updateRgn)
+#define WINDOW_DEF_PROC(wp) (((WindowPeek)(wp))->windowDefProc)
+#define WINDOW_DATA(wp) (((WindowPeek)(wp))->dataHandle)
+#define WINDOW_TITLE(wp) (((WindowPeek)(wp))->titleHandle)
+#define WINDOW_TITLE_WIDTH(wp) (((WindowPeek)(wp))->titleWidth)
+#define WINDOW_CONTROL_LIST(wp) (((WindowPeek)(wp))->controlList)
+#define WINDOW_NEXT_WINDOW(wp) (((WindowPeek)(wp))->nextWindow)
+#define WINDOW_PIC(wp) (((WindowPeek)(wp))->windowPic)
+#define WINDOW_REF_CON(wp) (((WindowPeek)(wp))->refCon)
 
 /* native byte order */
-#define WINDOW_KIND(wp) (WINDOW_KIND_X(wp))
-#define WINDOW_VISIBLE(wp) (WINDOW_VISIBLE_X(wp))
-#define WINDOW_HILITED(wp) (WINDOW_HILITED_X(wp))
-#define WINDOW_GO_AWAY_FLAG(wp) (WINDOW_GO_AWAY_FLAG_X(wp))
-#define WINDOW_SPARE_FLAG(wp) (WINDOW_SPARE_FLAG_X(wp))
+#define WINDOW_KIND(wp) (WINDOW_KIND(wp))
+#define WINDOW_VISIBLE(wp) (WINDOW_VISIBLE(wp))
+#define WINDOW_HILITED(wp) (WINDOW_HILITED(wp))
+#define WINDOW_GO_AWAY_FLAG(wp) (WINDOW_GO_AWAY_FLAG(wp))
+#define WINDOW_SPARE_FLAG(wp) (WINDOW_SPARE_FLAG(wp))
 
-#define WINDOW_STRUCT_REGION(wp) (WINDOW_STRUCT_REGION_X(wp))
-#define WINDOW_CONT_REGION(wp) (WINDOW_CONT_REGION_X(wp))
-#define WINDOW_UPDATE_REGION(wp) (WINDOW_UPDATE_REGION_X(wp))
-#define WINDOW_DEF_PROC(wp) (WINDOW_DEF_PROC_X(wp))
-#define WINDOW_DATA(wp) (WINDOW_DATA_X(wp))
-#define WINDOW_TITLE(wp) (WINDOW_TITLE_X(wp))
-#define WINDOW_TITLE_WIDTH(wp) (WINDOW_TITLE_WIDTH_X(wp))
-#define WINDOW_CONTROL_LIST(wp) (WINDOW_CONTROL_LIST_X(wp))
-#define WINDOW_NEXT_WINDOW(wp) (WINDOW_NEXT_WINDOW_X(wp))
-#define WINDOW_PIC(wp) (WINDOW_PIC_X(wp))
-#define WINDOW_REF_CON(wp) (WINDOW_REF_CON_X(wp))
+#define WINDOW_STRUCT_REGION(wp) (WINDOW_STRUCT_REGION(wp))
+#define WINDOW_CONT_REGION(wp) (WINDOW_CONT_REGION(wp))
+#define WINDOW_UPDATE_REGION(wp) (WINDOW_UPDATE_REGION(wp))
+#define WINDOW_DEF_PROC(wp) (WINDOW_DEF_PROC(wp))
+#define WINDOW_DATA(wp) (WINDOW_DATA(wp))
+#define WINDOW_TITLE(wp) (WINDOW_TITLE(wp))
+#define WINDOW_TITLE_WIDTH(wp) (WINDOW_TITLE_WIDTH(wp))
+#define WINDOW_CONTROL_LIST(wp) (WINDOW_CONTROL_LIST(wp))
+#define WINDOW_NEXT_WINDOW(wp) (WINDOW_NEXT_WINDOW(wp))
+#define WINDOW_PIC(wp) (WINDOW_PIC(wp))
+#define WINDOW_REF_CON(wp) (WINDOW_REF_CON(wp))
 
 /* dialog accessors */
 #define DIALOG_WINDOW(dialog) ((WindowPtr) & ((DialogPeek)(dialog))->window)
 
-#define DIALOG_ITEMS_X(dialog) (((DialogPeek)(dialog))->items)
-#define DIALOG_TEXTH_X(dialog) (((DialogPeek)(dialog))->textH)
-#define DIALOG_EDIT_FIELD_X(dialog) (((DialogPeek)(dialog))->editField)
-#define DIALOG_EDIT_OPEN_X(dialog) (((DialogPeek)(dialog))->editOpen)
-#define DIALOG_ADEF_ITEM_X(dialog) (((DialogPeek)(dialog))->aDefItem)
+#define DIALOG_ITEMS(dialog) (((DialogPeek)(dialog))->items)
+#define DIALOG_TEXTH(dialog) (((DialogPeek)(dialog))->textH)
+#define DIALOG_EDIT_FIELD(dialog) (((DialogPeek)(dialog))->editField)
+#define DIALOG_EDIT_OPEN(dialog) (((DialogPeek)(dialog))->editOpen)
+#define DIALOG_ADEF_ITEM(dialog) (((DialogPeek)(dialog))->aDefItem)
 
-#define DIALOG_ITEMS(dialog) (DIALOG_ITEMS_X(dialog))
-#define DIALOG_TEXTH(dialog) (DIALOG_TEXTH_X(dialog))
-#define DIALOG_EDIT_FIELD(dialog) (DIALOG_EDIT_FIELD_X(dialog))
-#define DIALOG_EDIT_OPEN(dialog) (DIALOG_EDIT_OPEN_X(dialog))
-#define DIALOG_ADEF_ITEM(dialog) (DIALOG_ADEF_ITEM_X(dialog))
+#define DIALOG_ITEMS(dialog) (DIALOG_ITEMS(dialog))
+#define DIALOG_TEXTH(dialog) (DIALOG_TEXTH(dialog))
+#define DIALOG_EDIT_FIELD(dialog) (DIALOG_EDIT_FIELD(dialog))
+#define DIALOG_EDIT_OPEN(dialog) (DIALOG_EDIT_OPEN(dialog))
+#define DIALOG_ADEF_ITEM(dialog) (DIALOG_ADEF_ITEM(dialog))
 
 enum pixpat_pattern_types
 {
@@ -1356,7 +1356,7 @@ void
 dump_textcenter(TCenterRecHdl h)
 {
     iprintf((o_fp, "y = 0x%08x\n", TEXTCENTER_Y(h)));
-    iprintf((o_fp, "x = 0x%08x\n", TEXTCENTER_X(h)));
+    iprintf((o_fp, "x = 0x%08x\n", TEXTCENTER(h)));
 }
 
 void

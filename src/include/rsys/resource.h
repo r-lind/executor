@@ -49,16 +49,12 @@ typedef resmap *resmapptr;
 typedef GUEST<resmapptr> *resmaphand;
 
 #define NAMEOFF(map) (*map)->namoff
-#define NAMEOFFX(map) ((*(map))->namoff)
 
 #define TYPEOFF(map) (*map)->typoff
-#define TYPEOFFX(map) ((*(map))->typoff)
 
 #define NUMTMINUS1(map) (*(GUEST<INTEGER> *)((char *)*(map) + (*map)->typoff))
-#define NUMTMINUS1X(map) (*(GUEST<INTEGER> *)((char *)*(map) + (*map)->typoff))
 
 #define MAPLEN(map) (*map)->rh.maplen
-#define MAPLENX(map) ((*(map))->rh.maplen)
 
 struct typref
 {

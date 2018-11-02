@@ -15,7 +15,7 @@ using namespace Executor;
 
 void Executor::C_Draw1Control(ControlHandle c) /* IMIV-53 */
 {
-    if(CTL_VIS_X(c))
+    if(CTL_VIS(c))
     {
         CtlCallGuard guard(c);
 
