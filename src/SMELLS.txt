@@ -42,10 +42,6 @@ WTF?
 my version:
 #define TILE(x) CW(((uint32_t) (x & 0x1F) * 0x8421UL) >> 4)
 
-teIMV.cpp:491:
-  LH_HEIGHT (lh) = font_height;
-should be
-  LH_HEIGHT (lh) = font_height;
 
 osutil.cpp:772
 #if !defined (BIGENDIAN)
@@ -56,12 +52,3 @@ osutil.cpp:772
 my version:
         sp.misc = SPMisc2, this matches InitUtil
 
-script.cpp:800
-      *widthRemainingp = pixelWidth - (locs[textLen] << 16);
-missing CL:
-      *widthRemainingp =  pixelWidth - (locs[textLen] << 16) ;
-
-
-alias.cpp:633
-      headp->length = n_bytes_needed;
-(CW was missing)

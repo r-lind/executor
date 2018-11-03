@@ -426,7 +426,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     if(bpp == 0 || !vdriver->setMode(0, 0, bpp, ((which_flags & (1 << gdDevType)) ? !(flags & (1 << gdDevType)) : vdriver->isGrayscale())))
     {
-        /* IMV says this2 returns non-zero in error case; not positive
+        /* IMV says this returns non-zero in error case; not positive
 	 cDepthErr is correct; need to verify */
         ShowCursor();
         return cDepthErr;

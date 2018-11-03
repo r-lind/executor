@@ -12,7 +12,6 @@
 /* get {C}PORT_... accessors */
 #include "rsys/cquick.h"
 #include "rsys/wind.h"
-#include "rsys/glue.h"
 
 using namespace Executor;
 

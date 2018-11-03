@@ -12,7 +12,6 @@
 #include "ResourceMgr.h"
 #include "MenuMgr.h"
 #include "ToolboxEvent.h"
-#include "rsys/glue.h"
 #include "rsys/mman.h"
 #include "rsys/device.h"
 #include "rsys/file.h"

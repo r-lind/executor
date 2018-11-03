@@ -7,8 +7,8 @@
 #include "rsys/common.h"
 #include "ResourceMgr.h"
 #include "FileMgr.h"
+#include "MemoryMgr.h"
 #include "rsys/resource.h"
-#include "rsys/glue.h"
 #include "rsys/file.h"
 #include "rsys/prefs.h"
 

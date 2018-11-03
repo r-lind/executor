@@ -12,7 +12,6 @@
 
 #include "rsys/quick.h"
 #include "rsys/cquick.h"
-#include "rsys/glue.h"
 #include "rsys/region.h"
 
 using namespace Executor;

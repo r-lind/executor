@@ -21,27 +21,18 @@ struct inline_key_desc_t
     GUEST<char> data[0];
 };
 
-/* #### always zero (?) */
-
-/* #### contains an applzone address */
-
-/* contains a tick that identifies the object, either `list' or
-     `reco'; for an apple event, this fiend contains the offset to the
-     parameter section */
-
-/* ### always zero (?) */
-
-/* offset: 0x18 */
 typedef struct list_header
 {
     GUEST_STRUCT;
-    GUEST<uint32_t> unknown_1;
-    GUEST<uint32_t> unknown_2;
-    GUEST<uint32_t> param_offset;
-    GUEST<uint32_t> attribute_count;
+    GUEST<uint32_t> unknown_1;          /* #### always zero (?) */
+    GUEST<uint32_t> unknown_2;          /* #### contains an applzone address */
+    GUEST<uint32_t> param_offset;       /* contains a tick that identifies the object, either `list' or
+                                           `reco'; for an apple event, this fiend contains the offset to the
+                                           parameter section */
+    GUEST<uint32_t> attribute_count;    
     GUEST<uint32_t> param_count;
-    GUEST<int32_t> unknown_3;
-    GUEST<char> data[0];
+    GUEST<int32_t> unknown_3;           /* ### always zero (?) */
+    GUEST<char> data[0];                /* offset: 0x18 */
 } list_header_t;
 
 typedef list_header_t *list_header_ptr;

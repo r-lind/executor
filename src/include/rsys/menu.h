@@ -24,13 +24,6 @@ namespace Executor
 #define MI_PROC(mi) ((*mi)->menuProc)
 #define MI_ENABLE_FLAGS(mi) ((*mi)->enableFlags)
 #define MI_DATA(mi) ((*mi)->menuData)
-
-
-
-
-
-
-
 #define MI_TITLE(mi) ((*mi)->menuTitle)
 
 typedef struct mext
@@ -110,12 +103,6 @@ typedef struct menu_elt
                                + sizeof(INTEGER) /* lastHMenu */)) \
          .p)
 
-
-
-
-
-
-
 struct menu_list
 {
     GUEST_STRUCT;
@@ -152,9 +139,6 @@ typedef GUEST<menulistp> *mlhandle;
 #define MCENTRY_ID(entry) ((entry)->mctID)
 #define MCENTRY_ITEM(entry) ((entry)->mctItem)
 #define MCENTRY_RESERVED(entry) ((entry)->mctReserved)
-
-
-
 
 #define MENULIST ((mlhandle)LM(MenuList))
 
@@ -197,16 +181,6 @@ struct mbdfentry
 
 #define MBRIGHTDIR 0
 #define MBLEFTDIR 1
-
-#if 0
-#if !defined(MBSaveLoc_H)
-extern GUEST<Handle> MBSaveLoc_H;
-extern GUEST<Handle> MBDFHndl_H;
-#endif
-
-#define LM(MBSaveLoc) (MBSaveLoc_H.p)
-#define LM(MBDFHndl) (MBDFHndl_H.p)
-#endif
 
 #define MBSAVELOC ((mbdfheaderhand)LM(MBSaveLoc))
 

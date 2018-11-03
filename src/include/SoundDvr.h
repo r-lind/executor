@@ -44,12 +44,7 @@ struct SWSynthRec
 };
 typedef SWSynthRec *SWSynthPtr;
 
-#if 1 || !defined(__alpha)
 typedef Byte Wave[256];
-#else /* defined(__alpha) */
-typedef Byte Wave;
-// FIXME: #warning improper Wave typedef
-#endif /* defined(__alpha) */
 
 typedef Wave *WavePtr;
 

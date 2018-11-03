@@ -124,5 +124,7 @@ typedef GUEST<tehiddenp> *tehiddenh;
 #define TEHIDDENH(teh) ((*(GUEST<tehiddenh> *)&(*teh)->recalBack))
 
 extern void ROMlib_recompute_caret(TEHandle te);
+
+extern INTEGER ROMlib_wordb(char *p);
 }
 #endif /* __TESAVE__ */

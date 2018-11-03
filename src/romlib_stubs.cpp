@@ -3,7 +3,6 @@
  */
 
 #include "rsys/common.h"
-#include "rsys/glue.h"
 
 namespace Executor
 {

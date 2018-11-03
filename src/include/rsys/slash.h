@@ -19,7 +19,6 @@ extern int Ustat(const char *path, struct stat *buf);
 
 #define Uaccess access
 #define Ufopen fopen
-#define Ulstat lstat
 #define Uopendir opendir
 #define Ustat stat
 

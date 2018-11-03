@@ -10,7 +10,6 @@
 #include "MemoryMgr.h"
 #include "ToolboxUtil.h"
 #include "rsys/resource.h"
-#include "rsys/glue.h"
 #include "rsys/mman.h"
 #include "rsys/file.h"
 

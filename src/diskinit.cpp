@@ -10,7 +10,6 @@
 #include "OSUtil.h"
 #include "rsys/common.h"
 #include "DiskInit.h"
-#include "rsys/glue.h"
 #include "mkvol/mkvol.h"
 #include "rsys/hfs.h"
 #include "rsys/syncint.h"

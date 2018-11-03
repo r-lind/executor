@@ -53,7 +53,6 @@
 #include "rsys/rgbutil.h"
 #include "rsys/option.h"
 #include "rsys/flags.h"
-#include "rsys/parse.h"
 #include "rsys/osevent.h"
 
 #include "x_keycodes.h"

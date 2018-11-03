@@ -11,7 +11,6 @@ namespace Executor
 {
 extern uint32_t ROMlib_version_long;
 extern void ROMlib_set_ppc(bool val);
-extern int ROMlib_uaf;
 
 typedef enum {
     launch_no_failure,

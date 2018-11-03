@@ -16,8 +16,6 @@
 #include "ToolboxUtil.h"
 #include "ToolboxEvent.h"
 #include "Iconutil.h"
-#include "PrintMgr.h"
-#include "StdFilePkg.h"
 #include "FontMgr.h"
 
 #include "rsys/cquick.h"
@@ -25,8 +23,6 @@
 #include "rsys/mman.h"
 #include "rsys/itm.h"
 #include "rsys/prefs.h"
-#include "rsys/stdfile.h"
-#include "rsys/print.h"
 #include "rsys/hook.h"
 #include "rsys/executor.h"
 #include "rsys/osevent.h"

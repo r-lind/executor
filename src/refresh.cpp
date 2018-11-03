@@ -115,11 +115,11 @@ void Executor::set_refresh_rate(int new1)
  * this routine fills in the rectangle coordinates, copies the changed
  * data from screen to shadow, and returns true.
  */
-BOOLEAN
-Executor::find_changed_rect_and_update_shadow(const uint32_t *screen, uint32_t *shadow,
-                                              long row_longs, long num_rows,
-                                              int *top_long, int *left_long,
-                                              int *bottom_long, int *right_long)
+static BOOLEAN
+find_changed_rect_and_update_shadow(const uint32_t *screen, uint32_t *shadow,
+                                    long row_longs, long num_rows,
+                                    int *top_long, int *left_long,
+                                    int *bottom_long, int *right_long)
 {
     long longs_left, last_ix, x, y, screen_longs;
     uint32_t *s1;

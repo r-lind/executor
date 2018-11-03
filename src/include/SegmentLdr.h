@@ -58,7 +58,6 @@ PASCAL_TRAP(FlushCodeCache, 0xA0BD);
 extern void HWPriv(LONGINT d0, LONGINT a0);
 REGISTER_TRAP2(HWPriv, 0xA198, void(D0,A0));
 
-extern char *ROMlib_undotdot(char *origp);
 extern void CountAppFiles(GUEST<INTEGER> *messagep,
                           GUEST<INTEGER> *countp);
 extern void GetAppFiles(INTEGER index, AppFile *filep);

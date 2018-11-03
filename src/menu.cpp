@@ -26,7 +26,6 @@
 #include "rsys/menu.h"
 #include "rsys/cquick.h"
 #include "rsys/quick.h"
-#include "rsys/glue.h"
 #include "rsys/mman.h"
 #include "rsys/wind.h"
 #include "rsys/hook.h"

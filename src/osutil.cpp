@@ -16,7 +16,6 @@
 #include "MenuMgr.h"
 #include "ToolboxEvent.h"
 
-#include "rsys/glue.h"
 #include "rsys/mman.h"
 #include "rsys/trapglue.h"
 #include "rsys/osutil.h"

@@ -14,7 +14,6 @@
 #include "OSUtil.h"
 #include "rsys/cquick.h"
 #include "rsys/font.h"
-#include "rsys/glue.h"
 
 using namespace Executor;
 

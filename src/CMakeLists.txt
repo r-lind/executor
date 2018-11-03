@@ -303,7 +303,6 @@ set(include_sources hintemplate.h
                   include/rsys/functions.impl.h
                   include/rsys/futzwithdosdisks.h
                   include/rsys/gestalt.h
-                  include/rsys/glue.h
                   include/rsys/gworld.h
                   include/rsys/hfs.h
                   include/rsys/hfs_plus.h
@@ -312,9 +311,7 @@ set(include_sources hintemplate.h
                   include/rsys/image.h
                   include/rsys/ini.h
                   include/rsys/itm.h
-                  include/rsys/iv.h
                   include/rsys/keyboard.h
-                  include/rsys/keyboards.h
                   include/rsys/launch.h
                   include/rsys/list.h
                   include/rsys/lockunlock.h
@@ -329,7 +326,6 @@ set(include_sources hintemplate.h
                   include/rsys/mixed_mode.h
                   include/rsys/mman.h
                   include/rsys/mman_private.h
-                  include/rsys/next.h
                   include/rsys/nextprint.h
                   include/rsys/noreturn.h
                   include/rsys/option.h
@@ -369,7 +365,6 @@ set(include_sources hintemplate.h
                   include/rsys/srcblt.h
                   include/rsys/stdbits.h
                   include/rsys/stdfile.h
-                  include/rsys/stdio_smashage.h
                   include/rsys/string.h
                   include/rsys/syncint.h
                   include/rsys/syserr.h

@@ -33,22 +33,15 @@
 #include "rsys/hfs.h"
 #include "rsys/file.h"
 #include "rsys/arrowkeys.h"
-#include "rsys/glue.h"
 #include "rsys/resource.h"
-#include "rsys/hfs.h"
 #include "rsys/time.h"
-#include "rsys/flags.h"
 #include "rsys/tempalloc.h"
 #include "rsys/hook.h"
 #include "rsys/toolevent.h"
 #include "rsys/string.h"
-#include "rsys/dcache.h"
-#include "rsys/menu.h"
 
-#include "rsys/executor.h"
 #include "rsys/osutil.h"
 #include "rsys/osevent.h"
-#include "rsys/prefs.h"
 
 #include "rsys/print.h"
 #include "rsys/system_error.h"
@@ -2008,11 +2001,13 @@ do_new_folder(fltype *f)
     return retval;
 }
 
+#if 0
 static void
 rep_from_host_reply_block(reply_u *repp,
                           const host_spf_reply_block *host_reply)
 {
 }
+#endif
 
 static bool
 is_normal_dlgid(getorput_t getorput, INTEGER dig)
@@ -2031,6 +2026,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
     bool reply_valid;
 
     reply_valid = false;
+#if 0
     if(is_normal_dlgid(getorput, dig) && host_has_spfcommon())
     {
         host_spf_reply_block reply;
@@ -2050,6 +2046,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
         if(reply_valid)
             rep_from_host_reply_block(&rep, &reply);
     }
+#endif
     if(!reply_valid)
     {
         Handle h;

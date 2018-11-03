@@ -25,25 +25,6 @@ namespace Executor
 #define VDRIVER_DEFAULT_SCREEN_WIDTH 640
 #define VDRIVER_DEFAULT_SCREEN_HEIGHT 480
 
-/* This is a macro to facilitate static declarations for hosts
- * where the number of modes is fixed. */
-#define VDRIVER_MODE_LIST_TYPE(num_entries)                    \
-    struct                                                     \
-    {                                                          \
-        int continuous_range_p; /* 2 entry inclusive range? */ \
-        int num_sizes; /* StrLength of size[] array.  */          \
-        struct                                                 \
-        {                                                      \
-            short width, height;                               \
-        } size[num_entries];                                   \
-    }
-
-typedef VDRIVER_MODE_LIST_TYPE(0) vdriver_modes_t;
-
-#define VDRIVER_MODE_LIST_SIZE(nelt) \
-    (sizeof(vdriver_modes_t)         \
-     + ((nelt) * sizeof(((vdriver_modes_t *)0)->size[0])))
-
 typedef struct
 {
     int top, left, bottom, right;

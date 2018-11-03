@@ -14,7 +14,6 @@
 
 #include "rsys/cquick.h"
 #include "rsys/mman.h"
-#include "rsys/glue.h"
 #include "SANE.h"
 #include "rsys/float.h"
 #include "rsys/floatconv.h"

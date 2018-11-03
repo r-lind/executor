@@ -34,7 +34,6 @@
 #include "rsys/osutil.h"
 #include "rsys/osevent.h"
 #include "rsys/keyboard.h"
-#include "rsys/parse.h"
 #include "rsys/refresh.h"
 #include "rsys/parseopt.h"
 #include "rsys/vdriver.h"

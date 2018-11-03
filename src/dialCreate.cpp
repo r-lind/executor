@@ -20,7 +20,6 @@
 #include "rsys/wind.h"
 #include "rsys/itm.h"
 #include "rsys/ctl.h"
-#include "rsys/glue.h"
 #include "rsys/mman.h"
 #include "rsys/resource.h"
 

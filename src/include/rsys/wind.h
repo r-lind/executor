@@ -1,4 +1,3 @@
-
 #if !defined(__WIND_H_)
 #define __WIND_H_
 
@@ -6,7 +5,6 @@
  * Copyright 1986, 1989, 1990 by Abacus Research and Development, Inc.
  * All rights reserved.
  *
-
  */
 
 #include "WindowMgr.h"
@@ -107,25 +105,6 @@ extern RGBColor *validate_colors_for_window(GrafPtr w);
 #define WINDOW_NEXT_WINDOW(wp) (((WindowPeek)(wp))->nextWindow)
 #define WINDOW_PIC(wp) (((WindowPeek)(wp))->windowPic)
 #define WINDOW_REF_CON(wp) (((WindowPeek)(wp))->refCon)
-
-/* native byte order */
-
-
-/* does this mean the window has focus? */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 

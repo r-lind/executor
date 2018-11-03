@@ -183,18 +183,4 @@ ROMlib_launch_native_app(int n_filenames, char **filenames)
     return 0;
 }
 
-bool Executor::host_has_spfcommon(void)
-{
-    return false;
-}
-
-bool
-Executor::host_spfcommon(host_spf_reply_block *replyp, const char *prompt,
-                         const char *incoming_filename, void *fp, void *filef, int numt,
-                         void *tl, getorput_t getorput, sf_flavor_t flavor,
-                         void *activeList, void *activateproc, void *yourdatap)
-{
-    return false;
-}
-
 #endif /* defined (LINUX) || defined (MACOSX) */

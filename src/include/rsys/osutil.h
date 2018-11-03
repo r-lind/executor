@@ -23,6 +23,7 @@ extern void date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp,
                                    GUEST<INTEGER> *secondp, GUEST<INTEGER> *dayofweekp,
                                    GUEST<INTEGER> *dayofyearp, GUEST<INTEGER> *weekofyearp);
 
+    // case insitive, diac insensitive
 extern int ROMlib_strcmp(const Byte *s1, const Byte *s2);
 
 extern void C_ROMlib_wakeup(void);

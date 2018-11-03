@@ -15,7 +15,6 @@
 #include "rsys/print.h"
 #include "rsys/string.h"
 #include "rsys/cquick.h"
-#include "rsys/dirtyrect.h"
 #include "rsys/vdriver.h"
 #include "rsys/file.h"
 

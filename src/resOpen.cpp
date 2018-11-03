@@ -10,7 +10,6 @@
 #include "FileMgr.h"
 
 #include "rsys/resource.h"
-#include "rsys/glue.h"
 #include "rsys/mman.h"
 #include "rsys/file.h"
 #include "rsys/osevent.h"

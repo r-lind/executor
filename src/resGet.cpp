@@ -10,7 +10,6 @@
 #include "rsys/resource.h"
 #include "MemoryMgr.h"
 #include "OSUtil.h"
-#include "rsys/glue.h"
 #include "rsys/mman.h"
 
 #include "rsys/ctl.h"

@@ -347,8 +347,6 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
     C_ExitToShell();
 }
 
-int Executor::ROMlib_uaf;
-
 launch_failure_t Executor::ROMlib_launch_failure = launch_no_failure;
 INTEGER Executor::ROMlib_exevrefnum;
 
@@ -580,8 +578,6 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
         set_refresh_rate(0);
         set_refresh_rate(save_ROMlib_refresh);
     }
-
-    ROMlib_uaf = 0;
 
     if(code0)
         beginexecutingat(guest_cast<LONGINT>(LM(CurrentA5)) + LM(CurJTOffset) + 2);

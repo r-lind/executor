@@ -3,10 +3,8 @@
 #include "rsys/osevent.h"
 #include "rsys/scrap.h"
 #include "rsys/keyboard.h"
-#include "rsys/parse.h"
 #include "OSEvent.h"
 #include "ToolboxEvent.h"
-#include "ScrapMgr.h"
 #include "SegmentLdr.h"
 
 #include "keycode_map.h"

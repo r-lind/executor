@@ -20,7 +20,6 @@
 #include "OSEvent.h"
 #include "FontMgr.h"
 #include "rsys/nextprint.h"
-#include "rsys/next.h"
 #include "rsys/PSstrings.h"
 #include "rsys/tempalloc.h"
 
@@ -1204,7 +1203,6 @@ static void txupdate(GrafPtr thePortp)
 {
     unsigned char fname[256];
 
-    SETUPA5;
     commonupdate(thePortp);
     if(thePortp->txMode != printport.txMode)
     {
@@ -1218,7 +1216,6 @@ static void txupdate(GrafPtr thePortp)
         printport.txFace = thePortp->txFace;
         printport.txSize = thePortp->txSize;
     }
-    RESTOREA5;
 }
 
 void pnupdate(GrafPtr thePortp)
@@ -1721,11 +1718,9 @@ short Executor::NeXTPrTxMeas(LONGINT n, Ptr p, GUEST<Point> *nump, GUEST<Point> 
     GUEST<Point> num, den;
     short retval;
 
-    SETUPA5;
     num.h = num.v = den.h = den.v = 0x100;
     retval = ROMlib_StdTxMeas(n,
                               (Ptr)p, &num, &den, nullptr);
-    RESTOREA5;
     return (float)retval * num.h / den.h;
 }
 
@@ -1746,8 +1741,6 @@ static void dopsunderline(GrafPtr thePortp, short total,
 {
     unsigned char fname[256];
     char *font;
-
-    SETUPA5;
 
     /* If we are substituting fonts, then we need to use PS's idea of
        how long a string is rather than use "total".  So before we do
@@ -1817,7 +1810,6 @@ static void dopsunderline(GrafPtr thePortp, short total,
     }
     PSstroke();
     PSgrestore();
-    RESTOREA5;
 }
 
 static void doshow(char *translated, LONGINT n)

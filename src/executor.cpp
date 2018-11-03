@@ -42,7 +42,7 @@
 using namespace Executor;
 
 
-void Executor::SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
+static void SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
 {
     ParamBlockRec pbr;
     Str255 save_name;

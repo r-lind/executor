@@ -29,19 +29,8 @@ enum
     toronto = 9,
     cairo = 11,
     losAngeles = 12,
-};
-
-#if !defined(NEXT)
-enum
-{
     times = 20,
 };
-#else /* NEXT */
-enum
-{
-    timesFont = 20,
-};
-#endif /* NEXT */
 
 enum
 {

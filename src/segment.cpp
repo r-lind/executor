@@ -18,7 +18,6 @@
 
 #include "rsys/hfs.h"
 #include "rsys/cpu.h"
-#include "rsys/glue.h"
 #include "rsys/wind.h"
 #include "rsys/segment.h"
 #include "rsys/vdriver.h"
@@ -112,60 +111,6 @@ void Executor::HWPriv(LONGINT d0, LONGINT a0)
             EM_D0 = hwParamErr; /* Maybe we should only touch d0.w? */
             break;
     }
-}
-
-char *Executor::ROMlib_undotdot(char *origp)
-{
-    int dotcount, nleft;
-    char *p, *oldloc;
-    bool slashseen_p;
-
-    nleft = strlen(origp) + 1;
-    slashseen_p = false;
-    dotcount = -1;
-    for(p = origp; *p; p++, nleft--)
-    {
-        switch(*p)
-        {
-            case '/':
-                switch(dotcount)
-                {
-                    case 0: /* slash slash */
-                        BlockMoveData((Ptr)p + 1, (Ptr)p, (Size)nleft - 1);
-                        break;
-                    case 1: /* slash dot slash */
-                        BlockMoveData((Ptr)p + 1, (Ptr)p - 1, (Size)nleft - 1);
-                        p -= 2;
-                        dotcount = 0;
-                        break;
-                    case 2: /* slash dot dot slash */
-                        for(oldloc = p - 4; oldloc >= origp && *oldloc != '/'; --oldloc)
-                            ;
-                        if(oldloc < origp)
-                            oldloc = origp + 1;
-                        else
-                            ++oldloc;
-                        BlockMoveData((Ptr)p + 1, (Ptr)oldloc, (Size)nleft - 1);
-                        p = oldloc - 1;
-                        dotcount = 0;
-                        break;
-                    default:
-                        dotcount = 0;
-                        break;
-                }
-                slashseen_p = true;
-                break;
-            case '.':
-                if(slashseen_p)
-                    dotcount++;
-                break;
-            default:
-                slashseen_p = false;
-                dotcount = -1;
-                break;
-        }
-    }
-    return origp;
 }
 
 static void lastcomponent(StringPtr dest, StringPtr src)

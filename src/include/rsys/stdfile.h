@@ -52,4 +52,30 @@ enum
 OSErr C_unixmount(CInfoPBRec *cbp);
 PASCAL_FUNCTION(unixmount);
 }
+
+namespace Executor
+{
+
+typedef enum { get,
+               put } getorput_t;
+typedef enum { original_sf,
+               new_sf,
+               new_custom_sf } sf_flavor_t;
+
+#if 0
+typedef struct
+{
+} host_spf_reply_block;
+
+extern bool host_has_spfcommon(void);
+extern bool host_spfcommon(host_spf_reply_block *replyp,
+                           const char *prompt, const char *filename,
+                           void *fp, void *filef, int numt,
+                           void *tl, getorput_t getorput,
+                           sf_flavor_t flavor,
+                           void *activeList, void *activateproc,
+                           void *yourdatap);
+#endif
+}
+
 #endif /* !defined(__RSYS_STDFILE__) */

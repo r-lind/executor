@@ -10,7 +10,6 @@
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"
 #include "BinaryDecimal.h"
-#include "rsys/glue.h"
 #include "rsys/resource.h"
 #include "rsys/hook.h"
 #include <ctype.h>

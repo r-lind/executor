@@ -643,9 +643,6 @@ void Executor::check_structs(void)
     check(generic_elt_t, 16);
     check(tehidden, 20);
 
-    /* rsys/toolevent.h */
-    check(keymap, 644);
-
     /* rsys/wind.h */
     check(windrestype, 20);
 

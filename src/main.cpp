@@ -72,7 +72,6 @@
 #include "rsys/os.h"
 #include "rsys/arch.h"
 #include "rsys/gestalt.h"
-#include "rsys/keyboards.h"
 #include "rsys/launch.h"
 #include "rsys/text.h"
 #include "rsys/appearance.h"

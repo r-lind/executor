@@ -11,7 +11,6 @@
 #include "rsys/quick.h"
 #include "rsys/cquick.h"
 #include "rsys/picture.h"
-#include "rsys/glue.h"
 
 using namespace Executor;
 
