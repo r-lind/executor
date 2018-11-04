@@ -199,6 +199,7 @@ REGISTER_TRAP2(MoreMasters, 0xA036, void (), ReturnMemErr<D0>);
 
 extern void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
                      Ptr limitPtr, THz startPtr);
+NOTRAP_FUNCTION2(InitZone);
 
 extern THz GetZone(void);
 REGISTER_TRAP2(GetZone, 0xA11A, A0 (), ReturnMemErr<D0>);

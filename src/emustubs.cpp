@@ -3,69 +3,27 @@
  */
 
 #include "rsys/common.h"
-
-#include <stdarg.h>
-
 #include "ResourceMgr.h"
-#include "ScriptMgr.h"
-#include "TextEdit.h"
-#include "ToolboxUtil.h"
-#include "ListMgr.h"
 #include "SANE.h"
-#include "BinaryDecimal.h"
-#include "FileMgr.h"
-#include "StdFilePkg.h"
-#include "DiskInit.h"
-#include "PrintMgr.h"
-#include "IntlUtil.h"
 #include "MemoryMgr.h"
-#include "CQuickDraw.h"
-#include "SoundMgr.h"
-#include "HelpMgr.h"
 #include "ADB.h"
-
 #include "SegmentLdr.h"
-#include "ToolboxUtil.h"
 #include "OSUtil.h"
-#include "VRetraceMgr.h"
-#include "TimeMgr.h"
 #include "ToolboxEvent.h"
 #include "OSEvent.h"
-#include "Gestalt.h"
+#include "ProcessMgr.h"
+#include "CommTool.h"
 #include "rsys/segment.h"
 #include "rsys/resource.h"
 #include "rsys/toolutil.h"
-#include "NotifyMgr.h"
-#include "ShutDown.h"
-#include "AppleEvents.h"
-#include "ProcessMgr.h"
-#include "AliasMgr.h"
-#include "EditionMgr.h"
-#include "FontMgr.h"
-#include "Finder.h"
-#include "Iconutil.h"
-#include "QuickTime.h"
-#include "CommTool.h"
-#include "SpeechManager.h"
-
-#include "rsys/file.h"
 #include "rsys/time.h"
-#include "rsys/mman.h"
 #include "rsys/prefs.h"
 #include "rsys/soundopts.h"
 #include "rsys/system_error.h"
 #include "rsys/emustubs.h"
-#include "rsys/gestalt.h"
 #include "rsys/executor.h"
 #include "rsys/mixed_mode.h"
-#include "rsys/cfm.h"
-#include "rsys/mixed_mode.h"
-
 #include <rsys/cpu.h>
-#include <PowerCore.h>
-#include <rsys/builtinlibs.h>
-#include <algorithm>
-#include <cassert>
 
 namespace Executor
 {
@@ -73,10 +31,14 @@ namespace Executor
 
 #define STUB(x) syn68k_addr_t _##x(syn68k_addr_t ignoreme, \
                                           void *ignoreme2)
+
+
+// QuickDraw.h
 void C_unknown574()
 {
 }
 
+// StartMgr.h
 STUB(GetDefaultStartup)
 {
     (SYN68K_TO_US(EM_A0))[0] = -1;
@@ -115,6 +77,7 @@ STUB(SetOSDefault)
     RTS();
 }
 
+// OSUtil.h
 STUB(SwapMMUMode)
 {
     EM_D0 &= 0xFFFFFF00;
@@ -123,6 +86,20 @@ STUB(SwapMMUMode)
     RTS();
 }
 
+// SCSI.h - no header file
+STUB(SCSIDispatch)
+{
+    syn68k_addr_t retaddr;
+
+    retaddr = POPADDR();
+    EM_A7 += 4; /* get rid of selector and location for errorvalue */
+#define scMgrBusyErr 7
+    PUSHUW(scMgrBusyErr);
+    PUSHADDR(retaddr);
+    RTS();
+}
+
+// SegmentLdr.h
 STUB(Launch)
 {
     LaunchParamBlockRec *lpbp;
@@ -143,24 +120,6 @@ STUB(Chain)
     RTS();
 }
 
-STUB(IMVI_LowerText)
-{
-    EM_D0 = resNotFound;
-    RTS();
-}
-
-STUB(SCSIDispatch)
-{
-    syn68k_addr_t retaddr;
-
-    retaddr = POPADDR();
-    EM_A7 += 4; /* get rid of selector and location for errorvalue */
-#define scMgrBusyErr 7
-    PUSHUW(scMgrBusyErr);
-    PUSHADDR(retaddr);
-    RTS();
-}
-
 STUB(LoadSeg)
 {
     syn68k_addr_t retaddr;
@@ -172,6 +131,7 @@ STUB(LoadSeg)
     RTS();
 }
 
+// ResourceMgr.h
 STUB(ResourceStub)
 {
     EM_A0 = US_TO_SYN68K_CHECK0(ROMlib_mgetres2(
@@ -180,6 +140,7 @@ STUB(ResourceStub)
     RTS();
 }
 
+// DeviceMgr.h
 STUB(DrvrInstall)
 {
     EM_D0 = -1;
@@ -192,6 +153,7 @@ STUB(DrvrRemove)
     RTS();    
 }
 
+// ADB.h
 STUB(ADBOp)
 {
     adbop_t *p;
@@ -203,6 +165,7 @@ STUB(ADBOp)
     RTS();
 }
 
+// ToolboxUtil.h
 STUB(Fix2X)
 {
     syn68k_addr_t retaddr;
@@ -237,7 +200,7 @@ STUB(Frac2X)
     return retaddr;
 }
 
-
+// ToolboxEvent.h
 /*
  * NOTE: The LM(Key1Trans) and LM(Key2Trans) implementations are just transcriptions
  *	 of what I had in stubs.s.  I'm still not satisified that we have
@@ -265,12 +228,14 @@ STUB(Key2Trans)
     KEYTRANSMACRO();
 }
 
+// PPC.h
 STUB(IMVI_PPC)
 {
     EM_D0 = paramErr; /* this is good enough for NetScape */
     RTS();
 }
 
+// CommTool.h
 STUB(CommToolboxDispatch)
 {
     comm_toolbox_dispatch_args_t *arg_block;
@@ -319,18 +284,18 @@ STUB(CommToolboxDispatch)
     RTS();
 }
 
+// OSEvent.h
 STUB(PostEvent)
 {
     GUEST<EvQElPtr> qelemp;
 
-    // FIXME: #warning the first argument to PPostEvent looks suspicious
     EM_D0 = PPostEvent(EM_A0, EM_D0,
                        (GUEST<EvQElPtr> *)&qelemp);
-    EM_A0 = qelemp.raw();
+    EM_A0 = qelemp.raw_host_order();
     RTS();
 }
 
-
+// OSUtil.h
 #define DIACBIT (1 << 9)
 #define CASEBIT (1 << 10)
 
@@ -363,15 +328,76 @@ STUB(UpperString)
     RTS();
 }
 
+STUB(IMVI_LowerText)
+{
+    EM_D0 = resNotFound;
+    RTS();
+}
+
 STUB(StripAddress)
 {
     RTS();
 }
 
-STUB(FInitQueue)
+
+/*
+ * This is just to trick out NIH Image... it's really not supported
+ */
+
+/* #warning SlotManager not properly implemented */
+
+STUB(SlotManager)
 {
+    EM_D0 = -300; /* smEmptySlot */
     RTS();
 }
+
+STUB(WackyQD32Trap)
+{
+    gui_fatal("This trap shouldn't be called");
+}
+
+// MemoryMgr.h
+STUB(InitZone68K)
+{
+    initzonehiddenargs_t *ip;
+
+    ip = (initzonehiddenargs_t *)SYN68K_TO_US(EM_A0);
+    InitZone(ip->pGrowZone, ip->cMoreMasters,
+             (Ptr)ip->limitPtr, (THz)ip->startPtr);
+    EM_D0 = LM(MemErr);
+    RTS();
+}
+
+// TimeMgr.h
+STUB(Microseconds)
+{
+    unsigned long ms = msecs_elapsed();
+    EM_D0 = ms * 1000;
+    EM_A0 = ((uint64_t)ms * 1000) >> 32;
+    RTS();
+}
+
+// OSUtils.h
+
+// The following is documented as ReadLocation by Apple.
+// It fills in a structure pointe to by A0, which contains
+// location info about the Mac. As in, latitude, longitude and time zone.
+STUB(IMVI_ReadXPRam)
+{
+    /* I, ctm, don't have the specifics for ReadXPram, but Bolo suggests that
+     when d0 is the value below that a 12 byte block is filled in, with some
+     sort of time info at offset 8 off of a0. */
+
+    if(EM_D0 == 786660)
+    {
+        /* memset((char *)SYN68K_TO_US(EM_A0), 0, 12); not needed */
+        *(long *)((char *)SYN68K_TO_US(EM_A0) + 8) = 0;
+    }
+    RTS();
+}
+
+
 
 #define GETTRAPNEWBIT (1 << 9)
 #define GETTRAPTOOLBIT (1 << 10)
@@ -599,57 +625,6 @@ STUB(Unimplemented)
     RTS(); /* in case we want to get return from within gdb */
     return /* dummy */ -1;
 }
-
-/*
- * This is just to trick out NIH Image... it's really not supported
- */
-
-/* #warning SlotManager not properly implemented */
-
-STUB(SlotManager)
-{
-    EM_D0 = -300; /* smEmptySlot */
-    RTS();
-}
-
-STUB(WackyQD32Trap)
-{
-    gui_fatal("This trap shouldn't be called");
-}
-
-STUB(InitZone)
-{
-    initzonehiddenargs_t *ip;
-
-    ip = (initzonehiddenargs_t *)SYN68K_TO_US(EM_A0);
-    InitZone(ip->pGrowZone, ip->cMoreMasters,
-             (Ptr)ip->limitPtr, (THz)ip->startPtr);
-    EM_D0 = LM(MemErr);
-    RTS();
-}
-
-STUB(Microseconds)
-{
-    unsigned long ms = msecs_elapsed();
-    EM_D0 = ms * 1000;
-    EM_A0 = ((uint64_t)ms * 1000) >> 32;
-    RTS();
-}
-
-STUB(IMVI_ReadXPRam)
-{
-    /* I, ctm, don't have the specifics for ReadXPram, but Bolo suggests that
-     when d0 is the value below that a 12 byte block is filled in, with some
-     sort of time info at offset 8 off of a0. */
-
-    if(EM_D0 == 786660)
-    {
-        /* memset((char *)SYN68K_TO_US(EM_A0), 0, 12); not needed */
-        *(long *)((char *)SYN68K_TO_US(EM_A0) + 8) = 0;
-    }
-    RTS();
-}
-
 
 /*
  * modeswitch is special; we don't return to from where we came.

@@ -42,27 +42,3 @@ void testfcb()
 }
 #endif /* TESTFCB */
 
-#if 0
-void myFInitQueue(void)/* IMIV-128 */
-{
-    /* When we support asynchronous stuff we'll have to do this */
-}
-
-QHdrPtr myGetFSQHdr(void)
-{
-    return &LM(FSQHdr);
-}
-
-QHdrPtr myGetVCBQHdr(void)
-{
-    return &LM(VCBQHdr);
-}
-#endif
-
-
-#if 0
-QHdrPtr myGetDrvQHdr(void)
-{
-    return &LM(DrvQHdr);
-}
-#endif

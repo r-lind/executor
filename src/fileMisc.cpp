@@ -158,21 +158,21 @@ Executor::open_attrib_bits(LONGINT file_id, VCB *vcbp, GUEST<INTEGER> *refnump)
 /* NOTE:  calling most of the routines here is a sign that the user may
 	  be depending on the internal layout of things a bit too much */
 
-void Executor::FInitQueue() /* IMIV-128 */
+void Executor::C_FInitQueue() /* IMIV-128 */
 {
 }
 
-QHdrPtr Executor::GetFSQHdr() /* IMIV-175 */
+QHdrPtr Executor::C_GetFSQHdr() /* IMIV-175 */
 {
     return (&LM(FSQHdr)); /* in UNIX domain, everything is synchronous */
 }
 
-QHdrPtr Executor::GetVCBQHdr() /* IMIV-178 */
+QHdrPtr Executor::C_GetVCBQHdr() /* IMIV-178 */
 {
     return (&LM(VCBQHdr));
 }
 
-QHdrPtr Executor::GetDrvQHdr() /* IMIV-182 */
+QHdrPtr Executor::C_GetDrvQHdr() /* IMIV-182 */
 {
     return (&LM(DrvQHdr));
 }

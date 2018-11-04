@@ -104,15 +104,26 @@ add_custom_command(OUTPUT parse.tab.cpp
 list(APPEND GENERATED_FILES rawpatstubs.ctable rawsrcstubs.ctable parse.tab.cpp)
 
 
-set(ctl_sources ctlArrows.cpp ctlDisplay.cpp ctlIMIV.cpp ctlInit.cpp ctlMisc.cpp
+set(ctl_sources
+    #include/ControlMgr.h
+    include/rsys/ctl.h
+    ctlArrows.cpp ctlDisplay.cpp ctlIMIV.cpp ctlInit.cpp ctlMisc.cpp
     ctlMouse.cpp ctlSet.cpp ctlSize.cpp ctlStddef.cpp ctlPopup.cpp)
 source_group(Controls FILES ${ctl_sources})
 
-set(dial_sources dialAlert.cpp dialCreate.cpp dialHandle.cpp dialInit.cpp dialManip.cpp
+set(dial_sources
+    #include/DialogMgr.h
+    include/rsys/dial.h
+    include/rsys/itm.h
+    dialAlert.cpp dialCreate.cpp dialHandle.cpp dialInit.cpp dialManip.cpp
     dialDispatch.cpp dialItem.cpp)
 source_group(Dialogs FILES ${dial_sources})
 
-set(file_sources 
+set(file_sources
+    #include/FileMgr.h
+    include/rsys/file.h
+    include/rsys/volume.h
+
     fileMisc.cpp
     fileHighlevel.cpp  fileUnimplemented.cpp
     dcache.cpp
@@ -163,16 +174,19 @@ set(print_sources PSstrings.cpp prError.cpp prInit.cpp prLowLevel.cpp
     prPrinting.cpp prRecords.cpp PSprint.cpp )
 source_group(Printing FILES ${print_sources})
 
-set(qd_sources qBit.cpp qCConv.cpp qCGrafPort.cpp qCRegular.cpp qColor.cpp qColorMgr.cpp
-             qColorutil.cpp qCursor.cpp qGrafport.cpp qIMIV.cpp qIMV.cpp qIMVxfer.cpp
-             qMisc.cpp qPaletteMgr.cpp qPen.cpp qPicstuff.cpp qPicture.cpp
-             qPixMapConv.cpp qPoint.cpp qPoly.cpp qRect.cpp qRegion.cpp qRegular.cpp
-             qScale.cpp qStandard.cpp qStdArc.cpp qStdBits.cpp qStdLine.cpp qStdOval.cpp
-             qStdPic.cpp qStdPoly.cpp qStdRRect.cpp qStdRect.cpp qStdRgn.cpp
-             qStdText.cpp qText.cpp qGWorld.cpp qGDevice.cpp qIMVI.cpp qHooks.cpp
-             xdata.cpp xdblt.cpp rawpatblt.cpp rawsrcblt.cpp dirtyrect.cpp srcblt.cpp
-             qColorPicker.cpp qPict2.cpp image.cpp image_inits.cpp
-             default_ctab_values.cpp dcconvert.cpp rgbutil.cpp dcmaketables.cpp)
+set(qd_sources
+    hintemplate.h
+    qBit.cpp qCConv.cpp qCGrafPort.cpp qCRegular.cpp qColor.cpp qColorMgr.cpp
+    qColorutil.cpp qCursor.cpp qGrafport.cpp qIMIV.cpp qIMV.cpp qIMVxfer.cpp
+    qMisc.cpp qPaletteMgr.cpp qPen.cpp qPicstuff.cpp qPicture.cpp
+    qPixMapConv.cpp qPoint.cpp qPoly.cpp qRect.cpp qRegion.cpp qRegular.cpp
+    qScale.cpp qStandard.cpp qStdArc.cpp qStdBits.cpp qStdLine.cpp qStdOval.cpp
+    qStdPic.cpp qStdPoly.cpp qStdRRect.cpp qStdRect.cpp qStdRgn.cpp
+    qStdText.cpp qText.cpp qGWorld.cpp qGDevice.cpp qIMVI.cpp qHooks.cpp
+    xdata.cpp xdblt.cpp rawpatblt.cpp rawsrcblt.cpp dirtyrect.cpp srcblt.cpp
+    qColorPicker.cpp qPict2.cpp image.cpp image_inits.cpp
+    default_ctab_values.cpp dcconvert.cpp rgbutil.cpp dcmaketables.cpp)
+
 source_group(QuickDraw FILES ${qd_sources})
 
 set(res_sources resGet.cpp resGetinfo.cpp resGettype.cpp resIMIV.cpp resInit.cpp
@@ -200,11 +214,45 @@ source_group(Sound FILES ${sound_sources})
 set(num_sources bindec.cpp float4.cpp float5.cpp float7.cpp floatnext.cpp toolmath.cpp)
 source_group(Numerics FILES ${num_sources})
 
+
+set(base_sources
+        # include/ExMacTypes.h
+        
+        include/rsys/common.h
+        include/rsys/mactype.h
+        include/rsys/lowglobals.h
+        include/rsys/functions.h
+        include/rsys/functions.impl.h
+        include/rsys/byteswap.h
+
+        include/rsys/m68kint.h
+        include/rsys/cpu.h
+        cpu.cpp    
+
+        include/rsys/traps.h
+        include/rsys/traps.impl.h
+        include/rsys/trapname.h
+        include/rsys/dispatcher.h
+        include/rsys/trapglue.h
+        include/rsys/logging.h
+        include/rsys/api-module.h
+        include/rsys/emustubs.h
+    
+        trapname.cpp
+        traps.cpp
+        dispatcher.cpp
+        emustubs.cpp
+        logging.cpp
+    
+        include/rsys/builtinlibs.h
+        builtinlibs.cpp
+    )
+source_group(Base FILES ${base_sources})
+
 set(misc_sources
-  traps.cpp logging.cpp builtinlibs.cpp
-  debugger.cpp cpu.cpp
-  desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp trapname.cpp font.cpp
-  gestalt.cpp globals.cpp iu.cpp launch.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
+  debugger.cpp
+  desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp font.cpp
+  gestalt.cpp iu.cpp launch.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
   osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
   slash.cpp stdfile.cpp romlib_stubs.cpp syserr.cpp toolevent.cpp toolutil.cpp time.cpp
   vbl.cpp syncint.cpp refresh.cpp autorefresh.cpp aboutbox.cpp
@@ -215,12 +263,12 @@ set(misc_sources
   icon.cpp redrawscreen.cpp ini.cpp qt.cpp
   commtool.cpp cfm.cpp pef_hash.cpp
   mixed_mode.cpp appearance.cpp lockrange.cpp
-  emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
+  unix_like.cpp parse.ypp check_structs.cpp
   executor.cpp  crc.cpp
-  prefpanel.cpp dispatcher.cpp options.cpp
+  prefpanel.cpp options.cpp
   vdriver.cpp)
 
-set(include_sources hintemplate.h
+set(include_sources 
                   include/ADB.h
                   include/AliasMgr.h
                   include/AppleEvents.h
@@ -267,14 +315,10 @@ set(include_sources hintemplate.h
                   include/rsys/arrowkeys.h
                   include/rsys/autorefresh.h
                   include/rsys/blockdev.h
-                  include/rsys/builtinlibs.h
-                  include/rsys/byteswap.h
                   include/rsys/cfm.h
                   include/rsys/check_structs.h
                   include/rsys/color_wheel_bits.h
-                  include/rsys/common.h
                   include/rsys/commonevt.h
-                  include/rsys/cpu.h
                   include/rsys/cquick.h
                   include/rsys/crc.h
                   include/rsys/ctl.h
@@ -287,7 +331,6 @@ set(include_sources hintemplate.h
                   include/rsys/drive_flags.h
                   include/rsys/dispatcher.h
                   include/rsys/dump.h
-                  include/rsys/emustubs.h
                   include/rsys/error.h
                   include/rsys/everything.h
                   include/rsys/evil.h
@@ -299,8 +342,6 @@ set(include_sources hintemplate.h
                   include/rsys/float_fcw.h
                   include/rsys/floatconv.h
                   include/rsys/font.h
-                  include/rsys/functions.h
-                  include/rsys/functions.impl.h
                   include/rsys/futzwithdosdisks.h
                   include/rsys/gestalt.h
                   include/rsys/gworld.h
@@ -316,10 +357,7 @@ set(include_sources hintemplate.h
                   include/rsys/list.h
                   include/rsys/lockunlock.h
                   include/rsys/logging.h
-                  include/rsys/lowglobals.h
-                  include/rsys/m68kint.h
                   include/rsys/macros.h
-                  include/rsys/mactype.h
                   include/rsys/macstrings.h
                   include/rsys/memsize.h
                   include/rsys/menu.h
@@ -375,10 +413,6 @@ set(include_sources hintemplate.h
                   include/rsys/time.h
                   include/rsys/toolevent.h
                   include/rsys/toolutil.h
-                  include/rsys/trapglue.h
-                  include/rsys/trapname.h
-                  include/rsys/traps.h
-                  include/rsys/traps.impl.h
                   include/rsys/uniquefile.h
                   include/rsys/vbl.h
                   include/rsys/vdriver.h
@@ -411,7 +445,7 @@ set(include_sources hintemplate.h
 
 include(trap_instances/trap_instances.cmake)
 
-set(sources ${ctl_sources} ${dial_sources} 
+set(sources ${base_sources} ${ctl_sources} ${dial_sources} 
     ${list_sources} ${menu_sources}
     ${print_sources} ${qd_sources} ${res_sources}
     ${te_sources} ${wind_sources} ${ae_sources}

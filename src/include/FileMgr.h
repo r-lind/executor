@@ -622,10 +622,15 @@ NOTRAP_FUNCTION2(RstFLock);
 extern OSErr Rename(StringPtr filen, INTEGER vrn,
                     StringPtr newf);
 NOTRAP_FUNCTION2(Rename);
-extern void FInitQueue(void);
-extern QHdrPtr GetFSQHdr(void);
-extern QHdrPtr GetVCBQHdr(void);
-extern QHdrPtr GetDrvQHdr(void);
+extern void C_FInitQueue(void);
+PASCAL_TRAP(FInitQueue, 0xA016);
+extern QHdrPtr C_GetFSQHdr(void);
+NOTRAP_FUNCTION(GetFSQHdr);
+extern QHdrPtr C_GetVCBQHdr(void);
+NOTRAP_FUNCTION(GetVCBQHdr);
+extern QHdrPtr C_GetDrvQHdr(void);
+NOTRAP_FUNCTION(GetDrvQHdr);
+
 extern OSErr GetVInfo(INTEGER drv, StringPtr voln,
                       GUEST<INTEGER> *vrn, GUEST<LONGINT> *freeb);
 extern OSErr GetVRefNum(INTEGER prn, GUEST<INTEGER> *vrn);
