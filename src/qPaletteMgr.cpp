@@ -1240,7 +1240,7 @@ void Executor::C_RestoreFore(ColorSpec *cp)
             goto USE_RGB_ANYWAY;
             break;
         default:
-            warning_unexpected("value = 0x%x (using rgb)", cp->value);
+            warning_unexpected("value = 0x%x (using rgb)", toHost(cp->value));
         /* FALL THROUGH */
         case useRGB:
         USE_RGB_ANYWAY:
@@ -1266,7 +1266,7 @@ void Executor::C_RestoreBack(ColorSpec *cp)
             goto USE_RGB_ANYWAY;
             break;
         default:
-            warning_unexpected("value = 0x%x (using rgb)", cp->value);
+            warning_unexpected("value = 0x%x (using rgb)", toHost(cp->value));
         /* FALL THROUGH */
         case useRGB:
         USE_RGB_ANYWAY:

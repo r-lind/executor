@@ -422,7 +422,7 @@ gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
                        (selector >> 16) & 0xFF,
                        (selector >> 8) & 0xFF,
                        (selector)&0xFF,
-                       *responsep,
+                       toHost(*responsep),
                        retval);
 
     return retval;

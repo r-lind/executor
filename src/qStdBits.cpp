@@ -263,7 +263,7 @@ write_copybits_picdata(PixMap *src, PixMap *dst,
         PICWRITE(&swapped_bogo_baseaddr, sizeof swapped_bogo_baseaddr);
     }
 
-    temp_pixmap_row_bytes = src->rowBytes | PIXMAP_DEFAULT_ROWBYTES;
+    temp_pixmap_row_bytes = src->rowBytes | PIXMAP_DEFAULT_ROW_BYTES;
     PICWRITE(&temp_pixmap_row_bytes, sizeof temp_pixmap_row_bytes);
 
     PICWRITE(&src->bounds, sizeof src->bounds);
@@ -855,7 +855,7 @@ ROMlib_real_copy_bits(PixMap *src, PixMap *dst,
 
         *new_src = *src;
         new_src->baseAddr = (Ptr)temp_bits;
-        new_src->rowBytes = temp_row_bytes | PIXMAP_DEFAULT_ROWBYTES;
+        new_src->rowBytes = temp_row_bytes | PIXMAP_DEFAULT_ROW_BYTES;
         new_src->bounds = *dst_rect;
 
         scale_blt_bitmap((blt_bitmap_t *)src, (blt_bitmap_t *)new_src,

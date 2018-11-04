@@ -142,7 +142,7 @@ create_temp_name(Str63 name, int i)
     err = GetCurrentProcess(&psn);
     if(err == noErr)
         sprintf((char *)name + 1,
-                "%x%x.%x", psn.highLongOfPSN, psn.lowLongOfPSN, i);
+                "%x%x.%x", toHost(psn.highLongOfPSN), toHost(psn.lowLongOfPSN), i);
     else
         sprintf((char *)name + 1, "%d.%x", err, i);
     name[0] = strlen((char *)name + 1);

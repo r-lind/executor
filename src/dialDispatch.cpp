@@ -3,7 +3,6 @@
  */
 
 #include "rsys/common.h"
-#include "EventMgr.h"
 
 #include "DialogMgr.h"
 

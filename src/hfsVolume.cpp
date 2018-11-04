@@ -97,7 +97,7 @@ static OSErr readvolumebitmap(HVCB *vcbp, volumeinfoPtr vp)
 
         words = (GUEST<uint32_t> *)vp;
         warning_fs_log("sigword = 0x%02x (%08x %08x %08x %08x)",
-                       vp->drSigWord, (unsigned)words[0], (unsigned)words[1],
+                       toHost(vp->drSigWord), (unsigned)words[0], (unsigned)words[1],
                        (unsigned)words[2], (unsigned)words[3]);
     }
     else

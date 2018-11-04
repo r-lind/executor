@@ -11,7 +11,6 @@
 #include "DialogMgr.h"
 #include "ControlMgr.h"
 #include "MemoryMgr.h"
-#include "rsys/osutil.h"
 #include "OSUtil.h"
 #include "ToolboxUtil.h"
 #include "ToolboxEvent.h"
@@ -24,7 +23,6 @@
 #include "rsys/itm.h"
 #include "rsys/prefs.h"
 #include "rsys/hook.h"
-#include "rsys/executor.h"
 #include "rsys/osevent.h"
 #include <rsys/functions.impl.h>
 
@@ -605,7 +603,7 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
             {
                 warning_unexpected("couldn't resolve editField -- dp = %p, "
                                    "*itemp = %d",
-                                   dp, *itemp);
+                                   dp, toHost(*itemp));
                 retval = false;
             }
             HSetState(((DialogPeek)dp)->items, flags);

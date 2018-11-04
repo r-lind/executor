@@ -160,7 +160,7 @@ addr_info(char *addr)
                               ? "SystemZone"
                               : "LM(TheZone)")),
             addr_zone,
-            ZONE_HEAP_DATA(addr_zone), ZONE_BK_LIM(addr_zone));
+            ZONE_HEAP_DATA(addr_zone), toHost(ZONE_BK_LIM(addr_zone)));
 
     block = addr_block(addr_zone, addr);
     if(block == nullptr)
@@ -217,7 +217,7 @@ addr_info(char *addr)
                 "addr `%p' points `%d' bytes into FREE block `%p'\n"
                 "which has a physical size of `%d'\n",
                 addr, (int)(addr - (char *)block), block,
-                PSIZE(block));
+                toHost(PSIZE(block)));
         return;
     }
 
@@ -381,7 +381,7 @@ void Executor::ROMlib_sledgehammer_zone(THz zone, bool print_p,
                     state = HANDLE_STATE(handle, block);
                     fprintf(stderr, "REL  %p; H:%p P:%p S:%08lx %c%c%c\n",
                             block,
-                            handle, *handle,
+                            handle, toHost(*handle),
                             (unsigned long)LSIZE(block),
                             state & LOCKBIT ? 'L' : ' ',
                             state & PURGEBIT ? 'P' : ' ',
@@ -410,7 +410,7 @@ void Executor::ROMlib_sledgehammer_zone(THz zone, bool print_p,
                     ++infop->n_free;
                 if(BLOCK_LOCATION_OFFSET(block))
                     mm_fatal("free block `%p' has non-zero location `%08x'",
-                             block, BLOCK_LOCATION_OFFSET(block));
+                             block, toHost(BLOCK_LOCATION_OFFSET(block)));
                 total_size += PSIZE(block);
                 if(infop)
                 {
@@ -426,7 +426,7 @@ void Executor::ROMlib_sledgehammer_zone(THz zone, bool print_p,
                 if(print_p)
                     fprintf(stderr, "FREE %p;                       S:%08x %c\n",
                             block,
-                            PSIZE(block),
+                            toHost(PSIZE(block)),
                             block == alloc_ptr ? 'A' : ' ');
                 break;
             default:

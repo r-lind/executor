@@ -10,7 +10,6 @@
 #include "MenuMgr.h"
 #include "ToolboxUtil.h"
 #include "Iconutil.h"
-#include "FontMgr.h"
 #include "OSUtil.h"
 
 #include "rsys/ctl.h"

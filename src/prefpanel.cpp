@@ -377,7 +377,7 @@ int saveprefvalues(const char *savefilename, LONGINT locationx, LONGINT location
             fprintf(fp, "// WindowName = \"%s\";\n", window_name.c_str());
         }
         fprintf(fp, "BitsPerPixel = %d;\n",
-                PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice))));
+                toHost(PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)))));
 
 #if 0 && defined(MACOSX_)
 	fprintf(fp, "ScreenSize = { %ld, %ld };\n", (long) curr_width, (long) curr_height);

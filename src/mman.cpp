@@ -565,7 +565,7 @@ void MoreMasters(void)
 #if !defined(NDEBUG)
 void print_free(void)
 {
-    printf("%d %d\n", LM(ApplZone)->zcbFree, LM(SysZone)->zcbFree);
+    printf("%d %d\n", toHost(LM(ApplZone)->zcbFree), toHost(LM(SysZone)->zcbFree));
 }
 #endif
 

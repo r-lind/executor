@@ -45,7 +45,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     static PixMap pattern_pixmap_tmpl = {
         /* baseAddr; to be filled in later */
         nullptr,
-        PIXMAP_DEFAULT_ROWBYTES | 1,
+        int16_t(PIXMAP_DEFAULT_ROW_BYTES | 1),
         { 0, 0, 8, 8 },
         /* version */
         0,
@@ -113,7 +113,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     *row_bytes = dst_row_bytes;
     dst_pixmap_tmpl.rowBytes = (dst_row_bytes
                                 | (target->rowBytes & ROWBYTES_FLAG_BITS)
-                                | PIXMAP_DEFAULT_ROWBYTES);
+                                | PIXMAP_DEFAULT_ROW_BYTES);
     pixmap_set_pixel_fields(&dst_pixmap_tmpl, target_depth);
     if(target_depth > 8)
     {
@@ -157,7 +157,7 @@ raw_bits_for_color_pattern(PixPatPtr pixpat, PixMap *target,
     dst.bounds = *bounds;
     dst.rowBytes = (row_bytes
                     | (target->rowBytes & ROWBYTES_FLAG_BITS)
-                    | PIXMAP_DEFAULT_ROWBYTES);
+                    | PIXMAP_DEFAULT_ROW_BYTES);
     dst.baseAddr = (Ptr)bits;
 
     data = pixpat->patData;

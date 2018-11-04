@@ -22,7 +22,7 @@ void Executor::C_OpenCPort(CGrafPtr port)
     PixPatHandle temp_pixpat;
 
     /* set up port version before using any other macros */
-    port->portVersion = (3 << 14) | /* color quickdraw version */ 0;
+    port->portVersion = static_cast<short>((3 << 14) | /* color quickdraw version */ 0);
 
     /* allocate storage for new CGrafPtr members, including portPixMap,
      pnPixPat, fillPixPat, bkPixPat, and grafVar */
@@ -339,7 +339,7 @@ PixMapHandle Executor::C_NewPixMap()
        * This is a hack to make Executor bootstrap properly.
        */
         memset(*pixmap, 0, sizeof(PixMap));
-        (*pixmap)->rowBytes = PIXMAP_DEFAULT_ROWBYTES;
+        (*pixmap)->rowBytes = PIXMAP_DEFAULT_ROW_BYTES;
         PIXMAP_HRES(pixmap) = PIXMAP_VRES(pixmap) = 72 << 16;
         PIXMAP_PIXEL_TYPE(pixmap) = chunky_pixel_type;
         PIXMAP_CMP_COUNT(pixmap) = 1;
@@ -435,7 +435,7 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
            && pixpat_type != pixpat_rgb_pattern)
         {
             warning_unexpected("unknown pixpat type `%d'",
-                               PIXPAT_TYPE(pixpat));
+                               toHost(PIXPAT_TYPE(pixpat)));
             PIXPAT_TYPE(pixpat) = pixpat_color_pattern;
         }
     }

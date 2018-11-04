@@ -10,8 +10,6 @@
 #include "OSUtil.h"
 #include "DialogMgr.h"
 #include "ControlMgr.h"
-#include "ResourceMgr.h"
-#include "FontMgr.h"
 #include "MemoryMgr.h"
 #include "ToolboxUtil.h"
 #include "Iconutil.h"

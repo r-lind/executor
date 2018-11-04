@@ -212,23 +212,19 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 /* big endian byte order */
 #define PIXMAP_BASEADDR(pixmap) ((*pixmap)->baseAddr)
 
-#define ROWBYTES_VALUE_BITS (0x3FFF)
+const short ROWBYTES_VALUE_BITS = 0x3FFF;
 
-#define ROWBYTES_FLAG_BITS (3 << 14)
+const short ROWBYTES_FLAG_BITS = short(3 << 14);
 #define PIXMAP_FLAGS(pixmap) \
     ((*pixmap)->rowBytes & ROWBYTES_FLAG_BITS)
 
 
-/* ### phase out; eventually i'd like to see consistent use of
-   `row_bytes', not `rowbytes' */
-#define PIXMAP_DEFAULT_ROWBYTES (1 << 15)
-
-#define PIXMAP_DEFAULT_ROW_BYTES (1 << 15)
+const short PIXMAP_DEFAULT_ROW_BYTES = short(1 << 15);
 
 /* the high two bits of the rowbytes field of a {c}grafport/pixmap
    is reserved; and has the following meaning(s): */
-#define PIXMAP_FLAG_BITS (2 << 14)
-#define CPORT_FLAG_BITS (3 << 14)
+const short PIXMAP_FLAG_BITS = short(2 << 14);
+const short CPORT_FLAG_BITS = short(3 << 14);
 
 /* this bit of the port version field of a cgrafport indicates
    the cgrafptr is really a gworldptr */
@@ -269,10 +265,10 @@ static inline GrafPtr ASSERT_NOT_CPORT(void *port)
 #define WRAPPER_PIXMAP_FOR_COPY(wrapper_decl_name) \
     BitMap *wrapper_decl_name = (BitMap *)alloca(sizeof(BitMap))
 
-#define WRAPPER_SET_PIXMAP(wrapper, pixmap_h)          \
+#define WRAPPER_SET_PIXMAP(wrapper, pixmap_h)            \
     do                                                   \
     {                                                    \
-        (wrapper)->rowBytes = 3 << 14;              \
+        (wrapper)->rowBytes = (short)(3 << 14);          \
         (wrapper)->baseAddr = guest_cast<Ptr>(pixmap_h); \
     } while(0)
 

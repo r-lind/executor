@@ -8,10 +8,8 @@
 #include "QuickDraw.h"
 #include "WindowMgr.h"
 #include "ControlMgr.h"
-#include "ToolboxUtil.h"
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"
-#include "OSUtil.h"
 
 #include "rsys/ctl.h"
 #include "rsys/wind.h"

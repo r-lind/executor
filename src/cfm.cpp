@@ -1167,19 +1167,19 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
     headp = (PEFContainerHeader_t*)addr;
 
     if(PEF_CONTAINER_TAG1_X(headp) != FOURCC('J', 'o', 'y', '!'))
-        warning_unexpected("0x%x", PEF_CONTAINER_TAG1(headp));
+        warning_unexpected("0x%x", toHost(PEF_CONTAINER_TAG1(headp)));
 
     if(PEF_CONTAINER_TAG2_X(headp) != FOURCC('p', 'e', 'f', 'f'))
-        warning_unexpected("0x%x", PEF_CONTAINER_TAG2(headp));
+        warning_unexpected("0x%x", toHost(PEF_CONTAINER_TAG2(headp)));
 
     if(PEF_CONTAINER_ARCHITECTURE(headp)
        != FOURCC('p', 'w', 'p', 'c'))
         warning_unexpected("0x%x",
-                           PEF_CONTAINER_ARCHITECTURE(headp));
+                           toHost(PEF_CONTAINER_ARCHITECTURE(headp)));
 
     if(PEF_CONTAINER_FORMAT_VERSION(headp) != 1)
         warning_unexpected("0x%x",
-                           PEF_CONTAINER_FORMAT_VERSION(headp));
+                           toHost(PEF_CONTAINER_FORMAT_VERSION(headp)));
 
     // #warning ignoring (old_dev, old_imp, current) version
 

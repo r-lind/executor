@@ -323,7 +323,7 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
         dst_pixmap.pixelType = Indirect;
         dst_pixmap.pixelSize = 1;
         dst_pixmap.baseAddr = dst->baseAddr;
-        dst_pixmap.rowBytes = dst->rowBytes | PIXMAP_DEFAULT_ROWBYTES;
+        dst_pixmap.rowBytes = dst->rowBytes | PIXMAP_DEFAULT_ROW_BYTES;
         dst_pixmap.pmTable = ROMlib_bw_ctab;
 
         ROMlib_fg_bk(&fg_pixel, &bk_pixel, nullptr, nullptr, nullptr, false, false);
@@ -673,7 +673,7 @@ void Executor::C_StdRgn(GrafVerb verb, RgnHandle rgn)
 
     if((*rgn)->rgnSize & 0x8000)
     {
-        warning_unexpected("negative rgnSize = 0x%x\n", (*rgn)->rgnSize);
+        warning_unexpected("negative rgnSize = 0x%x\n", toHost((*rgn)->rgnSize));
         return;
     }
 

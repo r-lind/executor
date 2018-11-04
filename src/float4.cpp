@@ -998,7 +998,7 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
 
     warning_floating_point("Fx2dec(" IEEE_T_FORMAT ", digits=%d) == %s%s * 10**%d",
                            (IEEE_T_PRINT_CAST)in, digits, dp->sgn ? "-" : "",
-                           c_string, dp->exp);
+                           c_string, toHost(dp->exp));
 }
 
 #if defined(CYGWIN32)
@@ -1095,7 +1095,7 @@ void Executor::C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel)
     warning_floating_point("Fdec2x(%s%.*s * 10**%d) == " IEEE_T_FORMAT "",
                            sp->sgn ? "-" : "",
                            (uint8_t)sp->sig[0], &sp->sig[1],
-                           sp->exp, (IEEE_T_PRINT_CAST)in);
+                           toHost(sp->exp), (IEEE_T_PRINT_CAST)in);
 }
 
 void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)

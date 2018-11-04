@@ -7,8 +7,6 @@
 #include "ControlMgr.h"
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
 #include "ToolboxUtil.h"
 #include "MemoryMgr.h"
 

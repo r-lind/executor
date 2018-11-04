@@ -62,7 +62,7 @@ void Executor::C_GetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
     temp_pm.bounds.bottom = 1;
     temp_pm.bounds.left = 0;
     temp_pm.bounds.right = 1;
-    temp_pm.rowBytes = 4 | PIXMAP_DEFAULT_ROWBYTES;
+    temp_pm.rowBytes = static_cast<int16_t>(4 | PIXMAP_DEFAULT_ROW_BYTES);
 
     if(CGrafPort_p(port))
     {

@@ -7,7 +7,6 @@
 #include "rsys/common.h"
 #include "WindowMgr.h"
 #include "ControlMgr.h"
-#include "EventMgr.h"
 #include "MemoryMgr.h"
 
 #include "rsys/cquick.h"

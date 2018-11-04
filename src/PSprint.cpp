@@ -1459,7 +1459,7 @@ void Executor::NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *d
                 if(ctab[i].value != i && !has_warned_p)
                 {
                     warning_unexpected("value = %d, i = %d",
-                                       ctab[i].value, i);
+                                       toHost(ctab[i].value), i);
                     has_warned_p = true;
                 }
                 r = ctab[i].rgb.red >> 8;

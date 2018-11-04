@@ -8,7 +8,6 @@
 
 #include "WindowMgr.h"
 #include "ControlMgr.h"
-#include "EventMgr.h"
 #include "ToolboxUtil.h"
 
 #include "rsys/ctl.h"

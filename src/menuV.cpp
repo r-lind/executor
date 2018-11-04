@@ -7,9 +7,7 @@
 #include "rsys/common.h"
 #include "QuickDraw.h"
 #include "MenuMgr.h"
-#include "WindowMgr.h"
 #include "ResourceMgr.h"
-#include "MemoryMgr.h"
 
 #include "rsys/cpu.h"
 #include "rsys/cquick.h"

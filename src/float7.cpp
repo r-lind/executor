@@ -247,7 +247,7 @@ abortlookahead:
 
     warning_floating_point("xstr2dec returning %s%.*s * 10**%d",
                            dp2->sgn ? "-" : "",
-                           dp2->sig[0], dp2->sig + 1, dp2->exp);
+                           dp2->sig[0], dp2->sig + 1, toHost(dp2->exp));
 }
 
 void Executor::C_ROMlib_Fcstr2dec(Decstr volatile sp2, INTEGER *volatile sp,

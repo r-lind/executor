@@ -11,9 +11,7 @@
 
 #include "rsys/common.h"
 
-#include "QuickDraw.h"
 #include "MemoryMgr.h"
-#include "CQuickDraw.h"
 #include "ToolboxEvent.h"
 #include "OSEvent.h"
 #include "EventMgr.h"
@@ -22,25 +20,18 @@
 #include "ProcessMgr.h"
 #include "AppleEvents.h"
 
-#include "rsys/cquick.h"
 #include "rsys/mman.h"
-#include "rsys/arrowkeys.h"
-#include "rsys/time.h"
 #include "rsys/prefs.h"
 #include "rsys/vdriver.h"
-#include "rsys/segment.h"
 #include "rsys/toolevent.h"
 #include "rsys/osevent.h"
 #include "rsys/osutil.h"
 #include "rsys/dirtyrect.h"
-#include "rsys/stdfile.h"
-#include "rsys/system_error.h"
 #include "rsys/syncint.h"
 
 #include "rsys/string.h"
 #include "rsys/keyboard.h"
 
-#include "DialogMgr.h"
 #include "SegmentLdr.h"
 
 using namespace Executor;

@@ -8,7 +8,6 @@
 #include "ResourceMgr.h"
 #include "WindowMgr.h"
 #include "DialogMgr.h"
-#include "EventMgr.h"
 #include "MemoryMgr.h"
 
 #include "OSUtil.h"

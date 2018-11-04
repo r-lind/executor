@@ -157,8 +157,8 @@ OSErr Executor::ROMlib_errortype(btparam *btpb)
     if(retval == dirNFErr)
         warning_trace_info("catkeyp->ckrParID = %d, "
                            "btpb->tofind.catk.ckrParID = %d",
-                           catkeyp->ckrParID,
-                           btpb->tofind.catk.ckrParID);
+                           toHost(catkeyp->ckrParID),
+                           toHost(btpb->tofind.catk.ckrParID));
     fs_err_hook(retval);
     return retval;
 }

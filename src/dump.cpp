@@ -28,7 +28,7 @@
 
 #include "rsys/print.h"
 
-#define deref(x) (*(x))
+#define deref(x) toHost(*(x))
 
 #define pmWindow(p) ((p)->pmWindow)
 #define pmPrivate(p) ((p)->pmPrivate)
@@ -232,9 +232,9 @@ void Executor::dump_rect(Rect *r)
 {
     iprintf((o_fp, "%s(Rect *%p) {\n", field_name.c_str(), r));
     indent += 2;
-    iprintf((o_fp, "top 0x%x; left 0x%x;\n", r->top, r->left));
+    iprintf((o_fp, "top 0x%x; left 0x%x;\n", toHost(r->top), toHost(r->left)));
     iprintf((o_fp, "bottom 0x%x; right 0x%x; }\n",
-             r->bottom, r->right));
+             toHost(r->bottom), toHost(r->right)));
     indent -= 2;
     fflush(o_fp);
 }
@@ -250,7 +250,7 @@ void Executor::dump_pattern(Pattern x)
 void Executor::dump_point(GUEST<Point> x)
 {
     iprintf((o_fp, "%s(Point) { v 0x%x; h 0x%x; }\n",
-             field_name.c_str(), x.v, x.h));
+             field_name.c_str(), toHost(x.v), toHost(x.h)));
     fflush(o_fp);
 }
 
@@ -320,7 +320,7 @@ void Executor::dump_bitmap(BitMap *x, Rect *rect)
 {
     iprintf((o_fp, "%s(BitMap *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "baseAddr %p;\n", x->baseAddr));
+    iprintf((o_fp, "baseAddr %p;\n", toHost(x->baseAddr)));
     if(dump_verbosity >= 3)
         dump_bitmap_data(x, 1, rect);
     iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)x->rowBytes));
@@ -375,7 +375,7 @@ void Executor::dump_grafport_real(GrafPtr x)
 {
     iprintf((o_fp, "%s(GrafPort *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "device %d;\n", x->device));
+    iprintf((o_fp, "device %d;\n", toHost(x->device)));
     dump_field(dump_bitmap_null_rect, &x->portBits, "portBits");
     dump_field(dump_rect, &x->portRect, "portRect");
     dump_field(dump_handle, x->visRgn, "visRgn");
@@ -384,18 +384,18 @@ void Executor::dump_grafport_real(GrafPtr x)
     dump_field(dump_pattern, x->fillPat, "fillPat");
     dump_field(dump_point, x->pnLoc, "pnLoc");
     dump_field(dump_point, x->pnSize, "pnSize");
-    iprintf((o_fp, "pnMode %d;\n", x->pnMode));
+    iprintf((o_fp, "pnMode %d;\n", toHost(x->pnMode)));
     dump_field(dump_pattern, x->pnPat, "pnPat");
-    iprintf((o_fp, "pnVis %d;\n", x->pnVis));
-    iprintf((o_fp, "txFont %d;\n", x->txFont));
+    iprintf((o_fp, "pnVis %d;\n", toHost(x->pnVis)));
+    iprintf((o_fp, "txFont %d;\n", toHost(x->txFont)));
     iprintf((o_fp, "txFace %d;\n", x->txFace));
-    iprintf((o_fp, "txMode %d;\n", x->txMode));
-    iprintf((o_fp, "txSize %d;\n", x->txSize));
-    iprintf((o_fp, "spExtra %d;\n", x->spExtra));
-    iprintf((o_fp, "fgColor 0x%x;\n", x->fgColor));
-    iprintf((o_fp, "bkColor 0x%x;\n", x->bkColor));
-    iprintf((o_fp, "colrBit %d;\n", x->colrBit));
-    iprintf((o_fp, "patStretch %d;\n", x->patStretch));
+    iprintf((o_fp, "txMode %d;\n", toHost(x->txMode)));
+    iprintf((o_fp, "txSize %d;\n", toHost(x->txSize)));
+    iprintf((o_fp, "spExtra %d;\n", toHost(x->spExtra)));
+    iprintf((o_fp, "fgColor 0x%x;\n", toHost(x->fgColor)));
+    iprintf((o_fp, "bkColor 0x%x;\n", toHost(x->bkColor)));
+    iprintf((o_fp, "colrBit %d;\n", toHost(x->colrBit)));
+    iprintf((o_fp, "patStretch %d;\n", toHost(x->patStretch)));
     dump_field(dump_handle, x->picSave, "picSave");
     dump_field(dump_handle, x->rgnSave, "rgnSave");
     dump_field(dump_handle, x->polySave, "polySave");
@@ -432,9 +432,9 @@ void Executor::dump_ctab(CTabHandle ctab)
 
     iprintf((o_fp, "%s(ColorTable **%p) {\n", field_name.c_str(), ctab));
     indent += 2;
-    iprintf((o_fp, "ctSeed 0x%x;\n", x->ctSeed));
-    iprintf((o_fp, "ctFlags 0x%x;\n", x->ctFlags));
-    iprintf((o_fp, "ctSize %d;\n", x->ctSize));
+    iprintf((o_fp, "ctSeed 0x%x;\n", toHost(x->ctSeed)));
+    iprintf((o_fp, "ctFlags 0x%x;\n", toHost(x->ctFlags)));
+    iprintf((o_fp, "ctSize %d;\n", toHost(x->ctSize)));
     if(dump_verbosity >= 2)
     {
         int i;
@@ -443,7 +443,7 @@ void Executor::dump_ctab(CTabHandle ctab)
         for(i = 0; i <= x->ctSize; i++)
         {
             iprintf((o_fp, "%d:[0x%x] { 0x%lx, 0x%lx, 0x%lx }\n",
-                     i, x->ctTable[i].value,
+                     i, toHost(x->ctTable[i].value),
                      (long)x->ctTable[i].rgb.red,
                      (long)x->ctTable[i].rgb.green,
                      (long)x->ctTable[i].rgb.blue));
@@ -465,8 +465,8 @@ void Executor::dump_itab(ITabHandle itab)
 
     iprintf((o_fp, "%s(ITab **%p) {\n", field_name.c_str(), itab));
     indent += 2;
-    iprintf((o_fp, "iTabSeed 0x%x;\n", x->iTabSeed));
-    iprintf((o_fp, "iTabRes %d;\n", x->iTabRes));
+    iprintf((o_fp, "iTabSeed 0x%x;\n", toHost(x->iTabSeed)));
+    iprintf((o_fp, "iTabRes %d;\n", toHost(x->iTabRes)));
 
     /* we always omit the inverse table... */
     iprintf((o_fp, "[iTTable field omitted]; }\n"));
@@ -503,7 +503,7 @@ void Executor::dump_pixpat(PixPatHandle pixpat)
         iprintf((o_fp, "[pat{Map, Data} field omitted]; }\n"));
     }
     dump_field(dump_handle, x->patXData, "patXData");
-    iprintf((o_fp, "patXValid %d;\n", x->patXValid));
+    iprintf((o_fp, "patXValid %d;\n", toHost(x->patXValid)));
     if(dump_verbosity
        && x->patXMap
        && !x->patXValid)
@@ -521,7 +521,7 @@ void dump_pixmap_ptr(PixMapPtr x, Rect *rect)
 {
     iprintf((o_fp, "%s(PixMap *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "baseAddr %p;\n", x->baseAddr));
+    iprintf((o_fp, "baseAddr %p;\n", toHost(x->baseAddr)));
     if(dump_verbosity >= 3
        && x->baseAddr)
     {
@@ -531,16 +531,16 @@ void dump_pixmap_ptr(PixMapPtr x, Rect *rect)
     }
     iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)x->rowBytes));
     dump_field(dump_rect, &x->bounds, "bounds");
-    iprintf((o_fp, "pmVersion 0x%x;\n", x->pmVersion));
-    iprintf((o_fp, "packType 0x%x;\n", x->packType));
-    iprintf((o_fp, "packSize 0x%x;\n", x->packSize));
+    iprintf((o_fp, "pmVersion 0x%x;\n", toHost(x->pmVersion)));
+    iprintf((o_fp, "packType 0x%x;\n", toHost(x->packType)));
+    iprintf((o_fp, "packSize 0x%x;\n", toHost(x->packSize)));
     iprintf((o_fp, "hRes 0x%x, vRes 0x%x;\n",
-             x->hRes, x->vRes));
-    iprintf((o_fp, "pixelType 0x%x;\n", x->pixelType));
-    iprintf((o_fp, "pixelSize %d;\n", x->pixelSize));
-    iprintf((o_fp, "cmpCount %d;\n", x->cmpCount));
-    iprintf((o_fp, "cmpSize %d;\n", x->cmpSize));
-    iprintf((o_fp, "planeBytes 0x%x;\n", x->planeBytes));
+             toHost(x->hRes), toHost(x->vRes)));
+    iprintf((o_fp, "pixelType 0x%x;\n", toHost(x->pixelType)));
+    iprintf((o_fp, "pixelSize %d;\n", toHost(x->pixelSize)));
+    iprintf((o_fp, "cmpCount %d;\n", toHost(x->cmpCount)));
+    iprintf((o_fp, "cmpSize %d;\n", toHost(x->cmpSize)));
+    iprintf((o_fp, "planeBytes 0x%x;\n", toHost(x->planeBytes)));
     if(dump_verbosity
        && x->pmTable)
         dump_field(dump_ctab, x->pmTable, "pmTable");
@@ -562,7 +562,7 @@ void Executor::dump_pixmap(PixMapHandle pixmap, Rect *rect)
 
     iprintf((o_fp, "%s(PixMap **%p) {\n", field_name.c_str(), pixmap));
     indent += 2;
-    iprintf((o_fp, "baseAddr %p;\n", x->baseAddr));
+    iprintf((o_fp, "baseAddr %p;\n", toHost(x->baseAddr)));
     if(dump_verbosity >= 3
        && x->baseAddr)
     {
@@ -572,16 +572,16 @@ void Executor::dump_pixmap(PixMapHandle pixmap, Rect *rect)
     }
     iprintf((o_fp, "rowBytes 0x%hx;\n", (unsigned short)x->rowBytes));
     dump_field(dump_rect, &x->bounds, "bounds");
-    iprintf((o_fp, "pmVersion 0x%x;\n", x->pmVersion));
-    iprintf((o_fp, "packType 0x%x;\n", x->packType));
-    iprintf((o_fp, "packSize 0x%x;\n", x->packSize));
+    iprintf((o_fp, "pmVersion 0x%x;\n", toHost(x->pmVersion)));
+    iprintf((o_fp, "packType 0x%x;\n", toHost(x->packType)));
+    iprintf((o_fp, "packSize 0x%x;\n", toHost(x->packSize)));
     iprintf((o_fp, "hRes 0x%x, vRes 0x%x;\n",
-             x->hRes, x->vRes));
-    iprintf((o_fp, "pixelType 0x%x;\n", x->pixelType));
-    iprintf((o_fp, "pixelSize %d;\n", x->pixelSize));
-    iprintf((o_fp, "cmpCount %d;\n", x->cmpCount));
-    iprintf((o_fp, "cmpSize %d;\n", x->cmpSize));
-    iprintf((o_fp, "planeBytes 0x%x;\n", x->planeBytes));
+             toHost(x->hRes), toHost(x->vRes)));
+    iprintf((o_fp, "pixelType 0x%x;\n", toHost(x->pixelType)));
+    iprintf((o_fp, "pixelSize %d;\n", toHost(x->pixelSize)));
+    iprintf((o_fp, "cmpCount %d;\n", toHost(x->cmpCount)));
+    iprintf((o_fp, "cmpSize %d;\n", toHost(x->cmpSize)));
+    iprintf((o_fp, "planeBytes 0x%x;\n", toHost(x->planeBytes)));
     if(dump_verbosity
        && x->pmTable)
         dump_field(dump_ctab, x->pmTable, "pmTable");
@@ -629,16 +629,16 @@ void Executor::dump_cgrafport_real(CGrafPtr x)
 {
     iprintf((o_fp, "%s(CGrafPort *%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "device 0x%x;\n", x->device));
+    iprintf((o_fp, "device 0x%x;\n", toHost(x->device)));
     if(dump_verbosity
        && x->portPixMap)
         dump_field(dump_pixmap_null_rect, x->portPixMap, "portPixMap");
     else
         dump_field(dump_handle, x->portPixMap, "portPixMap");
-    iprintf((o_fp, "portVersion 0x%x;\n", x->portVersion));
+    iprintf((o_fp, "portVersion 0x%x;\n", toHost(x->portVersion)));
     dump_field(dump_handle, x->grafVars, "grafVars");
-    iprintf((o_fp, "chExtra %d;\n", x->chExtra));
-    iprintf((o_fp, "pnLocHFrac 0x%x;\n", x->pnLocHFrac));
+    iprintf((o_fp, "chExtra %d;\n", toHost(x->chExtra)));
+    iprintf((o_fp, "pnLocHFrac 0x%x;\n", toHost(x->pnLocHFrac)));
     dump_field(dump_rect, &x->portRect, "portRect");
     dump_field(dump_handle, x->visRgn, "visRgn");
     dump_field(dump_handle, x->clipRgn, "clipRgn");
@@ -651,7 +651,7 @@ void Executor::dump_cgrafport_real(CGrafPtr x)
     dump_field(dump_rgb_color, &x->rgbBkColor, "rgbBkColor");
     dump_field(dump_point, x->pnLoc, "pnLoc");
     dump_field(dump_point, x->pnSize, "pnSize");
-    iprintf((o_fp, "pnMode %d;\n", x->pnMode));
+    iprintf((o_fp, "pnMode %d;\n", toHost(x->pnMode)));
     if(dump_verbosity
        && x->pnPixPat)
         dump_field(dump_pixpat, x->pnPixPat, "pnPixPat");
@@ -662,16 +662,16 @@ void Executor::dump_cgrafport_real(CGrafPtr x)
         dump_field(dump_pixpat, x->fillPixPat, "fillPixPat");
     else
         dump_field(dump_handle, x->fillPixPat, "fillPixPat");
-    iprintf((o_fp, "pnVis %d;\n", x->pnVis));
-    iprintf((o_fp, "txFont %d;\n", x->txFont));
+    iprintf((o_fp, "pnVis %d;\n", toHost(x->pnVis)));
+    iprintf((o_fp, "txFont %d;\n", toHost(x->txFont)));
     iprintf((o_fp, "txFace %d;\n", x->txFace));
-    iprintf((o_fp, "txMode %d;\n", x->txMode));
-    iprintf((o_fp, "txSize %d;\n", x->txSize));
-    iprintf((o_fp, "spExtra %d;\n", x->spExtra));
-    iprintf((o_fp, "fgColor 0x%x;\n", x->fgColor));
-    iprintf((o_fp, "bkColor 0x%x;\n", x->bkColor));
-    iprintf((o_fp, "colrBit %d;\n", x->colrBit));
-    iprintf((o_fp, "patStretch %x;\n", x->patStretch));
+    iprintf((o_fp, "txMode %d;\n", toHost(x->txMode)));
+    iprintf((o_fp, "txSize %d;\n", toHost(x->txSize)));
+    iprintf((o_fp, "spExtra %d;\n", toHost(x->spExtra)));
+    iprintf((o_fp, "fgColor 0x%x;\n", toHost(x->fgColor)));
+    iprintf((o_fp, "bkColor 0x%x;\n", toHost(x->bkColor)));
+    iprintf((o_fp, "colrBit %d;\n", toHost(x->colrBit)));
+    iprintf((o_fp, "patStretch %x;\n", toHost(x->patStretch)));
     dump_field(dump_handle, x->picSave, "picSave");
     dump_field(dump_handle, x->rgnSave, "rgnSave");
     dump_field(dump_handle, x->polySave, "polySave");
@@ -688,21 +688,21 @@ void Executor::dump_gdevice(GDHandle gdev)
 
     iprintf((o_fp, "%s(GDevice **%p) {\n", field_name.c_str(), gdev));
     indent += 2;
-    iprintf((o_fp, "gdID 0x%x;\n", x->gdID));
-    iprintf((o_fp, "gdType 0x%x;\n", x->gdType));
+    iprintf((o_fp, "gdID 0x%x;\n", toHost(x->gdID)));
+    iprintf((o_fp, "gdType 0x%x;\n", toHost(x->gdType)));
     if(dump_verbosity
        && x->gdITable)
         dump_field(dump_itab, x->gdITable, "gdITable");
     else
         dump_field(dump_handle, x->gdITable, "gdITable");
-    iprintf((o_fp, "gdResPref 0x%x;\n", x->gdResPref));
+    iprintf((o_fp, "gdResPref 0x%x;\n", toHost(x->gdResPref)));
 #if 0
   dump_field (dump_handle, x->gdSearchProc, "gdSearchProc");
 #else
-    iprintf((o_fp, "gdSearchProc %p;\n", x->gdSearchProc));
+    iprintf((o_fp, "gdSearchProc %p;\n", toHost(x->gdSearchProc)));
     for(proc = x->gdSearchProc; proc; proc = (*proc)->nxtSrch)
         iprintf((o_fp, "  proc [%p, %p]; %p\n",
-                 proc, (*proc)->nxtSrch, (*proc)->srchProc));
+                 proc, toHost((*proc)->nxtSrch), toHost((*proc)->srchProc)));
 #endif
     dump_field(dump_handle, x->gdCompProc, "gdCompProc");
     iprintf((o_fp, "gdFlags 0x%hx;\n", (unsigned short)x->gdFlags));
@@ -711,14 +711,14 @@ void Executor::dump_gdevice(GDHandle gdev)
         dump_field(dump_pixmap_null_rect, x->gdPMap, "gdPMap");
     else
         dump_field(dump_handle, x->gdPMap, "gdPMap");
-    iprintf((o_fp, "gdRefCon 0x%x;\n", x->gdRefCon));
+    iprintf((o_fp, "gdRefCon 0x%x;\n", toHost(x->gdRefCon)));
     if(dump_verbosity
        && x->gdNextGD)
         dump_field(dump_gdevice, (GDHandle)x->gdNextGD, "gdNextGD");
     else
         dump_field(dump_handle, x->gdNextGD, "gdNextGD");
     dump_field(dump_rect, &x->gdRect, "gdRect");
-    iprintf((o_fp, "gdMode 0x%x;\n", x->gdMode));
+    iprintf((o_fp, "gdMode 0x%x;\n", toHost(x->gdMode)));
     iprintf((o_fp, "[CC, Reserved fields omitted]; }\n"));
     indent -= 2;
     fflush(o_fp);
@@ -753,16 +753,16 @@ void Executor::dump_palette(PaletteHandle palette)
 
     iprintf((o_fp, "%s(PaletteHandle **%p) {\n", field_name.c_str(), palette));
     indent += 2;
-    iprintf((o_fp, "pmEntries 0x%x;\n", x->pmEntries));
+    iprintf((o_fp, "pmEntries 0x%x;\n", toHost(x->pmEntries)));
     if(pmWindow(x)
        && dump_verbosity >= 2
        && 0)
         dump_grafport((GrafPtr)pmWindow(x));
     else
         dump_field(dump_handle, pmWindow(x), "pmWindow");
-    iprintf((o_fp, "pmPrivate 0x%x\n", pmPrivate(x)));
-    iprintf((o_fp, "pmDevices 0x%x\n", pmDevices(x)));
-    iprintf((o_fp, "pmSeeds %p\n", pmSeeds(x)));
+    iprintf((o_fp, "pmPrivate 0x%x\n", toHost(pmPrivate(x))));
+    iprintf((o_fp, "pmDevices 0x%x\n", toHost(pmDevices(x))));
+    iprintf((o_fp, "pmSeeds %p\n", toHost(pmSeeds(x))));
     if(dump_verbosity >= 2)
     {
         int i;
@@ -776,10 +776,10 @@ void Executor::dump_palette(PaletteHandle palette)
                      (long)x->pmInfo[i].ciRGB.green,
                      (long)x->pmInfo[i].ciRGB.blue));
             iprintf((o_fp, "      usage 0x%x; tolerance 0x%x;\n",
-                     x->pmInfo[i].ciUsage,
-                     x->pmInfo[i].ciTolerance));
+                     toHost(x->pmInfo[i].ciUsage),
+                     toHost(x->pmInfo[i].ciTolerance)));
             iprintf((o_fp, "      flags 0x%x; private 0x%lx; };\n",
-                     ciFlags(&x->pmInfo[i]),
+                     toHost(ciFlags(&x->pmInfo[i])),
                      (unsigned long)ciPrivate(&x->pmInfo[i])));
         }
         indent -= 2;
@@ -799,7 +799,7 @@ void Executor::dump_ccrsr(CCrsrHandle ccrsr)
 
     iprintf((o_fp, "%s(CCrsrHandle **%p) {\n", field_name.c_str(), ccrsr));
     indent += 2;
-    iprintf((o_fp, "crsrType 0x%hx;\n", x->crsrType));
+    iprintf((o_fp, "crsrType 0x%hx;\n", toHost(x->crsrType)));
     if(x->crsrMap
        && dump_verbosity >= 1)
         dump_field(dump_pixmap_null_rect, x->crsrMap, "crsrMap");
@@ -827,13 +827,13 @@ void Executor::dump_ccrsr(CCrsrHandle ccrsr)
     }
     else
         dump_field(dump_handle, x->crsrXData, "crsrXData");
-    iprintf((o_fp, "crsrXValid %d;\n", x->crsrXValid));
+    iprintf((o_fp, "crsrXValid %d;\n", toHost(x->crsrXValid)));
     dump_field(dump_handle, x->crsrXHandle, "crsrXHandle");
     dump_field(dump_bits16, x->crsr1Data, "crsr1Data");
     dump_field(dump_bits16, x->crsrMask, "crsrMask");
     dump_field(dump_point, x->crsrHotSpot, "crsrHotSpot");
-    iprintf((o_fp, "crsrXTable %x\n", x->crsrXTable));
-    iprintf((o_fp, "crsrID 0x%x; }\n", x->crsrID));
+    iprintf((o_fp, "crsrXTable %x\n", toHost(x->crsrXTable)));
+    iprintf((o_fp, "crsrID 0x%x; }\n", toHost(x->crsrID)));
     indent -= 2;
     fflush(o_fp);
 }
@@ -903,9 +903,9 @@ void Executor::dump_dialog_peek(DialogPeek d)
     dump_field(dump_window_peek, (WindowPeek)DIALOG_WINDOW(d), "window");
     dump_field(dump_handle, DIALOG_ITEMS(d), "items");
     dump_field(dump_handle, DIALOG_TEXTH(d), "textH");
-    iprintf((o_fp, "editField 0x%x;\n", DIALOG_EDIT_FIELD(d)));
-    iprintf((o_fp, "editOpen 0x%x;\n", DIALOG_EDIT_OPEN(d)));
-    iprintf((o_fp, "aDefItem 0x%x; }\n", DIALOG_ADEF_ITEM(d)));
+    iprintf((o_fp, "editField 0x%x;\n", toHost(DIALOG_EDIT_FIELD(d))));
+    iprintf((o_fp, "editOpen 0x%x;\n", toHost(DIALOG_EDIT_OPEN(d))));
+    iprintf((o_fp, "aDefItem 0x%x; }\n", toHost(DIALOG_ADEF_ITEM(d))));
     indent -= 2;
 
     fflush(o_fp);
@@ -929,9 +929,9 @@ void dump_dialog_items(DialogPeek dp)
         item = items;
         fprintf(o_fp, "item %d; type %d, hand %p, (%d, %d, %d, %d)\n",
                 i, (int)(item->itmtype),
-                item->itmhand,
-                item->itmr.top, item->itmr.left,
-                item->itmr.bottom, item->itmr.right);
+                toHost(item->itmhand),
+                toHost(item->itmr.top), toHost(item->itmr.left),
+                toHost(item->itmr.bottom), toHost(item->itmr.right));
         BUMPIP(items);
     }
 }
@@ -952,12 +952,12 @@ void Executor::dump_aux_win(AuxWinHandle awh)
 
     iprintf((o_fp, "%s(AuxWinHandle **%p) {\n", field_name.c_str(), awh));
     indent += 2;
-    iprintf((o_fp, "awNext %p;\n", aw->awNext));
-    iprintf((o_fp, "awOwner %p;\n", aw->awOwner));
+    iprintf((o_fp, "awNext %p;\n", toHost(aw->awNext)));
+    iprintf((o_fp, "awOwner %p;\n", toHost(aw->awOwner)));
     dump_field(dump_ctab, aw->awCTable, "awCTable");
     dump_field(dump_handle, aw->dialogCItem, "dialogCItem");
     iprintf((o_fp, "awFlags 0x%lx;\n", (long)aw->awFlags));
-    iprintf((o_fp, "awReserved %p;\n", aw->awReserved));
+    iprintf((o_fp, "awReserved %p;\n", toHost(aw->awReserved)));
     iprintf((o_fp, "awRefCon 0x%lx; }\n", (long)aw->awRefCon));
     indent -= 2;
 
@@ -992,7 +992,7 @@ void Executor::dump_rgn(RgnHandle rgn)
     iprintf((o_fp, "%s(RgnHandle **%p) {\n", field_name.c_str(), rgn));
     indent += 2;
     x = deref(rgn);
-    iprintf((o_fp, "rgnSize %d\n", x->rgnSize));
+    iprintf((o_fp, "rgnSize %d\n", toHost(x->rgnSize)));
     dump_field(dump_rect, &x->rgnBBox, "rgnBBox");
     iprintf((o_fp, "[special data omitted]; }\n"));
     indent -= 2;
@@ -1004,11 +1004,11 @@ void dump_menu_info(MenuHandle x)
     dump_field(dump_handle, x, "MenuHandle");
     iprintf((o_fp, "%s(MenuHandle **%p) {\n", field_name.c_str(), x));
     indent += 2;
-    iprintf((o_fp, "menuID %d\n", MI_ID(x)));
-    iprintf((o_fp, "menuWidth %d\n", MI_WIDTH(x)));
-    iprintf((o_fp, "menuHeight %d\n", MI_HEIGHT(x)));
+    iprintf((o_fp, "menuID %d\n", toHost(MI_ID(x))));
+    iprintf((o_fp, "menuWidth %d\n", toHost(MI_WIDTH(x))));
+    iprintf((o_fp, "menuHeight %d\n", toHost(MI_HEIGHT(x))));
     dump_field(dump_handle, MI_PROC(x), "menuProc");
-    iprintf((o_fp, "enableFlags %x\n", MI_ENABLE_FLAGS(x)));
+    iprintf((o_fp, "enableFlags %x\n", toHost(MI_ENABLE_FLAGS(x))));
     dump_field(dump_string, MI_DATA(x), "menuTitle");
 
     indent += 2;
@@ -1115,22 +1115,21 @@ void dump_te(TEHandle te)
     dump_field(dump_rect, &TE_VIEW_RECT(te), "viewRect");
     dump_field(dump_rect, &TE_SEL_RECT(te), "selRect");
 
-    iprintf((o_fp, "lineHeight %d\n", TE_LINE_HEIGHT(te)));
-    iprintf((o_fp, "fontAscent %d\n", TE_FONT_ASCENT(te)));
+    iprintf((o_fp, "lineHeight %d\n", toHost(TE_LINE_HEIGHT(te))));
+    iprintf((o_fp, "fontAscent %d\n", toHost(TE_FONT_ASCENT(te))));
+    iprintf((o_fp, "selStart %d\n", toHost(TE_SEL_START(te))));
+    iprintf((o_fp, "selEnd %d\n", toHost(TE_SEL_END(te))));
+    iprintf((o_fp, "caretState %d\n", toHost(TE_CARET_STATE(te))));
 
-    iprintf((o_fp, "selStart %d\n", TE_SEL_START(te)));
-    iprintf((o_fp, "selEnd %d\n", TE_SEL_END(te)));
-    iprintf((o_fp, "caretState %d\n", TE_CARET_STATE(te)));
+    iprintf((o_fp, "just %d\n", toHost(TE_JUST(te))));
+    iprintf((o_fp, "teLength %d\n", toHost(TE_LENGTH(te))));
 
-    iprintf((o_fp, "just %d\n", TE_JUST(te)));
-    iprintf((o_fp, "teLength %d\n", TE_LENGTH(te)));
-
-    iprintf((o_fp, "txFont %d\n", TE_TX_FONT(te)));
+    iprintf((o_fp, "txFont %d\n", toHost(TE_TX_FONT(te))));
     iprintf((o_fp, "txFace %d\n", TE_TX_FACE(te)));
-    iprintf((o_fp, "txMode %d\n", TE_TX_MODE(te)));
-    iprintf((o_fp, "txSize %d\n", TE_TX_SIZE(te)));
+    iprintf((o_fp, "txMode %d\n", toHost(TE_TX_MODE(te))));
+    iprintf((o_fp, "txSize %d\n", toHost(TE_TX_SIZE(te))));
 
-    iprintf((o_fp, "nLines %d\n", TE_N_LINES(te)));
+    iprintf((o_fp, "nLines %d\n", toHost(TE_N_LINES(te))));
 
     {
         char buf[40000];
@@ -1151,7 +1150,7 @@ void dump_te(TEHandle te)
         line_starts = TE_LINE_STARTS(te);
 
         for(i = 0; i <= n_lines; i++)
-            iprintf((o_fp, "lineStart[%d]: %d\n", i, line_starts[i]));
+            iprintf((o_fp, "lineStart[%d]: %d\n", i, toHost(line_starts[i])));
     }
 
     {
@@ -1173,18 +1172,18 @@ void dump_te(TEHandle te)
         iprintf((o_fp, "(TEStyleHandle **%p) {\n", te_style));
         indent += 2;
 
-        iprintf((o_fp, "nRuns %d\n", TE_STYLE_N_RUNS(te_style)));
+        iprintf((o_fp, "nRuns %d\n", toHost(TE_STYLE_N_RUNS(te_style))));
         iprintf((o_fp, "nStyles %d\n", n_styles));
 
         for(i = 0; i <= n_lines; i++)
             iprintf((o_fp, "lhTab[%d]: lhHeight %d, lhAscent %d\n",
-                     i, LH_HEIGHT(&lh[i]), LH_ASCENT(&lh[i])));
+                     i, toHost(LH_HEIGHT(&lh[i])), toHost(LH_ASCENT(&lh[i]))));
 
         runs = TE_STYLE_RUNS(te_style);
         for(i = 0; i <= n_runs; i++)
             iprintf((o_fp, "runs[%d]: startChar %d, styleIndex %d\n", i,
-                     STYLE_RUN_START_CHAR(&runs[i]),
-                     STYLE_RUN_STYLE_INDEX(&runs[i])));
+                     toHost(STYLE_RUN_START_CHAR(&runs[i])),
+                     toHost(STYLE_RUN_STYLE_INDEX(&runs[i]))));
 
         style_table = TE_STYLE_STYLE_TABLE(te_style);
         for(i = 0; i < n_styles; i++)
@@ -1193,8 +1192,8 @@ void dump_te(TEHandle te)
 
             style = ST_ELT(style_table, i);
             iprintf((o_fp, "style[%d] stCount %d, stHieght %d, stAscent %d\n",
-                     i, ST_ELT_COUNT(style),
-                     ST_ELT_HEIGHT(style), ST_ELT_ASCENT(style)));
+                     i, toHost(ST_ELT_COUNT(style)),
+                     toHost(ST_ELT_HEIGHT(style)), toHost(ST_ELT_ASCENT(style))));
         }
 
         indent -= 2;
@@ -1345,25 +1344,25 @@ dump_textbegin(TTxtPicHdl h)
              just_name(TEXTPIC_JUST(h))));
     iprintf((o_fp, "flop = %d(%s)\n", TEXTPIC_FLOP(h),
              flop_name(TEXTPIC_FLOP(h))));
-    iprintf((o_fp, "angle = %d\n", TEXTPIC_ANGLE(h)));
+    iprintf((o_fp, "angle = %d\n", toHost(TEXTPIC_ANGLE(h))));
     iprintf((o_fp, "line = %d\n", TEXTPIC_LINE(h)));
     iprintf((o_fp, "comment = %d\n", TEXTPIC_COMMENT(h)));
     if(GetHandleSize((Handle)h) >= 10)
-        iprintf((o_fp, "angle_fixed = 0x%08x\n", TEXTPIC_ANGLE_FIXED(h)));
+        iprintf((o_fp, "angle_fixed = 0x%08x\n", toHost(TEXTPIC_ANGLE_FIXED(h))));
 }
 
 void
 dump_textcenter(TCenterRecHdl h)
 {
-    iprintf((o_fp, "y = 0x%08x\n", TEXTCENTER_Y(h)));
-    iprintf((o_fp, "x = 0x%08x\n", TEXTCENTER(h)));
+    iprintf((o_fp, "y = 0x%08x\n", toHost(TEXTCENTER_Y(h))));
+    iprintf((o_fp, "x = 0x%08x\n", toHost(TEXTCENTER(h))));
 }
 
 void
 dump_zone_stats(void)
 {
-    iprintf((o_fp, "applzone free = %d\n", ZONE_ZCB_FREE(LM(ApplZone))));
-    iprintf((o_fp, " syszone free = %d\n", ZONE_ZCB_FREE(LM(SysZone))));
+    iprintf((o_fp, "applzone free = %d\n", toHost(ZONE_ZCB_FREE(LM(ApplZone)))));
+    iprintf((o_fp, " syszone free = %d\n", toHost(ZONE_ZCB_FREE(LM(SysZone)))));
 }
 
 #endif /* !NDEBUG */

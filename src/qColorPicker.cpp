@@ -1085,7 +1085,7 @@ event_loop(void)
 
             default:
                 warning_unexpected("unknown event.what `%d'",
-                                   evt.what);
+                                   toHost(evt.what));
                 break;
         }
     }
