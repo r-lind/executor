@@ -12,7 +12,7 @@
 
 /* Forward declarations in StdFilePkg.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "rsys/stdfile.h"
 
 #include "DialogMgr.h"
@@ -28,26 +28,26 @@
 #include "OSUtil.h"
 #include "ScriptMgr.h"
 
-#include "rsys/cquick.h"
-#include "rsys/wind.h"
-#include "rsys/hfs.h"
-#include "rsys/file.h"
+#include "quickdraw/cquick.h"
+#include "wind/wind.h"
+#include "hfs/hfs.h"
+#include "file/file.h"
 #include "rsys/arrowkeys.h"
-#include "rsys/resource.h"
-#include "rsys/time.h"
-#include "rsys/tempalloc.h"
+#include "res/resource.h"
+#include "time/time.h"
+#include "mman/tempalloc.h"
 #include "rsys/hook.h"
 #include "rsys/toolevent.h"
 #include "rsys/string.h"
 
 #include "rsys/osutil.h"
-#include "rsys/osevent.h"
+#include "osevent/osevent.h"
 
-#include "rsys/print.h"
-#include "rsys/system_error.h"
+#include "print/print.h"
+#include "error/system_error.h"
 
-#include "rsys/functions.impl.h"
-#include "rsys/prefs.h"
+#include "base/functions.impl.h"
+#include "prefs/prefs.h"
 
 using namespace Executor;
 

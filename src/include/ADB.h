@@ -7,11 +7,11 @@
  *
  */
 
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 #include "ExMacTypes.h"
 
 #define MODULE_NAME ADB
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

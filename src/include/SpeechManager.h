@@ -13,7 +13,7 @@
 #include "FileMgr.h"
 
 #define MODULE_NAME SpeechManager
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

@@ -5,7 +5,7 @@
 // #warning Insert is not giving us a 0x72
 
 #include "x_keycodes.h"
-#include "rsys/common.h"
+#include "base/common.h"
 #include "rsys/keyboard.h"
 
 unsigned char x_keycode_to_mac_virt[] = {

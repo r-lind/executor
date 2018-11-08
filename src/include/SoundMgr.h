@@ -12,7 +12,7 @@
 #include "SANE.h"
 
 #define MODULE_NAME SoundMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

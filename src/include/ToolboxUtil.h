@@ -12,7 +12,7 @@
 #include "SANE.h"
 
 #define MODULE_NAME ToolboxUtil
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

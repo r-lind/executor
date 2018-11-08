@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 #define AUTOMATIC_CONVERSIONS
-#include <rsys/mactype.h>
-#include <rsys/byteswap.h>
+#include <base/mactype.h>
+#include <base/byteswap.h>
 using namespace Executor;
 
 TEST(guestvalues, andUL)

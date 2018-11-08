@@ -4,7 +4,7 @@
 
 /* Forward declarations in ToolboxUtil.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "ResourceMgr.h"
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
@@ -12,14 +12,14 @@
 #include "OSUtil.h"
 #include "MemoryMgr.h"
 
-#include "rsys/cquick.h"
-#include "rsys/mman.h"
+#include "quickdraw/cquick.h"
+#include "mman/mman.h"
 #include "SANE.h"
-#include "rsys/float.h"
-#include "rsys/floatconv.h"
+#include "sane/float.h"
+#include "sane/floatconv.h"
 #include "rsys/string.h"
-#include "rsys/mman_private.h"
-#include "rsys/resource.h"
+#include "mman/mman_private.h"
+#include "res/resource.h"
 #include "rsys/toolutil.h"
 #include <string>
 #include <algorithm>

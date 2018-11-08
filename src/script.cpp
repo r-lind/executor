@@ -4,7 +4,7 @@
 
 /* Forward declarations in ScriptMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "IntlUtil.h"
 #include "ScriptMgr.h"
@@ -13,14 +13,14 @@
 #include "OSUtil.h"
 
 #include "rsys/hook.h"
-#include "rsys/quick.h"
-#include "rsys/cquick.h"
+#include "quickdraw/quick.h"
+#include "quickdraw/cquick.h"
 #include "rsys/osutil.h"
-#include "rsys/osevent.h"
-#include "rsys/print.h"
-#include "rsys/floatconv.h"
+#include "osevent/osevent.h"
+#include "print/print.h"
+#include "sane/floatconv.h"
 #include "rsys/string.h"
-#include "rsys/mman.h"
+#include "mman/mman.h"
 
 #include <ctype.h>
 

@@ -11,7 +11,7 @@
 #include <rsys/macros.h>
 
 #define MODULE_NAME Gestalt
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

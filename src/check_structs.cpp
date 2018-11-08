@@ -15,7 +15,7 @@
  *          become incorrect on the port we generated the numbers on.
  */
 
-#include <rsys/common.h>
+#include <base/common.h>
 #include <rsys/check_structs.h>
 
 #include "ADB.h"
@@ -75,40 +75,40 @@
 #include "WindowMgr.h"
 
 #include <rsys/alias.h>
-#include <rsys/apple_events.h>
+#include <appleevent/apple_events.h>
 #include <rsys/cfm.h>
-#include <rsys/cquick.h>
-#include <rsys/ctl.h>
-#include <rsys/dial.h>
-#include <rsys/emustubs.h>
-#include <rsys/file.h>
-#include <rsys/float.h>
-#include <rsys/font.h>
-#include <rsys/hfs.h>
-#include <rsys/hfs_plus.h>
+#include <quickdraw/cquick.h>
+#include <ctl/ctl.h>
+#include <dial/dial.h>
+#include <base/emustubs.h>
+#include <file/file.h>
+#include <sane/float.h>
+#include <quickdraw/font.h>
+#include <hfs/hfs.h>
+#include <hfs/hfs_plus.h>
 #include <rsys/icon.h>
-#include <rsys/itm.h>
+#include <dial/itm.h>
 #include <rsys/keyboard.h>
 #include <rsys/launch.h>
-#include <rsys/menu.h>
+#include <menu/menu.h>
 #include <rsys/mixed_mode.h>
-#include <rsys/mman_private.h>
-#include <rsys/nextprint.h>
-#include <rsys/partition.h>
+#include <mman/mman_private.h>
+#include <print/nextprint.h>
+#include <hfs/partition.h>
 #include <rsys/pef.h>
-#include <rsys/picture.h>
-#include <rsys/print.h>
+#include <quickdraw/picture.h>
+#include <print/print.h>
 #include <rsys/process.h>
-#include <rsys/quick.h>
-#include <rsys/resource.h>
+#include <quickdraw/quick.h>
+#include <res/resource.h>
 #include <rsys/screen-dump.h>
 #include <rsys/segment.h>
 #include <rsys/serial.h>
-#include <rsys/soundopts.h>
-#include <rsys/syserr.h>
-#include <rsys/tesave.h>
+#include <sound/soundopts.h>
+#include <error/syserr.h>
+#include <textedit/tesave.h>
 #include <rsys/toolevent.h>
-#include <rsys/wind.h>
+#include <wind/wind.h>
 
 #define check(type, expected_size)                                             \
     do                                                                         \
@@ -435,7 +435,7 @@ void Executor::check_structs(void)
     check(alias_tail_t, 170);
     check(alias_parsed_t, 20);
 
-    /* rsys/apple_events.h */
+    /* appleevent/apple_events.h */
     check(inline_desc_t, 8);
     check(inline_key_desc_t, 12);
     check(list_header_t, 24);
@@ -455,24 +455,24 @@ void Executor::check_structs(void)
     check(CFragClosure_t, 4);
     //check(map_entry_t, 8);     // not a GUEST struct, contains native pointers
 
-    /* rsys/cquick.h */
+    /* quickdraw/cquick.h */
     check(GrafVars, 26);
 
-    /* rsys/ctl.h */
+    /* ctl/ctl.h */
     check(struct popup_data, 12);
     check(thumbstr, 18);
     check(contrlrestype, 24);
     check(struct lsastr, 18);
 
-    /* rsys/emustubs.h */
+    /* base/emustubs.h */
     check(adbop_t, 12);
     check(comm_toolbox_dispatch_args_t, 12);
     check(initzonehiddenargs_t, 14);
 
-    ///* rsys/dial.h */
+    ///* dial/dial.h */
     //check (icon_item_template_t, 18);
 
-    /* rsys/file.h */
+    /* file/file.h */
     check(hfs_access_t, 16);
     //check(DrvQExtra, 46); // not a GUEST struct, contains native pointers
     check(fcbrec, 94);
@@ -480,7 +480,7 @@ void Executor::check_structs(void)
     //check(VCBExtra, 202);   // not a GUEST struct, contains native pointers
     check(getvolparams_info_t, 20);
 
-/* rsys/float.h */
+/* sane/float.h */
 #if defined(mc68000)
     check(m68k_x96_t, 12);
 #endif /* defined (mc68000) */
@@ -497,11 +497,11 @@ void Executor::check_structs(void)
     check(f32_t, 4);
     check(native_f32_t, 4);
 
-    /* rsys/font.h */
+    /* quickdraw/font.h */
     check(fatabentry, 6);
     check(widentry_t, 4);
 
-    /* rsys/hfs.h */
+    /* hfs/hfs.h */
     check(xtntdesc, 4);
     check(volumeinfo, 162);
     check(btnode, 14);
@@ -517,7 +517,7 @@ void Executor::check_structs(void)
     check(cachehead, 12);
     check(wdentry, 16);
 
-    /* rsys/hfs_plus.h */
+    /* hfs/hfs_plus.h */
     check(HFSUniStr255, 512);
     check(HFSPlusPermissions, 16);
     check(HFSPlusExtentDescriptor, 8);
@@ -537,7 +537,7 @@ void Executor::check_structs(void)
     /* rsys/icon.h */
     //check(cotton_suite_layout_t, 26);  // not a GUEST struct, contains native pointers
 
-    /* rsys/itm.h */
+    /* dial/itm.h */
     check(itmstr, 14);
     check(altstr, 12);
     check(dlogstr, 22);
@@ -553,7 +553,7 @@ void Executor::check_structs(void)
     /* rsys/launch.h */
     check(vers_t, 8);
 
-    /* rsys/menu.h */
+    /* menu/menu.h */
     check(mext, 5);
     check(muelem, 6);
     //check(menu_elt, 8);  // not a GUEST struct, contains native pointers
@@ -570,11 +570,11 @@ void Executor::check_structs(void)
     check(RoutineRecord, 20);
     check(RoutineDescriptor, 32);
 
-    /* rsys/mman_private.h */
+    /* mman/mman_private.h */
     check(block_header_t, 12);
     check(pblock_t, 14);
 
-    /* rsys/partition.h */
+    /* hfs/partition.h */
     check(partmapentry_t, 256);
     check(oldmapentry_t, 12);
     check(oldblock1_t, 506);
@@ -587,10 +587,10 @@ void Executor::check_structs(void)
     check(PEFLoaderRelocationHeader_t, 12);
     check(PEFExportedSymbol, 10);
 
-    /* rsys/picture.h */
+    /* quickdraw/picture.h */
     check(piccache, 96);
 
-    /* rsys/print.h */
+    /* print/print.h */
     check(TGnlData, 8);
     check(TRslRg, 4);
     check(TRslRec, 4);
@@ -602,10 +602,10 @@ void Executor::check_structs(void)
     /* rsys/process.h */
     check(size_resource_t, 10);
 
-    /* rsys/quick.h */
+    /* quickdraw/quick.h */
     check(ccrsr_res, 148);
 
-    /* rsys/resource.h */
+    /* res/resource.h */
     check(reshead, 16);
     check(rsrvrec, 240);
     check(resmap, 28);
@@ -626,10 +626,10 @@ void Executor::check_structs(void)
     /* rsys/serial.h */
     check(sersetbuf_t, 6);
 
-    /* rsys/soundopts.h */
+    /* sound/soundopts.h */
     //check(ModifierStub, 47); // not a GUEST struct, contains native pointers
 
-    /* rsys/syserr.h */
+    /* error/syserr.h */
     check(myalerttab_t, 326);
     check(struct adef, 14);
     check(struct tdef, 10);
@@ -638,12 +638,12 @@ void Executor::check_structs(void)
     check(struct bdef, 18);
     check(struct sdef, 6);
 
-    /* rsys/tesave.h */
+    /* textedit/tesave.h */
     check(tesave, 56);
     check(generic_elt_t, 16);
     check(tehidden, 20);
 
-    /* rsys/wind.h */
+    /* wind/wind.h */
     check(windrestype, 20);
 
     /* config/arch/powerpc/ppc_stubs.h */

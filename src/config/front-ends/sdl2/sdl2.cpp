@@ -1,6 +1,6 @@
 #include "sdl2.h"
 #include "rsys/adb.h"
-#include "rsys/osevent.h"
+#include "osevent/osevent.h"
 #include "rsys/scrap.h"
 #include "rsys/keyboard.h"
 #include "OSEvent.h"

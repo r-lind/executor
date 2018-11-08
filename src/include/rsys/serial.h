@@ -10,7 +10,7 @@
 #include <DeviceMgr.h>
 
 #define MODULE_NAME rsys_serial
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 #define _SERIAL_H_
 
 namespace Executor

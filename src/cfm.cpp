@@ -7,7 +7,7 @@
  * to pull in certain sections (including temporarily the loader section).
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <assert.h>
 
@@ -20,11 +20,11 @@
 
 #include "rsys/cfm.h"
 #include "rsys/pef.h"
-#include "rsys/file.h"
+#include "file/file.h"
 #include "rsys/launch.h"
-#include "rsys/hfs.h"
+#include "hfs/hfs.h"
 #include "rsys/string.h"
-#include <rsys/builtinlibs.h>
+#include <base/builtinlibs.h>
 #include <algorithm>
 
 using namespace Executor;

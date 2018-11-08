@@ -10,7 +10,7 @@
 #include "QuickDraw.h"
 
 #define MODULE_NAME Iconutil
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 #define large1BitMask (FOURCC('I', 'C', 'N', '#'))
 #define large4BitData (FOURCC('i', 'c', 'l', '4'))

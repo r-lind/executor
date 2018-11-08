@@ -8,8 +8,8 @@
 
  */
 
-#include "rsys/mactype.h"
-#include "rsys/byteswap.h"
+#include "base/mactype.h"
+#include "base/byteswap.h"
 
 namespace Executor
 {

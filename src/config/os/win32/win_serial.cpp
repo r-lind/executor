@@ -5,8 +5,8 @@
 
 #include <windows.h>
 
-#include "rsys/common.h"
-#include "rsys/error.h"
+#include "base/common.h"
+#include "error/error.h"
 
 #include "win_serial.h"
 

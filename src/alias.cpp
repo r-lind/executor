@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <stdarg.h>
 
@@ -11,8 +11,8 @@
 #include "MemoryMgr.h"
 #include "ToolboxUtil.h"
 
-#include "rsys/file.h"
-#include "rsys/hfs.h"
+#include "file/file.h"
+#include "hfs/hfs.h"
 #include "rsys/string.h"
 #if defined(CYGWIN32)
 #include "win_temp.h"

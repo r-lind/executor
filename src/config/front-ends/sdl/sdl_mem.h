@@ -5,6 +5,6 @@
  * Derived from public domain source code written by Sam Lantinga
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 extern char *sdl_ReallocHandle(Executor::Handle mem, int len);

@@ -9,10 +9,10 @@
  */
 
 #include "ExMacTypes.h"
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 
 #define MODULE_NAME SegmentLdr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

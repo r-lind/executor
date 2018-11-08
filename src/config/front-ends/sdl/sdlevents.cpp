@@ -3,8 +3,8 @@
  */
 
 #include "sdl.h"
-#include "rsys/vdriver.h"
-#include "rsys/common.h"
+#include "vdriver/vdriver.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "EventMgr.h"
 #include "SegmentLdr.h"
@@ -13,8 +13,8 @@
 #include "ScrapMgr.h"
 
 #include "rsys/segment.h"
-#include "rsys/m68kint.h"
-#include "rsys/osevent.h"
+#include "base/m68kint.h"
+#include "osevent/osevent.h"
 #include "rsys/keyboard.h"
 #include "rsys/adb.h"
 #include "rsys/scrap.h"

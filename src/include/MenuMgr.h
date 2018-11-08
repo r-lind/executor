@@ -12,7 +12,7 @@
 #include "ResourceMgr.h"
 
 #define MODULE_NAME MenuMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

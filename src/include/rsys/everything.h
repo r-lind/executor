@@ -1,4 +1,4 @@
-#include <rsys/common.h>
+#include <base/common.h>
 
 #include <QuickDraw.h>
 #include <ControlMgr.h>
@@ -46,8 +46,8 @@
 #include <TimeMgr.h>
 #include <ADB.h>
 
-#include <rsys/file.h>
+#include <file/file.h>
 #include <rsys/adb.h>
-#include <rsys/soundopts.h>
+#include <sound/soundopts.h>
 #include <rsys/cfm.h>
 #include <rsys/mixed_mode.h>

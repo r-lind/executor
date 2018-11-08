@@ -4,7 +4,7 @@
 
 //#define DEBUG
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
@@ -24,17 +24,17 @@
 #include "PrintMgr.h"
 #include "CommTool.h"
 
-#include "rsys/trapglue.h"
-#include "rsys/cquick.h"
-#include "rsys/file.h"
-#include "rsys/prefs.h"
+#include "base/trapglue.h"
+#include "quickdraw/cquick.h"
+#include "file/file.h"
+#include "prefs/prefs.h"
 #include "rsys/segment.h"
 #include "rsys/executor.h"
-#include "rsys/hfs.h"
-#include "rsys/vdriver.h"
-#include "rsys/trapname.h"
+#include "hfs/hfs.h"
+#include "vdriver/vdriver.h"
+#include "base/trapname.h"
 
-#include "rsys/options.h"
+#include "prefs/options.h"
 #include "rsys/string.h"
 
 #include <algorithm>

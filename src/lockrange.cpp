@@ -19,7 +19,7 @@
  * to store our locks.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "MemoryMgr.h"
 

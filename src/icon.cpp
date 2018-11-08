@@ -5,15 +5,15 @@
 // FIXME: #warning the icon suite representation is our own brew -- tests should
 // FIXME: #warning be written and we should do what the Mac does
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
 #include "Iconutil.h"
 
-#include "rsys/cquick.h"
-#include "rsys/resource.h"
-#include "rsys/mman.h"
+#include "quickdraw/cquick.h"
+#include "res/resource.h"
+#include "mman/mman.h"
 #include "rsys/icon.h"
 
 using namespace Executor;

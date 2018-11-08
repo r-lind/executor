@@ -5,7 +5,7 @@
 #include "PPC.h"
 
 #define MODULE_NAME ProcessMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1995, 1996 by Abacus Research and Development, Inc.

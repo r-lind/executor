@@ -2,10 +2,10 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "rsys/version.h"
 #include "rsys/gestalt.h"
-#include "rsys/prefs.h"
+#include "prefs/prefs.h"
 
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"

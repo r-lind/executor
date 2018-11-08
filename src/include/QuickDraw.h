@@ -8,11 +8,11 @@
 
  */
 
-#include <rsys/common.h>
+#include <base/common.h>
 #include "ExMacTypes.h"
 
 #define MODULE_NAME QuickDraw
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

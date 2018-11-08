@@ -2,9 +2,9 @@
  * Development, Inc.  All rights reserved.
  */
 #include "sdl.h"
-#include "rsys/common.h"
-#include "rsys/srcblt.h"
-#include "rsys/refresh.h"
+#include "base/common.h"
+#include "quickdraw/srcblt.h"
+#include "vdriver/refresh.h"
 
 #if defined(CYGWIN32)
 #include "win_screen.h"

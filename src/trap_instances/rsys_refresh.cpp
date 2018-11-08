@@ -1,5 +1,5 @@
 #define INSTANTIATE_TRAPS_rsys_refresh
-#include <rsys/refresh.h>
+#include <vdriver/refresh.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {

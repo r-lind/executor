@@ -5,10 +5,10 @@
 #include "EventMgr.h"
 #include "ControlMgr.h"
 #include "DialogMgr.h"
-#include "rsys/file.h"
+#include "file/file.h"
 
 #define MODULE_NAME rsys_stdfile
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

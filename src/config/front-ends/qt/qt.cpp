@@ -12,16 +12,16 @@
 
 #include <optional>
 
-#include "rsys/vdriver.h"
-#include "rsys/cquick.h" /* for ThePortGuard */
+#include "vdriver/vdriver.h"
+#include "quickdraw/cquick.h" /* for ThePortGuard */
 #include "rsys/adb.h"
-#include "rsys/osevent.h"
+#include "osevent/osevent.h"
 #include "rsys/scrap.h"
 #include "rsys/keyboard.h"
 #include "OSEvent.h"
 #include "ToolboxEvent.h"
 #include "ScrapMgr.h"
-#include "rsys/refresh.h"
+#include "vdriver/refresh.h"
 
 #include "available_geometry.h"
 

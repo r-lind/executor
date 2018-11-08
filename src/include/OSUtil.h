@@ -13,7 +13,7 @@
 #include "OSEvent.h"
 
 #define MODULE_NAME OSUtil
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

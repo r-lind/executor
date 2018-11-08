@@ -4,13 +4,13 @@
 
 /* Forward declarations in IntlUtil.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "IntlUtil.h"
 #include "OSUtil.h"
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"
 #include "BinaryDecimal.h"
-#include "rsys/resource.h"
+#include "res/resource.h"
 #include "rsys/hook.h"
 #include <ctype.h>
 

@@ -4,7 +4,7 @@
 
 /* screen-dump.c; dump the mac screen to a tiff file */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <stdarg.h>
 
@@ -12,13 +12,13 @@
 #include "CQuickDraw.h"
 #include "MemoryMgr.h"
 
-#include "rsys/cquick.h"
-#include "rsys/mman.h"
-#include "rsys/tempalloc.h"
-#include "rsys/prefs.h"
+#include "quickdraw/cquick.h"
+#include "mman/mman.h"
+#include "mman/tempalloc.h"
+#include "prefs/prefs.h"
 #include "rsys/uniquefile.h"
-#include "rsys/file.h"
-#include "rsys/vdriver.h"
+#include "file/file.h"
+#include "vdriver/vdriver.h"
 #include "rsys/screen-dump.h"
 #include "rsys/paths.h"
 

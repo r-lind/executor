@@ -2,10 +2,10 @@
 #define _FILEMGR_H_
 
 #include "ExMacTypes.h"
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 
 #define MODULE_NAME FileMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990 by Abacus Research and Development, Inc.

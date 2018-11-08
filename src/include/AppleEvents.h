@@ -12,7 +12,7 @@
 #include "NotifyMgr.h"
 
 #define MODULE_NAME AppleEvents
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

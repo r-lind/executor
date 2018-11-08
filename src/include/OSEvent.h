@@ -4,10 +4,10 @@
 #include "EventMgr.h"
 #include "PPC.h"
 
-#include "rsys/commonevt.h"
+#include "osevent/commonevt.h"
 
 #define MODULE_NAME OSEvent
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990, 1996 by Abacus Research and Development, Inc.

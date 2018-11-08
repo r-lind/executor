@@ -4,7 +4,7 @@
 
 /* Forward declarations in DeviceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "DeviceMgr.h"
 #include "FileMgr.h"
 #include "MemoryMgr.h"
@@ -12,11 +12,11 @@
 #include "ResourceMgr.h"
 #include "MenuMgr.h"
 #include "ToolboxEvent.h"
-#include "rsys/mman.h"
+#include "mman/mman.h"
 #include "rsys/device.h"
-#include "rsys/file.h"
+#include "file/file.h"
 #include "rsys/serial.h"
-#include "rsys/functions.impl.h"
+#include "base/functions.impl.h"
 
 using namespace Executor;
 

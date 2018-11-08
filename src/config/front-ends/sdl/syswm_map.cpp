@@ -6,7 +6,7 @@
 #include "syswm_vars.h"
 #include "syswm_map.h"
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "sdlscrap.h"
 

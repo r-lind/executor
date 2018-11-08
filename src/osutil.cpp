@@ -4,7 +4,7 @@
 
 /* Forward declarations in OSUtil.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "FileMgr.h"
 #include "EventMgr.h"
@@ -16,15 +16,15 @@
 #include "MenuMgr.h"
 #include "ToolboxEvent.h"
 
-#include "rsys/mman.h"
-#include "rsys/trapglue.h"
+#include "mman/mman.h"
+#include "base/trapglue.h"
 #include "rsys/osutil.h"
-#include "rsys/time.h"
+#include "time/time.h"
 #include "rsys/toolevent.h"
-#include "rsys/syncint.h"
-#include "rsys/emustubs.h"
-#include "rsys/cpu.h"
-#include "rsys/vdriver.h"   /* for beepAtUser */
+#include "time/syncint.h"
+#include "base/emustubs.h"
+#include "base/cpu.h"
+#include "vdriver/vdriver.h"   /* for beepAtUser */
 #include <PowerCore.h>
 
 using namespace Executor;

@@ -2,15 +2,15 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "rsys/aboutbox.h"
-#include "rsys/mman.h"
-#include "rsys/vdriver.h"
+#include "mman/mman.h"
+#include "vdriver/vdriver.h"
 #include "rsys/string.h"
-#include "rsys/cquick.h"
-#include "rsys/quick.h"
-#include "rsys/ctl.h"
+#include "quickdraw/cquick.h"
+#include "quickdraw/quick.h"
+#include "ctl/ctl.h"
 #include "rsys/version.h"
 #include "CQuickDraw.h"
 #include "Gestalt.h"
@@ -19,12 +19,12 @@
 #include "FontMgr.h"
 #include "OSUtil.h"
 #include <ctype.h>
-#include "rsys/file.h"
+#include "file/file.h"
 #include "rsys/osutil.h"
 #include "SegmentLdr.h"
 #include "rsys/segment.h"
 #include "rsys/gestalt.h"
-#include "rsys/osevent.h"
+#include "osevent/osevent.h"
 #include "rsys/paths.h"
 #include <algorithm>
 

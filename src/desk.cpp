@@ -4,7 +4,7 @@
 
 /* Forward declarations in DeskMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
 #include "EventMgr.h"
@@ -17,8 +17,8 @@
 #include "ToolboxEvent.h"
 #include "OSUtil.h"
 
-#include "rsys/cquick.h"
-#include "rsys/wind.h"
+#include "quickdraw/cquick.h"
+#include "wind/wind.h"
 #include "rsys/hook.h"
 #include "rsys/aboutbox.h"
 

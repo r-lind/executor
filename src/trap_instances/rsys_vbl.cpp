@@ -1,5 +1,5 @@
 #define INSTANTIATE_TRAPS_rsys_vbl
-#include <rsys/vbl.h>
+#include <time/vbl.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {

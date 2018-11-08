@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
@@ -38,49 +38,49 @@
 #include "OSEvent.h"
 #include "ADB.h"
 
-#include "rsys/trapglue.h"
-#include "rsys/file.h"
-#include "rsys/sounddriver.h"
-#include "rsys/prefs.h"
-#include "rsys/flags.h"
+#include "base/trapglue.h"
+#include "file/file.h"
+#include "sound/sounddriver.h"
+#include "prefs/prefs.h"
+#include "commandline/flags.h"
 #include "rsys/segment.h"
-#include "rsys/tesave.h"
-#include "rsys/resource.h"
-#include "rsys/hfs.h"
+#include "textedit/tesave.h"
+#include "res/resource.h"
+#include "hfs/hfs.h"
 #include "rsys/osutil.h"
 #include "rsys/stdfile.h"
-#include "rsys/ctl.h"
-#include "rsys/refresh.h"
+#include "ctl/ctl.h"
+#include "vdriver/refresh.h"
 
-#include "rsys/options.h"
-#include "rsys/cquick.h"
+#include "prefs/options.h"
+#include "quickdraw/cquick.h"
 #include "rsys/desk.h"
-#include "rsys/parse.h"
+#include "prefs/parse.h"
 #include "rsys/executor.h"
-#include "rsys/crc.h"
-#include "rsys/float.h"
-#include "rsys/mman.h"
-#include "rsys/vdriver.h"
-#include "rsys/font.h"
-#include "rsys/emustubs.h"
+#include "prefs/crc.h"
+#include "sane/float.h"
+#include "mman/mman.h"
+#include "vdriver/vdriver.h"
+#include "quickdraw/font.h"
+#include "base/emustubs.h"
 
 #include "rsys/adb.h"
-#include "rsys/print.h"
+#include "print/print.h"
 #include "rsys/gestalt.h"
-#include "rsys/osevent.h"
-#include "rsys/time.h"
+#include "osevent/osevent.h"
+#include "time/time.h"
 
 #include "rsys/cfm.h"
 #include "rsys/launch.h"
 #include "rsys/version.h"
 #include "rsys/appearance.h"
 
-#include "rsys/logging.h"
+#include "base/logging.h"
 
 #include "rsys/paths.h"
 
-#include <rsys/builtinlibs.h>
-#include <rsys/cpu.h>
+#include <base/builtinlibs.h>
+#include <base/cpu.h>
 #include <PowerCore.h>
 
 #include <rsys/macstrings.h>

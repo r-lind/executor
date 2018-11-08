@@ -8,7 +8,7 @@
  *       just a bunch of stubs to make serial.c compile
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "winserial.h"
 #include "FileMgr.h"
 #include "Serial.h"

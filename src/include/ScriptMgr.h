@@ -11,10 +11,10 @@
 #include "SANE.h"
 #include "IntlUtil.h"
 #include <rsys/macros.h>
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 
 #define MODULE_NAME ScriptMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

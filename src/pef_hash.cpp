@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "MemoryMgr.h"
 

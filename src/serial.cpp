@@ -8,7 +8,7 @@
  * The UNIX specific stuff should be put in its appropriate place sometime.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #if defined(MACOSX)
 // FIXME: #warning bad serial support right now
@@ -26,8 +26,8 @@
 #include "MemoryMgr.h"
 #include "OSUtil.h"
 
-#include "rsys/file.h"
-#include "rsys/hfs.h"
+#include "file/file.h"
+#include "hfs/hfs.h"
 #include "rsys/serial.h"
 
 #if defined(CYGWIN32) || defined(WIN32)

@@ -4,7 +4,7 @@
 
 /* Forward declarations in SegmentLdr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "FileMgr.h"
 #include "SegmentLdr.h"
@@ -16,18 +16,18 @@
 #include "OSEvent.h"
 #include "WindowMgr.h"
 
-#include "rsys/hfs.h"
-#include "rsys/cpu.h"
-#include "rsys/wind.h"
+#include "hfs/hfs.h"
+#include "base/cpu.h"
+#include "wind/wind.h"
 #include "rsys/segment.h"
-#include "rsys/vdriver.h"
+#include "vdriver/vdriver.h"
 #include "rsys/executor.h"
-#include "rsys/flags.h"
-#include "rsys/prefs.h"
-#include "rsys/osevent.h"
-#include "rsys/cquick.h"
+#include "commandline/flags.h"
+#include "prefs/prefs.h"
+#include "osevent/osevent.h"
+#include "quickdraw/cquick.h"
 #include "rsys/desk.h"
-#include "rsys/dcache.h"
+#include "hfs/dcache.h"
 #include "rsys/launch.h"
 #include "rsys/paths.h"
 

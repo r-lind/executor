@@ -7,10 +7,10 @@
  *
  */
 
-#include <rsys/traps.h>
+#include <base/traps.h>
 
 #define MODULE_NAME rsys_adb
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

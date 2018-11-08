@@ -7,11 +7,11 @@
  *
  */
 
-#include <rsys/lowglobals.h>
-#include <rsys/traps.h>
+#include <base/lowglobals.h>
+#include <base/traps.h>
 
 #define MODULE_NAME SysErr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

@@ -4,14 +4,14 @@
 
 #if !defined(NDEBUG)
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "DialogMgr.h"
 #include "QuickDraw.h"
 
-#include "rsys/cquick.h"
-#include "rsys/region.h"
-#include "rsys/stdbits.h"
+#include "quickdraw/cquick.h"
+#include "quickdraw/region.h"
+#include "quickdraw/stdbits.h"
 #include "rsys/dump.h"
 
 #include "rsys/iv.h"

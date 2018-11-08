@@ -92,7 +92,7 @@ Author of Simple DirectMedia Layer -
 #include "SDL/SDL_endian.h"
 #include "SDL/SDL_version.h"
 
-#include "rsys/error.h"
+#include "error/error.h"
 
 #include "for_sam.h"
 

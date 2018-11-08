@@ -4,7 +4,7 @@
 
 /* Forward declarations in ScrapMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "FileMgr.h"
 #include "ScrapMgr.h"
 #include "MemoryMgr.h"
@@ -12,11 +12,11 @@
 #include "OSUtil.h"
 #include "CQuickDraw.h"
 
-#include "rsys/file.h"
+#include "file/file.h"
 #include "rsys/scrap.h"
 #include "rsys/executor.h"
-#include "rsys/cquick.h"
-#include "rsys/vdriver.h"
+#include "quickdraw/cquick.h"
+#include "vdriver/vdriver.h"
 
 #if defined(CYGWIN32) && defined(SDL)
 #include "sdlscrap.h"

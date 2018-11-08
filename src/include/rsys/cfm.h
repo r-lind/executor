@@ -11,7 +11,7 @@
  */
 
 #define MODULE_NAME rsys_cfm
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

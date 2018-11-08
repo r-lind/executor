@@ -10,7 +10,7 @@
 #include <rsys/macros.h>
 
 #define MODULE_NAME rsys_gestalt
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

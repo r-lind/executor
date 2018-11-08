@@ -1,4 +1,4 @@
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <stdio.h>
 #ifdef _WIN32
@@ -6,7 +6,7 @@
 #endif
 
 #include "sdlquit.h"
-#include "rsys/options.h"
+#include "prefs/options.h"
 #include "rsys/toolevent.h"
 
 using namespace Executor;

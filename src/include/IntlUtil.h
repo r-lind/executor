@@ -4,7 +4,7 @@
 #include "SANE.h"
 
 #define MODULE_NAME IntlUtil
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990, 1994 by Abacus Research and Development, Inc.

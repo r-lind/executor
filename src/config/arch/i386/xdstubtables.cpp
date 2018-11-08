@@ -2,8 +2,8 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
-#include "rsys/xdblt.h"
+#include "base/common.h"
+#include "quickdraw/xdblt.h"
 #include "pat-blitters.h"
 
 #if !defined(USE_PORTABLE_PATBLT)

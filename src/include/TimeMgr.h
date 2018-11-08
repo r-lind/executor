@@ -10,7 +10,7 @@
 #include "ExMacTypes.h"
 
 #define MODULE_NAME TimeMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

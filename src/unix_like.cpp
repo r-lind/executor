@@ -1,4 +1,4 @@
-#include "rsys/common.h"
+#include "base/common.h"
 
 /*
  * This file is a quick hack to hoist code from config/os/linux to where it
@@ -13,10 +13,10 @@
 #include <sys/mman.h>
 
 #include "rsys/os.h"
-#include "rsys/memsize.h"
-#include "rsys/mman.h"
-#include "rsys/system_error.h"
-#include "rsys/lowglobals.h"
+#include "mman/memsize.h"
+#include "mman/mman.h"
+#include "error/system_error.h"
+#include "base/lowglobals.h"
 
 #include "Gestalt.h"
 #include "SegmentLdr.h"

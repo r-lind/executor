@@ -1,14 +1,14 @@
 #include "gtest/gtest.h"
 #define AUTOMATIC_CONVERSIONS
 #include <FileMgr.h>
-#include <rsys/file.h>
+#include <file/file.h>
 #include <MemoryMgr.h>
 
 using namespace Executor;
 
 QDGlobals qd;
-#include <rsys/cquick.h>
-#include <rsys/vdriver.h>
+#include <quickdraw/cquick.h>
+#include <vdriver/vdriver.h>
 #include <ResourceMgr.h>
 
 class MockVDriver : public VideoDriver

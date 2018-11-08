@@ -8,7 +8,7 @@
 
 #if !defined(THINK_C)
 /* executor */
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
 #include "MemoryMgr.h"
@@ -17,16 +17,16 @@
 #include "MenuMgr.h"
 #include "FileMgr.h"
 
-#include "rsys/cquick.h"
-#include "rsys/wind.h"
-#include "rsys/ctl.h"
-#include "rsys/itm.h"
-#include "rsys/menu.h"
+#include "quickdraw/cquick.h"
+#include "wind/wind.h"
+#include "ctl/ctl.h"
+#include "dial/itm.h"
+#include "menu/menu.h"
 #include "rsys/dump.h"
 #include "rsys/string.h"
-#include "rsys/mman_private.h"
+#include "mman/mman_private.h"
 
-#include "rsys/print.h"
+#include "print/print.h"
 
 #define deref(x) toHost(*(x))
 

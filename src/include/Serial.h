@@ -9,7 +9,7 @@
 #include <ExMacTypes.h>
 
 #define MODULE_NAME Serial
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

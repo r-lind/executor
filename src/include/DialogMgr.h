@@ -12,7 +12,7 @@
 #include "TextEdit.h"
 
 #define MODULE_NAME DialogMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

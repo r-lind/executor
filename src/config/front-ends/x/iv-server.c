@@ -5,7 +5,7 @@
 #define Region Mac_Region
 #define Cursor Mac_Cursor
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 
 #undef Region

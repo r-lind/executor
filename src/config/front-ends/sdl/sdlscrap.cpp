@@ -14,9 +14,9 @@
 #include "syswm_vars.h"
 #include "sdl_mem.h"
 
-#include "rsys/common.h"
+#include "base/common.h"
 
-#include "rsys/error.h"
+#include "error/error.h"
 
 using namespace Executor;
 

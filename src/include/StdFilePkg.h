@@ -5,7 +5,7 @@
 #include "FileMgr.h"
 
 #define MODULE_NAME StdFilePkg
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990, 1995 by Abacus Research and Development, Inc.

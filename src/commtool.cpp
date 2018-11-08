@@ -2,14 +2,14 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "CommTool.h"
 #include "MemoryMgr.h"
 #include "OSUtil.h"
 
 #include "rsys/string.h"
-#include "rsys/mman.h"
+#include "mman/mman.h"
 
 using namespace Executor;
 

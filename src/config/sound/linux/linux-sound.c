@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <sys/soundcard.h>
 #include <sys/ipc.h>
@@ -16,7 +16,7 @@
 
 #include "rsys/vdriver.h"
 #include "rsys/sounddriver.h"
-#include "rsys/m68kint.h"
+#include "base/m68kint.h"
 #include "linux-sound.h"
 
 #define NUM_BUFS 2

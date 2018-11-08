@@ -2,7 +2,7 @@
 #include <OSUtil.h>
 
 #include <mon.h>
-#include <rsys/cpu.h>
+#include <base/cpu.h>
 #include <PowerCore.h>
 #include <syn68k_public.h>
 #include <SegmentLdr.h>

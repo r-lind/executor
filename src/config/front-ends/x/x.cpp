@@ -4,13 +4,13 @@
 
 
 #include "x.h"
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "ScrapMgr.h"
 #include "OSUtil.h"
 
-#include "rsys/commonevt.h"
-#include "rsys/dirtyrect.h"
+#include "osevent/commonevt.h"
+#include "vdriver/dirtyrect.h"
 #include "rsys/keyboard.h"
 #include "rsys/scrap.h"
 
@@ -42,18 +42,18 @@
 #include "ToolboxEvent.h"
 #include "rsys/adb.h"
 
-#include "rsys/cquick.h"
-#include "rsys/prefs.h"
-#include "rsys/mman.h"
-#include "rsys/refresh.h"
-#include "rsys/vdriver.h"
+#include "quickdraw/cquick.h"
+#include "prefs/prefs.h"
+#include "mman/mman.h"
+#include "vdriver/refresh.h"
+#include "vdriver/vdriver.h"
 #include <syn68k_public.h>
-#include "rsys/m68kint.h"
-#include "rsys/depthconv.h"
-#include "rsys/rgbutil.h"
-#include "rsys/option.h"
-#include "rsys/flags.h"
-#include "rsys/osevent.h"
+#include "base/m68kint.h"
+#include "quickdraw/depthconv.h"
+#include "quickdraw/rgbutil.h"
+#include "commandline/option.h"
+#include "commandline/flags.h"
+#include "osevent/osevent.h"
 
 #include "x_keycodes.h"
 

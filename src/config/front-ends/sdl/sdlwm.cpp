@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include "SDL/SDL.h"
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 /* Window manager interface functions */
 

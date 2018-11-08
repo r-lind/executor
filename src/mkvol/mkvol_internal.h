@@ -6,7 +6,7 @@
 #include <time.h>
 #include <assert.h>
 /*
- * NOTE: All the info here has been grabbed from rsys/hfs.h.
+ * NOTE: All the info here has been grabbed from hfs/hfs.h.
  *   I don't expect this stuff to change, but you never know ...
  */
 
