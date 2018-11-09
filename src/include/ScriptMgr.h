@@ -441,6 +441,17 @@ extern INTEGER C_TransliterateText(Handle srch, Handle dsth, INTEGER target,
                                    LONGINT srcmask, ScriptCode script);
 PASCAL_SUBTRAP(TransliterateText, 0xA8B5, 0xC20E0018, ScriptUtil);
 
+static_assert(sizeof(DateCacheRec) == 512);
+static_assert(sizeof(LongDateRec) == 28);
+static_assert(sizeof(NumFormatStringRec) == 256);
+static_assert(sizeof(WideChar) == 2);
+static_assert(sizeof(WideCharArr) == 22);
+static_assert(sizeof(NumberParts) == 172);
+static_assert(sizeof(Extended80) == 10);
+static_assert(sizeof(ToggleResults) == 2);
+static_assert(sizeof(LongDateField) == 1);
+static_assert(sizeof(DateDelta) == 1);
+static_assert(sizeof(TogglePB) == 28);
 }
 
 #endif /* _SCRIPTMGR_H_ */

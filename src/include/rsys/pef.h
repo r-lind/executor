@@ -259,5 +259,12 @@ pef_hash_t;
 
 extern PEFLoaderInfoHeader_t *ROMlib_build_pef_hash(const map_entry_t table[],
                                                     int count);
+
+static_assert(sizeof(PEFContainerHeader_t) == 40);
+static_assert(sizeof(PEFSectionHeader_t) == 28);
+static_assert(sizeof(PEFLoaderInfoHeader_t) == 56);
+static_assert(sizeof(PEFImportedLibrary_t) == 24);
+static_assert(sizeof(PEFLoaderRelocationHeader_t) == 12);
+static_assert(sizeof(PEFExportedSymbol) == 10);
 }
 #endif

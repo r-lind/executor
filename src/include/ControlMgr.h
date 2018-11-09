@@ -248,5 +248,9 @@ extern void C_SizeControl(ControlHandle c,
 PASCAL_TRAP(SizeControl, 0xA95C);
 extern void C_SetControlColor(ControlHandle ctl, CCTabHandle ctab);
 PASCAL_TRAP(SetControlColor, 0xAA43);
+
+static_assert(sizeof(ControlRecord) == 296);
+static_assert(sizeof(CtlCTab) == 16);
+static_assert(sizeof(AuxCtlRec) == 22);
 }
 #endif /* __CONTROL__ */

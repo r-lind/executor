@@ -254,6 +254,14 @@ extern void ROMlib_gsave(void);
 extern void ROMlib_grestore(void);
 
 extern void ROMlib_acknowledge_job_dialog(THPrint thprint);
+
+static_assert(sizeof(TGnlData) == 8);
+static_assert(sizeof(TRslRg) == 4);
+static_assert(sizeof(TRslRec) == 4);
+static_assert(sizeof(TGetRslBlk) == 128);
+static_assert(sizeof(TSetRslBlk) == 16);
+static_assert(sizeof(TTxtPicRec) == 10);
+static_assert(sizeof(TCenterRec) == 8);
 }
 
 extern "C" {

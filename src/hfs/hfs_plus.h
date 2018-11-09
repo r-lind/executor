@@ -211,5 +211,21 @@ struct HFSPlusAttrExtents
 };
 
 extern bool ROMlib_hfs_plus_support;
+
+static_assert(sizeof(HFSUniStr255) == 512);
+static_assert(sizeof(HFSPlusPermissions) == 16);
+static_assert(sizeof(HFSPlusExtentDescriptor) == 8);
+static_assert(sizeof(HFSPlusExtentRecord) == 64);
+static_assert(sizeof(HFSPlusForkData) == 80);
+static_assert(sizeof(HFSPlusVolumeHeader) == 512);
+static_assert(sizeof(BTNodeDescriptor) == 14);
+static_assert(sizeof(BTHeaderRec) == 106);
+static_assert(sizeof(HFSPlusCatalogKey) == 518);
+static_assert(sizeof(HFSPlusCatalogFolder) == 88);
+static_assert(sizeof(HFSPlusCatalogFile) == 248);
+static_assert(sizeof(HFSPlusCatalogThread) == 520);
+static_assert(sizeof(HFSPlusExtentKey) == 12);
+static_assert(sizeof(HFSPlusAttrForkData) == 88);
+static_assert(sizeof(HFSPlusAttrExtents) == 72);
 }
 #endif

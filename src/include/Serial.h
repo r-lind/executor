@@ -136,6 +136,8 @@ NOTRAP_FUNCTION2(SerGetBuf);
 extern OSErr SerStatus(INTEGER rn, SerStaRec *serstap);
 NOTRAP_FUNCTION2(SerStatus);
 
+static_assert(sizeof(SerShk) == 8);
+static_assert(sizeof(SerStaRec) == 8);
 }
 
 #endif /* __SERIAL__ */

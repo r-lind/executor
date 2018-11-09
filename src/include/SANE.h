@@ -290,5 +290,11 @@ PASCAL_SUBTRAP(ROMlib_Fgethv, 0xA9EB, 0x07, Pack4);
 extern void C_ROMlib_FnextX(uint8_t *x, uint8_t *y,
                                         unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FnextX, 0xA9EB, 0x13, Pack4);
+
+static_assert(sizeof(comp_t) == 8);
+static_assert(sizeof(native_comp_t) == 8);
+static_assert(sizeof(x80_t) == 10);
+static_assert(sizeof(Decimal) == 24);
+static_assert(sizeof(DecForm) == 4);
 }
 #endif

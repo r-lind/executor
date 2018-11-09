@@ -208,5 +208,10 @@ typedef GUEST<kchr_ptr_t> *kchr_hand;
 #define MKV_RESET 0x7f
 
 extern unsigned char ibm_virt_to_mac_virt[];
+
+static_assert(sizeof(completer_pair_t) == 2);
+static_assert(sizeof(completer_t) == 2);
+static_assert(sizeof(dead_key_rec_t) == 4);
+static_assert(sizeof(kchr_str) == 260);
 }
 #endif /* !defined(_RSYS_KEYBOARD_H_) */

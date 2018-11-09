@@ -165,5 +165,9 @@ extern void C_new_pos_ctl(INTEGER depth, INTEGER flags, GDHandle target,
                           LONGINT l);
 PASCAL_FUNCTION(new_pos_ctl);
 
+static_assert(sizeof(popup_data) == 12);
+static_assert(sizeof(thumbstr) == 18);
+static_assert(sizeof(contrlrestype) == 24);
+static_assert(sizeof(lsastr) == 18);
 }
 #endif /* !_CTL_H_ */

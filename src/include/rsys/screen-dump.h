@@ -26,6 +26,10 @@ struct __attribute__((packed)) ifd
     int16_t count;
     struct directory_entry entries[1];
 };
+
+static_assert(sizeof(header) == 8);
+static_assert(sizeof(directory_entry) == 12);
+static_assert(sizeof(ifd) == 14);
 }
 
 #endif /* !defined (__rsys_screen_dump_h__) */

@@ -80,8 +80,6 @@
 #include "rsys/debugger.h"
 #include <PowerCore.h>
 
-#include "rsys/check_structs.h"
-
 #include "default_vdriver.h"
 
 
@@ -617,7 +615,6 @@ construct_command_line_string(int argc, char **argv)
 int main(int argc, char **argv)
 {
     char thingOnStack; /* used to determine an approximation of the stack base address */
-    check_structs();
 
     INTEGER i;
     uint32_t l;

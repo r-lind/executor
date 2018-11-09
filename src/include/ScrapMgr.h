@@ -52,5 +52,7 @@ PASCAL_TRAP(PutScrap, 0xA9FE);
 extern LONGINT C_GetScrap(Handle h, ResType rest,
                                       GUEST<LONGINT> *off);
 PASCAL_TRAP(GetScrap, 0xA9FD);
+
+static_assert(sizeof(ScrapStuff) == 16);
 }
 #endif /* __SCRAP__ */

@@ -64,6 +64,9 @@ typedef struct PPCPortRec
         } port;
     } u;
 } * PPCPortPtr;
+
+static_assert(sizeof(LocationNameRec) == 104);
+static_assert(sizeof(PPCPortRec) == 72);
 }
 
 #endif /* !_PPC_H_ */

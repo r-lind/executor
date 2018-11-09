@@ -419,5 +419,14 @@ extern void C_FinaleUnknown1(void);
 extern OSErr C_FinaleUnknown2(ResType, LONGINT, Ptr, Ptr);
 extern LONGINT C_DirectorUnknown3(void);
 extern INTEGER C_DirectorUnknown4(ResType, INTEGER, Ptr, Ptr);
+
+static_assert(sizeof(SndCommand) == 8);
+static_assert(sizeof(SndChannel) == 1060);
+static_assert(sizeof(soundbuffer_t) == 24);
+static_assert(sizeof(SoundHeader) == 24);
+static_assert(sizeof(ExtSoundHeader) == 66);
+static_assert(sizeof(SndDoubleBuffer) == 18);
+static_assert(sizeof(SndDoubleBufferHeader) == 24);
+static_assert(sizeof(SCStatus) == 24);
 }
 #endif /* __SOUNDMGR__ */

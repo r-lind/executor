@@ -625,5 +625,15 @@ extern void TESetScrapLength(LONGINT ln);
 extern int16_t C_TEFeatureFlag(int16_t feature, int16_t action,
                                TEHandle te);
 PASCAL_SUBTRAP(TEFeatureFlag, 0xA83D, 0x000E, TEDispatch);
+
+static_assert(sizeof(TERec) == 98);
+static_assert(sizeof(StyleRun) == 4);
+static_assert(sizeof(STElement) == 18);
+static_assert(sizeof(LHElement) == 4);
+static_assert(sizeof(TextStyle) == 12);
+static_assert(sizeof(ScrpSTElement) == 20);
+static_assert(sizeof(StScrpRec) == 22);
+static_assert(sizeof(NullSTRec) == 8);
+static_assert(sizeof(TEStyleRec) == 24);
 }
 #endif /* _TEXTEDIT_H_ */

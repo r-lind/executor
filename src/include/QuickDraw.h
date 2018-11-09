@@ -912,5 +912,27 @@ extern void C_IMVI_CopyDeepMask(
     INTEGER mode,
     RgnHandle maskRgn);
 PASCAL_TRAP(IMVI_CopyDeepMask, 0xAA51);
+
+static_assert(sizeof(Region) == 10);
+static_assert(sizeof(BitMap) == 14);
+static_assert(sizeof(Cursor) == 68);
+static_assert(sizeof(Polygon) == 14);
+static_assert(sizeof(FontInfo) == 8);
+static_assert(sizeof(QDProcs) == 52);
+static_assert(sizeof(GrafPort) == 108);
+static_assert(sizeof(Picture) == 10);
+static_assert(sizeof(PenState) == 18);
+static_assert(sizeof(RGBColor) == 6);
+static_assert(sizeof(HSVColor) == 6);
+static_assert(sizeof(HSLColor) == 6);
+static_assert(sizeof(CMYColor) == 6);
+static_assert(sizeof(ColorSpec) == 8);
+static_assert(sizeof(ColorTable) == 16);
+static_assert(sizeof(CQDProcs) == 80);
+static_assert(sizeof(PixMap) == 50);
+static_assert(sizeof(PixPat) == 28);
+static_assert(sizeof(CGrafPort) == 108);
+static_assert(sizeof(CCrsr) == 96);
+static_assert(sizeof(MatchRec) == 10);
 }
 #endif /* _QUICKDRAW_H_ */

@@ -268,5 +268,9 @@ NOTRAP_FUNCTION2(SetCurrentA5);
 extern LONGINT SetA5(LONGINT newA5);
 NOTRAP_FUNCTION2(SetA5);
 
+static_assert(sizeof(SysParmType) == 20);
+static_assert(sizeof(DateTimeRec) == 14);
+static_assert(sizeof(SysEnvRec) == 16);
+static_assert(sizeof(QElem) == 178);
 }
 #endif /* __OSUTIL__ */

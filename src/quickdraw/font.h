@@ -44,4 +44,7 @@ extern Fixed font_width_expand(Fixed width, Fixed extra,
                                Fixed hOutputInverse);
 
 extern void ROMlib_shutdown_font_manager(void);
+
+static_assert(sizeof(fatabentry) == 6);
+static_assert(sizeof(widentry_t) == 4);
 }

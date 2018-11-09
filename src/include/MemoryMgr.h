@@ -280,5 +280,7 @@ extern void C_TempHUnlock(Handle h, GUEST<OSErr> *result_code);
 PASCAL_SUBTRAP(TempHUnlock, 0xA88F, 0x001F, OSDispatch);
 extern void C_TempDisposeHandle(Handle h, GUEST<OSErr> *result_code);
 PASCAL_SUBTRAP(TempDisposeHandle, 0xA88F, 0x0020, OSDispatch);
+
+static_assert(sizeof(Zone) == 54);
 }
 #endif /* _MEMORY_MGR_H_ */

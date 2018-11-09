@@ -68,12 +68,6 @@ typedef WindowPtr DialogPtr;
 #define DIALOG_EDIT_OPEN(dialog) (((DialogPeek)(dialog))->editOpen)
 #define DIALOG_ADEF_ITEM(dialog) (((DialogPeek)(dialog))->aDefItem)
 
-
-
-
-
-
-
 struct DialogTemplate
 {
     GUEST_STRUCT;
@@ -257,6 +251,11 @@ PASCAL_SUBTRAP(SetDialogTracksCursor, 0xAA68, 0x0306, DialogDispatch);
 extern void AppendDITL(DialogPtr, Handle, DITLMethod);
 extern void ShortenDITL(DialogPtr, int16_t);
 extern int16_t CountDITL(DialogPtr);
+
+static_assert(sizeof(DialogRecord) == 170);
+static_assert(sizeof(DialogTemplate) == 276);
+static_assert(sizeof(StageList) == 2);
+static_assert(sizeof(AlertTemplate) == 12);
 }
 
 #endif /* _DIALOG_H_ */

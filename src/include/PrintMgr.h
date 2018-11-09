@@ -311,5 +311,14 @@ extern BOOLEAN C_PrJobDialog(THPrint hPrint);
 PASCAL_SUBTRAP(PrJobDialog, 0xA8FD, 0x32040488, PrGlue);
 extern void C_PrJobMerge(THPrint hPrintSrc, THPrint hPrintDst);
 PASCAL_SUBTRAP(PrJobMerge, 0xA8FD, 0x5804089C, PrGlue);
+
+static_assert(sizeof(TPrPort) == 178);
+static_assert(sizeof(TPrInfo) == 14);
+static_assert(sizeof(TPrStl) == 8);
+static_assert(sizeof(TPrXInfo) == 16);
+static_assert(sizeof(TPrJob) == 20);
+static_assert(sizeof(TPrint) == 120);
+static_assert(sizeof(TPrStatus) == 26);
+static_assert(sizeof(TPrDlg) == 204);
 }
 #endif /* __PRINTING__ */

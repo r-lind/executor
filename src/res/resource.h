@@ -213,6 +213,14 @@ struct res_sorttype_t
     LONGINT diskoff;
     resref *rrptr;
 };
+
+static_assert(sizeof(reshead) == 16);
+static_assert(sizeof(rsrvrec) == 240);
+static_assert(sizeof(resmap) == 28);
+static_assert(sizeof(typref) == 8);
+static_assert(sizeof(resref) == 12);
+static_assert(sizeof(empty_resource_template_t) == 286);
+static_assert(sizeof(dcomp_info_t) == 16);
 }
 #define __MYRESOURCE__
 #endif /* __MYRESOURCE__ */

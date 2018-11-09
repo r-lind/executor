@@ -253,5 +253,7 @@ typedef GUEST<piccacheptr> *piccachehand;
 
 extern PicHandle ROMlib_OpenPicture_helper(const Rect *pf,
                                            const OpenCPicParams *params);
+
+static_assert(sizeof(piccache) == 96);
 }
 #endif /* _PICTURE_H_ */

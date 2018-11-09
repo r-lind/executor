@@ -250,5 +250,8 @@ extern void mman_heap_death(const char *func, const char *where);
     _HEAP_DEATH(__PRETTY_FUNCTION__, " in " __FILE__ ":", __LINE__)
 
 #define HEAPEND (LM(HeapEnd) + MIN_BLOCK_SIZE) /* temporary ctm hack */
+
+static_assert(sizeof(block_header_t) == 12);
+static_assert(sizeof(pblock_t) == 14);
 }
 #endif /* _MMAN_PRIVATE_H */

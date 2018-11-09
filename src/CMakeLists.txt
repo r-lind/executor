@@ -408,7 +408,7 @@ set(misc_sources
   icon.cpp redrawscreen.cpp qt.cpp
   commtool.cpp cfm.cpp pef_hash.cpp
   mixed_mode.cpp appearance.cpp lockrange.cpp
-  unix_like.cpp check_structs.cpp
+  unix_like.cpp
   executor.cpp  
   prefpanel.cpp
   qColorPicker.cpp
@@ -462,7 +462,6 @@ set(include_sources
                   include/rsys/arch.h
                   include/rsys/arrowkeys.h
                   include/rsys/cfm.h
-                  include/rsys/check_structs.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/desk.h
                   include/rsys/device.h

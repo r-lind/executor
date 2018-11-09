@@ -170,6 +170,8 @@ extern Fixed C_R_X2Fix(extended80 *x);
 PASCAL_TRAP(R_X2Fix, 0xA844);
 extern Fract C_R_X2Frac(extended80 *x);
 PASCAL_TRAP(R_X2Frac, 0xA846);
+
+static_assert(sizeof(Int64Bit) == 8);
 }
 
 #endif /* _TOOLBOX_UTIL_H_ */

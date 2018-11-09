@@ -889,7 +889,27 @@ NOTRAP_FUNCTION2(HOpenDF);
 extern OSErr GetWDInfo(INTEGER wd, GUEST<INTEGER> *vrefp, GUEST<LONGINT> *dirp,
                        GUEST<LONGINT> *procp);
 
-
-
+static_assert(sizeof(FInfo) == 16);
+static_assert(sizeof(FXInfo) == 16);
+static_assert(sizeof(DInfo) == 16);
+static_assert(sizeof(DXInfo) == 16);
+static_assert(sizeof(IOParam) == 50);
+static_assert(sizeof(FileParam) == 80);
+static_assert(sizeof(VolumeParam) == 64);
+static_assert(sizeof(CntrlParam) == 50);
+static_assert(sizeof(ParamBlockRec) == 80);
+static_assert(sizeof(HIoParam) == 50);
+static_assert(sizeof(HFileParam) == 80);
+static_assert(sizeof(HVolumeParam) == 122);
+static_assert(sizeof(HParamBlockRec) == 122);
+static_assert(sizeof(HFileInfo) == 108);
+static_assert(sizeof(DirInfo) == 104);
+static_assert(sizeof(CInfoPBRec) == 108);
+static_assert(sizeof(CMovePBRec) == 52);
+static_assert(sizeof(WDPBRec) == 52);
+static_assert(sizeof(FCBPBRec) == 62);
+static_assert(sizeof(VCB) == 178);
+static_assert(sizeof(DrvQEl) == 16);
+static_assert(sizeof(FSSpec) == 70);
 }
 #endif /* _FILEMGR_H_ */

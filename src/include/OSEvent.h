@@ -180,6 +180,10 @@ extern bool hle_get_event(EventRecord *evt, bool remflag);
 extern void hle_init(void);
 extern void hle_reinit(void);
 extern void hle_reset(void);
+
+static_assert(sizeof(EvQEl) == 22);
+static_assert(sizeof(TargetID) == 252);
+static_assert(sizeof(HighLevelEventMsg) == 36);
 }
 
 #endif /* !_OSEVENT_H_ */

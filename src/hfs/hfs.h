@@ -581,5 +581,19 @@ extern void ROMlib_OurClose(void);
 extern long ROMlib_priv_open(const char *filename, long mode);
 extern void vcbsync(HVCB *vcbp);
 
+static_assert(sizeof(xtntdesc) == 4);
+static_assert(sizeof(volumeinfo) == 162);
+static_assert(sizeof(btnode) == 14);
+static_assert(sizeof(catkey) == 38);
+static_assert(sizeof(xtntkey) == 8);
+static_assert(sizeof(anykey) == 38);
+static_assert(sizeof(filerec) == 102);
+static_assert(sizeof(directoryrec) == 70);
+static_assert(sizeof(threadrec) == 46);
+static_assert(sizeof(filecontrolblock) == 94);
+static_assert(sizeof(btblock0) == 512);
+static_assert(sizeof(cacheentry) == 540);
+static_assert(sizeof(cachehead) == 12);
+static_assert(sizeof(wdentry) == 16);
 }
 #endif /* !defined(__RSYS_HFS__) */

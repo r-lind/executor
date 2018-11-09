@@ -176,5 +176,9 @@ log1p(double x)
 #endif /* NEED_LOG1P */
 
 #define _romlib_float_h_2_
+
+static_assert(sizeof(f64_t) == 8);
+static_assert(sizeof(f32_t) == 4);
+static_assert(sizeof(native_f32_t) == 4);
 }
 #endif

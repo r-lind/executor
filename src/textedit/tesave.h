@@ -126,5 +126,9 @@ typedef GUEST<tehiddenp> *tehiddenh;
 extern void ROMlib_recompute_caret(TEHandle te);
 
 extern INTEGER ROMlib_wordb(char *p);
+
+static_assert(sizeof(tesave) == 56);
+static_assert(sizeof(generic_elt_t) == 16);
+static_assert(sizeof(tehidden) == 20);
 }
 #endif /* __TESAVE__ */

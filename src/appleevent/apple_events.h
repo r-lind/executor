@@ -94,5 +94,10 @@ typedef struct subdesc_info
     bool key_p;
     int inline_desc_header_size;
 } subdesc_info_t;
+
+static_assert(sizeof(inline_desc_t) == 8);
+static_assert(sizeof(inline_key_desc_t) == 12);
+static_assert(sizeof(list_header_t) == 24);
+static_assert(sizeof(ae_header_t) == 66);
 }
 #endif /* !defined (__rsys_apple_events_h__) */

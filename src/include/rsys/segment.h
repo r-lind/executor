@@ -17,6 +17,7 @@ struct finderinfo
 
 extern void ROMlib_seginit(LONGINT argc, char **argv);
 extern void empty_timer_queues(void);
-}
 
+static_assert(sizeof(finderinfo) == 268);
+}
 #endif /* !_SEGMENT_H_ */

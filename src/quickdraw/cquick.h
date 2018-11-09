@@ -721,5 +721,7 @@ public:
         SetGDevice(saveDevice);
     }
 };
+
+static_assert(sizeof(GrafVars) == 26);
 }
 #endif /* _CQUICK_H_ */

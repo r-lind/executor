@@ -118,6 +118,14 @@ struct sdef
     GUEST<INTEGER> alen;
     GUEST<char[1]> text;
 };
+
+static_assert(sizeof(myalerttab_t) == 326);
+static_assert(sizeof(adef) == 14);
+static_assert(sizeof(tdef) == 10);
+static_assert(sizeof(idef) == 140);
+static_assert(sizeof(pdef) == 8);
+static_assert(sizeof(bdef) == 18);
+static_assert(sizeof(sdef) == 6);
 }
 
 #endif /* !defined (__rsys_syserr_h__) */

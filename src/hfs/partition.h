@@ -63,4 +63,8 @@ struct oldblock1_t
 #define OLDMAPSIG1 'S'
 
 #define PARTOFFSET 1
+
+static_assert(sizeof(partmapentry_t) == 256);
+static_assert(sizeof(oldmapentry_t) == 12);
+static_assert(sizeof(oldblock1_t) == 506);
 }

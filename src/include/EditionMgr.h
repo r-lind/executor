@@ -307,6 +307,15 @@ extern OSErr C_CallFormatIOProc(FormatIOVerb selector,
                                             FormatIOParamBlock *param_block,
                                             FormatIOProcPtr proc);
 PASCAL_SUBTRAP(CallFormatIOProc, 0xA82D, 0x0530, Pack11);
+
+static_assert(sizeof(SectionRecord) == 36);
+static_assert(sizeof(EditionContainerSpec) == 110);
+static_assert(sizeof(EditionInfoRecord) == 126);
+static_assert(sizeof(NewPublisherReply) == 122);
+static_assert(sizeof(NewSubscriberReply) == 112);
+static_assert(sizeof(SectionOptionsReply) == 10);
+static_assert(sizeof(EditionOpenerParamBlock) == 148);
+static_assert(sizeof(FormatIOParamBlock) == 24);
 }
 
 #endif /* _EDITIONMGR_H_ */

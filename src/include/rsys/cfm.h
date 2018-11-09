@@ -270,6 +270,18 @@ PASCAL_SUBTRAP(GetIndSymbol, 0xAA5A, 0x0007, CodeFragmentDispatch);
 
 extern ConnectionID ROMlib_new_connection(uint32_t n_sects);
 extern void ROMlib_release_tracking_values(void);
+
+static_assert(sizeof(cfrg_resource_t) == 32);
+static_assert(sizeof(cfir_t) == 44);
+static_assert(sizeof(MemFragment) == 12);
+static_assert(sizeof(DiskFragment) == 12);
+static_assert(sizeof(SegmentedFragment) == 12);
+static_assert(sizeof(FragmentLocator) == 16);
+static_assert(sizeof(InitBlock) == 36);
+static_assert(sizeof(section_info_t) == 16);
+static_assert(sizeof(CFragConnection_t) == 28);
+static_assert(sizeof(lib_t) == 12);
+static_assert(sizeof(CFragClosure_t) == 4);
 }
 
 #endif

@@ -254,6 +254,8 @@ PASCAL_SUBTRAP(GetIconCacheProc, 0xABC9, 0x041B, IconDispatch);
 extern OSErr C_SetIconCacheProc(Handle cache,
                                             IconGetterProcPtr proc);
 PASCAL_SUBTRAP(SetIconCacheProc, 0xABC9, 0x041C, IconDispatch);
+
+static_assert(sizeof(CIcon) == 84);
 }
 
 #endif /* !_ICON_UTIL_H */

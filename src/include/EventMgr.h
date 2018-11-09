@@ -94,6 +94,7 @@ struct EventRecord
 const LowMemGlobal<unsigned char[16]> KeyMap { 0x174 }; // EventMgr SysEqu.a (true-b);
 /* was LONGINT KeypadMap[2]; */
 
+static_assert(sizeof(EventRecord) == 16);
 }
 
 #endif /* __EVENT__ */

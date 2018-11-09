@@ -158,6 +158,9 @@ extern void C_CustomGetFile(FileFilterYDProcPtr filefilter,
                                         ActivateYDProcPtr activateproc,
                                         void *yourdatap);
 PASCAL_SUBTRAP(CustomGetFile, 0xA9EA, 0x0008, Pack3);
+
+static_assert(sizeof(SFReply) == 74);
+static_assert(sizeof(StandardFileReply) == 88);
 }
 
 #endif /* __STDFILE__ */

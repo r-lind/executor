@@ -198,5 +198,9 @@ PASCAL_SUBTRAP(GetPortNameFromProcessSerialNumber, 0xA88F, 0x0046, OSDispatch);
 
 extern OSErr NewLaunch(StringPtr appl, INTEGER vrefnum,
                        LaunchParamBlockRec *lpbp);
+
+static_assert(sizeof(ProcessSerialNumber) == 8);
+static_assert(sizeof(LaunchParamBlockRec) == 44);
+static_assert(sizeof(ProcessInfoRec) == 60);
 }
 #endif

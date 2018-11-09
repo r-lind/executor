@@ -12,5 +12,7 @@ struct icon_item_template_t
     GUEST<uint8_t> len;
     GUEST<int16_t> res_id;
 };
+
+static_assert(sizeof(icon_item_template_t) == 18);
 }
 #endif /* !defined (__rsys_dial_h__) */

@@ -563,6 +563,17 @@ extern OSErr C_AESetObjectCallbacks(ProcPtr myCompareProc,
                                                 ProcPtr myAdjustMarksProc,
                                                 ProcPtr myGetErrDescProc);
 PASCAL_SUBTRAP(AESetObjectCallbacks, 0xA816, 0x0E35, Pack8);
+
+static_assert(sizeof(AEArrayData) == 12);
+static_assert(sizeof(AEDesc) == 8);
+static_assert(sizeof(AEKeyDesc) == 12);
+static_assert(sizeof(AE_hdlr_t) == 8);
+static_assert(sizeof(AE_hdlr_selector_t) == 8);
+static_assert(sizeof(AE_hdlr_table_elt_t) == 24);
+static_assert(sizeof(AE_hdlr_table_t) == 52);
+static_assert(sizeof(AE_zone_tables_t) == 56);
+static_assert(sizeof(AE_info_t) == 596);
+static_assert(sizeof(AEArrayData) == 12);
 }
 
 #endif /* ! _AppleEvents_H_ */

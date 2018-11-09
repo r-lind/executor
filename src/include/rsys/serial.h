@@ -32,5 +32,7 @@ extern OSErr C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp);
 REGISTER_FUNCTION(ROMlib_serialstatus, D0(A0,A1));
 extern OSErr C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp);
 REGISTER_FUNCTION(ROMlib_serialclose, D0(A0,A1));
+
+static_assert(sizeof(sersetbuf_t) == 6);
 }
 #endif

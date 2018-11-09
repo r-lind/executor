@@ -133,5 +133,11 @@ inline void BUMPIP(itmp& ip)
 
 extern void BEEPER(INTEGER n);
 #define BEEP(n) BEEPER(n)
+
+static_assert(sizeof(itmstr) == 14);
+static_assert(sizeof(altstr) == 12);
+static_assert(sizeof(dlogstr) == 22);
+static_assert(sizeof(item_style_info_t) == 20);
+static_assert(sizeof(item_color_info_t) == 4);
 }
 #endif /* _ITM_H_ */

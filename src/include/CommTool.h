@@ -77,5 +77,8 @@ extern OSErr CRMRemove(QElemPtr);
 extern QElemPtr CRMSearch(QElemPtr);
 
 extern CRMErr InitCRM();
+
+static_assert(sizeof(CRMRec) == 34);
+static_assert(sizeof(CRMSerialRecord) == 30);
 }
 #endif

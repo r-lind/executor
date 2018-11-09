@@ -106,6 +106,7 @@ extern RGBColor *validate_colors_for_window(GrafPtr w);
 #define WINDOW_PIC(wp) (((WindowPeek)(wp))->windowPic)
 #define WINDOW_REF_CON(wp) (((WindowPeek)(wp))->refCon)
 
+static_assert(sizeof(windrestype) == 20);
 }
 
 #endif /* !_WIND_H_ */

@@ -339,5 +339,9 @@ PASCAL_TRAP(SetDeskCPat, 0xAA47);
 
 extern BOOLEAN C_GetAuxWin(WindowPtr, GUEST<AuxWinHandle> *);
 PASCAL_TRAP(GetAuxWin, 0xAA42);
+
+static_assert(sizeof(WindowRecord) == 156);
+static_assert(sizeof(WStateData) == 16);
+static_assert(sizeof(AuxWinRec) == 28);
 }
 #endif /* __WINDOW__ */

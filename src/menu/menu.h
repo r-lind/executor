@@ -281,6 +281,15 @@ void menu_item_colors(int16_t id, int16_t item,
                       RGBColor *mark_color, RGBColor *command_color);
 
 void menu_delete_entries(int16_t menu_id);
+
+static_assert(sizeof(mext) == 5);
+static_assert(sizeof(muelem) == 6);
+static_assert(sizeof(menu_list) == 8);
+static_assert(sizeof(menulist) == 102);
+static_assert(sizeof(mbdfheader) == 20);
+static_assert(sizeof(mbdfentry) == 28);
+static_assert(sizeof(mct_res_t) == 32);
+static_assert(sizeof(mbartype) == 4);
 }
 
 #endif /* !_MENU_H_ */

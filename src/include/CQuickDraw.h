@@ -613,5 +613,17 @@ PASCAL_SUBTRAP(GetPixMapInfo, 0xA831, 0x0801, Pack15);
 
 extern PicHandle C_OpenCPicture(OpenCPicParams *newheaderp);
 PASCAL_TRAP(OpenCPicture, 0xAA20);
+
+static_assert(sizeof(ITab) == 8);
+static_assert(sizeof(SProcRec) == 8);
+static_assert(sizeof(CProcRec) == 8);
+static_assert(sizeof(GDevice) == 62);
+static_assert(sizeof(ColorInfo) == 16);
+static_assert(sizeof(Palette) == 32);
+static_assert(sizeof(ReqListRec) == 4);
+static_assert(sizeof(OpenCPicParams) == 24);
+static_assert(sizeof(CommentSpec) == 4);
+static_assert(sizeof(FontSpec) == 26);
+static_assert(sizeof(PictInfo) == 104);
 }
 #endif /* _CQUICKDRAW_H_ */

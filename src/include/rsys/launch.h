@@ -31,6 +31,7 @@ struct vers_t
 
 extern launch_failure_t ROMlib_launch_failure;
 extern INTEGER ROMlib_exevrefnum;
-}
 
+static_assert(sizeof(vers_t) == 8);
+}
 #endif

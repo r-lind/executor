@@ -172,5 +172,7 @@ PASCAL_SUBTRAP(LCellSize, 0xA9E7, 0x0014, Pack0);
 extern BOOLEAN C_LGetSelect(BOOLEAN next,
                                         GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LGetSelect, 0xA9E7, 0x003C, Pack0);
+
+static_assert(sizeof(ListRec) == 88);
 }
 #endif /* __LIST__ */

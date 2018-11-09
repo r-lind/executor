@@ -103,5 +103,9 @@ RAW_68K_TRAP(SetOSDefault, 0xA083);
 RAW_68K_TRAP(IMVI_ReadXPRam, 0xA051);
 RAW_68K_FUNCTION(bad_trap_unimplemented);
 RAW_68K_TRAP(IMVI_PPC, 0xA0DD);
+
+static_assert(sizeof(adbop_t) == 12);
+static_assert(sizeof(comm_toolbox_dispatch_args_t) == 12);
+static_assert(sizeof(initzonehiddenargs_t) == 14);
 }
 #endif

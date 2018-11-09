@@ -343,5 +343,10 @@ extern LONGINT ROMlib_magic_offset;
 extern INTEGER ROMlib_nextvrn;
 
 std::string expandPath(std::string);
+
+static_assert(sizeof(hfs_access_t) == 16);
+static_assert(sizeof(fcbrec) == 94);
+static_assert(sizeof(fcbhidden) == 32714);
+static_assert(sizeof(getvolparams_info_t) == 20);
 }
 #endif /* !defined(__rsys_file__) */

@@ -74,5 +74,6 @@ PASCAL_TRAP(UnloadSeg, 0xA9F1);
 
 extern void C_LoadSeg(INTEGER volatile segno);
 
+static_assert(sizeof(AppFile) == 264);
 }
 #endif /* __SEGMENT__ */

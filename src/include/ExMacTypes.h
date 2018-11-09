@@ -141,5 +141,8 @@ inline bool RECT_EQUAL_P(const Rect *r1, const Rect *r2)
 typedef INTEGER ScriptCode;
 typedef INTEGER LangCode;
 
+static_assert(sizeof(QHdr) == 10);
+static_assert(sizeof(Point) == 4);
+static_assert(sizeof(Rect) == 8);
 }
 #endif /* _MACTYPES_H_ */

@@ -79,5 +79,7 @@ PASCAL_SUBTRAP(DisposeMovieController, 0xAAAA, 0x018B, QuickTime);
 extern OSErr C_OpenMovieFile(const FSSpec *filespecp,
                                          INTEGER *refnump, uint8_t perm);
 PASCAL_SUBTRAP(OpenMovieFile, 0xAAAA, 0x0192, QuickTime);
+
+static_assert(sizeof(MovieRecord) == 4);
 }
 #endif
