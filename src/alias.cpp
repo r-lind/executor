@@ -91,149 +91,6 @@ get_sys_vref_and_dirid(INTEGER *sys_vrefp, LONGINT *sys_diridp)
 }
 
 static OSErr
-try_to_find(INTEGER vref, const char *str, INTEGER *vrefp, LONGINT *diridp)
-{
-    return nsvErr;
-#if 0
-    OSErr err;
-    HVCB *vcbp;
-
-    warning_trace_info("str = '%s'", str);
-    vcbp = ROMlib_vcbbybiggestunixname(str);
-
-    if(!vcbp)
-        err = nsvErr;
-    else
-    {
-        VCBExtra *vcbextrap;
-        struct stat sbuf;
-
-        vcbextrap = (VCBExtra *)vcbp;
-        warning_trace_info("unixname = '%s'", vcbextrap->unixname);
-        if(Ustat(str, &sbuf) < 0)
-        {
-            warning_trace_info("stat failed, errno = %d", errno);
-            err = ROMlib_maperrno();
-        }
-        else
-        {
-            warning_trace_info("ino = %ld, ufs.ino = %ld", (long)ST_INO(sbuf),
-                               (long)vcbextrap->u.ufs.ino);
-            if(vref != vcbp->vcbVRefNum)
-                err = fnfErr;
-            else
-            {
-                *vrefp = vref;
-                if(ST_INO(sbuf) == vcbextrap->u.ufs.ino)
-                    *diridp = 2;
-                else
-                    *diridp = ST_INO(sbuf);
-                err = noErr;
-            }
-        }
-    }
-    warning_trace_info("err = %d", err);
-    return err;
-#endif
-}
-
-static OSErr
-look_for_volume(const char *vol_name, INTEGER *vrefp, LONGINT *diridp)
-{
-    OSErr retval;
-    ParamBlockRec pbr;
-    Str255 pvol_name;
-
-    str255_from_c_string(pvol_name, vol_name);
-    pbr.volumeParam.ioNamePtr = &pvol_name[0];
-    pbr.volumeParam.ioVolIndex = -1;
-    pbr.volumeParam.ioVRefNum = 0;
-    retval = PBGetVInfo(&pbr, false);
-    if(retval == noErr)
-    {
-        *vrefp = pbr.volumeParam.ioVRefNum;
-        *diridp = 2;
-    }
-    return retval;
-}
-
-/*
- * We call this when we haven't been able to find what we want, so we
- * try to construct something ourselves.
- */
-
-static OSErr
-last_chance_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp,
-                               LONGINT *tmp_diridp)
-{
-    OSErr retval;
-    HParamBlockRec pb = {};
-
-    pb.volumeParam.ioVRefNum = vref;
-    retval = PBHGetVInfo(&pb, false);
-    if(retval == noErr)
-    {
-        static const char *top_level_names[] = {
-            "\3tmp",
-            "\4temp",
-        };
-        int i;
-        OSErr err;
-
-        *tmp_vrefp = vref;
-
-        for(i = 0, err = fnfErr;
-            err != noErr && i < NELEM(top_level_names);
-            ++i)
-        {
-            CInfoPBRec hpb;
-
-            memset(&hpb, 0, sizeof hpb);
-            hpb.dirInfo.ioNamePtr = (StringPtr)top_level_names[i];
-            hpb.dirInfo.ioVRefNum = pb.volumeParam.ioVRefNum;
-            hpb.dirInfo.ioDrDirID = 2;
-            err = PBGetCatInfo(&hpb, false);
-            if(err == noErr && (hpb.hFileInfo.ioFlAttrib & ATTRIB_ISADIR))
-                *tmp_diridp = hpb.dirInfo.ioDrDirID;
-        }
-        if(err != noErr)
-            *tmp_diridp = 2;
-    }
-
-    return retval;
-}
-
-static OSErr
-get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
-{
-    int i;
-    OSErr retval;
-    static const char *guesses[] = {
-
-#if !defined(MSDOS) && !defined(CYGWIN32)
-        "/tmp",
-#else
-#if defined(CYGWIN32)
-        nullptr,
-#endif
-        "c:/tmp",
-        "c:/temp",
-        "c:/"
-#endif
-    };
-
-    retval = look_for_volume("tmp:", tmp_vrefp, tmp_diridp);
-
-    for(i = 0; retval != noErr && i < (int)NELEM(guesses); ++i)
-        retval = try_to_find(vref, guesses[i], tmp_vrefp, tmp_diridp);
-
-    if(retval != noErr)
-        retval = last_chance_tmp_vref_and_dirid(vref, tmp_vrefp, tmp_diridp);
-
-    return retval;
-}
-
-static OSErr
 test_directory(INTEGER vref, LONGINT dirid, const char *sub_dirp,
                LONGINT *new_idp)
 {
@@ -254,6 +111,36 @@ test_directory(INTEGER vref, LONGINT dirid, const char *sub_dirp,
     return err;
 }
 
+
+static OSErr
+get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
+{
+    // FIXME: get proper paths
+    // FIXME: temp directory for other volumes?
+#ifdef WIN32
+    auto spec = nativePathToFSSpec("C:/temp");
+#else
+    auto spec = nativePathToFSSpec("/tmp");
+#endif
+    if(!spec)
+        return fnfErr;
+
+    CInfoPBRec cpb;
+
+    cpb.hFileInfo.ioNamePtr = spec->name;
+    cpb.hFileInfo.ioVRefNum = spec->vRefNum;
+    cpb.hFileInfo.ioFDirIndex = 0;
+    cpb.hFileInfo.ioDirID = spec->parID;
+    OSErr err = PBGetCatInfo(&cpb, false);
+    if(err == noErr && !(cpb.hFileInfo.ioFlAttrib & ATTRIB_ISADIR))
+        err = dupFNErr;
+    if(err == noErr)
+    {
+        *tmp_diridp = cpb.dirInfo.ioDrDirID;
+        *tmp_vrefp = spec->vRefNum;
+    }
+    return err;
+}
 static OSErr
 create_directory(INTEGER sys_vref, LONGINT sys_dirid, const char *sub_dirp,
                  LONGINT *new_idp)
