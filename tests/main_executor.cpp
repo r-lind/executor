@@ -61,6 +61,8 @@ public:
 
         vdriver = new MockVDriver();
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
+        
+        LM(ResErrProc) = 0;
         InitResources();
         ROMlib_InitGDevices();
         LM(TheZone) = LM(ApplZone);
