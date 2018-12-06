@@ -10,6 +10,7 @@ if(TARGET Qt5::Gui)
             qt.cpp
             available_geometry.h
             available_geometry.cpp
+            qtkeycodes.cpp
             ../x/x_keycodes.cpp
         )
 

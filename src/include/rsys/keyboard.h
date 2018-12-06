@@ -1,5 +1,8 @@
 #if !defined(_RSYS_KEYBOARD_H_)
 #define _RSYS_KEYBOARD_H_
+
+#include <ExMacTypes.h>
+
 namespace Executor
 {
 /*
