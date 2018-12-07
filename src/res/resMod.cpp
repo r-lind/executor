@@ -298,14 +298,14 @@ static OSErr writemap(resmaphand map)
     if(terr != noErr)
         return (terr);
     lc = sizeof(reshead);
-    terr = FSWriteAll((*map)->resfn, guestref(lc), (Ptr) & ((*map)->rh));
+    terr = FSWriteAll((*map)->resfn, inout(lc), (Ptr) & ((*map)->rh));
     if(terr != noErr)
         return (terr);
     terr = SetFPos((*map)->resfn, fsFromStart, (*map)->rh.rmapoff);
     if(terr != noErr)
         return (terr);
     lc = (*map)->rh.maplen;
-    terr = FSWriteAll((*map)->resfn, guestref(lc), (Ptr)*map);
+    terr = FSWriteAll((*map)->resfn, inout(lc), (Ptr)*map);
     if(terr == noErr)
         (*map)->resfatr &= ~(mapChanged);
     return (terr);
@@ -339,11 +339,11 @@ void Executor::ROMlib_wr(resmaphand map, resref *rr) /* INTERNAL */
             return;
         lc = sizeof(LONGINT);
         swappedrsize = rsize;
-        ROMlib_setreserr(FSWriteAll((*map)->resfn, guestref(lc), (Ptr)&swappedrsize));
+        ROMlib_setreserr(FSWriteAll((*map)->resfn, inout(lc), (Ptr)&swappedrsize));
         if(LM(ResErr) != noErr)
             return;
         lc = rsize;
-        ROMlib_setreserr(FSWriteAll((*map)->resfn, guestref(lc), *res));
+        ROMlib_setreserr(FSWriteAll((*map)->resfn, inout(lc), *res));
         if(LM(ResErr) != noErr)
             return;
         rr->ratr &= ~resChanged;
@@ -384,7 +384,7 @@ static void getdat(INTEGER fn, LONGINT datoff, LONGINT doff, Handle *h)
     gui_assert(doff >= 0);
     SetFPos(fn, fsFromStart, datoff + doff);
     lc = sizeof(LONGINT);
-    FSReadAll(fn, guestref(lc), (Ptr)&size_s);
+    FSReadAll(fn, inout(lc), (Ptr)&size_s);
     size = size_s;
     gui_assert(size >= 0);
     *h = NewHandle(size);
@@ -392,7 +392,7 @@ static void getdat(INTEGER fn, LONGINT datoff, LONGINT doff, Handle *h)
     HSetState(*h, RSRCBIT);
     lc = size;
     HLock(*h);
-    FSReadAll(fn, guestref(lc), **h);
+    FSReadAll(fn, inout(lc), **h);
     gui_assert(lc == size);
     HUnlock(*h);
 }
@@ -408,10 +408,10 @@ static void putdat(INTEGER fn, LONGINT datoff, LONGINT *doffp, Handle h)
     SetFPos(fn, fsFromStart, datoff + *doffp);
     lc = sizeof(LONGINT);
     swappedsize = size;
-    FSWriteAll(fn, guestref(lc), (Ptr)&swappedsize);
+    FSWriteAll(fn, inout(lc), (Ptr)&swappedsize);
     lc = size;
     HLock(h);
-    FSWriteAll(fn, guestref(lc), *h);
+    FSWriteAll(fn, inout(lc), *h);
     HUnlock(h);
     *doffp += sizeof(LONGINT) + size;
 }
@@ -452,7 +452,7 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
             SetFPos(fn, fsFromStart, datoff + doff);
             lc = sizeof(LONGINT);
             GUEST<LONGINT> size_s;
-            FSReadAll(fn, guestref(lc), (Ptr)&size_s);
+            FSReadAll(fn, inout(lc), (Ptr)&size_s);
             gui_assert(lc == sizeof(LONGINT));
             size = size_s;
             gui_assert(size >= 0);

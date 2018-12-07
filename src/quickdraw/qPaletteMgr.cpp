@@ -339,7 +339,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
     })
 
 #define EXPLICIT_LOOP(bits)                                                         \
-    ({                                                                              \
+    do {                                                                            \
         for(i = 0; i < entries; i++)                                                \
         {                                                                           \
             ColorInfo *entry;                                                       \
@@ -360,7 +360,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
                || (i & gd_index_mask) == gd_ctab_size)                              \
                 continue;                                                           \
             holder = &holders[i & gd_index_mask];                                   \
-            if(elt->value & CTAB_RESERVED_BIT)                                    \
+            if(elt->value & CTAB_RESERVED_BIT)                                      \
             {                                                                       \
                 if(holder->palette)                                                 \
                 {                                                                   \
@@ -382,7 +382,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
                 }                                                                   \
                 force_p = 1;                                                        \
             }                                                                       \
-            else if(elt->value & CTAB_TOLERANT_BIT)                               \
+            else if(elt->value & CTAB_TOLERANT_BIT)                                 \
             {                                                                       \
                 ColorInfo *prev_entry;                                              \
                                                                                     \
@@ -403,10 +403,10 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
             }                                                                       \
             allocator(bits, elt, i &gd_index_mask, entry, i, force_p);              \
         }                                                                           \
-    })
+    } while(false)
 
 #define ANIMATED_LOOP(bits)                                                         \
-    ({                                                                              \
+    do {                                                                            \
         int free_elt_i, steal_elt_i;                                                \
                                                                                     \
         /* start with 1, it is not possible to reserve the first or last            \
@@ -445,7 +445,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
             {                                                                       \
                 pm_resource_holder_t *holder;                                       \
                 ColorSpec *elt;                                                     \
-                ColorInfo *prev_entry = nullptr;                                       \
+                ColorInfo *prev_entry = nullptr;                                    \
                                                                                     \
                 elt = &gd_ctab_table[steal_elt_i];                                  \
                 holder = &holders[steal_elt_i];                                     \
@@ -462,7 +462,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
                                           entry, i))                                \
                     continue;                                                       \
                                                                                     \
-                if(holder->palette == nullptr)                                         \
+                if(holder->palette == nullptr)                                      \
                 {                                                                   \
                     /* to restore when we are done with it, what happens if         \
                    the ColorMgr frees up this slot in the meantime? */              \
@@ -478,7 +478,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
             }                                                                       \
         next_entry:;                                                                \
         }                                                                           \
-    })
+    } while(false)
 
 /* for each tolerant entry, find the closest free color table entry,
    and if it isn't close enough, smash it
@@ -487,13 +487,13 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
    the inverse table after the other passes, then if the closest match
    is not close enough, steal the (an) entry */
 #define TOLERANT_LOOP(bits)                                                 \
-    ({                                                                      \
+    do {                                                                    \
         for(i = 0; i < entries; i++)                                        \
         {                                                                   \
             ColorInfo *entry;                                               \
             int closest_elt_i = -1, closest_delta;                          \
             int elt_i;                                                      \
-            ColorSpec *closest_elt = nullptr;                                  \
+            ColorSpec *closest_elt = nullptr;                               \
                                                                             \
             entry = &palette_info[i];                                       \
             /* if this entry is inhibited on this device, go to the next */ \
@@ -543,7 +543,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
                 }                                                           \
             }                                                               \
         }                                                                   \
-    })
+    } while(false)
 
 static void
 pm_do_updates_gd_changed(void)

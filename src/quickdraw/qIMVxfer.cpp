@@ -179,7 +179,7 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
     ((void)((pixel) = Color2Index(rgb)))
 
 #define RGB_TO_DIRECT_PIXEL(bpp, rgb, pixel)                                   \
-    ((void)({                                                                  \
+    do {                                                                       \
         uint32_t swapped_pixel;                                                \
                                                                                \
         swapped_pixel = ((*rgb_spec->rgbcolor_to_pixel)(rgb_spec, rgb, true)); \
@@ -194,11 +194,16 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
             default:                                                           \
                 gui_fatal("unknown bpp");                                      \
         }                                                                      \
-    }))
-#define RGB_TO_PIXEL(bpp, rgb, pixel)                  \
-    ((void)((bpp) == 32 || (bpp) == 16                 \
-                ? RGB_TO_DIRECT_PIXEL(bpp, rgb, pixel) \
-                : RGB_TO_INDIRECT_PIXEL(rgb, pixel)))
+    } while(false)
+
+#define RGB_TO_PIXEL(bpp, rgb, pixel)             \
+    do                                            \
+    {                                             \
+        if((bpp) == 32 || (bpp) == 16)            \
+            RGB_TO_DIRECT_PIXEL(bpp, rgb, pixel); \
+        else                                      \
+            RGB_TO_INDIRECT_PIXEL(rgb, pixel);    \
+    } while(false)
 
     if(CGrafPort_p(qdGlobals().thePort))
         bk_color = PORT_BK_COLOR(qdGlobals().thePort);

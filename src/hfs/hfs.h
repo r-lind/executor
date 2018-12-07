@@ -380,14 +380,13 @@ extern INTEGER LM(SCSIFlags);
 #define WDMASK 0xC001
 #define WDMAGIC 0x8001
 
-#define ISWDNUM(v)                                                                     \
-    ({                                                                                 \
-        uint16_t _v;                                                                   \
-                                                                                       \
-        _v = (v);                                                                      \
-        (_v & WDMASK) == WDMAGIC ? (_v ^ WDMAGIC) % sizeof(wdentry) == sizeof(INTEGER) \
-                                 : false;                                              \
-    })
+inline bool ISWDNUM(uint16_t v)
+{
+    if((v & WDMASK) == WDMAGIC)
+        return (v ^ WDMAGIC) % sizeof(wdentry) == sizeof(INTEGER);
+    else
+        return false;
+}
 
 #define WDNUMTOWDP(v) ((wdentry *)(LM(WDCBsPtr) + (INTEGER)((v) ^ WDMAGIC)))
 #define WDPTOWDNUM(p) (((char *)(p) - (char *)LM(WDCBsPtr)) ^ WDMAGIC)

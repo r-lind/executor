@@ -1674,25 +1674,24 @@ void cursor_init(void)
     x_hidden_cursor = create_x_cursor(zero, zero, 0, 0);
 }
 
-#define RGB_DIST(red, green, blue)                          \
-    ({                                                      \
-        int _red = (red), _green = (green), _blue = (blue); \
-        (_red * _red + _green * _green + _blue * _blue);    \
-    })
+inline int rgb_dist(int red, int green, int blue)
+{
+    return red * red + green * green + blue * blue;
+}
 
-#define MAX_CDIST (RGB_DIST(65535 >> 1, 65535 >> 1, 65535 >> 1) + 1U)
+#define MAX_CDIST (rgb_dist(65535 >> 1, 65535 >> 1, 65535 >> 1) + 1U)
 
 /* distance between two ColorSpec */
 
 static inline int
 cs_cs_dist(const ColorSpec *c0, const ColorSpec *c1)
 {
-    return RGB_DIST((c0->rgb.red - c1->rgb.red) >> 1,
+    return rgb_dist((c0->rgb.red - c1->rgb.red) >> 1,
                     (c0->rgb.green - c1->rgb.green) >> 1,
                     (c0->rgb.blue - c1->rgb.blue) >> 1);
 }
 
-#define CS_X_DIST(r, g, b, x) RGB_DIST((r) - (x).red,   \
+#define CS_X_DIST(r, g, b, x) rgb_dist((r) - (x).red,   \
                                        (g) - (x).green, \
                                        (b) - (x).blue)
 

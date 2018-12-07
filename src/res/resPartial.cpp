@@ -46,7 +46,7 @@ void Executor::C_ReadPartialResource(Handle res, int32_t offset, Ptr buffer,
                     LONGINT lcount;
 
                     lcount = count;
-                    err = FSReadAll(rn, guestref(lcount), buffer);
+                    err = FSReadAll(rn, inout(lcount), buffer);
                     if(err == noErr)
                         if(*res)
                             err = resourceInMemory;

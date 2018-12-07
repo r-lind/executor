@@ -804,7 +804,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
    * map to the last entry in the color table, even if there's more
    * than one black or near-black color.
    */
-    for(i = 0; i <= ctab_size; i += ctab_size ?: 1)
+    for(i = 0; i <= ctab_size; i += ctab_size ? ctab_size : 1)
     {
         ULONGINT color_sum;
 

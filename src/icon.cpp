@@ -19,25 +19,13 @@
 using namespace Executor;
 
 #define ICON_RETURN_ERROR(error)                                     \
-    ({                                                               \
+    do{                                                               \
         OSErr _error_ = (error);                                     \
                                                                      \
         if(_error_ != noErr)                                         \
             warning_unexpected("error `%s', `%d'", #error, _error_); \
         return _error_;                                              \
-    })
-
-#define _GetIconSuite(icon_suite, res_id, selector)                \
-    ({                                                             \
-        GUEST<Handle> _icon_suite_;                                \
-        OSErr _err_;                                               \
-                                                                   \
-        _err_ = GetIconSuite(&_icon_suite_, (res_id), (selector)); \
-                                                                   \
-        *(icon_suite) = _icon_suite_;                          \
-                                                                   \
-        _err_;                                                     \
-    })
+    }while(false)
 
 OSErr Executor::C_PlotIconID(const Rect *rect, IconAlignmentType align,
                              IconTransformType transform, short res_id)
@@ -45,7 +33,7 @@ OSErr Executor::C_PlotIconID(const Rect *rect, IconAlignmentType align,
     Handle icon_suite;
     OSErr err;
 
-    err = _GetIconSuite(&icon_suite, res_id, svAllAvailableData);
+    err = GetIconSuite(out(icon_suite), res_id, svAllAvailableData);
     if(err != noErr)
         ICON_RETURN_ERROR(err);
 

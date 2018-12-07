@@ -133,7 +133,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
 
             lc = sizeof(l);
             GetFPos((*map)->resfn, &master_save_pos);
-            ROMlib_setreserr(FSReadAll((*map)->resfn, guestref(lc), (Ptr)l));
+            ROMlib_setreserr(FSReadAll((*map)->resfn, inout(lc), (Ptr)l));
             if(LM(ResErr) != noErr || l[1] != COMPRESSED_TAG)
             {
                 SetFPos((*map)->resfn, fsFromStart, master_save_pos);
@@ -155,7 +155,7 @@ LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
         not_compressed_after_all:
             lc = sizeof(retval);
             GUEST<Size> tmpRet;
-            ROMlib_setreserr(FSReadAll((*map)->resfn, guestref(lc), (Ptr)&tmpRet));
+            ROMlib_setreserr(FSReadAll((*map)->resfn, inout(lc), (Ptr)&tmpRet));
             retval = tmpRet;
             if(LM(ResErr) != noErr)
                 /*-->*/ return -1;

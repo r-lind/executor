@@ -55,11 +55,11 @@ LONGINT Executor::C_UnloadScrap()
 
     if(LM(ScrapState) > 0)
     {
-        retval = cropen(guestref(f));
+        retval = cropen(out(f));
         if(retval != noErr)
             /*-->*/ return (retval);
         HLock(LM(ScrapHandle));
-        retval = FSWriteAll(f, guestref(l), *LM(ScrapHandle));
+        retval = FSWriteAll(f, inout(l), *LM(ScrapHandle));
         HUnlock(LM(ScrapHandle));
         if(retval != noErr)
             /*-->*/ return (retval);
@@ -79,7 +79,7 @@ LONGINT Executor::C_LoadScrap()
 
     if(LM(ScrapState) == 0)
     {
-        retval = FSOpen(LM(ScrapName), LM(BootDrive), guestref(f));
+        retval = FSOpen(LM(ScrapName), LM(BootDrive), out(f));
         if(retval != noErr)
             return (retval);
 
@@ -88,7 +88,7 @@ LONGINT Executor::C_LoadScrap()
         if(LM(MemErr) != noErr)
             /*-->*/ return LM(MemErr);
         HLock(LM(ScrapHandle));
-        retval = FSReadAll(f, guestref(l), *LM(ScrapHandle));
+        retval = FSReadAll(f, inout(l), *LM(ScrapHandle));
         HUnlock(LM(ScrapHandle));
         if(retval != noErr)
             return (retval);
@@ -117,7 +117,7 @@ LONGINT Executor::ROMlib_ZeroScrap()
     }
     else if(LM(ScrapState) == 0)
     {
-        retval = cropen(guestref(f));
+        retval = cropen(out(f));
         if(retval != noErr)
             return retval;
         retval = SetEOF(f, (LONGINT)0);
@@ -156,18 +156,18 @@ LONGINT Executor::C_PutScrap(LONGINT len, ResType rest, Ptr p)
 
     if(LM(ScrapState) == 0)
     {
-        retval = FSOpen(LM(ScrapName), LM(BootDrive), guestref(f));
+        retval = FSOpen(LM(ScrapName), LM(BootDrive), out(f));
         if(retval != noErr)
             /*-->*/ return (retval);
         SetFPos(f, fsFromStart, (LONGINT)LM(ScrapSize));
         l = 4;
         GUEST<ResType> rest_s = rest;
-        FSWriteAll(f, guestref(l), (Ptr)&rest_s);
+        FSWriteAll(f, inout(l), (Ptr)&rest_s);
         l = 4;
         swappedlen = len;
-        FSWriteAll(f, guestref(l), (Ptr)&swappedlen);
+        FSWriteAll(f, inout(l), (Ptr)&swappedlen);
         l = len = (len + 1) & -2L;
-        FSWriteAll(f, guestref(len), p);
+        FSWriteAll(f, inout(len), p);
         FSClose(f);
     }
     else
@@ -277,14 +277,14 @@ LONGINT Executor::C_GetScrap(Handle h, ResType rest, GUEST<LONGINT> *off)
     }
     if(LM(ScrapState) == 0)
     {
-        retval = FSOpen(LM(ScrapName), LM(BootDrive), guestref(f));
+        retval = FSOpen(LM(ScrapName), LM(BootDrive), out(f));
         if(retval != noErr)
             /*-->*/ RETURN(retval);
         found = false;
         while(l < LM(ScrapSize) && !found)
         {
             ltoread = 8;
-            FSReadAll(f, guestref(ltoread), (Ptr)restlen);
+            FSReadAll(f, inout(ltoread), (Ptr)restlen);
             s = restlen[1];
             if(rest == restlen[0])
                 found = true;
@@ -305,7 +305,7 @@ LONGINT Executor::C_GetScrap(Handle h, ResType rest, GUEST<LONGINT> *off)
             /*-->*/ RETURN(LM(MemErr));
         HLock(h);
         ltoread = s;
-        FSReadAll(f, guestref(ltoread), *h);
+        FSReadAll(f, inout(ltoread), *h);
         HUnlock(h);
         FSClose(f);
     }

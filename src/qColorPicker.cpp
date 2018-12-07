@@ -34,18 +34,7 @@ using namespace Executor;
     ((WindowPtr)NewCWindow(arg0, arg1, arg2, arg3, arg4,            \
                            (CWindowPtr)(arg5), arg6, arg7))
 
-#define _FindControl(arg0, arg1, arg2)             \
-    ({                                             \
-        int16_t retval;                            \
-        GUEST<ControlHandle> bogo_c;               \
-                                                   \
-        retval = FindControl(arg0, arg1, &bogo_c); \
-        *(arg2) = bogo_c;                      \
-                                                   \
-        retval;                                    \
-    })
-
-#define sqr(v) ({ decltype (v) _v = (v);  _v * _v; })
+template<typename T> T sqr(T v) { return v * v; }
 
 #define color_picker_window_bounds (_bounds)
 #define ok_button_bounds (&_bounds[1])
@@ -879,7 +868,7 @@ event_loop(void)
                 GlobalToLocal(&tmpPt);
                 local_pt = tmpPt.get();
 
-                control_p = _FindControl(local_pt, color_picker_window, &c);
+                control_p = FindControl(local_pt, color_picker_window, out(c));
                 if(control_p)
                 {
                     release_part = TrackControl(c, local_pt, (ControlActionUPP)-1);

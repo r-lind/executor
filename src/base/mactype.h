@@ -621,7 +621,7 @@ int32_t ptr_to_longint(TT p)
     return GUEST<TT>(p).raw_host_order();
 }
 
-template<class T>
+template<class T, bool inout = true>
 class GuestRef
 {
     T& native;
@@ -630,7 +630,8 @@ public:
     GuestRef(T& x)
         : native(x)
     {
-        guest = x;
+        if(inout)
+            guest = x;
     }
     GuestRef(const GuestRef<T>&) = delete;
 
@@ -645,7 +646,11 @@ public:
     }
 };
 template<class T>
-GuestRef<T> guestref(T& x) { return GuestRef<T>(x); }
+GuestRef<T,true> inout(T& x) { return GuestRef<T, true>(x); }
+
+template<class T>
+GuestRef<T,false> out(T& x) { return GuestRef<T, false>(x); }
+
 
 }
 

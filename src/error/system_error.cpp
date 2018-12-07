@@ -31,17 +31,6 @@ using namespace Executor;
     ((WindowPtr)NewCWindow(arg0, arg1, arg2, arg3, arg4,            \
                            (CWindowPtr)(arg5), arg6, arg7))
 
-#define _FindControl(arg0, arg1, arg2)             \
-    ({                                             \
-        int16_t retval;                            \
-        GUEST<ControlHandle> bogo_c;               \
-                                                   \
-        retval = FindControl(arg0, arg1, &bogo_c); \
-        *(arg2) = bogo_c;                      \
-                                                   \
-        retval;                                    \
-    })
-
 #pragma pack(push, 2)
 
 struct button
@@ -93,7 +82,7 @@ event_loop(void)
                 GlobalToLocal(&tmpPt);
                 local_pt = tmpPt.get();
 
-                control_p = _FindControl(local_pt, msg_window, &c);
+                control_p = FindControl(local_pt, msg_window, out(c));
                 if(control_p)
                 {
                     int release_part;

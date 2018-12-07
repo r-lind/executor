@@ -9,7 +9,7 @@
 using namespace Executor;
 extern QDGlobals qd;
 
-#define PTR(x) (&guestref(x))
+#define PTR(x) (&inout(x))
 
     // FIXME: Executor still defines Pattern as an array, rather than an array wrapped in a struct
 #define PATREF(pat) (pat)

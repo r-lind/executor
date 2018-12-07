@@ -46,7 +46,7 @@ enum
 GUEST<LONGINT> toIoMisc(long x) { return (LONGINT)x; }
 GUEST<LONGINT> toIoMisc(void* x) { return guest_cast<LONGINT>(x); }
 
-#define PTR(x) (&guestref(x))
+#define PTR(x) (&inout(x))
 
 
 #else

@@ -84,13 +84,10 @@ PEFComputeHashTableExponent(int32_t count)
 /* 8-41 has a hash-word function that will produce the same values as
    the following code */
 
-#define PseudoRotate(x)         \
-    ({                          \
-        int32_t _x;             \
-                                \
-        _x = (x);               \
-        (_x << 1) - (_x >> 16); \
-    })
+inline int32_t PseudoRotate(int32_t x)
+{
+    return (x << 1) - (x >> 16);
+}
 
 static uint32_t
 PEFComputeHashWord(const unsigned char *orig_p, uint32_t namemax)
@@ -109,13 +106,10 @@ PEFComputeHashWord(const unsigned char *orig_p, uint32_t namemax)
     return retval;
 }
 
-#define PEFHashTableIndex(fullHashWord, hashTablePower)                                      \
-    ({                                                                                       \
-        decltype(fullHashWord) _fullHashWord = (fullHashWord);                               \
-        decltype(hashTablePower) _hashTablePower = (hashTablePower);                         \
-                                                                                             \
-        (_fullHashWord ^ (_fullHashWord >> _hashTablePower)) & ((1 << _hashTablePower) - 1); \
-    })
+inline uint32_t PEFHashTableIndex(uint32_t fullHashWord, uint32_t hashTablePower)
+{
+    return (fullHashWord ^ (fullHashWord >> hashTablePower)) & ((1 << hashTablePower) - 1);
+}
 
 /*
  * This is used for pseudo-libraries (MathLib, InterfaceLib)
