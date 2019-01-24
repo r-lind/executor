@@ -48,6 +48,7 @@ if(CMAKE_SYSTEM_NAME MATCHES Retro.*)
     set_target_properties(tests PROPERTIES LINK_FLAGS "-Wl,-gc-sections")
 
 else()
+    set(INSTALL_GTEST FALSE)
     include(GoogleTest)
 
     add_executable(tests main_executor.cpp files.cpp quickdraw.cpp guestvalues.cpp)
