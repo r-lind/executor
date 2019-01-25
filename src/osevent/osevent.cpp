@@ -13,7 +13,7 @@
 
 #include "MemoryMgr.h"
 #include "ToolboxEvent.h"
-#include "OSEvent.h"
+#include <OSEvent.h>
 #include "EventMgr.h"
 #include "OSUtil.h"
 #include "ResourceMgr.h"

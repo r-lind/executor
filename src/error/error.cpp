@@ -5,7 +5,7 @@
 #include "base/common.h"
 
 #include <stdarg.h>
-#include "SysErr.h"
+#include <SysErr.h>
 #include "SegmentLdr.h"
 #include "CQuickDraw.h"
 

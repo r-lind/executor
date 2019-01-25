@@ -12,7 +12,7 @@
 #include "DialogMgr.h"
 #include "OSUtil.h"
 #include "SegmentLdr.h"
-#include "SysErr.h"
+#include <SysErr.h>
 #include "MemoryMgr.h"
 #include "BinaryDecimal.h"
 
