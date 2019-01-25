@@ -562,3 +562,10 @@ target_link_libraries(romlib resources)
 
 add_executable(executor main.cpp)
 target_link_libraries(executor romlib front-end-${FRONT_END})
+
+if(APPLE)
+    set_target_properties(executor PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
+        )
+endif()
