@@ -456,23 +456,6 @@ BOOLEAN Executor::C_GetGray(GDHandle gdev, RGBColor *bk, RGBColor *fg)
     return average_color(gdev, bk, fg, 0x8000, fg);
 }
 
-#define ENQUEUE(x) ({                             \
-    const unsigned _q_elt_ = (x);                 \
-    if(!index_in_queue_p[_q_elt_])                \
-    {                                             \
-        queue[head] = _q_elt_;                    \
-        index_in_queue_p[_q_elt_] = true;         \
-        head = (head + 1) & (itab_elt_count - 1); \
-    }                                             \
-})
-
-#define DEQUEUE() ({                          \
-    const unsigned _q_elt_ = queue[tail];     \
-    tail = (tail + 1) & (itab_elt_count - 1); \
-    index_in_queue_p[_q_elt_] = false;        \
-    _q_elt_;                                  \
-})
-
 #define SET_RGB_ERROR(ix, err) (rgb_error[ix] = (err))
 
 /* These are the parameters to rgb_error_for_res_*.  Because they
@@ -614,6 +597,22 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
     unsigned char *itab_table;
     const int *offset;
     NativeColorSpec color_for_index[256];
+
+    auto ENQUEUE = [&queue, &head, &tail, &index_in_queue_p, &itab_elt_count](unsigned _q_elt_) {
+        if(!index_in_queue_p[_q_elt_])
+        {
+            queue[head] = _q_elt_;
+            index_in_queue_p[_q_elt_] = true;
+            head = (head + 1) & (itab_elt_count - 1);
+        }
+    };
+
+    auto DEQUEUE = [&queue, &head, &tail, &index_in_queue_p, &itab_elt_count]() {
+        const unsigned _q_elt_ = queue[tail];
+        tail = (tail + 1) & (itab_elt_count - 1);
+        index_in_queue_p[_q_elt_] = false;
+        return _q_elt_;
+    };
 
     {
         static bool been_here_p = false;

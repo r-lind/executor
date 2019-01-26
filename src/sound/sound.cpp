@@ -210,7 +210,7 @@ resample(uint8_t *inbuf, uint8_t *orig_outbuf, unsigned int insize,
    * ignore the resampled waveform anyway, but it makes the "real"
    * sound and "dummy" sound cases more similar.  Is it worth it?
    */
-    outbuf = orig_outbuf ?: (uint8_t *)alloca(outsize);
+    outbuf = orig_outbuf ? orig_outbuf : (uint8_t *)alloca(outsize);
 
     step = snd_fixed_div(infreq, outfreq);
 

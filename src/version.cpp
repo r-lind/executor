@@ -40,7 +40,7 @@ const char *ROMlib_executor_full_name = "Executor " EXECUTOR_VERSION
 #endif
 
 #define UPDATE_RES(typ, id, fmt, args...)               \
-    ({                                                  \
+    do {                                                \
         int len;                                        \
         char str[1024];                                 \
         GUEST<INTEGER> save_map;                        \
@@ -61,10 +61,10 @@ const char *ROMlib_executor_full_name = "Executor " EXECUTOR_VERSION
             *(char *)*h = len - 1;                \
         else if(_typ == TICK("vers"))                   \
             ((char *)*h)[12] = len - 13;          \
-    })
+    } while(0)
 
 #define UPDATE_VERS(major, minor, rev, vers, fmt, args...)                                                       \
-    ({                                                                                                           \
+    do {                                                                                                         \
         int _major;                                                                                              \
         int _minor;                                                                                              \
         int _rev;                                                                                                \
@@ -75,7 +75,7 @@ const char *ROMlib_executor_full_name = "Executor " EXECUTOR_VERSION
                                                                                                                  \
         UPDATE_RES(TICK("vers"), vers, "%c%c\x80%c%c%c\x5%d.%d.%d" fmt, _major, ((_minor << 4) | _rev), 0, 0, 0, \
                    _major, _minor, _rev, args);                                                                  \
-    })
+    } while(0)
 
 void
 ROMlib_set_system_version(uint32_t version)

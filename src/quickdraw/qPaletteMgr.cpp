@@ -318,7 +318,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
 }
 
 #define allocator(bits, elt, elt_i, entry, entry_i, force_p)                    \
-    ({                                                                          \
+    do {                                                                        \
         int allocated_p = false;                                                \
                                                                                 \
         if((bits)&pmAnimated)                                                   \
@@ -336,7 +336,7 @@ int higher_priority_p(ColorInfo *entry0, int entry0_index,
                                                                                 \
             gd_ctab_changed_p = true;                                           \
         }                                                                       \
-    })
+    } while(0)
 
 #define EXPLICIT_LOOP(bits)                                                         \
     do {                                                                            \

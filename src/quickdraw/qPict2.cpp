@@ -56,27 +56,29 @@ OSErr Executor::C_GetPictInfo(PicHandle pic_h, PictInfo *pict_info,
 #endif
 }
 
-#define INDIRECT_PIXEL_TO_RGB(pixel, r, g, b, color_table) \
-    ((void)({                                              \
-        const RGBColor *color;                             \
-        color = &CTAB_TABLE(color_table)[pixel].rgb;       \
-        (r) = color->red;                              \
-        (g) = color->green;                            \
-        (b) = color->blue;                             \
-    }))
-#define DIRECT_PIXEL_TO_RGB(bpp, pixel, red_out, green_out, blue_out, \
-                            dummy_color_table)                        \
-    ((void)({                                                         \
-        RGBColor color;                                               \
-                                                                      \
-        (*rgb_spec->pixel_to_rgbcolor)(rgb_spec, (pixel), &color);    \
-        (red_out) = color.red;                                    \
-        (green_out) = color.green;                                \
-        (blue_out) = color.blue;                                  \
-    }))
+inline void INDIRECT_PIXEL_TO_RGB(
+    uint32_t pixel, uint32_t& r, uint32_t& g, uint32_t& b, 
+    CTabHandle color_table)
+{
+    const RGBColor *color = &CTAB_TABLE(color_table)[pixel].rgb;
+    r = color->red;
+    g = color->green;
+    b = color->blue;
+}
+
+inline void DIRECT_PIXEL_TO_RGB(const rgb_spec_t *rgb_spec, uint32_t pixel,
+    uint32_t& red_out, uint32_t& green_out, uint32_t& blue_out)
+{
+    RGBColor color;
+
+    (*rgb_spec->pixel_to_rgbcolor)(rgb_spec, pixel, &color);
+    red_out = color.red;
+    green_out = color.green;
+    blue_out = color.blue;
+}
 #define PIXEL_TO_RGB(bpp, pixel, red, green, blue, color_table)                  \
     ((void)((bpp) == 32 || (bpp) == 16                                           \
-                ? DIRECT_PIXEL_TO_RGB(bpp, pixel, red, green, blue, color_table) \
+                ? DIRECT_PIXEL_TO_RGB(rgb_spec, pixel, red, green, blue) \
                 : INDIRECT_PIXEL_TO_RGB(pixel, red, green, blue, color_table)))
 #define SHIFT_COUNT(x, bpp) (8 - (bpp) - (bpp) * ((x) & (7 / (bpp))))
 #define READ_INDIRECT_PIXEL(b, x, bpp) \
@@ -88,7 +90,7 @@ OSErr Executor::C_GetPictInfo(PicHandle pic_h, PictInfo *pict_info,
 #define READ_DIRECT32_PIXEL(b, x, bpp) \
     ((uint32_t *)b)[x]
 #define RECORD_COLORS(read, record, bpp)                               \
-    ({                                                                 \
+    do {                                                               \
         int x, y;                                                      \
                                                                        \
         for(y = 0; y < height; y++)                                    \
@@ -106,7 +108,7 @@ OSErr Executor::C_GetPictInfo(PicHandle pic_h, PictInfo *pict_info,
             }                                                          \
             row_base += row_bytes;                                     \
         }                                                              \
-    })
+    } while(0)
 
 #define systemMethod 0
 #define popularMethod 1
@@ -170,7 +172,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
     unique_colors = 0;
 
 #define RECORD_555(red, green, blue)                                               \
-    ({                                                                             \
+    do {                                                                             \
         int bank_index;                                                            \
         const uint16_t mask = 0xF100;                                              \
         uint16_t count;                                                            \
@@ -182,7 +184,7 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
         if(!count)                                                                 \
             unique_colors++;                                                       \
         bank[bank_index] = /* ### CW*/ (count + 1);                                \
-    })
+    } while(0)
 
     switch(bpp)
     {
@@ -337,19 +339,19 @@ OSErr Executor::C_GetPixMapInfo(PixMapHandle pixmap, PictInfo *pict_info,
         }
 
     cleanup_and_return:
-    {
-        struct link *t, *next;
-
-        DisposePtr((Ptr)bank);
-
-        for(t = head, next = t->next;
-            t;
-            t = next, next = t ? t->next : nullptr)
         {
-            if(t)
-                DisposePtr((Ptr)t);
+            struct link *t, *next;
+
+            DisposePtr((Ptr)bank);
+
+            for(t = head, next = t->next;
+                t;
+                t = next, next = t ? t->next : nullptr)
+            {
+                if(t)
+                    DisposePtr((Ptr)t);
+            }
+            return retval;
         }
-        return retval;
-    }
     }
 }
