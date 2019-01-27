@@ -684,6 +684,7 @@ passes_filter(fltype *f, CInfoPBRec *cinfop, INTEGER numt)
             break;
         case new_custom_sf:
             retval = (!f->flfilef.cflfilef
+                      || (cinfop->hFileInfo.ioFlAttrib & ATTRIB_ISADIR)
                       || !f->flfilef.cflfilef(cinfop, f->mydata));
             break;
         default:
@@ -2342,9 +2343,12 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
             }
             else if(ihit == FAKEOPENDIR)
             {
-                LM(CurDirStore) = *SF_FTYPE_XP(&f);
-                unixcd(&f);
-                ihit = FAKEREDRAW;
+                if(folder_selected_p(&f))
+                {
+                    LM(CurDirStore) = *SF_FTYPE_XP(&f);
+                    unixcd(&f);
+                    ihit = FAKEREDRAW;
+                }
             }
             else if(ihit == sfItemNewFolderUser)
             {
