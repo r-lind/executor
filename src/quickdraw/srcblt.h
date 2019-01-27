@@ -1,9 +1,9 @@
 #if !defined(_SRCBLT_H_)
 #define _SRCBLT_H_
 
-#include "QuickDraw.h"
-#include "quickdraw/cquick.h"
-#include "vdriver/vdriver.h"
+#include <QuickDraw.h>
+#include <quickdraw/cquick.h>
+#include <vdriver/vdriver.h>
 
 extern "C" {
 

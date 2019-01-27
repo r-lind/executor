@@ -3,12 +3,12 @@
 
    shutdown.c; ShutDown Manager routines */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "ShutDown.h"
-#include "SegmentLdr.h"
+#include <ShutDown.h>
+#include <SegmentLdr.h>
 
-#include "rsys/segment.h"
+#include <rsys/segment.h>
 
 using namespace Executor;
 

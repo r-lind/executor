@@ -2,22 +2,22 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
-#include "WindowMgr.h"
-#include "MenuMgr.h"
-#include "SysErr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
+#include <WindowMgr.h>
+#include <MenuMgr.h>
+#include <SysErr.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "vdriver/vdriver.h"
-#include "commandline/flags.h"
-#include "vdriver/autorefresh.h"
-#include "rsys/redrawscreen.h"
-#include "rsys/executor.h"
-#include "base/functions.impl.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <vdriver/vdriver.h>
+#include <commandline/flags.h>
+#include <vdriver/autorefresh.h>
+#include <rsys/redrawscreen.h>
+#include <rsys/executor.h>
+#include <base/functions.impl.h>
 
 using namespace Executor;
 

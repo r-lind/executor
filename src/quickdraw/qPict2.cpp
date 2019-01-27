@@ -2,15 +2,15 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/picture.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/rgbutil.h"
+#include <quickdraw/picture.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/rgbutil.h>
 
 using namespace Executor;
 

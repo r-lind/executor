@@ -4,22 +4,22 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
-#include "ToolboxUtil.h"
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
+#include <ToolboxUtil.h>
 
-#include "quickdraw/stdbits.h"
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/region.h"
-#include "quickdraw/gworld.h"
-#include "quickdraw/picture.h"
-#include "mman/mman.h"
-#include "commandline/flags.h"
-#include "mman/tempalloc.h"
+#include <quickdraw/stdbits.h>
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/region.h>
+#include <quickdraw/gworld.h>
+#include <quickdraw/picture.h>
+#include <mman/mman.h>
+#include <commandline/flags.h>
+#include <mman/tempalloc.h>
 
 using namespace Executor;
 

@@ -6,8 +6,8 @@
  *
  */
 
-#include "ExMacTypes.h"
-#include "QuickDraw.h"
+#include <ExMacTypes.h>
+#include <QuickDraw.h>
 
 #define MODULE_NAME Iconutil
 #include <base/api-module.h>

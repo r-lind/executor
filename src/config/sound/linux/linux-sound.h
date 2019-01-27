@@ -3,7 +3,7 @@
 
 #define SOUND_LINUX
 
-#include "sound/sounddriver.h"
+#include <sound/sounddriver.h>
 
 extern bool sound_linux_init(sound_driver_t *s);
 

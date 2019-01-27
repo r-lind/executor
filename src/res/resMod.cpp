@@ -4,14 +4,14 @@
 
 /* Forward declarations in ResourceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "FileMgr.h"
-#include "MemoryMgr.h"
-#include "ToolboxUtil.h"
-#include "res/resource.h"
-#include "mman/mman.h"
-#include "file/file.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <FileMgr.h>
+#include <MemoryMgr.h>
+#include <ToolboxUtil.h>
+#include <res/resource.h>
+#include <mman/mman.h>
+#include <file/file.h>
 
 using namespace Executor;
 

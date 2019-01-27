@@ -21,7 +21,7 @@
 
 #include "paramline.h"
 
-#include "SDL/SDL.h"
+#include <SDL/SDL.h>
 
 /* This is where execution begins */
 int STDCALL WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)

@@ -4,17 +4,17 @@
 
 /* Forward declarations in ResourceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "MemoryMgr.h"
-#include "FileMgr.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <MemoryMgr.h>
+#include <FileMgr.h>
 
-#include "res/resource.h"
-#include "mman/mman.h"
-#include "file/file.h"
-#include "osevent/osevent.h"
-#include "prefs/prefs.h"
-#include "base/functions.impl.h"
+#include <res/resource.h>
+#include <mman/mman.h>
+#include <file/file.h>
+#include <osevent/osevent.h>
+#include <prefs/prefs.h>
+#include <base/functions.impl.h>
 #include <algorithm>
 
 using namespace Executor;

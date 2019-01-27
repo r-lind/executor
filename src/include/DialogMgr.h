@@ -8,8 +8,8 @@
 
  */
 
-#include "WindowMgr.h"
-#include "TextEdit.h"
+#include <WindowMgr.h>
+#include <TextEdit.h>
 
 #define MODULE_NAME DialogMgr
 #include <base/api-module.h>

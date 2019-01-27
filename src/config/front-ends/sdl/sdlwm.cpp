@@ -3,9 +3,9 @@
  */
 #include "sdl.h"
 #include <stdio.h>
-#include "SDL/SDL.h"
+#include <SDL/SDL.h>
 
-#include "base/common.h"
+#include <base/common.h>
 
 /* Window manager interface functions */
 

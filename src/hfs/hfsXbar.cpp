@@ -4,15 +4,15 @@
 
 /* Forward declarations in FileMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "FileMgr.h"
-#include "hfs/hfs.h"
-#include "file/file.h"
-#include "hfs/futzwithdosdisks.h"
-#include "commandline/flags.h"
-#include "prefs/prefs.h"
-#include "base/cpu.h"
-#include "file/volume.h"
+#include <base/common.h>
+#include <FileMgr.h>
+#include <hfs/hfs.h>
+#include <file/file.h>
+#include <hfs/futzwithdosdisks.h>
+#include <commandline/flags.h>
+#include <prefs/prefs.h>
+#include <base/cpu.h>
+#include <file/volume.h>
 
 using namespace Executor;
 

@@ -14,10 +14,10 @@
 #define YES YES_EXEC
 #define NO NO_EXEC
 #undef SIGDIGLEN
-#include "base/common.h"
-#include "MemoryMgr.h"
-#include "base/byteswap.h"
-#include "SpeechManager-MacBridge.h"
+#include <base/common.h>
+#include <MemoryMgr.h>
+#include <base/byteswap.h>
+#include <SpeechManager-MacBridge.h>
 #undef BOOL
 #undef YES
 #undef NO

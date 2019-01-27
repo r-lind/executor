@@ -12,16 +12,16 @@
 
 #include <optional>
 
-#include "vdriver/vdriver.h"
-#include "quickdraw/cquick.h" /* for ThePortGuard */
-#include "rsys/adb.h"
-#include "osevent/osevent.h"
-#include "rsys/scrap.h"
-#include "rsys/keyboard.h"
-#include "OSEvent.h"
-#include "ToolboxEvent.h"
-#include "ScrapMgr.h"
-#include "vdriver/refresh.h"
+#include <vdriver/vdriver.h>
+#include <quickdraw/cquick.h> /* for ThePortGuard */
+#include <rsys/adb.h>
+#include <osevent/osevent.h>
+#include <rsys/scrap.h>
+#include <rsys/keyboard.h>
+#include <OSEvent.h>
+#include <ToolboxEvent.h>
+#include <ScrapMgr.h>
+#include <vdriver/refresh.h>
 
 #include "available_geometry.h"
 
@@ -34,7 +34,7 @@
 #ifdef MACOSX
 void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
 #endif
-#include "../x/x_keycodes.h"
+#include <../x/x_keycodes.h>
 
 #ifdef STATIC_WINDOWS_QT
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)

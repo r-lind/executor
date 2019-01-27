@@ -9,30 +9,30 @@
  * is to say just like main.c should be, it isn't yet)
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "MemoryMgr.h"
-#include "ToolboxEvent.h"
+#include <MemoryMgr.h>
+#include <ToolboxEvent.h>
 #include <OSEvent.h>
-#include "EventMgr.h"
-#include "OSUtil.h"
-#include "ResourceMgr.h"
-#include "ProcessMgr.h"
-#include "AppleEvents.h"
+#include <EventMgr.h>
+#include <OSUtil.h>
+#include <ResourceMgr.h>
+#include <ProcessMgr.h>
+#include <AppleEvents.h>
 
-#include "mman/mman.h"
-#include "prefs/prefs.h"
-#include "vdriver/vdriver.h"
-#include "rsys/toolevent.h"
-#include "osevent/osevent.h"
-#include "rsys/osutil.h"
-#include "vdriver/dirtyrect.h"
-#include "time/syncint.h"
+#include <mman/mman.h>
+#include <prefs/prefs.h>
+#include <vdriver/vdriver.h>
+#include <rsys/toolevent.h>
+#include <osevent/osevent.h>
+#include <rsys/osutil.h>
+#include <vdriver/dirtyrect.h>
+#include <time/syncint.h>
 
-#include "rsys/string.h"
-#include "rsys/keyboard.h"
+#include <rsys/string.h>
+#include <rsys/keyboard.h>
 
-#include "SegmentLdr.h"
+#include <SegmentLdr.h>
 
 using namespace Executor;
 

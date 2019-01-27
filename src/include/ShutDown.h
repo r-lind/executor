@@ -2,7 +2,7 @@
 
 /* shutdown manager define/routines */
 
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 
 #define MODULE_NAME ShutDown
 #include <base/api-module.h>

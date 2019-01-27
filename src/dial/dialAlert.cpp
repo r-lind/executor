@@ -4,19 +4,19 @@
 
 /* Forward declarations in DialogMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "WindowMgr.h"
-#include "DialogMgr.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <WindowMgr.h>
+#include <DialogMgr.h>
+#include <MemoryMgr.h>
 
-#include "OSUtil.h"
-#include "dial/itm.h"
-#include "res/resource.h"
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
-#include "prefs/options.h"
-#include "dial/dial.h"
+#include <OSUtil.h>
+#include <dial/itm.h>
+#include <res/resource.h>
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
+#include <prefs/options.h>
+#include <dial/dial.h>
 
 using namespace Executor;
 

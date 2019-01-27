@@ -30,8 +30,8 @@
 
 #if defined(MSDOS) || defined(CYGWIN32)
 
-#include "MemoryMgr.h"
-#include "mman/mman.h"
+#include <MemoryMgr.h>
+#include <mman/mman.h>
 
 typedef enum {
     TEMP_ALLOC_NO_FREE,

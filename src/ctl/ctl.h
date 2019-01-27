@@ -8,13 +8,13 @@
 
  */
 
-#include "ControlMgr.h"
-#include "MenuMgr.h"
-#include "MemoryMgr.h"
-#include "ResourceMgr.h"
+#include <ControlMgr.h>
+#include <MenuMgr.h>
+#include <MemoryMgr.h>
+#include <ResourceMgr.h>
 
-#include "mman/mman.h"
-#include "quickdraw/cquick.h"
+#include <mman/mman.h>
+#include <quickdraw/cquick.h>
 
 #define MODULE_NAME rsys_ctl
 #include <base/api-module.h>

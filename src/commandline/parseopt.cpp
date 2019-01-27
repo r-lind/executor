@@ -2,14 +2,14 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "Gestalt.h"
-#include "commandline/parseopt.h"
-#include "vdriver/vdriver.h"
-#include "commandline/flags.h"
-#include "prefs/prefs.h"
-#include "rsys/version.h"
-#include "rsys/paths.h"
+#include <base/common.h>
+#include <Gestalt.h>
+#include <commandline/parseopt.h>
+#include <vdriver/vdriver.h>
+#include <commandline/flags.h>
+#include <prefs/prefs.h>
+#include <rsys/version.h>
+#include <rsys/paths.h>
 
 #include <ctype.h>
 #include <string.h>

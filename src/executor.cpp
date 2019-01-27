@@ -4,38 +4,38 @@
 
 //#define DEBUG
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "ResourceMgr.h"
-#include "SegmentLdr.h"
-#include "MemoryMgr.h"
-#include "StdFilePkg.h"
-#include "EventMgr.h"
-#include "VRetraceMgr.h"
-#include "OSUtil.h"
-#include "FontMgr.h"
-#include "ScrapMgr.h"
-#include "ToolboxUtil.h"
-#include "FileMgr.h"
-#include "ControlMgr.h"
-#include "DeviceMgr.h"
-#include "PrintMgr.h"
-#include "CommTool.h"
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <ResourceMgr.h>
+#include <SegmentLdr.h>
+#include <MemoryMgr.h>
+#include <StdFilePkg.h>
+#include <EventMgr.h>
+#include <VRetraceMgr.h>
+#include <OSUtil.h>
+#include <FontMgr.h>
+#include <ScrapMgr.h>
+#include <ToolboxUtil.h>
+#include <FileMgr.h>
+#include <ControlMgr.h>
+#include <DeviceMgr.h>
+#include <PrintMgr.h>
+#include <CommTool.h>
 
-#include "base/trapglue.h"
-#include "quickdraw/cquick.h"
-#include "file/file.h"
-#include "prefs/prefs.h"
-#include "rsys/segment.h"
-#include "rsys/executor.h"
-#include "hfs/hfs.h"
-#include "vdriver/vdriver.h"
-#include "base/trapname.h"
+#include <base/trapglue.h>
+#include <quickdraw/cquick.h>
+#include <file/file.h>
+#include <prefs/prefs.h>
+#include <rsys/segment.h>
+#include <rsys/executor.h>
+#include <hfs/hfs.h>
+#include <vdriver/vdriver.h>
+#include <base/trapname.h>
 
-#include "prefs/options.h"
-#include "rsys/string.h"
+#include <prefs/options.h>
+#include <rsys/string.h>
 
 #include <algorithm>
 

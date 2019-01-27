@@ -87,12 +87,12 @@ Author of Simple DirectMedia Layer -
 #include <stdlib.h>
 #include <stdbool.h>
 
-#include "SDL/SDL_error.h"
-#include "SDL/SDL_video.h"
-#include "SDL/SDL_endian.h"
-#include "SDL/SDL_version.h"
+#include <SDL/SDL_error.h>
+#include <SDL/SDL_video.h>
+#include <SDL/SDL_endian.h>
+#include <SDL/SDL_version.h>
 
-#include "error/error.h"
+#include <error/error.h>
 
 #include "for_sam.h"
 

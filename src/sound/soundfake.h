@@ -1,7 +1,7 @@
 #if !defined(_RSYS_SOUNDFAKE_H_)
 #define _RSYS_SOUNDFAKE_H_
 
-#include "sound/sounddriver.h"
+#include <sound/sounddriver.h>
 
 namespace Executor
 {

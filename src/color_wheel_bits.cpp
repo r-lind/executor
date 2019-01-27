@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/color_wheel_bits.h"
+#include <rsys/color_wheel_bits.h>
 
 using namespace Executor;
 

@@ -5,8 +5,8 @@
 #define Region Mac_Region
 #define Cursor Mac_Cursor
 
-#include "base/common.h"
-#include "QuickDraw.h"
+#include <base/common.h>
+#include <QuickDraw.h>
 
 #undef Region
 #undef Cursor
@@ -27,7 +27,7 @@
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "rsys/iv.h"
+#include <rsys/iv.h>
 
 Display *x_dpy;
 int x_screen;

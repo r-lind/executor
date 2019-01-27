@@ -4,17 +4,17 @@
 
 #if !defined(NDEBUG)
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "DialogMgr.h"
-#include "QuickDraw.h"
+#include <DialogMgr.h>
+#include <QuickDraw.h>
 
-#include "quickdraw/cquick.h"
-#include "quickdraw/region.h"
-#include "quickdraw/stdbits.h"
-#include "rsys/dump.h"
+#include <quickdraw/cquick.h>
+#include <quickdraw/region.h>
+#include <quickdraw/stdbits.h>
+#include <rsys/dump.h>
 
-#include "rsys/iv.h"
+#include <rsys/iv.h>
 
 #include <unistd.h>
 

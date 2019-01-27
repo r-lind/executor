@@ -2,11 +2,11 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "sound/sounddriver.h"
-#include "sound/soundfake.h"
-#include "base/m68kint.h"
-#include "TimeMgr.h"
+#include <base/common.h>
+#include <sound/sounddriver.h>
+#include <sound/soundfake.h>
+#include <base/m68kint.h>
+#include <TimeMgr.h>
 
 using namespace Executor;
 

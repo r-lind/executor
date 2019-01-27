@@ -4,12 +4,12 @@
 
 /* color menu routines added in IMV and beyond */
 
-#include "base/common.h"
-#include "MenuMgr.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <MenuMgr.h>
+#include <MemoryMgr.h>
 
-#include "menu/menu.h"
-#include "quickdraw/cquick.h"
+#include <menu/menu.h>
+#include <quickdraw/cquick.h>
 
 using namespace Executor;
 

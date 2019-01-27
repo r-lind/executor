@@ -4,16 +4,16 @@
 
 /* Forward declarations in FontMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "CQuickDraw.h"
-#include "QuickDraw.h"
-#include "MemoryMgr.h"
-#include "FontMgr.h"
-#include "ToolboxUtil.h"
-#include "OSUtil.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/font.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <CQuickDraw.h>
+#include <QuickDraw.h>
+#include <MemoryMgr.h>
+#include <FontMgr.h>
+#include <ToolboxUtil.h>
+#include <OSUtil.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/font.h>
 
 using namespace Executor;
 

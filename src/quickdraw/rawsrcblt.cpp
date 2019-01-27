@@ -2,12 +2,12 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "quickdraw/srcblt.h"
-#include "quickdraw/quick.h"
-#include "quickdraw/xdblt.h"
-#include "quickdraw/rawblt.h"
+#include <quickdraw/srcblt.h>
+#include <quickdraw/quick.h>
+#include <quickdraw/xdblt.h>
+#include <quickdraw/rawblt.h>
 
 #if defined(USE_PORTABLE_SRCBLT)
 

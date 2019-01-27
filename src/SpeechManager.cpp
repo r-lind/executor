@@ -6,12 +6,12 @@
 //  Copyright (c) 2014 C.W. Betts. All rights reserved.
 //
 
-#include "base/common.h"
-#include "SpeechManager.h"
-#include "error/error.h"
+#include <base/common.h>
+#include <SpeechManager.h>
+#include <error/error.h>
 
 #ifdef MACOSX
-#include "SpeechManager-MacBridge.h"
+#include <SpeechManager-MacBridge.h>
 #endif
 
 using namespace Executor;

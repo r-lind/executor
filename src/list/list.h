@@ -8,10 +8,10 @@
 
  */
 
-#include "ListMgr.h"
-#include "MemoryMgr.h"
-#include "ResourceMgr.h"
-#include "mman/mman.h"
+#include <ListMgr.h>
+#include <MemoryMgr.h>
+#include <ResourceMgr.h>
+#include <mman/mman.h>
 
 #define MODULE_NAME rsys_list
 #include <base/api-module.h>

@@ -1,7 +1,7 @@
 #if !defined(_pef_h_)
 #define _pef_h_
 
-#include "rsys/cfm.h"
+#include <rsys/cfm.h>
 
 /*
  * Copyright 1999-2000 by Abacus Research and Development, Inc.

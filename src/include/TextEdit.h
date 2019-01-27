@@ -8,7 +8,7 @@
 
  */
 
-#include "QuickDraw.h"
+#include <QuickDraw.h>
 
 #define MODULE_NAME TextEdit
 #include <base/api-module.h>

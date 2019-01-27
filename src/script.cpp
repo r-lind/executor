@@ -4,23 +4,23 @@
 
 /* Forward declarations in ScriptMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "IntlUtil.h"
-#include "ScriptMgr.h"
-#include "MemoryMgr.h"
-#include "ToolboxUtil.h"
-#include "OSUtil.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <IntlUtil.h>
+#include <ScriptMgr.h>
+#include <MemoryMgr.h>
+#include <ToolboxUtil.h>
+#include <OSUtil.h>
 
-#include "rsys/hook.h"
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
-#include "rsys/osutil.h"
-#include "osevent/osevent.h"
-#include "print/print.h"
-#include "sane/floatconv.h"
-#include "rsys/string.h"
-#include "mman/mman.h"
+#include <rsys/hook.h>
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
+#include <rsys/osutil.h>
+#include <osevent/osevent.h>
+#include <print/print.h>
+#include <sane/floatconv.h>
+#include <rsys/string.h>
+#include <mman/mman.h>
 
 #include <ctype.h>
 

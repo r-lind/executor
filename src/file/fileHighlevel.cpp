@@ -8,16 +8,16 @@
 	  faster and a little easier to debug, but not enough of any to
 	  make it sensible to do that initially.  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "MemoryMgr.h"
-#include "FileMgr.h"
-#include "ProcessMgr.h"
+#include <MemoryMgr.h>
+#include <FileMgr.h>
+#include <ProcessMgr.h>
 
-#include "file/file.h"
-#include "rsys/string.h"
-#include "hfs/hfs.h"
-#include "rsys/executor.h"
+#include <file/file.h>
+#include <rsys/string.h>
+#include <hfs/hfs.h>
+#include <rsys/executor.h>
 
 using namespace Executor;
 

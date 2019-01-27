@@ -8,8 +8,8 @@
 
  */
 
-#include "QuickDraw.h"
-#include "ResourceMgr.h"
+#include <QuickDraw.h>
+#include <ResourceMgr.h>
 
 #define MODULE_NAME MenuMgr
 #include <base/api-module.h>

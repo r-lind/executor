@@ -4,23 +4,23 @@
 
 /* Forward declarations in TextEdit.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "EventMgr.h"
-#include "TextEdit.h"
-#include "MemoryMgr.h"
-#include "ScrapMgr.h"
-#include "OSUtil.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <EventMgr.h>
+#include <TextEdit.h>
+#include <MemoryMgr.h>
+#include <ScrapMgr.h>
+#include <OSUtil.h>
 
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
-#include "textedit/tesave.h"
-#include "rsys/arrowkeys.h"
-#include "osevent/osevent.h"
-#include "quickdraw/text.h"
-#include "prefs/prefs.h"
-#include "vdriver/vdriver.h"
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
+#include <textedit/tesave.h>
+#include <rsys/arrowkeys.h>
+#include <osevent/osevent.h>
+#include <quickdraw/text.h>
+#include <prefs/prefs.h>
+#include <vdriver/vdriver.h>
 
 using namespace Executor;
 

@@ -9,7 +9,7 @@
  */
 
 #include <syn68k_public.h>
-#include "SANE.h"
+#include <SANE.h>
 #include <float.h>
 #include <math.h>
 

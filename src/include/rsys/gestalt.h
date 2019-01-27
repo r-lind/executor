@@ -6,7 +6,7 @@
 #if !defined(_RSYS_GESTALT_H_)
 #define _RSYS_GESTALT_H_
 
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 #include <rsys/macros.h>
 
 #define MODULE_NAME rsys_gestalt

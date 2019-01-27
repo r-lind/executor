@@ -2,13 +2,13 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <math.h>
 
-#include "SANE.h"
-#include "sane/float.h"
-#include "sane/floatconv.h"
+#include <SANE.h>
+#include <sane/float.h>
+#include <sane/floatconv.h>
 
 using namespace Executor;
 

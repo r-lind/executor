@@ -19,11 +19,11 @@
  * to store our locks.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "MemoryMgr.h"
+#include <MemoryMgr.h>
 
-#include "rsys/lockunlock.h"
+#include <rsys/lockunlock.h>
 
 using namespace Executor;
 

@@ -2,12 +2,12 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "EventMgr.h"
-#include "OSEvent.h"
-#include "ADB.h"
-#include "rsys/adb.h"
-#include "osevent/osevent.h"
+#include <base/common.h>
+#include <EventMgr.h>
+#include <OSEvent.h>
+#include <ADB.h>
+#include <rsys/adb.h>
+#include <osevent/osevent.h>
 
 #include <stdarg.h>
 /*

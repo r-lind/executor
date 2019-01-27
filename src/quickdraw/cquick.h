@@ -1,11 +1,11 @@
 #if !defined(_CQUICK_H_)
 #define _CQUICK_H_
 
-#include "CQuickDraw.h"
-#include "Iconutil.h"
-#include "MemoryMgr.h"
+#include <CQuickDraw.h>
+#include <Iconutil.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/rgbutil.h"
+#include <quickdraw/rgbutil.h>
 namespace Executor
 {
 #define SET_HILITE_BIT() \

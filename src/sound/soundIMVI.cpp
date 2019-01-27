@@ -4,18 +4,18 @@
 
 /* Forward declarations in SoundMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "MemoryMgr.h"
-#include "ResourceMgr.h"
-#include "SoundDvr.h"
-#include "SoundMgr.h"
-#include "TimeMgr.h"
-#include "FileMgr.h"
-#include "sound/sounddriver.h"
-#include "prefs/prefs.h"
-#include "sound/soundopts.h"
-#include "base/functions.impl.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <MemoryMgr.h>
+#include <ResourceMgr.h>
+#include <SoundDvr.h>
+#include <SoundMgr.h>
+#include <TimeMgr.h>
+#include <FileMgr.h>
+#include <sound/sounddriver.h>
+#include <prefs/prefs.h>
+#include <sound/soundopts.h>
+#include <base/functions.impl.h>
 
 using namespace Executor;
 

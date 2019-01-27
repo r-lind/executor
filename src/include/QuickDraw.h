@@ -9,7 +9,7 @@
  */
 
 #include <base/common.h>
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 
 #define MODULE_NAME QuickDraw
 #include <base/api-module.h>

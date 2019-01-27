@@ -2,17 +2,17 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "vdriver/refresh.h"
-#include "vdriver/vdriver.h"
-#include "prefs/prefs.h"
-#include "vdriver/dirtyrect.h"
-#include "commandline/flags.h"
-#include "vdriver/autorefresh.h"
-#include "TimeMgr.h"
-#include "OSEvent.h"
-#include "time/syncint.h"
-#include "quickdraw/cquick.h"
+#include <base/common.h>
+#include <vdriver/refresh.h>
+#include <vdriver/vdriver.h>
+#include <prefs/prefs.h>
+#include <vdriver/dirtyrect.h>
+#include <commandline/flags.h>
+#include <vdriver/autorefresh.h>
+#include <TimeMgr.h>
+#include <OSEvent.h>
+#include <time/syncint.h>
+#include <quickdraw/cquick.h>
 
 using namespace Executor;
 

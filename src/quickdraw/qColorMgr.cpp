@@ -4,18 +4,18 @@
 
 /* color manager */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "mman/mman.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/rgbutil.h"
+#include <mman/mman.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/rgbutil.h>
 #include <syn68k_public.h>
-#include "vdriver/vdriver.h"
-#include "vdriver/dirtyrect.h"
-#include "time/syncint.h"
+#include <vdriver/vdriver.h>
+#include <vdriver/dirtyrect.h>
+#include <time/syncint.h>
 
 using namespace Executor;
 

@@ -4,23 +4,23 @@
 
 /* Forward declarations in DeskMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "EventMgr.h"
-#include "WindowMgr.h"
-#include "DeviceMgr.h"
-#include "DeskMgr.h"
-#include "MenuMgr.h"
-#include "QuickDraw.h"
-#include "OSEvent.h"
-#include "ToolboxEvent.h"
-#include "OSUtil.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <EventMgr.h>
+#include <WindowMgr.h>
+#include <DeviceMgr.h>
+#include <DeskMgr.h>
+#include <MenuMgr.h>
+#include <QuickDraw.h>
+#include <OSEvent.h>
+#include <ToolboxEvent.h>
+#include <OSUtil.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "rsys/hook.h"
-#include "rsys/aboutbox.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <rsys/hook.h>
+#include <rsys/aboutbox.h>
 
 using namespace Executor;
 

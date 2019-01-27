@@ -8,11 +8,11 @@
 
  */
 
-#include "DialogMgr.h"
-#include "PrintMgr.h"
-#include "print/nextprint.h"
-#include "print/ini.h"
-#include "prefs/prefs.h"
+#include <DialogMgr.h>
+#include <PrintMgr.h>
+#include <print/nextprint.h>
+#include <print/ini.h>
+#include <prefs/prefs.h>
 
 #if defined(CYGWIN32)
 #include "win_print.h"

@@ -2,12 +2,12 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "vdriver/autorefresh.h"
-#include "vdriver/vdriver.h"
-#include "vdriver/refresh.h"
-#include "commandline/flags.h"
-#include "prefs/prefs.h"
+#include <base/common.h>
+#include <vdriver/autorefresh.h>
+#include <vdriver/vdriver.h>
+#include <vdriver/refresh.h>
+#include <commandline/flags.h>
+#include <prefs/prefs.h>
 
 /* This file provides a mechanism to detect when applications are
  * bypassing QuickDraw and writing directly to screen memory.

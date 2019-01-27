@@ -4,9 +4,9 @@
 
 /* Forward declarations in PrintMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "PrintMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <PrintMgr.h>
 
 using namespace Executor;
 

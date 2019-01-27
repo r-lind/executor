@@ -5,14 +5,14 @@
 #include <windows.h>
 #include "windriver.h"
 
-#include "OSEvent.h"
-#include "ToolboxEvent.h"
-#include "SegmentLdr.h"
-#include "rsys/adb.h"
-#include "rsys/segment.h"
-#include "rsys/osevent.h"
-#include "rsys/keyboard.h"
-#include "rsys/param.h"
+#include <OSEvent.h>
+#include <ToolboxEvent.h>
+#include <SegmentLdr.h>
+#include <rsys/adb.h>
+#include <rsys/segment.h>
+#include <rsys/osevent.h>
+#include <rsys/keyboard.h>
+#include <rsys/param.h>
 
 #include "vk_to_mkv.h"
 

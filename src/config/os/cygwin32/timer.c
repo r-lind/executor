@@ -5,8 +5,8 @@
 /* Set up a 60 hz timer interrupt using the multimedia timers */
 /* Are these used anymore? */
 
-#include "base/common.h"
-#include "rsys/blockinterrupts.h"
+#include <base/common.h>
+#include <rsys/blockinterrupts.h>
 
 #include "timer.h"
 

@@ -1,10 +1,10 @@
 #if !defined(_OSEVENT_H_)
 #define _OSEVENT_H_
 
-#include "EventMgr.h"
-#include "PPC.h"
+#include <EventMgr.h>
+#include <PPC.h>
 
-#include "osevent/commonevt.h"
+#include <osevent/commonevt.h>
 
 #define MODULE_NAME OSEvent
 #include <base/api-module.h>

@@ -4,17 +4,17 @@
 
 /* Forward declarations in Gestalt.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "MemoryMgr.h"
-#include "Gestalt.h"
+#include <base/common.h>
+#include <MemoryMgr.h>
+#include <Gestalt.h>
 
-#include "prefs/prefs.h"
-#include "sound/soundopts.h"
-#include "mman/mman.h"
-#include "rsys/gestalt.h"
-#include "rsys/version.h"
-#include "vdriver/vdriver.h"
-#include "base/functions.impl.h"
+#include <prefs/prefs.h>
+#include <sound/soundopts.h>
+#include <mman/mman.h>
+#include <rsys/gestalt.h>
+#include <rsys/version.h>
+#include <vdriver/vdriver.h>
+#include <base/functions.impl.h>
 
 using namespace Executor;
 

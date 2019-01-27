@@ -17,7 +17,7 @@
 #include <OSUtil.h>
 #include <FileMgr.h>
 
-#include "file/file.h"
+#include <file/file.h>
 
 #if !defined(UNIX)
 #include <string.h>

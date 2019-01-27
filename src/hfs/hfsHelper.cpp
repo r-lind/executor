@@ -2,19 +2,19 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "OSUtil.h"
-#include "FileMgr.h"
-#include "SegmentLdr.h"
-#include "ToolboxEvent.h"
-#include "MemoryMgr.h"
-#include "SysErr.h"
-#include "DialogMgr.h"
-#include "ResourceMgr.h"
+#include <base/common.h>
+#include <OSUtil.h>
+#include <FileMgr.h>
+#include <SegmentLdr.h>
+#include <ToolboxEvent.h>
+#include <MemoryMgr.h>
+#include <SysErr.h>
+#include <DialogMgr.h>
+#include <ResourceMgr.h>
 
-#include "hfs/hfs.h"
-#include "file/file.h"
-#include "hfs/partition.h"
+#include <hfs/hfs.h>
+#include <file/file.h>
+#include <hfs/partition.h>
 #include <algorithm>
 
 #if defined(MSDOS) || defined(CYGWIN32)

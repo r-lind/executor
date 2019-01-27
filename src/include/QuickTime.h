@@ -8,9 +8,9 @@
 
  */
 
-#include "Components.h"
-#include "CQuickDraw.h"
-#include "FileMgr.h"
+#include <Components.h>
+#include <CQuickDraw.h>
+#include <FileMgr.h>
 
 #define MODULE_NAME QuickTime
 #include <base/api-module.h>

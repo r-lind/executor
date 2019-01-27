@@ -5,8 +5,8 @@
  * Derived from public domain source code written by Sam Lantinga
  */
 
-#include "base/common.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <MemoryMgr.h>
 
 using namespace Executor;
 

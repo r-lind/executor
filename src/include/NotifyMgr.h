@@ -7,7 +7,7 @@
  *
  */
 
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 
 #define MODULE_NAME NotifyMgr
 #include <base/api-module.h>

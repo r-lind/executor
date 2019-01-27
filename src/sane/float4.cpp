@@ -10,16 +10,16 @@
  *      up in FreeHand 1.0
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <math.h>
 #include <string.h>
 #include <stdlib.h>
 #include <float.h>
-#include "SANE.h"
-#include "sane/float.h"
-#include "sane/floatconv.h"
-#include "sane/float_fcw.h"
+#include <SANE.h>
+#include <sane/float.h>
+#include <sane/floatconv.h>
+#include <sane/float_fcw.h>
 
 using namespace Executor;
 

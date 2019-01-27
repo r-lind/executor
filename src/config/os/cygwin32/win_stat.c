@@ -8,14 +8,14 @@
 
 #define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <windows.h>
 
 #include <ctype.h>
 #include <string.h>
 
-#include "rsys/error.h"
+#include <rsys/error.h>
 
 #include "win_stat_private.h"
 #include "win_stat.h"

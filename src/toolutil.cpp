@@ -4,23 +4,23 @@
 
 /* Forward declarations in ToolboxUtil.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "ToolboxUtil.h"
-#include "OSUtil.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <ToolboxUtil.h>
+#include <OSUtil.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
-#include "SANE.h"
-#include "sane/float.h"
-#include "sane/floatconv.h"
-#include "rsys/string.h"
-#include "mman/mman_private.h"
-#include "res/resource.h"
-#include "rsys/toolutil.h"
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
+#include <SANE.h>
+#include <sane/float.h>
+#include <sane/floatconv.h>
+#include <rsys/string.h>
+#include <mman/mman_private.h>
+#include <res/resource.h>
+#include <rsys/toolutil.h>
 #include <string>
 #include <algorithm>
 

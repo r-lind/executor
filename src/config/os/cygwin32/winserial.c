@@ -8,10 +8,10 @@
  *       just a bunch of stubs to make serial.c compile
  */
 
-#include "base/common.h"
+#include <base/common.h>
 #include "winserial.h"
-#include "FileMgr.h"
-#include "Serial.h"
+#include <FileMgr.h>
+#include <Serial.h>
 
 PUBLIC ssize_t
 serial_bios_read(LONGINT fd, void *buf, size_t count)

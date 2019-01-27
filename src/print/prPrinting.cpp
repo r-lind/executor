@@ -2,27 +2,27 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "PrintMgr.h"
-#include "MemoryMgr.h"
-#include "FontMgr.h"
-#include "ResourceMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <PrintMgr.h>
+#include <MemoryMgr.h>
+#include <FontMgr.h>
+#include <ResourceMgr.h>
 
-#include "print/PSstrings.h"
-#include "mman/mman.h"
-#include "rsys/uniquefile.h"
-#include "print/print.h"
-#include "rsys/string.h"
-#include "quickdraw/cquick.h"
-#include "vdriver/vdriver.h"
-#include "file/file.h"
+#include <print/PSstrings.h>
+#include <mman/mman.h>
+#include <rsys/uniquefile.h>
+#include <print/print.h>
+#include <rsys/string.h>
+#include <quickdraw/cquick.h>
+#include <vdriver/vdriver.h>
+#include <file/file.h>
 
-#include "prefs/prefs.h"
+#include <prefs/prefs.h>
 
 #if defined(MSDOS) || defined(CYGWIN32)
 #include <stdarg.h>
-#include "rsys/cleanup.h"
+#include <rsys/cleanup.h>
 
 bool deferred_printing_p = false /* true */;
 
@@ -53,7 +53,7 @@ int ROMlib_paper_y = 0;
 
 static bool page_is_open = false;
 }
-#include "print/nextprint.h"
+#include <print/nextprint.h>
 
 LONGINT Executor::pagewanted = 0;
 static int lastpagewanted = 0;

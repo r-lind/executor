@@ -2,27 +2,27 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "SANE.h"
-#include "MemoryMgr.h"
-#include "ADB.h"
-#include "SegmentLdr.h"
-#include "OSUtil.h"
-#include "ToolboxEvent.h"
-#include "OSEvent.h"
-#include "ProcessMgr.h"
-#include "CommTool.h"
-#include "rsys/segment.h"
-#include "res/resource.h"
-#include "rsys/toolutil.h"
-#include "time/time.h"
-#include "prefs/prefs.h"
-#include "sound/soundopts.h"
-#include "error/system_error.h"
-#include "base/emustubs.h"
-#include "rsys/executor.h"
-#include "rsys/mixed_mode.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <SANE.h>
+#include <MemoryMgr.h>
+#include <ADB.h>
+#include <SegmentLdr.h>
+#include <OSUtil.h>
+#include <ToolboxEvent.h>
+#include <OSEvent.h>
+#include <ProcessMgr.h>
+#include <CommTool.h>
+#include <rsys/segment.h>
+#include <res/resource.h>
+#include <rsys/toolutil.h>
+#include <time/time.h>
+#include <prefs/prefs.h>
+#include <sound/soundopts.h>
+#include <error/system_error.h>
+#include <base/emustubs.h>
+#include <rsys/executor.h>
+#include <rsys/mixed_mode.h>
 #include <base/cpu.h>
 
 namespace Executor

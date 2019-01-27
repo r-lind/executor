@@ -4,21 +4,21 @@
 
 /* AppleEvents implementation */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "EventMgr.h"
-#include "NotifyMgr.h"
-#include "AppleEvents.h"
-#include "MemoryMgr.h"
-#include "ProcessMgr.h"
-#include "OSEvent.h"
-#include "OSUtil.h"
-#include "ProcessMgr.h"
-#include "AliasMgr.h"
+#include <EventMgr.h>
+#include <NotifyMgr.h>
+#include <AppleEvents.h>
+#include <MemoryMgr.h>
+#include <ProcessMgr.h>
+#include <OSEvent.h>
+#include <OSUtil.h>
+#include <ProcessMgr.h>
+#include <AliasMgr.h>
 
-#include "mman/mman.h"
-#include "commandline/flags.h"
-#include "base/functions.impl.h"
+#include <mman/mman.h>
+#include <commandline/flags.h>
+#include <base/functions.impl.h>
 
 namespace Executor
 {

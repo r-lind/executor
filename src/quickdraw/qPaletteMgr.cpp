@@ -4,19 +4,19 @@
 
 /* Palette Manager */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "WindowMgr.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
-#include "ResourceMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <WindowMgr.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
+#include <ResourceMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "res/resource.h"
-#include "mman/mman.h"
-#include "vdriver/vdriver.h"
-#include "vdriver/dirtyrect.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <res/resource.h>
+#include <mman/mman.h>
+#include <vdriver/vdriver.h>
+#include <vdriver/dirtyrect.h>
 #include <algorithm>
 
 using namespace Executor;

@@ -8,8 +8,8 @@
 
  */
 
-#include "QuickDraw.h"
-#include "SANE.h"
+#include <QuickDraw.h>
+#include <SANE.h>
 
 #define MODULE_NAME ToolboxUtil
 #include <base/api-module.h>

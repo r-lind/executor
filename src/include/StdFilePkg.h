@@ -1,8 +1,8 @@
 #if !defined(__STDFILE__)
 #define __STDFILE__
 
-#include "DialogMgr.h"
-#include "FileMgr.h"
+#include <DialogMgr.h>
+#include <FileMgr.h>
 
 #define MODULE_NAME StdFilePkg
 #include <base/api-module.h>

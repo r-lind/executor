@@ -1,7 +1,7 @@
 #if !defined(_refresh_h_)
 #define _refresh_h_
 
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 
 #define MODULE_NAME rsys_refresh
 #include <base/api-module.h>

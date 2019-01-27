@@ -6,7 +6,7 @@
  * All rights reserved.
  *
  */
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 
 #define MODULE_NAME rsys_osutil
 #include <base/api-module.h>

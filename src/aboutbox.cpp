@@ -2,30 +2,30 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "rsys/aboutbox.h"
-#include "mman/mman.h"
-#include "vdriver/vdriver.h"
-#include "rsys/string.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/quick.h"
-#include "ctl/ctl.h"
-#include "rsys/version.h"
-#include "CQuickDraw.h"
-#include "Gestalt.h"
-#include "ToolboxEvent.h"
-#include "TextEdit.h"
-#include "FontMgr.h"
-#include "OSUtil.h"
+#include <rsys/aboutbox.h>
+#include <mman/mman.h>
+#include <vdriver/vdriver.h>
+#include <rsys/string.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/quick.h>
+#include <ctl/ctl.h>
+#include <rsys/version.h>
+#include <CQuickDraw.h>
+#include <Gestalt.h>
+#include <ToolboxEvent.h>
+#include <TextEdit.h>
+#include <FontMgr.h>
+#include <OSUtil.h>
 #include <ctype.h>
-#include "file/file.h"
-#include "rsys/osutil.h"
-#include "SegmentLdr.h"
-#include "rsys/segment.h"
-#include "rsys/gestalt.h"
-#include "osevent/osevent.h"
-#include "rsys/paths.h"
+#include <file/file.h>
+#include <rsys/osutil.h>
+#include <SegmentLdr.h>
+#include <rsys/segment.h>
+#include <rsys/gestalt.h>
+#include <osevent/osevent.h>
+#include <rsys/paths.h>
 #include <algorithm>
 
 #include <cmrc/cmrc.hpp>

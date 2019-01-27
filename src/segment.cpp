@@ -4,32 +4,32 @@
 
 /* Forward declarations in SegmentLdr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "FileMgr.h"
-#include "SegmentLdr.h"
-#include "MemoryMgr.h"
-#include "ResourceMgr.h"
-#include "StdFilePkg.h"
-#include "SysErr.h"
-#include "FontMgr.h"
-#include "OSEvent.h"
-#include "WindowMgr.h"
+#include <FileMgr.h>
+#include <SegmentLdr.h>
+#include <MemoryMgr.h>
+#include <ResourceMgr.h>
+#include <StdFilePkg.h>
+#include <SysErr.h>
+#include <FontMgr.h>
+#include <OSEvent.h>
+#include <WindowMgr.h>
 
-#include "hfs/hfs.h"
-#include "base/cpu.h"
-#include "wind/wind.h"
-#include "rsys/segment.h"
-#include "vdriver/vdriver.h"
-#include "rsys/executor.h"
-#include "commandline/flags.h"
-#include "prefs/prefs.h"
-#include "osevent/osevent.h"
-#include "quickdraw/cquick.h"
-#include "rsys/desk.h"
-#include "hfs/dcache.h"
-#include "rsys/launch.h"
-#include "rsys/paths.h"
+#include <hfs/hfs.h>
+#include <base/cpu.h>
+#include <wind/wind.h>
+#include <rsys/segment.h>
+#include <vdriver/vdriver.h>
+#include <rsys/executor.h>
+#include <commandline/flags.h>
+#include <prefs/prefs.h>
+#include <osevent/osevent.h>
+#include <quickdraw/cquick.h>
+#include <rsys/desk.h>
+#include <hfs/dcache.h>
+#include <rsys/launch.h>
+#include <rsys/paths.h>
 
 #include <ctype.h>
 #include <algorithm>

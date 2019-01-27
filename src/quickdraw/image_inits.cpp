@@ -2,9 +2,9 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "ctl/ctl.h"
-#include "quickdraw/image.h"
+#include <base/common.h>
+#include <ctl/ctl.h>
+#include <quickdraw/image.h>
 
 using namespace Executor;
 

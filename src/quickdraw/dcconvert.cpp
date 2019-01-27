@@ -2,9 +2,9 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "quickdraw/depthconv.h"
-#include "quickdraw/cquick.h"
+#include <base/common.h>
+#include <quickdraw/depthconv.h>
+#include <quickdraw/cquick.h>
 
 namespace Executor
 {

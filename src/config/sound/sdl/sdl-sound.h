@@ -4,7 +4,7 @@
 #define SOUND_SDL
 
 #include <SDL_Sound/SDL_sound.h>
-#include "sound/sounddriver.h"
+#include <sound/sounddriver.h>
 
 namespace Executor
 {

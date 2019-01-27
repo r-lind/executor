@@ -4,16 +4,16 @@
 
 /* Forward declarations in MenuMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "MenuMgr.h"
-#include "ResourceMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <MenuMgr.h>
+#include <ResourceMgr.h>
 
-#include "base/cpu.h"
-#include "quickdraw/cquick.h"
-#include "menu/menu.h"
-#include "wind/wind.h"
-#include "prefs/prefs.h"
+#include <base/cpu.h>
+#include <quickdraw/cquick.h>
+#include <menu/menu.h>
+#include <wind/wind.h>
+#include <prefs/prefs.h>
 
 using namespace Executor;
 

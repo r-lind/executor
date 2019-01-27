@@ -7,7 +7,7 @@
  * The -t option can be used to tell how big the device is.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 #include <stdio.h>
 #include <dev/scsireg.h>
 #include <sys/file.h>

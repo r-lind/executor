@@ -1,11 +1,11 @@
 #if !defined(_RSYS_XDBLT_H_)
 #define _RSYS_XDBLT_H_
 
-#include "QuickDraw.h"
+#include <QuickDraw.h>
 
-#include "quickdraw/cquick.h"
-#include "quickdraw/xdata.h"
-#include "quickdraw/region.h"
+#include <quickdraw/cquick.h>
+#include <quickdraw/xdata.h>
+#include <quickdraw/region.h>
 
 #if !defined(ARCH_PROVIDES_RAW_PATBLT)
 #define USE_PORTABLE_PATBLT

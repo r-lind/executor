@@ -8,8 +8,8 @@
 
  */
 
-#include "QuickDraw.h"
-#include "WindowMgr.h"
+#include <QuickDraw.h>
+#include <WindowMgr.h>
 
 #define MODULE_NAME ControlMgr
 #include <base/api-module.h>

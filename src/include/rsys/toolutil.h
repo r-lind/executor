@@ -1,7 +1,7 @@
 #if !defined(__RSYS_TOOLUTIL__)
 #define __RSYS_TOOLUTIL__
 
-#include "SANE.h"
+#include <SANE.h>
 
 namespace Executor
 {

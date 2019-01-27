@@ -8,34 +8,34 @@
  * TODO: use update regions if we don't have room to save and restore bitmaps
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "MenuMgr.h"
-#include "WindowMgr.h"
-#include "ResourceMgr.h"
-#include "MemoryMgr.h"
-#include "EventMgr.h"
-#include "FontMgr.h"
-#include "OSUtil.h"
-#include "ToolboxUtil.h"
-#include "ToolboxEvent.h"
-#include "OSEvent.h"
-#include "DeskMgr.h"
-#include "SysErr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <MenuMgr.h>
+#include <WindowMgr.h>
+#include <ResourceMgr.h>
+#include <MemoryMgr.h>
+#include <EventMgr.h>
+#include <FontMgr.h>
+#include <OSUtil.h>
+#include <ToolboxUtil.h>
+#include <ToolboxEvent.h>
+#include <OSEvent.h>
+#include <DeskMgr.h>
+#include <SysErr.h>
 
-#include "menu/menu.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/quick.h"
-#include "mman/mman.h"
-#include "wind/wind.h"
-#include "rsys/hook.h"
-#include "res/resource.h"
-#include "rsys/aboutbox.h"
-#include "error/system_error.h"
-#include "vdriver/vdriver.h"
-#include "rsys/version.h"
-#include "base/functions.impl.h"
-#include "prefs/prefs.h"
+#include <menu/menu.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/quick.h>
+#include <mman/mman.h>
+#include <wind/wind.h>
+#include <rsys/hook.h>
+#include <res/resource.h>
+#include <rsys/aboutbox.h>
+#include <error/system_error.h>
+#include <vdriver/vdriver.h>
+#include <rsys/version.h>
+#include <base/functions.impl.h>
+#include <prefs/prefs.h>
 
 using namespace Executor;
 

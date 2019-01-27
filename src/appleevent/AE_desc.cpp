@@ -2,13 +2,13 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "AppleEvents.h"
-#include "MemoryMgr.h"
+#include <AppleEvents.h>
+#include <MemoryMgr.h>
 
-#include "mman/mman.h"
-#include "appleevent/apple_events.h"
+#include <mman/mman.h>
+#include <appleevent/apple_events.h>
 #include <algorithm>
 
 using namespace Executor;

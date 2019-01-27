@@ -9,9 +9,9 @@
 
  */
 
-#include "MenuMgr.h"
-#include "ResourceMgr.h"
-#include "mman/mman.h"
+#include <MenuMgr.h>
+#include <ResourceMgr.h>
+#include <mman/mman.h>
 
 #define MODULE_NAME rsys_menu
 #include <base/api-module.h>

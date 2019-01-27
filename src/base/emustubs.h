@@ -7,9 +7,9 @@
  *
  */
 
-#include "ExMacTypes.h"
-#include "DialogMgr.h"
-#include "MemoryMgr.h"
+#include <ExMacTypes.h>
+#include <DialogMgr.h>
+#include <MemoryMgr.h>
 
 #define MODULE_NAME rsys_emustubs
 #include <base/api-module.h>

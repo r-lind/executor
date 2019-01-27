@@ -4,22 +4,22 @@
 
 /* Forward declarations in FileMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "FileMgr.h"
-#include "OSEvent.h"
-#include "VRetraceMgr.h"
-#include "OSUtil.h"
-#include "MemoryMgr.h"
-#include "StdFilePkg.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <FileMgr.h>
+#include <OSEvent.h>
+#include <VRetraceMgr.h>
+#include <OSUtil.h>
+#include <MemoryMgr.h>
+#include <StdFilePkg.h>
 
-#include "hfs/hfs.h"
-#include "file/file.h"
-#include "hfs/futzwithdosdisks.h"
-#include "print/ini.h"
-#include "rsys/string.h"
-#include "rsys/segment.h"
-#include "rsys/paths.h"
+#include <hfs/hfs.h>
+#include <file/file.h>
+#include <hfs/futzwithdosdisks.h>
+#include <print/ini.h>
+#include <rsys/string.h>
+#include <rsys/segment.h>
+#include <rsys/paths.h>
 
 #if !defined(WIN32)
 #include <pwd.h>

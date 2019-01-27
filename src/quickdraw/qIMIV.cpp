@@ -4,17 +4,17 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
 
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/stdbits.h"
-#include "rsys/safe_alloca.h"
-#include "mman/tempalloc.h"
-#include "vdriver/dirtyrect.h"
-#include "vdriver/vdriver.h"
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/stdbits.h>
+#include <rsys/safe_alloca.h>
+#include <mman/tempalloc.h>
+#include <vdriver/dirtyrect.h>
+#include <vdriver/vdriver.h>
 
 #undef ALLOCABEGIN
 #define ALLOCABEGIN SAFE_DECL();

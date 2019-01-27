@@ -2,13 +2,13 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "SysErr.h"
-#include "WindowMgr.h"
-#include "MenuMgr.h"
-#include "rsys/redrawscreen.h"
-#include "quickdraw/cquick.h"
-#include "vdriver/vdriver.h"
+#include <base/common.h>
+#include <SysErr.h>
+#include <WindowMgr.h>
+#include <MenuMgr.h>
+#include <rsys/redrawscreen.h>
+#include <quickdraw/cquick.h>
+#include <vdriver/vdriver.h>
 
 using namespace Executor;
 

@@ -2,16 +2,16 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "QuickDraw.h"
-#include "DialogMgr.h"
-#include "Iconutil.h"
-#include "ControlMgr.h"
+#include <QuickDraw.h>
+#include <DialogMgr.h>
+#include <Iconutil.h>
+#include <ControlMgr.h>
 
-#include "dial/itm.h"
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
+#include <dial/itm.h>
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
 #include <algorithm>
 
 using namespace Executor;

@@ -2,25 +2,25 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "TextEdit.h"
-#include "EventMgr.h"
-#include "ToolboxEvent.h"
-#include "OSEvent.h"
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <TextEdit.h>
+#include <EventMgr.h>
+#include <ToolboxEvent.h>
+#include <OSEvent.h>
 
-#include "quickdraw/cquick.h"
-#include "ctl/ctl.h"
+#include <quickdraw/cquick.h>
+#include <ctl/ctl.h>
 
 /* ### hack for `image_bits ()' */
-#include "menu/menu.h"
-#include "rsys/color_wheel_bits.h"
-#include "osevent/osevent.h"
-#include "prefs/options.h"
+#include <menu/menu.h>
+#include <rsys/color_wheel_bits.h>
+#include <osevent/osevent.h>
+#include <prefs/options.h>
 
 #include <ctype.h>
 #include <math.h>

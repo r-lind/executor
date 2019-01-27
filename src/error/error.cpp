@@ -2,20 +2,20 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <stdarg.h>
 #include <SysErr.h>
-#include "SegmentLdr.h"
-#include "CQuickDraw.h"
+#include <SegmentLdr.h>
+#include <CQuickDraw.h>
 
-#include "vdriver/vdriver.h"
-#include "commandline/option.h"
-#include "error/system_error.h"
-#include "sound/soundopts.h"
-#include "rsys/version.h"
-#include "mman/mman.h"
-#include "commandline/flags.h"
+#include <vdriver/vdriver.h>
+#include <commandline/option.h>
+#include <error/system_error.h>
+#include <sound/soundopts.h>
+#include <rsys/version.h>
+#include <mman/mman.h>
+#include <commandline/flags.h>
 
 using namespace Executor;
 

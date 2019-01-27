@@ -7,9 +7,9 @@
  *
  */
 
-#include "ExMacTypes.h"
-#include "QuickDraw.h"
-#include "TextEdit.h"
+#include <ExMacTypes.h>
+#include <QuickDraw.h>
+#include <TextEdit.h>
 
 #define MODULE_NAME rsys_tesave
 #include <base/api-module.h>

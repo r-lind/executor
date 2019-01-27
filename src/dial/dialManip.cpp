@@ -4,18 +4,18 @@
 
 /* Forward declarations in DialogMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "ControlMgr.h"
-#include "DialogMgr.h"
-#include "OSUtil.h"
-#include "MemoryMgr.h"
+#include <ControlMgr.h>
+#include <DialogMgr.h>
+#include <OSUtil.h>
+#include <MemoryMgr.h>
 
-#include "dial/itm.h"
-#include "wind/wind.h"
-#include "ctl/ctl.h"
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
+#include <dial/itm.h>
+#include <wind/wind.h>
+#include <ctl/ctl.h>
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
 
 using namespace Executor;
 

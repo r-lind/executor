@@ -8,8 +8,8 @@
 
  */
 
-#include "WindowMgr.h"
-#include "FileMgr.h"
+#include <WindowMgr.h>
+#include <FileMgr.h>
 
 #define MODULE_NAME DeviceMgr
 #include <base/api-module.h>

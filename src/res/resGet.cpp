@@ -4,22 +4,22 @@
 
 /* Forward declarations in ResourceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "FileMgr.h"
-#include "res/resource.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
-#include "mman/mman.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <FileMgr.h>
+#include <res/resource.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
+#include <mman/mman.h>
 
-#include "ctl/ctl.h"
-#include "list/list.h"
-#include "menu/menu.h"
-#include "wind/wind.h"
-#include "sound/soundopts.h"
-#include "file/file.h"
-#include "rsys/aboutbox.h"
-#include "rsys/stdfile.h" /* for unixmount */
+#include <ctl/ctl.h>
+#include <list/list.h>
+#include <menu/menu.h>
+#include <wind/wind.h>
+#include <sound/soundopts.h>
+#include <file/file.h>
+#include <rsys/aboutbox.h>
+#include <rsys/stdfile.h> /* for unixmount */
 
 #include <ctype.h>
 

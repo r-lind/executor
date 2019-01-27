@@ -7,8 +7,8 @@
  *
  */
 
-#include "ExMacTypes.h"
-#include "rsys/macros.h"
+#include <ExMacTypes.h>
+#include <rsys/macros.h>
 
 #define MODULE_NAME SANE
 #include <base/api-module.h>

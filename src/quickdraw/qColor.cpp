@@ -4,16 +4,16 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "MemoryMgr.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
+#include <base/common.h>
+#include <MemoryMgr.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
 
-#include "quickdraw/cquick.h"
-#include "quickdraw/picture.h"
-#include "res/resource.h"
+#include <quickdraw/cquick.h>
+#include <quickdraw/picture.h>
+#include <res/resource.h>
 
-#include "quickdraw/qcolor.h"
+#include <quickdraw/qcolor.h>
 
 using namespace Executor;
 

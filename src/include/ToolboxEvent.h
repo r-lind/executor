@@ -8,8 +8,8 @@
 
  */
 
-#include "EventMgr.h"
-#include "QuickDraw.h"
+#include <EventMgr.h>
+#include <QuickDraw.h>
 
 #define MODULE_NAME ToolboxEvent
 #include <base/api-module.h>

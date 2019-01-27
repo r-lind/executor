@@ -8,9 +8,9 @@
  */
 
 #include <base/lowglobals.h>
-#include "ExMacTypes.h"
-#include "EventMgr.h"
-#include "WindowMgr.h"
+#include <ExMacTypes.h>
+#include <EventMgr.h>
+#include <WindowMgr.h>
 
 #define MODULE_NAME DeskMgr
 #include <base/api-module.h>

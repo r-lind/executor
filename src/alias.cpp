@@ -2,23 +2,23 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <stdarg.h>
 
-#include "FileMgr.h"
-#include "AliasMgr.h"
-#include "MemoryMgr.h"
-#include "ToolboxUtil.h"
+#include <FileMgr.h>
+#include <AliasMgr.h>
+#include <MemoryMgr.h>
+#include <ToolboxUtil.h>
 
-#include "file/file.h"
-#include "hfs/hfs.h"
-#include "rsys/string.h"
+#include <file/file.h>
+#include <hfs/hfs.h>
+#include <rsys/string.h>
 #if defined(CYGWIN32)
 #include "win_temp.h"
 #endif
 
-#include "rsys/alias.h"
+#include <rsys/alias.h>
 
 #include <algorithm>
 

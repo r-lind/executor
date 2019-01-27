@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-#include "rsys/noreturn.h"
+#include <rsys/noreturn.h>
 
 #ifdef __cplusplus
 #include <string>

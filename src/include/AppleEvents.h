@@ -8,8 +8,8 @@
 
  */
 
-#include "EventMgr.h"
-#include "NotifyMgr.h"
+#include <EventMgr.h>
+#include <NotifyMgr.h>
 
 #define MODULE_NAME AppleEvents
 #include <base/api-module.h>

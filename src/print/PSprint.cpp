@@ -5,7 +5,7 @@
 
  */
 
-#include "base/common.h"
+#include <base/common.h>
 #include <stdarg.h>
 
 #undef MACOSX_ /* no idea what's going on here... */
@@ -15,18 +15,18 @@
 #import <AppKit/NSFontManager.h>
 #endif
 
-#include "MemoryMgr.h"
-#include "QuickDraw.h"
-#include "OSEvent.h"
-#include "FontMgr.h"
-#include "print/nextprint.h"
-#include "print/PSstrings.h"
-#include "mman/tempalloc.h"
+#include <MemoryMgr.h>
+#include <QuickDraw.h>
+#include <OSEvent.h>
+#include <FontMgr.h>
+#include <print/nextprint.h>
+#include <print/PSstrings.h>
+#include <mman/tempalloc.h>
 
-#include "print/print.h"
-#include "quickdraw/text.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/quick.h"
+#include <print/print.h>
+#include <quickdraw/text.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/quick.h>
 
 #include <ctype.h>
 

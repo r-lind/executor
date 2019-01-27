@@ -2,7 +2,7 @@
 #define IMAGE_H_
 
 #ifndef STANDALONE_IMAGE_H
-#include "QuickDraw.h"
+#include <QuickDraw.h>
 
 namespace Executor
 {

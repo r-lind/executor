@@ -4,15 +4,15 @@
 
 
 #include "x.h"
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "ScrapMgr.h"
-#include "OSUtil.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <ScrapMgr.h>
+#include <OSUtil.h>
 
-#include "osevent/commonevt.h"
-#include "vdriver/dirtyrect.h"
-#include "rsys/keyboard.h"
-#include "rsys/scrap.h"
+#include <osevent/commonevt.h>
+#include <vdriver/dirtyrect.h>
+#include <rsys/keyboard.h>
+#include <rsys/scrap.h>
 
 #include <assert.h>
 
@@ -35,25 +35,25 @@
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
-#include "OSEvent.h"
-#include "EventMgr.h"
-#include "ToolboxEvent.h"
-#include "rsys/adb.h"
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
+#include <OSEvent.h>
+#include <EventMgr.h>
+#include <ToolboxEvent.h>
+#include <rsys/adb.h>
 
-#include "quickdraw/cquick.h"
-#include "prefs/prefs.h"
-#include "mman/mman.h"
-#include "vdriver/refresh.h"
-#include "vdriver/vdriver.h"
+#include <quickdraw/cquick.h>
+#include <prefs/prefs.h>
+#include <mman/mman.h>
+#include <vdriver/refresh.h>
+#include <vdriver/vdriver.h>
 #include <syn68k_public.h>
-#include "base/m68kint.h"
-#include "quickdraw/depthconv.h"
-#include "quickdraw/rgbutil.h"
-#include "commandline/option.h"
-#include "commandline/flags.h"
-#include "osevent/osevent.h"
+#include <base/m68kint.h>
+#include <quickdraw/depthconv.h>
+#include <quickdraw/rgbutil.h>
+#include <commandline/option.h>
+#include <commandline/flags.h>
+#include <osevent/osevent.h>
 
 #include "x_keycodes.h"
 

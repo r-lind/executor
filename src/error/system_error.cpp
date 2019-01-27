@@ -2,23 +2,23 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "TextEdit.h"
-#include "EventMgr.h"
-#include "ToolboxEvent.h"
-#include "OSEvent.h"
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <TextEdit.h>
+#include <EventMgr.h>
+#include <ToolboxEvent.h>
+#include <OSEvent.h>
 
-#include "error/system_error.h"
-#include "rsys/redrawscreen.h"
+#include <error/system_error.h>
+#include <rsys/redrawscreen.h>
 
-#include "quickdraw/cquick.h"
-#include "osevent/osevent.h"
-#include "prefs/options.h"
+#include <quickdraw/cquick.h>
+#include <osevent/osevent.h>
+#include <prefs/options.h>
 #include <algorithm>
 
 using namespace Executor;

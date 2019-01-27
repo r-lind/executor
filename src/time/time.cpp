@@ -4,20 +4,20 @@
 
 /* Forward declarations in TimeMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "OSUtil.h"
-#include "TimeMgr.h"
+#include <OSUtil.h>
+#include <TimeMgr.h>
 
-#include "rsys/osutil.h"
-#include "time/vbl.h"
-#include "time/time.h"
-#include "time/syncint.h"
-#include "rsys/hook.h"
-#include "vdriver/refresh.h"
-#include "sound/soundopts.h"
-#include "base/cpu.h"
-#include "rsys/debugger.h"
+#include <rsys/osutil.h>
+#include <time/vbl.h>
+#include <time/time.h>
+#include <time/syncint.h>
+#include <rsys/hook.h>
+#include <vdriver/refresh.h>
+#include <sound/soundopts.h>
+#include <base/cpu.h>
+#include <rsys/debugger.h>
 #include <PowerCore.h>
 
 using namespace Executor;

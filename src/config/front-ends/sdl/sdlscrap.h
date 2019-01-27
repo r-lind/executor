@@ -9,7 +9,7 @@
 #define __sdlscrap_h__
 
 #if defined(CYGWIN32)
-#include "SDL/SDL.h"
+#include <SDL/SDL.h>
 
 extern SDL_Surface *surface_from_dib(void *lp);
 #endif

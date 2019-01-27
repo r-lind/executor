@@ -8,7 +8,7 @@
 #if !defined(_PICTURE_H_)
 #define _PICTURE_H_
 
-#include "quickdraw/quick.h"
+#include <quickdraw/quick.h>
 
 namespace Executor
 {

@@ -2,9 +2,9 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "quickdraw/cquick.h"
-#include "QuickDraw.h"
+#include <base/common.h>
+#include <quickdraw/cquick.h>
+#include <QuickDraw.h>
 
 using namespace Executor;
 

@@ -4,23 +4,23 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
+#include <base/common.h>
+#include <QuickDraw.h>
 /* ack */
-#include "WindowMgr.h"
-#include "CQuickDraw.h"
-#include "EventMgr.h"
-#include "OSEvent.h"
-#include "MemoryMgr.h"
+#include <WindowMgr.h>
+#include <CQuickDraw.h>
+#include <EventMgr.h>
+#include <OSEvent.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
-#include "res/resource.h"
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
+#include <res/resource.h>
 
-#include "osevent/osevent.h"
+#include <osevent/osevent.h>
 
-#include "quickdraw/quick.h"
-#include "vdriver/vdriver.h"
+#include <quickdraw/quick.h>
+#include <vdriver/vdriver.h>
 
 #if !defined(CURSOR_DEBUG)
 
@@ -30,8 +30,8 @@ using namespace Executor;
 
 #else
 
-#include "vdriver/dirtyrect.h"
-#include "vdriver/vdriver.h"
+#include <vdriver/dirtyrect.h>
+#include <vdriver/vdriver.h>
 
 using namespace Executor;
 

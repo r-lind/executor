@@ -2,13 +2,13 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
 
 using namespace Executor;
 

@@ -3,7 +3,7 @@
 
 #include <stdarg.h>
 #include <stdint.h>
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 
 #define MODULE_NAME rsys_mixed_mode
 #include <base/api-module.h>

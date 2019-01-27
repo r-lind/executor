@@ -2,20 +2,20 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/depthconv.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/rgbutil.h"
-#include "prefs/prefs.h"
-#include "mman/tempalloc.h"
-#include "quickdraw/picture.h"
-#include "mman/mman.h"
-#include "vdriver/vdriver.h"
+#include <quickdraw/depthconv.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/rgbutil.h>
+#include <prefs/prefs.h>
+#include <mman/tempalloc.h>
+#include <quickdraw/picture.h>
+#include <mman/mman.h>
+#include <vdriver/vdriver.h>
 #include <algorithm>
 
 using namespace Executor;

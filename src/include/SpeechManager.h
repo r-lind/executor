@@ -9,8 +9,8 @@
 #ifndef __CocoaExecutor__SpeechManager__
 #define __CocoaExecutor__SpeechManager__
 
-#include "SoundMgr.h"
-#include "FileMgr.h"
+#include <SoundMgr.h>
+#include <FileMgr.h>
 
 #define MODULE_NAME SpeechManager
 #include <base/api-module.h>

@@ -2,16 +2,16 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "ToolboxUtil.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <ToolboxUtil.h>
+#include <MemoryMgr.h>
 
-#include "ctl/ctl.h"
-#include "quickdraw/cquick.h"
+#include <ctl/ctl.h>
+#include <quickdraw/cquick.h>
 
 using namespace Executor;
 

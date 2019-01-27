@@ -8,8 +8,8 @@
 
  */
 
-#include "SANE.h"
-#include "IntlUtil.h"
+#include <SANE.h>
+#include <IntlUtil.h>
 #include <rsys/macros.h>
 #include <base/lowglobals.h>
 

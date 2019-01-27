@@ -4,9 +4,9 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "quickdraw/cquick.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <quickdraw/cquick.h>
 
 using namespace Executor;
 

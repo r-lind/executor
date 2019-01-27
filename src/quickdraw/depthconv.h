@@ -1,8 +1,8 @@
 #if !defined(_DEPTHCONV_H_)
 #define _DEPTHCONV_H_
 
-#include "quickdraw/rgbutil.h"
-#include "CQuickDraw.h"
+#include <quickdraw/rgbutil.h>
+#include <CQuickDraw.h>
 
 namespace Executor
 {

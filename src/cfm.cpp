@@ -7,23 +7,23 @@
  * to pull in certain sections (including temporarily the loader section).
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <assert.h>
 
-#include "FileMgr.h"
-#include "OSUtil.h"
-#include "MemoryMgr.h"
-#include "SegmentLdr.h"
-#include "AliasMgr.h"
-#include "ResourceMgr.h"
+#include <FileMgr.h>
+#include <OSUtil.h>
+#include <MemoryMgr.h>
+#include <SegmentLdr.h>
+#include <AliasMgr.h>
+#include <ResourceMgr.h>
 
-#include "rsys/cfm.h"
-#include "rsys/pef.h"
-#include "file/file.h"
-#include "rsys/launch.h"
-#include "hfs/hfs.h"
-#include "rsys/string.h"
+#include <rsys/cfm.h>
+#include <rsys/pef.h>
+#include <file/file.h>
+#include <rsys/launch.h>
+#include <hfs/hfs.h>
+#include <rsys/string.h>
 #include <base/builtinlibs.h>
 #include <algorithm>
 

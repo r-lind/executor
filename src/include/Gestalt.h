@@ -7,7 +7,7 @@
 #if !defined(__GESTALT__)
 #define __GESTALT__
 
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 #include <rsys/macros.h>
 
 #define MODULE_NAME Gestalt

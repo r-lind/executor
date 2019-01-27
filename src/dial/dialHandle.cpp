@@ -6,24 +6,24 @@
 
 /* HLock checked by ctm on Mon May 13 17:54:22 MDT 1991 */
 
-#include "base/common.h"
-#include "EventMgr.h"
-#include "DialogMgr.h"
-#include "ControlMgr.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
-#include "ToolboxUtil.h"
-#include "ToolboxEvent.h"
-#include "Iconutil.h"
-#include "FontMgr.h"
+#include <base/common.h>
+#include <EventMgr.h>
+#include <DialogMgr.h>
+#include <ControlMgr.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
+#include <ToolboxUtil.h>
+#include <ToolboxEvent.h>
+#include <Iconutil.h>
+#include <FontMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "ctl/ctl.h"
-#include "mman/mman.h"
-#include "dial/itm.h"
-#include "prefs/prefs.h"
-#include "rsys/hook.h"
-#include "osevent/osevent.h"
+#include <quickdraw/cquick.h>
+#include <ctl/ctl.h>
+#include <mman/mman.h>
+#include <dial/itm.h>
+#include <prefs/prefs.h>
+#include <rsys/hook.h>
+#include <osevent/osevent.h>
 #include <base/functions.impl.h>
 
 using namespace Executor;

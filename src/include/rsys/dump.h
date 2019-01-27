@@ -1,7 +1,7 @@
 
 #if defined(THINK_C)
 #include <stdio.h>
-#include "Palettes.h"
+#include <Palettes.h>
 #endif
 namespace Executor
 {

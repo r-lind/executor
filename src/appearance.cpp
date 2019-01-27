@@ -4,16 +4,16 @@
 
 /* Forward declarations in ResourceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "rsys/appearance.h"
+#include <base/common.h>
+#include <rsys/appearance.h>
 
-#include "ResourceMgr.h"
-#include "FileMgr.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
+#include <ResourceMgr.h>
+#include <FileMgr.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
 
-#include "error/error.h"
-#include "prefs/options.h"
+#include <error/error.h>
+#include <prefs/options.h>
 
 using namespace Executor;
 

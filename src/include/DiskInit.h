@@ -1,7 +1,7 @@
 #if !defined(__DISKINIT__)
 #define __DISKINIT__
 
-#include "QuickDraw.h"
+#include <QuickDraw.h>
 
 #define MODULE_NAME DiskInit
 #include <base/api-module.h>

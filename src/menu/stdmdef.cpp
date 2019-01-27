@@ -2,19 +2,19 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "MenuMgr.h"
-#include "WindowMgr.h"
-#include "FontMgr.h"
-#include "MemoryMgr.h"
-#include "ToolboxEvent.h"
-#include "Iconutil.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <MenuMgr.h>
+#include <WindowMgr.h>
+#include <FontMgr.h>
+#include <MemoryMgr.h>
+#include <ToolboxEvent.h>
+#include <Iconutil.h>
 
-#include "menu/menu.h"
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
+#include <menu/menu.h>
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
 #include <algorithm>
 
 using namespace Executor;

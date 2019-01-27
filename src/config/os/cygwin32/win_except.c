@@ -4,9 +4,9 @@
 
 #define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "SegmentLdr.h"
+#include <SegmentLdr.h>
 #include "win_except.h"
 
 #include <windows.h>
@@ -17,8 +17,8 @@
 
 #if defined(SDL)
 #include <SDL/SDL.h>
-#include "rsys/segment.h"
-#include "rsys/launch.h"
+#include <rsys/segment.h>
+#include <rsys/launch.h>
 #endif
 
 #if defined(__WIN32__) && (__GNUC__ == 2 && __GNUC_MINOR__ < 95)

@@ -4,14 +4,14 @@
 
 /* color window manager functions; introduced in IM-V or beyond */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "WindowMgr.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <WindowMgr.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
 
 using namespace Executor;
 

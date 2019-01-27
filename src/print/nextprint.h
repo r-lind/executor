@@ -1,8 +1,8 @@
 #if !defined(__RSYS_NEXTPRINT_H__)
 #define __RSYS_NEXTPRINT_H__
 
-#include "base/mactype.h"
-#include "QuickDraw.h"
+#include <base/mactype.h>
+#include <QuickDraw.h>
 
 /*
  * Copyright 1992 by Abacus Research and Development, Inc.

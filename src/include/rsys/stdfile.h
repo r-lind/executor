@@ -1,11 +1,11 @@
 #if !defined(__RSYS_STDFILE__)
 #define __RSYS_STDFILE__
 
-#include "FileMgr.h"
-#include "EventMgr.h"
-#include "ControlMgr.h"
-#include "DialogMgr.h"
-#include "file/file.h"
+#include <FileMgr.h>
+#include <EventMgr.h>
+#include <ControlMgr.h>
+#include <DialogMgr.h>
+#include <file/file.h>
 
 #define MODULE_NAME rsys_stdfile
 #include <base/api-module.h>

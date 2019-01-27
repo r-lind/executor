@@ -1,8 +1,8 @@
 #if !defined(_PROCESSMGR_H_)
 #define _PROCESSMGR_H_
 
-#include "FileMgr.h"
-#include "PPC.h"
+#include <FileMgr.h>
+#include <PPC.h>
 
 #define MODULE_NAME ProcessMgr
 #include <base/api-module.h>

@@ -4,17 +4,17 @@
 
 /* Forward declarations in ControlMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "ResourceMgr.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <ResourceMgr.h>
+#include <MemoryMgr.h>
 
-#include "ctl/ctl.h"
-#include "wind/wind.h"
-#include "quickdraw/cquick.h"
-#include "res/resource.h"
+#include <ctl/ctl.h>
+#include <wind/wind.h>
+#include <quickdraw/cquick.h>
+#include <res/resource.h>
 
 using namespace Executor;
 

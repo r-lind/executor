@@ -4,23 +4,23 @@
 
 /* screen-dump.c; dump the mac screen to a tiff file */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <stdarg.h>
 
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
-#include "mman/tempalloc.h"
-#include "prefs/prefs.h"
-#include "rsys/uniquefile.h"
-#include "file/file.h"
-#include "vdriver/vdriver.h"
-#include "rsys/screen-dump.h"
-#include "rsys/paths.h"
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
+#include <mman/tempalloc.h>
+#include <prefs/prefs.h>
+#include <rsys/uniquefile.h>
+#include <file/file.h>
+#include <vdriver/vdriver.h>
+#include <rsys/screen-dump.h>
+#include <rsys/paths.h>
 
 using namespace Executor;
 

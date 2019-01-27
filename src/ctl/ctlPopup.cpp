@@ -2,18 +2,18 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "ControlMgr.h"
-#include "MenuMgr.h"
-#include "ToolboxUtil.h"
-#include "Iconutil.h"
-#include "OSUtil.h"
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <ControlMgr.h>
+#include <MenuMgr.h>
+#include <ToolboxUtil.h>
+#include <Iconutil.h>
+#include <OSUtil.h>
 
-#include "ctl/ctl.h"
-#include "menu/menu.h"
+#include <ctl/ctl.h>
+#include <menu/menu.h>
 
 #include <algorithm>
 

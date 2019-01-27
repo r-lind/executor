@@ -4,24 +4,24 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
-#include "ToolboxUtil.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
+#include <ToolboxUtil.h>
 
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/picture.h"
-#include "prefs/prefs.h"
-#include "mman/mman.h"
-#include "commandline/flags.h"
-#include "vdriver/vdriver.h"
-#include "mman/tempalloc.h"
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/picture.h>
+#include <prefs/prefs.h>
+#include <mman/mman.h>
+#include <commandline/flags.h>
+#include <vdriver/vdriver.h>
+#include <mman/tempalloc.h>
 
-#include "quickdraw/xdblt.h"
-#include "quickdraw/srcblt.h"
-#include "vdriver/dirtyrect.h"
+#include <quickdraw/xdblt.h>
+#include <quickdraw/srcblt.h>
+#include <vdriver/dirtyrect.h>
 
 using namespace Executor;
 

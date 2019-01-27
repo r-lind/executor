@@ -1,6 +1,6 @@
 #include "keycode_map.h"
-#include "base/common.h"
-#include "rsys/keyboard.h"
+#include <base/common.h>
+#include <rsys/keyboard.h>
 
 #include <SDL.h>
 

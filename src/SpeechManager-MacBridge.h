@@ -9,7 +9,7 @@
 #ifndef __CocoaExecutor__SpeechManager_MacBridge__
 #define __CocoaExecutor__SpeechManager_MacBridge__
 
-#include "SpeechManager.h"
+#include <SpeechManager.h>
 
 namespace MacBridge
 {

@@ -2,14 +2,14 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "rsys/version.h"
-#include "rsys/gestalt.h"
-#include "prefs/prefs.h"
+#include <base/common.h>
+#include <rsys/version.h>
+#include <rsys/gestalt.h>
+#include <prefs/prefs.h>
 
-#include "ResourceMgr.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
+#include <ResourceMgr.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
 
 using namespace Executor;
 

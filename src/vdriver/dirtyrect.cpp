@@ -2,15 +2,15 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "vdriver/vdriver.h"
-#include "vdriver/dirtyrect.h"
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
-#include "prefs/prefs.h"
-#include "commandline/flags.h"
-#include "vdriver/autorefresh.h"
-#include "OSEvent.h"
+#include <base/common.h>
+#include <vdriver/vdriver.h>
+#include <vdriver/dirtyrect.h>
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
+#include <prefs/prefs.h>
+#include <commandline/flags.h>
+#include <vdriver/autorefresh.h>
+#include <OSEvent.h>
 #include <algorithm>
 
 #if !defined(MAX_DIRTY_RECTS)

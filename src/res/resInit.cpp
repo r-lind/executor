@@ -4,18 +4,18 @@
 
 /* Forward declarations in ResourceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "ResourceMgr.h"
-#include "QuickDraw.h"
-#include "MemoryMgr.h"
+#include <ResourceMgr.h>
+#include <QuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "res/resource.h"
-#include "file/file.h"
-#include "mman/mman.h"
-#include "commandline/flags.h"
-#include "rsys/version.h"
-#include "rsys/appearance.h"
+#include <res/resource.h>
+#include <file/file.h>
+#include <mman/mman.h>
+#include <commandline/flags.h>
+#include <rsys/version.h>
+#include <rsys/appearance.h>
 
 using namespace Executor;
 

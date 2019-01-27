@@ -8,9 +8,9 @@
 
  */
 
-#include "VRetraceMgr.h"
-#include "FileMgr.h"
-#include "OSEvent.h"
+#include <VRetraceMgr.h>
+#include <FileMgr.h>
+#include <OSEvent.h>
 
 #define MODULE_NAME OSUtil
 #include <base/api-module.h>

@@ -9,7 +9,7 @@
 #include <string.h>
 
 #define STANDALONE_IMAGE_H
-#include "quickdraw/image.h"
+#include <quickdraw/image.h>
 
 /* consume input from o_fp, produce output to o_fp */
 static FILE *i_fp, *o_fp;

@@ -6,23 +6,23 @@
 
 /* Forward declarations in MemoryMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "MemoryMgr.h"
-#include "SegmentLdr.h"
-#include "QuickDraw.h"
-#include "SysErr.h"
-#include "TextEdit.h"
-#include "OSEvent.h"
+#include <base/common.h>
+#include <MemoryMgr.h>
+#include <SegmentLdr.h>
+#include <QuickDraw.h>
+#include <SysErr.h>
+#include <TextEdit.h>
+#include <OSEvent.h>
 
-#include "mman/mman_private.h"
-#include "base/cpu.h"
-#include "rsys/hook.h"
-#include "mman/memsize.h"
-#include "rsys/executor.h"
-#include "prefs/options.h"
-#include "rsys/toolutil.h"
-#include "rsys/gestalt.h"
-#include "vdriver/vdriver.h"   /* for WeOwnScrapX */
+#include <mman/mman_private.h>
+#include <base/cpu.h>
+#include <rsys/hook.h>
+#include <mman/memsize.h>
+#include <rsys/executor.h>
+#include <prefs/options.h>
+#include <rsys/toolutil.h>
+#include <rsys/gestalt.h>
+#include <vdriver/vdriver.h>   /* for WeOwnScrapX */
 #include <algorithm>
 
 #if defined(LINUX)

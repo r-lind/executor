@@ -4,22 +4,22 @@
 
 /* Forward declarations in WindowMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "WindowMgr.h"
-#include "EventMgr.h"
-#include "ToolboxUtil.h"
-#include "OSEvent.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <WindowMgr.h>
+#include <EventMgr.h>
+#include <ToolboxUtil.h>
+#include <OSEvent.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "rsys/hook.h"
-#include "MemoryMgr.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <rsys/hook.h>
+#include <MemoryMgr.h>
 
-#include "rsys/evil.h"
-#include "rsys/executor.h"
-#include "base/functions.impl.h"
+#include <rsys/evil.h>
+#include <rsys/executor.h>
+#include <base/functions.impl.h>
 
 using namespace Executor;
 

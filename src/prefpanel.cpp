@@ -1,20 +1,20 @@
-#include "rsys/prefpanel.h"
-#include "prefs/options.h"
-#include "prefs/prefs.h"
-#include "sound/sounddriver.h"
-#include "vdriver/refresh.h"
-#include "rsys/string.h"
-#include "quickdraw/cquick.h"
-#include "commandline/parseopt.h"
-#include "vdriver/vdriver.h"
+#include <rsys/prefpanel.h>
+#include <prefs/options.h>
+#include <prefs/prefs.h>
+#include <sound/sounddriver.h>
+#include <vdriver/refresh.h>
+#include <rsys/string.h>
+#include <quickdraw/cquick.h>
+#include <commandline/parseopt.h>
+#include <vdriver/vdriver.h>
 
-#include "DialogMgr.h"
-#include "SysErr.h"
-#include "OSUtil.h"
-#include "SegmentLdr.h"
-#include "ControlMgr.h"
-#include "CQuickDraw.h"
-#include "BinaryDecimal.h"
+#include <DialogMgr.h>
+#include <SysErr.h>
+#include <OSUtil.h>
+#include <SegmentLdr.h>
+#include <ControlMgr.h>
+#include <CQuickDraw.h>
+#include <BinaryDecimal.h>
 
 
 

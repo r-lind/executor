@@ -2,7 +2,7 @@
 #if !defined(_CQUICKDRAW_H_)
 #define _CQUICKDRAW_H_
 
-#include "WindowMgr.h"
+#include <WindowMgr.h>
 
 #define MODULE_NAME CQuickDraw
 #include <base/api-module.h>

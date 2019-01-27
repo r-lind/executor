@@ -9,8 +9,8 @@
 
  */
 
-#include "IntlUtil.h"
-#include "AliasMgr.h"
+#include <IntlUtil.h>
+#include <AliasMgr.h>
 
 #define MODULE_NAME EditionMgr
 #include <base/api-module.h>

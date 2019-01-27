@@ -4,19 +4,19 @@
 
 /* Forward declarations in ControlMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "EventMgr.h"
-#include "ToolboxEvent.h"
-#include "OSEvent.h"
-#include "ListMgr.h"
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <EventMgr.h>
+#include <ToolboxEvent.h>
+#include <OSEvent.h>
+#include <ListMgr.h>
 
-#include "ctl/ctl.h"
-#include "wind/wind.h"
-#include "rsys/stdfile.h"
-#include "rsys/hook.h"
+#include <ctl/ctl.h>
+#include <wind/wind.h>
+#include <rsys/stdfile.h>
+#include <rsys/hook.h>
 #include <base/functions.impl.h>
 
 /*

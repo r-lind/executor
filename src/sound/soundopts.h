@@ -1,9 +1,9 @@
 #if !defined(__RSYS_SOUNDOPTS__)
 #define __RSYS_SOUNDOPTS__
 
-#include "SoundMgr.h"
+#include <SoundMgr.h>
 /* to get extern for `ROMlib_PretendSound' */
-#include "prefs/prefs.h"
+#include <prefs/prefs.h>
 
 #define MODULE_NAME rsys_soundopts
 #include <base/api-module.h>

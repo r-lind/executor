@@ -8,9 +8,9 @@
 
  */
 
-#include "TextEdit.h"
-#include "MenuMgr.h"
-#include "WindowMgr.h"
+#include <TextEdit.h>
+#include <MenuMgr.h>
+#include <WindowMgr.h>
 
 #define MODULE_NAME HelpMgr
 #include <base/api-module.h>

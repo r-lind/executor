@@ -7,8 +7,8 @@
 
 #if !defined(__MYRESOURCE__)
 
-#include "ResourceMgr.h"
-#include "rsys/string.h"
+#include <ResourceMgr.h>
+#include <rsys/string.h>
 
 namespace Executor
 {

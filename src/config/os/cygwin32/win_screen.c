@@ -4,8 +4,8 @@
 
 #define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 
-#include "base/common.h"
-#include "rsys/error.h"
+#include <base/common.h>
+#include <rsys/error.h>
 
 #include "syswm_vars.h"
 

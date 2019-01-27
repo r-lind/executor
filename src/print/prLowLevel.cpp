@@ -5,30 +5,30 @@
 
 /* Forward declarations in PrintMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "PrintMgr.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
-#include "BinaryDecimal.h"
-#include "ControlMgr.h"
-#include "ResourceMgr.h"
-#include "print/nextprint.h"
-#include "print/print.h"
-#include "rsys/hook.h"
-#include "ctl/ctl.h"
-#include "print/ini.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <PrintMgr.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
+#include <BinaryDecimal.h>
+#include <ControlMgr.h>
+#include <ResourceMgr.h>
+#include <print/nextprint.h>
+#include <print/print.h>
+#include <rsys/hook.h>
+#include <ctl/ctl.h>
+#include <print/ini.h>
 #include <ctype.h>
-#include "MenuMgr.h"
-#include "vdriver/vdriver.h"
-#include "rsys/uniquefile.h"
-#include "error/system_error.h"
-#include "prefs/options.h"
-#include "rsys/string.h"
-#include "osevent/osevent.h"
-#include "base/functions.impl.h"
-#include "prefs/prefs.h"
-#include "rsys/paths.h"
+#include <MenuMgr.h>
+#include <vdriver/vdriver.h>
+#include <rsys/uniquefile.h>
+#include <error/system_error.h>
+#include <prefs/options.h>
+#include <rsys/string.h>
+#include <osevent/osevent.h>
+#include <base/functions.impl.h>
+#include <prefs/prefs.h>
+#include <rsys/paths.h>
 #include <algorithm>
 
 #ifdef MACOSX_

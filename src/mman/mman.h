@@ -2,7 +2,7 @@
 #if !defined(_MMAN_PUBLIC_H_)
 #define _MMAN_PUBLIC_H_
 
-#include "MemoryMgr.h"
+#include <MemoryMgr.h>
 
 /*
  * Copyright 1986, 1989, 1990 by Abacus Research and Development, Inc.

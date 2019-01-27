@@ -1,7 +1,7 @@
 #if !defined(_MEMORY_MGR_H_)
 #define _MEMORY_MGR_H_
 
-#include "ExMacTypes.h"
+#include <ExMacTypes.h>
 #include <base/lowglobals.h>
 
 #define MODULE_NAME MemoryMgr

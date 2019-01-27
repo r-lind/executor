@@ -4,9 +4,9 @@
 
 #define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "SegmentLdr.h"
+#include <SegmentLdr.h>
 
 #include <windows.h>
 #include <stdio.h>
@@ -14,12 +14,12 @@
 
 #include "win_print.h"
 #include "win_print_private.h"
-#include "rsys/gestalt.h"
-#include "rsys/error.h"
-#include "rsys/float_fcw.h"
-#include "rsys/segment.h"
-#include "rsys/launch.h"
-#include "rsys/option.h"
+#include <rsys/gestalt.h>
+#include <rsys/error.h>
+#include <rsys/float_fcw.h>
+#include <rsys/segment.h>
+#include <rsys/launch.h>
+#include <rsys/option.h>
 
 /*
  * Some of the Win32 routines smash the floating point environment registers,

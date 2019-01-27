@@ -4,16 +4,16 @@
 
 /* Forward declarations in SoundMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "MemoryMgr.h"
-#include "ResourceMgr.h"
-#include "SoundDvr.h"
-#include "SoundMgr.h"
-#include "FileMgr.h"
-#include "sound/sounddriver.h"
-#include "mman/mman.h"
-#include "base/functions.impl.h"
-#include "time/syncint.h"
+#include <base/common.h>
+#include <MemoryMgr.h>
+#include <ResourceMgr.h>
+#include <SoundDvr.h>
+#include <SoundMgr.h>
+#include <FileMgr.h>
+#include <sound/sounddriver.h>
+#include <mman/mman.h>
+#include <base/functions.impl.h>
+#include <time/syncint.h>
 
 using namespace Executor;
 

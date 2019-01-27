@@ -10,8 +10,8 @@
 #define WIN32
 #endif
 
-#include "SDL/SDL.h"
-#include "SDL/SDL_syswm.h"
+#include <SDL/SDL.h>
+#include <SDL/SDL_syswm.h>
 
 /* System dependent variables */
 #if defined(__unix__) || defined(MACOSX)

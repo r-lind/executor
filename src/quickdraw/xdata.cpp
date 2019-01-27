@@ -2,16 +2,16 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "MemoryMgr.h"
+#include <MemoryMgr.h>
 
-#include "quickdraw/xdata.h"
-#include "quickdraw/xdblt.h"
-#include "mman/tempalloc.h"
-#include "mman/mman.h"
+#include <quickdraw/xdata.h>
+#include <quickdraw/xdblt.h>
+#include <mman/tempalloc.h>
+#include <mman/mman.h>
 
-#include "vdriver/vdriver.h"
+#include <vdriver/vdriver.h>
 
 using namespace Executor;
 

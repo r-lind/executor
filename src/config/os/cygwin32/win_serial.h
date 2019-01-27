@@ -6,7 +6,7 @@
  * All rights reserved.
  */
 
-#include "Serial.h"
+#include <Serial.h>
 
 /*
  * This should really be divided into public and private .h files

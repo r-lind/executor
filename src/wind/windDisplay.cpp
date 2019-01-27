@@ -4,14 +4,14 @@
 
 /* Forward declarations in WindowMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "OSUtil.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <OSUtil.h>
+#include <MemoryMgr.h>
 
 /* get {C}PORT_... accessors */
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
 
 using namespace Executor;
 

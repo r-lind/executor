@@ -1,7 +1,7 @@
 #if !defined(__SCRAP__)
 #define __SCRAP__
 
-#include "ResourceMgr.h"
+#include <ResourceMgr.h>
 
 #define MODULE_NAME ScrapMgr
 #include <base/api-module.h>

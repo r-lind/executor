@@ -1,7 +1,7 @@
 #if !defined(_RSYS_SOUNDDRIVER_H_)
 #define _RSYS_SOUNDDRIVER_H_
 
-#include "sound/soundopts.h"
+#include <sound/soundopts.h>
 
 namespace Executor
 {

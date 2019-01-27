@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <cstddef>
 #include <type_traits>
-#include "base/mactype.h"
+#include <base/mactype.h>
 #include <syn68k_public.h> /* for ROMlib_offset */
 
 namespace Executor

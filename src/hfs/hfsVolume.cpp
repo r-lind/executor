@@ -2,13 +2,13 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "OSUtil.h"
-#include "FileMgr.h"
-#include "MemoryMgr.h"
-#include "hfs/hfs.h"
-#include "file/file.h"
-#include "hfs/hfs_plus.h"
+#include <base/common.h>
+#include <OSUtil.h>
+#include <FileMgr.h>
+#include <MemoryMgr.h>
+#include <hfs/hfs.h>
+#include <file/file.h>
+#include <hfs/hfs_plus.h>
 
 #if defined(WIN32)
 #include "winfs.h"

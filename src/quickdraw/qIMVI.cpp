@@ -4,13 +4,13 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MemoryMgr.h"
-#include "quickdraw/quick.h"
-#include "quickdraw/region.h"
-#include "quickdraw/picture.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MemoryMgr.h>
+#include <quickdraw/quick.h>
+#include <quickdraw/region.h>
+#include <quickdraw/picture.h>
 
 #include "sspairtable.ctable"
 

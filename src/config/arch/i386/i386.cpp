@@ -2,8 +2,8 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "rsys/arch.h"
+#include <base/common.h>
+#include <rsys/arch.h>
 
 #if !defined(ALWAYS_ON_I486)
 arch_type_t arch_type;

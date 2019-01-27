@@ -1,6 +1,6 @@
-#include "prefs/options.h"
-#include "commandline/flags.h"
-#include "prefs/prefs.h"
+#include <prefs/options.h>
+#include <commandline/flags.h>
+#include <prefs/prefs.h>
 
 // This file contains the definitions for the strange set of
 // global variables whose declarations are spread between flags.h, options.h and prefs.h

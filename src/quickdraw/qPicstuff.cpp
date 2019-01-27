@@ -4,24 +4,24 @@
 
 /* Forward declarations in QuickDraw.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "MemoryMgr.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "OSUtil.h"
-#include "ToolboxUtil.h"
-#include "FontMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <MemoryMgr.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <OSUtil.h>
+#include <ToolboxUtil.h>
+#include <FontMgr.h>
 
-#include "rsys/toolutil.h"
-#include "quickdraw/cquick.h"
-#include "quickdraw/picture.h"
-#include "mman/mman.h"
-#include "quickdraw/xdata.h"
-#include "mman/tempalloc.h"
-#include "print/print.h"
-#include "rsys/executor.h"
+#include <rsys/toolutil.h>
+#include <quickdraw/cquick.h>
+#include <quickdraw/picture.h>
+#include <mman/mman.h>
+#include <quickdraw/xdata.h>
+#include <mman/tempalloc.h>
+#include <print/print.h>
+#include <rsys/executor.h>
 #include <base/functions.impl.h>
 #include <algorithm>
 

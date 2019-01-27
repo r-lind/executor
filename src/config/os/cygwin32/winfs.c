@@ -12,7 +12,7 @@
 #define _STUBIFY_H_ /* prevent conflicts between stubify.h and windows.h */
 #define BOOLEAN MAC_BOOLEAN /* we want the Windows version of these two */
 #define CHAR MAC_CHAR
-#include "base/common.h"
+#include <base/common.h>
 #undef BOOLEAN
 #undef CHAR
 #undef Time
@@ -22,7 +22,7 @@
 #include <errno.h>
 
 #include "winfs.h"
-#include "rsys/lockunlock.h"
+#include <rsys/lockunlock.h>
 
 #if 0 /* mingw32 has opendir, readdir, closedir and friends */
 

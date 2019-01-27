@@ -1,7 +1,7 @@
 #if !defined(__PRINTING__)
 #define __PRINTING__
 
-#include "DialogMgr.h"
+#include <DialogMgr.h>
 
 #define MODULE_NAME PrintMgr
 #include <base/api-module.h>

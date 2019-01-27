@@ -4,16 +4,16 @@
 
 /* Forward declarations in WindowMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "EventMgr.h"
-#include "OSEvent.h"
-#include "MemoryMgr.h"
-#include "MenuMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <EventMgr.h>
+#include <OSEvent.h>
+#include <MemoryMgr.h>
+#include <MenuMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "menu/menu.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <menu/menu.h>
 
 using namespace Executor;
 

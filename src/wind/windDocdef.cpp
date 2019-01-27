@@ -2,17 +2,17 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "WindowMgr.h"
-#include "ToolboxUtil.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <WindowMgr.h>
+#include <ToolboxUtil.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "ctl/ctl.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <ctl/ctl.h>
 
-#include "quickdraw/image.h"
+#include <quickdraw/image.h>
 
 using namespace Executor;
 

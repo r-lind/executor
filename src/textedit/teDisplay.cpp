@@ -4,16 +4,16 @@
 
 /* Forward declarations in TextEdit.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "TextEdit.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <TextEdit.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "textedit/tesave.h"
-#include "quickdraw/region.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <textedit/tesave.h>
+#include <quickdraw/region.h>
 
 using namespace Executor;
 

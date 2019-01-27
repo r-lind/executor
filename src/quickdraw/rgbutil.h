@@ -1,7 +1,7 @@
 #if !defined(_RGBUTIL_H_)
 #define _RGBUTIL_H_
 
-#include "QuickDraw.h"
+#include <QuickDraw.h>
 
 namespace Executor
 {

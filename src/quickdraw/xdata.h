@@ -1,8 +1,8 @@
 #if !defined(_RSYS_XDATA_H_)
 #define _RSYS_XDATA_H_
 
-#include "quickdraw/rgbutil.h"
-#include "quickdraw/cquick.h"
+#include <quickdraw/rgbutil.h>
+#include <quickdraw/cquick.h>
 
 namespace Executor
 {

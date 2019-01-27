@@ -4,27 +4,27 @@
 
 /* Forward declarations in SysErr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "EventMgr.h"
-#include "ToolboxEvent.h"
-#include "DialogMgr.h"
-#include "OSUtil.h"
-#include "SegmentLdr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <EventMgr.h>
+#include <ToolboxEvent.h>
+#include <DialogMgr.h>
+#include <OSUtil.h>
+#include <SegmentLdr.h>
 #include <SysErr.h>
-#include "MemoryMgr.h"
-#include "BinaryDecimal.h"
+#include <MemoryMgr.h>
+#include <BinaryDecimal.h>
 
-#include "quickdraw/cquick.h"
-#include "quickdraw/quick.h"
-#include "rsys/segment.h"
-#include "commandline/flags.h"
-#include "rsys/version.h"
-#include "vdriver/vdriver.h"
-#include "osevent/osevent.h"
-#include "prefs/options.h"
-#include "error/syserr.h"
+#include <quickdraw/cquick.h>
+#include <quickdraw/quick.h>
+#include <rsys/segment.h>
+#include <commandline/flags.h>
+#include <rsys/version.h>
+#include <vdriver/vdriver.h>
+#include <osevent/osevent.h>
+#include <prefs/options.h>
+#include <error/syserr.h>
 
 using namespace Executor;
 

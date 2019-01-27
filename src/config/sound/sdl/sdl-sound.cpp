@@ -7,7 +7,7 @@
  * a different way to drive SDL's sound.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -17,9 +17,9 @@
 #include <sched.h>
 #include <pthread.h>
 
-#include "vdriver/vdriver.h"
-#include "sound/sounddriver.h"
-#include "base/m68kint.h"
+#include <vdriver/vdriver.h>
+#include <sound/sounddriver.h>
+#include <base/m68kint.h>
 #include "sdl-sound.h"
 #include <SDL_Audio.h>
 

@@ -2,22 +2,22 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "EventMgr.h"
-#include "TextEdit.h"
-#include "OSUtil.h"
-#include "ToolboxEvent.h"
-#include "ToolboxUtil.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <EventMgr.h>
+#include <TextEdit.h>
+#include <OSUtil.h>
+#include <ToolboxEvent.h>
+#include <ToolboxUtil.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
-#include "textedit/tesave.h"
-#include "rsys/hook.h"
-#include "quickdraw/region.h"
-#include "quickdraw/text.h"
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
+#include <textedit/tesave.h>
+#include <rsys/hook.h>
+#include <quickdraw/region.h>
+#include <quickdraw/text.h>
 
 using namespace Executor;
 

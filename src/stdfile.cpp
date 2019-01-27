@@ -12,42 +12,42 @@
 
 /* Forward declarations in StdFilePkg.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "rsys/stdfile.h"
+#include <base/common.h>
+#include <rsys/stdfile.h>
 
-#include "DialogMgr.h"
-#include "FileMgr.h"
-#include "EventMgr.h"
-#include "StdFilePkg.h"
-#include "ControlMgr.h"
-#include "MenuMgr.h"
-#include "ResourceMgr.h"
-#include "ToolboxEvent.h"
-#include "ToolboxUtil.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
-#include "ScriptMgr.h"
+#include <DialogMgr.h>
+#include <FileMgr.h>
+#include <EventMgr.h>
+#include <StdFilePkg.h>
+#include <ControlMgr.h>
+#include <MenuMgr.h>
+#include <ResourceMgr.h>
+#include <ToolboxEvent.h>
+#include <ToolboxUtil.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
+#include <ScriptMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "hfs/hfs.h"
-#include "file/file.h"
-#include "rsys/arrowkeys.h"
-#include "res/resource.h"
-#include "time/time.h"
-#include "mman/tempalloc.h"
-#include "rsys/hook.h"
-#include "rsys/toolevent.h"
-#include "rsys/string.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <hfs/hfs.h>
+#include <file/file.h>
+#include <rsys/arrowkeys.h>
+#include <res/resource.h>
+#include <time/time.h>
+#include <mman/tempalloc.h>
+#include <rsys/hook.h>
+#include <rsys/toolevent.h>
+#include <rsys/string.h>
 
-#include "rsys/osutil.h"
-#include "osevent/osevent.h"
+#include <rsys/osutil.h>
+#include <osevent/osevent.h>
 
-#include "print/print.h"
-#include "error/system_error.h"
+#include <print/print.h>
+#include <error/system_error.h>
 
-#include "base/functions.impl.h"
-#include "prefs/prefs.h"
+#include <base/functions.impl.h>
+#include <prefs/prefs.h>
 
 using namespace Executor;
 

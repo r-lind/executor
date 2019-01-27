@@ -2,12 +2,12 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "sound/sounddriver.h"
-#include "sound/soundfake.h"
+#include <base/common.h>
+#include <sound/sounddriver.h>
+#include <sound/soundfake.h>
 
 #ifdef Sound_MACOSX_
-#include "SoundOSX.h"
+#include <SoundOSX.h>
 #endif
 
 #ifdef Sound_SDL_Sound

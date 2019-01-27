@@ -4,7 +4,7 @@
 
 #undef _DARWIN_NO_64_BIT_INODE
 
-/* #include "base/common.h" */
+/* #include <base/common.h> */
 #if defined(__MINGW32__)
 #define CYGWIN32
 #endif
@@ -50,7 +50,7 @@ typedef enum { false,
                true } bool;
 #endif
 
-#include "commandline/parsenum.h"
+#include <commandline/parsenum.h>
 
 using namespace Executor;
 

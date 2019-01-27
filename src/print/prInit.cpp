@@ -4,14 +4,14 @@
 
 /* Forward declarations in PrintMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "PrintMgr.h"
-#include "ResourceMgr.h"
-#include "FileMgr.h"
-#include "ToolboxUtil.h"
-#include "MemoryMgr.h"
-#include "print/print.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <PrintMgr.h>
+#include <ResourceMgr.h>
+#include <FileMgr.h>
+#include <ToolboxUtil.h>
+#include <MemoryMgr.h>
+#include <print/print.h>
 
 using namespace Executor;
 

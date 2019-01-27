@@ -2,12 +2,12 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "quickdraw/quick.h"
-#include "rsys/hook.h"
-#include "print/print.h"
-#include "prefs/options.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <quickdraw/quick.h>
+#include <rsys/hook.h>
+#include <print/print.h>
+#include <prefs/options.h>
 #include <base/functions.impl.h>
 
 using namespace Executor;

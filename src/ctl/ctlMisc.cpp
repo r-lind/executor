@@ -4,16 +4,16 @@
 
 /* Forward declarations in ControlMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "ctl/ctl.h"
-#include "res/resource.h"
-#include "rsys/hook.h"
-#include "base/functions.impl.h"
+#include <quickdraw/cquick.h>
+#include <ctl/ctl.h>
+#include <res/resource.h>
+#include <rsys/hook.h>
+#include <base/functions.impl.h>
 
 /* cheat, and make this a plain ctab, so we can use our old accessor
    macros */

@@ -2,14 +2,14 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "FileMgr.h"
-#include "MemoryMgr.h"
+#include <FileMgr.h>
+#include <MemoryMgr.h>
 
-#include "rsys/mixed_mode.h"
+#include <rsys/mixed_mode.h>
 
-#include "file/file.h"
+#include <file/file.h>
 #include <base/cpu.h>
 #include <PowerCore.h>
 #include <cassert>

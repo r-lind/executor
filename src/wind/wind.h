@@ -7,12 +7,12 @@
  *
  */
 
-#include "WindowMgr.h"
-#include "MemoryMgr.h"
-#include "ResourceMgr.h"
+#include <WindowMgr.h>
+#include <MemoryMgr.h>
+#include <ResourceMgr.h>
 #include <OSUtil.h>
 
-#include "mman/mman.h"
+#include <mman/mman.h>
 
 #define MODULE_NAME rsys_wind
 #include <base/api-module.h>

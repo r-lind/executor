@@ -2,21 +2,21 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "QuickDraw.h"
-#include "MemoryMgr.h"
+#include <QuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/xdata.h"
-#include "quickdraw/xdblt.h"
-#include "vdriver/vdriver.h"
+#include <quickdraw/xdata.h>
+#include <quickdraw/xdblt.h>
+#include <vdriver/vdriver.h>
 
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
-#include "vdriver/dirtyrect.h"
-#include "prefs/prefs.h"
-#include "vdriver/autorefresh.h"
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
+#include <vdriver/dirtyrect.h>
+#include <prefs/prefs.h>
+#include <vdriver/autorefresh.h>
 
 using namespace Executor;
 

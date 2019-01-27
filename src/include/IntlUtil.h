@@ -1,7 +1,7 @@
 #if !defined(_INTLUTIL_H_)
 #define _INTLUTIL_H_
 
-#include "SANE.h"
+#include <SANE.h>
 
 #define MODULE_NAME IntlUtil
 #include <base/api-module.h>

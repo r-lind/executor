@@ -4,18 +4,18 @@
 
 /* Miscellaneous subroutines for memory management */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "MemoryMgr.h"
+#include <MemoryMgr.h>
 
 /* ### this probably shouldn't be here */
-#include "ResourceMgr.h"
+#include <ResourceMgr.h>
 
-#include "mman/mman_private.h"
-#include "rsys/hook.h"
-#include "error/system_error.h"
-#include "vdriver/vdriver.h"
-#include "base/functions.impl.h"
+#include <mman/mman_private.h>
+#include <rsys/hook.h>
+#include <error/system_error.h>
+#include <vdriver/vdriver.h>
+#include <base/functions.impl.h>
 
 #include <stdarg.h>
 

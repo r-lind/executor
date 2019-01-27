@@ -2,10 +2,10 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "time/syncint.h"
-#include "base/cpu.h"
+#include <time/syncint.h>
+#include <base/cpu.h>
 #include <PowerCore.h>
 
 using namespace Executor;

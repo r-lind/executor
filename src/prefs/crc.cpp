@@ -2,11 +2,11 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "MemoryMgr.h"
-#include "prefs/options.h"
-#include "prefs/crc.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <MemoryMgr.h>
+#include <prefs/options.h>
+#include <prefs/crc.h>
 
 /*
  * Algorithm from "Computer Networks" by Andrew S. Tanenbaum pp. 129-132.

@@ -21,7 +21,7 @@
  */
 
 #include <string.h>
-#include "sane/float.h"
+#include <sane/float.h>
 
 #if defined(powerpc)
 #include <ieee754.h>

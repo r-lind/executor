@@ -13,8 +13,8 @@
 #include <type_traits>
 #include <syn68k_public.h>
 
-#include "base/functions.h"
-#include "base/traps.h"
+#include <base/functions.h>
+#include <base/traps.h>
 
 #ifndef __cplusplus
 #error C++ required

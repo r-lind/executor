@@ -4,10 +4,10 @@
 
 /* Forward declarations in ResourceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "ResourceMgr.h"
-#include "res/resource.h"
-#include "rsys/hook.h"
+#include <base/common.h>
+#include <ResourceMgr.h>
+#include <res/resource.h>
+#include <rsys/hook.h>
 
 using namespace Executor;
 

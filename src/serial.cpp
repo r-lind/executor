@@ -8,7 +8,7 @@
  * The UNIX specific stuff should be put in its appropriate place sometime.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
 #if defined(MACOSX)
 // FIXME: #warning bad serial support right now
@@ -20,15 +20,15 @@
 #include <stdio.h>
 #endif /* !defined (MACOSX) */
 
-#include "Serial.h"
-#include "DeviceMgr.h"
-#include "FileMgr.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
+#include <Serial.h>
+#include <DeviceMgr.h>
+#include <FileMgr.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
 
-#include "file/file.h"
-#include "hfs/hfs.h"
-#include "rsys/serial.h"
+#include <file/file.h>
+#include <hfs/hfs.h>
+#include <rsys/serial.h>
 
 #if defined(CYGWIN32) || defined(WIN32)
 #include "win_serial.h"

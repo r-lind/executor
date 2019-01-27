@@ -4,7 +4,7 @@
 
 #define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 
-#include "base/common.h"
+#include <base/common.h>
 
 #include <windows.h>
 #include <stdio.h>
@@ -13,9 +13,9 @@
 #include <rsys/scrap.h>
 #include <rsys/error.h>
 
-#include "SDL/SDL.h"
-#include "SDL_bmp.h"
-#include "SDL/SDL_syswm.h"
+#include <SDL/SDL.h>
+#include <SDL_bmp.h>
+#include <SDL/SDL_syswm.h>
 
 #include "win_win.h"
 

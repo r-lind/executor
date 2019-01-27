@@ -14,15 +14,15 @@
 #include "syswm_vars.h"
 #include "sdl_mem.h"
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "error/error.h"
+#include <error/error.h>
 
 using namespace Executor;
 
 #if defined(CYGWIN32)
 
-#include "SDL_bmp.h"
+#include <SDL_bmp.h>
 
 #warning TODO: copy pixels properly and handle various bit depths
 

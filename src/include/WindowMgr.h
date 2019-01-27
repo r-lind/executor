@@ -8,8 +8,8 @@
 
  */
 
-#include "QuickDraw.h"
-#include "EventMgr.h"
+#include <QuickDraw.h>
+#include <EventMgr.h>
 
 #define MODULE_NAME WindowMgr
 #include <base/api-module.h>

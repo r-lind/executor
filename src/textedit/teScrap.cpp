@@ -4,13 +4,13 @@
 
 /* Forward declarations in TextEdit.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "TextEdit.h"
-#include "MemoryMgr.h"
-#include "ScrapMgr.h"
+#include <base/common.h>
+#include <TextEdit.h>
+#include <MemoryMgr.h>
+#include <ScrapMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "mman/mman.h"
+#include <quickdraw/cquick.h>
+#include <mman/mman.h>
 
 using namespace Executor;
 

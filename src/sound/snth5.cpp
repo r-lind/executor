@@ -2,9 +2,9 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
-#include "SoundMgr.h"
-#include "sound/soundopts.h"
+#include <base/common.h>
+#include <SoundMgr.h>
+#include <sound/soundopts.h>
 
 using namespace Executor;
 

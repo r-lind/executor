@@ -9,17 +9,17 @@
  *        calculations.
  */
 
-#include "base/common.h"
-#include "WindowMgr.h"
-#include "ControlMgr.h"
-#include "EventMgr.h"
-#include "TextEdit.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <WindowMgr.h>
+#include <ControlMgr.h>
+#include <EventMgr.h>
+#include <TextEdit.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "textedit/tesave.h"
-#include "rsys/hook.h"
-#include "quickdraw/text.h"
+#include <quickdraw/cquick.h>
+#include <textedit/tesave.h>
+#include <rsys/hook.h>
+#include <quickdraw/text.h>
 #include <algorithm>
 
 using namespace Executor;

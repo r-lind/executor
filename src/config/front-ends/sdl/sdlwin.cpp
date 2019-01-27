@@ -2,15 +2,15 @@
  * Development, Inc.  All rights reserved.
  */
 #include "sdl.h"
-#include "base/common.h"
-#include "quickdraw/srcblt.h"
-#include "vdriver/refresh.h"
+#include <base/common.h>
+#include <quickdraw/srcblt.h>
+#include <vdriver/refresh.h>
 
 #if defined(CYGWIN32)
 #include "win_screen.h"
 #endif
 
-#include "SDL/SDL.h"
+#include <SDL/SDL.h>
 
 #include "sdlevents.h"
 #include "syswm_map.h"

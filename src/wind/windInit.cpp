@@ -4,36 +4,36 @@
 
 /* Forward declarations in WindowMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "WindowMgr.h"
-#include "ToolboxUtil.h"
-#include "ResourceMgr.h"
-#include "FontMgr.h"
-#include "MemoryMgr.h"
-#include "SegmentLdr.h"
-#include "OSUtil.h"
-#include "OSEvent.h"
-#include "ControlMgr.h"
-#include "MenuMgr.h"
-#include "SysErr.h"
-#include "DialogMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <WindowMgr.h>
+#include <ToolboxUtil.h>
+#include <ResourceMgr.h>
+#include <FontMgr.h>
+#include <MemoryMgr.h>
+#include <SegmentLdr.h>
+#include <OSUtil.h>
+#include <OSEvent.h>
+#include <ControlMgr.h>
+#include <MenuMgr.h>
+#include <SysErr.h>
+#include <DialogMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "wind/wind.h"
-#include "menu/menu.h"
-#include "res/resource.h"
-#include "error/system_error.h"
+#include <quickdraw/cquick.h>
+#include <wind/wind.h>
+#include <menu/menu.h>
+#include <res/resource.h>
+#include <error/system_error.h>
 
-#include "prefs/prefs.h"
-#include "commandline/flags.h"
+#include <prefs/prefs.h>
+#include <commandline/flags.h>
 
-#include "rsys/segment.h"
-#include "file/file.h"
-#include "rsys/executor.h"
-#include "prefs/options.h"
-#include "rsys/launch.h"
+#include <rsys/segment.h>
+#include <file/file.h>
+#include <rsys/executor.h>
+#include <prefs/options.h>
+#include <rsys/launch.h>
 
 #include <algorithm>
 

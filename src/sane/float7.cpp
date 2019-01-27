@@ -4,9 +4,9 @@
 
 /* Forward declarations in SANE.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "SANE.h"
-#include "sane/float.h"
+#include <base/common.h>
+#include <SANE.h>
+#include <sane/float.h>
 #include <ctype.h>
 
 using namespace Executor;

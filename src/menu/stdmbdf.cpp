@@ -6,21 +6,21 @@
  * Checked for HLock and HUnlock by ctm on Fri May 10 18:31:31 MDT 1991
  */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "CQuickDraw.h"
-#include "MenuMgr.h"
-#include "WindowMgr.h"
-#include "MemoryMgr.h"
-#include "ToolboxUtil.h"
-#include "FontMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <CQuickDraw.h>
+#include <MenuMgr.h>
+#include <WindowMgr.h>
+#include <MemoryMgr.h>
+#include <ToolboxUtil.h>
+#include <FontMgr.h>
 
-#include "quickdraw/cquick.h"
-#include "menu/menu.h"
-#include "wind/wind.h"
-#include "quickdraw/image.h"
-#include "rsys/executor.h"
-#include "prefs/options.h"
+#include <quickdraw/cquick.h>
+#include <menu/menu.h>
+#include <wind/wind.h>
+#include <quickdraw/image.h>
+#include <rsys/executor.h>
+#include <prefs/options.h>
 #include <algorithm>
 
 /* apple image */

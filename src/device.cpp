@@ -4,19 +4,19 @@
 
 /* Forward declarations in DeviceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "base/common.h"
-#include "DeviceMgr.h"
-#include "FileMgr.h"
-#include "MemoryMgr.h"
-#include "OSUtil.h"
-#include "ResourceMgr.h"
-#include "MenuMgr.h"
-#include "ToolboxEvent.h"
-#include "mman/mman.h"
-#include "rsys/device.h"
-#include "file/file.h"
-#include "rsys/serial.h"
-#include "base/functions.impl.h"
+#include <base/common.h>
+#include <DeviceMgr.h>
+#include <FileMgr.h>
+#include <MemoryMgr.h>
+#include <OSUtil.h>
+#include <ResourceMgr.h>
+#include <MenuMgr.h>
+#include <ToolboxEvent.h>
+#include <mman/mman.h>
+#include <rsys/device.h>
+#include <file/file.h>
+#include <rsys/serial.h>
+#include <base/functions.impl.h>
 
 using namespace Executor;
 

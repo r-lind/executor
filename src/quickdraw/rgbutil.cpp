@@ -2,11 +2,11 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "CQuickDraw.h"
-#include "quickdraw/rgbutil.h"
-#include "quickdraw/cquick.h"
+#include <CQuickDraw.h>
+#include <quickdraw/rgbutil.h>
+#include <quickdraw/cquick.h>
 
 using namespace Executor;
 

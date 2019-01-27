@@ -6,12 +6,12 @@
 
 /* HLock checked by ctm on Mon May 13 17:55:01 MDT 1991 */
 
-#include "base/common.h"
-#include "QuickDraw.h"
-#include "MemoryMgr.h"
+#include <base/common.h>
+#include <QuickDraw.h>
+#include <MemoryMgr.h>
 
-#include "quickdraw/quick.h"
-#include "quickdraw/cquick.h"
+#include <quickdraw/quick.h>
+#include <quickdraw/cquick.h>
 
 using namespace Executor;
 

@@ -2,12 +2,12 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "base/common.h"
+#include <base/common.h>
 
-#include "ResourceMgr.h"
-#include "FileMgr.h"
-#include "res/resource.h"
-#include "file/file.h"
+#include <ResourceMgr.h>
+#include <FileMgr.h>
+#include <res/resource.h>
+#include <file/file.h>
 
 using namespace Executor;
 
