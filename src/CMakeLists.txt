@@ -466,7 +466,6 @@ set(include_sources
                   include/rsys/desk.h
                   include/rsys/device.h
                   include/rsys/dump.h
-                  include/rsys/everything.h
                   include/rsys/evil.h
                   include/rsys/executor.h
                   include/rsys/filesystem.h
