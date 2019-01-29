@@ -269,6 +269,134 @@ read_driver_block_size(LONGINT fd, LONGINT bsize, LONGINT maxbytes,
     return retval;
 }
 
+static bool
+charcmp(char c1, char c2)
+{
+    bool retval;
+
+    if(c1 == c2)
+        retval = true;
+    else if(c1 == '/')
+        retval = c2 == '\\';
+    else if(c1 == '\\')
+        retval = c2 == '/';
+    else
+        retval = tolower(c1) == tolower(c2);
+    return retval;
+}
+
+static int
+slashstrcmp(const char *p1, const char *p2)
+{
+    int retval;
+
+    retval = 0;
+
+    while(*p1 || *p2)
+    {
+        if(!charcmp(*p1, *p2))
+        {
+            retval = -1;
+            break;
+        }
+        ++p1;
+        ++p2;
+    }
+    return retval;
+}
+
+static INTEGER ROMlib_driveno = 3;
+static INTEGER ROMlib_ejdriveno = 2;
+
+/*
+ * NOTE: The way we handle drive information is pretty messed up right now.
+ * In general the correct information is in the VCBExtra; we only recently
+ * began putting it in the DriveExtra and right now we only use the info
+ * in the DriveExtra to allow us to format floppies -- no other formatting
+ * is currently permitted.  The problem is there's no easy way to map drive
+ * characteristics from the non-Mac host into Mac type information unless
+ * we can pull the information out of the Mac filesystem.
+ */
+
+DrvQExtra *
+Executor::ROMlib_addtodq(ULONGINT drvsize, const char *devicename, INTEGER partition,
+                         INTEGER drefnum, drive_flags_t flags, hfs_access_t *hfsp)
+{
+    INTEGER dno;
+    DrvQExtra *dqp;
+    DrvQEl *dp;
+    int strl;
+    GUEST<THz> saveZone;
+    static bool seen_floppy = false;
+
+    saveZone = LM(TheZone);
+    LM(TheZone) = LM(SysZone);
+#if !defined(LETGCCWAIL)
+    dqp = (DrvQExtra *)0;
+#endif
+    dno = 0;
+    for(dp = (DrvQEl *)LM(DrvQHdr).qHead; dp; dp = (DrvQEl *)dp->qLink)
+    {
+        dqp = (DrvQExtra *)((char *)dp - sizeof(LONGINT));
+        if(dqp->partition == partition && slashstrcmp((char *)dqp->devicename, devicename) == 0)
+        {
+            dno = dqp->dq.dQDrive;
+            /*-->*/ break;
+        }
+    }
+    if(!dno)
+    {
+        if((flags & DRIVE_FLAGS_FLOPPY) && !seen_floppy)
+        {
+            dno = 1;
+            seen_floppy = true;
+        }
+        else
+        {
+            if((flags & DRIVE_FLAGS_FIXED) || ROMlib_ejdriveno == 3)
+                dno = ROMlib_driveno++;
+            else
+                dno = ROMlib_ejdriveno++;
+        }
+        dqp = (DrvQExtra *)NewPtr(sizeof(DrvQExtra));
+        dqp->flags = 1 << 7; /* is not single sided */
+        if(flags & DRIVE_FLAGS_LOCKED)
+            dqp->flags = dqp->flags | 1L << 31;
+        if(flags & DRIVE_FLAGS_FIXED)
+            dqp->flags = dqp->flags | 8L << 16;
+        else
+            dqp->flags = dqp->flags | 2; /* IMIV-181 says
+							   it can be 1 or 2 */
+
+        /*	dqp->dq.qLink will be set up when we Enqueue this baby */
+        dqp->dq.dQDrvSz = drvsize;
+        dqp->dq.dQDrvSz2 = drvsize >> 16;
+        dqp->dq.qType = 1;
+        dqp->dq.dQDrive = dno;
+        dqp->dq.dQRefNum = drefnum;
+        dqp->dq.dQFSID = 0;
+        if(!devicename)
+            dqp->devicename = 0;
+        else
+        {
+            strl = strlen(devicename);
+            dqp->devicename = NewPtr(strl + 1);
+            strcpy((char *)dqp->devicename, devicename);
+        }
+        dqp->partition = partition;
+        if(hfsp)
+            dqp->hfs = *hfsp;
+        else
+        {
+            memset(&dqp->hfs, 0, sizeof(dqp->hfs));
+            dqp->hfs.fd = -1;
+        }
+        Enqueue((QElemPtr)&dqp->dq, &LM(DrvQHdr));
+    }
+    LM(TheZone) = saveZone;
+    return dqp;
+}
+
 void
 Executor::try_to_mount_disk(const char *dname, LONGINT floppyfd, GUEST<LONGINT> *messp,
                             LONGINT bsize, LONGINT maxbytes, drive_flags_t flags,
