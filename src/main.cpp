@@ -417,7 +417,6 @@ static void setstartdir(char *argv0)
     {
         char *lastslash;
 
-        ROMlib_start_drive = argv0[0];
         strcpy(ROMlib_startdir, argv0);
         lastslash = strrchr(ROMlib_startdir, '/');
         if(!lastslash)
@@ -427,7 +426,6 @@ static void setstartdir(char *argv0)
     }
     else
     {
-        ROMlib_start_drive = 0;
         strcpy(ROMlib_startdir, ".");
     }
 #endif /* defined(MSDOS) */

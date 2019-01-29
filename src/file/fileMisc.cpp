@@ -41,9 +41,6 @@ namespace Executor
 {
 int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
 char ROMlib_startdir[MAXPATHLEN];
-#if defined(WIN32)
-char ROMlib_start_drive;
-#endif
 std::string ROMlib_appname;
 }
 
