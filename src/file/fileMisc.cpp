@@ -20,6 +20,7 @@
 #include <rsys/string.h>
 #include <rsys/segment.h>
 #include <rsys/paths.h>
+#include <rsys/macstrings.h>
 
 #if !defined(WIN32)
 #include <pwd.h>
@@ -322,6 +323,87 @@ is_unix_path(const char *pathname)
     return retval;
 }
 
+std::optional<FSSpec> Executor::cmdlinePathToFSSpec(const std::string& path)
+{
+    if(is_unix_path(path.c_str()))
+    {
+        if(auto native = nativePathToFSSpec(path))
+            return native;
+    }
+
+    VCBExtra *vcbp;
+
+    std::string swappedString = path;
+    for(char& c : swappedString)
+    {
+        if(c == ':')
+            c = '/';
+        else if(c == '/')
+            c = ':';
+    }
+
+    std::vector<mac_string> elements;
+    
+    for(auto sep = swappedString.begin();
+        sep != swappedString.end();
+        )
+    {            
+        auto p = sep;
+        sep = std::find(p, swappedString.end(), '/');
+
+        if(p != sep)
+            elements.push_back(toMacRomanFilename(std::string(p, sep)));
+
+        if(sep != swappedString.end())
+            ++sep;
+    }
+
+    if(elements.empty())
+        return {};
+
+    for(vcbp = (VCBExtra *)LM(VCBQHdr).qHead; vcbp; vcbp = (VCBExtra *)vcbp->vcb.qLink)
+    {
+        if(mac_string_view(vcbp->vcb.vcbVN) == elements[0])
+        {
+            long dirID = 2;
+            
+            for(int i = 1; i < elements.size() -1; i++)
+            {
+                CInfoPBRec pb;
+                pb.dirInfo.ioCompletion = nullptr;
+                pb.dirInfo.ioVRefNum = vcbp->vcb.vcbVRefNum;
+                pb.dirInfo.ioDrDirID = dirID;
+                pb.dirInfo.ioFDirIndex = 0;
+
+                unsigned char strbuf[64];
+                std::copy(elements[i].begin(), elements[i].end(), strbuf+1);
+                strbuf[0] = elements[i].size();
+                
+                pb.dirInfo.ioNamePtr = strbuf;
+                OSErr err = PBGetCatInfoSync(&pb);
+                if(err != noErr)
+                    return {};
+
+                dirID = pb.dirInfo.ioDrDirID;
+            }
+
+            FSSpec spec;
+            spec.vRefNum = vcbp->vcb.vcbVRefNum;
+            spec.parID = dirID;
+
+            if(elements.size() >= 2)
+            {
+                std::copy(elements.back().begin(), elements.back().end(), spec.name+1);
+                spec.name[0] = elements.back().size();
+            }
+            else
+                spec.name[0] = 0;
+            return spec;
+        }
+    }
+    return {};
+}
+
 static void MountMacVolumes(std::string macVolumes)
 {
     GUEST<LONGINT> m;
@@ -386,35 +468,29 @@ static void MountMacVolumes(std::string macVolumes)
 void Executor::InitSystemFolder(std::string systemFolder)
 {
     CInfoPBRec cpb;
-    WDPBRec wpb;
 
-    if(is_unix_path(systemFolder.c_str()))
+    unsigned char nameBuf[64];
+    if(auto sysFolderSpec = cmdlinePathToFSSpec(systemFolder))
     {
-        if(auto sysSpec = nativePathToFSSpec(fs::path(systemFolder) / "System")) // FIXME: SYSMACNAME
-        {
-            cpb.hFileInfo.ioNamePtr = (StringPtr)SYSMACNAME;
-            cpb.hFileInfo.ioVRefNum = sysSpec->vRefNum;
-            cpb.hFileInfo.ioDirID = sysSpec->parID;
-        }
-        else
-        {
-            fprintf(stderr, "Couldn't find '%s'\n", systemFolder.c_str());
-            exit(1);
-        }
+        mac_string systemFilePath = 
+            mac_string((unsigned char*)":") + 
+            mac_string(mac_string_view(sysFolderSpec->name)) + 
+            (unsigned char*)":" + 
+            mac_string(mac_string_view((unsigned char*)SYSMACNAME));
+        cpb.hFileInfo.ioNamePtr = assignPString(nameBuf, systemFilePath, 63);
+        cpb.hFileInfo.ioVRefNum = sysFolderSpec->vRefNum;
+        cpb.hFileInfo.ioDirID = sysFolderSpec->parID;            
     }
     else
     {
-        int sysnamelen = 1 + systemFolder.size() + 1 + strlen(SYSMACNAME + 1) + 1;
-        char *sysname = (char *)alloca(sysnamelen);
-        *sysname = sysnamelen - 2; /* don't count first byte or nul */
-        sprintf(sysname + 1, "%s:%s", systemFolder.c_str(), SYSMACNAME + 1);
-        cpb.hFileInfo.ioNamePtr = (StringPtr)sysname;
-        cpb.hFileInfo.ioVRefNum = 0;
-        cpb.hFileInfo.ioDirID = 0;
+        fprintf(stderr, "Couldn't find '%s'\n", systemFolder.c_str());
+        exit(1);
     }
+    
     cpb.hFileInfo.ioFDirIndex = 0;
     if(PBGetCatInfo(&cpb, false) == noErr)
     {
+        WDPBRec wpb;
         wpb.ioNamePtr = 0;
         wpb.ioVRefNum = cpb.hFileInfo.ioVRefNum;
         wpb.ioWDProcID = TICK("unix");

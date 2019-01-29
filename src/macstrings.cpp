@@ -275,3 +275,13 @@ bool Executor::matchesMacRomanFilename(const fs::path& s, mac_string_view sv)
                             converted.size() << 16 | sv.size()) == 0;
 }
 
+
+unsigned char* Executor::assignPString(unsigned char* s, mac_string_view v, int max)
+{
+    if(v.size() > max)
+        v = {v.begin(), v.begin() + max};
+    
+    std::copy(v.begin(), v.end(), s+1);
+    s[0] = v.size();
+    return s;
+}

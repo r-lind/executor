@@ -46,7 +46,6 @@ struct mac_string_view : std::basic_string_view<unsigned char>
         : basic_string_view(&*p,q-p)
     {
     }
-
 };
 
 inline mac_string_view PascalStringView(const unsigned char *s)
@@ -56,6 +55,8 @@ inline mac_string_view PascalStringView(const unsigned char *s)
     else
         return mac_string_view();
 }
+
+unsigned char *assignPString(unsigned char* s, mac_string_view v, int max = 255);
 
 using mac_string = std::basic_string<unsigned char>;
 

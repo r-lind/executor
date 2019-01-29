@@ -221,7 +221,7 @@ extern fcbrec *PRNTOFPERR(INTEGER prn, OSErr *errp);
 class Volume;
 void MountLocalVolume();
 std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
-std::optional<FSSpec> macPathToFSSpec(const std::string& p);
+std::optional<FSSpec> cmdlinePathToFSSpec(const std::string& p);
 
 void ROMlib_fileinit(void);
 void InitSystemFolder(std::string systemFolder);
