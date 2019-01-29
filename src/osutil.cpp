@@ -919,13 +919,62 @@ LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
     return l;
 }
 
-
 void Executor::C_MakeDataExecutable(void *ptr, uint32_t sz)
 {
     getPowerCore().flushCache(US_TO_SYN68K(ptr), sz);    
 }
 
+void Executor::C_FlushCodeCache()
+{
+    ROMlib_destroy_blocks((syn68k_addr_t)0, (uint32_t)~0, true);
+}
 
+void Executor::HWPriv(LONGINT d0, LONGINT a0)
+{
+    static char d_cache_enabled = true, i_cache_enabled = true;
+    int new_state;
+
+    switch(d0)
+    {
+        case 0: /* Dis/Ena Instr cache */
+            warning_unimplemented("Dis/Ena instr cache");
+            new_state = ((EM_A0 & 0xFFFF) != 0);
+            EM_A0 = i_cache_enabled;
+            i_cache_enabled = new_state;
+            break;
+        case 1: /* Flush Instr cache */
+            FlushCodeCache();
+            break;
+        case 2: /* Dis/Ena Data cache */
+            warning_unimplemented("Dis/Ena data cache");
+            new_state = ((EM_A0 & 0xFFFF) != 0);
+            EM_A0 = d_cache_enabled;
+            d_cache_enabled = new_state;
+            break;
+        case 3: /* Flush Data cache */
+#if 0
+	FlushCodeCache();
+#endif
+            break;
+        case 4: /* Enable external cache */
+            warning_unimplemented("Enable external cache");
+            break;
+        case 5: /* Disable external cache */
+            warning_unimplemented("Disable external cache");
+            break;
+        case 6: /* Flush external cache */
+            FlushCodeCache();
+            break;
+        case 9: /* Flush cache range */
+            ROMlib_destroy_blocks((syn68k_addr_t)a0, EM_A1, true);
+            EM_D0 = noErr; /* Maybe we should only touch d0.w? */
+            break;
+        default:
+            warning_unexpected("d0 = 0x%x", d0);
+            EM_D0 = hwParamErr; /* Maybe we should only touch d0.w? */
+            break;
+    }
+}
 
 LONGINT Executor::C_NGetTrapAddress(INTEGER n, TrapType ttype) /* IMII-384 */
 {

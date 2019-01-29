@@ -30,6 +30,7 @@ enum
     clkWrErr = (-86),
     prInitErr = (-88),
     prWrErr = (-87),
+    hwParamErr = (-502),
 };
 
 struct SysParmType
@@ -262,6 +263,11 @@ PASCAL_TRAP(Debugger, 0xA9FF);
 extern void
 C_MakeDataExecutable(void *ptr, uint32_t sz);
 NOTRAP_FUNCTION(MakeDataExecutable);
+extern void C_FlushCodeCache(void);
+PASCAL_TRAP(FlushCodeCache, 0xA0BD);
+
+extern void HWPriv(LONGINT d0, LONGINT a0);
+REGISTER_TRAP2(HWPriv, 0xA198, void(D0,A0));
 
 extern LONGINT SetCurrentA5();
 NOTRAP_FUNCTION2(SetCurrentA5);

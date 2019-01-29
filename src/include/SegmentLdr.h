@@ -35,28 +35,17 @@ struct AppFile
     GUEST<Str255> fName;
 };
 
-enum
-{
-    hwParamErr = (-502),
-};
-
 const LowMemGlobal<Byte> loadtrap { 0x12D }; // SegmentLdr SysEqu.a (true-b);
 const LowMemGlobal<Byte[16]> FinderName { 0x2E0 }; // SegmentLdr IMII-59 (true);
 const LowMemGlobal<INTEGER> CurApRefNum { 0x900 }; // SegmentLdr IMII-58 (true);
 /*
- * NOTE: IMIII says CurApName is 32 bytes LONGINT, but it looks to me like
- * it is really 34 bytes LONGINT.
+ * NOTE: IMIII says CurApName is 32 bytes long, but it looks to me like
+ * it is really 34 bytes long.
  */
 const LowMemGlobal<Byte[34]> CurApName { 0x910 }; // SegmentLdr IMII-58 (true);
 const LowMemGlobal<INTEGER> CurJTOffset { 0x934 }; // SegmentLdr IMII-62 (true-b);
 const LowMemGlobal<INTEGER> CurPageOption { 0x936 }; // SegmentLdr IMII-60 (true);
 const LowMemGlobal<Handle> AppParmHandle { 0xAEC }; // SegmentLdr IMII-57 (true);
-
-extern void C_FlushCodeCache(void);
-PASCAL_TRAP(FlushCodeCache, 0xA0BD);
-
-extern void HWPriv(LONGINT d0, LONGINT a0);
-REGISTER_TRAP2(HWPriv, 0xA198, void(D0,A0));
 
 extern void CountAppFiles(GUEST<INTEGER> *messagep,
                           GUEST<INTEGER> *countp);
