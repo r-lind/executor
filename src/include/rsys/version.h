@@ -6,7 +6,7 @@ extern "C" {
 #endif
 
 #if !defined(EXECUTOR_VERSION)
-#define EXECUTOR_VERSION "2.1pr16" /* don't forget EXECUTOR_VERSION_NUMERIC */
+#define EXECUTOR_VERSION "" /* don't forget EXECUTOR_VERSION_NUMERIC */
 #endif
 
 #define SYSTEM_VERSION_ENCODING(m, n, x, b) ((m)*1000000                         \
@@ -15,7 +15,7 @@ extern "C" {
                                              + (b))
 
 #if !defined(EXECUTOR_VERSION_NUMERIC)
-#define EXECUTOR_VERSION_NUMERIC SYSTEM_VERSION_ENCODING(2, 1, 0, 16)
+#define EXECUTOR_VERSION_NUMERIC SYSTEM_VERSION_ENCODING(3, 0, 0, 0)
 #endif
 
 #define MINIMUM_SYSTEM_FILE_NEEDED SYSTEM_VERSION_ENCODING(2, 0, 0, 3)

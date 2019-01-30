@@ -50,8 +50,8 @@ CMRC_DECLARE(resources);
 #define LICENSE_BUTTON_NAME "License"
 #define TIPS_BUTTON_NAME "Tips"
 
-#define COPYRIGHT_STRING_1 "Copyright \251 ARDI 1986-2006"
-#define COPYRIGHT_STRING_2 "All rights reserved."
+//#define COPYRIGHT_STRING_1 "Copyright \251 ARDI 1986-2006"
+//#define COPYRIGHT_STRING_2 "All rights reserved."
 
 using namespace Executor;
 
@@ -63,29 +63,6 @@ struct AboutPage
 };
 
 std::vector<AboutPage> about_box_buttons;
-
-#if 0
-static struct
-{
-    const char *name;
-    const char *text;
-    ControlHandle ctl;
-} about_box_buttons[] = {
-    { LICENSE_BUTTON_NAME, "License." /* generated on the fly from licensetext.c */,
-      nullptr },
-  /*  { "Maker",
-      "ARDI\r"
-      "World Wide Web: <http://www.ardi.com>\r"
-      "FTP: <ftp://ftp.ardi.com/pub>\r",
-      nullptr },*/
-
-    { 
-      nullptr },
-    { TIPS_BUTTON_NAME,
-      "Don't delete tips.txt.  If you do, that will be your only tip.\r", nullptr },
-    { DONE_BUTTON_NAME, "Internal error!", nullptr }
-};
-#endif
 
 static WindowPtr about_box;
 static ControlHandle about_scrollbar;
@@ -538,10 +515,10 @@ event_loop(bool executor_p)
                 else
                     DrawText_c_string("Carbonless Copies Runtime System");
                 TextSize(12);
-                MoveTo(TE_LEFT, 49);
+                /*MoveTo(TE_LEFT, 49);
                 DrawText_c_string(COPYRIGHT_STRING_1);
                 MoveTo(TE_LEFT, 62);
-                DrawText_c_string(COPYRIGHT_STRING_2);
+                DrawText_c_string(COPYRIGHT_STRING_2);*/
                 draw_status_info(executor_p);
                 FrameRect(&frame_rect);
                 TEUpdate(&te_dest_rect, about_te);
