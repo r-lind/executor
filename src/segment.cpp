@@ -30,6 +30,7 @@
 #include <hfs/dcache.h>
 #include <rsys/launch.h>
 #include <rsys/paths.h>
+#include <rsys/macstrings.h>
 
 #include <ctype.h>
 #include <algorithm>
