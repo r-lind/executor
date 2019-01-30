@@ -78,8 +78,8 @@ picked it up and ported the whole thing from plain C to C++.
 And after that, yours truly, Wolfgang Thaller (https://github.com/autc04) took
 posession of it...
 
-Building
---------
+Building and Running
+--------------------
 
 Needs a modern C++ compiler, CMake, and Qt 5.
 SDL2, SDL1.2 or X11 libraries are required to build some of the alternate front-ends.
@@ -97,3 +97,13 @@ When `./build/src/executor` is first invoked, it will automatically install its
 fake Mac system file and the `Browser` finder replacement to `~/.executor/`, so
 no further setup should be needed.
 
+If you're using Wayland, you will need to force Qt to use its X11 backend, as their
+Wayland backend hopelessly fails for executor:
+
+```
+export QT_QPA_PLATFORM=xcb
+```
+
+Executor 2000 should be able to use native Mac files on macOS, AppleDouble 
+file pairs (`foo` and `%foo`) as used by older executor verions, as well as
+files written by Basilisk or SheepShaver (`foo`, `.rsrc/foo` and `.finf/foo`).
