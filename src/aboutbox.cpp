@@ -463,7 +463,7 @@ draw_status_info(bool executor_p)
 }
 
 static void
-event_loop(bool executor_p)
+event_loop()
 {
     static Rect frame_rect = {
         TE_TOP,
@@ -510,10 +510,7 @@ event_loop(bool executor_p)
                 TextFont(helvetica);
                 TextSize(24);
                 MoveTo(TE_LEFT, 30);
-                if(executor_p)
-                    DrawText_c_string(ROMlib_executor_full_name);
-                else
-                    DrawText_c_string("Carbonless Copies Runtime System");
+                DrawText_c_string(ROMlib_executor_full_name);
                 TextSize(12);
                 /*MoveTo(TE_LEFT, 49);
                 DrawText_c_string(COPYRIGHT_STRING_1);
@@ -633,9 +630,7 @@ void Executor::do_about_box(void)
             {
                 ThePortGuard portGuard(about_box);
                 C_ShowWindow(about_box);
-                event_loop(strncasecmp(ROMlib_appname.c_str(), EXECUTOR_NAME,
-                                       sizeof EXECUTOR_NAME - 1)
-                           == 0);
+                event_loop();
             }
 
             TEDispose(about_te);

@@ -20,13 +20,8 @@ extern "C" {
 
 #define MINIMUM_SYSTEM_FILE_NEEDED SYSTEM_VERSION_ENCODING(2, 0, 0, 3)
 
-#define MAJOR_REVISION 2
-#define MINOR_REVISION 1
-
 extern const char ROMlib_executor_version[];
 extern const char *ROMlib_executor_full_name;
-
-#define EXECUTOR_NAME "executor"
 
 extern void ROMlib_set_system_version(uint32_t version);
 

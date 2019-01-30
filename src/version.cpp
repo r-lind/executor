@@ -17,27 +17,7 @@ using namespace Executor;
 const char ROMlib_executor_version[] = EXECUTOR_VERSION;
 
 /* A descriptive string like "Executor 1.99q DEMO" */
-const char *ROMlib_executor_full_name = "Executor 2000 " EXECUTOR_VERSION
-#if defined(RELEASE_DEMO)
-                                        " DEMO"
-#elif defined(RELEASE_INTERNAL)
-                                        " DEBUG"
-#endif
-#if defined(EXPERIMENTAL)
-                                        " EXPERIMENTAL"
-#endif
-    ;
-
-#if defined(CYGWIN32) || defined(MSDOS)
-
-/*
- * No snprintf, so we just ignore the length.
- * This is very ugly, but the strings we're crafting won't overflow the
- * 1024 byte buffer we're using.  ICK.
- */
-
-#define snprintf(str, len, fmt, args...) sprintf(str, fmt, args)
-#endif
+const char *ROMlib_executor_full_name = "Executor 2000 " EXECUTOR_VERSION;
 
 #define UPDATE_RES(typ, id, fmt, args...)               \
     do {                                                \
@@ -100,11 +80,10 @@ ROMlib_set_system_version(uint32_t version)
         gestalt_set_system_version(version);
 
         UPDATE_RES(TICK("STR "), 0, "XMacintosh System Software, "
-                                    "version %d.%d\r\r\r\xa9 ARDI 1986-2000\r"
-                                    "All rights reserved.",
+                                    "version %d.%d",
                    major, minor);
 
-        UPDATE_VERS(major, minor, rev, 1, "X%d.%d.%d \xa9 ARDI 1986-00",
+        UPDATE_VERS(major, minor, rev, 1, "X%d.%d.%d",
                     major, minor, rev);
 
         UPDATE_VERS(major, minor, rev, 2, "XSystem %d.%d Version %d.%d.%d",
