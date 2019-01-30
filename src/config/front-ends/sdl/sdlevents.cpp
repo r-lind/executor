@@ -583,7 +583,7 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
 
             case SDL_QUIT:
             {
-                ROMlib_exit = 1;
+                ROMlib_exit = true;
                 ExitToShell();
             }
             break;

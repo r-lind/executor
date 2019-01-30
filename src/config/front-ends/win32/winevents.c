@@ -33,7 +33,7 @@ void process_win32_events(void)
     {
         if(msg.message == WM_QUIT)
         {
-            ROMlib_exit = 1;
+            ROMlib_exit = true;
             ExitToShell();
         }
         else

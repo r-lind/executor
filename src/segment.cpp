@@ -54,6 +54,9 @@
 
 namespace Executor
 {
+char *ROMlib_errorstring;
+bool ROMlib_exit = false;
+
 typedef finderinfo *finderinfoptr;
 
 typedef GUEST<finderinfoptr> *finderinfohand;
@@ -61,218 +64,69 @@ typedef GUEST<finderinfoptr> *finderinfohand;
 
 using namespace Executor;
 
-static void lastcomponent(StringPtr dest, StringPtr src)
+static BOOLEAN argv_to_appfile(const char *uname, AppFile *ap)
 {
-    unsigned char *c, *lastcolon;
-    int n;
+    auto spec = cmdlinePathToFSSpec(uname);
 
-    lastcolon = 0;
-    for(c = src + 1, n = src[0]; --n >= 0; ++c)
-        if(*c == ':')
-            lastcolon = c;
-    if(lastcolon)
-    {
-        ++lastcolon;
-        n = src[0] - (lastcolon - (src + 1));
-    }
-    else
-    {
-        lastcolon = src + 1;
-        n = src[0];
-    }
-    dest[0] = n;
-    memmove(dest + 1, lastcolon, n);
-}
+    if(!spec)
+        return false;
 
-
-static uint8_t
-hexval(char c)
-{
-    uint8_t retval;
-
-    if(c >= '0' && c <= '9')
-        retval = c - '0';
-    else if(c >= 'a' && c <= 'f')
-        retval = c - 'a' + 10;
-    else if(c >= 'A' && c <= 'F')
-        retval = c - 'A' + 10;
-    else
-        retval = 0;
-
-    return retval;
-}
-
-/*
- * Copies a c string into a pascal string changing occurrances of ::XY
- * (where X and Y are hex digits) into the character 0xXY.
- */
-
-static void
-colon_colon_copy(StringPtr dst, const char *src)
-{
-    StringPtr save_dst;
-
-    save_dst = dst;
-    while(*src)
-    {
-        if(src[0] == ':' && src[1] == ':'
-           && isxdigit(src[2]) && isxdigit(src[3]))
-        {
-            *++dst = (hexval(src[2]) << 4) | hexval(src[3]);
-            src += 4;
-        }
-        else
-            *++dst = *src++;
-    }
-    save_dst[0] = dst - save_dst;
-}
-
-static BOOLEAN argv_to_appfile(char *, AppFile *);
-
-static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
-{
-    unsigned char *path;
-    BOOLEAN retval;
     CInfoPBRec cinfo;
-    WDPBRec wpb;
-    
-    FSSpec spec;
-
-    if(auto unixSpec = nativePathToFSSpec(uname))
-    {
-        spec = unixSpec.value();
-        cinfo.hFileInfo.ioVRefNum = spec.vRefNum;
-        cinfo.hFileInfo.ioDirID = spec.parID;
-        path = spec.name;
-    }
-    else
-    {
-        int len;
-        len = strlen(uname);
-        path = (unsigned char *)alloca(len + 1);
-        colon_colon_copy(path, uname);
-        cinfo.hFileInfo.ioVRefNum = 0;
-        cinfo.hFileInfo.ioDirID = 0;
-    }
-    
+    cinfo.hFileInfo.ioVRefNum = spec->vRefNum;
+    cinfo.hFileInfo.ioDirID = spec->parID;
     cinfo.hFileInfo.ioFDirIndex = 0;
-    cinfo.hFileInfo.ioNamePtr = path;
-    if((retval = (PBGetCatInfo(&cinfo, false) == noErr)))
-    {
-        ap->fType = cinfo.hFileInfo.ioFlFndrInfo.fdType;
-        ap->versNum = 0;
-        wpb.ioNamePtr = path;
-        wpb.ioVRefNum = cinfo.hFileInfo.ioVRefNum;
-        wpb.ioWDProcID = TICK("unix");
-        wpb.ioWDDirID = cinfo.hFileInfo.ioFlParID;
-        if(PBOpenWD(&wpb, false) == noErr)
-        {
-            ap->vRefNum = wpb.ioVRefNum;
-            lastcomponent(ap->fName, path);
-        }
-        else
-        {
-            ap->vRefNum = cinfo.hFileInfo.ioVRefNum;
-            str255assign(ap->fName, path);
-        }
-    }
-    else
+    cinfo.hFileInfo.ioNamePtr = spec->name;
+    
+    if(PBGetCatInfo(&cinfo, false) != noErr)
     {
         warning_unexpected("%s: unable to get info on `%s'\n", ROMlib_appname.c_str(),
                            uname);
+        return false;
     }
-    return retval;
+
+    ap->fType = cinfo.hFileInfo.ioFlFndrInfo.fdType;
+    ap->versNum = 0;
+    str255assign(ap->fName, spec->name);
+
+    WDPBRec wpb;
+    wpb.ioNamePtr = spec->name;
+    wpb.ioVRefNum = spec->vRefNum;
+    wpb.ioWDProcID = TICK("unix");
+    wpb.ioWDDirID = spec->parID;
+    if(PBOpenWD(&wpb, false) == noErr)
+        ap->vRefNum = wpb.ioVRefNum;
+    else
+        ap->vRefNum = spec->vRefNum;
+
+    return true;
 }
 
-
-#if !defined(MSDOS) && !defined(CYGWIN32)
-#define PATH_SEPARATER ':'
-#else
-#define PATH_SEPARATER ';'
-#endif
-
-void Executor::ROMlib_seginit(LONGINT argc, char **argv)
+void Executor::InitAppFiles(int argc, char **argv)
 {
-    char *path, *firstcolon;
-    char *fullpathname;
-    finderinfohand fh;
-    AppFile app;
-    INTEGER newcount;
-    GUEST<THz> saveZone;
+    LM(CurApRefNum) = -1;
+    assignPString(LM(CurApName), toMacRomanFilename(ROMlib_appname), sizeof(LM(CurApName)) - 1);
 
-    fullpathname = 0;
-    if(Uaccess(argv[0], X_OK) == 0)
-        fullpathname = argv[0];
-    else
-    {
-        for(path = getenv("PATH"); path && path[0];
-            path = firstcolon ? firstcolon + 1 : 0)
-        {
-            if((firstcolon = strchr(path, PATH_SEPARATER)))
-                *firstcolon = 0;
-            if(path[0])
-            {
-                fullpathname = (char *)NewPtr(strlen(path) + 1 + strlen(argv[0]) + 1);
-                sprintf(fullpathname, "%s/%s", path, argv[0]);
-            }
-            else
-            {
-                fullpathname = (char *)NewPtr(strlen(argv[0]) + 1);
-                sprintf(fullpathname, "%s", argv[0]);
-            }
-            if(firstcolon)
-                *firstcolon = PATH_SEPARATER; /* if we don't replace this,
-					       Linux gets confused */
-            if(Uaccess(fullpathname, X_OK) == 0)
-                firstcolon = 0; /* this will break us out of the loop */
-            else
-            {
-                DisposePtr((Ptr)fullpathname);
-                fullpathname = 0;
-            }
-        }
-    }
-
-    /* NOTE: It's not clear why we're calling argv_to_appfile on fullpathname
-       below, but argv_to_appfile has enough potential side-effects that I'm
-       not about to remove it.  OTOH, the call to OpenRFPerm will create
-       a spurious %executor file and then fail, so I've #if 0'd it out. */
-
-    if(argv_to_appfile(fullpathname, &app))
-    {
-#if 0
-	LM(CurApRefNum) = OpenRFPerm(app.fName, app.vRefNum, fsCurPerm);
-#endif
-        LM(CurApName)[0] = std::min<uint8_t>(app.fName[0], sizeof(LM(CurApName)) - 1);
-        BlockMoveData((Ptr)app.fName + 1, (Ptr)LM(CurApName) + 1, (Size)LM(CurApName)[0]);
-    }
-    else
-    {
-        LM(CurApRefNum) = -1;
-        LM(CurApName)[0] = 0;
-    }
-    saveZone = LM(TheZone);
+    GUEST<THz> saveZone = LM(TheZone);
     LM(TheZone) = LM(SysZone);
-    fh = (finderinfohand)
+    finderinfohand fh = (finderinfohand)
         NewHandle((Size)sizeof(finderinfo) - sizeof(AppFile));
     LM(TheZone) = saveZone;
 
     LM(AppParmHandle) = (Handle)fh;
     (*fh)->count = 0;
     (*fh)->message = ROMlib_print ? appPrint : appOpen;
-    if(fullpathname && fullpathname != argv[0])
-        DisposePtr((Ptr)fullpathname);
-    while(--argc > 0)
+
+    for(int i = 1; i < argc; i++)
     {
-        ++argv;
-        if(argv_to_appfile(argv[0], &app))
+        AppFile appFile;
+        if(argv_to_appfile(argv[i], &appFile))
         {
             ROMlib_exit = true;
-            newcount = (*fh)->count + 1;
+            INTEGER newcount = (*fh)->count + 1;
             (*fh)->count = newcount;
             SetHandleSize((Handle)fh,
                             (char *)&(*fh)->files[newcount] - (char *)*fh);
-            (*fh)->files[(*fh)->count - 1] = app;
+            (*fh)->files[(*fh)->count - 1] = appFile;
         }
     }
 }
@@ -312,9 +166,6 @@ void Executor::C_GetAppParms(StringPtr namep, GUEST<INTEGER> *rnp,
     *rnp = LM(CurApRefNum);
     *aphandp = LM(AppParmHandle);
 }
-
-char *ROMlib_errorstring;
-char ROMlib_exit = 0;
 
 static BOOLEAN valid_browser(void)
 {
@@ -426,7 +277,7 @@ void Executor::C_ExitToShell()
                       applonly, nullptr, &reply);
 
             if(!reply.good)
-                ROMlib_exit = 1;
+                ROMlib_exit = true;
             else
             {
                 LM(CurApName)[0] = std::min<uint8_t>(reply.fName[0], 31);
@@ -451,7 +302,7 @@ void Executor::C_ExitToShell()
     }
 
 
-    exit(ROMlib_exit == 1 ? 0 : ROMlib_exit); /* 1 is historically good */
+    exit(0);
     ALLOCAEND /* yeah, right, if exit fails... */
 }
 

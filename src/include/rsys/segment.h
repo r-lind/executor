@@ -1,12 +1,13 @@
 #if !defined(_SEGMENT_H_)
 #define _SEGMENT_H_
 
-extern char ROMlib_exit;
 
 #include <SegmentLdr.h>
 
 namespace Executor
 {
+extern bool ROMlib_exit;
+
 struct finderinfo
 {
     GUEST_STRUCT;
@@ -15,7 +16,7 @@ struct finderinfo
     GUEST<AppFile[1]> files;
 };
 
-extern void ROMlib_seginit(LONGINT argc, char **argv);
+extern void InitAppFiles(int argc, char **argv);
 extern void empty_timer_queues(void);
 
 static_assert(sizeof(finderinfo) == 268);

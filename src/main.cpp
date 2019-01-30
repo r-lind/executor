@@ -1096,7 +1096,7 @@ int main(int argc, char **argv)
             display_keyboard_choices();
     }
 
-    ROMlib_seginit(argc, argv);
+    InitAppFiles(argc, argv);
 
     InitFonts();
 
