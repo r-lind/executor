@@ -562,6 +562,9 @@ target_link_libraries(romlib resources)
 add_executable(executor main.cpp)
 target_link_libraries(executor romlib front-end-${FRONT_END})
 
+set_target_properties(executor PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
 if(APPLE)
     set_target_properties(executor PROPERTIES
             MACOSX_BUNDLE TRUE
