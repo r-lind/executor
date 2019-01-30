@@ -412,7 +412,7 @@ draw_mem_string(char *s, int y)
 }
 
 static void
-draw_status_info(bool executor_p)
+draw_status_info()
 {
     char total_ram_string[128];
     char applzone_ram_string[128];
@@ -422,18 +422,9 @@ draw_status_info(bool executor_p)
     GUEST<LONGINT> total_ram_x;
     const char *ram_tag, *system_ram_tag, *application_ram_tag;
 
-    if(executor_p)
-    {
-        ram_tag = "Emulated RAM: ";
-        system_ram_tag = "System RAM free: ";
-        application_ram_tag = "Application RAM free: ";
-    }
-    else
-    {
-        ram_tag = "";
-        system_ram_tag = "";
-        application_ram_tag = "";
-    }
+    ram_tag = "Emulated RAM: ";
+    system_ram_tag = "System RAM free: ";
+    application_ram_tag = "Application RAM free: ";
 
 /* Compute a string for total RAM. */
 #define MB (1024 * 1024U)
@@ -516,7 +507,7 @@ event_loop()
                 DrawText_c_string(COPYRIGHT_STRING_1);
                 MoveTo(TE_LEFT, 62);
                 DrawText_c_string(COPYRIGHT_STRING_2);*/
-                draw_status_info(executor_p);
+                draw_status_info();
                 FrameRect(&frame_rect);
                 TEUpdate(&te_dest_rect, about_te);
                 DrawControls(about_box);
