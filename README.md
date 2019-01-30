@@ -1,168 +1,99 @@
-Executor 2018
+Executor 2000
 =============
 
-This version of Executor now builds and runs on 64-bit Linux and macOS High Sierra (10.13).
+This is a modernized (as of 2019) fork of Executor, the "original" version
+of which you can still find upstream at https://github.com/ctm/executor.
+The home of the "Executor 2000" fork is at https://github.com/autc04/executor.
 
-Building with the (rootless) Qt frontend:
-````
+Why "2000"? Because that's what we used to call the future.
+
+Executor was a commercially available Mac emulator in the 90s -
+what makes it different from other Mac emulators is that it doesn't need a
+ROM file or any original Apple software to run; rather, it attempts to
+re-implement the classic Mac OS APIs, just as WINE does for Windows.
+
+Executor 2000 feature highlights:
+
+  - Builds and runs on modern 64-bit Linux and macOS (Windows support is planned).
+  - Rootless - emulated Windows are part of your desktop.
+  - PowerPC support (well, not many Apps will run, but it's there)
+  - Support for native Mac resource forks (Mac version)
+  - Exchange files with Basilisk & SheepShaver
+  - Lots of code cleanup, according to my own definition of "clean"
+  - included debugger based on cxmon from Basilisk
+  - started a test suite
+  - Removed old, no longer functioning, DOS, NeXT and Windows ports.
+  - I probably broke lots of other things that used to work.
+
+You can reach the maintainer of this fork at wolfgang.thaller@gmx.net or via
+the github issues page at https://github.com/autc4/executor/issues.
+
+License
+-------
+
+MIT-Style license, see COPYING.
+
+The cxmon monitor, on which Executor's new built-in debugger is based,
+is released under GPL v2+, so you are essentially bound by the GPL's terms
+for all of Executor; however, cxmon is an optional component, which can easily
+be removed should a non-copyleft version of Executor be needed.
+
+Credits
+-------
+
+Executor was originally developped at Abacus Research and Development, Inc (ARDI)
+and initially released in 1990. In 2008, Clifford Matthews (https://github.com/ctm)
+open-sourced Executor under a MIT license.
+The original Credits read:
+
+```
+Bill Goldman - Browser, Testing
+Mat Hostetter - Syn68k, Low Level Graphics, DOS port, more...
+Joel Hunter - Low Level DOS Sound
+Sam Lantinga - Win32 port
+Patrick LoPresti - High Level Sound, Low Level Linux Sound
+Cliff Matthews - this credit list (and most things not listed)
+Cotton Seed - High Level Graphics, Apple Events, more...
+Lauri Pesonen - Low Level Win32 CD-ROM access (Executor 2.1)
+Samuel Vincent - Low Level DOS Serial Port Support
+and all the engineers and testers who helped us build version 1.x
+
+Windows Appearance:
+
+The windows appearance option uses "Jim's CDEFs" copyright Jim Stout and the "Infinity Windoid" copyright Troy Gaul.
+
+Primary Pre-Beta Testers:
+
+Jon Abbott - Testing, Icon Design
+Ziv Arazi - Testing
+Edmund Ronald - Advice, Testing
+K. Harrison Liang - Testing
+Hugh Mclenaghan - Testing
+Emilio Moreno - Testing, Spanish Translation + Keyboard, Icon Design
+Ernst Oud - Documentation, Testing
+```
+
+After Executor's open-sourcing, C.W. Betts (https://github.com/MaddTheSane)
+picked it up and ported the whole thing from plain C to C++.
+And after that, yours truly, Wolfgang Thaller (https://github.com/autc04) took
+posession of it...
+
+Building
+--------
+
+Needs a modern C++ compiler, CMake, and Qt 5.
+SDL2, SDL1.2 or X11 libraries are required to build some of the alternate front-ends.
+
+```
+git submodule init
+git submodule update
 mkdir build
 cd build
-cmake .. -DFRONT_END=qt
-cmake --build .
-````
+cmake ..
+make
+```
 
-Qt front-end on macoOS:
-````
-brew install berkeley-db
-brew install qt
-mkdir build
-cd build
-cmake .. -DFRONT_END=qt -DCMAKE_PREFIX_PATH=/usr/local/Cellar/qt/5.10.0/lib/cmake/ 
-cmake --build .
-````
+When `./build/src/executor` is first invoked, it will automatically install its
+fake Mac system file and the `Browser` finder replacement to `~/.executor/`, so
+no further setup should be needed.
 
-Other frontends are 'sdl2', 'sdl', and 'x', which will give you a more "traditional" experience.
-The sdl and x frontends are the "old", time-tested frontends, the sdl2 frontend is currently inefficient
-and always copies the entire screen... however, the slowness is not really noticeable on current systems.
-
-Next, make a copy of the `sc/skel/volume` directory in a place of your choosing;
-
-````
-cp src/skel/volume ~/ExecutorVolume
-export SystemFolder=~/ExecutorVolume/System\ Folder
-```` 
-
-Now you can launch executor.
-
-
-----------------------------
-
-
-About the 64-bit port
-=====================
-
-This is based on MaddTheSane's cpp port of executor.
-Most big-endian values are now no longer stored as plain values, but
-as `GUEST<T>` values.
-`GUEST<T>` is a template alias that maps to T for single-byte types
-and for struct types, and to `GuestWrapper<T>` for multi-byte integers and pointers.
-This class handles endian conversion and pointer conversion.
-The `CW`, `CL`, `MR`, `RM` macros and friends have been redefined as inline functions
-accordingly.
-This makes byte swapping reasonably type safe, and allows us to store
-pointers as 4 byte values without losing all type information on 64-bit systems.
-See `rsys/mactype.h` and `rsys/byteswap.h`.
-
-A possible future direction would be to replace the `CW`, `CL`, `MR`, `RM` macros
-by implicit conversion operators and hope that makes code simpler and more readable.
-
-The other part of 64-bit support was to make syn68k map different parts of the
-64-bit address space into the M68K's 32-bit address space. 68K code can
-access the emulated memory, the video surface, Executor's global variables
-and local variables in Executor functions. Each of these can be located more
-than 4GB away from the others in the 64-bit address space.
-Unfortunately, this means that the 64-bit version will always be slower
-than the 32-bit version.
-
-Original Readme
-========================================================================
-
-Executor is a Macintosh emulator that is able to run many ancient Mac
-OS 680x0 binaries (System 6 era, early System 7) without using any
-intellectual property from Apple Computer.
-
-Executor has not been actively worked on for many years.  It is more
-of a curiousity than anything practical; it does not run PowerPC
-binaries, nor did it even run most System 7 applications.  Unless you
-have a particular application that you know works with Executor, or
-just like emulation a lot, you probably don't want to spend any time
-with Executor.
-
-Included are a bunch of auxiliarly files and miscellaneous front-ends.
-
-The DOS port required various other libraries that we had permission
-to use, but that we did not necessarily have the permission to publish
-the source for, so the source to some of the packages that the DOS
-port requires is not present in the github repository.
-
-If you want to try to build a version of Executor, try this:
-
-  cd src
-  autoreconf --install
-  cd ..
-  mkdir build
-  cd build
-  ../src/configure
-  make
-  make install
-
-That should leave you with a binary called "executor" (at least on
-32-bit x86 Linux systems, or a Mac (Intel or PowerPC) with XCode 3
-installed) and a directory called "skel".  By default, executor will
-be installed in "/usr/local/bin" and skel will be installed in
-"/usr/local/share/executor".
-
-skel itself isn't meant to be written to; it's meant to be copied
-somewhere and for the copy to be read/write.  For example,
-
-  cp -Rp /usr/local/share/executor/skel/volume /tmp/ExecutorVolume
-  export SystemFolder="/tmp/ExecutorVolume/System Folder"
-  executor
-
-The environment variables that drive Executor including where Executor
-looks for the system folder are a bit arcane and meant to fit together
-with installers that we no longer use.  It may make sense to make it
-so that Executor automatically copies the contents of skel/volume to a
-users home-directory the first time Executor is run, but that's an
-exercise left to the reader.
-
-If you're on an x86_64 based machine and you have the ability to compile
-32-bit binaries and you have these packages installed (where the ? is 3 for
-Fedora 10, 5 for Fedora 11 and 6 for Fedora 12):
-
-  SDL-devel.i?86
-  libX11-devel.i?86
-  db4-devel.i?86
-  libXext.i?86
-  libXrender.i?86
-  libXrandr.i?86
-
-you should be able to build a copy of Executor by overriding CC and
-OBJC to be the 32-bit version and explicitly stating that you're
-building on a 32-bit system (which is a little bit untrue, but works):
-
-  mkdir -p build/debug-linux
-  cd build/debug-linux
-  CC='gcc -m32' OBJC='gcc -m32' ../../src/configure --build=i686-pc-linux
-  make
-
-The above works on Fedora 10, 11 and 12 x86_64.
-
-Yes, the above is pretty messy.  Since the x86_64 bit native version of
-Executor doesn't build and is likely to anytime soon, it probably makes
-sense to make it so that by default we build the ix86 version of Executor
-when compiling on x86_64, and that we complain if the various 32-bit
-libraries aren't available.
-
-In the past it was possible to cross-compile a version of Executor for
-Windows using mingw32.  So far that port hasn't been tried since
-putting the code on Github.  It probably doesn't work, but probably
-could be made to work without much effort.
-
-At one time we had Executor running on the Alpha, a 64-bit
-environment.  We actually modified gcc to support "pointer bit-fields"
-and were able to get Executor to run.  Now that 64-bit machines are
-more popular, I've begun an experiment in supporting 64-bit machines
-without modifying the compiler.  See README.64 for more info.
-
-As I continue Executor's transition to a recent gnu build system I may
-inadvertantly push versions that don't build when using the above
-commands.  Don't hesitate to ask me if you're having trouble
-compiling, linking or running any of the above platforms.
-
-My email address is still <ctm@ardi.com>, although ARDI itself is
-defunct.  I get a ridiculous amount of spam and will quite possibly
-not see email addressed to me.  I'm ctm on github (http://github.com)
-and typically check my email there once a day.
-
---Cliff Matthews
