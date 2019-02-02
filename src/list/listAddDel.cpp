@@ -76,6 +76,9 @@ INTEGER Executor::C_LAddColumn(INTEGER count, INTEGER coln,
                     C_LDraw(c, list);
         }
     }
+    (*list)->maxIndex = ((*list)->dataBounds.right - (*list)->dataBounds.left) 
+        * ((*list)->dataBounds.bottom - (*list)->dataBounds.top) + 1;
+
     return coln;
 }
 
@@ -132,6 +135,8 @@ INTEGER Executor::C_LAddRow(INTEGER count, INTEGER rown,
                     C_LDraw(c, list);
         }
     }
+    (*list)->maxIndex = ((*list)->dataBounds.right - (*list)->dataBounds.left) 
+        * ((*list)->dataBounds.bottom - (*list)->dataBounds.top) + 1;
     return rown;
 }
 
@@ -189,6 +194,10 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
             EraseRect(&(*list)->rView);
         if((control = (*list)->hScroll))
             SetControlMaximum(control, (*control)->contrlMin);
+
+        (*list)->maxIndex = ((*list)->dataBounds.right - (*list)->dataBounds.left) 
+            * ((*list)->dataBounds.bottom - (*list)->dataBounds.top) + 1;
+
         /*-->*/ return; /* quick delete of everything */
     }
 
@@ -295,6 +304,9 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
                     C_LDraw(c, list);
         }
     }
+
+    (*list)->maxIndex = ((*list)->dataBounds.right - (*list)->dataBounds.left) 
+        * ((*list)->dataBounds.bottom - (*list)->dataBounds.top) + 1;
 }
 
 void Executor::C_LDelRow(INTEGER count, INTEGER rown,
@@ -327,6 +339,10 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
             EraseRect(&(*list)->rView);
         if((control = (*list)->vScroll))
             SetControlMaximum(control, (*control)->contrlMin);
+
+        (*list)->maxIndex = ((*list)->dataBounds.right - (*list)->dataBounds.left) 
+            * ((*list)->dataBounds.bottom - (*list)->dataBounds.top) + 1;
+
         /*-->*/ return; /* quick delete of all */
     }
 
@@ -411,4 +427,6 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
                     C_LDraw(c, list);
         }
     }
+    (*list)->maxIndex = ((*list)->dataBounds.right - (*list)->dataBounds.left) 
+        * ((*list)->dataBounds.bottom - (*list)->dataBounds.top) + 1;
 }

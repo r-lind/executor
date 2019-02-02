@@ -149,7 +149,7 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     lp->lastClick.v = -1;
     lp->refCon = 0;
     lp->userHandle = nullptr;
-    lp->maxIndex = -1; /* What is this anyway? */
+    lp->maxIndex = noffs;
     ip = (INTEGER *)lp->cellArray;
     for(i = 0; i <= noffs; i++)
         *ip++ = 0;
