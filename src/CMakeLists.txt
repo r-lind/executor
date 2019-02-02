@@ -393,6 +393,7 @@ set(prefs_sources
     prefs/parse.ypp
     prefs/crc.cpp
     prefs/options.cpp
+    prefs/prefs.cpp
 )
 
 set(misc_sources

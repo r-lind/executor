@@ -3,7 +3,7 @@
 
 namespace Executor
 {
-    extern char ROMlib_startdir[MAXPATHLEN];
+    extern fs::path ROMlib_startdir;
     extern std::string ROMlib_ConfigurationFolder;
     extern fs::path ROMlib_DirectoryMap;
     extern std::string ROMlib_ScreenDumpFile;

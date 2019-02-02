@@ -41,7 +41,7 @@ using namespace Executor;
 namespace Executor
 {
 int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
-char ROMlib_startdir[MAXPATHLEN];
+fs::path ROMlib_startdir;
 std::string ROMlib_appname;
 }
 
@@ -241,7 +241,7 @@ Executor::expandPath(std::string name)
     switch(name[0])
     {
         case '+':
-            name = ROMlib_startdir + name.substr(1);
+            name = ROMlib_startdir.string() + name.substr(1);
             break;
         case '~':
         {

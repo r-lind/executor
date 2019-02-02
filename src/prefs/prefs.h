@@ -3,6 +3,7 @@
 
 #include <string>
 #include <stdint.h>
+#include <ExMacTypes.h>
 
 namespace Executor
 {
@@ -61,6 +62,22 @@ extern void ROMlib_WriteWhen(WriteWhenType when);
 extern void do_dump_screen(void);
 extern std::string ROMlib_configfilename;
 extern FILE *configfile;
+
+int saveprefvalues(const char *savefilename);
+void ParseConfigFile(std::string appname, OSType type);
+
+
+#define C_STRING_FROM_SYSTEM_VERSION()        \
+    ({                                        \
+        char *retval;                         \
+        retval = (char *)alloca(9);           \
+        sprintf(retval, "%d.%d.%d",           \
+                (system_version >> 8) & 0xF,  \
+                (system_version >> 4) & 0xF,  \
+                (system_version >> 0) & 0xF); \
+        retval;                               \
+    })
+
 }
 
 #endif /* !defined(__RSYS_PREFS__) */

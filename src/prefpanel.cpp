@@ -174,17 +174,6 @@ INTEGER getedittext(DialogPtr dp, INTEGER itemno)
     return (INTEGER)l;
 }
 
-#define C_STRING_FROM_SYSTEM_VERSION()        \
-    ({                                        \
-        char *retval;                         \
-        retval = (char *)alloca(9);           \
-        sprintf(retval, "%d.%d.%d",           \
-                (system_version >> 8) & 0xF,  \
-                (system_version >> 4) & 0xF,  \
-                (system_version >> 0) & 0xF); \
-        retval;                               \
-    })
-
 void setupprefvalues(DialogPtr dp)
 {
     INTEGER toset;
@@ -331,127 +320,6 @@ void readprefvalues(DialogPtr dp)
     }
 }
 
-/*
- * Get rid of any characters that cause trouble inside a quoted
- * string.  Look at yylex() in parse.y.
- */
-
-static void
-clean(std::string& str)
-{
-    for(char& c : str)
-        if(c == '"')
-            c = '\'';
-}
-
-int saveprefvalues(const char *savefilename, LONGINT locationx, LONGINT locationy)
-{
-    int retval;
-    FILE *fp;
-
-    if((fp = Ufopen(savefilename, "w")))
-    {
-        {
-            const char *lastslash;
-
-            lastslash = strrchr(savefilename, '/');
-            lastslash = lastslash ? lastslash + 1 : savefilename;
-            fprintf(fp, "// This Configuration file (%s) was built by "
-                        "Executor\n",
-                    lastslash);
-        }
-        if(!ROMlib_Comments.empty())
-        {
-            clean(ROMlib_Comments);
-            fprintf(fp, "Comments = \"%s\";\n", ROMlib_Comments.c_str());
-        }
-        if(!ROMlib_WindowName.empty())
-        {
-            clean(ROMlib_WindowName);
-            fprintf(fp, "WindowName = \"%s\";\n", ROMlib_WindowName.c_str());
-        }
-        else
-        {
-            std::string window_name = vdriver->getTitle();
-            clean(window_name);
-            fprintf(fp, "// WindowName = \"%s\";\n", window_name.c_str());
-        }
-        fprintf(fp, "BitsPerPixel = %d;\n",
-                toHost(PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)))));
-
-#if 0 && defined(MACOSX_)
-	fprintf(fp, "ScreenSize = { %ld, %ld };\n", (long) curr_width, (long) curr_height);
-	fprintf(fp, "MacSize = { %ld, %ld };\n", (long) orig_width, (long) orig_height);
-#endif
-        fprintf(fp, "ScreenLocation = { %ld, %ld };\n", (long)locationx, (long)locationy);
-
-        fprintf(fp, "SystemVersion = %s;\n", C_STRING_FROM_SYSTEM_VERSION());
-        fprintf(fp, "RefreshNumber = %d;\n", ROMlib_refresh);
-        fprintf(fp, "Delay = %d;\n", ROMlib_delay);
-        fprintf(fp, "Options = {");
-        switch(ROMlib_when)
-        {
-            case WriteAlways:
-            case WriteInBltrgn:
-                fprintf(fp, "BlitOften");
-                break;
-            default:
-            case WriteNever:
-            case WriteInOSEvent:
-                fprintf(fp, "BlitInOSEvent");
-                break;
-            case WriteAtEndOfTrap:
-                fprintf(fp, "BlitAtTrapEnd");
-                break;
-        }
-        switch(ROMlib_PretendSound)
-        {
-            case soundoff:
-                fprintf(fp, ", SoundOff");
-                break;
-            case soundpretend:
-                fprintf(fp, ", PretendSound");
-                break;
-            case soundon:
-                fprintf(fp, ", SoundOn");
-                break;
-        }
-        if(ROMlib_passpostscript)
-            fprintf(fp, ", PassPostscript");
-        if(ROMlib_newlinetocr)
-            fprintf(fp, ", NewLineToCR");
-        if(ROMlib_directdiskaccess)
-            fprintf(fp, ", DirectDiskAccess");
-#if 0
-	if (ROMlib_accelerated)
-	    fprintf(fp, ", Accelerated");
-	if (ROMlib_clock != 2)
-	    fprintf(fp, ", NoClock");
-#endif
-        if(ROMlib_nowarn32)
-            fprintf(fp, ", NoWarn32");
-        if(ROMlib_flushoften)
-            fprintf(fp, ", FlushOften");
-        if(ROMlib_options & ROMLIB_DEBUG_BIT)
-            fprintf(fp, ", Debug");
-
-        if(ROMlib_pretend_help)
-            fprintf(fp, ", PretendHelp");
-        if(ROMlib_pretend_edition)
-            fprintf(fp, ", PretendEdition");
-        if(ROMlib_pretend_script)
-            fprintf(fp, ", PretendScript");
-        if(ROMlib_pretend_alias)
-            fprintf(fp, ", PretendAlias");
-
-        fprintf(fp, "};\n");
-        fclose(fp);
-        retval = true;
-    }
-    else
-        retval = false;
-    return retval;
-}
 
 typedef enum { disable,
                enable } enableness_t;
@@ -648,7 +516,7 @@ void Executor::dopreferences(void)
                 {
                     readprefvalues(dp);
                     if(ihit == PREFSAVEITEM)
-                        saveprefvalues(ROMlib_configfilename.c_str(), 0, 0);
+                        saveprefvalues(ROMlib_configfilename.c_str());
                 }
                 DisposeDialog(dp);
                 am_already_here = false;

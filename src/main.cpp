@@ -367,7 +367,6 @@ static void setstartdir(char *argv0)
     char buf[MAXPATHLEN];
     INTEGER nread, arg0len;
     char *lookhere, *suffix, *whichstr;
-    char savedir[MAXPATHLEN];
 
     if(argv0[0] == '/' || Uaccess(argv0, X_OK) == 0)
         lookhere = argv0;
@@ -405,29 +404,16 @@ static void setstartdir(char *argv0)
     suffix = rindex(lookhere, '/');
     if(suffix)
         *suffix = 0;
-    getcwd(savedir, sizeof savedir);
+    auto savedir = fs::current_path();
     chdir(lookhere);
     if(suffix)
         *suffix = '/';
-    getcwd(ROMlib_startdir, sizeof ROMlib_startdir);
-    chdir(savedir);
+    ROMlib_startdir = fs::current_path();
+    fs::current_path(savedir);
+    
 #else /* defined(MSDOS) || defined(CYGWIN32) */
     // TODO: replace by GetModuleFilename()
-    if(argv0[1] == ':')
-    {
-        char *lastslash;
-
-        strcpy(ROMlib_startdir, argv0);
-        lastslash = strrchr(ROMlib_startdir, '/');
-        if(!lastslash)
-            lastslash = strrchr(ROMlib_startdir, '\\');
-        if(lastslash)
-            *lastslash = 0;
-    }
-    else
-    {
-        strcpy(ROMlib_startdir, ".");
-    }
+    ROMlib_startdir = fs::canonical(argv0).parent_path();
 #endif /* defined(MSDOS) */
 }
 
