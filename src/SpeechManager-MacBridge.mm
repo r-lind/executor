@@ -31,6 +31,11 @@
 #define VoiceIDKey @"VoiceNumericID"
 #define VoiceNameKey @"VoiceName"
 
+// OSType of voices that started out as MacInTalk 3 voices
+#define kMacInTalk3VoiceCreator ((Executor::OSType)'mtk3')
+// OSType of voices that started out as MacInTalk Pro voices
+#define kMacInTalkProVoiceCreator ((Executor::OSType)'gala')
+
 using namespace Executor;
 
 static NSSpeechSynthesizer *internalSynthesizer;
@@ -42,10 +47,110 @@ static dispatch_block_t initSpeechBlock= ^{
   synthesizerMap = std::map<Executor::LONGINT, NSSpeechSynthesizer *>();
   NSMutableArray *tmpVoices = [[NSMutableArray alloc] init];
   @autoreleasepool {
+    // Contains a dictionary of voices where the creator and ID aren't included in Cocoa.
+    NSDictionary<NSString*,NSDictionary<NSString*,id>*> *oldVoicesDict = @{
+      @"com.apple.speech.synthesis.voice.Agnes": @{
+        VoiceCreatorIDKey: @(kMacInTalkProVoiceCreator),
+        VoiceIDKey: @(300),
+      },
+      @"com.apple.speech.synthesis.voice.Albert": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(41),
+      },
+      @"com.apple.speech.synthesis.voice.BadNews": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(36),
+      },
+      @"com.apple.speech.synthesis.voice.Bahh": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(40),
+      },
+      @"com.apple.speech.synthesis.voice.Bells": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(26),
+      },
+      @"com.apple.speech.synthesis.voice.Boing": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(16),
+      },
+      @"com.apple.speech.synthesis.voice.Bruce": @{
+        VoiceCreatorIDKey: @(kMacInTalkProVoiceCreator),
+        VoiceIDKey: @(100),
+      },
+      @"com.apple.speech.synthesis.voice.Bubbles": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(50),
+      },
+      @"com.apple.speech.synthesis.voice.Cellos": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(35),
+      },
+      @"com.apple.speech.synthesis.voice.Deranged": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(38),
+      },
+      @"com.apple.speech.synthesis.voice.Fred": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(1),
+      },
+      @"com.apple.speech.synthesis.voice.GoodNews": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(39),
+      },
+      @"com.apple.speech.synthesis.voice.Hysterical": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(30),
+      },
+      @"com.apple.speech.synthesis.voice.Junior": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(4),
+      },
+      @"com.apple.speech.synthesis.voice.Kathy": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(2),
+      },
+      @"com.apple.speech.synthesis.voice.Organ": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(31),
+      },
+      @"com.apple.speech.synthesis.voice.Princess": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(3),
+      },
+      @"com.apple.speech.synthesis.voice.Ralph": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(5),
+      },
+      @"com.apple.speech.synthesis.voice.Trinoids": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(9),
+      },
+      @"com.apple.speech.synthesis.voice.Victoria": @{
+        VoiceCreatorIDKey: @(kMacInTalkProVoiceCreator),
+        VoiceIDKey: @(200),
+      },
+      @"com.apple.speech.synthesis.voice.Whisper": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(6),
+      },
+      @"com.apple.speech.synthesis.voice.Zarvox": @{
+        VoiceCreatorIDKey: @(kMacInTalk3VoiceCreator),
+        VoiceIDKey: @(8),
+      }
+    };
     for (NSString *aVoice in [NSSpeechSynthesizer availableVoices]) {
       NSDictionary *voiceDict = [NSSpeechSynthesizer attributesForVoice:aVoice];
       NSNumber *synthesizerID = voiceDict[@"VoiceSynthesizerNumericID"];
       NSNumber *voiceID = voiceDict[@"VoiceNumericID"];
+      
+      if ((!synthesizerID || !voiceID) && oldVoicesDict[aVoice]) {
+        synthesizerID = oldVoicesDict[aVoice][VoiceCreatorIDKey];
+        voiceID = oldVoicesDict[aVoice][VoiceIDKey];
+      }
+      
+      if (!synthesizerID || !voiceID) {
+        continue;
+      }
       
       [tmpVoices addObject:@{VoiceNameKey: aVoice,
                              VoiceCreatorIDKey: synthesizerID,

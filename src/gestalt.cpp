@@ -85,6 +85,9 @@ static gestaltentry_t gtable[] = {
     {
         gestaltSoundAttr, 0x0C00,
     },
+    {
+        gestaltSpeechAttr, 0x0001
+    },
 /*  gestaltStdNBPAttr,		0,	*/
 /*  gestaltTermMgrAttr,		0,	*/
 /*  gestaltParityAttr,		0,	*/
@@ -321,6 +324,10 @@ find_selector_in_table(OSType selector, gestaltentry_t table[],
             break;
         case gestaltAliasMgrAttr:
             if(!ROMlib_pretend_alias)
+                selector = -1;
+            break;
+        case gestaltSpeechAttr:
+            if(!ROMlib_speech_enabled)
                 selector = -1;
             break;
     }
