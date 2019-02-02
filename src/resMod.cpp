@@ -213,7 +213,7 @@ void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
     EWALKTR(tr)
 }
 
-void Executor::C_RmveResource(Handle res)
+void Executor::C_RemoveResource(Handle res)
 {
     resmaphand map;
     typref *tr;
@@ -299,14 +299,14 @@ static OSErr writemap(resmaphand map)
     if(terr != noErr)
         return (terr);
     lc = sizeof(reshead);
-    terr = FSWriteAll(Hx(map, resfn), &lc, (Ptr) & (HxX(map, rh)));
+    terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr) & (HxX(map, rh)));
     if(terr != noErr)
         return (terr);
     terr = SetFPos(Hx(map, resfn), fsFromStart, Hx(map, rh.rmapoff));
     if(terr != noErr)
         return (terr);
     lc = Hx(map, rh.maplen);
-    terr = FSWriteAll(Hx(map, resfn), &lc, (Ptr)STARH(map));
+    terr = FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)STARH(map));
     if(terr == noErr)
         HxX(map, resfatr).raw_and(CWC(~(mapChanged)));
     return (terr);
@@ -340,11 +340,11 @@ void Executor::ROMlib_wr(resmaphand map, resref *rr) /* INTERNAL */
             return;
         lc = sizeof(LONGINT);
         swappedrsize = CL(rsize);
-        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), &lc, (Ptr)&swappedrsize));
+        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), (Ptr)&swappedrsize));
         if(LM(ResErr) != CWC(noErr))
             return;
         lc = rsize;
-        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), &lc, STARH(res)));
+        ROMlib_setreserr(FSWriteAll(Hx(map, resfn), guestref(lc), STARH(res)));
         if(LM(ResErr) != CWC(noErr))
             return;
         rr->ratr &= ~resChanged;
@@ -385,7 +385,7 @@ static void getdat(INTEGER fn, LONGINT datoff, LONGINT doff, Handle *h)
     gui_assert(doff >= 0);
     SetFPos(fn, fsFromStart, datoff + doff);
     lc = sizeof(LONGINT);
-    FSReadAll(fn, &lc, (Ptr)&size_s);
+    FSReadAll(fn, guestref(lc), (Ptr)&size_s);
     size = CL(size_s);
     gui_assert(size >= 0);
     *h = NewHandle(size);
@@ -393,7 +393,7 @@ static void getdat(INTEGER fn, LONGINT datoff, LONGINT doff, Handle *h)
     HSetState(*h, RSRCBIT);
     lc = size;
     HLock(*h);
-    FSReadAll(fn, &lc, STARH(*h));
+    FSReadAll(fn, guestref(lc), STARH(*h));
     gui_assert(lc == size);
     HUnlock(*h);
 }
@@ -409,10 +409,10 @@ static void putdat(INTEGER fn, LONGINT datoff, LONGINT *doffp, Handle h)
     SetFPos(fn, fsFromStart, datoff + *doffp);
     lc = sizeof(LONGINT);
     swappedsize = CL(size);
-    FSWriteAll(fn, &lc, (Ptr)&swappedsize);
+    FSWriteAll(fn, guestref(lc), (Ptr)&swappedsize);
     lc = size;
     HLock(h);
-    FSWriteAll(fn, &lc, STARH(h));
+    FSWriteAll(fn, guestref(lc), STARH(h));
     HUnlock(h);
     *doffp += sizeof(LONGINT) + size;
 }
@@ -435,7 +435,7 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
         } else if (!sp->rrptr->rhand || !*(Handle)CL(sp->rrptr->rhand)) {
 	    getdat(fn, datoff, sp->diskoff, &h);
 	    putdat(fn, datoff, &doff,  h);
-	    DisposHandle(h);
+	    DisposeHandle(h);
 	} else if (doff != sp->diskoff)
 	    putdat(fn, datoff, &doff, (Handle) CL(sp->rrptr->rhand));
         else
@@ -453,7 +453,7 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
             SetFPos(fn, fsFromStart, datoff + doff);
             lc = sizeof(LONGINT);
             GUEST<LONGINT> size_s;
-            FSReadAll(fn, &lc, (Ptr)&size_s);
+            FSReadAll(fn, guestref(lc), (Ptr)&size_s);
             gui_assert(lc == sizeof(LONGINT));
             size = CL(size_s);
             gui_assert(size >= 0);
@@ -464,7 +464,7 @@ static LONGINT walkst(res_sorttype_t *sp, res_sorttype_t *sep, INTEGER fn,
             getdat(fn, datoff, sp->diskoff, &h);
             putdat(fn, datoff, &doff, h);
             HSetState(h, HGetState(h) & ~RSRCBIT);
-            DisposHandle(h);
+            DisposeHandle(h);
         }
 #endif
         sp++;
@@ -497,7 +497,7 @@ static void compactdata(resmaphand map)
     HxX(map, resfatr).raw_and(CWC(~mapCompact));
     HxX(map, rh.rmapoff) = CL(sizeof(reshead) + sizeof(rsrvrec) + datlen);
     HxX(map, rh.datlen) = CL(datlen);
-    DisposHandle((Handle)st);
+    DisposeHandle((Handle)st);
 }
 
 void Executor::C_UpdateResFile(INTEGER rn)

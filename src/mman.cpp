@@ -15,7 +15,7 @@
 #include "OSEvent.h"
 
 #include "rsys/mman_private.h"
-#include "rsys/file.h"
+#include "rsys/cpu.h"
 #include "rsys/hook.h"
 #include "rsys/memsize.h"
 #include "rsys/executor.h"
@@ -45,21 +45,14 @@ int ROMlib_stack_size = DEFAULT_STACK_SIZE;
 
 /* these two variables define, in ROMlib space, the beginning of mac-memory
    and the end of mac memory.  They're purpose is to try to prevent routines
-   like DisposHandle () from crashing when passed a bogus pointer.
+   like DisposeHandle () from crashing when passed a bogus pointer.
    Specifically, I know an application that picks up 4 bytes from low-memory
-   global 0x100 and then calls DisposHandle () on it.  That location contains
+   global 0x100 and then calls DisposeHandle () on it.  That location contains
    0xFFFF0048 both here and on a Mac.  On a Mac, this doesn't cause a crash.
    */
 
 uintptr_t ROMlib_syszone;
 uintptr_t ROMlib_memtop;
-
-#if defined(MM_MANY_APPLZONES)
-/* for debugging, we can have multiple applzones which are used
-   roundrobin */
-int mm_n_applzones = 1;
-static int mm_current_applzone;
-#endif
 
 /* for routines that simply set LM(MemErr) */
 #define SET_MEM_ERR(err)   \
@@ -299,7 +292,7 @@ void HClrRBit(Handle h)
     SET_MEM_ERR(noErr);
 }
 
-/* Zone sizes will be zero modulo this number (which must be a power of 2). */
+/* Zone sizes will be zero modulo this number (which must be a pow of 2). */
 #define ZONE_ALIGN_SIZE 8192
 
 static void
@@ -347,7 +340,6 @@ void InitApplZone(void)
     SET_MEM_ERR(noErr);
 }
 
-#define MANDELSLOP (32L * 1024)
 
 void print_mem_full_message(void)
 {
@@ -384,11 +376,7 @@ void ROMlib_InitZones()
 
 #define STACK_SIZE ROMlib_stack_size
 
-#if defined(MM_MANY_APPLZONES)
-        applzone_memory_segment_size = (mm_n_applzones * INIT_APPLZONE_SIZE);
-#else /* !MM_MANY_APPLZONES */
         applzone_memory_segment_size = INIT_APPLZONE_SIZE;
-#endif /* !MM_MANY_APPLZONES */
 
         /* Determine total allocated memory.  Round up to next 8K
        * since that's the page size we pretend to have.
@@ -432,6 +420,7 @@ void ROMlib_InitZones()
 #endif
         {
             int low_global_room = (char *)&LM(lastlowglobal) - (char *)&LM(nilhandle);
+            memset(memory, ~0, low_global_room);
             memory += low_global_room;
             init_syszone_size -= low_global_room;
         }
@@ -446,37 +435,18 @@ void ROMlib_InitZones()
         beenhere = true;
     }
 
-#if defined(MM_MANY_APPLZONES)
-    if(mm_n_applzones != 1)
-    {
-        if(munmap((char *)MR(LM(SysZone))
-                      + INIT_SYSZONE_SIZE,
-                  applzone_memory_segment_size)
-           == -1)
-            warning_errno("unable to `munmap ()' previous applzone");
-
-        LM(ApplZone) = RM((THz)((char *)MR(LM(SysZone))
-                            + INIT_SYSZONE_SIZE
-                            + (mm_current_applzone * INIT_APPLZONE_SIZE)));
-        mm_current_applzone = (mm_current_applzone + 1) % mm_n_applzones;
-
-        if(mmap((char *)MR(LM(ApplZone)), INIT_APPLZONE_SIZE,
-                PROT_READ | PROT_WRITE,
-                MAP_ANONYMOUS | MAP_FIXED | MAP_PRIVATE, -1, 0)
-           == (void *)-1)
-            errno_fatal("unable to `mmap ()' new applzone");
-    }
-    else
-        LM(ApplZone) = RM((THz)((Ptr)MR(LM(SysZone)) + INIT_SYSZONE_SIZE));
-#else /* !MM_MANY_APPLZONES */
     LM(ApplZone) = RM((THz)((Ptr)MR(LM(SysZone)) + INIT_SYSZONE_SIZE));
-#endif
 
     Executor::InitApplZone();
 
     LM(ApplLimit) = RM(((Ptr)MR(LM(ApplZone))
                     + INIT_APPLZONE_SIZE));
 
+
+    // Why do we waste 32KB on the stack?
+    // It probably seemed necessary for compatibility with *something*.
+    // "MANDELSLOP" is such a descriptive name..
+#define MANDELSLOP (32L * 1024)
     EM_A7 = US_TO_SYN68K(stack_end - 16 - MANDELSLOP);
 
     LM(MemErr) = CWC(noErr);
@@ -698,7 +668,7 @@ _NewHandle_flags(Size size, bool sys_p, bool clear_p)
     size += HDRSIZE;
     if(ROMlib_relalloc(size, &block) != noErr)
     {
-        DisposHandle(newh);
+        DisposeHandle(newh);
         newh = NULL;
         SET_MEM_ERR(memFullErr);
         goto done;
@@ -724,7 +694,7 @@ done:
 
 #define TTS_HACK (ROMlib_options & ROMLIB_DISPOSHANDLE_HACK_BIT)
 
-void DisposHandle(Handle h)
+void DisposeHandle(Handle h)
 {
     MM_SLAM("entry");
 
@@ -1034,7 +1004,7 @@ _RecoverHandle_flags(Ptr p, bool sys_p)
     return h;
 }
 
-void ReallocHandle(Handle h, Size size)
+void ReallocateHandle(Handle h, Size size)
 {
     block_header_t *oldb, *newb;
     int32_t newsize;
@@ -1143,7 +1113,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
 
     ZONE_ALLOC_PTR_X(current_zone) = CLC_NULL;
 
-    ResrvMem(size);
+    ReserveMem(size);
     if(ROMlib_relalloc(size, &b))
     {
 #if 0
@@ -1177,7 +1147,7 @@ Ptr _NewPtr_flags(Size size, bool sys_p, bool clear_p)
     return p;
 }
 
-void DisposPtr(Ptr p)
+void DisposePtr(Ptr p)
 {
     MM_SLAM("entry");
 
@@ -1370,7 +1340,7 @@ int32_t _FreeMem_flags(bool sys_p)
     return freespace;
 }
 
-Size _MaxMem_flags(Size *growp, bool sys_p)
+Size _MaxMem_flags(GUEST<Size> *growp, bool sys_p)
 {
     block_header_t *b;
     GUEST<THz> save_zone;
@@ -1471,7 +1441,7 @@ Size _MaxMem_flags(Size *growp, bool sys_p)
 
     LM(TheZone) = save_zone;
 
-    *growp = grow;
+    *growp = CL(grow);
     SET_MEM_ERR(noErr);
     MM_SLAM("exit");
     return biggestfree;
@@ -1589,7 +1559,6 @@ void _ResrvMem_flags(Size needed, bool sys_p)
     GUEST<THz> save_zone;
     THz current_zone;
     block_header_t *b;
-    Size free;
     long avail;
     bool already_maxed_p;
 
@@ -1624,7 +1593,9 @@ again:
         }
     }
 
-    avail = MaxMem(&free);
+    GUEST<Size> free_s;
+    avail = MaxMem(&free_s);
+    Size free = CL(free_s);
     if(avail >= needed && !already_maxed_p)
     {
         already_maxed_p = true;
@@ -1717,12 +1688,12 @@ BlockMove_and_possibly_flush_cache(Ptr src, Ptr dst, Size cnt,
     LM(MemErr) = CWC(noErr);
 }
 
-void BlockMove(Ptr src, Ptr dst, Size cnt)
+void C_BlockMove(Ptr src, Ptr dst, Size cnt)
 {
     BlockMove_and_possibly_flush_cache(src, dst, cnt, true);
 }
 
-void BlockMoveData(Ptr src, Ptr dst, Size cnt)
+void C_BlockMoveData(Ptr src, Ptr dst, Size cnt)
 {
     BlockMove_and_possibly_flush_cache(src, dst, cnt, false);
 }
@@ -1770,6 +1741,12 @@ void MoveHHi(Handle h)
     SET_MEM_ERR(noErr);
 }
 
+void C_HLockHi(Handle h)
+{
+    MoveHHi(h);
+    HLock(h);
+}
+
 int32_t _MaxBlock_flags(bool sys_p)
 {
     GUEST<THz> save_zone;
@@ -1810,7 +1787,7 @@ int32_t _MaxBlock_flags(bool sys_p)
     return MAX(total_free, max_free) - HDRSIZE;
 }
 
-void _PurgeSpace_flags(Size *total_out, Size *contig_out, bool sys_p)
+void _PurgeSpace_flags(GUEST<Size> *total_out, GUEST<Size> *contig_out, bool sys_p)
 {
     GUEST<THz> save_zone;
     THz current_zone;
@@ -1855,8 +1832,8 @@ void _PurgeSpace_flags(Size *total_out, Size *contig_out, bool sys_p)
     LM(TheZone) = save_zone;
 
     SET_MEM_ERR(noErr);
-    *total_out = total_free - HDRSIZE;
-    *contig_out = MAX(this_contig, max_contig) - HDRSIZE;
+    *total_out = CL(total_free - HDRSIZE);
+    *contig_out = CL(MAX(this_contig, max_contig) - HDRSIZE);
     MM_SLAM("exit");
 }
 
@@ -1979,7 +1956,7 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         SetHandleSize(dh, size);
         if(LM(MemErr) == CWC(noErr))
             BlockMove(STARH(sh), STARH(dh), size);
-        DisposHandle(sh);
+        DisposeHandle(sh);
     }
     else
     {
@@ -1995,25 +1972,40 @@ void ROMlib_installhandle(Handle sh, Handle dh)
     MM_SLAM("exit");
 }
 
-OSErr MemError(void)
+OSErr C_MemError(void)
 {
     MM_SLAM("entry");
 
     return CW(LM(MemErr));
 }
 
-THz SystemZone(void)
+THz C_SystemZone(void)
 {
     MM_SLAM("entry");
 
     return MR(LM(SysZone));
 }
 
-THz ApplicZone(void)
+THz C_ApplicationZone(void)
 {
     MM_SLAM("entry");
 
     return MR(LM(ApplZone));
+}
+
+Ptr C_GetApplLimit()
+{
+    return MR(LM(ApplLimit));
+}
+
+Ptr C_TopMem()
+{
+    return MR(LM(MemTop));
+}
+
+Handle C_GZSaveHnd()
+{
+    return MR(LM(GZRootHnd));
 }
 
 /* Like NewHandle, but fills in the newly allocated memory by copying

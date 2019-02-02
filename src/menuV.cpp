@@ -11,7 +11,7 @@
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"
 
-#include "rsys/file.h"
+#include "rsys/cpu.h"
 #include "rsys/cquick.h"
 #include "rsys/menu.h"
 #include "rsys/wind.h"
@@ -27,7 +27,7 @@ void Executor::C_InitProcMenu(INTEGER mbid)
 #if 0
     /* NOTE:  We don't dispose this guy because it is a phoney resource */
     if (LM(MBDFHndl))
-	DisposHandle(Cx(LM(MBDFHndl)));
+	DisposeHandle(Cx(LM(MBDFHndl)));
 #endif
 
     /* NOTE: even though the docs imply that the low three bits of the

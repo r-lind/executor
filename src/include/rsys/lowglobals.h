@@ -14,6 +14,7 @@ namespace Executor
 template<class T>
 struct LowMemGlobal
 {
+    using type = T;
     uint32_t address;
 };
 

@@ -4,9 +4,12 @@
 /*
  * Copyright 1986, 1989, 1990 by Abacus Research and Development, Inc.
  * All rights reserved.
- *
-
  */
+
+#include <ExMacTypes.h>
+
+#define MODULE_NAME Serial
+#include <rsys/api-module.h>
 
 namespace Executor
 {
@@ -115,14 +118,24 @@ enum
 };
 
 extern OSErr RAMSDOpen(SPortSel port);
+NOTRAP_FUNCTION2(RAMSDOpen);
 extern void RAMSDClose(SPortSel port);
+NOTRAP_FUNCTION2(RAMSDClose);
 extern OSErr SerReset(INTEGER rn, INTEGER config);
+NOTRAP_FUNCTION2(SerReset);
 extern OSErr SerSetBuf(INTEGER rn, Ptr p, INTEGER len);
-extern OSErr SerHShake(INTEGER rn, SerShk flags);
+NOTRAP_FUNCTION2(SerSetBuf);
+extern OSErr SerHShake(INTEGER rn, const SerShk *flags);
+NOTRAP_FUNCTION2(SerHShake);
 extern OSErr SerSetBrk(INTEGER rn);
+NOTRAP_FUNCTION2(SerSetBrk);
 extern OSErr SerClrBrk(INTEGER rn);
+NOTRAP_FUNCTION2(SerClrBrk);
 extern OSErr SerGetBuf(INTEGER rn, LONGINT *lp);
+NOTRAP_FUNCTION2(SerGetBuf);
 extern OSErr SerStatus(INTEGER rn, SerStaRec *serstap);
+NOTRAP_FUNCTION2(SerStatus);
+
 }
 
 #endif /* __SERIAL__ */

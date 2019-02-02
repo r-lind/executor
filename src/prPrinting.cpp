@@ -36,9 +36,6 @@ using namespace std;
 int pageno = 0; /* This isn't really the way to do it */
 namespace Executor
 {
-int ROMlib_passpostscript = true;
-int ROMlib_fontsubstitution = false;
-
 string ROMlib_document_paper_sizes;
 string ROMlib_paper_size;
 string ROMlib_paper_size_name;
@@ -714,7 +711,7 @@ void Executor::C_PrCloseDoc(TPPrPort port)
 
 #endif
     if(port->fOurPtr)
-        DisposPtr((Ptr)port);
+        DisposePtr((Ptr)port);
 #if defined(QUESTIONABLE_FIX_FOR_LOGBOOK_THAT_BREAKS_PRINTING_UNDER_TESTGEN)
     LM(FractEnable) = save_FractEnable;
 #endif

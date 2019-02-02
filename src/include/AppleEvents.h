@@ -334,21 +334,21 @@ extern OSErr C_AECoerceDesc(AEDesc *desc, DescType result_type,
                                         AEDesc *desc_out);
 PASCAL_SUBTRAP(AECoerceDesc, 0xA816, 0x0603, Pack8);
 
-extern OSErr C_AEGetKeyPtr(AERecord *record, AEKeyword keyword,
+extern OSErr C_AEGetParamPtr(AERecord *record, AEKeyword keyword,
                                        DescType desired_type, GUEST<DescType> *type_out,
                                        Ptr data, Size max_size, GUEST<Size> *size_out);
-PASCAL_SUBTRAP(AEGetKeyPtr, 0xA816, 0x0E11, Pack8);
+PASCAL_SUBTRAP(AEGetParamPtr, 0xA816, 0x0E11, Pack8);
 
-extern OSErr C_AEGetKeyDesc(AERecord *record, AEKeyword keyword,
+extern OSErr C_AEGetParamDesc(AERecord *record, AEKeyword keyword,
                                         DescType desired_type, AEDesc *desc_out);
-PASCAL_SUBTRAP(AEGetKeyDesc, 0xA816, 0x0812, Pack8);
+PASCAL_SUBTRAP(AEGetParamDesc, 0xA816, 0x0812, Pack8);
 
-extern OSErr C_AEPutKeyPtr(AERecord *record, AEKeyword keyword,
+extern OSErr C_AEPutParamPtr(AERecord *record, AEKeyword keyword,
                                        DescType type, Ptr data, Size data_size);
-PASCAL_SUBTRAP(AEPutKeyPtr, 0xA816, 0x0A0F, Pack8);
-extern OSErr C_AEPutKeyDesc(AERecord *record, AEKeyword keyword,
+PASCAL_SUBTRAP(AEPutParamPtr, 0xA816, 0x0A0F, Pack8);
+extern OSErr C_AEPutParamDesc(AERecord *record, AEKeyword keyword,
                                         AEDesc *desc);
-PASCAL_SUBTRAP(AEPutKeyDesc, 0xA816, 0x0610, Pack8);
+PASCAL_SUBTRAP(AEPutParamDesc, 0xA816, 0x0610, Pack8);
 
 /*
 extern OSErr C_AEDeleteParam(AppleEvent *evt, AEKeyword keyword);
@@ -361,9 +361,9 @@ extern OSErr C_AEDeleteAttribute(AppleEvent *evt,
 PASCAL_SUBTRAP_UNKNOWN(AEDeleteAttribute, 0xA816, Pack8);
 */
 
-extern OSErr C_AESizeOfKeyDesc(AERecord *record, AEKeyword keyword,
+extern OSErr C_AESizeOfParam(AERecord *record, AEKeyword keyword,
                                            GUEST<DescType> *type_out, GUEST<Size> *size_out);
-PASCAL_SUBTRAP(AESizeOfKeyDesc, 0xA816, 0x0829, Pack8);
+PASCAL_SUBTRAP(AESizeOfParam, 0xA816, 0x0829, Pack8);
 
 extern OSErr C_AESetInteractionAllowed(AEInteractionAllowed level);
 PASCAL_SUBTRAP(AESetInteractionAllowed, 0xA816, 0x011E, Pack8);
@@ -400,8 +400,8 @@ PASCAL_SUBTRAP(AECountItems, 0xA816, 0x0407, Pack8);
 extern OSErr C_AEDeleteItem(AEDescList *list, int32_t index);
 PASCAL_SUBTRAP(AEDeleteItem, 0xA816, 0x040E, Pack8);
 
-extern OSErr C_AEDeleteKeyDesc(AERecord *record, AEKeyword keyword);
-PASCAL_SUBTRAP(AEDeleteKeyDesc, 0xA816, 0x0413, Pack8);
+extern OSErr C_AEDeleteParam(AERecord *record, AEKeyword keyword);
+PASCAL_SUBTRAP(AEDeleteParam, 0xA816, 0x0413, Pack8);
 
 extern OSErr C_AEInstallSpecialHandler(AEKeyword function_class,
                                                    EventHandlerProcPtr hdlr,

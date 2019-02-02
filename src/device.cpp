@@ -17,6 +17,7 @@
 #include "rsys/device.h"
 #include "rsys/file.h"
 #include "rsys/serial.h"
+#include "rsys/functions.impl.h"
 
 using namespace Executor;
 
@@ -38,8 +39,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
     ramdriverhand ramdh;
     DCtlHandle h;
     OSErr retval;
-    typedef OSErr (*devfp_t)(ParmBlkPtr, DCtlPtr);
-    devfp_t procp;
+    DriverProcPtr procp;
 
     devicen = -CW(p->cntrlParam.ioCRefNum) - 1;
     if(devicen < 0 || devicen >= NDEVICES)
@@ -59,19 +59,19 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             switch(routine)
             {
                 case Open:
-                    retval = (*(devfp_t)MR(HxP(h, dCtlDriver)->udrvrOpen))(p, STARH(h));
+                    retval = (MR(HxP(h, dCtlDriver)->udrvrOpen))(p, STARH(h));
                     break;
                 case Prime:
-                    retval = (*(devfp_t)MR(HxP(h, dCtlDriver)->udrvrPrime))(p, STARH(h));
+                    retval = (MR(HxP(h, dCtlDriver)->udrvrPrime))(p, STARH(h));
                     break;
                 case Ctl:
-                    retval = (*(devfp_t)MR(HxP(h, dCtlDriver)->udrvrCtl))(p, STARH(h));
+                    retval = (MR(HxP(h, dCtlDriver)->udrvrCtl))(p, STARH(h));
                     break;
                 case Stat:
-                    retval = (*(devfp_t)MR(HxP(h, dCtlDriver)->udrvrStatus))(p, STARH(h));
+                    retval = (MR(HxP(h, dCtlDriver)->udrvrStatus))(p, STARH(h));
                     break;
                 case Close:
-                    retval = (*(devfp_t)MR(HxP(h, dCtlDriver)->udrvrClose))(p, STARH(h));
+                    retval = (MR(HxP(h, dCtlDriver)->udrvrClose))(p, STARH(h));
                     break;
                 default:
                     retval = fsDSIntErr;
@@ -86,19 +86,19 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             switch(routine)
             {
                 case Open:
-                    procp = (devfp_t)(STARH(ramdh) + Hx(ramdh, drvrOpen));
+                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrOpen));
                     break;
                 case Prime:
-                    procp = (devfp_t)(STARH(ramdh) + Hx(ramdh, drvrPrime));
+                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrPrime));
                     break;
                 case Ctl:
-                    procp = (devfp_t)(STARH(ramdh) + Hx(ramdh, drvrCtl));
+                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrCtl));
                     break;
                 case Stat:
-                    procp = (devfp_t)(STARH(ramdh) + Hx(ramdh, drvrStatus));
+                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrStatus));
                     break;
                 case Close:
-                    procp = (devfp_t)(STARH(ramdh) + Hx(ramdh, drvrClose));
+                    procp = (DriverProcPtr)(STARH(ramdh) + Hx(ramdh, drvrClose));
                     break;
                 default:
                     procp = 0;
@@ -112,7 +112,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
                 savea2 = EM_A2;
                 EM_A0 = US_TO_SYN68K(p);
                 EM_A1 = US_TO_SYN68K(STARH(h));
-                EM_A2 = US_TO_SYN68K(procp); /* for compatibility with above */
+                EM_A2 = US_TO_SYN68K((ProcPtr)procp); /* for compatibility with above */
                 saved1 = EM_D1;
                 saved2 = EM_D2;
                 saved3 = EM_D3;
@@ -124,7 +124,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
                 savea4 = EM_A4;
                 savea5 = EM_A5;
                 savea6 = EM_A6;
-                CALL_EMULATOR(US_TO_SYN68K(procp));
+                CALL_EMULATOR(US_TO_SYN68K((ProcPtr)procp));
                 EM_D1 = saved1;
                 EM_D2 = saved2;
                 EM_D3 = saved3;
@@ -258,35 +258,41 @@ DCtlHandle Executor::GetDCtlEntry(INTEGER rn)
  * beginning with * a period.
  */
 
-driverinfo *ROMlib_otherdrivers = 0; /* for extensibility */
+static std::vector<driverinfo> knowndrivers;
 
-static driverinfo knowndrivers[] = {
+
+static void InitBuiltinDrivers()
+{
+    knowndrivers = {
 #if defined(LINUX) || defined(MACOSX_) || defined(MSDOS) || defined(CYGWIN32)
-    {
-        (OSErr(*)())ROMlib_serialopen, (OSErr(*)())ROMlib_serialprime, (OSErr(*)())ROMlib_serialctl,
-        (OSErr(*)())ROMlib_serialstatus, (OSErr(*)())ROMlib_serialclose, (StringPtr) "\04.AIn", -6,
-    },
+        {
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\04.AIn", -6,
+        },
 
-    {
-        (OSErr(*)())ROMlib_serialopen, (OSErr(*)())ROMlib_serialprime, (OSErr(*)())ROMlib_serialctl,
-        (OSErr(*)())ROMlib_serialstatus, (OSErr(*)())ROMlib_serialclose, (StringPtr) "\05.AOut", -7,
-    },
+        {
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\05.AOut", -7,
+        },
 
-    {
-        (OSErr(*)())ROMlib_serialopen, (OSErr(*)())ROMlib_serialprime, (OSErr(*)())ROMlib_serialctl,
-        (OSErr(*)())ROMlib_serialstatus, (OSErr(*)())ROMlib_serialclose, (StringPtr) "\04.BIn", -8,
-    },
+        {
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\04.BIn", -8,
+        },
 
-    {
-        (OSErr(*)())ROMlib_serialopen, (OSErr(*)())ROMlib_serialprime, (OSErr(*)())ROMlib_serialctl,
-        (OSErr(*)())ROMlib_serialstatus, (OSErr(*)())ROMlib_serialclose, (StringPtr) "\05.BOut", -9,
-    },
+        {
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\05.BOut", -9,
+        },
 #endif
-};
+    };
+}
 
 OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
 {
-    driverinfo *dip, *edip;
+    if(knowndrivers.empty())
+        InitBuiltinDrivers();
+
     OSErr err;
     INTEGER devicen;
     umacdriverptr up;
@@ -338,26 +344,13 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
     }
     else
     {
-
-        dip = 0;
-        if(ROMlib_otherdrivers)
-        {
-            for(dip = ROMlib_otherdrivers; dip->open && !EqualString(dip->name, MR(pbp->ioParam.ioNamePtr), false, true);
-                dip++)
-                ;
-            if(!dip->open)
-                dip = 0;
-        }
-        if(!dip)
-        {
-            for(dip = knowndrivers, edip = dip + NELEM(knowndrivers);
-                dip != edip && !EqualString(dip->name, MR(pbp->ioParam.ioNamePtr), false, true);
-                dip++)
-                ;
-            if(dip == edip)
-                dip = 0;
-        }
-        if(dip)
+        auto dip = knowndrivers.begin(), edip = knowndrivers.end();
+        for(;
+            dip != edip && !EqualString(dip->name, MR(pbp->ioParam.ioNamePtr), false, true);
+            dip++)
+            ;
+        
+        if(dip != edip)
         {
             devicen = -dip->refnum - 1;
             if(devicen < 0 || devicen >= NDEVICES)
@@ -379,11 +372,11 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
                         err = MemError();
                     else
                     {
-                        up->udrvrOpen = RM((ProcPtr)dip->open);
-                        up->udrvrPrime = RM((ProcPtr)dip->prime);
-                        up->udrvrCtl = RM((ProcPtr)dip->ctl);
-                        up->udrvrStatus = RM((ProcPtr)dip->status);
-                        up->udrvrClose = RM((ProcPtr)dip->close);
+                        up->udrvrOpen = RM(dip->open);
+                        up->udrvrPrime = RM(dip->prime);
+                        up->udrvrCtl = RM(dip->ctl);
+                        up->udrvrStatus = RM(dip->status);
+                        up->udrvrClose = RM(dip->close);
                         str255assign(up->udrvrName, dip->name);
                         err = noErr;
                     }

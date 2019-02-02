@@ -46,7 +46,7 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
     }
 }
 
-void Executor::C_LDoDraw(BOOLEAN draw, ListHandle list) /* IMIV-275 */
+void Executor::C_LSetDrawingMode(BOOLEAN draw, ListHandle list) /* IMIV-275 */
 {
     if(draw)
     {
@@ -115,9 +115,9 @@ void Executor::C_LScroll(INTEGER ncol, INTEGER nrow,
     C_LCellSize(p, list); /*  recalculates visible */
 
     if(ncol && (ch = HxP(list, hScroll)))
-        SetCtlValue(ch, Hx(list, visible.left));
+        SetControlValue(ch, Hx(list, visible.left));
     if(nrow && (ch = HxP(list, vScroll)))
-        SetCtlValue(ch, Hx(list, visible.top));
+        SetControlValue(ch, Hx(list, visible.top));
 
     if(Hx(list, listFlags) & DODRAW)
     {

@@ -116,6 +116,13 @@ foreach $trap (keys %kinds) {
     print "\n";
 }
 
+open(SED, ">../util/oldtonew.sed");
+foreach $old (keys %newnames) {
+    print SED "s/\\b$old\\b/$newnames{$old}/g\n";
+    print SED "s/\\bC_$old\\b/C_$newnames{$old}/g\n";
+}
+close(SED);
+
 while($f = <include/*.h>) {
     open(INCLUDE, $f);
     while($l = <INCLUDE>) {

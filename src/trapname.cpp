@@ -61,15 +61,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA01C */
     "MaxMem", /* 0xA01D */
     "NewPtr", /* 0xA01E */
-    "DisposPtr", /* 0xA01F */
+    "DisposePtr", /* 0xA01F */
     "SetPtrSize", /* 0xA020 */
     "GetPtrSize", /* 0xA021 */
     "NewHandle", /* 0xA022 */
-    "DisposHandle", /* 0xA023 */
+    "DisposeHandle", /* 0xA023 */
     "SetHandleSize", /* 0xA024 */
     "GetHandleSize", /* 0xA025 */
     "HandleZone", /* 0xA026 */
-    "ReallocHandle", /* 0xA027 */
+    "ReallocateHandle", /* 0xA027 */
     "RecoverHandle", /* 0xA028 */
     "HLock", /* 0xA029 */
     "HUnlock", /* 0xA02A */
@@ -94,7 +94,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA03D */
     "DrvrRemove", /* 0xA03E */
     "InitUtil", /* 0xA03F */
-    "ResrvMem", /* 0xA040 */
+    "ReserveMem", /* 0xA040 */
     "PBSetFLock", /* 0xA041 */
     "PBRstFLock", /* 0xA042 */
     "PBSetFVers", /* 0xA043 */
@@ -114,7 +114,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA051 */
     "IMVI_WriteXPRam", /* 0xA052 */
     "A053", /* 0xA053 */
-    "UprString", /* 0xA054 */
+    "UpperString", /* 0xA054 */
     "StripAddress", /* 0xA055 */
     "IMVI_LowerText", /* 0xA056 */
     "SetApplBase", /* 0xA057 */
@@ -317,15 +317,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA11C */
     "MaxMem", /* 0xA11D */
     "NewPtr", /* 0xA11E */
-    "DisposPtr", /* 0xA11F */
+    "DisposePtr", /* 0xA11F */
     "SetPtrSize", /* 0xA120 */
     "GetPtrSize", /* 0xA121 */
     "NewHandle", /* 0xA122 */
-    "DisposHandle", /* 0xA123 */
+    "DisposeHandle", /* 0xA123 */
     "SetHandleSize", /* 0xA124 */
     "GetHandleSize", /* 0xA125 */
     "HandleZone", /* 0xA126 */
-    "ReallocHandle", /* 0xA127 */
+    "ReallocateHandle", /* 0xA127 */
     "RecoverHandle", /* 0xA128 */
     "HLock", /* 0xA129 */
     "HUnlock", /* 0xA12A */
@@ -350,7 +350,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA13D */
     "DrvrRemove", /* 0xA13E */
     "InitUtil", /* 0xA13F */
-    "ResrvMem", /* 0xA140 */
+    "ReserveMem", /* 0xA140 */
     "PBSetFLock", /* 0xA141 */
     "PBRstFLock", /* 0xA142 */
     "PBSetFVers", /* 0xA143 */
@@ -370,7 +370,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA151 */
     "IMVI_WriteXPRam", /* 0xA152 */
     "A153", /* 0xA153 */
-    "UprString", /* 0xA154 */
+    "UpperString", /* 0xA154 */
     "StripAddress", /* 0xA155 */
     "IMVI_LowerText", /* 0xA156 */
     "SetApplBase", /* 0xA157 */
@@ -573,15 +573,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA21C */
     "MaxMem", /* 0xA21D */
     "NewPtr", /* 0xA21E */
-    "DisposPtr", /* 0xA21F */
+    "DisposePtr", /* 0xA21F */
     "SetPtrSize", /* 0xA220 */
     "GetPtrSize", /* 0xA221 */
     "NewHandle", /* 0xA222 */
-    "DisposHandle", /* 0xA223 */
+    "DisposeHandle", /* 0xA223 */
     "SetHandleSize", /* 0xA224 */
     "GetHandleSize", /* 0xA225 */
     "HandleZone", /* 0xA226 */
-    "ReallocHandle", /* 0xA227 */
+    "ReallocateHandle", /* 0xA227 */
     "RecoverHandle", /* 0xA228 */
     "HLock", /* 0xA229 */
     "HUnlock", /* 0xA22A */
@@ -606,7 +606,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA23D */
     "DrvrRemove", /* 0xA23E */
     "InitUtil", /* 0xA23F */
-    "ResrvMem", /* 0xA240 */
+    "ReserveMem", /* 0xA240 */
     "PBSetFLock", /* 0xA241 */
     "PBRstFLock", /* 0xA242 */
     "PBSetFVers", /* 0xA243 */
@@ -626,7 +626,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA251 */
     "IMVI_WriteXPRam", /* 0xA252 */
     "A253", /* 0xA253 */
-    "UprString", /* 0xA254 */
+    "UpperString", /* 0xA254 */
     "StripAddress", /* 0xA255 */
     "IMVI_LowerText", /* 0xA256 */
     "SetApplBase", /* 0xA257 */
@@ -829,15 +829,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA31C */
     "MaxMem", /* 0xA31D */
     "NewPtr", /* 0xA31E */
-    "DisposPtr", /* 0xA31F */
+    "DisposePtr", /* 0xA31F */
     "SetPtrSize", /* 0xA320 */
     "GetPtrSize", /* 0xA321 */
     "NewHandle", /* 0xA322 */
-    "DisposHandle", /* 0xA323 */
+    "DisposeHandle", /* 0xA323 */
     "SetHandleSize", /* 0xA324 */
     "GetHandleSize", /* 0xA325 */
     "HandleZone", /* 0xA326 */
-    "ReallocHandle", /* 0xA327 */
+    "ReallocateHandle", /* 0xA327 */
     "RecoverHandle", /* 0xA328 */
     "HLock", /* 0xA329 */
     "HUnlock", /* 0xA32A */
@@ -862,7 +862,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA33D */
     "DrvrRemove", /* 0xA33E */
     "InitUtil", /* 0xA33F */
-    "ResrvMem", /* 0xA340 */
+    "ReserveMem", /* 0xA340 */
     "PBSetFLock", /* 0xA341 */
     "PBRstFLock", /* 0xA342 */
     "PBSetFVers", /* 0xA343 */
@@ -882,7 +882,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA351 */
     "IMVI_WriteXPRam", /* 0xA352 */
     "A353", /* 0xA353 */
-    "UprString", /* 0xA354 */
+    "UpperString", /* 0xA354 */
     "StripAddress", /* 0xA355 */
     "IMVI_LowerText", /* 0xA356 */
     "SetApplBase", /* 0xA357 */
@@ -1085,15 +1085,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA41C */
     "MaxMem", /* 0xA41D */
     "NewPtr", /* 0xA41E */
-    "DisposPtr", /* 0xA41F */
+    "DisposePtr", /* 0xA41F */
     "SetPtrSize", /* 0xA420 */
     "GetPtrSize", /* 0xA421 */
     "NewHandle", /* 0xA422 */
-    "DisposHandle", /* 0xA423 */
+    "DisposeHandle", /* 0xA423 */
     "SetHandleSize", /* 0xA424 */
     "GetHandleSize", /* 0xA425 */
     "HandleZone", /* 0xA426 */
-    "ReallocHandle", /* 0xA427 */
+    "ReallocateHandle", /* 0xA427 */
     "RecoverHandle", /* 0xA428 */
     "HLock", /* 0xA429 */
     "HUnlock", /* 0xA42A */
@@ -1118,7 +1118,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA43D */
     "DrvrRemove", /* 0xA43E */
     "InitUtil", /* 0xA43F */
-    "ResrvMem", /* 0xA440 */
+    "ReserveMem", /* 0xA440 */
     "PBSetFLock", /* 0xA441 */
     "PBRstFLock", /* 0xA442 */
     "PBSetFVers", /* 0xA443 */
@@ -1138,7 +1138,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA451 */
     "IMVI_WriteXPRam", /* 0xA452 */
     "A453", /* 0xA453 */
-    "UprString", /* 0xA454 */
+    "UpperString", /* 0xA454 */
     "StripAddress", /* 0xA455 */
     "IMVI_LowerText", /* 0xA456 */
     "SetApplBase", /* 0xA457 */
@@ -1341,15 +1341,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA51C */
     "MaxMem", /* 0xA51D */
     "NewPtr", /* 0xA51E */
-    "DisposPtr", /* 0xA51F */
+    "DisposePtr", /* 0xA51F */
     "SetPtrSize", /* 0xA520 */
     "GetPtrSize", /* 0xA521 */
     "NewHandle", /* 0xA522 */
-    "DisposHandle", /* 0xA523 */
+    "DisposeHandle", /* 0xA523 */
     "SetHandleSize", /* 0xA524 */
     "GetHandleSize", /* 0xA525 */
     "HandleZone", /* 0xA526 */
-    "ReallocHandle", /* 0xA527 */
+    "ReallocateHandle", /* 0xA527 */
     "RecoverHandle", /* 0xA528 */
     "HLock", /* 0xA529 */
     "HUnlock", /* 0xA52A */
@@ -1374,7 +1374,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA53D */
     "DrvrRemove", /* 0xA53E */
     "InitUtil", /* 0xA53F */
-    "ResrvMem", /* 0xA540 */
+    "ReserveMem", /* 0xA540 */
     "PBSetFLock", /* 0xA541 */
     "PBRstFLock", /* 0xA542 */
     "PBSetFVers", /* 0xA543 */
@@ -1394,7 +1394,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA551 */
     "IMVI_WriteXPRam", /* 0xA552 */
     "A553", /* 0xA553 */
-    "UprString", /* 0xA554 */
+    "UpperString", /* 0xA554 */
     "StripAddress", /* 0xA555 */
     "IMVI_LowerText", /* 0xA556 */
     "SetApplBase", /* 0xA557 */
@@ -1597,15 +1597,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA61C */
     "MaxMem", /* 0xA61D */
     "NewPtr", /* 0xA61E */
-    "DisposPtr", /* 0xA61F */
+    "DisposePtr", /* 0xA61F */
     "SetPtrSize", /* 0xA620 */
     "GetPtrSize", /* 0xA621 */
     "NewHandle", /* 0xA622 */
-    "DisposHandle", /* 0xA623 */
+    "DisposeHandle", /* 0xA623 */
     "SetHandleSize", /* 0xA624 */
     "GetHandleSize", /* 0xA625 */
     "HandleZone", /* 0xA626 */
-    "ReallocHandle", /* 0xA627 */
+    "ReallocateHandle", /* 0xA627 */
     "RecoverHandle", /* 0xA628 */
     "HLock", /* 0xA629 */
     "HUnlock", /* 0xA62A */
@@ -1630,7 +1630,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA63D */
     "DrvrRemove", /* 0xA63E */
     "InitUtil", /* 0xA63F */
-    "ResrvMem", /* 0xA640 */
+    "ReserveMem", /* 0xA640 */
     "PBSetFLock", /* 0xA641 */
     "PBRstFLock", /* 0xA642 */
     "PBSetFVers", /* 0xA643 */
@@ -1650,7 +1650,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA651 */
     "IMVI_WriteXPRam", /* 0xA652 */
     "A653", /* 0xA653 */
-    "UprString", /* 0xA654 */
+    "UpperString", /* 0xA654 */
     "StripAddress", /* 0xA655 */
     "IMVI_LowerText", /* 0xA656 */
     "SetApplBase", /* 0xA657 */
@@ -1853,15 +1853,15 @@ const char *trap_name_array[0x1000] = {
     "FreeMem", /* 0xA71C */
     "MaxMem", /* 0xA71D */
     "NewPtr", /* 0xA71E */
-    "DisposPtr", /* 0xA71F */
+    "DisposePtr", /* 0xA71F */
     "SetPtrSize", /* 0xA720 */
     "GetPtrSize", /* 0xA721 */
     "NewHandle", /* 0xA722 */
-    "DisposHandle", /* 0xA723 */
+    "DisposeHandle", /* 0xA723 */
     "SetHandleSize", /* 0xA724 */
     "GetHandleSize", /* 0xA725 */
     "HandleZone", /* 0xA726 */
-    "ReallocHandle", /* 0xA727 */
+    "ReallocateHandle", /* 0xA727 */
     "RecoverHandle", /* 0xA728 */
     "HLock", /* 0xA729 */
     "HUnlock", /* 0xA72A */
@@ -1886,7 +1886,7 @@ const char *trap_name_array[0x1000] = {
     "DrvrInstall", /* 0xA73D */
     "DrvrRemove", /* 0xA73E */
     "InitUtil", /* 0xA73F */
-    "ResrvMem", /* 0xA740 */
+    "ReserveMem", /* 0xA740 */
     "PBSetFLock", /* 0xA741 */
     "PBRstFLock", /* 0xA742 */
     "PBSetFVers", /* 0xA743 */
@@ -1906,7 +1906,7 @@ const char *trap_name_array[0x1000] = {
     "IMVI_ReadXPRam", /* 0xA751 */
     "IMVI_WriteXPRam", /* 0xA752 */
     "A753", /* 0xA753 */
-    "UprString", /* 0xA754 */
+    "UpperString", /* 0xA754 */
     "StripAddress", /* 0xA755 */
     "IMVI_LowerText", /* 0xA756 */
     "SetApplBase", /* 0xA757 */
@@ -2087,7 +2087,7 @@ const char *trap_name_array[0x1000] = {
     "SndControl", /* 0xA806 */
     "SndNewChannel", /* 0xA807 */
     "InitProcMenu", /* 0xA808 */
-    "GetCVariant", /* 0xA809 */
+    "GetControlVariant", /* 0xA809 */
     "GetWVariant", /* 0xA80A */
     "PopUpMenuSelect", /* 0xA80B */
     "RGetResource", /* 0xA80C */
@@ -2111,14 +2111,14 @@ const char *trap_name_array[0x1000] = {
     "A81E", /* 0xA81E */
     "Get1Resource", /* 0xA81F */
     "Get1NamedResource", /* 0xA820 */
-    "MaxSizeRsrc", /* 0xA821 */
+    "GetMaxResourceSize", /* 0xA821 */
     "ResourceDispatch", /* 0xA822 */
     "AliasDispatch", /* 0xA823 */
     "A824", /* 0xA824 */
     "A825", /* 0xA825 */
-    "InsMenuItem", /* 0xA826 */
-    "HideDItem", /* 0xA827 */
-    "ShowDItem", /* 0xA828 */
+    "InsertMenuItem", /* 0xA826 */
+    "HideDialogItem", /* 0xA827 */
+    "ShowDialogItem", /* 0xA828 */
     "A829", /* 0xA829 */
     "A82A", /* 0xA82A */
     "Pack9", /* 0xA82B */
@@ -2140,7 +2140,7 @@ const char *trap_name_array[0x1000] = {
     "TrackBox", /* 0xA83B */
     "TEGetOffset", /* 0xA83C */
     "TEDispatch", /* 0xA83D */
-    "TEStylNew", /* 0xA83E */
+    "TEStyleNew", /* 0xA83E */
     "Long2Fix", /* 0xA83F */
     "Fix2Long", /* 0xA840 */
     "Fix2Frac", /* 0xA841 */
@@ -2404,44 +2404,44 @@ const char *trap_name_array[0x1000] = {
     "GetItemMark", /* 0xA943 */
     "SetItemMark", /* 0xA944 */
     "CheckItem", /* 0xA945 */
-    "GetItem", /* 0xA946 */
-    "SetItem", /* 0xA947 */
+    "GetMenuItemText", /* 0xA946 */
+    "SetMenuItemText", /* 0xA947 */
     "CalcMenuSize", /* 0xA948 */
-    "GetMHandle", /* 0xA949 */
+    "GetMenuHandle", /* 0xA949 */
     "SetMenuFlash", /* 0xA94A */
     "PlotIcon", /* 0xA94B */
     "FlashMenuBar", /* 0xA94C */
-    "AddResMenu", /* 0xA94D */
+    "AppendResMenu", /* 0xA94D */
     "PinRect", /* 0xA94E */
     "DeltaPoint", /* 0xA94F */
     "CountMItems", /* 0xA950 */
     "InsertResMenu", /* 0xA951 */
-    "DelMenuItem", /* 0xA952 */
-    "UpdtControl", /* 0xA953 */
+    "DeleteMenuItem", /* 0xA952 */
+    "UpdateControls", /* 0xA953 */
     "NewControl", /* 0xA954 */
     "DisposeControl", /* 0xA955 */
     "KillControls", /* 0xA956 */
     "ShowControl", /* 0xA957 */
     "HideControl", /* 0xA958 */
     "MoveControl", /* 0xA959 */
-    "GetCRefCon", /* 0xA95A */
-    "SetCRefCon", /* 0xA95B */
+    "GetControlReference", /* 0xA95A */
+    "SetControlReference", /* 0xA95B */
     "SizeControl", /* 0xA95C */
     "HiliteControl", /* 0xA95D */
-    "GetCTitle", /* 0xA95E */
-    "SetCTitle", /* 0xA95F */
-    "GetCtlValue", /* 0xA960 */
-    "GetCtlMin", /* 0xA961 */
-    "GetCtlMax", /* 0xA962 */
-    "SetCtlValue", /* 0xA963 */
-    "SetCtlMin", /* 0xA964 */
-    "SetCtlMax", /* 0xA965 */
+    "GetControlTitle", /* 0xA95E */
+    "SetControlTitle", /* 0xA95F */
+    "GetControlValue", /* 0xA960 */
+    "GetControlMinimum", /* 0xA961 */
+    "GetControlMaximum", /* 0xA962 */
+    "SetControlValue", /* 0xA963 */
+    "SetControlMinimum", /* 0xA964 */
+    "SetControlMaximum", /* 0xA965 */
     "TestControl", /* 0xA966 */
     "DragControl", /* 0xA967 */
     "TrackControl", /* 0xA968 */
     "DrawControls", /* 0xA969 */
-    "GetCtlAction", /* 0xA96A */
-    "SetCtlAction", /* 0xA96B */
+    "GetControlAction", /* 0xA96A */
+    "SetControlAction", /* 0xA96B */
     "FindControl", /* 0xA96C */
     "Draw1Control", /* 0xA96D */
     "Dequeue", /* 0xA96E */
@@ -2454,19 +2454,19 @@ const char *trap_name_array[0x1000] = {
     "TickCount", /* 0xA975 */
     "GetKeys", /* 0xA976 */
     "WaitMouseUp", /* 0xA977 */
-    "UpdtDialog", /* 0xA978 */
+    "UpdateDialog", /* 0xA978 */
     "CouldDialog", /* 0xA979 */
     "FreeDialog", /* 0xA97A */
     "InitDialogs", /* 0xA97B */
     "GetNewDialog", /* 0xA97C */
     "NewDialog", /* 0xA97D */
-    "SelIText", /* 0xA97E */
+    "SelectDialogItemText", /* 0xA97E */
     "IsDialogEvent", /* 0xA97F */
     "DialogSelect", /* 0xA980 */
     "DrawDialog", /* 0xA981 */
     "CloseDialog", /* 0xA982 */
-    "DisposDialog", /* 0xA983 */
-    "FindDItem", /* 0xA984 */
+    "DisposeDialog", /* 0xA983 */
+    "FindDialogItem", /* 0xA984 */
     "Alert", /* 0xA985 */
     "StopAlert", /* 0xA986 */
     "NoteAlert", /* 0xA987 */
@@ -2475,10 +2475,10 @@ const char *trap_name_array[0x1000] = {
     "FreeAlert", /* 0xA98A */
     "ParamText", /* 0xA98B */
     "ErrorSound", /* 0xA98C */
-    "GetDItem", /* 0xA98D */
-    "SetDItem", /* 0xA98E */
-    "SetIText", /* 0xA98F */
-    "GetIText", /* 0xA990 */
+    "GetDialogItem", /* 0xA98D */
+    "SetDialogItem", /* 0xA98E */
+    "SetDialogItemText", /* 0xA98F */
+    "GetDialogItemText", /* 0xA990 */
     "ModalDialog", /* 0xA991 */
     "DetachResource", /* 0xA992 */
     "SetResPurge", /* 0xA993 */
@@ -2499,7 +2499,7 @@ const char *trap_name_array[0x1000] = {
     "LoadResource", /* 0xA9A2 */
     "ReleaseResource", /* 0xA9A3 */
     "HomeResFile", /* 0xA9A4 */
-    "SizeResource", /* 0xA9A5 */
+    "GetResourceSizeOnDisk", /* 0xA9A5 */
     "GetResAttrs", /* 0xA9A6 */
     "SetResAttrs", /* 0xA9A7 */
     "GetResInfo", /* 0xA9A8 */
@@ -2507,7 +2507,7 @@ const char *trap_name_array[0x1000] = {
     "ChangedResource", /* 0xA9AA */
     "AddResource", /* 0xA9AB */
     "AddReference", /* 0xA9AC */
-    "RmveResource", /* 0xA9AD */
+    "RemoveResource", /* 0xA9AD */
     "RmveReference", /* 0xA9AE */
     "ResError", /* 0xA9AF */
     "WriteResource", /* 0xA9B0 */
@@ -2529,18 +2529,18 @@ const char *trap_name_array[0x1000] = {
     "GetNewMBar", /* 0xA9C0 */
     "UniqueID", /* 0xA9C1 */
     "SystemEdit", /* 0xA9C2 */
-    "KeyTrans", /* 0xA9C3 */
+    "KeyTranslate", /* 0xA9C3 */
     "OpenRFPerm", /* 0xA9C4 */
     "RsrcMapEntry", /* 0xA9C5 */
-    "Secs2Date", /* 0xA9C6 */
-    "Date2Secs", /* 0xA9C7 */
+    "SecondsToDate", /* 0xA9C6 */
+    "DateToSeconds", /* 0xA9C7 */
     "SysBeep", /* 0xA9C8 */
     "SysError", /* 0xA9C9 */
     "PutIcon", /* 0xA9CA */
     "TEGetText", /* 0xA9CB */
     "TEInit", /* 0xA9CC */
     "TEDispose", /* 0xA9CD */
-    "TextBox", /* 0xA9CE */
+    "TETextBox", /* 0xA9CE */
     "TESetText", /* 0xA9CF */
     "TECalText", /* 0xA9D0 */
     "TESetSelect", /* 0xA9D1 */
@@ -2557,7 +2557,7 @@ const char *trap_name_array[0x1000] = {
     "TEKey", /* 0xA9DC */
     "TEScroll", /* 0xA9DD */
     "TEInsert", /* 0xA9DE */
-    "TESetJust", /* 0xA9DF */
+    "TESetAlignment", /* 0xA9DF */
     "Munger", /* 0xA9E0 */
     "HandToHand", /* 0xA9E1 */
     "PtrToXHand", /* 0xA9E2 */
@@ -2594,11 +2594,11 @@ const char *trap_name_array[0x1000] = {
     "InitCPort", /* 0xAA01 */
     "CloseCPort", /* 0xAA02 */
     "NewPixMap", /* 0xAA03 */
-    "DisposPixMap", /* 0xAA04 */
+    "DisposePixMap", /* 0xAA04 */
     "CopyPixMap", /* 0xAA05 */
     "SetPortPix", /* 0xAA06 */
     "NewPixPat", /* 0xAA07 */
-    "DisposPixPat", /* 0xAA08 */
+    "DisposePixPat", /* 0xAA08 */
     "CopyPixPat", /* 0xAA09 */
     "PenPixPat", /* 0xAA0A */
     "BackPixPat", /* 0xAA0B */
@@ -2626,9 +2626,9 @@ const char *trap_name_array[0x1000] = {
     "OpColor", /* 0xAA21 */
     "HiliteColor", /* 0xAA22 */
     "CharExtra", /* 0xAA23 */
-    "DisposCTable", /* 0xAA24 */
+    "DisposeCTable", /* 0xAA24 */
     "DisposeCIcon", /* 0xAA25 */
-    "DisposCCursor", /* 0xAA26 */
+    "DisposeCCursor", /* 0xAA26 */
     "GetMaxDevice", /* 0xAA27 */
     "GetCTSeed", /* 0xAA28 */
     "GetDeviceList", /* 0xAA29 */
@@ -2657,15 +2657,15 @@ const char *trap_name_array[0x1000] = {
     "QDError", /* 0xAA40 */
     "SetWinColor", /* 0xAA41 */
     "GetAuxWin", /* 0xAA42 */
-    "SetCtlColor", /* 0xAA43 */
-    "GetAuxCtl", /* 0xAA44 */
+    "SetControlColor", /* 0xAA43 */
+    "GetAuxiliaryControlRecord", /* 0xAA44 */
     "NewCWindow", /* 0xAA45 */
     "GetNewCWindow", /* 0xAA46 */
     "SetDeskCPat", /* 0xAA47 */
     "GetCWMgrPort", /* 0xAA48 */
     "SaveEntries", /* 0xAA49 */
     "RestoreEntries", /* 0xAA4A */
-    "NewCDialog", /* 0xAA4B */
+    "NewColorDialog", /* 0xAA4B */
     "DelSearch", /* 0xAA4C */
     "DelComp", /* 0xAA4D */
     "SetStdCProcs", /* 0xAA4E */
@@ -2686,10 +2686,10 @@ const char *trap_name_array[0x1000] = {
     "AA5D", /* 0xAA5D */
     "AA5E", /* 0xAA5E */
     "AA5F", /* 0xAA5F */
-    "DelMCEntries", /* 0xAA60 */
+    "DeleteMCEntries", /* 0xAA60 */
     "GetMCInfo", /* 0xAA61 */
     "SetMCInfo", /* 0xAA62 */
-    "DispMCInfo", /* 0xAA63 */
+    "DisposeMCInfo", /* 0xAA63 */
     "GetMCEntry", /* 0xAA64 */
     "SetMCEntries", /* 0xAA65 */
     "MenuChoice", /* 0xAA66 */
@@ -3111,7 +3111,7 @@ const char *trap_name_array[0x1000] = {
     "SndControl", /* 0xAC06 */
     "SndNewChannel", /* 0xAC07 */
     "InitProcMenu", /* 0xAC08 */
-    "GetCVariant", /* 0xAC09 */
+    "GetControlVariant", /* 0xAC09 */
     "GetWVariant", /* 0xAC0A */
     "PopUpMenuSelect", /* 0xAC0B */
     "RGetResource", /* 0xAC0C */
@@ -3135,14 +3135,14 @@ const char *trap_name_array[0x1000] = {
     "AC1E", /* 0xAC1E */
     "Get1Resource", /* 0xAC1F */
     "Get1NamedResource", /* 0xAC20 */
-    "MaxSizeRsrc", /* 0xAC21 */
+    "GetMaxResourceSize", /* 0xAC21 */
     "ResourceDispatch", /* 0xAC22 */
     "AliasDispatch", /* 0xAC23 */
     "AC24", /* 0xAC24 */
     "AC25", /* 0xAC25 */
-    "InsMenuItem", /* 0xAC26 */
-    "HideDItem", /* 0xAC27 */
-    "ShowDItem", /* 0xAC28 */
+    "InsertMenuItem", /* 0xAC26 */
+    "HideDialogItem", /* 0xAC27 */
+    "ShowDialogItem", /* 0xAC28 */
     "AC29", /* 0xAC29 */
     "AC2A", /* 0xAC2A */
     "Pack9", /* 0xAC2B */
@@ -3164,7 +3164,7 @@ const char *trap_name_array[0x1000] = {
     "TrackBox", /* 0xAC3B */
     "TEGetOffset", /* 0xAC3C */
     "TEDispatch", /* 0xAC3D */
-    "TEStylNew", /* 0xAC3E */
+    "TEStyleNew", /* 0xAC3E */
     "Long2Fix", /* 0xAC3F */
     "Fix2Long", /* 0xAC40 */
     "Fix2Frac", /* 0xAC41 */
@@ -3428,44 +3428,44 @@ const char *trap_name_array[0x1000] = {
     "GetItemMark", /* 0xAD43 */
     "SetItemMark", /* 0xAD44 */
     "CheckItem", /* 0xAD45 */
-    "GetItem", /* 0xAD46 */
-    "SetItem", /* 0xAD47 */
+    "GetMenuItemText", /* 0xAD46 */
+    "SetMenuItemText", /* 0xAD47 */
     "CalcMenuSize", /* 0xAD48 */
-    "GetMHandle", /* 0xAD49 */
+    "GetMenuHandle", /* 0xAD49 */
     "SetMenuFlash", /* 0xAD4A */
     "PlotIcon", /* 0xAD4B */
     "FlashMenuBar", /* 0xAD4C */
-    "AddResMenu", /* 0xAD4D */
+    "AppendResMenu", /* 0xAD4D */
     "PinRect", /* 0xAD4E */
     "DeltaPoint", /* 0xAD4F */
     "CountMItems", /* 0xAD50 */
     "InsertResMenu", /* 0xAD51 */
-    "DelMenuItem", /* 0xAD52 */
-    "UpdtControl", /* 0xAD53 */
+    "DeleteMenuItem", /* 0xAD52 */
+    "UpdateControls", /* 0xAD53 */
     "NewControl", /* 0xAD54 */
     "DisposeControl", /* 0xAD55 */
     "KillControls", /* 0xAD56 */
     "ShowControl", /* 0xAD57 */
     "HideControl", /* 0xAD58 */
     "MoveControl", /* 0xAD59 */
-    "GetCRefCon", /* 0xAD5A */
-    "SetCRefCon", /* 0xAD5B */
+    "GetControlReference", /* 0xAD5A */
+    "SetControlReference", /* 0xAD5B */
     "SizeControl", /* 0xAD5C */
     "HiliteControl", /* 0xAD5D */
-    "GetCTitle", /* 0xAD5E */
-    "SetCTitle", /* 0xAD5F */
-    "GetCtlValue", /* 0xAD60 */
-    "GetCtlMin", /* 0xAD61 */
-    "GetCtlMax", /* 0xAD62 */
-    "SetCtlValue", /* 0xAD63 */
-    "SetCtlMin", /* 0xAD64 */
-    "SetCtlMax", /* 0xAD65 */
+    "GetControlTitle", /* 0xAD5E */
+    "SetControlTitle", /* 0xAD5F */
+    "GetControlValue", /* 0xAD60 */
+    "GetControlMinimum", /* 0xAD61 */
+    "GetControlMaximum", /* 0xAD62 */
+    "SetControlValue", /* 0xAD63 */
+    "SetControlMinimum", /* 0xAD64 */
+    "SetControlMaximum", /* 0xAD65 */
     "TestControl", /* 0xAD66 */
     "DragControl", /* 0xAD67 */
     "TrackControl", /* 0xAD68 */
     "DrawControls", /* 0xAD69 */
-    "GetCtlAction", /* 0xAD6A */
-    "SetCtlAction", /* 0xAD6B */
+    "GetControlAction", /* 0xAD6A */
+    "SetControlAction", /* 0xAD6B */
     "FindControl", /* 0xAD6C */
     "Draw1Control", /* 0xAD6D */
     "Dequeue", /* 0xAD6E */
@@ -3478,19 +3478,19 @@ const char *trap_name_array[0x1000] = {
     "TickCount", /* 0xAD75 */
     "GetKeys", /* 0xAD76 */
     "WaitMouseUp", /* 0xAD77 */
-    "UpdtDialog", /* 0xAD78 */
+    "UpdateDialog", /* 0xAD78 */
     "CouldDialog", /* 0xAD79 */
     "FreeDialog", /* 0xAD7A */
     "InitDialogs", /* 0xAD7B */
     "GetNewDialog", /* 0xAD7C */
     "NewDialog", /* 0xAD7D */
-    "SelIText", /* 0xAD7E */
+    "SelectDialogItemText", /* 0xAD7E */
     "IsDialogEvent", /* 0xAD7F */
     "DialogSelect", /* 0xAD80 */
     "DrawDialog", /* 0xAD81 */
     "CloseDialog", /* 0xAD82 */
-    "DisposDialog", /* 0xAD83 */
-    "FindDItem", /* 0xAD84 */
+    "DisposeDialog", /* 0xAD83 */
+    "FindDialogItem", /* 0xAD84 */
     "Alert", /* 0xAD85 */
     "StopAlert", /* 0xAD86 */
     "NoteAlert", /* 0xAD87 */
@@ -3499,10 +3499,10 @@ const char *trap_name_array[0x1000] = {
     "FreeAlert", /* 0xAD8A */
     "ParamText", /* 0xAD8B */
     "ErrorSound", /* 0xAD8C */
-    "GetDItem", /* 0xAD8D */
-    "SetDItem", /* 0xAD8E */
-    "SetIText", /* 0xAD8F */
-    "GetIText", /* 0xAD90 */
+    "GetDialogItem", /* 0xAD8D */
+    "SetDialogItem", /* 0xAD8E */
+    "SetDialogItemText", /* 0xAD8F */
+    "GetDialogItemText", /* 0xAD90 */
     "ModalDialog", /* 0xAD91 */
     "DetachResource", /* 0xAD92 */
     "SetResPurge", /* 0xAD93 */
@@ -3523,7 +3523,7 @@ const char *trap_name_array[0x1000] = {
     "LoadResource", /* 0xADA2 */
     "ReleaseResource", /* 0xADA3 */
     "HomeResFile", /* 0xADA4 */
-    "SizeResource", /* 0xADA5 */
+    "GetResourceSizeOnDisk", /* 0xADA5 */
     "GetResAttrs", /* 0xADA6 */
     "SetResAttrs", /* 0xADA7 */
     "GetResInfo", /* 0xADA8 */
@@ -3531,7 +3531,7 @@ const char *trap_name_array[0x1000] = {
     "ChangedResource", /* 0xADAA */
     "AddResource", /* 0xADAB */
     "AddReference", /* 0xADAC */
-    "RmveResource", /* 0xADAD */
+    "RemoveResource", /* 0xADAD */
     "RmveReference", /* 0xADAE */
     "ResError", /* 0xADAF */
     "WriteResource", /* 0xADB0 */
@@ -3553,18 +3553,18 @@ const char *trap_name_array[0x1000] = {
     "GetNewMBar", /* 0xADC0 */
     "UniqueID", /* 0xADC1 */
     "SystemEdit", /* 0xADC2 */
-    "KeyTrans", /* 0xADC3 */
+    "KeyTranslate", /* 0xADC3 */
     "OpenRFPerm", /* 0xADC4 */
     "RsrcMapEntry", /* 0xADC5 */
-    "Secs2Date", /* 0xADC6 */
-    "Date2Secs", /* 0xADC7 */
+    "SecondsToDate", /* 0xADC6 */
+    "DateToSeconds", /* 0xADC7 */
     "SysBeep", /* 0xADC8 */
     "SysError", /* 0xADC9 */
     "PutIcon", /* 0xADCA */
     "TEGetText", /* 0xADCB */
     "TEInit", /* 0xADCC */
     "TEDispose", /* 0xADCD */
-    "TextBox", /* 0xADCE */
+    "TETextBox", /* 0xADCE */
     "TESetText", /* 0xADCF */
     "TECalText", /* 0xADD0 */
     "TESetSelect", /* 0xADD1 */
@@ -3581,7 +3581,7 @@ const char *trap_name_array[0x1000] = {
     "TEKey", /* 0xADDC */
     "TEScroll", /* 0xADDD */
     "TEInsert", /* 0xADDE */
-    "TESetJust", /* 0xADDF */
+    "TESetAlignment", /* 0xADDF */
     "Munger", /* 0xADE0 */
     "HandToHand", /* 0xADE1 */
     "PtrToXHand", /* 0xADE2 */
@@ -3618,11 +3618,11 @@ const char *trap_name_array[0x1000] = {
     "InitCPort", /* 0xAE01 */
     "AE02", /* 0xAE02 */
     "NewPixMap", /* 0xAE03 */
-    "DisposPixMap", /* 0xAE04 */
+    "DisposePixMap", /* 0xAE04 */
     "CopyPixMap", /* 0xAE05 */
     "SetPortPix", /* 0xAE06 */
     "NewPixPat", /* 0xAE07 */
-    "DisposPixPat", /* 0xAE08 */
+    "DisposePixPat", /* 0xAE08 */
     "CopyPixPat", /* 0xAE09 */
     "PenPixPat", /* 0xAE0A */
     "BackPixPat", /* 0xAE0B */
@@ -3650,9 +3650,9 @@ const char *trap_name_array[0x1000] = {
     "OpColor", /* 0xAE21 */
     "HiliteColor", /* 0xAE22 */
     "CharExtra", /* 0xAE23 */
-    "DisposCTable", /* 0xAE24 */
+    "DisposeCTable", /* 0xAE24 */
     "DisposeCIcon", /* 0xAE25 */
-    "DisposCCursor", /* 0xAE26 */
+    "DisposeCCursor", /* 0xAE26 */
     "GetMaxDevice", /* 0xAE27 */
     "GetCTSeed", /* 0xAE28 */
     "GetDeviceList", /* 0xAE29 */
@@ -3681,15 +3681,15 @@ const char *trap_name_array[0x1000] = {
     "QDError", /* 0xAE40 */
     "SetWinColor", /* 0xAE41 */
     "GetAuxWin", /* 0xAE42 */
-    "SetCtlColor", /* 0xAE43 */
-    "GetAuxCtl", /* 0xAE44 */
+    "SetControlColor", /* 0xAE43 */
+    "GetAuxiliaryControlRecord", /* 0xAE44 */
     "NewCWindow", /* 0xAE45 */
     "GetNewCWindow", /* 0xAE46 */
     "SetDeskCPat", /* 0xAE47 */
     "GetCWMgrPort", /* 0xAE48 */
     "SaveEntries", /* 0xAE49 */
     "RestoreEntries", /* 0xAE4A */
-    "NewCDialog", /* 0xAE4B */
+    "NewColorDialog", /* 0xAE4B */
     "DelSearch", /* 0xAE4C */
     "DelComp", /* 0xAE4D */
     "SetStdCProcs", /* 0xAE4E */
@@ -3710,10 +3710,10 @@ const char *trap_name_array[0x1000] = {
     "AE5D", /* 0xAE5D */
     "AE5E", /* 0xAE5E */
     "AE5F", /* 0xAE5F */
-    "DelMCEntries", /* 0xAE60 */
+    "DeleteMCEntries", /* 0xAE60 */
     "GetMCInfo", /* 0xAE61 */
     "SetMCInfo", /* 0xAE62 */
-    "DispMCInfo", /* 0xAE63 */
+    "DisposeMCInfo", /* 0xAE63 */
     "GetMCEntry", /* 0xAE64 */
     "SetMCEntries", /* 0xAE65 */
     "MenuChoice", /* 0xAE66 */

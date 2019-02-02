@@ -7,6 +7,8 @@
 #error "MODULE_NAME must be defined before including rsys/api-module.h"
 #endif
 
+#include <rsys/traps.h>
+
 #define PREPROCESSOR_CONCAT1D(A,B) defined(A##B)
 #define PREPROCESSOR_CONCATD(A,B) PREPROCESSOR_CONCAT1D(A,B)
 

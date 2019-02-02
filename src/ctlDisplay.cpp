@@ -13,7 +13,7 @@
 
 using namespace Executor;
 
-void Executor::C_SetCTitle(ControlHandle c, StringPtr t) /* IMI-321 */
+void Executor::C_SetControlTitle(ControlHandle c, StringPtr t) /* IMI-321 */
 {
     if(c)
     {
@@ -29,7 +29,7 @@ void Executor::C_SetCTitle(ControlHandle c, StringPtr t) /* IMI-321 */
     }
 }
 
-void Executor::C_GetCTitle(ControlHandle c, StringPtr t) /* IMI-321 */
+void Executor::C_GetControlTitle(ControlHandle c, StringPtr t) /* IMI-321 */
 {
     if(c)
         str255assign(t, HxX(c, contrlTitle));

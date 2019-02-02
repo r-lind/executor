@@ -65,7 +65,7 @@ OSErr Executor::GetFInfo(StringPtr filen, INTEGER vrn,
     return temp;
 }
 
-OSErr HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name, FInfo *fndrinfo)
+OSErr Executor::HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name, FInfo *fndrinfo)
 {
     HParamBlockRec pbr;
     OSErr retval;
@@ -308,7 +308,7 @@ OSErr Executor::ROMlib_PBGetSetFInfoD(ParmBlkPtr pb, BOOLEAN a,
     OSErr err;
     char *pathname, *filename, *endname, *rpathname;
     char savechar;
-    struct stat datasbuf, resourcesbuf, parentsbuf;
+    struct stat datasbuf, parentsbuf;
     GUEST<LONGINT> longzero(0);
     VCBExtra *vcbp;
     GUEST<THz> savezone;
@@ -488,6 +488,7 @@ OSErr Executor::ROMlib_PBGetSetFInfoD(ParmBlkPtr pb, BOOLEAN a,
             }
         }
 #if 0
+        struct stat resourcesbuf;
         if(Ustat(rpathname, &resourcesbuf) < 0)
         {
             pb->fileParam.ioFlRPyLen = 0;

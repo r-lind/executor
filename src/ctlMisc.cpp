@@ -116,17 +116,17 @@ Executor::lookup_aux_ctl(ControlHandle ctl)
     return t;
 }
 
-void Executor::C_SetCRefCon(ControlHandle c, LONGINT data) /* IMI-327 */
+void Executor::C_SetControlReference(ControlHandle c, LONGINT data) /* IMI-327 */
 {
     HxX(c, contrlRfCon) = CL(data);
 }
 
-LONGINT Executor::C_GetCRefCon(ControlHandle c) /* IMI-327 */
+LONGINT Executor::C_GetControlReference(ControlHandle c) /* IMI-327 */
 {
     return Hx(c, contrlRfCon);
 }
 
-void Executor::C_SetCtlAction(ControlHandle c, ControlActionUPP a) /* IMI-328 */
+void Executor::C_SetControlAction(ControlHandle c, ControlActionUPP a) /* IMI-328 */
 {
     if(a != (ControlActionUPP)-1)
         HxX(c, contrlAction) = RM(a);
@@ -134,12 +134,12 @@ void Executor::C_SetCtlAction(ControlHandle c, ControlActionUPP a) /* IMI-328 */
         HxX(c, contrlAction) = guest_cast<ControlActionUPP>(CLC(-1));
 }
 
-ControlActionUPP Executor::C_GetCtlAction(ControlHandle c) /* IMI-328 */
+ControlActionUPP Executor::C_GetControlAction(ControlHandle c) /* IMI-328 */
 {
     return HxP(c, contrlAction);
 }
 
-INTEGER Executor::C_GetCVariant(ControlHandle c) /* IMV-222 */
+INTEGER Executor::C_GetControlVariant(ControlHandle c) /* IMV-222 */
 {
     AuxCtlHandle h;
 
@@ -151,11 +151,11 @@ INTEGER Executor::C_GetCVariant(ControlHandle c) /* IMV-222 */
 /* according to IM-MTE; this has been renamed
    `GetAuxiliaryControlRecord ()', possibly because of the
    inconsistency below, i can only assume they have the same trap word */
-BOOLEAN Executor::C_GetAuxCtl(ControlHandle ctl,
+BOOLEAN Executor::C_GetAuxiliaryControlRecord(ControlHandle ctl,
                               GUEST<AuxCtlHandle> *aux_ctl) /* IMV-222 */
 {
     /* according to testing on the Mac+
-     `GetAuxCtl ()' returns false (not true) and leaves
+     `GetAuxiliaryControlRecord ()' returns false (not true) and leaves
      aux_ctl untouched; this is not the case of later
      mac version, such as the color classic v7.1 */
 

@@ -84,7 +84,7 @@ static INTEGER initar(INTEGER rn)
         }
         mostbytesneeded *= sizeof(ResType);
         if(ar)
-            ReallocHandle((Handle)ar, mostbytesneeded);
+            ReallocateHandle((Handle)ar, mostbytesneeded);
         else
         {
             TheZoneGuard guard(LM(SysZone));

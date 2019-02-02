@@ -30,7 +30,7 @@ using namespace Executor;
  * NOTE: these are stubs to help me make FileMaker Pro go.
  */
 
-LONGINT Executor::C_GetEnvirons(INTEGER verb)
+LONGINT Executor::C_GetScriptManagerVariable(INTEGER verb)
 {
     LONGINT retval;
 
@@ -55,25 +55,25 @@ LONGINT Executor::C_GetEnvirons(INTEGER verb)
     return retval;
 }
 
-OSErr Executor::C_SetEnvirons(INTEGER verb, LONGINT param)
+OSErr Executor::C_SetScriptManagerVariable(INTEGER verb, LONGINT param)
 {
     ROMlib_hook(script_notsupported);
     return smVerbNotFound;
 }
 
-LONGINT Executor::C_GetScript(INTEGER script, INTEGER verb)
+LONGINT Executor::C_GetScriptVariable(INTEGER script, INTEGER verb)
 {
     warning_unimplemented(NULL_STRING);
     return 0;
 }
 
-OSErr Executor::C_SetScript(INTEGER script, INTEGER verb, LONGINT param)
+OSErr Executor::C_SetScriptVariable(INTEGER script, INTEGER verb, LONGINT param)
 {
     warning_unimplemented(NULL_STRING);
     return smVerbNotFound;
 }
 
-INTEGER Executor::C_Font2Script(INTEGER fontnum)
+INTEGER Executor::C_FontToScript(INTEGER fontnum)
 {
     warning_unimplemented(NULL_STRING);
     return 0;
@@ -204,7 +204,7 @@ void Executor::C_MeasureJust(Ptr textbufp, int16_t length, int16_t slop,
     MeasureText(length, textbufp, charlocs);
 }
 
-void Executor::C_NMeasureJust(Ptr text, int32_t length, Fixed slop,
+void Executor::C_MeasureJustified(Ptr text, int32_t length, Fixed slop,
                               Ptr charLocs, JustStyleCode run_pos, Point numer,
                               Point denom)
 {
@@ -391,7 +391,7 @@ enum
     dateTimeNotFound = 0x8400
 };
 
-String2DateStatus Executor::C_String2Time(
+String2DateStatus Executor::C_StringToTime(
     Ptr textp, LONGINT len, Ptr cachep, GUEST<LONGINT> *lenusedp,
     GUEST<Ptr> *datetimep)
 {
@@ -406,7 +406,7 @@ this_date_rec(DateTimeRec *p)
     GUEST<ULONGINT> now;
 
     GetDateTime(&now);
-    Secs2Date(CL(now), p);
+    SecondsToDate(CL(now), p);
 }
 
 static int
@@ -429,7 +429,7 @@ this_millennium(void)
     return retval;
 }
 
-String2DateStatus Executor::C_String2Date(
+String2DateStatus Executor::C_StringToDate(
     Ptr text, int32_t length, DateCachePtr cache,
     GUEST<int32_t> *length_used_ret, LongDatePtr date_time)
 {
@@ -568,7 +568,7 @@ INTEGER Executor::C_ReplaceText(Handle base_text, Handle subst_text, Str15 key)
     return retval;
 }
 
-/* FormatStr2X is now StringToExtended */
+/* StringToExtended is now StringToExtended */
 FormatStatus Executor::C_StringToExtended(
     Str255 string, NumFormatStringRec *formatp, NumberParts *partsp,
     Extended80 *xp) /* TTS TODO */
@@ -648,7 +648,7 @@ LONGINT Executor::C_VisibleLength(Ptr textp, LONGINT len)
     return len;
 }
 
-void Executor::C_LongDate2Secs(LongDateRec *ldatep, GUEST<ULONGINT> *secs_outp)
+void Executor::C_LongDateToSeconds(LongDateRec *ldatep, GUEST<ULONGINT> *secs_outp)
 {
     long long secs;
     LONGINT high, low;
@@ -667,7 +667,7 @@ void Executor::C_LongDate2Secs(LongDateRec *ldatep, GUEST<ULONGINT> *secs_outp)
     secs_outp[1] = CL(low);
 }
 
-void Executor::C_LongSecs2Date(GUEST<ULONGINT> *secs_inp, LongDateRec *ldatep)
+void Executor::C_LongSecondsToDate(GUEST<ULONGINT> *secs_inp, LongDateRec *ldatep)
 
 {
     long long secs;
@@ -701,11 +701,11 @@ RawPrinterValues
 
 NPixel2Char
 
-NChar2Pixel
+CharToPixel
 
-NDrawJust
+DrawJustified
 
-NPortionText
+PortionLine
 
 ReplaceText
 
@@ -717,19 +717,19 @@ NFindWord
 
 ValidDate
 
-FormatStr2X
+StringToExtended
 
-FormatX2Str
+ExtendedToString
 
-Format2Str
+FormatRecToString
 
-Str2Format
+StringToFormatRec
 
 ToggleDate
 
-LongSecs2Date
+LongSecondsToDate
 
-LongDate2Secs
+LongDateToSeconds
 
 IntlTokenize
 

@@ -580,7 +580,7 @@ Executor::HCreate(INTEGER vref, LONGINT dirid, Str255 name, OSType creator, OSTy
 
 OSErr
 Executor::HOpenRF(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
-                  INTEGER *refp)
+                  GUEST<INTEGER> *refp)
 {
     HParamBlockRec hpb;
     OSErr retval;
@@ -592,6 +592,42 @@ Executor::HOpenRF(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
     hpb.fileParam.ioDirID = CL(dirid);
     retval = PBHOpenRF(&hpb, false);
     if(retval == noErr)
-        *refp = CW(hpb.ioParam.ioRefNum);
+        *refp = hpb.ioParam.ioRefNum;
+    return retval;
+}
+
+OSErr
+Executor::HOpenDF(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
+                  GUEST<INTEGER> *refp)
+{
+    HParamBlockRec hpb;
+    OSErr retval;
+
+    hpb.fileParam.ioNamePtr = RM(name);
+    hpb.fileParam.ioVRefNum = CW(vref);
+    hpb.ioParam.ioPermssn = CB(perm);
+    hpb.ioParam.ioMisc = CLC(0);
+    hpb.fileParam.ioDirID = CL(dirid);
+    retval = PBHOpenDF(&hpb, false);
+    if(retval == noErr)
+        *refp = hpb.ioParam.ioRefNum;
+    return retval;
+}
+
+OSErr
+Executor::HOpen(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
+                  GUEST<INTEGER> *refp)
+{
+    HParamBlockRec hpb;
+    OSErr retval;
+
+    hpb.fileParam.ioNamePtr = RM(name);
+    hpb.fileParam.ioVRefNum = CW(vref);
+    hpb.ioParam.ioPermssn = CB(perm);
+    hpb.ioParam.ioMisc = CLC(0);
+    hpb.fileParam.ioDirID = CL(dirid);
+    retval = PBHOpen(&hpb, false);
+    if(retval == noErr)
+        *refp = hpb.ioParam.ioRefNum;
     return retval;
 }

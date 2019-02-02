@@ -70,43 +70,9 @@ void Executor::C_FillOval(Rect *r, Pattern pat)
     CALLOVAL(fill, r);
 }
 
-static bool
-rect_matches_control_item(WindowPtr w, Rect *rp)
-{
-    bool retval;
-    ControlHandle c;
-
-    retval = false;
-    for(c = WINDOW_CONTROL_LIST(w); !retval && c; c = CTL_NEXT_CONTROL(c))
-    {
-        Rect r;
-
-        r = CTL_RECT(c);
-        retval = ((CW(r.top) - CW(rp->top) == CW(rp->bottom) - CW(r.bottom)) && (CW(r.left) - CW(rp->left) == CW(rp->right) - CW(r.right)));
-    }
-
-    return retval;
-}
-
 void Executor::C_FrameRoundRect(Rect *r, INTEGER ow, INTEGER oh)
 {
-    bool do_rect;
-
-    do_rect = false;
-
-    if(ROMlib_cdef0_is_rectangular)
-    {
-        AuxWinHandle aux;
-
-        aux = MR(*lookup_aux_win(thePort));
-        if(aux && rect_matches_control_item(HxP(aux, awOwner), r))
-            do_rect = true;
-    }
-
-    if(do_rect)
-        FrameRect(r);
-    else
-        CALLRRECT(frame, r, ow, oh);
+    CALLRRECT(frame, r, ow, oh);
 }
 
 void Executor::C_PaintRoundRect(Rect *r, INTEGER ow, INTEGER oh)

@@ -89,6 +89,9 @@ Executor::ROMlib_priv_open(const char *filename, long mode)
     return retval;
 }
 
+#if !defined(MSDOS) && !defined(CYGWIN32)
+[[maybe_unused]]
+#endif
 static void eject_floppy_notify(void)
 {
 

@@ -146,8 +146,8 @@ DISPATCHER_TRAP(Pack6, 0xA9ED, StackW);
 extern void C_IUDatePString(LONGINT date,
                                         DateForm form, StringPtr p, Handle h);
 PASCAL_SUBTRAP(IUDatePString, 0xA9ED, 0x000E, Pack6);
-extern Handle C_IUGetIntl(INTEGER id);
-PASCAL_SUBTRAP(IUGetIntl, 0xA9ED, 0x0006, Pack6);
+extern Handle C_GetIntlResource(INTEGER id);
+PASCAL_SUBTRAP(GetIntlResource, 0xA9ED, 0x0006, Pack6);
 
 extern void C_IUDateString(LONGINT date,
                                        DateForm form, StringPtr p);
@@ -158,12 +158,12 @@ PASCAL_SUBTRAP(IUTimePString, 0xA9ED, 0x0010, Pack6);
 extern void C_IUTimeString(LONGINT date,
                                        BOOLEAN secs, StringPtr p);
 PASCAL_SUBTRAP(IUTimeString, 0xA9ED, 0x0002, Pack6);
-extern BOOLEAN C_IUMetric(void);
-PASCAL_SUBTRAP(IUMetric, 0xA9ED, 0x0004, Pack6);
+extern BOOLEAN C_IsMetric(void);
+PASCAL_SUBTRAP(IsMetric, 0xA9ED, 0x0004, Pack6);
 
-extern void C_IUSetIntl(INTEGER rn,
+extern void C_SetIntlResource(INTEGER rn,
                                     INTEGER id, Handle newh);
-PASCAL_SUBTRAP(IUSetIntl, 0xA9ED, 0x0008, Pack6);
+PASCAL_SUBTRAP(SetIntlResource, 0xA9ED, 0x0008, Pack6);
 
 extern INTEGER C_IUMagString(Ptr ptr1, Ptr ptr2, INTEGER len1, INTEGER len2);
 PASCAL_SUBTRAP(IUMagString, 0xA9ED, 0x000A, Pack6);
@@ -187,8 +187,8 @@ extern void C_IULTimeString(LongDateTime *datetimep,
                                         BOOLEAN wantseconds, Str255 result, Handle intlhand);
 PASCAL_SUBTRAP(IULTimeString, 0xA9ED, 0x0016, Pack6);
 
-extern void C_IUClearCache(void);
-PASCAL_SUBTRAP(IUClearCache, 0xA9ED, 0x0018, Pack6);
+extern void C_ClearIntlResourceCache(void);
+PASCAL_SUBTRAP(ClearIntlResourceCache, 0xA9ED, 0x0018, Pack6);
 
 extern INTEGER C_IUMagPString(Ptr ptra, Ptr ptrb, INTEGER lena,
                                           INTEGER lenb, Handle itl2hand);
@@ -210,8 +210,8 @@ extern INTEGER C_IUTextOrder(Ptr ptra, Ptr ptrb, INTEGER lena,
                                          LangCode langb);
 PASCAL_SUBTRAP(IUTextOrder, 0xA9ED, 0x0022, Pack6);
 
-extern void C_IUGetItlTable(ScriptCode script, INTEGER tablecode,
+extern void C_GetIntlResourceTable(ScriptCode script, INTEGER tablecode,
                                         Handle *itlhandlep, LONGINT *offsetp, LONGINT *lengthp);
-PASCAL_SUBTRAP(IUGetItlTable, 0xA9ED, 0x0024, Pack6);
+PASCAL_SUBTRAP(GetIntlResourceTable, 0xA9ED, 0x0024, Pack6);
 }
 #endif /* _INTLUTIL_H_ */

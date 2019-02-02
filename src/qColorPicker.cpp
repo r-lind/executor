@@ -587,13 +587,13 @@ text_box_update(struct text_box *box, bool update_text_p)
             TE_DEST_RECT(te) = dummy_rect;
             TE_VIEW_RECT(te) = dummy_rect;
 
-            TextBox((Ptr)buf, strlen(buf), &box->te_rect, teFlushRight);
+            TETextBox((Ptr)buf, strlen(buf), &box->te_rect, teFlushRight);
         }
         else
             TEUpdate(&box->te_rect, te);
     }
     else
-        TextBox((Ptr)buf, strlen(buf), &box->te_rect, teFlushRight);
+        TETextBox((Ptr)buf, strlen(buf), &box->te_rect, teFlushRight);
 
     PenSize(1, 1);
     FrameRect(&box->frame_rect);
@@ -1022,7 +1022,7 @@ event_loop(void)
                 compare_box_update();
 
                 /* draw the prompt */
-                TextBox((Ptr)&prompt_text[1], *prompt_text,
+                TETextBox((Ptr)&prompt_text[1], *prompt_text,
                         prompt_bounds, teFlushLeft);
 
                 color_wheel_update();
@@ -1405,7 +1405,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
                                        0, 0, 1, pushButProc, -1);
 
             te = TENew(dummy_rect, dummy_rect);
-            TESetJust(teFlushRight, te);
+            TESetAlignment(teFlushRight, te);
             text_box_init();
 
             /* event loop exits when one of `Cancel' (returning zero) or
@@ -1417,7 +1417,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
         }
     }
 
-    DisposHandle((Handle)color_wheel_color_table);
+    DisposeHandle((Handle)color_wheel_color_table);
 
     DisposePalette(palette);
 

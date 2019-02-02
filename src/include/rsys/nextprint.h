@@ -52,8 +52,6 @@ extern void NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
 extern short NeXTPrTxMeas(LONGINT n, Ptr p, GUEST<Point> *nump, GUEST<Point> *denp,
                           FontInfo *finfop, GrafPtr gp);
 extern void NeXTOpenPage(void);
-extern void ROMlib_updatenextpagerect(Rect *rp);
-extern void ROMlib_updatemacpagerect(Rect *rp1, Rect *rp2, Rect *rp3);
 
 extern char **ROMlib_availableFonts(void);
 extern void ROMlib_newFont(char *font, float txSize);

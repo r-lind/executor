@@ -148,7 +148,7 @@ void Executor::C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
       PORT_RECT (thePort) = saverect;
       thePort->portBits = savemap;
       if (bogo_port_pixmap)
-	DisposHandle ((Handle) bogo_port_pixmap);
+	DisposeHandle ((Handle) bogo_port_pixmap);
       DisposeRgn (big_region);
     }
 #endif

@@ -53,46 +53,46 @@ extern OSErr PBDTCloseDown(DTPBPtr dtp);
 REGISTER_SUBTRAP2(PBDTCloseDown, 0xA260, 0x21, FSDispatch, D0(A0));
 
 extern OSErr PBDTAddIcon(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTAddIcon, 0xA260, 0x22, FSDispatch);
+FILE_SUBTRAP(PBDTAddIcon, DTPBPtr, 0xA260, 0x22, FSDispatch);
 
 extern OSErr PBDTGetIcon(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTGetIcon, 0xA260, 0x23, FSDispatch);
+FILE_SUBTRAP(PBDTGetIcon, DTPBPtr, 0xA260, 0x23, FSDispatch);
 
 extern OSErr PBDTGetIconInfo(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTGetIconInfo, 0xA260, 0x24, FSDispatch);
+FILE_SUBTRAP(PBDTGetIconInfo, DTPBPtr, 0xA260, 0x24, FSDispatch);
 
 extern OSErr PBDTAddAPPL(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTAddAPPL, 0xA260, 0x25, FSDispatch);
+FILE_SUBTRAP(PBDTAddAPPL, DTPBPtr, 0xA260, 0x25, FSDispatch);
 
 extern OSErr PBDTRemoveAPPL(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTRemoveAPPL, 0xA260, 0x26, FSDispatch);
+FILE_SUBTRAP(PBDTRemoveAPPL, DTPBPtr, 0xA260, 0x26, FSDispatch);
 
 extern OSErr PBDTGetAPPL(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTGetAPPL, 0xA260, 0x27, FSDispatch);
+FILE_SUBTRAP(PBDTGetAPPL, DTPBPtr, 0xA260, 0x27, FSDispatch);
 
 extern OSErr PBDTSetComment(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTSetComment, 0xA260, 0x28, FSDispatch);
+FILE_SUBTRAP(PBDTSetComment, DTPBPtr, 0xA260, 0x28, FSDispatch);
 
 extern OSErr PBDTRemoveComment(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTRemoveComment, 0xA260, 0x29, FSDispatch);
+FILE_SUBTRAP(PBDTRemoveComment, DTPBPtr, 0xA260, 0x29, FSDispatch);
 
 extern OSErr PBDTGetComment(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTGetComment, 0xA260, 0x2A, FSDispatch);
+FILE_SUBTRAP(PBDTGetComment, DTPBPtr, 0xA260, 0x2A, FSDispatch);
 
 extern OSErr PBDTFlush(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTFlush, 0xA260, 0x2B, FSDispatch);
+FILE_SUBTRAP(PBDTFlush, DTPBPtr, 0xA260, 0x2B, FSDispatch);
 
 extern OSErr PBDTReset(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTReset, 0xA260, 0x2C, FSDispatch);
+FILE_SUBTRAP(PBDTReset, DTPBPtr, 0xA260, 0x2C, FSDispatch);
 
 extern OSErr PBDTGetInfo(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTGetInfo, 0xA260, 0x2D, FSDispatch);
+FILE_SUBTRAP(PBDTGetInfo, DTPBPtr, 0xA260, 0x2D, FSDispatch);
 
 extern OSErr PBDTOpenInform(DTPBPtr dtp);
 REGISTER_SUBTRAP2(PBDTOpenInform, 0xA260, 0x2E, FSDispatch, D0(A0));
 
 extern OSErr PBDTDelete(DTPBPtr dtp, BOOLEAN async);
-FILE_SUBTRAP(PBDTDelete, 0xA260, 0x2F, FSDispatch);
+FILE_SUBTRAP(PBDTDelete, DTPBPtr, 0xA260, 0x2F, FSDispatch);
 
 }
 #endif

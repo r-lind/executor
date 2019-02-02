@@ -155,7 +155,7 @@ addr_info(char *addr)
 
     fprintf(stderr, "addr `%p' is located in zone %s: `%p', `%p:%p'\n",
             addr, ((addr_zone == zones[0])
-                       ? "ApplicZone"
+                       ? "ApplicationZone"
                        : ((addr_zone == zones[1])
                               ? "SystemZone"
                               : "LM(TheZone)")),

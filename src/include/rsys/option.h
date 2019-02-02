@@ -81,14 +81,16 @@ void opt_register(std::string new_interface, option_vec opts);
 
 /* provide a function to parse specified arguments */
 opt_database_t opt_alloc_db(void);
-int opt_parse(opt_database_t &db, option_vec opts,
+bool opt_parse(opt_database_t &db, option_vec opts,
               int *argc, char *argv[]);
 
 /* returns true if options was specified */
-int opt_int_val(opt_database_t &db, std::string opt, int *retval,
+bool opt_int_val(opt_database_t &db, std::string opt, int *retval,
+                bool *parse_error_p);
+bool opt_bool_val(opt_database_t &db, std::string opt, bool *retval,
                 bool *parse_error_p);
 
-int opt_val(opt_database_t &db, std::string opt, std::string *retval);
+bool opt_val(opt_database_t &db, std::string opt, std::string *retval);
 void opt_put_val(opt_database_t &db, const std::string &opt, std::string value,
                  priority_t pri, int temp_val_p);
 

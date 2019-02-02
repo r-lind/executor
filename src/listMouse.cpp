@@ -131,8 +131,8 @@ static void scrollbyvalues(ListHandle list)
     ControlHandle ch;
     Point p;
 
-    h = (ch = HxP(list, hScroll)) ? GetCtlValue(ch) : Hx(list, visible.left);
-    v = (ch = HxP(list, vScroll)) ? GetCtlValue(ch) : Hx(list, visible.top);
+    h = (ch = HxP(list, hScroll)) ? GetControlValue(ch) : Hx(list, visible.left);
+    v = (ch = HxP(list, vScroll)) ? GetControlValue(ch) : Hx(list, visible.top);
     C_LScroll(h - Hx(list, visible.left), v - Hx(list, visible.top), list);
     HxX(list, visible.left) = CW(h);
     HxX(list, visible.top) = CW(v);
@@ -170,7 +170,7 @@ void Executor::C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
             quant = 0;
             break;
     }
-    SetCtlValue(ch, GetCtlValue(ch) + quant);
+    SetControlValue(ch, GetControlValue(ch) + quant);
     scrollbyvalues(MR(guest_cast<ListHandle>(HxX(ch, contrlRfCon))));
 }
 
@@ -360,7 +360,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                 {
                     if(scrollh)
                     {
-                        SetCtlValue(scrollh, GetCtlValue(scrollh) - 1);
+                        SetControlValue(scrollh, GetControlValue(scrollh) - 1);
                         ctlchanged = true;
                     }
                     else
@@ -370,7 +370,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                 {
                     if(scrollh)
                     {
-                        SetCtlValue(scrollh, GetCtlValue(scrollh) + 1);
+                        SetControlValue(scrollh, GetControlValue(scrollh) + 1);
                         ctlchanged = true;
                     }
                     else
@@ -380,7 +380,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                 {
                     if(scrollv)
                     {
-                        SetCtlValue(scrollv, GetCtlValue(scrollv) - 1);
+                        SetControlValue(scrollv, GetControlValue(scrollv) - 1);
                         ctlchanged = true;
                     }
                     else
@@ -390,7 +390,7 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
                 {
                     if(scrollv)
                     {
-                        SetCtlValue(scrollv, GetCtlValue(scrollv) + 1);
+                        SetControlValue(scrollv, GetControlValue(scrollv) + 1);
                         ctlchanged = true;
                     }
                     else

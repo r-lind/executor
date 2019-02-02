@@ -27,7 +27,7 @@ bool Executor::update_xdata_if_needed(xdata_handle_t xh, PixPat *pixpat,
        || (x->log2_bpp >= 4 && x->rgb_spec != pixmap_rgb_spec(dest)))
     {
         if(x->raw_pat_bits_mem)
-            DisposPtr(x->raw_pat_bits_mem);
+            DisposePtr(x->raw_pat_bits_mem);
         xdata_for_pixpat_with_space(pixpat, dest, xh);
         return true;
     }
@@ -490,11 +490,11 @@ void Executor::xdata_free(xdata_handle_t xh)
     {
         Ptr p = HxX(xh, raw_pat_bits_mem);
         if(p)
-            DisposPtr(p);
+            DisposePtr(p);
     }
     else
     {
         warning_unexpected("invalid xdata size; appl juked xdata maybe");
     }
-    DisposHandle((Handle)xh);
+    DisposeHandle((Handle)xh);
 }

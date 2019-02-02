@@ -13,7 +13,7 @@
 
 using namespace Executor;
 
-void Executor::C_SetCtlValue(ControlHandle c, INTEGER v) /* IMI-326 */
+void Executor::C_SetControlValue(ControlHandle c, INTEGER v) /* IMI-326 */
 {
     CtlCallGuard guard(c);
     if(v < Hx(c, contrlMin))
@@ -27,12 +27,12 @@ void Executor::C_SetCtlValue(ControlHandle c, INTEGER v) /* IMI-326 */
     EM_D0 = 0;
 }
 
-INTEGER Executor::C_GetCtlValue(ControlHandle c) /* IMI-326 */
+INTEGER Executor::C_GetControlValue(ControlHandle c) /* IMI-326 */
 {
     return Hx(c, contrlValue);
 }
 
-void Executor::C_SetCtlMin(ControlHandle c, INTEGER v) /* IMI-326 */
+void Executor::C_SetControlMinimum(ControlHandle c, INTEGER v) /* IMI-326 */
 {
     CtlCallGuard guard(c);
     HxX(c, contrlMin) = CW(v);
@@ -41,12 +41,12 @@ void Executor::C_SetCtlMin(ControlHandle c, INTEGER v) /* IMI-326 */
     CTLCALL(c, drawCntl, ALLINDICATORS);
 }
 
-INTEGER Executor::C_GetCtlMin(ControlHandle c) /* IMI-327 */
+INTEGER Executor::C_GetControlMinimum(ControlHandle c) /* IMI-327 */
 {
     return Hx(c, contrlMin);
 }
 
-void Executor::C_SetCtlMax(ControlHandle c, INTEGER v) /* IMI-327 */
+void Executor::C_SetControlMaximum(ControlHandle c, INTEGER v) /* IMI-327 */
 {
     CtlCallGuard guard(c);
     /* #### TEST ON MAC MacBreadboard's behaviour suggests that
@@ -60,7 +60,7 @@ void Executor::C_SetCtlMax(ControlHandle c, INTEGER v) /* IMI-327 */
     CTLCALL(c, drawCntl, ALLINDICATORS);
 }
 
-INTEGER Executor::C_GetCtlMax(ControlHandle c) /* IMI-327 */
+INTEGER Executor::C_GetControlMaximum(ControlHandle c) /* IMI-327 */
 {
     return Hx(c, contrlMax);
 }

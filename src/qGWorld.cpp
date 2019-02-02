@@ -507,10 +507,10 @@ void Executor::C_DisposeGWorld(GWorldPtr graphics_world)
         Handle h;
 
         h = RecoverHandle((Ptr)(PIXMAP_BASEADDR(gw_info->gw_pixmap)));
-        DisposHandle(h);
+        DisposeHandle(h);
     }
     else
-        DisposHandle((Handle)PIXMAP_BASEADDR(gw_info->gw_pixmap));
+        DisposeHandle((Handle)PIXMAP_BASEADDR(gw_info->gw_pixmap));
 
     if(gw_info->gd_allocated_p)
     {
@@ -518,7 +518,7 @@ void Executor::C_DisposeGWorld(GWorldPtr graphics_world)
     }
 
     ClosePort((GrafPtr)graphics_world);
-    DisposPtr((Ptr)graphics_world);
+    DisposePtr((Ptr)graphics_world);
 
     delete_gw_info(gw_info);
 }
@@ -691,7 +691,7 @@ QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,
 
     if(p == NULL)
     {
-        DisposPixMap(pixels);
+        DisposePixMap(pixels);
         return cNoMemErr;
     }
 
@@ -720,13 +720,13 @@ void Executor::C_DisposeScreenBuffer(PixMapHandle pixels)
             Handle baseaddr;
 
             baseaddr = RecoverHandle(PIXMAP_BASEADDR(pixels));
-            DisposHandle(baseaddr);
+            DisposeHandle(baseaddr);
         }
         else
-            DisposHandle((Handle)PIXMAP_BASEADDR(pixels));
+            DisposeHandle((Handle)PIXMAP_BASEADDR(pixels));
 
         /* and the pixmap */
-        DisposPixMap(pixels);
+        DisposePixMap(pixels);
     }
 }
 

@@ -188,7 +188,6 @@ extern void _errno_warning(const char *file, int line, const char *fn,
 #endif
 
 #if defined(SUPPORT_LOG_ERR_TO_RAM)
-extern bool log_err_to_ram_p;
 extern void error_dump_ram_err_buf(const char *separator_message);
 #endif
 

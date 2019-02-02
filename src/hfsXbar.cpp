@@ -11,6 +11,7 @@
 #include "rsys/stdfile.h"
 #include "rsys/flags.h"
 #include "rsys/prefs.h"
+#include "rsys/cpu.h"
 
 using namespace Executor;
 
@@ -155,8 +156,6 @@ try_to_reopen(DrvQExtra *dqp)
                           "yet\nbeen written for this platform.");
 #endif
 }
-
-int Executor::ROMlib_directdiskaccess = false;
 
 OSErr Executor::PBRead(ParmBlkPtr pb, BOOLEAN async)
 {
@@ -365,7 +364,7 @@ OSErr Executor::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
     OSErr retval;
 
     if(pb->ioParam.ioBuffer == 0 && pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
-       && MR(pb->ioParam.ioNamePtr)[1] == '.')
+       && MR(pb->ioParam.ioNamePtr)[1] == '.')  // FIXME: PBHOpen should work with dotfiles if no driver is found
         retval = ROMlib_driveropen((ParmBlkPtr)pb, async);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBHOpen(pb, async);
@@ -374,7 +373,7 @@ OSErr Executor::PBHOpen(HParmBlkPtr pb, BOOLEAN async)
     FAKEASYNC(pb, async, retval);
 }
 
-OSErr Executor::PBOpenDF(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::PBHOpenDF(HParmBlkPtr pb, BOOLEAN async)
 {
     OSErr retval;
 
@@ -554,7 +553,7 @@ OSErr Executor::PBOpen(ParmBlkPtr pb, BOOLEAN async)
     OSErr retval;
 
     if(pb->ioParam.ioNamePtr && MR(pb->ioParam.ioNamePtr)[0]
-       && MR(pb->ioParam.ioNamePtr)[1] == '.')
+       && MR(pb->ioParam.ioNamePtr)[1] == '.') // FIXME: PBOpen should work with dotfiles if no driver is found
         retval = ROMlib_driveropen(pb, async);
     else if(hfsvol((IOParam *)pb))
         retval = hfsPBOpen(pb, async);
@@ -562,6 +561,18 @@ OSErr Executor::PBOpen(ParmBlkPtr pb, BOOLEAN async)
         retval = ufsPBOpen(pb, async);
     FAKEASYNC(pb, async, retval);
 }
+
+OSErr Executor::PBOpenDF(ParmBlkPtr pb, BOOLEAN async)
+{
+    OSErr retval;
+
+    if(hfsvol((IOParam *)pb))
+        retval = hfsPBOpen(pb, async);
+    else
+        retval = ufsPBOpen(pb, async);
+    FAKEASYNC(pb, async, retval);
+}
+
 
 #if !defined(NDEBUG)
 void test_serial(void)

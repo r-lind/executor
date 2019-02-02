@@ -10,6 +10,7 @@
 #include "rsys/cfm.h"
 
 #include <math.h>
+#include <iostream>
 
 using namespace Executor;
 
@@ -140,17 +141,17 @@ hash_index_compare(const void *p1, const void *p2)
 }
 
 static void
-update_export_hash_table(uint32_t *hashp, int hash_index, int first_index,
+update_export_hash_table(GUEST<uint32_t> *hashp, int hash_index, int first_index,
                          int run_count)
 {
     uint32_t new_value;
 
     new_value = ((run_count << CHAIN_COUNT_SHIFT) | (first_index & FIRST_INDEX_MASK));
-    hashp[hash_index] = CL_RAW(new_value);
+    hashp[hash_index] = CL(new_value);
 }
 
 PEFLoaderInfoHeader_t *
-ROMlib_build_pef_hash(const map_entry_t table[], int count)
+Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
 {
     PEFLoaderInfoHeader_t *retval;
     uint32_t hash_power;
@@ -158,8 +159,8 @@ ROMlib_build_pef_hash(const map_entry_t table[], int count)
     uint32_t hash_offset, export_offset, symbol_table_offset, string_table_offset;
     int hash_length, export_length, symbol_table_length, string_table_length;
     Size n_bytes_needed;
-    uint32_t *hashp;
-    uint32_t *exportp;
+    GUEST<uint32_t> *hashp;
+    GUEST<uint32_t> *exportp;
     PEFExportedSymbol *symbol_tablep;
     char *string_tablep;
     int i;
@@ -220,7 +221,7 @@ ROMlib_build_pef_hash(const map_entry_t table[], int count)
             sorted[i].hash_index = PEFHashTableIndex(sorted[i].hash_word,
                                                      hash_power);
             sorted[i].class_and_name_x = CL((kPEFTVectSymbol << 24) | name_offset);
-            sorted[i].value = guest_cast<void *>(RM(&table[i].value)); // ### ???
+            sorted[i].value = guest_cast<void *>(RM(table[i].value));
             length = strlen(table[i].symbol_name);
             memcpy(string_tablep + name_offset, table[i].symbol_name, length);
             name_offset += length;
@@ -245,7 +246,7 @@ ROMlib_build_pef_hash(const map_entry_t table[], int count)
                 previous_hash_index = sorted[i].hash_index;
                 previous_index_of_first_element = i;
             }
-            exportp[i] = sorted[i].hash_word;
+            exportp[i] = CL(sorted[i].hash_word);
             PEFEXS_CLASS_AND_NAME_X(&symbol_tablep[i]) = sorted[i].class_and_name_x;
             PEFEXS_SYMBOL_VALUE_X(&symbol_tablep[i]) = guest_cast<uint32_t>(sorted[i].value);
             PEFEXS_SECTION_INDEX_X(&symbol_tablep[i]) = CWC(-2);
@@ -292,11 +293,11 @@ lookup_by_name(const ConnectionID connp,
     int chain_count;
     int index;
     int past_index;
-    uint32_t hash_word_swapped;
+    GUEST<uint32_t> hash_word_swapped;
     PEFExportedSymbol *retval;
     PEFLoaderInfoHeader_t *lihp;
-    uint32_t *hash_entries;
-    uint32_t *export_key_table;
+    GUEST<uint32_t> *hash_entries;
+    GUEST<uint32_t> *export_key_table;
     PEFExportedSymbol *symbol_table;
     uint32_t offset;
     const char *string_tablep;
@@ -326,12 +327,12 @@ lookup_by_name(const ConnectionID connp,
     offset = PEFLIH_STRINGS_OFFSET(lihp);
     string_tablep = (decltype(string_tablep))((char *)lihp + offset);
 
-    chain_count_and_first_index = CL_RAW(hash_entries[hash_index]);
+    chain_count_and_first_index = CL(hash_entries[hash_index]);
     chain_count = ((chain_count_and_first_index >> CHAIN_COUNT_SHIFT)
                    & CHAIN_COUNT_MASK);
     index = ((chain_count_and_first_index >> FIRST_INDEX_SHIFT)
              & FIRST_INDEX_MASK);
-    hash_word_swapped = CL_RAW(hash_word);
+    hash_word_swapped = CL(hash_word);
     for(past_index = index + chain_count;
         index < past_index && (export_key_table[index] != hash_word_swapped || strncmp(name, SYMBOL_NAME(&symbol_table[index], string_tablep), name_len) != 0);
         ++index)
@@ -340,6 +341,12 @@ lookup_by_name(const ConnectionID connp,
         retval = NULL;
     else
         retval = &symbol_table[index];
+
+    if(!retval)
+    {
+        std::cerr << "Symbol not found: " << std::string(name, name+name_len) << std::endl;
+    }
+
     return retval;
 }
 
@@ -394,7 +401,7 @@ OSErr Executor::C_FindSymbol(ConnectionID connID, Str255 symName,
                 break;
             default:
             {
-                GUEST<uint32_t> sect_start = connID->sects[section_index].start;
+                GUEST<void*> sect_start = connID->sects[section_index].start;
                 *symAddr = RM(val + MR(guest_cast<Ptr>(sect_start)));
             }
             break;

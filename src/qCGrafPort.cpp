@@ -29,7 +29,7 @@ void Executor::C_OpenCPort(CGrafPtr port)
     CPORT_PIXMAP_X(port) = RM(NewPixMap());
 
     /* Free up the empty color table, since we're not going to use it. */
-    DisposHandle((Handle)PIXMAP_TABLE(CPORT_PIXMAP(port)));
+    DisposeHandle((Handle)PIXMAP_TABLE(CPORT_PIXMAP(port)));
 
     temp_pixpat = NewPixPat();
     PIXPAT_TYPE_X(temp_pixpat) = CWC(pixpat_type_orig);
@@ -242,7 +242,7 @@ void Executor::C_PenPixPat(PixPatHandle new_pen)
             return;
 
         if(old_pen && (PIXPAT_TYPE_X(old_pen) == CWC(pixpat_type_orig)))
-            DisposPixPat(old_pen);
+            DisposePixPat(old_pen);
 
         CPORT_PEN_PIXPAT_X(theCPort) = RM(new_pen);
     }
@@ -261,7 +261,7 @@ void Executor::C_BackPixPat(PixPatHandle new_bk)
             return;
 
         if(old_bk && PIXPAT_TYPE_X(old_bk) == CWC(pixpat_type_orig))
-            DisposPixPat(old_bk);
+            DisposePixPat(old_bk);
 
         CPORT_BK_PIXPAT_X(theCPort) = RM(new_bk);
     }
@@ -281,7 +281,7 @@ void Executor::ROMlib_fill_pixpat(PixPatHandle new_fill)
 
 #if 0
       if (PIXPAT_TYPE_X (old_fill) == CWC (pixpat_type_orig))
-	DisposPixPat (old_fill);
+	DisposePixPat (old_fill);
 #endif
 
         CPORT_FILL_PIXPAT_X(theCPort) = RM(new_fill);
@@ -353,12 +353,12 @@ PixMapHandle Executor::C_NewPixMap()
     return pixmap;
 }
 
-void Executor::C_DisposPixMap(PixMapHandle pixmap)
+void Executor::C_DisposePixMap(PixMapHandle pixmap)
 {
     if(pixmap)
     {
-        DisposCTable(PIXMAP_TABLE(pixmap));
-        DisposHandle((Handle)pixmap);
+        DisposeCTable(PIXMAP_TABLE(pixmap));
+        DisposeHandle((Handle)pixmap);
     }
 }
 
@@ -494,21 +494,21 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     return pixpat;
 }
 
-void Executor::C_DisposPixPat(PixPatHandle pixpat_h)
+void Executor::C_DisposePixPat(PixPatHandle pixpat_h)
 {
     if(pixpat_h)
     {
         /* ##### determine which of these checks are necessary, and which
 	 should be asserts that the handles are non-NULL */
         if(PIXPAT_MAP_X(pixpat_h))
-            DisposPixMap(PIXPAT_MAP(pixpat_h));
+            DisposePixMap(PIXPAT_MAP(pixpat_h));
         if(PIXPAT_DATA_X(pixpat_h))
-            DisposHandle(PIXPAT_DATA(pixpat_h));
+            DisposeHandle(PIXPAT_DATA(pixpat_h));
         /* We ignore the xmap field, so no need to free it. */
         if(PIXPAT_XDATA_X(pixpat_h))
             xdata_free((xdata_handle_t)PIXPAT_XDATA(pixpat_h));
 
-        DisposHandle((Handle)pixpat_h);
+        DisposeHandle((Handle)pixpat_h);
     }
 }
 

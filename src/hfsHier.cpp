@@ -298,7 +298,7 @@ OSErr Executor::hfsPBCatMove(CMovePBPtr pb, BOOLEAN async)
                                               (catkey *)dstdirbtparam.foundp, dstdirdrp);
                         /*
  * NOTE: Even though it is less safe to delete and then create (an
- *	 untimely power hit loses the file), we need to do it in this
+ *	 untimely pow hit loses the file), we need to do it in this
  *	 order or greatly rework things.  The problem is that if we
  *	 do a create followed by a delete, we wind up putting in another
  *	 thread record WITH A DUPLICATE KEY, which means that the dirdelete

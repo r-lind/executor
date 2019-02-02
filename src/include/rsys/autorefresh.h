@@ -8,7 +8,6 @@ namespace Executor
 
 #define NUM_AUTOREFRESH_STRIPS 8U
 
-extern bool do_autorefresh_p;
 extern void note_executor_changed_screen(int top, int bottom);
 extern bool autodetect_refresh(void);
 }

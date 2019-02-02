@@ -23,9 +23,6 @@ namespace Executor
 
 static bool executor_changed_screen_p[NUM_AUTOREFRESH_STRIPS];
 
-/* Check auto refresh? */
-bool do_autorefresh_p;
-
 /* Returns a value that will tend to change when the screen contents change
  * for the specified horizontal strip on the screen.
  */

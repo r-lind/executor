@@ -20,6 +20,7 @@
 #include "rsys/wind.h"
 #include "rsys/image.h"
 #include "rsys/executor.h"
+#include "rsys/options.h"
 
 /* apple image */
 namespace Executor
@@ -437,7 +438,7 @@ save(int16_t offset, Rect *rect)
 	   p = NewPtr (height * row_bytes);
 	   if (LM(MemErr) != CWC (noErr))
 	   {
-		   DisposPixMap (save_pmh);
+		   DisposePixMap (save_pmh);
 		   FAIL;
 	   }
 	   PIXMAP_BASEADDR_X (save_pmh) = RM (p);
@@ -516,8 +517,8 @@ restore(void)
                      &save_rect, &save_rect, srcCopy, NULL);
         }
 
-        DisposPtr(PIXMAP_BASEADDR(save_pmh));
-        DisposPixMap(save_pmh);
+        DisposePtr(PIXMAP_BASEADDR(save_pmh));
+        DisposePixMap(save_pmh);
     }
 
     mep->mbBitsSave = NULL;

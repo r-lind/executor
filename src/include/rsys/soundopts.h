@@ -10,12 +10,6 @@
 
 namespace Executor
 {
-typedef enum {
-    soundoff,
-    soundpretend,
-    soundon
-} sound_t;
-
 #if defined(MACOSX_)
 extern void ROMlib_outbuffer(char *buf, LONGINT nsamp, LONGINT rate, void *chanp);
 extern void ROMlib_callcompletion(void *chanp);

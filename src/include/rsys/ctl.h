@@ -68,9 +68,7 @@ extern int32_t C_cdef1008(int16_t var, ControlHandle ctl, int16_t mess,
                           int32_t param);
 PASCAL_FUNCTION(cdef1008);
 
-#define VAR(w) (GetCVariant((w)))
-
-extern BOOLEAN ROMlib_dirtyvariant;
+#define VAR(w) (GetControlVariant((w)))
 
 extern void sb_ctl_init(void);
 
@@ -145,8 +143,6 @@ struct lsastr
     GUEST<Rect> slopRect;
     GUEST<INTEGER> axis;
 };
-
-extern BOOLEAN ROMlib_cdef0_is_rectangular;
 
 extern void image_arrow_up_active_init(void);
 extern void image_arrow_up_inactive_init(void);

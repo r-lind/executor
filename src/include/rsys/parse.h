@@ -14,10 +14,10 @@ extern int yyparse(void); /* ick -- that's what yacc produces */
 namespace Executor
 {
 extern void ROMlib_HideScreen(void);
-extern void ROMlib_SetTitle(char *name);
-extern void ROMlib_SetLocation(pair_t *pairsp);
+extern void ROMlib_SetTitle(const char *name);
+extern void ROMlib_SetLocation(std::pair<int,int> *pairsp);
 extern void ROMlib_ShowScreen(void);
-extern void ROMlib_SetSize(pair_t *pairsp, pair_t *pairs2p);
+extern void ROMlib_SetSize(std::pair<int,int> *pairsp, std::pair<int,int> *pairs2p);
 extern char *ROMlib_GetTitle(void);
 extern void ROMlib_FreeTitle(char *title);
 }
