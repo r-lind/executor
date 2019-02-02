@@ -40,6 +40,7 @@ extern bool ROMlib_pretend_help;
 extern bool ROMlib_pretend_alias;
 extern bool ROMlib_pretend_script;
 extern bool ROMlib_pretend_edition;
+extern bool ROMlib_speech_enabled;
 
 extern bool ROMlib_sticky_menus_p;
 extern bool ROMlib_no_dot_files;

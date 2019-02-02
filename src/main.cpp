@@ -299,7 +299,8 @@ capable of color.",
 
     { "hfsplusro", "unsupported -- do not use", opt_no_arg, "" },
 
-    { "logtraps", "print every operating system and toolbox calls and their arguments", opt_no_arg, "" }
+    { "logtraps", "print every operating system and toolbox calls and their arguments", opt_no_arg, "" },
+    { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""}
 };
 
 opt_database_t Executor::common_db;
@@ -821,6 +822,7 @@ int main(int argc, char **argv)
     opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
     opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);    // FIXME: currently ignored
+    opt_bool_val(common_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);    // FIXME: currently ignored
 #if 0
   opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
 #endif

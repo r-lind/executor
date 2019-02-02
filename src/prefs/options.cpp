@@ -40,6 +40,7 @@ bool ROMlib_pretend_help = false;
 bool ROMlib_pretend_alias = false;
 bool ROMlib_pretend_script = false;
 bool ROMlib_pretend_edition = false;
+bool ROMlib_speech_enabled = false;
 
 /* the system version that executor is currently reporting to
    applications, set through the `-system' options.  contains the

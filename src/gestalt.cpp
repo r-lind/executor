@@ -326,6 +326,10 @@ find_selector_in_table(OSType selector, gestaltentry_t table[],
             if(!ROMlib_pretend_alias)
                 selector = -1;
             break;
+        case gestaltSpeechAttr:
+            if(!ROMlib_speech_enabled)
+                selector = -1;
+            break;
     }
 
     for(i = 0; i < table_length && table[i].selector != selector; ++i)
