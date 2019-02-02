@@ -459,19 +459,18 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     code0 = Get1Resource(FOURCC('C', 'O', 'D', 'E'), 0);
     cfrg0 = Get1Resource(FOURCC('c', 'f', 'r', 'g'), 0);
 
-    if(cfrg0 && ppc_launch_p && ROMlib_find_cfrg(cfrg0, FOURCC('p', 'w', 'p', 'c'), kApplicationCFrag,
-                                                 (StringPtr) ""))
+    bool havePowerPCCode = cfrg0
+            && ROMlib_find_cfrg(cfrg0, FOURCC('p', 'w', 'p', 'c'),
+                                kApplicationCFrag, (StringPtr) "");
+
+    if(havePowerPCCode && ppc_launch_p)
         code0 = nullptr;
-    else if(!code0)
+    
+    if(!havePowerPCCode && !code0)
     {
-        if(cfrg0)
-        {
-            if(ROMlib_find_cfrg(cfrg0, FOURCC('m', '6', '8', 'k'),
-                                kApplicationCFrag, (StringPtr) ""))
-                ROMlib_launch_failure = launch_cfm_requiring;
-            else
-                ROMlib_launch_failure = launch_ppc_only;
-        }
+        if(cfrg0 && ROMlib_find_cfrg(cfrg0, FOURCC('m', '6', '8', 'k'),
+                                     kApplicationCFrag, (StringPtr) ""))
+            ROMlib_launch_failure = launch_cfm_requiring;
         else
             ROMlib_launch_failure = launch_damaged;
         C_ExitToShell();
