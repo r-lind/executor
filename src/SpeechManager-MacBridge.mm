@@ -32,9 +32,9 @@
 #define VoiceNameKey @"VoiceName"
 
 // OSType of voices that started out as MacInTalk 3 voices
-#define kMacInTalk3VoiceCreator ((OSType)'mtk3')
+#define kMacInTalk3VoiceCreator ((Executor::OSType)'mtk3')
 // OSType of voices that started out as MacInTalk Pro voices
-#define kMacInTalkProVoiceCreator ((OSType)'gala')
+#define kMacInTalkProVoiceCreator ((Executor::OSType)'gala')
 
 using namespace Executor;
 
