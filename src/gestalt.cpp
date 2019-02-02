@@ -4,17 +4,17 @@
 
 /* Forward declarations in Gestalt.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "MemoryMgr.h"
 #include "Gestalt.h"
 
-#include "rsys/prefs.h"
-#include "rsys/soundopts.h"
-#include "rsys/mman.h"
+#include "prefs/prefs.h"
+#include "sound/soundopts.h"
+#include "mman/mman.h"
 #include "rsys/gestalt.h"
 #include "rsys/version.h"
-#include "rsys/vdriver.h"
-#include "rsys/functions.impl.h"
+#include "vdriver/vdriver.h"
+#include "base/functions.impl.h"
 
 using namespace Executor;
 
@@ -398,7 +398,7 @@ gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
     if(selector == gestaltSoundAttr && ROMlib_PretendSound == soundoff)
         selector = 0;
 
-    *responsep = CLC(0); /* better safe than sorry */
+    *responsep = 0; /* better safe than sorry */
 
     if(searchlist && (gp = find_selector_on_list(selector)))
         retval = gp->selectorFunction(selector, responsep);
@@ -414,7 +414,7 @@ gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
             else
             {
                 retval = noErr;
-                *responsep = CL(gep->value);
+                *responsep = gep->value;
             }
         }
     }
@@ -425,7 +425,7 @@ gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
                        (selector >> 16) & 0xFF,
                        (selector >> 8) & 0xFF,
                        (selector)&0xFF,
-                       CL(*responsep),
+                       toHost(*responsep),
                        retval);
 
     return retval;
@@ -464,14 +464,14 @@ typedef struct
     GUEST<uint32_t> value;
 } gestalt_list_entry_t;
 
-static gestalt_list_entry_t *gestalt_listp = NULL;
+static gestalt_list_entry_t *gestalt_listp = nullptr;
 static size_t listp_size = 0;
 
 void
 Executor::ROMlib_clear_gestalt_list(void)
 {
     free(gestalt_listp);
-    gestalt_listp = NULL;
+    gestalt_listp = nullptr;
     listp_size = 0;
 }
 
@@ -491,7 +491,7 @@ Executor::ROMlib_add_to_gestalt_list(OSType selector, OSErr retval, uint32_t new
         entryp = (decltype(entryp))((char *)gestalt_listp + listp_size);
         entryp->selector = selector;
         entryp->retval = retval;
-        entryp->value = CL(new_value);
+        entryp->value = new_value;
         listp_size += sizeof *gestalt_listp;
     }
 }
@@ -549,7 +549,7 @@ OSErr Executor::C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
     {
         case gestaltScreenSize:
             replace_physgestalt_selector(gestaltScreenSize,
-                                         ((vdriver_height << 16) | (uint16_t)vdriver_width));
+                                         ((vdriver->height() << 16) | (uint16_t)vdriver->width()));
             break;
 #if defined(CYGWIN32)
         case gestaltGhostScriptVersion:
@@ -578,9 +578,9 @@ syszone_p(ProcPtr p)
 {
     THz syszone;
 
-    syszone = MR(LM(SysZone));
+    syszone = LM(SysZone);
     return ((uintptr_t)p >= (uintptr_t)&syszone->heapData
-            && (uintptr_t)p < (uintptr_t)MR(syszone->bkLim));
+            && (uintptr_t)p < (uintptr_t)syszone->bkLim);
 }
 
 static OSErr
@@ -633,7 +633,7 @@ OSErr Executor::C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
     {
         if(syszone_p((ProcPtr)selFunc))
         {
-            *oldSelFuncp = RM(gp->selectorFunction);
+            *oldSelFuncp = gp->selectorFunction;
             gp->selectorFunction = selFunc;
             retval = noErr;
         }
@@ -649,7 +649,7 @@ OSErr Executor::C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
             retval = gestaltUndefSelectorErr;
         else
         {
-            *oldSelFuncp = RM(&GestaltTablesOnly);
+            *oldSelFuncp = &GestaltTablesOnly;
             retval = new_link(selector, selFunc);
         }
     }

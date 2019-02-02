@@ -5,7 +5,7 @@
 #include "FileMgr.h"
 
 #define MODULE_NAME StdFilePkg
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990, 1995 by Abacus Research and Development, Inc.
@@ -158,6 +158,9 @@ extern void C_CustomGetFile(FileFilterYDProcPtr filefilter,
                                         ActivateYDProcPtr activateproc,
                                         void *yourdatap);
 PASCAL_SUBTRAP(CustomGetFile, 0xA9EA, 0x0008, Pack3);
+
+static_assert(sizeof(SFReply) == 74);
+static_assert(sizeof(StandardFileReply) == 88);
 }
 
 #endif /* __STDFILE__ */

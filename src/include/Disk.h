@@ -55,5 +55,7 @@ struct DrvSts
 extern OSErr DiskEject(INTEGER rn);
 extern OSErr SetTagBuffer(Ptr bp);
 extern OSErr DriveStatus(INTEGER dn, DrvSts *statp);
+
+static_assert(sizeof(DrvSts) == 22);
 }
 #endif /* __DISK__ */

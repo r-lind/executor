@@ -5,6 +5,8 @@
 open(CMAKE, ">trap_instances/trap_instances.cmake");
 print CMAKE "set(trap_instance_sources\n";
 
+@allmodules = ();
+
 while($header = <include/*.h include/rsys/*.h>) {
     $hadtrap = 0;
     $i = 0;
@@ -29,6 +31,8 @@ while($header = <include/*.h include/rsys/*.h>) {
             $headername = "$1.h";
         }
 
+        push(@allmodules, $modname);
+
         open(HEADER, $header);
         open(OUT, ">temp.h");
         $i = 0;
@@ -41,7 +45,7 @@ while($header = <include/*.h include/rsys/*.h>) {
 
                 print OUT "\n";
                 print OUT "#define MODULE_NAME ", $modname, "\n";
-                print OUT "#include <rsys/api-module.h>\n"
+                print OUT "#include <rsys/api-module.h>\n";
             }
         }
         close(OUT);
@@ -49,12 +53,32 @@ while($header = <include/*.h include/rsys/*.h>) {
 
         open(OUT, ">trap_instances/$modname.cpp");
         print OUT "#define INSTANTIATE_TRAPS_$modname\n";
-        print OUT "#include <$headername>";        
+        print OUT "#include <$headername>\n";
+        print OUT "\n";
+        print OUT "// Function for preventing the linker from considering the static constructors in this module unused\n";
+        print OUT "namespace Executor {\n";
+        print OUT "namespace ReferenceTraps {\n";
+        print OUT "    void $modname() {}\n";
+        print OUT "}\n";
+        print OUT "}\n";
         close(OUT);
         print CMAKE "\t\ttrap_instances/$modname.cpp\n";
         
         system "mv temp.h $header";
     }
 }
+print CMAKE "\t\ttrap_instances/ReferenceAllTraps.cpp\n";
 print CMAKE "\t)\n";
 close(CMAKE);
+
+open(OUT, ">trap_instances/ReferenceAllTraps.cpp");
+print OUT "namespace Executor {\n";
+print OUT "    namespace ReferenceTraps {\n";
+print OUT "        void $_();\n" for (@allmodules);
+print OUT "    }\n";
+print OUT "    void ReferenceAllTraps()\n";
+print OUT "    {\n";
+print OUT "        ReferenceTraps::$_();\n" for (@allmodules);
+print OUT "    }\n";
+print OUT "}\n";
+close(OUT);

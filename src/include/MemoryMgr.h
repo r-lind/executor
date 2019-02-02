@@ -2,10 +2,10 @@
 #define _MEMORY_MGR_H_
 
 #include "ExMacTypes.h"
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 
 #define MODULE_NAME MemoryMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990 by Abacus Research and Development, Inc.
@@ -41,6 +41,8 @@ enum
 
 typedef UPP<LONGINT(Size)> GrowZoneProcPtr;
 
+struct block_header_t;
+
 struct Zone
 {
     GUEST_STRUCT;
@@ -60,7 +62,7 @@ struct Zone
     GUEST<LONGINT> minCBFree;
     GUEST<ProcPtr> purgeProc;
     GUEST<Ptr> sparePtr;
-    GUEST<Ptr> allocPtr;
+    GUEST<block_header_t*> allocPtr;
     GUEST<INTEGER> heapData;
 };
 typedef Zone *THz;
@@ -102,7 +104,7 @@ namespace callconv
     {
         syn68k_addr_t afterwards(syn68k_addr_t ret)
         {
-            Loc::set(CW(LM(MemErr)));
+            Loc::set(LM(MemErr));
             return ret;
         }
     };
@@ -110,7 +112,7 @@ namespace callconv
     {
         syn68k_addr_t afterwards(syn68k_addr_t ret)
         {
-            auto err = CW(LM(MemErr));
+            auto err = LM(MemErr);
             if(err < 0)
                 Loc::set(err);
             return ret;
@@ -167,6 +169,8 @@ REGISTER_FLAG_TRAP(_PurgeSpace_flags, PurgeSpace, PurgeSpaceSys,
 extern void ROMlib_installhandle(Handle sh, Handle dh);
 
 extern void ROMlib_InitZones();
+extern void InitMemory(void *thingOnStack);
+
 extern OSErr C_MemError(void);
 NOTRAP_FUNCTION(MemError);
 
@@ -195,6 +199,7 @@ REGISTER_TRAP2(MoreMasters, 0xA036, void (), ReturnMemErr<D0>);
 
 extern void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
                      Ptr limitPtr, THz startPtr);
+NOTRAP_FUNCTION2(InitZone);
 
 extern THz GetZone(void);
 REGISTER_TRAP2(GetZone, 0xA11A, A0 (), ReturnMemErr<D0>);
@@ -275,5 +280,7 @@ extern void C_TempHUnlock(Handle h, GUEST<OSErr> *result_code);
 PASCAL_SUBTRAP(TempHUnlock, 0xA88F, 0x001F, OSDispatch);
 extern void C_TempDisposeHandle(Handle h, GUEST<OSErr> *result_code);
 PASCAL_SUBTRAP(TempDisposeHandle, 0xA88F, 0x0020, OSDispatch);
+
+static_assert(sizeof(Zone) == 54);
 }
 #endif /* _MEMORY_MGR_H_ */

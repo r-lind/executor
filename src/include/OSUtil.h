@@ -13,7 +13,7 @@
 #include "OSEvent.h"
 
 #define MODULE_NAME OSUtil
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -174,7 +174,7 @@ REGISTER_TRAP2(HandAndHand, 0xA9E4, D0(A0,A1), MoveA1ToA0, SaveA1D1D2, CCFromD0)
 extern OSErr PtrAndHand(Ptr p, Handle h, LONGINT s1);
 REGISTER_TRAP2(PtrAndHand, 0xA9EF, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD0);
 
-extern LONGINT ROMlib_RelString(unsigned char *s1, unsigned char *s2,
+extern LONGINT ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
                                 BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0);
 extern INTEGER RelString(StringPtr s1, StringPtr s2,
                                  BOOLEAN casesig, BOOLEAN diacsig);
@@ -268,5 +268,9 @@ NOTRAP_FUNCTION2(SetCurrentA5);
 extern LONGINT SetA5(LONGINT newA5);
 NOTRAP_FUNCTION2(SetA5);
 
+static_assert(sizeof(SysParmType) == 20);
+static_assert(sizeof(DateTimeRec) == 14);
+static_assert(sizeof(SysEnvRec) == 16);
+static_assert(sizeof(QElem) == 178);
 }
 #endif /* __OSUTIL__ */

@@ -1,11 +1,12 @@
 #include "rsys/prefpanel.h"
-#include "rsys/options.h"
-#include "rsys/prefs.h"
-#include "rsys/sounddriver.h"
-#include "rsys/refresh.h"
+#include "prefs/options.h"
+#include "prefs/prefs.h"
+#include "sound/sounddriver.h"
+#include "vdriver/refresh.h"
 #include "rsys/string.h"
-#include "rsys/cquick.h"
-#include "rsys/parseopt.h"
+#include "quickdraw/cquick.h"
+#include "commandline/parseopt.h"
+#include "vdriver/vdriver.h"
 
 #include "DialogMgr.h"
 #include "SysErr.h"
@@ -33,8 +34,8 @@ void modstate(DialogPtr dp, INTEGER tomod, modstate_t mod)
     Rect r;
 
     GetDialogItem(dp, tomod, &type, &ch_s, &r);
-    ch = (ControlHandle)MR(ch_s);
-    if(type & CWC(ctrlItem))
+    ch = (ControlHandle)ch_s;
+    if(type & ctrlItem)
     {
         switch(mod)
         {
@@ -53,7 +54,7 @@ void modstate(DialogPtr dp, INTEGER tomod, modstate_t mod)
                 break;
 #endif /* !defined(LETGCCWAIL) */
         }
-        if(type & CWC(itemDisable))
+        if(type & itemDisable)
         {
             SetControlValue(ch, 0);
             HiliteControl(ch, 255);
@@ -70,7 +71,7 @@ INTEGER getvalue(DialogPtr dp, INTEGER toget)
     Rect r;
 
     GetDialogItem(dp, toget, &type, (GUEST<Handle> *)&ch, &r);
-    return (type & CWC(ctrlItem)) ? GetControlValue(MR(ch)) : 0;
+    return (type & ctrlItem) ? GetControlValue(ch) : 0;
 }
 
 typedef struct depth
@@ -107,7 +108,7 @@ set_depth(DialogPtr dp, int16_t item_to_set)
         depth_t *depth = &depths_list[i];
 
         if(item_to_set == depth->item)
-            C_SetDepth(MR(LM(MainDevice)), depth->bpp, 0, 0);
+            C_SetDepth(LM(MainDevice), depth->bpp, 0, 0);
     }
 
     current_depth_item = item_to_set;
@@ -133,7 +134,7 @@ void setedittext(DialogPtr dp, INTEGER itemno, StringPtr str)
     GUEST<Handle> h;
 
     GetDialogItem(dp, itemno, &type, &h, &r);
-    SetDialogItemText(MR(h), str);
+    SetDialogItemText(h, str);
 }
 
 void setedittextnum(DialogPtr dp, INTEGER itemno, INTEGER value)
@@ -167,10 +168,10 @@ INTEGER getedittext(DialogPtr dp, INTEGER itemno)
     GUEST<LONGINT> l;
 
     GetDialogItem(dp, itemno, &type, &h_s, &r);
-    h = MR(h_s);
+    h = h_s;
     GetDialogItemText(h, str);
     StringToNum(str, &l);
-    return (INTEGER)CL(l);
+    return (INTEGER)l;
 }
 
 #define C_STRING_FROM_SYSTEM_VERSION()        \
@@ -254,7 +255,7 @@ void setupprefvalues(DialogPtr dp)
     {
         int bpp, i;
 
-        bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(MR(LM(MainDevice))));
+        bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)));
         for(i = 0; i < (int)NELEM(depths_list); i++)
         {
             depth_t *depth = &depths_list[i];
@@ -280,7 +281,7 @@ void update_string_from_edit_text(std::string& cstr, DialogPtr dp, INTEGER itemn
     Rect r;
 
     GetDialogItem(dp, itemno, &type, &h_s, &r);
-    h = MR(h_s);
+    h = h_s;
     GetDialogItemText(h, str);
     cstr = std::string(&str[1], &str[str[0] + 1]);
 }
@@ -371,17 +372,12 @@ int saveprefvalues(const char *savefilename, LONGINT locationx, LONGINT location
         }
         else
         {
-#if defined(VDRIVER_DISPLAYED_IN_WINDOW)
-            char *window_name;
-
-            window_name = ROMlib_GetTitle();
+            std::string window_name = vdriver->getTitle();
             clean(window_name);
-            fprintf(fp, "// WindowName = \"%s\";\n", window_name);
-            ROMlib_FreeTitle(window_name);
-#endif /* defined(VDRIVER_DISPLAYED_IN_WINDOW) */
+            fprintf(fp, "// WindowName = \"%s\";\n", window_name.c_str());
         }
         fprintf(fp, "BitsPerPixel = %d;\n",
-                PIXMAP_PIXEL_SIZE(GD_PMAP(MR(LM(MainDevice)))));
+                toHost(PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)))));
 
 #if 0 && defined(MACOSX_)
 	fprintf(fp, "ScreenSize = { %ld, %ld };\n", (long) curr_width, (long) curr_height);
@@ -471,8 +467,8 @@ static void mod_item_enableness(DialogPtr dp, INTEGER item,
     Rect r;
 
     GetDialogItem(dp, item, &type_s, &tmpH, &r);
-    type = CW(type_s);
-    h = MR(tmpH);
+    type = type_s;
+    h = tmpH;
     if(((type & itemDisable) && enableness_wanted == enable)
        || (!(type & itemDisable) && enableness_wanted == disable))
     {
@@ -480,9 +476,9 @@ static void mod_item_enableness(DialogPtr dp, INTEGER item,
         SetDialogItem(dp, item, type, h, &r);
     }
     ch = (ControlHandle)h;
-    if(Hx(ch, contrlHilite) == 255 && enableness_wanted == enable)
+    if((*ch)->contrlHilite == 255 && enableness_wanted == enable)
         HiliteControl(ch, 0);
-    else if(Hx(ch, contrlHilite) != 255 && enableness_wanted == disable)
+    else if((*ch)->contrlHilite != 255 && enableness_wanted == disable)
         HiliteControl(ch, 255);
 }
 
@@ -499,7 +495,7 @@ set_sound_on_string(DialogPtr dp)
                               ? "On (silent)"
                               : "On"));
     GetDialogItem(dp, PREFSOUNDONITEM, &junk1, &h, &junk2);
-    SetControlTitle((ControlHandle)MR(h), sound_string);
+    SetControlTitle((ControlHandle)h, sound_string);
 }
 
 /*
@@ -555,7 +551,7 @@ static void enable_disable_pref_items(DialogPtr dp)
     {
         depth_t *depth = &depths_list[i];
 
-        if(C_HasDepth(MR(LM(MainDevice)), depth->bpp, 0, 0))
+        if(C_HasDepth(LM(MainDevice), depth->bpp, 0, 0))
             mod_item_enableness(dp, depth->item, enable);
         else
             mod_item_enableness(dp, depth->item, disable);
@@ -569,7 +565,7 @@ static void ROMlib_circledefault(DialogPtr dp)
     Rect r;
     GrafPtr saveport;
 
-    saveport = thePort;
+    saveport = qdGlobals().thePort;
     SetPort(dp);
     GetDialogItem(dp, 1, &type, &h, &r);
     PenSize(3, 3);
@@ -609,7 +605,7 @@ void Executor::dopreferences(void)
                 do
                 {
                     ModalDialog(nullptr, &ihit_s);
-                    ihit = CW(ihit_s);
+                    ihit = ihit_s;
                     switch(ihit)
                     {
                         case PREFNORMALITEM:

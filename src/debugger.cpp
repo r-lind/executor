@@ -2,11 +2,13 @@
 #include <OSUtil.h>
 
 #include <mon.h>
-#include <rsys/cpu.h>
+#include <base/cpu.h>
 #include <PowerCore.h>
 #include <syn68k_public.h>
 #include <SegmentLdr.h>
+#ifndef WIN32
 #include <signal.h>
+#endif
 
 using namespace Executor;
 
@@ -85,11 +87,13 @@ void Executor::InitDebugger()
 
     mon_inited = true;
 
-    struct sigaction act = {0};
+#ifndef WIN32
+    struct sigaction act = {};
     act.sa_handler = [](int) {
         nmi = true;
     };
     sigaction(SIGINT, &act, nullptr);
+#endif
 }
 
 void Executor::CheckForDebuggerInterrupt()

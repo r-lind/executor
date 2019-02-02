@@ -11,7 +11,6 @@ namespace Executor
 {
 extern uint32_t ROMlib_version_long;
 extern void ROMlib_set_ppc(bool val);
-extern int ROMlib_uaf;
 
 typedef enum {
     launch_no_failure,
@@ -32,6 +31,7 @@ struct vers_t
 
 extern launch_failure_t ROMlib_launch_failure;
 extern INTEGER ROMlib_exevrefnum;
-}
 
+static_assert(sizeof(vers_t) == 8);
+}
 #endif

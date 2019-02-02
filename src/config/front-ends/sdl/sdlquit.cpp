@@ -1,5 +1,4 @@
-#define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <stdio.h>
 #ifdef _WIN32
@@ -7,7 +6,7 @@
 #endif
 
 #include "sdlquit.h"
-#include "rsys/options.h"
+#include "prefs/options.h"
 #include "rsys/toolevent.h"
 
 using namespace Executor;
@@ -30,7 +29,7 @@ os_specific_really_quit(void)
     mess = alloca(sizeof FORMAT_STR + strlen(name));
     sprintf(mess, FORMAT_STR, name);
 
-    reply = MessageBox(NULL, mess, "Terminate?", MB_OKCANCEL);
+    reply = MessageBox(nullptr, mess, "Terminate?", MB_OKCANCEL);
 
     retval = reply == IDOK;
     return retval;

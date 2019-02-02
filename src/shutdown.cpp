@@ -3,7 +3,7 @@
 
    shutdown.c; ShutDown Manager routines */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "ShutDown.h"
 #include "SegmentLdr.h"

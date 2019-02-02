@@ -8,10 +8,10 @@
  */
 
 #include "ExMacTypes.h"
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 
 #define MODULE_NAME VRetraceMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -48,5 +48,7 @@ extern OSErr SlotVInstall(VBLTaskPtr vtaskp, INTEGER slot);
 REGISTER_TRAP2(SlotVInstall, 0xA06F, D0(A0,D0));
 extern OSErr SlotVRemove(VBLTaskPtr vtaskp, INTEGER slot);
 REGISTER_TRAP2(SlotVRemove, 0xA070, D0(A0,D0));
+
+static_assert(sizeof(VBLTask) == 14);
 }
 #endif /* __VRETRACE__ */

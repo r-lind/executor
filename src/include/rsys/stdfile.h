@@ -5,10 +5,10 @@
 #include "EventMgr.h"
 #include "ControlMgr.h"
 #include "DialogMgr.h"
-#include "rsys/file.h"
+#include "file/file.h"
 
 #define MODULE_NAME rsys_stdfile
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -37,19 +37,11 @@ namespace Executor
 #define FAKECURDIR 102
 #define FAKEOPENDIR 103
 
-extern int ROMlib_strcmp(const Byte *s1, const Byte *s2);
-extern void futzwithdosdisks(void);
 extern void C_ROMlib_stdftrack(ControlHandle, INTEGER);
 PASCAL_FUNCTION(ROMlib_stdftrack);
 extern Boolean C_ROMlib_stdffilt(DialogPtr, EventRecord *, GUEST<INTEGER> *);
 PASCAL_FUNCTION(ROMlib_stdffilt);
 extern void ROMlib_init_stdfile(void);
-
-#if defined(LINUX)
-extern int linuxfloppy_open(int disk, LONGINT *bsizep,
-                            drive_flags_t *flagsp, const char *dname);
-extern int linuxfloppy_close(int disk);
-#endif
 
 enum
 {
@@ -60,4 +52,30 @@ enum
 OSErr C_unixmount(CInfoPBRec *cbp);
 PASCAL_FUNCTION(unixmount);
 }
+
+namespace Executor
+{
+
+typedef enum { get,
+               put } getorput_t;
+typedef enum { original_sf,
+               new_sf,
+               new_custom_sf } sf_flavor_t;
+
+#if 0
+typedef struct
+{
+} host_spf_reply_block;
+
+extern bool host_has_spfcommon(void);
+extern bool host_spfcommon(host_spf_reply_block *replyp,
+                           const char *prompt, const char *filename,
+                           void *fp, void *filef, int numt,
+                           void *tl, getorput_t getorput,
+                           sf_flavor_t flavor,
+                           void *activeList, void *activateproc,
+                           void *yourdatap);
+#endif
+}
+
 #endif /* !defined(__RSYS_STDFILE__) */

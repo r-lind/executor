@@ -14,12 +14,11 @@
 #include <malloc.h>
 #include "win_screen.h"
 
-/* #include <ndbm.h> */
 /* #include <sys/vfs.h> */
 /* #include <sys/param.h> */
 
 /* win32 headers define NULL as 0, which we don't want.  That definition
- * causes CLC(NULL) to generate warnings in some places.
+ * causes NULL to generate warnings in some places.
  */
 #undef NULL
 #define NULL ((void *)0)

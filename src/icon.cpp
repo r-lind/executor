@@ -5,15 +5,15 @@
 // FIXME: #warning the icon suite representation is our own brew -- tests should
 // FIXME: #warning be written and we should do what the Mac does
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
 #include "Iconutil.h"
 
-#include "rsys/cquick.h"
-#include "rsys/resource.h"
-#include "rsys/mman.h"
+#include "quickdraw/cquick.h"
+#include "res/resource.h"
+#include "mman/mman.h"
 #include "rsys/icon.h"
 
 using namespace Executor;
@@ -34,7 +34,7 @@ using namespace Executor;
                                                                    \
         _err_ = GetIconSuite(&_icon_suite_, (res_id), (selector)); \
                                                                    \
-        *(icon_suite) = MR(_icon_suite_);                          \
+        *(icon_suite) = _icon_suite_;                          \
                                                                    \
         _err_;                                                     \
     })
@@ -68,7 +68,7 @@ OSErr Executor::C_PlotIconMethod(const Rect *rect, IconAlignmentType align,
 
 void Executor::C_PlotIcon(const Rect *rect, Handle icon)
 {
-    if(icon == NULL)
+    if(icon == nullptr)
         return;
 
     if(!*icon)
@@ -78,21 +78,21 @@ void Executor::C_PlotIcon(const Rect *rect, Handle icon)
     BitMap bm;
 
     bm.baseAddr = *icon;
-    bm.rowBytes = CWC(4);
-    bm.bounds.left = bm.bounds.top = CWC(0);
+    bm.rowBytes = 4;
+    bm.bounds.left = bm.bounds.top = 0;
     if(GetHandleSize(icon) == 2 * 16)
     {
-        bm.rowBytes = CWC(2);
-        bm.bounds.bottom = CWC(16);
+        bm.rowBytes = 2;
+        bm.bounds.bottom = 16;
     }
     else
     {
-        bm.rowBytes = CWC(4);
-        bm.bounds.bottom = CWC(32);
+        bm.rowBytes = 4;
+        bm.bounds.bottom = 32;
     }
     bm.bounds.right = bm.bounds.bottom;
-    CopyBits(&bm, PORT_BITS_FOR_COPY(thePort), &bm.bounds, rect,
-             srcCopy, NULL);
+    CopyBits(&bm, PORT_BITS_FOR_COPY(qdGlobals().thePort), &bm.bounds, rect,
+             srcCopy, nullptr);
 }
 
 OSErr Executor::C_PlotIconHandle(const Rect *rect, IconAlignmentType align,
@@ -120,7 +120,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
     if(!icon)
         return;
 
-    current_port = thePort;
+    current_port = qdGlobals().thePort;
 
     cgrafport_p = CGrafPort_p(current_port);
     if(cgrafport_p)
@@ -128,8 +128,8 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         fg_rgb = CPORT_RGB_FG_COLOR(current_port);
         bk_rgb = CPORT_RGB_BK_COLOR(current_port);
     }
-    fg_color = PORT_FG_COLOR_X(current_port);
-    bk_color = PORT_BK_COLOR_X(current_port);
+    fg_color = PORT_FG_COLOR(current_port);
+    bk_color = PORT_BK_COLOR(current_port);
 
     RGBForeColor(&ROMlib_black_rgb_color);
     RGBBackColor(&ROMlib_white_rgb_color);
@@ -143,15 +143,15 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
     icon_bm = &CICON_BMAP(icon);
 
     mask_bm = &CICON_MASK(icon);
-    BITMAP_BASEADDR_X(mask_bm) = RM((Ptr)CICON_MASK_DATA(icon));
+    BITMAP_BASEADDR(mask_bm) = (Ptr)CICON_MASK_DATA(icon);
 
-    gd_pixmap = GD_PMAP(MR(LM(MainDevice)));
+    gd_pixmap = GD_PMAP(LM(MainDevice));
 
-    if((PORT_BASEADDR_X(current_port) == PIXMAP_BASEADDR_X(gd_pixmap)
+    if((PORT_BASEADDR(current_port) == PIXMAP_BASEADDR(gd_pixmap)
         && PIXMAP_PIXEL_SIZE(gd_pixmap) > 2)
        || (CGrafPort_p(current_port)
            && PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(current_port)) > 2)
-       || !BITMAP_ROWBYTES_X(icon_bm))
+       || !BITMAP_ROWBYTES(icon_bm))
     {
         Handle icon_data;
 
@@ -161,7 +161,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         PixMap *icon_pm;
 
         icon_pm = &CICON_PMAP(icon);
-        BITMAP_BASEADDR_X(icon_pm) = *icon_data;
+        BITMAP_BASEADDR(icon_pm) = *icon_data;
 
         CopyMask((BitMap *)icon_pm,
                  mask_bm,
@@ -185,7 +185,7 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         bm_baseaddr = (Ptr)((char *)CICON_MASK_DATA(icon)
                             + mask_data_size);
 
-        BITMAP_BASEADDR_X(icon_bm) = RM(bm_baseaddr);
+        BITMAP_BASEADDR(icon_bm) = bm_baseaddr;
         CopyMask(icon_bm,
                  mask_bm,
                  PORT_BITS_FOR_COPY(current_port),
@@ -200,8 +200,8 @@ void Executor::C_PlotCIcon(const Rect *rect, CIconHandle icon)
         CPORT_RGB_FG_COLOR(current_port) = fg_rgb;
         CPORT_RGB_BK_COLOR(current_port) = bk_rgb;
     }
-    PORT_FG_COLOR_X(current_port) = fg_color;
-    PORT_BK_COLOR_X(current_port) = bk_color;
+    PORT_FG_COLOR(current_port) = fg_color;
+    PORT_BK_COLOR(current_port) = bk_color;
 }
 
 OSErr Executor::C_PlotCIconHandle(const Rect *rect, IconAlignmentType align,
@@ -248,13 +248,13 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
     int new_size;
 
     cicon_res_handle = (CIconHandle)ROMlib_getrestid(TICK("cicn"), icon_id);
-    if(cicon_res_handle == NULL)
-        return NULL;
+    if(cicon_res_handle == nullptr)
+        return nullptr;
 
-    cicon_res = STARH(cicon_res_handle);
+    cicon_res = *cicon_res_handle;
     height = RECT_HEIGHT(&cicon_res->iconPMap.bounds);
-    mask_data_size = CW(cicon_res->iconMask.rowBytes) * height;
-    bmap_data_size = CW(cicon_res->iconBMap.rowBytes) * height;
+    mask_data_size = cicon_res->iconMask.rowBytes * height;
+    bmap_data_size = cicon_res->iconBMap.rowBytes * height;
     new_size = sizeof(CIcon) - sizeof(INTEGER) + mask_data_size + bmap_data_size;
 
     cicon_handle = (CIconHandle)NewHandle(new_size);
@@ -269,8 +269,8 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
     int pmap_data_size;
     CIconPtr cicon;
 
-    cicon = STARH(cicon_handle);
-    cicon_res = STARH(cicon_res_handle);
+    cicon = *cicon_handle;
+    cicon_res = *cicon_res_handle;
 
     BlockMoveData((Ptr)cicon_res, (Ptr)cicon, new_size);
 
@@ -280,17 +280,17 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
 
     pmap_ctab_offset = bmap_data_offset + bmap_data_size;
     tmp_ctab = (CTabPtr)((char *)&cicon_res->iconMaskData + pmap_ctab_offset);
-    pmap_ctab_size = sizeof(ColorTable) + (CW(tmp_ctab->ctSize)
+    pmap_ctab_size = sizeof(ColorTable) + (tmp_ctab->ctSize
                                            * sizeof(ColorSpec));
 
     pmap_data_offset = pmap_ctab_offset + pmap_ctab_size;
-    pmap_data_size = (CW(cicon->iconPMap.rowBytes)
+    pmap_data_size = (cicon->iconPMap.rowBytes
                       & ROWBYTES_VALUE_BITS)
         * height;
 
-    cicon->iconMask.baseAddr = CLC_NULL;
+    cicon->iconMask.baseAddr = nullptr;
 
-    cicon->iconBMap.baseAddr = CLC_NULL;
+    cicon->iconBMap.baseAddr = nullptr;
 
     {
         CTabHandle color_table;
@@ -298,15 +298,15 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
         color_table
             = (CTabHandle)NewHandle(pmap_ctab_size);
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_ctab_offset,
-                      (Ptr)STARH(color_table),
+                      (Ptr)*color_table,
                       pmap_ctab_size);
-        CTAB_SEED_X(color_table) = CL(GetCTSeed());
-        cicon->iconPMap.pmTable = RM(color_table);
+        CTAB_SEED(color_table) = GetCTSeed();
+        cicon->iconPMap.pmTable = color_table;
 
-        cicon->iconPMap.baseAddr = CLC_NULL;
-        cicon->iconData = RM(NewHandle(pmap_data_size));
+        cicon->iconPMap.baseAddr = nullptr;
+        cicon->iconData = NewHandle(pmap_data_size);
         BlockMoveData((Ptr)&cicon_res->iconMaskData + pmap_data_offset,
-                      (Ptr)STARH(MR(cicon->iconData)),
+                      (Ptr)(*cicon->iconData),
                       pmap_data_size);
     }
 
@@ -316,7 +316,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
 void Executor::C_DisposeCIcon(CIconHandle icon)
 {
     DisposeHandle(CICON_DATA(icon));
-    DisposeHandle((Handle)MR(CICON_PMAP(icon).pmTable));
+    DisposeHandle((Handle)CICON_PMAP(icon).pmTable);
     DisposeHandle((Handle)icon);
 }
 
@@ -370,12 +370,12 @@ OSErr Executor::C_GetIconSuite(GUEST<Handle> *icon_suite_return, short res_id,
     int i;
 
     icon_suite = NewHandleClear(sizeof(cotton_suite_layout_t));
-    if(LM(MemErr) != CWC(noErr))
+    if(LM(MemErr) != noErr)
         ICON_RETURN_ERROR(memFullErr);
 
     HLockGuard guard(icon_suite);
 
-    icons = (Handle *)STARH(icon_suite);
+    icons = (Handle *)*icon_suite;
 
     for(i = 0; i < N_SUITE_ICONS; i++)
     {
@@ -384,12 +384,12 @@ OSErr Executor::C_GetIconSuite(GUEST<Handle> *icon_suite_return, short res_id,
             Handle icon;
 
             icon = GetResource(restype_for_icon[i], res_id);
-            if(icon != NULL)
+            if(icon != nullptr)
                 icons[i] = icon;
         }
     }
 
-    *icon_suite_return = RM(icon_suite);
+    *icon_suite_return = icon_suite;
 
     ICON_RETURN_ERROR(noErr);
 }
@@ -399,10 +399,10 @@ OSErr Executor::C_NewIconSuite(GUEST<Handle> *icon_suite_return)
     Handle icon_suite;
 
     icon_suite = NewHandleClear(sizeof(cotton_suite_layout_t));
-    if(LM(MemErr) != CWC(noErr))
+    if(LM(MemErr) != noErr)
         ICON_RETURN_ERROR(memFullErr);
 
-    *icon_suite_return = RM(icon_suite);
+    *icon_suite_return = icon_suite;
 
     ICON_RETURN_ERROR(noErr);
 }
@@ -412,7 +412,7 @@ OSErr Executor::C_AddIconToSuite(Handle icon_data, Handle icon_suite,
 {
     Handle *icons;
 
-    icons = (Handle *)STARH(icon_suite);
+    icons = (Handle *)*icon_suite;
     icons[restype_to_index(type)] = icon_data;
 
     ICON_RETURN_ERROR(noErr);
@@ -423,13 +423,13 @@ OSErr Executor::C_GetIconFromSuite(GUEST<Handle> *icon_data_return,
 {
     Handle *icons, icon_data;
 
-    icons = (Handle *)STARH(icon_suite);
+    icons = (Handle *)*icon_suite;
     icon_data = icons[restype_to_index(type)];
 
-    if(icon_data == NULL)
+    if(icon_data == nullptr)
         ICON_RETURN_ERROR(paramErr);
 
-    *icon_data_return = RM(icon_data);
+    *icon_data_return = icon_data;
     ICON_RETURN_ERROR(noErr);
 }
 
@@ -443,13 +443,13 @@ find_best_icon(bool small_p, int bpp,
     Handle icon_data, icon_mask;
     int best_icon;
 
-    icons = (Handle *)STARH(icon_suite_h);
+    icons = (Handle *)*icon_suite_h;
 
     sized_icons = (small_p
                        ? &icons[small_bw_icon]
                        : &icons[large_bw_icon]);
     icon_mask = *sized_icons;
-    if(icon_mask == NULL)
+    if(icon_mask == nullptr)
     {
         small_p = !small_p;
 
@@ -457,20 +457,20 @@ find_best_icon(bool small_p, int bpp,
                            ? &icons[small_bw_icon]
                            : &icons[large_bw_icon]);
         icon_mask = *sized_icons;
-        if(icon_mask == NULL)
+        if(icon_mask == nullptr)
             ICON_RETURN_ERROR(noMaskFoundErr);
     }
 
     best_icon = icon_for_log2_bpp[ROMlib_log2[bpp]];
 
 #if !defined(LETGCCWAIL)
-    icon_data = NULL;
+    icon_data = nullptr;
 #endif
 
     for(; best_icon > -1; best_icon--)
     {
         icon_data = sized_icons[best_icon];
-        if(icon_data != NULL)
+        if(icon_data != nullptr)
             break;
     }
 
@@ -500,11 +500,11 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
     if(transform != ttNone)
         warning_unimplemented("unhandled icon transform `%d'", transform);
 
-    current_port = thePort;
+    current_port = qdGlobals().thePort;
     little_rect_p = (RECT_WIDTH(rect) < 32
                      && RECT_HEIGHT(rect) < 32);
     port_bpp = (CGrafPort_p(current_port)
-                    ? PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(current_port))
+                    ? toHost(PIXMAP_PIXEL_SIZE(CPORT_PIXMAP(current_port)))
                     : 1);
 
     err = find_best_icon(little_rect_p, port_bpp, icon_suite,
@@ -529,19 +529,19 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
     memset(&icon_rect, '\000', sizeof icon_rect);
 
     icon_size = (little_icon_p ? 16 : 32);
-    icon_rect.bottom = icon_rect.right = CW(icon_size);
+    icon_rect.bottom = icon_rect.right = icon_size;
 
     icon_pm.baseAddr = *icon_data;
-    icon_pm.rowBytes = CW((icon_size * icon_bpp / 8)
-                          | PIXMAP_DEFAULT_ROW_BYTES);
+    icon_pm.rowBytes = (icon_size * icon_bpp / 8)
+                          | PIXMAP_DEFAULT_ROW_BYTES;
     icon_pm.bounds = icon_rect;
-    icon_pm.pixelSize = icon_pm.cmpSize = CW(icon_bpp);
-    icon_pm.cmpCount = CWC(1);
-    icon_pm.pmTable = RM(color_table);
+    icon_pm.pixelSize = icon_pm.cmpSize = icon_bpp;
+    icon_pm.cmpCount = 1;
+    icon_pm.pmTable = color_table;
 
-    mask_bm.baseAddr = RM((Ptr)(char *)STARH(icon_mask)
-                          + icon_size * icon_size / 8);
-    mask_bm.rowBytes = CW(icon_size / 8);
+    mask_bm.baseAddr = (Ptr)(char *)*icon_mask
+                          + icon_size * icon_size / 8;
+    mask_bm.rowBytes = icon_size / 8;
     mask_bm.bounds = icon_rect;
 
     CopyMask((BitMap *)&icon_pm, &mask_bm,
@@ -567,8 +567,8 @@ short Executor::C_GetSuiteLabel(Handle suite)
     short retval;
     cotton_suite_layout_t *suitep;
 
-    suitep = (cotton_suite_layout_t *)STARH(suite);
-    retval = CW(suitep->label);
+    suitep = (cotton_suite_layout_t *)*suite;
+    retval = suitep->label;
     return retval;
 }
 
@@ -577,8 +577,8 @@ OSErr Executor::C_SetSuiteLabel(Handle suite, short label)
     OSErr retval;
     cotton_suite_layout_t *suitep;
 
-    suitep = (cotton_suite_layout_t *)STARH(suite);
-    suitep->label = CW(label);
+    suitep = (cotton_suite_layout_t *)*suite;
+    suitep->label = label;
     retval = noErr;
 
     return retval;
@@ -593,43 +593,43 @@ typedef struct
 static label_info_t labels[7] = {
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\011Essential",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\03Hot",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\013In Progress",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\04Cool",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\010Personal",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\011Project 1",
     },
     {
         {
-            CWC(0), CWC(0), CWC(0),
+            0, 0, 0,
         },
         "\011Project 2",
     },
@@ -678,7 +678,7 @@ OSErr Executor::C_DisposeIconSuite(Handle suite, Boolean dispose_data_p)
         Handle *icons;
         int i;
 
-        icons = (Handle *)STARH(suite);
+        icons = (Handle *)*suite;
         for(i = 0; i < N_SUITE_ICONS; i++)
         {
             Handle icon;

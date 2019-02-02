@@ -9,7 +9,7 @@
 #include <string.h>
 
 #define STANDALONE_IMAGE_H
-#include "rsys/image.h"
+#include "quickdraw/image.h"
 
 /* consume input from o_fp, produce output to o_fp */
 static FILE *i_fp, *o_fp;
@@ -118,9 +118,9 @@ emit_rest(char *map_name)
         {
             fprintf(o_fp, "BitMap %s_%d =\n", map_name, bits[i].bpp);
             fprintf(o_fp, "{\n");
-            fprintf(o_fp, "  NULL,");
-            fprintf(o_fp, "  CWC (%d),\n", bits[i].row_bytes);
-            fprintf(o_fp, "  { CWC (%d), CWC (%d), CWC (%d), CWC (%d) }\n",
+            fprintf(o_fp, "  nullptr,");
+            fprintf(o_fp, "  %d,\n", bits[i].row_bytes);
+            fprintf(o_fp, "  { %d, %d, %d, %d }\n",
                     bounds.top, bounds.left,
                     bounds.bottom, bounds.right);
             fprintf(o_fp, "};\n");
@@ -163,7 +163,7 @@ emit_rest(char *map_name)
             {
                 struct rgb_color *color = &colors[color_i];
 
-                fprintf(o_fp, "        { CWC(%d), CWC(%d), CWC(%d) },\n",
+                fprintf(o_fp, "        { %d, %d, %d },\n",
                         (color->red),
                         (color->green),
                         (color->blue));
@@ -225,7 +225,7 @@ read_string()
     read_white_space();
 
     if(!read_char('"'))
-        return NULL;
+        return nullptr;
 
     size = 64;
     string_base = (char *)xmalloc(size);
@@ -370,7 +370,7 @@ read_hexnum(int *err)
     /* nul-out the invalid character */
     num_base[i] = '\0';
 
-    retval = strtol(num_base, NULL, 16);
+    retval = strtol(num_base, nullptr, 16);
     free(num_base);
 
     return retval;

@@ -5,12 +5,12 @@
 #include "WindowMgr.h"
 
 #define MODULE_NAME CQuickDraw
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
-#define theCPort (STARH(STARH((GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))))
-#define theCPortX ((*STARH((GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))))
+#define theCPort  (**(GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))
+#define theCPortX (**(GUEST<GUEST<CGrafPtr> *> *)SYN68K_TO_US(EM_A5))
 
 enum
 {
@@ -112,7 +112,6 @@ typedef struct Palette
     GUEST<ColorInfo[1]> pmInfo;
 } * PalettePtr;
 
-#define CI_USAGE_TYPE_BITS_X (CWC(0xF))
 enum
 {
     CI_USAGE_TYPE_BITS = (0xF),
@@ -146,7 +145,7 @@ typedef GUEST<PalettePtr> *PaletteHandle;
    and not a graf port or cgraf port */
 #define GRAPHICS_WORLD_P(maybe_graphics_world) \
     (CGrafPort_p(maybe_graphics_world)         \
-     && CPORT_VERSION_X(maybe_graphics_world) & GW_FLAG_BIT_X)
+     && CPORT_VERSION(maybe_graphics_world) & GW_FLAG_BIT)
 
 #define GW_CPORT(graphics_world) ((CGrafPtr)(graphics_world))
 
@@ -614,5 +613,17 @@ PASCAL_SUBTRAP(GetPixMapInfo, 0xA831, 0x0801, Pack15);
 
 extern PicHandle C_OpenCPicture(OpenCPicParams *newheaderp);
 PASCAL_TRAP(OpenCPicture, 0xAA20);
+
+static_assert(sizeof(ITab) == 8);
+static_assert(sizeof(SProcRec) == 8);
+static_assert(sizeof(CProcRec) == 8);
+static_assert(sizeof(GDevice) == 62);
+static_assert(sizeof(ColorInfo) == 16);
+static_assert(sizeof(Palette) == 32);
+static_assert(sizeof(ReqListRec) == 4);
+static_assert(sizeof(OpenCPicParams) == 24);
+static_assert(sizeof(CommentSpec) == 4);
+static_assert(sizeof(FontSpec) == 26);
+static_assert(sizeof(PictInfo) == 104);
 }
 #endif /* _CQUICKDRAW_H_ */

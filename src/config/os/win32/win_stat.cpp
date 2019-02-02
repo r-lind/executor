@@ -6,16 +6,14 @@
    avoid collisions.  Unfortunately, it didn't have the property that
    the same directory would have the same name between runs of Executor */
 
-#define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
-
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <windows.h>
 
 #include <ctype.h>
 #include <string.h>
 
-#include "rsys/error.h"
+#include "error/error.h"
 
 #include "win_stat_private.h"
 #include "win_stat.h"

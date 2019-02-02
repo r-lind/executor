@@ -1,0 +1,184 @@
+#if !defined(_romlib_float_h_)
+#define _romlib_float_h_
+
+/*
+ * Copyright 1995 by Abacus Research and Development, Inc.
+ * All rights reserved.
+ *
+
+ */
+
+#include <syn68k_public.h>
+#include "SANE.h"
+#include <float.h>
+#include <math.h>
+
+namespace Executor
+{
+const LowMemGlobal<Byte[6]> macfpstate { 0xA4A }; // unknown ToolEqu.a (true-b);
+
+#define NATIVE_COMP_IS_NAN(c) \
+    ((c).val == (signed long long)0x8000000000000000ULL)
+
+/* Macros for manipulating the sgn and exponent fields of an x80_t. */
+
+#define GET_X80_SGN(x) ((x)->sgn_and_exp >> 15)
+#define SET_X80_SGN(x, v) ((x)->sgn_and_exp = ((x)->sgn_and_exp & 0x7FFF) | (v << 15))
+#define GET_X80_EXP(x) ((x)->sgn_and_exp & 0x7FFF)
+#define SET_X80_EXP(x, v) ((x)->sgn_and_exp = ((x)->sgn_and_exp & 0x8000) | v)
+
+
+/* This is meant to represent an IEEE FP value with 80 bits of precision.
+ * Unfortunately, there may be no C type with that many bits available; in
+ * this case, we must compile -O and hope all computations are performed in FP
+ * registers so that no precision is lost.
+ */
+#if 1 /* long double seems to work */
+typedef long double ieee_t;
+#else
+typedef double ieee_t;
+#endif
+
+/* 68k 96 bit IEEE FP memory representation. */
+#if defined(mc68000)
+typedef union {
+    struct
+    {
+        GUEST_STRUCT;
+        GUEST<unsigned short> sgn_and_exp;
+        GUEST<unsigned short> zero;
+        GUEST<unsigned long long> man;
+    };
+    ieee_t val;
+} m68k_x96_t;
+#endif
+
+/* i386 80 bit IEEE FP memory representation. */
+#if defined(i386)
+struct PACKED i386_x80_t
+{
+    uint32_t man_lo; /* Little endian. */
+    uint32_t man_hi; /* Little endian. */
+    uint16_t sgn_and_exp; /* Little endian. */
+};
+#endif
+
+#if defined(__alpha)
+typedef struct PACKED
+{
+    ULONGINT man_lo;
+    ULONGINT man_hi : 20;
+    ULONGINT exp : 11;
+    ULONGINT sgn : 1;
+} alpha_x64_t;
+#endif
+
+/* Define asm constants for various CC bit combinations resulting from
+ * compares.
+ */
+
+/* m68k "double". */
+typedef union {
+    struct
+    {
+        ULONGINT hi;
+        ULONGINT lo;
+    } hilo;
+    double d;
+} f64_t;
+
+typedef f64_t native_f64_t;
+
+/* m68k "float". */
+typedef union {
+    ULONGINT n;
+    float f;
+} f32_t;
+
+typedef f32_t native_f32_t;
+
+#define OPCODE_MASK 0x3F00
+
+#if defined(NEED_LOGB)
+#if defined(HAVE_LOG2)
+#define logb(x) log2(x)
+#else /* !HAVE_LOG2 */
+
+#if !defined(M_LOG2E)
+#define M_LOG2E 1.4426950408889634074
+#endif
+
+#define logb ROMlib_logb /* Gross hack to avoid warnings w/djgpp. */
+#define ROMlib_logb(n) (log(n) * M_LOG2E)
+#endif /* !HAVE_LOG2 */
+#endif /* NEED_LOGB */
+
+#define DECLAREIN() ieee_t in
+#define DECLAREIN2() ieee_t in1, in2
+#define DECLAREIN2OUT() ieee_t in1, in2, out
+#define DECLAREINOUT() ieee_t in, out
+
+#endif /* Not _romlib_float_h_ */
+
+#if !defined(_romlib_float_h_2_)
+
+#if !defined(EXTERN_INLINE)
+#define EXTERN_INLINE extern inline
+#endif
+
+#define ALWAYS_INLINE __attribute__((always_inline))
+
+#if defined(NEED_RINT)
+#define rint ROMlib_rint /* Gross hack to avoid warnings w/djgpp. */
+EXTERN_INLINE double
+rint(double n) ALWAYS_INLINE;
+
+EXTERN_INLINE double
+rint(double n)
+{
+#if defined(i386)
+    asm("frndint"
+        : "=t"(n)
+        : "0"(n));
+#else
+#error "You're out of luck; you need to write rint!"
+#endif
+    return n;
+}
+#endif /* NEED_RINT */
+
+#if defined(NEED_SCALB)
+#define scalb ROMlib_scalb /* Gross hack to avoid warnings w/djgpp. */
+EXTERN_INLINE double
+scalb(double x, int n) ALWAYS_INLINE;
+
+EXTERN_INLINE double
+scalb(double x, int n)
+{
+    /* #warning scalb is implemented poorly */
+    warning_unimplemented("poorly implemented");
+    return x * pow(2.0, n);
+}
+#endif /* NEED_SCALB */
+
+#if defined(NEED_LOG1P)
+#define log1p ROMlib_log1p /* Gross hack to avoid warnings w/djgpp. */
+EXTERN_INLINE double
+log1p(double x) ALWAYS_INLINE;
+
+EXTERN_INLINE double
+log1p(double x)
+{
+    /* #warning log1p is implemented poorly */
+    /* This isn't technically correct, since it will fail for small x. */
+    return log(x + 1);
+}
+#endif /* NEED_LOG1P */
+
+#define _romlib_float_h_2_
+
+static_assert(sizeof(f64_t) == 8);
+static_assert(sizeof(f32_t) == 4);
+static_assert(sizeof(native_f32_t) == 4);
+}
+#endif

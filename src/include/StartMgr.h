@@ -42,6 +42,10 @@ const LowMemGlobal<Byte> CPUFlag { 0x12F }; // StartMgr IMV-348 (true-b);
 const LowMemGlobal<INTEGER> TimeDBRA { 0xD00 }; // StartMgr IMV (false);
 const LowMemGlobal<INTEGER> TimeSCCDB { 0xD02 }; // StartMgr IMV (false);
 const LowMemGlobal<INTEGER> TimeSCSIDB { 0xDA6 }; // StartMgr IMV (false);
+
+static_assert(sizeof(DefStartRec) == 4);
+static_assert(sizeof(DefVideoRec) == 2);
+static_assert(sizeof(DefOSRec) == 2);
 }
 
 #endif

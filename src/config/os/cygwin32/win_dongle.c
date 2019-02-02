@@ -4,7 +4,7 @@
 
 #define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "rsys/error.h"
 
 #include <windows.h>
@@ -170,7 +170,7 @@ sentinel_dongle_query(uint32_t *valuep)
                 if(status == SENTPRO_SUCCESS)
                 {
                     status = 0;
-                    *valuep = CL((uint32_t)word);
+                    *valuep = (uint32_t)word;
                 }
             }
         }
@@ -185,9 +185,9 @@ hasp_dongle_query(hasp_param_block *valuep)
 {
     int retval;
 
-    if(valuep->magic != CLC(HASP_MAGIC))
+    if(valuep->magic != HASP_MAGIC)
         retval = HASP_BAD_MAGIC_ERROR;
-    else if(CL(valuep->size) < sizeof(hasp_param_block))
+    else if(valuep->size < sizeof(hasp_param_block))
         retval = HASP_BAD_LENGTH_ERROR;
     else
     {
@@ -211,15 +211,15 @@ hasp_dongle_query(hasp_param_block *valuep)
             int32_t p3;
             int32_t p4;
 
-            service = CL(valuep->Service);
-            seed = CL(valuep->SeedCode);
-            lptnum = CL(valuep->LptNum);
-            pass1 = CL(valuep->Password1);
-            pass2 = CL(valuep->Password2);
-            p1 = CL(valuep->Par1);
-            p2 = CL(valuep->Par2);
-            p3 = CL(valuep->Par3);
-            p4 = CL(valuep->Par4);
+            service = valuep->Service;
+            seed = valuep->SeedCode;
+            lptnum = valuep->LptNum;
+            pass1 = valuep->Password1;
+            pass2 = valuep->Password2;
+            p1 = valuep->Par1;
+            p2 = valuep->Par2;
+            p3 = valuep->Par3;
+            p4 = valuep->Par4;
             if(service == ReadBlock || service == WriteBlock)
                 p4 = (int32_t)SYN68K_TO_US(p4);
 
@@ -230,30 +230,30 @@ hasp_dongle_query(hasp_param_block *valuep)
             switch(service)
             {
                 case IsHasp:
-                    valuep->Par1 = CL(p1);
-                    valuep->Par3 = CL(p3);
+                    valuep->Par1 = p1;
+                    valuep->Par3 = p3;
                     break;
                 case HaspCode:
                 default:
-                    valuep->Par1 = CL(p1);
-                    valuep->Par2 = CL(p2);
-                    valuep->Par3 = CL(p3);
-                    valuep->Par4 = CL(p4);
+                    valuep->Par1 = p1;
+                    valuep->Par2 = p2;
+                    valuep->Par3 = p3;
+                    valuep->Par4 = p4;
                     break;
                 case HaspStatus:
                 case HaspID:
-                    valuep->Par1 = CL(p1);
-                    valuep->Par2 = CL(p2);
-                    valuep->Par3 = CL(p3);
+                    valuep->Par1 = p1;
+                    valuep->Par2 = p2;
+                    valuep->Par3 = p3;
                     break;
                 case ReadWord:
-                    valuep->Par2 = CL(p2);
-                    valuep->Par3 = CL(p3);
+                    valuep->Par2 = p2;
+                    valuep->Par3 = p3;
                     break;
                 case WriteWord:
                 case ReadBlock:
                 case WriteBlock:
-                    valuep->Par3 = CL(p3);
+                    valuep->Par3 = p3;
                     break;
             }
             retval = HASP_NO_ERROR;
@@ -268,9 +268,9 @@ dll_query(dll_param_block *dp)
 {
     int retval;
 
-    if(dp->magic != CLC(DLL_MAGIC))
+    if(dp->magic != DLL_MAGIC)
         retval = DLL_BAD_MAGIC_ERROR;
-    else if(CL(dp->size) < sizeof *dp)
+    else if(dp->size < sizeof *dp)
         retval = DLL_BAD_LENGTH_ERROR;
     else
     {
@@ -280,9 +280,9 @@ dll_query(dll_param_block *dp)
         HINSTANCE dll_lib;
         void (*funcp)(void *arg);
 
-        dll_name = MR(dp->dll_name);
-        func_name = MR(dp->function_name);
-        arg = MR(dp->arg_to_function);
+        dll_name = dp->dll_name;
+        func_name = dp->function_name;
+        arg = dp->arg_to_function;
         dll_lib = LoadLibrary(dll_name);
         if(!dll_lib)
             retval = DLL_NO_LIBRARY_ERROR;
@@ -315,12 +315,12 @@ dongle_query(uint32_t *valuep)
 
     switch(*valuep)
     {
-        case CLC(HASP_TYPE):
+        case HASP_TYPE:
             warning_trace_info("hasp type");
             retval = hasp_dongle_query((hasp_param_block *)valuep);
             break;
 
-        case CLC(DLL_TYPE):
+        case DLL_TYPE:
             warning_trace_info("dll type");
             retval = dll_query((dll_param_block *)valuep);
             break;

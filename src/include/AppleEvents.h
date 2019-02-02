@@ -12,7 +12,7 @@
 #include "NotifyMgr.h"
 
 #define MODULE_NAME AppleEvents
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -31,11 +31,11 @@ typedef struct AEDesc
 /* ### hack, delete */
 typedef AEDesc descriptor_t;
 
-#define DESC_TYPE_X(desc) ((desc)->descriptorType)
-#define DESC_DATA_X(desc) ((desc)->dataHandle)
+#define DESC_TYPE(desc) ((desc)->descriptorType)
+#define DESC_DATA(desc) ((desc)->dataHandle)
 
-#define DESC_TYPE(desc) (CL(DESC_TYPE_X(desc)))
-#define DESC_DATA(desc) (MR(DESC_DATA_X(desc)))
+
+
 
 typedef struct AEKeyDesc
 {
@@ -45,9 +45,9 @@ typedef struct AEKeyDesc
 
 typedef AEKeyDesc key_desc_t;
 
-#define KEY_DESC_KEYWORD_X(keydesc) ((keydesc)->descKey)
+#define KEY_DESC_KEYWORD(keydesc) ((keydesc)->descKey)
 
-#define KEY_DESC_KEYWORD(keydesc) (CL(KEY_DESC_KEYWORD_X(keydesc)))
+
 #define KEY_DESC_CONTENT(keydesc) ((keydesc)->descContent)
 
 typedef AEDesc AEAddressDesc;
@@ -161,16 +161,11 @@ typedef struct AE_hdlr_table_elt
     GUEST<int32_t> pad_2;
 } AE_hdlr_table_elt_t;
 
-#define AE_TABLE_ELTS(table) (HxX(table, elts))
+#define AE_TABLE_ELTS(table) ((*table)->elts)
 
-#define AE_TABLE_N_ELTS_X(table) (HxX(table, n_elts))
-#define AE_TABLE_N_ALLOCATED_BYTES_X(table) \
-    (HxX(table, n_allocated_bytes))
-
-#define AE_TABLE_N_ELTS(table) \
-    (CL(AE_TABLE_N_ELTS_X(table)))
+#define AE_TABLE_N_ELTS(table) ((*table)->n_elts)
 #define AE_TABLE_N_ALLOCATED_BYTES(table) \
-    (CL(AE_TABLE_N_ALLOCATED_BYTES_X(table)))
+    ((*table)->n_allocated_bytes)
 
 typedef struct AE_hdlr_table
 {
@@ -568,6 +563,17 @@ extern OSErr C_AESetObjectCallbacks(ProcPtr myCompareProc,
                                                 ProcPtr myAdjustMarksProc,
                                                 ProcPtr myGetErrDescProc);
 PASCAL_SUBTRAP(AESetObjectCallbacks, 0xA816, 0x0E35, Pack8);
+
+static_assert(sizeof(AEArrayData) == 12);
+static_assert(sizeof(AEDesc) == 8);
+static_assert(sizeof(AEKeyDesc) == 12);
+static_assert(sizeof(AE_hdlr_t) == 8);
+static_assert(sizeof(AE_hdlr_selector_t) == 8);
+static_assert(sizeof(AE_hdlr_table_elt_t) == 24);
+static_assert(sizeof(AE_hdlr_table_t) == 52);
+static_assert(sizeof(AE_zone_tables_t) == 56);
+static_assert(sizeof(AE_info_t) == 596);
+static_assert(sizeof(AEArrayData) == 12);
 }
 
 #endif /* ! _AppleEvents_H_ */

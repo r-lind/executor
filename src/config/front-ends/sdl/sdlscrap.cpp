@@ -7,24 +7,16 @@
 
 /* Handle clipboard text and data in arbitrary formats */
 
+#include "sdl.h"
 #include <stdio.h>
 #include <limits.h>
 
 #include "syswm_vars.h"
 #include "sdl_mem.h"
 
-#define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
+#include "base/common.h"
 
-#include "rsys/common.h"
-
-#include "rsys/error.h"
-
-namespace Executor
-{
-// ### FIXME: clean up headers.
-extern void PutScrapX(OSType type, LONGINT length, char *p, int scrap_cnt);
-extern LONGINT GetScrapX(OSType type, Handle h);
-}
+#include "error/error.h"
 
 using namespace Executor;
 
@@ -116,12 +108,12 @@ surface_from_dib(void *lp)
 #if SDL_MAJOR_VERSION == 0 && SDL_MINOR_VERSION < 9
                SDL_MapSurface(retval, new_surface->format) != 0 ||
 #endif
-               SDL_BlitSurface(retval, NULL, new_surface, NULL) != 0)
+               SDL_BlitSurface(retval, nullptr, new_surface, nullptr) != 0)
             {
                 if(new_surface)
                 {
                     SDL_FreeSurface(new_surface);
-                    new_surface = NULL;
+                    new_surface = nullptr;
                 }
             }
             SDL_FreeSurface(retval);
@@ -138,7 +130,7 @@ surface_from_dib(void *lp)
     BITMAPINFOHEADER *bp;
     SDL_Surface *retval;
 
-    retval = NULL;
+    retval = nullptr;
     bp = lp;
     switch(bp->biBitCount)
     {
@@ -226,7 +218,7 @@ surface_from_dib(void *lp)
 #endif
 #endif
 
-#if defined(SDL) && defined(LINUX) /* DON'T USE THIS CODE FOR CYGWIN32! */
+#if defined(LINUX) /* DON'T USE THIS CODE FOR CYGWIN32! */
 
 #include "sdlscrap.h"
 
@@ -454,12 +446,12 @@ put_scrap(int type, int srclen, char *src)
     char *dst;
 
     format = convert_format(type);
-    dstlen = convert_data(type, NULL, src, srclen);
+    dstlen = convert_data(type, nullptr, src, srclen);
 
 #if defined(X11_SCRAP)
     /* * */
     dst = (char *)alloca(dstlen);
-    if(dst != NULL)
+    if(dst != nullptr)
     {
         convert_data(type, dst, src, srclen);
         XChangeProperty(SDL_Display, DefaultRootWindow(SDL_Display),
@@ -476,7 +468,7 @@ put_scrap(int type, int srclen, char *src)
         HANDLE hMem;
 
         hMem = GlobalAlloc((GMEM_MOVEABLE | GMEM_DDESHARE), dstlen);
-        if(hMem != NULL)
+        if(hMem != nullptr)
         {
             dst = (char *)GlobalLock(hMem);
             convert_data(type, dst, src, srclen);
@@ -551,9 +543,9 @@ get_scrap(int type, int *dstlen, Handle dst)
             if(seln_type == format)
             {
                 char *mem;
-                *dstlen = convert_scrap(type, NULL, src, nbytes);
+                *dstlen = convert_scrap(type, nullptr, src, nbytes);
                 mem = sdl_ReallocHandle(dst, *dstlen);
-                if(mem == NULL)
+                if(mem == nullptr)
                     *dstlen = -1;
                 else
                     convert_scrap(type, mem, src, nbytes);
@@ -570,13 +562,13 @@ get_scrap(int type, int *dstlen, Handle dst)
         char *src;
 
         hMem = GetClipboardData(format);
-        if(hMem != NULL)
+        if(hMem != nullptr)
         {
             char *mem;
             src = (char *)GlobalLock(hMem);
-            *dstlen = convert_scrap(type, NULL, src, 0);
+            *dstlen = convert_scrap(type, nullptr, src, 0);
             mem = sdl_ReallocHandle(dst, *dstlen);
-            if(mem == NULL)
+            if(mem == nullptr)
                 *dstlen = -1;
             else
                 convert_scrap(type, mem, src, 0);
@@ -638,14 +630,14 @@ void export_scrap(const SDL_Event *event)
 }
 
 /* For Executor compatibility */
-LONGINT Executor::GetScrapX(LONGINT type, Executor::Handle h)
+LONGINT SDLVideoDriver::getScrap(LONGINT type, Executor::Handle h)
 {
     int scraplen;
 
     get_scrap(type, &scraplen, h);
     return (scraplen);
 }
-void Executor::PutScrapX(LONGINT type, LONGINT length, char *p, int scrap_count)
+void SDLVideoDriver::putScrap(LONGINT type, LONGINT length, char *p, int scrap_count)
 {
     put_scrap(type, length, p);
 }
@@ -661,11 +653,11 @@ we_lost_clipboard(void)
     return false; /* TODO */
 }
 
-LONGINT Executor::GetScrapX(LONGINT type, Handle h)
+LONGINT SDLVideoDriver::getScrap(LONGINT type, Handle h)
 {
     return -1; /* TODO */
 }
-void Executor::PutScrapX(LONGINT type, LONGINT length, char *p, int scrap_count)
+void SDLVideoDriver::putScrap(LONGINT type, LONGINT length, char *p, int scrap_count)
 {
     /* TODO */
 }

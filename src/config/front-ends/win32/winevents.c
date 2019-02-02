@@ -211,8 +211,8 @@ LONG CALLBACK AppWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
 
         case WM_MOUSEMOVE:
-            MouseLocation.h = CW(LOWORD(lParam));
-            MouseLocation.v = CW(HIWORD(lParam));
+            MouseLocation.h = LOWORD(lParam);
+            MouseLocation.v = HIWORD(lParam);
             adb_apeiron_hack(false);
             break;
 
@@ -250,8 +250,8 @@ LONG CALLBACK AppWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     w32_clover_p = 0;
                 }
                 when = TickCount();
-                where.h = CW(MouseLocation.h);
-                where.v = CW(MouseLocation.v);
+                where.h = MouseLocation.h;
+                where.v = MouseLocation.v;
                 button_state = Keyboard_State();
                 if(w32_modifier_p(virt, &whichmod))
                     button_state &= ~whichmod;

@@ -10,7 +10,7 @@
  * out these routines is much easier than rewriting the other routines.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "rsys/lockunlock.h"
 #include "rsys/slash.h"
 
@@ -48,65 +48,16 @@ int Uaccess(const char *path, int mode)
     return access(path, mode);
 }
 
-int Uchdir(const char *path)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return chdir(path);
-}
-
-int Uchmod(const char *path, int mode)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return chmod(path, mode);
-}
-
-int Ucreat(const char *path, int mode)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return creat(path, mode);
-}
-
 FILE *Ufopen(const char *path, const char *type)
 {
     path = DOUBLE_SLASH_REMOVE(path);
     return fopen(path, type);
 }
 
-int Ulink(const char *path, const char *newpath)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    newpath = DOUBLE_SLASH_REMOVE(newpath);
-    return link(path, newpath);
-}
-
-int Umkdir(const char *path, int mode)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return mkdir(path
-#if !defined(WIN32)
-                 ,
-                 mode
-#endif
-                 );
-}
-
 DIR *Uopendir(const char *path)
 {
     path = DOUBLE_SLASH_REMOVE(path);
     return opendir((char *)path);
-}
-
-int Urename(const char *path, const char *newpath)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    newpath = DOUBLE_SLASH_REMOVE(newpath);
-    return rename(path, newpath);
-}
-
-int Urmdir(const char *path)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return rmdir(path);
 }
 
 int Ustat(const char *path, struct stat *buf)
@@ -135,29 +86,6 @@ int Ustat(const char *path, struct stat *buf)
     }
 #endif
     return retval;
-}
-
-int Ustatfs(const char *path, struct statfs *buf)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return statfs(path, buf);
-}
-
-int Uunlink(const char *path)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return unlink(path);
-}
-
-int Uutimes(const char *path, struct timeval tvp[2])
-{
-#if 0
-  path = DOUBLE_SLASH_REMOVE (path);
-  return utimes(path, tvp);
-#else
-    // FIXME: #warning "Blowing off utimes"
-    return -1;
-#endif
 }
 
 #else

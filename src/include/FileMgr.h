@@ -2,10 +2,10 @@
 #define _FILEMGR_H_
 
 #include "ExMacTypes.h"
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 
 #define MODULE_NAME FileMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990 by Abacus Research and Development, Inc.
@@ -622,12 +622,15 @@ NOTRAP_FUNCTION2(RstFLock);
 extern OSErr Rename(StringPtr filen, INTEGER vrn,
                     StringPtr newf);
 NOTRAP_FUNCTION2(Rename);
-extern unsigned char ROMlib_fromhex(unsigned char c);
-extern INTEGER ROMlib_UNIX7_to_Mac(char *name, INTEGER length);
-extern void FInitQueue(void);
-extern QHdrPtr GetFSQHdr(void);
-extern QHdrPtr GetVCBQHdr(void);
-extern QHdrPtr GetDrvQHdr(void);
+extern void C_FInitQueue(void);
+PASCAL_TRAP(FInitQueue, 0xA016);
+extern QHdrPtr C_GetFSQHdr(void);
+NOTRAP_FUNCTION(GetFSQHdr);
+extern QHdrPtr C_GetVCBQHdr(void);
+NOTRAP_FUNCTION(GetVCBQHdr);
+extern QHdrPtr C_GetDrvQHdr(void);
+NOTRAP_FUNCTION(GetDrvQHdr);
+
 extern OSErr GetVInfo(INTEGER drv, StringPtr voln,
                       GUEST<INTEGER> *vrn, GUEST<LONGINT> *freeb);
 extern OSErr GetVRefNum(INTEGER prn, GUEST<INTEGER> *vrn);
@@ -817,8 +820,8 @@ FILE_SUBTRAP(PBHCopyFile, HParmBlkPtr, 0xA260, 0x36, FSDispatch);
 extern OSErr PBHMoveRename(HParmBlkPtr pb, BOOLEAN a);
 FILE_SUBTRAP(PBHMoveRename, HParmBlkPtr, 0xA260, 0x37, FSDispatch);
 
-extern OSErr OpenDeny(HParmBlkPtr pb, BOOLEAN a);
-FILE_SUBTRAP(OpenDeny, HParmBlkPtr, 0xA260, 0x38, FSDispatch);
+extern OSErr PBHOpenDeny(HParmBlkPtr pb, BOOLEAN a);
+FILE_SUBTRAP(PBHOpenDeny, HParmBlkPtr, 0xA260, 0x38, FSDispatch);
 
 /* prototypes for the high level filesystem dispatch traps */
 DISPATCHER_TRAP(HighLevelFSDispatch, 0xAA52, D0<0xF>);
@@ -886,7 +889,27 @@ NOTRAP_FUNCTION2(HOpenDF);
 extern OSErr GetWDInfo(INTEGER wd, GUEST<INTEGER> *vrefp, GUEST<LONGINT> *dirp,
                        GUEST<LONGINT> *procp);
 
-
-
+static_assert(sizeof(FInfo) == 16);
+static_assert(sizeof(FXInfo) == 16);
+static_assert(sizeof(DInfo) == 16);
+static_assert(sizeof(DXInfo) == 16);
+static_assert(sizeof(IOParam) == 50);
+static_assert(sizeof(FileParam) == 80);
+static_assert(sizeof(VolumeParam) == 64);
+static_assert(sizeof(CntrlParam) == 50);
+static_assert(sizeof(ParamBlockRec) == 80);
+static_assert(sizeof(HIoParam) == 50);
+static_assert(sizeof(HFileParam) == 80);
+static_assert(sizeof(HVolumeParam) == 122);
+static_assert(sizeof(HParamBlockRec) == 122);
+static_assert(sizeof(HFileInfo) == 108);
+static_assert(sizeof(DirInfo) == 104);
+static_assert(sizeof(CInfoPBRec) == 108);
+static_assert(sizeof(CMovePBRec) == 52);
+static_assert(sizeof(WDPBRec) == 52);
+static_assert(sizeof(FCBPBRec) == 62);
+static_assert(sizeof(VCB) == 178);
+static_assert(sizeof(DrvQEl) == 16);
+static_assert(sizeof(FSSpec) == 70);
 }
 #endif /* _FILEMGR_H_ */

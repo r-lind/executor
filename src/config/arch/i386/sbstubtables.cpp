@@ -2,9 +2,9 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
-#include "rsys/srcblt.h"
-#include "rsys/vdriver.h"
+#include "base/common.h"
+#include "quickdraw/srcblt.h"
+#include "vdriver/vdriver.h"
 #include "src-blitters.h"
 
 #if !defined(USE_PORTABLE_SRCBLT)

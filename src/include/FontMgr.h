@@ -11,7 +11,7 @@
 #include "QuickDraw.h"
 
 #define MODULE_NAME FontMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -29,19 +29,8 @@ enum
     toronto = 9,
     cairo = 11,
     losAngeles = 12,
-};
-
-#if !defined(NEXT)
-enum
-{
     times = 20,
 };
-#else /* NEXT */
-enum
-{
-    timesFont = 20,
-};
-#endif /* NEXT */
 
 enum
 {
@@ -265,5 +254,12 @@ extern Boolean C_GetPreserveGlyph(void);
 PASCAL_SUBTRAP(GetPreserveGlyph, 0xA854, 0x000B, FontDispatch);
 extern OSErr C_FlushFonts(void);
 PASCAL_SUBTRAP(FlushFonts, 0xA854, 0x000C, FontDispatch);
+
+static_assert(sizeof(FMetricRec) == 20);
+static_assert(sizeof(FamRec) == 52);
+static_assert(sizeof(WidthTable) == 1072);
+static_assert(sizeof(FMInput) == 16);
+static_assert(sizeof(FMOutput) == 26);
+static_assert(sizeof(FontRec) == 26);
 }
 #endif /* _FONTMGR_H_ */

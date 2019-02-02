@@ -19,7 +19,7 @@
  * to store our locks.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "MemoryMgr.h"
 
@@ -189,7 +189,7 @@ find_fd_start_count_helper(int fd, uint32_t start_byte, uint32_t count)
     int i;
     lock_entry_t *retval;
 
-    retval = NULL;
+    retval = nullptr;
     for(i = 0; !retval && i < n_entries; ++i)
     {
         if(entries[i].fd == fd && entries[i].start_byte == start_byte)

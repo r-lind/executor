@@ -12,7 +12,7 @@
 #include "FileMgr.h"
 
 #define MODULE_NAME DeviceMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Note the structure below is similar to that presented on IM-188,
@@ -172,5 +172,7 @@ NOTRAP_FUNCTION2(KillIO);
 extern DCtlHandle GetDCtlEntry(INTEGER rn);
 NOTRAP_FUNCTION2(GetDCtlEntry);
 
+static_assert(sizeof(ramdriver) == 20);
+static_assert(sizeof(DCtlEntry) == 40);
 }
 #endif /* __DEVICEMGR__ */

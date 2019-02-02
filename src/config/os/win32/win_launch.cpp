@@ -2,19 +2,18 @@
  * Development, Inc.  All rights reserved.
  */
 
-//#define USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES
-
-//#include "rsys/common.h"
-//#include "rsys/error.h"
+//#include "base/common.h"
+//#include "error/error.h"
 
 #include <windows.h>
 #include <stdio.h>
+#include <malloc.h>
 
-#include "sdl2_hwnd.h"
+//#include "sdl2_hwnd.h"
 
-using namespace Executor;
+//using namespace Executor;
 /*
- * returns number of characters written (or needed if bufp is NULL).
+ * returns number of characters written (or needed if bufp is nullptr).
  */
 
 static int
@@ -76,6 +75,7 @@ enum
 
 int ROMlib_launch_native_app(int n_filenames, char **filenames)
 {
+#if 0
     HINSTANCE hi;
     int buf_len;
     char *command_buf;
@@ -85,15 +85,17 @@ int ROMlib_launch_native_app(int n_filenames, char **filenames)
     command_buf = (char *)alloca(buf_len);
     sprintf(command_buf, "%s%s", filenames[0], COMMAND_SUFFIX);
 
-    buf_len = construct_command_line(NULL, n_filenames - 1, filenames + 1,
+    buf_len = construct_command_line(nullptr, n_filenames - 1, filenames + 1,
                                      DOCUMENT_SUFFIX);
     args_buf = (char *)alloca(buf_len);
     construct_command_line(args_buf, n_filenames - 1, filenames + 1,
                            DOCUMENT_SUFFIX);
     slash_replace(command_buf);
     slash_replace(args_buf);
-    hi = ShellExecute(getMainSDLWindow(), NULL, command_buf, args_buf, NULL,
+    hi = ShellExecute(getMainSDLWindow(), nullptr, command_buf, args_buf, nullptr,
                       SW_SHOWNORMAL);
 
     return ((intptr_t)hi > 32 ? noErr : paramErr);
+#endif
+    return paramErr;
 }

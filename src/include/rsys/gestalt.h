@@ -1,3 +1,8 @@
+/*
+ * Copyright 1996-1999 by Abacus Research and Development, Inc.
+ * All rights reserved.
+ *
+ */
 #if !defined(_RSYS_GESTALT_H_)
 #define _RSYS_GESTALT_H_
 
@@ -5,15 +10,10 @@
 #include <rsys/macros.h>
 
 #define MODULE_NAME rsys_gestalt
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
-#if defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
-typedef uint32_t OSType;
-typedef uint32_t OSErr;
-#endif
-
 enum
 {
     DONGLE_GESTALT = 0xb7d20e84,
@@ -29,14 +29,6 @@ enum
 {
     gestaltGhostScriptVersion = FOURCC('g', 'o', 's', 't')
 };
-
-#if !defined(USE_WINDOWS_NOT_MAC_TYPEDEFS_AND_DEFINES)
-/*
- * Copyright 1996-1999 by Abacus Research and Development, Inc.
- * All rights reserved.
- *
-
- */
 
 /* Executor Version as string */
 enum
@@ -67,6 +59,5 @@ extern void gestalt_set_system_version(uint32_t version);
 extern void gestalt_set_memory_size(uint32_t size);
 extern void gestalt_set_cpu_type(uint32_t type);
 
-#endif
 }
 #endif /* !_RSYS_GESTALT_H_ */

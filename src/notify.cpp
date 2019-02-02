@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "OSUtil.h"
 #include "NotifyMgr.h"
 #include "rsys/hook.h"
@@ -31,9 +31,9 @@ OSErr Executor::NMInstall(NMRecPtr nmptr)
    * really irritating to use.
    */
     SysBeep(5);
-    if(MR(nmptr->nmResp))
+    if(nmptr->nmResp)
     {
-        if(guest_cast<LONGINT>(nmptr->nmResp) == CLC(-1))
+        if(guest_cast<LONGINT>(nmptr->nmResp) == -1)
             NMRemove(nmptr);
         else
         {
@@ -47,7 +47,7 @@ OSErr Executor::NMInstall(NMRecPtr nmptr)
             savea0 = EM_A0;
             savea1 = EM_A1;
             PUSHADDR(US_TO_SYN68K(nmptr));
-            CALL_EMULATOR(CL(guest_cast<uint32_t>(nmptr->nmResp)));
+            CALL_EMULATOR(guest_cast<uint32_t>(nmptr->nmResp));
             EM_D0 = saved0;
             EM_D1 = saved1;
             EM_D2 = saved2;

@@ -4,7 +4,7 @@
 
 /* screen-dump.c; dump the mac screen to a tiff file */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <stdarg.h>
 
@@ -12,14 +12,15 @@
 #include "CQuickDraw.h"
 #include "MemoryMgr.h"
 
-#include "rsys/cquick.h"
-#include "rsys/mman.h"
-#include "rsys/tempalloc.h"
-#include "rsys/prefs.h"
+#include "quickdraw/cquick.h"
+#include "mman/mman.h"
+#include "mman/tempalloc.h"
+#include "prefs/prefs.h"
 #include "rsys/uniquefile.h"
-#include "rsys/notmac.h"
-#include "rsys/vdriver.h"
+#include "file/file.h"
+#include "vdriver/vdriver.h"
 #include "rsys/screen-dump.h"
+#include "rsys/paths.h"
 
 using namespace Executor;
 
@@ -74,7 +75,7 @@ ifd_add_entry(struct ifd *ifd, int tag, int type, ...)
     switch(type)
     {
         case SHORT:
-            *(int16_t *)(&current_entry->value_offset) = (int16_t)va_arg(ap, int32_t);
+            current_entry->value_offset_16 = (int16_t)va_arg(ap, int32_t);
             break;
         case LONG:
             current_entry->value_offset = va_arg(ap, int32_t);
@@ -136,7 +137,7 @@ dump_indirect_pm(PixMap *pm)
     height = RECT_HEIGHT(&pm->bounds);
     width = RECT_WIDTH(&pm->bounds);
 
-    bpp = CW(pm->pixelSize);
+    bpp = pm->pixelSize;
 
     if((bpp != 8 && bpp != 4)
        || VDRIVER_BYPASS_INTERNAL_FBUF_P())
@@ -150,8 +151,8 @@ dump_indirect_pm(PixMap *pm)
         TEMP_ALLOC_ALLOCATE(fbuf, temp_fbuf_bits, fbuf_size);
         row_bytes = (width * bpp + 31) / 32 * 4;
 
-        tiff_pm->baseAddr = RM((Ptr)fbuf);
-        tiff_pm->rowBytes = CW(row_bytes | PIXMAP_DEFAULT_ROW_BYTES);
+        tiff_pm->baseAddr = (Ptr)fbuf;
+        tiff_pm->rowBytes = row_bytes | PIXMAP_DEFAULT_ROW_BYTES;
         tiff_pm->bounds = pm->bounds;
 
         pixmap_set_pixel_fields(tiff_pm, bpp);
@@ -160,7 +161,7 @@ dump_indirect_pm(PixMap *pm)
 
         CopyBits((BitMap *)pm, (BitMap *)tiff_pm,
                  &pm->bounds, &tiff_pm->bounds,
-                 srcCopy, NULL);
+                 srcCopy, nullptr);
     }
     else
     {
@@ -235,14 +236,14 @@ dump_indirect_pm(PixMap *pm)
 
         memset(color_map, 0xFF, color_map_size);
 
-        color_table_size = CTAB_SIZE(MR(tiff_pm->pmTable));
-        color_table = CTAB_TABLE(MR(tiff_pm->pmTable));
+        color_table_size = CTAB_SIZE(tiff_pm->pmTable);
+        color_table = CTAB_TABLE(tiff_pm->pmTable);
 
         for(i = 0; i <= color_table_size; i++)
         {
-            color_map[i] = CW(color_table[i].rgb.red);
-            color_map[i + (1 << bpp)] = CW(color_table[i].rgb.green);
-            color_map[i + (2 << bpp)] = CW(color_table[i].rgb.blue);
+            color_map[i] = color_table[i].rgb.red;
+            color_map[i + (1 << bpp)] = color_table[i].rgb.green;
+            color_map[i + (2 << bpp)] = color_table[i].rgb.blue;
         }
     }
 
@@ -303,15 +304,15 @@ void Executor::do_dump_screen(void)
     GDHandle gd;
     PixMapHandle gd_pmh;
 
-    gd = MR(LM(MainDevice));
+    gd = LM(MainDevice);
     gd_pmh = GD_PMAP(gd);
 
     HLockGuard guard(gd_pmh);
     PixMap *gd_pm;
     int log2_bpp;
 
-    gd_pm = STARH(gd_pmh);
-    log2_bpp = ROMlib_log2[CW(gd_pm->pixelSize)];
+    gd_pm = *gd_pmh;
+    log2_bpp = ROMlib_log2[gd_pm->pixelSize];
 
     (*dump_fns[log2_bpp])(gd_pm);
 }

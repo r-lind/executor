@@ -24,5 +24,8 @@ typedef struct ComponentInstanceRecord
 } ComponentInstanceRecord;
 
 typedef ComponentInstanceRecord *ComponentInstance;
+
+static_assert(sizeof(ComponentRecord) == 4);
+static_assert(sizeof(ComponentInstanceRecord) == 4);
 }
 #endif

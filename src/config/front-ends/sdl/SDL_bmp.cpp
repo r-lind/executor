@@ -92,13 +92,13 @@ Author of Simple DirectMedia Layer -
 #include "SDL/SDL_endian.h"
 #include "SDL/SDL_version.h"
 
-#include "rsys/error.h"
+#include "error/error.h"
 
 #include "for_sam.h"
 
 #if SDL_MAJOR_VERSION > 0 || SDL_MINOR_VERSION >= 9
 
-#define READLE_DECL(width)                            \
+#define READLE_DEwidth                            \
     static Uint##width                                \
         ctm_ReadLE##width(FILE *fp)                   \
     {                                                 \
@@ -111,10 +111,10 @@ Author of Simple DirectMedia Layer -
         return retval;                                \
     }
 
-READLE_DECL(16)
-READLE_DECL(32)
+READLE_DE16
+READLE_DE32
 
-#define WRITELE_DECL(width)                                     \
+#define WRITELE_DEwidth                                     \
     static int                                                  \
         ctm_WriteLE##width(FILE *fp, Uint##width value)         \
     {                                                           \
@@ -130,8 +130,8 @@ READLE_DECL(32)
         return retval;                                          \
     }
 
-WRITELE_DECL(16)
-WRITELE_DECL(32)
+WRITELE_DE16
+WRITELE_DE32
 
 #define SDL_ReadLE16 ctm_ReadLE16
 #define SDL_ReadLE32 ctm_ReadLE32
@@ -203,7 +203,7 @@ bmp_read_init(dib_read_obj_t *obj)
 {
     obj->error = false;
     obj->u.bmp.fp = fopen(obj->u.bmp.filename, "rb");
-    if(obj->u.bmp.fp == NULL)
+    if(obj->u.bmp.fp == nullptr)
     {
         SDL_SetError("Couldn't open %s for reading", obj->u.bmp.filename);
         obj->error = true;
@@ -375,7 +375,7 @@ bmp_read_close(dib_read_obj_t *obj)
         int fret;
 
         fret = fclose(obj->u.bmp.fp);
-        obj->u.bmp.fp = NULL;
+        obj->u.bmp.fp = nullptr;
         obj->error = obj->error || fret != 0;
     }
 }
@@ -434,7 +434,7 @@ SDL_BMP_read_helper(dib_read_obj_t *obj)
     Uint16_t desired_bit_depth;
     Uint16_t pixels_per_bit;
 
-    surface = NULL;
+    surface = nullptr;
 
     obj->read_init(obj);
 
@@ -540,7 +540,7 @@ SDL_BMP_read_helper(dib_read_obj_t *obj)
     surface = SDL_AllocSurface(SDL_SWSURFACE,
                                biWidth, biHeight, desired_bit_depth, Rmask, Gmask,
                                Bmask, 0);
-    if(surface == NULL)
+    if(surface == nullptr)
     {
         obj->error = true;
         goto ERROR_EXIT;
@@ -642,7 +642,7 @@ ERROR_EXIT:
         if(surface)
         {
             SDL_FreeSurface(surface);
-            surface = NULL;
+            surface = nullptr;
         }
     }
     obj->read_close(obj);
@@ -734,7 +734,7 @@ bmp_write_init(dib_write_obj_t *obj)
 {
     obj->error = false;
     obj->u.bmp.fp = fopen(obj->u.bmp.filename, "wb");
-    if(obj->u.bmp.fp == NULL)
+    if(obj->u.bmp.fp == nullptr)
     {
         SDL_SetError("Couldn't open %s for writing", obj->u.bmp.filename);
         obj->error = true;
@@ -777,11 +777,11 @@ bmp_write_init(dib_write_obj_t *obj)
 static void
 cfdib_write_init(dib_write_obj_t *obj)
 {
-    obj->u.cfdib.bytes = NULL;
+    obj->u.cfdib.bytes = nullptr;
     obj->u.cfdib.n_bytes_allocated = 0;
     obj->u.cfdib.n_bytes_used = 0;
     obj->u.cfdib.block_size = (1 << 12);
-    obj->u.cfdib.p = NULL;
+    obj->u.cfdib.p = nullptr;
     obj->error = false;
 }
 
@@ -1038,7 +1038,7 @@ int SDL_BMP_write_helper(SDL_Surface *surfp, dib_write_obj_t *obj)
 #else
                 if(
 #endif
-                   SDL_BlitSurface(surfp, NULL, temp_surface, NULL) == 0
+                   SDL_BlitSurface(surfp, nullptr, temp_surface, nullptr) == 0
 #if 0
 		   /* ctm note: I don't understand this second MapSurface,
 		      and it looks like it could even cause problems if

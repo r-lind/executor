@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "WindowMgr.h"
 #include "ControlMgr.h"
@@ -13,17 +13,18 @@
 #include "ToolboxEvent.h"
 #include "OSEvent.h"
 
-#include "rsys/cquick.h"
-#include "rsys/ctl.h"
+#include "quickdraw/cquick.h"
+#include "ctl/ctl.h"
 
 /* ### hack for `image_bits ()' */
-#include "rsys/menu.h"
+#include "menu/menu.h"
 #include "rsys/color_wheel_bits.h"
-#include "rsys/osevent.h"
-#include "rsys/options.h"
+#include "osevent/osevent.h"
+#include "prefs/options.h"
 
 #include <ctype.h>
 #include <math.h>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -39,7 +40,7 @@ using namespace Executor;
         GUEST<ControlHandle> bogo_c;               \
                                                    \
         retval = FindControl(arg0, arg1, &bogo_c); \
-        *(arg2) = MR(bogo_c);                      \
+        *(arg2) = bogo_c;                      \
                                                    \
         retval;                                    \
     })
@@ -61,34 +62,34 @@ static Rect _bounds[] = {
     /* top, left, bottom, right */
 
     /* color picker window bounds; filled in by `compute_bounds' */
-    { CWC((short)-1), CWC((short)-1), CWC((short)-1), CWC((short)-1) },
+    { (short)-1, (short)-1, (short)-1, (short)-1 },
 
     /* ok button bounds */
-    { CWC(330), CWC(410), CWC(350), CWC(470) },
+    { 330, 410, 350, 470 },
     /* cancel button bounds */
-    { CWC(330), CWC(337), CWC(350), CWC(397) },
+    { 330, 337, 350, 397 },
 
     /* text entry box rects */
-    { CWC(324), CWC(10), CWC(350), CWC(90) },
-    { CWC(299), CWC(10), CWC(325), CWC(90) },
-    { CWC(274), CWC(10), CWC(300), CWC(90) },
+    { 324, 10, 350, 90 },
+    { 299, 10, 325, 90 },
+    { 274, 10, 300, 90 },
 
-    { CWC(228), CWC(10), CWC(254), CWC(90) },
-    { CWC(203), CWC(10), CWC(229), CWC(90) },
-    { CWC(178), CWC(10), CWC(204), CWC(90) },
+    { 228, 10, 254, 90 },
+    { 203, 10, 229, 90 },
+    { 178, 10, 204, 90 },
 
     /* rectangle for the color comparison boxes */
     /* frame */
-    { CWC(78), CWC(0), CWC(138), CWC(100) },
+    { 78, 0, 138, 100 },
     /* orig, current */
-    { CWC(108), CWC(2), CWC(136), CWC(98) },
-    { CWC(80), CWC(2), CWC(108), CWC(98) },
+    { 108, 2, 136, 98 },
+    { 80, 2, 108, 98 },
 
     /* prompt bounds */
-    { CWC(10), CWC(10), CWC(60), CWC(240) },
+    { 10, 10, 60, 240 },
 
     /* color wheel bounds */
-    { CWC(20), CWC(268), CWC(212), CWC(460) },
+    { 20, 268, 212, 460 },
 };
 
 #define compare_box_frame_bounds (compare_box_bounds)
@@ -207,14 +208,14 @@ compute_bounds(Point maybe_top_left)
         int gd_width;
         int gd_height;
 
-        gd_rect = &GD_RECT(MR(LM(MainDevice)));
+        gd_rect = &GD_RECT(LM(MainDevice));
         gd_width = RECT_WIDTH(gd_rect);
         gd_height = RECT_HEIGHT(gd_rect);
 
         /* centered horizontally, with a third of the space above the
 	 window, and two-thirds below */
-        top = CW(gd_rect->top) + (gd_height - height) / 3;
-        left = CW(gd_rect->left) + (gd_width - width) / 2;
+        top = gd_rect->top + (gd_height - height) / 3;
+        left = gd_rect->left + (gd_width - width) / 2;
     }
     else
     {
@@ -222,10 +223,10 @@ compute_bounds(Point maybe_top_left)
         left = maybe_top_left.h;
     }
 
-    color_picker_window_bounds->top = CW(top);
-    color_picker_window_bounds->left = CW(left);
-    color_picker_window_bounds->bottom = CW(top + height);
-    color_picker_window_bounds->right = CW(left + width);
+    color_picker_window_bounds->top = top;
+    color_picker_window_bounds->left = left;
+    color_picker_window_bounds->bottom = top + height;
+    color_picker_window_bounds->right = left + width;
 }
 
 typedef enum miniarrow_hilite {
@@ -352,8 +353,8 @@ text_box_init(void)
 
         title = titles[i];
         label = labels[i];
-        offset = MAX(offset, StringWidth(title));
-        label_width = MAX(label_width, StringWidth(label));
+        offset = std::max<int>(offset, StringWidth(title));
+        label_width = std::max<int>(label_width, StringWidth(label));
     }
 
     for(i = 0; i < N_TEXT_BOXES; i++)
@@ -391,8 +392,8 @@ text_box_init(void)
         *te_bounds = *frame_bounds;
         InsetRect(te_bounds, 4, 4);
 
-        baseline = ((CW(frame_bounds->top)
-                     + CW(frame_bounds->bottom))
+        baseline = ((frame_bounds->top
+                     + frame_bounds->bottom)
                         / 2
                     - font_height / 2 + font_ascent);
 
@@ -400,19 +401,19 @@ text_box_init(void)
         label_pt = &box->label_pt;
 
         title_pt->v = label_pt->v = baseline;
-        title_pt->h = CW(template_bounds->left) + offset - StringWidth(title);
-        label_pt->h = CW(frame_bounds->right) + space_width / 2;
+        title_pt->h = template_bounds->left + offset - StringWidth(title);
+        label_pt->h = frame_bounds->right + space_width / 2;
 
         miniarrow_bounds = &box->miniarrow_rect;
 
         *miniarrow_bounds = *frame_bounds;
-        miniarrow_bounds->left = CW(label_pt->h
+        miniarrow_bounds->left = label_pt->h
                                     + label_width
-                                    + space_width / 2);
-        miniarrow_bounds->right = CW(label_pt->h
+                                    + space_width / 2;
+        miniarrow_bounds->right = label_pt->h
                                      + label_width
                                      + space_width / 2
-                                     + 22);
+                                     + 22;
     }
 
     for(i = 0; i < 3; i++)
@@ -532,7 +533,7 @@ text_box_miniarrow_update(struct text_box *box,
     Rect dst_rect, *miniarrow_rect;
     BitMap miniarrow_bitmap;
     int center_x, center_y;
-    char *bits = NULL;
+    char *bits = nullptr;
 
     switch(_hilite)
     {
@@ -547,21 +548,21 @@ text_box_miniarrow_update(struct text_box *box,
             break;
     }
 
-    miniarrow_bitmap.baseAddr = RM((Ptr)bits);
-    miniarrow_bitmap.rowBytes = CWC(2);
+    miniarrow_bitmap.baseAddr = (Ptr)bits;
+    miniarrow_bitmap.rowBytes = 2;
     SetRect(&miniarrow_bitmap.bounds, 0, 0, 13, 22);
 
     miniarrow_rect = &box->miniarrow_rect;
 
-    center_x = (CW(miniarrow_rect->left) + CW(miniarrow_rect->right)) / 2;
-    center_y = (CW(miniarrow_rect->top) + CW(miniarrow_rect->bottom)) / 2;
+    center_x = (miniarrow_rect->left + miniarrow_rect->right) / 2;
+    center_y = (miniarrow_rect->top + miniarrow_rect->bottom) / 2;
 
     SetRect(&dst_rect,
             center_x - 13 / 2, center_y - 22 / 2,
             center_x - 13 / 2 + 13, center_y - 22 / 2 + 22);
 
-    CopyBits(&miniarrow_bitmap, PORT_BITS_FOR_COPY(thePort),
-             &miniarrow_bitmap.bounds, &dst_rect, srcCopy, NULL);
+    CopyBits(&miniarrow_bitmap, PORT_BITS_FOR_COPY(qdGlobals().thePort),
+             &miniarrow_bitmap.bounds, &dst_rect, srcCopy, nullptr);
 }
 
 static void
@@ -579,7 +580,7 @@ text_box_update(struct text_box *box, bool update_text_p)
         {
             Rect dummy_rect;
 
-            te_box = NULL;
+            te_box = nullptr;
 
             TEDeactivate(te);
 
@@ -645,13 +646,13 @@ text_box_update_value_1(struct text_box *box, int newval,
     switch(box->i)
     {
         case red_index:
-            current_color.red = CW(red);
+            current_color.red = red;
             break;
         case green_index:
-            current_color.green = CW(green);
+            current_color.green = green;
             break;
         case blue_index:
-            current_color.blue = CW(blue);
+            current_color.blue = blue;
             break;
         case hue_index:
         case saturation_index:
@@ -672,10 +673,10 @@ compare_box_update(void)
     /* draw the color comparison box */
 
     RGBForeColor(&orig_color);
-    FillRect(orig_compare_box_bounds, black);
+    FillRect(orig_compare_box_bounds, qdGlobals().black);
 
     RGBForeColor(&current_color);
-    FillRect(current_compare_box_bounds, black);
+    FillRect(current_compare_box_bounds, qdGlobals().black);
 
     PenSize(2, 2);
     ForeColor(blackColor);
@@ -699,18 +700,18 @@ hue_saturation_update(int new_hue, int new_saturation,
 
     if(full_update_p)
     {
-        hsl_color.hue = CW(hue);
-        hsl_color.saturation = CW(saturation);
-        hsl_color.lightness = CW(lightness);
+        hsl_color.hue = hue;
+        hsl_color.saturation = saturation;
+        hsl_color.lightness = lightness;
 
         HSL2RGB(&hsl_color, &rgb_color);
 
         text_box_update_value_1(&text_boxes[red_index],
-                                CW(rgb_color.red), true, true);
+                                rgb_color.red, true, true);
         text_box_update_value_1(&text_boxes[green_index],
-                                CW(rgb_color.green), true, true);
+                                rgb_color.green, true, true);
         text_box_update_value_1(&text_boxes[blue_index],
-                                CW(rgb_color.blue), true, true);
+                                rgb_color.blue, true, true);
 
         compare_box_update();
     }
@@ -762,17 +763,17 @@ text_box_update_value(struct text_box *box, int newval,
         {
             text_box_update_value_1(box, newval, update_if_p, true);
 
-            rgb_color.red = CW(red);
-            rgb_color.green = CW(green);
-            rgb_color.blue = CW(blue);
+            rgb_color.red = red;
+            rgb_color.green = green;
+            rgb_color.blue = blue;
 
             RGB2HSL(&rgb_color, &hsl_color);
 
-            hue_saturation_update(CW(hsl_color.hue), CW(hsl_color.saturation),
+            hue_saturation_update(hsl_color.hue, hsl_color.saturation,
                                   false);
 
             text_box_update_value_1(&text_boxes[lightness_index],
-                                    CW(hsl_color.lightness), true, true);
+                                    hsl_color.lightness, true, true);
             break;
         }
 
@@ -782,18 +783,18 @@ text_box_update_value(struct text_box *box, int newval,
         {
             text_box_update_value_1(box, newval, update_if_p, true);
 
-            hsl_color.hue = CW(hue);
-            hsl_color.saturation = CW(saturation);
-            hsl_color.lightness = CW(lightness);
+            hsl_color.hue = hue;
+            hsl_color.saturation = saturation;
+            hsl_color.lightness = lightness;
 
             HSL2RGB(&hsl_color, &rgb_color);
 
             text_box_update_value_1(&text_boxes[red_index],
-                                    CW(rgb_color.red), true, true);
+                                    rgb_color.red, true, true);
             text_box_update_value_1(&text_boxes[green_index],
-                                    CW(rgb_color.green), true, true);
+                                    rgb_color.green, true, true);
             text_box_update_value_1(&text_boxes[blue_index],
-                                    CW(rgb_color.blue), true, true);
+                                    rgb_color.blue, true, true);
             break;
         }
     }
@@ -822,7 +823,7 @@ text_box_set_te(struct text_box *box)
         int max;
 
         texth = TE_HTEXT(te);
-        text = (char *)STARH(texth);
+        text = (char *)*texth;
 
         str_if(text, TE_LENGTH(te), &integer, &fractional);
         max = orig_te_box->max;
@@ -860,7 +861,7 @@ event_loop(void)
 
         TEIdle(te);
 
-        switch(CW(evt.what))
+        switch(evt.what)
         {
             case mouseDown:
             {
@@ -898,7 +899,7 @@ event_loop(void)
                     if(PtInRect(local_pt, &box->te_rect))
                     {
                         text_box_set_te(box);
-                        TEClick(local_pt, ((evt.modifiers & CWC(shiftKey))
+                        TEClick(local_pt, ((evt.modifiers & shiftKey)
                                                ? true
                                                : false),
                                 te);
@@ -908,8 +909,8 @@ event_loop(void)
                     {
                         int center_y;
 
-                        center_y = (CW(box->miniarrow_rect.top)
-                                    + CW(box->miniarrow_rect.bottom))
+                        center_y = (box->miniarrow_rect.top
+                                    + box->miniarrow_rect.bottom)
                             / 2;
 
                         integer_increment_p = false;
@@ -1031,18 +1032,18 @@ event_loop(void)
 #define orig_compare_box_label ((StringPtr) "\012Original: ")
 #define current_compare_box_label ((StringPtr) "\005New: ")
 
-                MoveTo((CW(orig_compare_box_bounds->left)
+                MoveTo((orig_compare_box_bounds->left
                         - StringWidth(orig_compare_box_label)),
-                       ((CW(orig_compare_box_bounds->top)
-                         + CW(orig_compare_box_bounds->bottom))
+                       ((orig_compare_box_bounds->top
+                         + orig_compare_box_bounds->bottom)
                             / 2
                         - font_height / 2 + font_ascent));
                 DrawString(orig_compare_box_label);
 
-                MoveTo((CW(current_compare_box_bounds->left)
+                MoveTo((current_compare_box_bounds->left
                         - StringWidth(current_compare_box_label)),
-                       ((CW(current_compare_box_bounds->top)
-                         + CW(current_compare_box_bounds->bottom))
+                       ((current_compare_box_bounds->top
+                         + current_compare_box_bounds->bottom)
                             / 2
                         - font_height / 2 + font_ascent));
                 DrawString(current_compare_box_label);
@@ -1056,7 +1057,7 @@ event_loop(void)
             {
                 char ch;
 
-                ch = CL(evt.message) & 0xFF;
+                ch = evt.message & 0xFF;
                 switch(ch)
                 {
                     case '\r':
@@ -1084,7 +1085,7 @@ event_loop(void)
 
             default:
                 warning_unexpected("unknown event.what `%d'",
-                                   CW(evt.what));
+                                   toHost(evt.what));
                 break;
         }
     }
@@ -1110,31 +1111,31 @@ color_wheel_init(void)
     *color_wheel_bounds = *template_color_wheel_bounds;
     OffsetRect(color_wheel_bounds, -StringWidth(label_0_degs), font_height);
 
-    color_wheel_center_y = (CW(color_wheel_bounds->top)
-                            + CW(color_wheel_bounds->bottom))
+    color_wheel_center_y = (color_wheel_bounds->top
+                            + color_wheel_bounds->bottom)
         / 2;
-    color_wheel_center_x = (CW(color_wheel_bounds->left)
-                            + CW(color_wheel_bounds->right))
+    color_wheel_center_x = (color_wheel_bounds->left
+                            + color_wheel_bounds->right)
         / 2;
 
     /* the colorwheel appears to be 192 pixels on a side, but it is
      really 208 pixels to handle target overlap */
     InsetRect(color_wheel_bounds, -8, -8);
 
-    bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(MR(LM(MainDevice))));
-    color_wheel_pixmap.baseAddr = RM((Ptr)((bpp == 8)
+    bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)));
+    color_wheel_pixmap.baseAddr = (Ptr)((bpp == 8)
                                                ? color_wheel_bits_8
                                                : (bpp == 4
                                                       ? color_wheel_bits_4
-                                                      : (gui_abort(), nullptr))));
-    color_wheel_pixmap.rowBytes = CW((bpp == 8)
+                                                      : (gui_abort(), nullptr)));
+    color_wheel_pixmap.rowBytes = (bpp == 8)
                                          ? 0x80D0
                                          : (bpp == 4
                                                 ? 0x8068
-                                                : (gui_abort(), -1)));
+                                                : (gui_abort(), -1));
     SetRect(&color_wheel_pixmap.bounds, 0, 0, 208, 208);
     pixmap_set_pixel_fields(&color_wheel_pixmap, bpp);
-    color_wheel_pixmap.pmTable = RM(no_stdbits_color_conversion_color_table);
+    color_wheel_pixmap.pmTable = no_stdbits_color_conversion_color_table;
 
     current_target_x = color_wheel_center_x;
     current_target_y = color_wheel_center_y;
@@ -1163,17 +1164,17 @@ color_wheel_target_update(bool short_cut_p)
         return;
 
     /* erase the current target */
-    dst_rect.top = CW(current_target_y - 7);
-    dst_rect.left = CW(current_target_x - 7);
-    dst_rect.bottom = CW(current_target_y + 9);
-    dst_rect.right = CW(current_target_x + 9);
+    dst_rect.top = current_target_y - 7;
+    dst_rect.left = current_target_x - 7;
+    dst_rect.bottom = current_target_y + 9;
+    dst_rect.right = current_target_x + 9;
 
     src_rect = dst_rect;
-    OffsetRect(&src_rect, -CW(color_wheel_bounds->left),
-               -CW(color_wheel_bounds->top));
+    OffsetRect(&src_rect, -color_wheel_bounds->left,
+               -color_wheel_bounds->top);
 
-    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(thePort),
-             &src_rect, &dst_rect, srcCopy, NULL);
+    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(qdGlobals().thePort),
+             &src_rect, &dst_rect, srcCopy, nullptr);
 
     PenSize(1, 1);
 
@@ -1204,8 +1205,8 @@ color_wheel_target_update(bool short_cut_p)
 static void
 color_wheel_update(void)
 {
-    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(thePort),
-             &color_wheel_pixmap.bounds, color_wheel_bounds, srcCopy, NULL);
+    CopyBits((BitMap *)&color_wheel_pixmap, PORT_BITS_FOR_COPY(qdGlobals().thePort),
+             &color_wheel_pixmap.bounds, color_wheel_bounds, srcCopy, nullptr);
 
     MoveTo(470 - StringWidth(label_0_degs),
            color_wheel_center_y - font_height / 2 + font_ascent);
@@ -1278,12 +1279,12 @@ color_wheel_notice_lightness_change(void)
     for(i = 0; i < (int)NELEM(color_desc); i++)
     {
         /* one half */
-        hsl_color.lightness = CW(lightness);
-        hsl_color.hue = CW(color_desc[i].angle
+        hsl_color.lightness = lightness;
+        hsl_color.hue = color_desc[i].angle
                            * 0xFFFF
-                           / 360.0);
-        hsl_color.saturation = CW(color_desc[i].dist
-                                  * 0xFFFF);
+                           / 360.0;
+        hsl_color.saturation = color_desc[i].dist
+                                  * 0xFFFF;
 
         HSL2RGB(&hsl_color, &rgb_color);
 
@@ -1308,10 +1309,10 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
 
         GetFontInfo(&font_info);
 
-        font_height = (CW(font_info.ascent)
-                       + CW(font_info.descent)
-                       + CW(font_info.leading));
-        font_ascent = CW(font_info.ascent);
+        font_height = (font_info.ascent
+                       + font_info.descent
+                       + font_info.leading);
+        font_ascent = font_info.ascent;
 
         space_width = CharWidth(' ');
     }
@@ -1319,15 +1320,15 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
     {
         HSLColor *hsl_color = (HSLColor *)alloca(sizeof *hsl_color);
 
-        red = CW(in_color->red);
-        green = CW(in_color->green);
-        blue = CW(in_color->blue);
+        red = in_color->red;
+        green = in_color->green;
+        blue = in_color->blue;
 
         RGB2HSL(in_color, hsl_color);
 
-        hue = CW(hsl_color->hue);
-        saturation = CW(hsl_color->saturation);
-        lightness = CW(hsl_color->lightness);
+        hue = hsl_color->hue;
+        saturation = hsl_color->saturation;
+        lightness = hsl_color->lightness;
 
         color_wheel_noticed_lightness = -1;
 
@@ -1340,9 +1341,9 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
     compute_bounds(where);
     color_wheel_init();
 
-    color_picker_window = _NewCWindow(NULL, color_picker_window_bounds,
+    color_picker_window = _NewCWindow(nullptr, color_picker_window_bounds,
                                       /* no title */
-                                      NULL,
+                                      nullptr,
                                       /* visible */
                                       true,
                                       dBoxProc,
@@ -1362,7 +1363,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
      
      of course, even the mac doesn't try it on 4bpp or b/w devices */
 
-    palette = NewPalette(16, NULL, pmAnimated | pmExplicit, -1);
+    palette = NewPalette(16, nullptr, pmAnimated | pmExplicit, -1);
     NSetPalette(color_picker_window, palette, pmAllUpdates);
 
     SetEntryUsage(palette, 0, pmCourteous, -1);
@@ -1380,7 +1381,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
     {
         HLockGuard guard(color_wheel_color_table);
 
-        CTAB_SIZE_X(color_wheel_color_table) = CW(23);
+        CTAB_SIZE(color_wheel_color_table) = 23;
         color_wheel_colors = CTAB_TABLE(color_wheel_color_table);
 
         color_wheel_notice_lightness_change();
@@ -1413,7 +1414,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
             retval = event_loop();
 
             TEDispose(te);
-            te_box = NULL;
+            te_box = nullptr;
         }
     }
 

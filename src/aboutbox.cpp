@@ -2,15 +2,15 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "rsys/aboutbox.h"
-#include "rsys/mman.h"
-#include "rsys/vdriver.h"
+#include "mman/mman.h"
+#include "vdriver/vdriver.h"
 #include "rsys/string.h"
-#include "rsys/cquick.h"
-#include "rsys/quick.h"
-#include "rsys/ctl.h"
+#include "quickdraw/cquick.h"
+#include "quickdraw/quick.h"
+#include "ctl/ctl.h"
 #include "rsys/version.h"
 #include "CQuickDraw.h"
 #include "Gestalt.h"
@@ -19,13 +19,18 @@
 #include "FontMgr.h"
 #include "OSUtil.h"
 #include <ctype.h>
-#include "rsys/file.h"
+#include "file/file.h"
 #include "rsys/osutil.h"
 #include "SegmentLdr.h"
 #include "rsys/segment.h"
-#include "rsys/notmac.h"
 #include "rsys/gestalt.h"
-#include "rsys/osevent.h"
+#include "osevent/osevent.h"
+#include "rsys/paths.h"
+#include <algorithm>
+
+#include <cmrc/cmrc.hpp>
+
+CMRC_DECLARE(resources);
 
 #define ABOUT_BOX_WIDTH 500
 #define ABOUT_BOX_HEIGHT 300
@@ -50,6 +55,16 @@
 
 using namespace Executor;
 
+struct AboutPage
+{
+    std::string name;
+    cmrc::file text;
+    ControlHandle ctl;
+};
+
+std::vector<AboutPage> about_box_buttons;
+
+#if 0
 static struct
 {
     const char *name;
@@ -57,62 +72,20 @@ static struct
     ControlHandle ctl;
 } about_box_buttons[] = {
     { LICENSE_BUTTON_NAME, "License." /* generated on the fly from licensetext.c */,
-      NULL },
-    { "Maker",
+      nullptr },
+  /*  { "Maker",
       "ARDI\r"
       "World Wide Web: <http://www.ardi.com>\r"
       "FTP: <ftp://ftp.ardi.com/pub>\r",
-      NULL },
+      nullptr },*/
 
-    { "Credits",
-      "Bill Goldman \321 Browser, Testing\r"
-      "Mat Hostetter \321 Syn68k, Low Level Graphics, DOS port, more...\r"
-      "Joel Hunter \321 Low Level DOS Sound\r"
-      "Sam Lantinga \321 Win32 port\r"
-      "Patrick LoPresti \321 High Level Sound, Low Level Linux Sound\r"
-      "Cliff Matthews \321 this credit list (and most things not listed)\r"
-      "Cotton Seed \321 High Level Graphics, Apple Events, more...\r"
-      "Lauri Pesonen \321 Low Level Win32 CD-ROM access (Executor 2.1)\r"
-      "Samuel Vincent \321 Low Level DOS Serial Port Support\r"
-      "and all the engineers and testers who helped us build version 1.x\r"
-      "\r"
-      "Windows Appearance:\r"
-      "\r"
-      "The windows appearance option uses \"Jim's CDEFs\" copyright "
-      "Jim Stout and the "
-      "\"Infinity Windoid\" copyright Troy Gaul.\r"
-      "\r"
-      "Primary Pre-Beta Testers:\r"
-      "\r"
-      "Jon Abbott \321 Testing, Icon Design\r"
-      "Ziv Arazi \321 Testing\r"
-      "Edmund Ronald \321 Advice, Testing\r"
-      "K. Harrison Liang \321 Testing\r"
-      "Hugh Mclenaghan \321 Testing\r"
-      "Emilio Moreno \321 Testing, Spanish Translation + Keyboard, Icon Design\r"
-      "Ernst Oud \321 Documentation, Testing\r"
-      "\r"
-      "Some of the best development tools are Free and written by:\r"
-      "\r"
-      "The Free Software Foundation \321 the gcc compiler, more ...\r"
-      "Cygnus Support \321 the gdb debugger, the gnats bug tracking software\r"
-      "Linus Torvalds et al. \321 Linux, our favorite OS"
-      "\r"
-      "Executor/DOS was ported via DJGPP, DJ Delorie's port of gcc.\r"
-      "DJGPP's primary authors are:\r"
-      "\r"
-      "DJ Delorie \321 Ringleader\r"
-      "William Metzenthen \321 80387 emulator\r"
-      "Charles Sandmann \321 cwsdpmi, more...\r"
-      "Morten Welinder \321 misc.\r"
-      "Eli Zaretskii \321 Some DOS-related library functions\r"
-      "\rThis product includes software developed by "
-      "the University of California, Berkeley and its contributors\r",
-      NULL },
+    { 
+      nullptr },
     { TIPS_BUTTON_NAME,
-      "Don't delete tips.txt.  If you do, that will be your only tip.\r", NULL },
-    { DONE_BUTTON_NAME, "Internal error!", NULL }
+      "Don't delete tips.txt.  If you do, that will be your only tip.\r", nullptr },
+    { DONE_BUTTON_NAME, "Internal error!", nullptr }
 };
+#endif
 
 static WindowPtr about_box;
 static ControlHandle about_scrollbar;
@@ -192,56 +165,22 @@ scroll_stub(syn68k_addr_t junk, void *junk2)
     return retaddr;
 }
 
-static int
-find_button(const char *button_name)
-{
-    int i;
-
-    for(i = 0; i < (int)NELEM(about_box_buttons); i++)
-        if(!strcmp(about_box_buttons[i].name, button_name))
-            break;
-    gui_assert(i < (int)NELEM(about_box_buttons));
-    return i;
-}
-
-/* Returns the index of the button with name LICENSE_BUTTON_NAME. */
-static int
-find_license_button(void)
-{
-    int retval;
-
-    retval = find_button(LICENSE_BUTTON_NAME);
-    return retval;
-}
-
-static void
-create_license_text(void)
-{
-    int b;
-
-    b = find_license_button();
-    if(about_box_buttons[b].text == NULL)
-    {
-        //about_box_buttons[b].text = license_text;
-    }
-}
-
 /*
  * get an upper bound on the number of tips that may be in the buffer
  */
 
 static int
-approximate_tips(char *p)
+approximate_tips(const char *p, const char *q)
 {
     int retval;
 
     retval = 0;
-    while(*p)
+    while(p != q)
     {
         ++retval;
-        while(*p && *p != '\n')
+        while(p != q && *p != '\n')
             ++p;
-        while(*p && *p == '\n')
+        while(p != q && (*p == '\n' || *p == '\r'))
             ++p;
     }
     return retval;
@@ -254,7 +193,7 @@ typedef struct
 } tip_t;
 
 static int
-find_tips(tip_t *tips, const char *p)
+find_tips(tip_t *tips, const char *p, const char *q)
 {
     const char *orig_p;
     int retval;
@@ -262,17 +201,19 @@ find_tips(tip_t *tips, const char *p)
     retval = 0;
 
     orig_p = p;
-    while(*p)
+    while(p != q)
     {
         /* suck up any excess leading \n */
-        while(*p && *p == '\n')
+        while(p != q && (*p == '\n' || *p == '\r'))
             ++p;
 
-        if(*p)
+        if(p != q)
         {
             tips->tip_offset = p - orig_p;
-            while(*p && (*p != '\n' || (p[1] && p[1] != '\n')))
+
+            while(p != q && (*p != '\n' || (p + 1 != q && p[1] != '\n' && p[1] != '\r')))
                 ++p;
+
             tips->tip_length = p - orig_p - tips->tip_offset;
             ++retval;
             ++tips;
@@ -283,17 +224,23 @@ find_tips(tip_t *tips, const char *p)
 }
 
 static void
-add_to_str(char **pp, const char *ip, int n)
+add_to_str(char*& pp, const char *ip, int n)
 {
     int i;
 
     for(i = 0; i < n; ++i)
-        (*pp)[i] = ip[i] == '\n' ? ' ' : ip[i];
-    *pp += n;
+    {
+        if(ip[i] == '\r')
+            ;
+        else if(ip[i] == '\n')
+            *pp++ = ' ';
+        else
+            *pp++ = ip[i];
+    }
 }
 
 static char *
-parse_and_randomize_tips(char *buf)
+parse_and_randomize_tips(const char *buf, const char *bufend)
 {
     int n_tips, chars_needed;
     tip_t *tips;
@@ -302,9 +249,9 @@ parse_and_randomize_tips(char *buf)
     char *p;
     int i;
 
-    n_tips = approximate_tips(buf);
+    n_tips = approximate_tips(buf, bufend);
     tips = (tip_t *)alloca(n_tips * sizeof *tips);
-    n_tips = find_tips(tips, buf);
+    n_tips = find_tips(tips, buf, bufend);
 
     chars_needed = 0;
     for(i = 0; i < n_tips; ++i)
@@ -317,11 +264,13 @@ parse_and_randomize_tips(char *buf)
     while(n_tips)
     {
         if(seen_tip)
-            add_to_str(&p, "\r\r", 2);
+        {
+            *p++ = '\r'; *p++ = '\r';
+        }
         else
             seen_tip = true;
         i = rand() % n_tips;
-        add_to_str(&p, buf + tips[i].tip_offset, tips[i].tip_length);
+        add_to_str(p, buf + tips[i].tip_offset, tips[i].tip_length);
         tips[i] = tips[n_tips - 1];
         --n_tips;
     }
@@ -329,120 +278,96 @@ parse_and_randomize_tips(char *buf)
     return retval;
 }
 
-static char *orig_text;
-
 static void
-create_tips_text(void)
+load_pages()
 {
-    FILE *fp;
-    int b;
+    if(!about_box_buttons.empty())
+        return;
+    
+    auto efs = cmrc::resources::get_filesystem();
 
-    b = find_button(TIPS_BUTTON_NAME);
-    if(!orig_text)
+    for(auto file : efs.iterate_directory("about"))
     {
-        srand(LM(Ticks).get()); /* NOTE: we don't care that rand/srand is not a
-			   particular good way to generate random numbers */
-        orig_text = (char *)about_box_buttons[b].text;
+        about_box_buttons.push_back({
+            file.filename(),
+            efs.open("about/" + file.filename()),
+            nullptr
+        });
     }
-    if(about_box_buttons[b].text == orig_text)
+
+    for(auto& b : about_box_buttons)
     {
-        auto filename = expandPath("+/tips.txt");
-        fp = fopen(filename.c_str(), "r");
-        if(fp)
-        {
-            char tempbuf[32768];
-            size_t nread;
-
-            nread = fread(tempbuf, 1, sizeof tempbuf - 1, fp);
-            tempbuf[nread] = 0;
-            if(nread > 0)
-                about_box_buttons[b].text = parse_and_randomize_tips(tempbuf);
-            fclose(fp);
-        }
+        size_t pos;
+        if((pos = b.name.find("_")) != std::string::npos)
+            b.name = b.name.substr(pos + 1);
+        if((pos = b.name.find(".")) != std::string::npos)
+            b.name = b.name.substr(0,pos);
     }
-}
 
-static void
-dispose_license_text(void)
-{
-    int b;
+    std::sort(about_box_buttons.begin(), about_box_buttons.end(),
+        [](auto a, auto b) { return a.name < b.name; });
 
-    b = find_license_button();
-    if(about_box_buttons[b].text != NULL)
-    {
-        DisposePtr((Ptr)about_box_buttons[b].text);
-        about_box_buttons[b].text = NULL;
-    }
-}
-
-static void
-dispose_tips_text(void)
-{
-    int b;
-
-    b = find_button(TIPS_BUTTON_NAME);
-    if(about_box_buttons[b].text != orig_text)
-    {
-        free((void *)about_box_buttons[b].text);
-        about_box_buttons[b].text = orig_text;
-    }
+        about_box_buttons.push_back({
+            DONE_BUTTON_NAME,
+            {},
+            nullptr
+        });
 }
 
 static void
 create_about_box()
 {
+    load_pages();
+
     static Rect scroll_bar_bounds = {
-        CWC(TE_TOP),
-        CWC(TE_RIGHT - SCROLL_BAR_WIDTH),
-        CWC(TE_BOTTOM),
-        CWC(TE_RIGHT)
+        TE_TOP,
+        TE_RIGHT - SCROLL_BAR_WIDTH,
+        TE_BOTTOM,
+        TE_RIGHT
     };
     static Rect te_bounds = {
-        CWC(TE_TOP + 1),
-        CWC(TE_LEFT + TE_MARGIN),
-        CWC(TE_BOTTOM - 1),
-        CWC(TE_RIGHT - TE_MARGIN - SCROLL_BAR_WIDTH)
+        TE_TOP + 1,
+        TE_LEFT + TE_MARGIN,
+        TE_BOTTOM - 1,
+        TE_RIGHT - TE_MARGIN - SCROLL_BAR_WIDTH
     };
     Rect about_box_bounds;
     int b;
 
-    create_license_text();
-    create_tips_text();
-
     SetRect(&about_box_bounds,
-            (vdriver_width - ABOUT_BOX_WIDTH) / 2U,
-            (vdriver_height - ABOUT_BOX_HEIGHT) / 3U + 15,
-            (vdriver_width + ABOUT_BOX_WIDTH) / 2U,
-            (vdriver_height + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
+            (vdriver->width() - ABOUT_BOX_WIDTH) / 2U,
+            (vdriver->height() - ABOUT_BOX_HEIGHT) / 3U + 15,
+            (vdriver->width() + ABOUT_BOX_WIDTH) / 2U,
+            (vdriver->height() + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
 
     /* Create the window. */
-    about_box = (WindowPtr)NewCWindow(NULL, &about_box_bounds,
+    about_box = (WindowPtr)NewCWindow(nullptr, &about_box_bounds,
                                       (StringPtr) "\016About Executor",
                                       false, dBoxProc, (CWindowPtr)-1,
                                       true, /* go away flag */
                                       -5 /* unused */);
     ThePortGuard guard(about_box);
     /* Create the push buttons. */
-    for(b = 0; b < (int)NELEM(about_box_buttons); b++)
+    for(b = 0; b < about_box_buttons.size(); b++)
     {
         Str255 str;
         Rect r;
 
         /* Set up the rectangle enclosing each button. */
-        r.top = CWC(ABOUT_BOX_HEIGHT - 30);
-        r.bottom = CWC(ABOUT_BOX_HEIGHT - 30 + BUTTON_HEIGHT);
-        r.left = CW((b * ABOUT_BOX_WIDTH / NELEM(about_box_buttons))
-                    + (ABOUT_BOX_WIDTH / NELEM(about_box_buttons)
+        r.top = ABOUT_BOX_HEIGHT - 30;
+        r.bottom = ABOUT_BOX_HEIGHT - 30 + BUTTON_HEIGHT;
+        r.left = (b * ABOUT_BOX_WIDTH / about_box_buttons.size())
+                    + (ABOUT_BOX_WIDTH / about_box_buttons.size()
                        - BUTTON_WIDTH)
-                        / 2);
-        r.right = CW(CW(r.left) + BUTTON_WIDTH);
+                        / 2;
+        r.right = r.left + BUTTON_WIDTH;
 
-        str255_from_c_string(str, about_box_buttons[b].name);
+        str255_from_c_string(str, about_box_buttons[b].name.c_str());
         about_box_buttons[b].ctl = NewControl(about_box, &r, str, true, 0,
                                               0, 1, pushButProc, b);
     }
 
-    about_scrollbar = NewControl(about_box, &scroll_bar_bounds, NULL, true,
+    about_scrollbar = NewControl(about_box, &scroll_bar_bounds, nullptr, true,
                                  0, 0, 100, scrollBarProc, -1);
     about_te = TENew(&te_bounds, &te_bounds);
     TESetAlignment(teFlushLeft, about_te);
@@ -453,19 +378,17 @@ static void
 dispose_about_box(void)
 {
     C_DisposeWindow(about_box);
-    about_box = NULL;
-    about_scrollbar = NULL;
-    dispose_license_text();
-    dispose_tips_text();
+    about_box = nullptr;
+    about_scrollbar = nullptr;
 }
 
 /* Sets the text currently being displayed. */
 static void
-set_text(const char *text)
+set_text(const char *text, size_t size)
 {
-    TESetText((Ptr)text, strlen(text), about_te);
+    TESetText((Ptr)text, size, about_te);
     SetControlMaximum(about_scrollbar,
-              MAX(0, (TE_N_LINES(about_te)
+              std::max(0, (TE_N_LINES(about_te)
                       - ((TE_HEIGHT - 2) / TE_LINE_HEIGHT(about_te)))));
     SetControlValue(about_scrollbar, 0);
     TE_DEST_RECT(about_te) = TE_VIEW_RECT(about_te);
@@ -477,8 +400,30 @@ static void
 set_current_button(int button)
 {
     int i;
-    set_text(about_box_buttons[button].text);
-    for(i = 0; i < (int)NELEM(about_box_buttons); i++)
+    if(about_box_buttons[button].name == TIPS_BUTTON_NAME)
+    {
+        srand(LM(Ticks).get());
+        char* str = parse_and_randomize_tips(about_box_buttons[button].text.begin(),
+                                             about_box_buttons[button].text.end());
+        set_text(str, strlen(str));
+        free(str);
+    }
+    else
+    {
+        char *str = (char*)alloca(about_box_buttons[button].text.size());
+        char *p = str;
+        for(char c : about_box_buttons[button].text)
+        {
+            if(c == '\n')
+                *p++ = '\r';
+            else if(c == '\r')
+                ;
+            else
+                *p++ = c;
+        }
+        set_text(str, p-str);
+    }
+    for(i = 0; i < about_box_buttons.size(); i++)
         HiliteControl(about_box_buttons[i].ctl, (i == button) ? 255 : 0);
 }
 
@@ -517,7 +462,7 @@ draw_status_info(bool executor_p)
 #define MB (1024 * 1024U)
     gestalt_success_p = (C_GestaltTablesOnly(gestaltLogicalRAMSize, &total_ram_x)
                          == noErr);
-    total_ram = CL(total_ram_x);
+    total_ram = total_ram_x;
     if(gestalt_success_p)
         sprintf(total_ram_string, "%s%u.%02u MB", ram_tag,
                 total_ram / MB, (total_ram % MB) * 100 / MB);
@@ -544,10 +489,10 @@ static void
 event_loop(bool executor_p)
 {
     static Rect frame_rect = {
-        CWC(TE_TOP),
-        CWC(TE_LEFT),
-        CWC(TE_BOTTOM),
-        CWC(TE_RIGHT - SCROLL_BAR_WIDTH + 1)
+        TE_TOP,
+        TE_LEFT,
+        TE_BOTTOM,
+        TE_RIGHT - SCROLL_BAR_WIDTH + 1
     };
     EventRecord evt;
     bool done_p;
@@ -577,7 +522,7 @@ event_loop(bool executor_p)
 
         TEIdle(about_te);
 
-        switch(CW(evt.what))
+        switch(evt.what)
         {
             case updateEvt:
                 BeginUpdate(about_box);
@@ -609,7 +554,7 @@ event_loop(bool executor_p)
             {
                 char ch;
 
-                ch = CL(evt.message) & 0xFF;
+                ch = evt.message & 0xFF;
                 switch(ch)
                 {
                     case '\r':
@@ -635,7 +580,7 @@ event_loop(bool executor_p)
 
                 GUEST<ControlHandle> bogo_c;
                 control_p = FindControl(local_pt, about_box, &bogo_c);
-                c = MR(bogo_c);
+                c = bogo_c;
                 if(!control_p)
                     SysBeep(1);
                 else
@@ -672,8 +617,7 @@ event_loop(bool executor_p)
                         new_text = CTL_REF_CON(c);
                         if(new_text != which_text)
                         {
-                            if(!strcmp(about_box_buttons[new_text].name,
-                                       DONE_BUTTON_NAME))
+                            if(about_box_buttons[new_text].name == DONE_BUTTON_NAME)
                                 done_p = true;
                             else
                             {
@@ -703,7 +647,7 @@ void Executor::do_about_box(void)
         busy_p = true; /* Only allow one about box at a time. */
 
         if(scroll_bar_callback == nullptr)
-            scroll_bar_callback = (ControlActionUPP)SYN68K_TO_US(callback_install(scroll_stub, NULL));
+            scroll_bar_callback = (ControlActionUPP)SYN68K_TO_US(callback_install(scroll_stub, nullptr));
 
         {
             TheZoneGuard guard(LM(SysZone));
@@ -718,7 +662,7 @@ void Executor::do_about_box(void)
             }
 
             TEDispose(about_te);
-            about_te = NULL;
+            about_te = nullptr;
             dispose_about_box();
         }
 

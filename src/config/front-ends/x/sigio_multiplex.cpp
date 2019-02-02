@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <unistd.h>
 #include <sys/types.h>
@@ -38,12 +38,12 @@ sigio_multiplex_hdlr(int signo)
         int fd;
 
         fd = sigio_hdlrs[i].fd;
-        max_fd = MAX(max_fd, fd);
+        max_fd = std::max(max_fd, fd);
         FD_SET(fd, &read_set);
     }
 
     nowait.tv_sec = nowait.tv_usec = 0;
-    n_fds_available = select(max_fd + 1, &read_set, NULL, NULL, &nowait);
+    n_fds_available = select(max_fd + 1, &read_set, nullptr, nullptr, &nowait);
     if(n_fds_available < 0)
     {
         warning_unexpected("select returned negative value, panic!");
@@ -79,7 +79,7 @@ void sigio_multiplex_install_handler(int fd, sigio_hdlr_t hdlr)
         sigaddset(&sa.sa_mask, SIGIO);
         sa.sa_flags = 0;
 
-        sigaction(SIGIO, &sa, NULL);
+        sigaction(SIGIO, &sa, nullptr);
 #else
         struct sigvec sv;
 
@@ -87,7 +87,7 @@ void sigio_multiplex_install_handler(int fd, sigio_hdlr_t hdlr)
         sv.sv_mask = sigmask(SIGIO);
         sv.sv_flags = 0;
 
-        sigvec(SIGIO, &sv, NULL);
+        sigvec(SIGIO, &sv, nullptr);
 #endif
     }
 }

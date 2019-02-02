@@ -10,7 +10,7 @@
 #include "ExMacTypes.h"
 
 #define MODULE_NAME TimeMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -29,5 +29,7 @@ extern void RmvTime(QElemPtr taskp);
 REGISTER_TRAP2(RmvTime, 0xA059, void(A0), ClearD0);
 extern void PrimeTime(QElemPtr taskp, LONGINT count);
 REGISTER_TRAP2(PrimeTime, 0xA05A, void(A0,D0), ClearD0);
+
+static_assert(sizeof(TMTask) == 14);
 }
 #endif /* __TIMEMGR__ */

@@ -7,13 +7,13 @@
  *
  */
 
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 #include "ExMacTypes.h"
 #include "EventMgr.h"
 #include "WindowMgr.h"
 
 #define MODULE_NAME DeskMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

@@ -5,7 +5,7 @@
 #define Region Mac_Region
 #define Cursor Mac_Cursor
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 
 #undef Region
@@ -722,7 +722,7 @@ int main(int argc, char *argv[])
         __FD_ZERO(&read_set);
         for(i = 0; i < n_fds; i++)
         {
-            max_fd = MAX(max_fd, fds[i].fd);
+            max_fd = std::max(max_fd, fds[i].fd);
             __FD_SET(fds[i].fd, &read_set);
         }
 

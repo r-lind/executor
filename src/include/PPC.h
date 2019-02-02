@@ -15,6 +15,7 @@ typedef int16_t PPCLocationKind;
 
 typedef struct EntityName
 {
+  GUEST_STRUCT;
   Str32 objStr;
   Str32 typeStr;
   Str32 zoneStr;
@@ -63,6 +64,9 @@ typedef struct PPCPortRec
         } port;
     } u;
 } * PPCPortPtr;
+
+static_assert(sizeof(LocationNameRec) == 104);
+static_assert(sizeof(PPCPortRec) == 72);
 }
 
 #endif /* !_PPC_H_ */

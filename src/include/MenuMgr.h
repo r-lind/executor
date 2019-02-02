@@ -12,7 +12,7 @@
 #include "ResourceMgr.h"
 
 #define MODULE_NAME MenuMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -237,6 +237,9 @@ extern void C_SetMCEntries(INTEGER, MCTablePtr);
 PASCAL_TRAP(SetMCEntries, 0xAA65);
 extern void C_InvalMenuBar(void);
 PASCAL_TRAP(InvalMenuBar, 0xA81D);
+
+static_assert(sizeof(MenuInfo) == 270);
+static_assert(sizeof(MCEntry) == 30);
 }
 
 #endif /* __MENU__ */

@@ -6,9 +6,9 @@
 //  Copyright (c) 2014 C.W. Betts. All rights reserved.
 //
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "SpeechManager.h"
-#include "rsys/error.h"
+#include "error/error.h"
 
 #ifdef MACOSX
 #include "SpeechManager-MacBridge.h"
@@ -46,7 +46,7 @@ int16_t Executor::C_SpeechBusySystemWide()
 #endif
 }
 
-OSErr Executor::C_CountVoices(int16_t *numVoices)
+OSErr Executor::C_CountVoices(GUEST<int16_t> *numVoices)
 {
 #ifdef MACOSX
     return MacBridge::CountVoices(numVoices);
@@ -146,7 +146,7 @@ OSErr Executor::C_SetSpeechRate(SpeechChannel chan, Fixed rate)
 #endif
 }
 
-OSErr Executor::C_GetSpeechRate(SpeechChannel chan, Fixed *rate)
+OSErr Executor::C_GetSpeechRate(SpeechChannel chan, GUEST<Fixed> *rate)
 {
 #ifdef MACOSX
     return MacBridge::GetSpeechRate(chan, rate);
@@ -166,7 +166,7 @@ OSErr Executor::C_SetSpeechPitch(SpeechChannel chan, Fixed pitch)
 #endif
 }
 
-OSErr Executor::C_GetSpeechPitch(SpeechChannel chan, Fixed *pitch)
+OSErr Executor::C_GetSpeechPitch(SpeechChannel chan, GUEST<Fixed> *pitch)
 {
 #ifdef MACOSX
     return MacBridge::GetSpeechPitch(chan, pitch);

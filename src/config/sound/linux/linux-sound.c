@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <sys/soundcard.h>
 #include <sys/ipc.h>
@@ -16,7 +16,7 @@
 
 #include "rsys/vdriver.h"
 #include "rsys/sounddriver.h"
-#include "rsys/m68kint.h"
+#include "base/m68kint.h"
 #include "linux-sound.h"
 
 #define NUM_BUFS 2
@@ -265,7 +265,7 @@ bool sound_linux_init(sound_driver_t *s)
     atexit(sound_linux_shutdown_at_exit); /* make sure semid gets freed */
 
     my_callback = callback_install(sound_callback, NULL);
-    *(syn68k_addr_t *)SYN68K_TO_US(M68K_SOUND_VECTOR * 4) = CL(my_callback);
+    *(syn68k_addr_t *)SYN68K_TO_US(M68K_SOUND_VECTOR * 4) = my_callback;
 
     {
         sigset_t all_signals, current_mask;

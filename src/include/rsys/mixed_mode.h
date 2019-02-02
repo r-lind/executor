@@ -6,7 +6,7 @@
 #include "ExMacTypes.h"
 
 #define MODULE_NAME rsys_mixed_mode
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -175,5 +175,7 @@ NOTRAP_FUNCTION(CallUniversalProc);
 
 extern uint32_t ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType procInfo, ISAType fromISA);
 
+static_assert(sizeof(RoutineRecord) == 20);
+static_assert(sizeof(RoutineDescriptor) == 32);
 }
 #endif

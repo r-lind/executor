@@ -12,7 +12,7 @@
 #include "TextEdit.h"
 
 #define MODULE_NAME DialogMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -62,17 +62,11 @@ typedef WindowPtr DialogPtr;
 /* dialog record accessors */
 #define DIALOG_WINDOW(dialog) ((WindowPtr) & ((DialogPeek)dialog)->window)
 
-#define DIALOG_ITEMS_X(dialog) (((DialogPeek)(dialog))->items)
-#define DIALOG_TEXTH_X(dialog) (((DialogPeek)(dialog))->textH)
-#define DIALOG_EDIT_FIELD_X(dialog) (((DialogPeek)(dialog))->editField)
-#define DIALOG_EDIT_OPEN_X(dialog) (((DialogPeek)(dialog))->editOpen)
-#define DIALOG_ADEF_ITEM_X(dialog) (((DialogPeek)(dialog))->aDefItem)
-
-#define DIALOG_ITEMS(dialog) (MR(DIALOG_ITEMS_X(dialog)))
-#define DIALOG_TEXTH(dialog) (MR(DIALOG_TEXTH_X(dialog)))
-#define DIALOG_EDIT_FIELD(dialog) (CW(DIALOG_EDIT_FIELD_X(dialog)))
-#define DIALOG_EDIT_OPEN(dialog) (CW(DIALOG_EDIT_OPEN_X(dialog)))
-#define DIALOG_ADEF_ITEM(dialog) (CW(DIALOG_ADEF_ITEM_X(dialog)))
+#define DIALOG_ITEMS(dialog) (((DialogPeek)(dialog))->items)
+#define DIALOG_TEXTH(dialog) (((DialogPeek)(dialog))->textH)
+#define DIALOG_EDIT_FIELD(dialog) (((DialogPeek)(dialog))->editField)
+#define DIALOG_EDIT_OPEN(dialog) (((DialogPeek)(dialog))->editOpen)
+#define DIALOG_ADEF_ITEM(dialog) (((DialogPeek)(dialog))->aDefItem)
 
 struct DialogTemplate
 {
@@ -92,23 +86,7 @@ typedef DialogTemplate *DialogTPtr;
 
 typedef GUEST<DialogTPtr> *DialogTHndl;
 
-// This has a 50% chance of being right.
-// It does not seem to be used, however.
-typedef struct PACKED
-{
-    unsigned boldItm4 : 1;
-    unsigned boxDrwn4 : 1;
-    unsigned sound4 : 2;
-    unsigned boldItm3 : 1;
-    unsigned boxDrwn3 : 1;
-    unsigned sound3 : 2;
-    unsigned boldItm2 : 1;
-    unsigned boxDrwn2 : 1;
-    unsigned sound2 : 2;
-    unsigned boldItm1 : 1;
-    unsigned boxDrwn1 : 1;
-    unsigned sound1 : 2;
-} StageList;
+typedef int16_t StageList;
 
 struct AlertTemplate
 {
@@ -273,6 +251,11 @@ PASCAL_SUBTRAP(SetDialogTracksCursor, 0xAA68, 0x0306, DialogDispatch);
 extern void AppendDITL(DialogPtr, Handle, DITLMethod);
 extern void ShortenDITL(DialogPtr, int16_t);
 extern int16_t CountDITL(DialogPtr);
+
+static_assert(sizeof(DialogRecord) == 170);
+static_assert(sizeof(DialogTemplate) == 276);
+static_assert(sizeof(StageList) == 2);
+static_assert(sizeof(AlertTemplate) == 12);
 }
 
 #endif /* _DIALOG_H_ */

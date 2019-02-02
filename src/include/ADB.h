@@ -7,11 +7,11 @@
  *
  */
 
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 #include "ExMacTypes.h"
 
 #define MODULE_NAME ADB
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -47,6 +47,9 @@ extern OSErr GetADBInfo(ADBDataBlock *adbp, INTEGER address);
 REGISTER_TRAP2(GetADBInfo, 0xA079, D0(A0,D0));
 extern OSErr SetADBInfo(ADBSetInfoBlock *adbp, INTEGER address);
 REGISTER_TRAP2(SetADBInfo, 0xA07A, D0(A0,D0));
+
+static_assert(sizeof(ADBDataBlock) == 10);
+static_assert(sizeof(ADBSetInfoBlock) == 8);
 }
 
 #endif /* !_ADB_H_ */

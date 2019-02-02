@@ -1,39 +1,16 @@
 #if !defined(_MACROS_H_)
 #define _MACROS_H_
 
-#if !defined(MAX)
-#define MAX(a, b) ({ decltype (a) _maxa = (a); \
-		      decltype (b) _maxb = (b); \
-		      _maxa > _maxb ? _maxa : _maxb; })
-#endif
-
-#if !defined(MIN)
-#define MIN(a, b) ({ decltype (a) _mina = (a); \
-		      decltype (b) _minb = (b); \
-		      _mina < _minb ? _mina : _minb; })
-#endif
-
-#if !defined(ABS)
-#define ABS(x) ({ decltype (x) _absx = (x);  (_absx < 0) ? -_absx : _absx; })
-#endif
-
-#if 0 /* This should be defined by target-os-config.h */
-      /* if we define it here, then we get warning messages when we */
-      /* include target-os-config.h after this file has been included */
-      /* so it's better to just get it from there in the first place */
-
-#if !defined(offsetof)
-#define offsetof(t, f) ((int)&((t *)0)->f)
-#endif
-
-#endif
-
 #if !defined(NELEM)
 #define NELEM(s) (sizeof(s) / sizeof(s)[0])
 #endif
 
 #if !defined(PACKED)
+#ifdef _MSC_VER
+#define PACKED /* FIXME: check where this is used, we might need somethig */
+#else
 #define PACKED __attribute__((packed))
+#endif
 #endif
 
 #if !defined(U)
@@ -42,12 +19,12 @@
 
 #if !defined(ALLOCABEGIN)
 #define ALLOCABEGIN /* nothing */
-#define ALLOCA(n) __builtin_alloca(n)
+#define ALLOCA(n) alloca(n)
 #define ALLOCAEND /* nothing */
 #endif
 
 #define str255assign(d, s) \
-    (BlockMove((Ptr)(s), (Ptr)(d), (Size)((unsigned char)(s)[0]) + 1))
+    (memcpy(d, s, uint8_t((s)[0]) + 1))
 
 #define PATASSIGN(dest, src)                                 \
     (((uint32_t *)(dest))[0] = ((const uint32_t *)(src))[0], \
@@ -62,20 +39,6 @@
                        | (((uint32_t)(uint8_t)(c)) << 8)  \
                        | (((uint32_t)(uint8_t)(d)) << 0))
 
-#define TICK(str) (((LONGINT)(unsigned char)str[0] << 24) | ((LONGINT)(unsigned char)str[1] << 16) | ((LONGINT)(unsigned char)str[2] << 8) | ((LONGINT)(unsigned char)str[3] << 0))
-
-#if 0
-#if !defined(LITTLEENDIAN)
-
-#define TICKX(str) (TICK(str))
-
-#else /* defined(LITTLEENDIAN) */
-
-#define TICKX(str) (((LONGINT)(unsigned char)str[0] << 0) | ((LONGINT)(unsigned char)str[1] << 8) | ((LONGINT)(unsigned char)str[2] << 16) | ((LONGINT)(unsigned char)str[3] << 24))
-
-#endif /* defined(LITTLEENDIAN) */
-#else
-#define TICKX(str) CLC(TICK(str))
-#endif
+#define TICK(str) FOURCC(str[0], str[1], str[2], str[3])
 
 #endif /* !_MACROS_H_ */

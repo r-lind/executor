@@ -20,12 +20,12 @@
 #define CHAR MAC_CHAR
 #define Polygon MAC_Polygon
 
-#include "rsys/common.h"
+#include "base/common.h"
 
-#include "rsys/cquick.h"
-#include "rsys/refresh.h"
-#include "rsys/vdriver.h"
-#include "rsys/flags.h"
+#include "quickdraw/cquick.h"
+#include "vdriver/refresh.h"
+#include "vdriver/vdriver.h"
+#include "commandline/flags.h"
 
 /* Global Variables */
 extern const char *Win_AppName;

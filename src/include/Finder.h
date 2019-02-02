@@ -10,7 +10,7 @@
 #include "ExMacTypes.h"
 
 #define MODULE_NAME Finder
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -94,5 +94,6 @@ REGISTER_SUBTRAP2(PBDTOpenInform, 0xA260, 0x2E, FSDispatch, D0(A0));
 extern OSErr PBDTDelete(DTPBPtr dtp, BOOLEAN async);
 FILE_SUBTRAP(PBDTDelete, DTPBPtr, 0xA260, 0x2F, FSDispatch);
 
+static_assert(sizeof(DTPBRec) == 104);
 }
 #endif

@@ -7,7 +7,7 @@
  * a different way to drive SDL's sound.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <sys/ipc.h>
 #include <sys/sem.h>
@@ -17,9 +17,9 @@
 #include <sched.h>
 #include <pthread.h>
 
-#include "rsys/vdriver.h"
-#include "rsys/sounddriver.h"
-#include "rsys/m68kint.h"
+#include "vdriver/vdriver.h"
+#include "sound/sounddriver.h"
+#include "base/m68kint.h"
 #include "sdl-sound.h"
 #include <SDL_Audio.h>
 
@@ -30,7 +30,7 @@ enum
     NON_RUNNING_SOUND_RATE = 22255
 };
 
-static char *sdl_audio_driver_name = NULL;
+static char *sdl_audio_driver_name = nullptr;
 
 void
 ROMlib_set_sdl_audio_driver_name(const char *str)
@@ -40,7 +40,7 @@ ROMlib_set_sdl_audio_driver_name(const char *str)
     if(str)
         sdl_audio_driver_name = strdup(str);
     else
-        sdl_audio_driver_name = NULL;
+        sdl_audio_driver_name = nullptr;
 }
 
 /* Wait on the semaphore (atomic decrement) */
@@ -57,7 +57,7 @@ void SDLSound::patl_wait(void)
             continue;
         if(errno != EIDRM)
             perror("semop failed");
-        pthread_exit(NULL);
+        pthread_exit(nullptr);
     }
 }
 
@@ -127,7 +127,7 @@ SDLSound::sdl_write(const void *buf, size_t len)
     if(sdl_stream)
     {
         memcpy(sdl_stream, buf, len);
-        sdl_stream = NULL;
+        sdl_stream = nullptr;
     }
 
     return len;
@@ -171,7 +171,7 @@ void SDLSound::sound_shutdown()
         have_sound_p = false;
     }
 
-    sdl_stream = NULL;
+    sdl_stream = nullptr;
 }
 
 void SDLSound::sound_clear_pending()
@@ -216,7 +216,7 @@ SDLSound::loop(void *unused)
         }
     }
 
-    return NULL; /* won't get here */
+    return nullptr; /* won't get here */
 }
 
 void SDLSound::hunger_callback(void *unused, Uint8 *stream, int len)
@@ -251,7 +251,7 @@ bool SDLSound::sound_init()
     semid = -1; /* Semaphore id */
     sound_on = 0; /* 1 if we are generating interrupts */
     t1 = 0;
-    sdl_stream = NULL;
+    sdl_stream = nullptr;
     ROMlib_SND_RATE = NON_RUNNING_SOUND_RATE; /* we need to set this to something,
                            in case we don't succeed when we
                            try to initialize.  May as well set
@@ -268,7 +268,7 @@ bool SDLSound::sound_init()
 
         err = SDL_GetError();
         fprintf(stderr, "SDL_Init(SDL_INIT_AUDIO) failed: '%s'\n",
-                err ? err : "(NULL)");
+                err ? err : "(nullptr)");
         return false;
     }
 
@@ -283,7 +283,7 @@ bool SDLSound::sound_init()
         if(!success)
         {
             fprintf(stderr, "Wanted '%s', got '%s'", sdl_audio_driver_name,
-                    sanity_check_name ? sanity_check_name : "NULL");
+                    sanity_check_name ? sanity_check_name : "nullptr");
             return false;
         }
     }
@@ -301,9 +301,9 @@ bool SDLSound::sound_init()
 #define SDL_OpenAudioEx(a, b, c, d) SDL_OpenAudio(a, b)
 #endif
 
-    if(SDL_OpenAudioEx(&spec, NULL, sdl_audio_driver_name, 0) < 0)
+    if(SDL_OpenAudioEx(&spec, nullptr, sdl_audio_driver_name, 0) < 0)
     {
-        if(!sdl_audio_driver_name || SDL_OpenAudioEx(&spec, NULL, NULL, 0) < 0)
+        if(!sdl_audio_driver_name || SDL_OpenAudioEx(&spec, nullptr, nullptr, 0) < 0)
         {
             fprintf(stderr, "SDL_OpenAudio failed '%s'\n", SDL_GetError());
             goto fail;
@@ -337,7 +337,7 @@ bool SDLSound::sound_init()
 
     atexit(sound_sdl_shutdown_at_exit); /* make sure semid gets freed */
 
-    my_callback = callback_install(sound_callback, NULL);
+    my_callback = callback_install(sound_callback, nullptr);
     *(syn68k_addr_t *)SYN68K_TO_US(M68K_SOUND_VECTOR * 4) = BigEndianValue(my_callback);
 
     {
@@ -348,7 +348,7 @@ bool SDLSound::sound_init()
         sigdelset(&all_signals, SIGIO);
         sigprocmask(SIG_SETMASK, &all_signals, &current_mask);
         //    fprintf (stderr, "about to start thread\n");
-        sysret = pthread_create(&thread, NULL, loop, this);
+        sysret = pthread_create(&thread, nullptr, loop, this);
         sigprocmask(SIG_SETMASK, &current_mask, 0);
     }
     if(sysret != 0)

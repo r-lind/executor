@@ -4,7 +4,7 @@
 
 /* Forward declarations in ResourceMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "rsys/appearance.h"
 
 #include "ResourceMgr.h"
@@ -12,8 +12,8 @@
 #include "MemoryMgr.h"
 #include "OSUtil.h"
 
-#include "rsys/error.h"
-#include "rsys/options.h"
+#include "error/error.h"
+#include "prefs/options.h"
 
 using namespace Executor;
 
@@ -97,7 +97,7 @@ AddResourceRN(INTEGER rn, Handle h, ResType type, INTEGER id, Str255 name)
                 warning_unexpected("err = %d", err);
             else
             {
-                memcpy(STARH(current_handle), STARH(h), new_size);
+                memcpy(*current_handle, *h, new_size);
 
                 /* NOTE: we don't call ChangedResource because we don't
 		 care if this change gets lost.  In fact, we will try
@@ -116,8 +116,8 @@ AddResourceRN(INTEGER rn, Handle h, ResType type, INTEGER id, Str255 name)
         INTEGER savern;
         GUEST<Handle> hh;
 
-        hh = RM(h);
-        if(HandleZone(h) != MR(LM(SysZone)))
+        hh = h;
+        if(HandleZone(h) != LM(SysZone))
         {
             Handle save_hand;
 
@@ -127,7 +127,7 @@ AddResourceRN(INTEGER rn, Handle h, ResType type, INTEGER id, Str255 name)
         }
         savern = CurResFile();
         UseResFile(rn);
-        AddResource(MR(hh), type, id, name);
+        AddResource(hh, type, id, name);
         UseResFile(savern);
     }
 }
@@ -170,7 +170,7 @@ silently_replace_resources(INTEGER master_file_rn, INTEGER from_file_rn)
     INTEGER save_resload;
 
     save_zone = GetZone();
-    SetZone(MR(LM(SysZone)));
+    SetZone(LM(SysZone));
     type_num_max = CountTypesRN(from_file_rn);
     save_resload = LM(ResLoad);
     SetResLoad(false);
@@ -181,7 +181,7 @@ silently_replace_resources(INTEGER master_file_rn, INTEGER from_file_rn)
         INTEGER res_num, res_num_max;
 
         GetIndTypeRN(from_file_rn, &type_s, type_num);
-        type = CL(type_s);
+        type = type_s;
         res_num_max = CountResourcesRN(from_file_rn, type);
         for(res_num = 1; res_num <= res_num_max; ++res_num)
         {
@@ -194,7 +194,7 @@ silently_replace_resources(INTEGER master_file_rn, INTEGER from_file_rn)
 
             h = GetIndResourceRN(from_file_rn, type, res_num);
             GetResInfo(h, &id_s, &t, name);
-            id = CW(id_s);
+            id = id_s;
             LoadResource(h);
             DetachResource(h);
             AddResourceRN(master_file_rn, h, type, id, name);
@@ -209,10 +209,10 @@ Executor::ROMlib_set_appearance(void)
 {
     INTEGER res_file;
 
-    res_file = OpenRFPerm(res_filenames[appearance], CW(LM(BootDrive)), fsRdPerm);
+    res_file = OpenRFPerm(res_filenames[appearance], LM(BootDrive), fsRdPerm);
     if(res_file != -1)
     {
-        silently_replace_resources(CW(LM(SysMap)), res_file);
+        silently_replace_resources(LM(SysMap), res_file);
         CloseResFile(res_file);
     }
     else if(appearance != 0)

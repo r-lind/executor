@@ -15,12 +15,9 @@ struct finderinfo
     GUEST<AppFile[1]> files;
 };
 
-extern void SFSaveDisk_Update(INTEGER vrefnum, Str255 filename);
-
-extern char *ROMlib_undotdot(char *origp);
-
 extern void ROMlib_seginit(LONGINT argc, char **argv);
 extern void empty_timer_queues(void);
-}
 
+static_assert(sizeof(finderinfo) == 268);
+}
 #endif /* !_SEGMENT_H_ */

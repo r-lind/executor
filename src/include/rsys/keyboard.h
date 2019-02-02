@@ -1,5 +1,8 @@
 #if !defined(_RSYS_KEYBOARD_H_)
 #define _RSYS_KEYBOARD_H_
+
+#include <ExMacTypes.h>
+
 namespace Executor
 {
 /*
@@ -27,10 +30,10 @@ struct completer_t
     GUEST<completer_pair_t> completer_recs[0]; /* VARIABLE LENGTH */
 };
 
-#define COMPLETER_N_RECS_X(p) ((p)->n_recs)
-#define COMPLETER_COMPLETER_RECS_X(p) ((p)->completer_recs)
+#define COMPLETER_N_RECS(p) ((p)->n_recs)
+#define COMPLETER_COMPLETER_RECS(p) ((p)->completer_recs)
 
-#define COMPLETER_N_RECS(p) (CW(COMPLETER_N_RECS_X(p)))
+
 
 struct dead_key_rec_t
 {
@@ -38,23 +41,23 @@ struct dead_key_rec_t
     GUEST<modifier_table_number_t> table_number;
     GUEST<virt_key_t> virt_key;
     GUEST<completer_t> completer; /* VARIABLE LENGTH */
-    GUEST<unsigned char> filler;
-    GUEST<unsigned char> no_match;
+    //GUEST<unsigned char> filler;
+    //GUEST<unsigned char> no_match;
 };
 
-#define DEAD_KEY_TABLE_NUMBER_X(p) ((p)->table_number)
-#define DEAD_KEY_VIRT_KEY_X(p) ((p)->virt_key)
-#define DEAD_KEY_COMPLETER_X(p) ((p)->completer)
+#define DEAD_KEY_TABLE_NUMBER(p) ((p)->table_number)
+#define DEAD_KEY_VIRT_KEY(p) ((p)->virt_key)
+#define DEAD_KEY_COMPLETER(p) ((p)->completer)
 
-#define DEAD_KEY_NO_MATCH_X(p) (*((unsigned char *)&DEAD_KEY_COMPLETER_X(p)    \
-                                  + sizeof(DEAD_KEY_COMPLETER_X(p))            \
-                                  + COMPLETER_N_RECS(&DEAD_KEY_COMPLETER_X(p)) \
+#define DEAD_KEY_NO_MATCH(p) (*((unsigned char *)&DEAD_KEY_COMPLETER(p)    \
+                                  + sizeof(DEAD_KEY_COMPLETER(p))            \
+                                  + COMPLETER_N_RECS(&DEAD_KEY_COMPLETER(p)) \
                                       * sizeof(completer_pair_t)               \
                                   + 1))
 
-#define DEAD_KEY_TABLE_NUMBER(p) (CB(DEAD_KEY_TABLE_NUMBER_X(p)))
-#define DEAD_KEY_VIRT_KEY(p) (CB(DEAD_KEY_VIRT_KEY_X(p)))
-#define DEAD_KEY_NO_MATCH(p) (CB(DEAD_KEY_NO_MATCH_X(p)))
+
+
+
 
 typedef struct kchr_str
 {
@@ -63,25 +66,25 @@ typedef struct kchr_str
     GUEST<modifier_table_number_t[256]> modifier_table;
     GUEST<INTEGER> n_tables;
     GUEST<unsigned char> table[0][128]; /* VARIABLE LENGTH */
-    GUEST<INTEGER> n_dead_key_recs;
-    GUEST<dead_key_rec_t> dead_key_recs[0]; /* VARIABLE LENGTH */
+    //GUEST<INTEGER> n_dead_key_recs;
+    //GUEST<dead_key_rec_t> dead_key_recs[0]; /* VARIABLE LENGTH */
 } * kchr_ptr_t;
 
 typedef GUEST<kchr_ptr_t> *kchr_hand;
 
-#define KCHR_VERSION_X(p) ((p)->version)
-#define KCHR_MODIFIER_TABLE_X(p) ((p)->modifier_table)
-#define KCHR_N_TABLES_X(p) ((p)->n_tables)
-#define KCHR_TABLE_X(p) ((p)->table)
+#define KCHR_VERSION(p) ((p)->version)
+#define KCHR_MODIFIER_TABLE(p) ((p)->modifier_table)
+#define KCHR_N_TABLES(p) ((p)->n_tables)
+#define KCHR_TABLE(p) ((p)->table)
 
-#define KCHR_N_DEAD_KEY_RECS_X(p) (*(GUEST<INTEGER> *)(KCHR_TABLE_X(p) \
+#define KCHR_N_DEAD_KEY_RECS(p) (*(GUEST<INTEGER> *)(KCHR_TABLE(p) \
                                                        + KCHR_N_TABLES(p)))
 
-#define KCHR_DEAD_KEY_RECS_X(p) ((dead_key_rec_t *)(&KCHR_N_DEAD_KEY_RECS_X(p) + 1))
+#define KCHR_DEAD_KEY_RECS(p) ((dead_key_rec_t *)(&KCHR_N_DEAD_KEY_RECS(p) + 1))
 
-#define KCHR_VERSION(p) (CW(KCHR_VERSION_X(p)))
-#define KCHR_N_TABLES(p) (CW(KCHR_N_TABLES_X(p)))
-#define KCHR_N_DEAD_KEY_RECS(p) (CW(KCHR_N_DEAD_KEY_RECS_X(p)))
+
+
+
 
 /* MKV prefix denotes a true mac virtual key code (as opposed to the
    ones I made up) */
@@ -208,5 +211,10 @@ typedef GUEST<kchr_ptr_t> *kchr_hand;
 #define MKV_RESET 0x7f
 
 extern unsigned char ibm_virt_to_mac_virt[];
+
+static_assert(sizeof(completer_pair_t) == 2);
+static_assert(sizeof(completer_t) == 2);
+static_assert(sizeof(dead_key_rec_t) == 4);
+static_assert(sizeof(kchr_str) == 260);
 }
 #endif /* !defined(_RSYS_KEYBOARD_H_) */

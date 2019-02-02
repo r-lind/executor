@@ -4,8 +4,7 @@
 
 /* Forward declarations in BinaryDecimal.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
-#include "rsys/glue.h"
+#include "base/common.h"
 #include "BinaryDecimal.h"
 
 using namespace Executor;

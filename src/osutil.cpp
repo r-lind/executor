@@ -4,7 +4,7 @@
 
 /* Forward declarations in OSUtil.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "FileMgr.h"
 #include "EventMgr.h"
@@ -16,19 +16,15 @@
 #include "MenuMgr.h"
 #include "ToolboxEvent.h"
 
-#include "rsys/glue.h"
-#include "rsys/notmac.h"
-#include "rsys/mman.h"
-#include "rsys/blockinterrupts.h"
-#include "rsys/trapglue.h"
+#include "mman/mman.h"
+#include "base/trapglue.h"
 #include "rsys/osutil.h"
-#include "rsys/host.h"
-#include "rsys/time.h"
+#include "time/time.h"
 #include "rsys/toolevent.h"
-#include "rsys/stdfile.h"
-#include "rsys/syncint.h"
-#include "rsys/emustubs.h"
-#include "rsys/cpu.h"
+#include "time/syncint.h"
+#include "base/emustubs.h"
+#include "base/cpu.h"
+#include "vdriver/vdriver.h"   /* for beepAtUser */
 #include <PowerCore.h>
 
 using namespace Executor;
@@ -50,7 +46,7 @@ OSErr Executor::HandToHand(GUEST<Handle> *hp)
         /*-->*/ return nilHandleErr;
     }
 
-    s = GetHandleSize(MR(*hp));
+    s = GetHandleSize(*hp);
     if((err = MemError()))
         /*-->*/ return (err);
 
@@ -58,8 +54,8 @@ OSErr Executor::HandToHand(GUEST<Handle> *hp)
     if((err = MemError()))
         /*-->*/ return (err);
 
-    BlockMove(STARH(MR(*hp)), STARH(nh), s);
-    *hp = RM(nh);
+    BlockMove(**hp, *nh, s);
+    *hp = nh;
     return noErr;
 }
 
@@ -76,10 +72,10 @@ OSErr Executor::PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s)
     nh = NewHandle(s);
     if((err = MemError()))
         return (err);
-    BlockMove(p, STARH(nh), s);
+    BlockMove(p, *nh, s);
     if((err = MemError()))
         return (err);
-    *h = RM(nh);
+    *h = nh;
     return (noErr);
 }
 
@@ -93,7 +89,7 @@ OSErr Executor::PtrToXHand(Ptr p, Handle h, LONGINT s)
     SetHandleSize(h, s);
     if((err = MemError()))
         return (err);
-    BlockMove(p, STARH(h), s);
+    BlockMove(p, *h, s);
     if((err = MemError()))
         return (err);
     return (noErr);
@@ -107,7 +103,7 @@ OSErr Executor::HandAndHand(Handle h1, Handle h2)
     SetHandleSize(h2, s1 + s2);
     if((err = MemError()))
         return (err);
-    BlockMove(STARH(h1), STARH(h2) + s2, s1);
+    BlockMove(*h1, *h2 + s2, s1);
     if((err = MemError()))
         return (err);
     return (noErr);
@@ -121,7 +117,7 @@ OSErr Executor::PtrAndHand(Ptr p, Handle h, LONGINT s1)
     SetHandleSize(h, s1 + s2);
     if((err = MemError()))
         return (err);
-    BlockMove(p, STARH(h) + s2, s1);
+    BlockMove(p, *h + s2, s1);
     if((err = MemError()))
         return (err);
     return (noErr);
@@ -207,11 +203,11 @@ static unsigned char order[256] = {
     0xF0, 0xF1, 0xF2, 0xF3, 0xF4, 0xF5, 0xF6, 0xF7, 0xF8, 0xF9, 0xFA, 0xFB, 0xFC, 0xFD, 0xFE, 0xFF,
 };
 
-LONGINT Executor::ROMlib_RelString(unsigned char *s1, unsigned char *s2,
+LONGINT Executor::ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
                                    BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0)
 {
     INTEGER n1, n2;
-    unsigned char *s, *t;
+    const unsigned char *s, *t;
     unsigned char c1, c2;
 
     s = s1;
@@ -338,9 +334,9 @@ void Executor::GetDateTime(GUEST<ULONGINT> *mactimepointer)
     {
         unsigned long msecs;
         msecs = msecs_elapsed();
-        *mactimepointer = CL(UNIXTIMETOMACTIME(ROMlib_start_time.tv_sec)
+        *mactimepointer = UNIXTIMETOMACTIME(ROMlib_start_time.tv_sec)
                              + (((ROMlib_start_time.tv_usec / 1000) + msecs)
-                                / 1000));
+                                / 1000);
     }
 }
 
@@ -526,7 +522,7 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
         warning_unexpected(NULL_STRING);
 
     if(dayofweekp)
-        *dayofweekp = CW((mactime / N_SECS_IN_DAY + 5) % 7 + 1);
+        *dayofweekp = (mactime / N_SECS_IN_DAY + 5) % 7 + 1;
 
     if(mactime >= (1LL << 32))
     {
@@ -547,7 +543,7 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
         approx_year++;
         secs_left -= secs_approx_year;
     }
-    *yearp = CW(approx_year + 1904);
+    *yearp = approx_year + 1904;
 
     if(secs_left < 0)
     {
@@ -559,10 +555,10 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
     }
 
     if(dayofyearp)
-        *dayofyearp = CW(secs_left / N_SECS_IN_DAY + 1);
+        *dayofyearp = secs_left / N_SECS_IN_DAY + 1;
 
     if(weekofyearp)
-        *weekofyearp = CW(secs_left / N_SECS_IN_DAY / 7 + 1);
+        *weekofyearp = secs_left / N_SECS_IN_DAY / 7 + 1;
 
     if(isleap(approx_year + 1904))
     {
@@ -580,21 +576,21 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
             ;
         secs_left -= secsinmonths(month);
     }
-    *monthp = CW(month + 1);
+    *monthp = month + 1;
 
     day = secs_left / N_SECS_IN_DAY;
-    *dayp = CW(day + 1);
+    *dayp = day + 1;
     secs_left -= day * N_SECS_IN_DAY;
 
     hour = secs_left / N_SECS_IN_HOUR;
-    *hourp = CW(hour);
+    *hourp = hour;
     secs_left -= hour * N_SECS_IN_HOUR;
 
     minute = secs_left / N_SECS_IN_MINUTE;
-    *minutep = CW(minute);
+    *minutep = minute;
     secs_left -= minute * N_SECS_IN_MINUTE;
 
-    *secondp = CW(secs_left);
+    *secondp = secs_left;
 }
 
 /* end of code to test */
@@ -607,9 +603,9 @@ void Executor::DateToSeconds(DateTimeRec *d, GUEST<ULONGINT> *s)
 {
     long long l;
 
-    l = ROMlib_long_long_secs(CW(d->year), CW(d->month), CW(d->day),
-                              CW(d->hour), CW(d->minute), CW(d->second));
-    *s = CL((ULONGINT)l);
+    l = ROMlib_long_long_secs(d->year, d->month, d->day,
+                              d->hour, d->minute, d->second);
+    *s = (ULONGINT)l;
 }
 
 void Executor::SecondsToDate(ULONGINT mactime, DateTimeRec *d)
@@ -624,7 +620,7 @@ void Executor::GetTime(DateTimeRec *d)
     GUEST<ULONGINT> secs;
 
     GetDateTime(&secs);
-    SecondsToDate(CL(secs), d);
+    SecondsToDate(secs, d);
 }
 
 void Executor::SetTime(DateTimeRec *d)
@@ -632,7 +628,7 @@ void Executor::SetTime(DateTimeRec *d)
     GUEST<ULONGINT> secs;
 
     DateToSeconds(d, &secs);
-    SetDateTime(CL(secs));
+    SetDateTime(secs);
 }
 
 typedef enum { Read,
@@ -643,11 +639,11 @@ typedef enum { Read,
 static void setdefaults()
 {
     LM(SPValid) = VALID;
-    LM(SPAlarm) = CLC(0);
+    LM(SPAlarm) = 0;
     LM(SPATalkB) = LM(SPATalkA) = LM(SPConfig) = 0;
-    LM(SPPortB) = LM(SPPortA) = CW(baud9600 | stop10 | data8 | noParity);
+    LM(SPPortB) = LM(SPPortA) = baud9600 | stop10 | data8 | noParity;
     LM(SPPrint) = 0;
-    LM(SPFont) = CW(geneva - 1);
+    LM(SPFont) = geneva - 1;
     LM(SPKbd) = 0x63;
     LM(SPVolCtl) = 3;
     LM(SPClikCaret) = 0x88;
@@ -659,13 +655,13 @@ static OSErr openparam(GUEST<INTEGER> *rnp)
     static char paramname[] = PARAMRAMMACNAME;
     OSErr err;
 
-    err = FSOpen((StringPtr)paramname, Cx(LM(BootDrive)), rnp);
+    err = FSOpen((StringPtr)paramname, LM(BootDrive), rnp);
     if(err == fnfErr)
     {
-        if((err = Create((StringPtr)paramname, Cx(LM(BootDrive)), TICK("unix"),
+        if((err = Create((StringPtr)paramname, LM(BootDrive), TICK("unix"),
                          TICK("pram")))
            == noErr)
-            err = FSOpen((StringPtr)paramname, Cx(LM(BootDrive)), rnp);
+            err = FSOpen((StringPtr)paramname, LM(BootDrive), rnp);
     }
     return err;
 }
@@ -697,11 +693,11 @@ static void deriveglobals()
     gmtimenow = (tmg.tm_yday * 24 * 60 * 60) + (tmg.tm_hour * 60 * 60) + (tmg.tm_min * 60) + tmg.tm_sec;
     ROMlib_GMTcorrect = gmtimenow - ltimenow;
 
-    LM(KeyThresh) = CW((short)((LM(SPKbd) >> 4) & 0xF) * 4);
-    LM(KeyRepThresh) = CW((short)(LM(SPKbd) & 0xF) * 4);
-    LM(MenuFlash) = CW((short)(LM(SPMisc2) >> 2) & 3);
-    LM(CaretTime) = CL((short)(LM(SPClikCaret) & 0xF) * 4);
-    LM(DoubleTime) = CL((short)(LM(SPClikCaret) & 0xF0) / 4);
+    LM(KeyThresh) = (short)((LM(SPKbd) >> 4) & 0xF) * 4;
+    LM(KeyRepThresh) = (short)(LM(SPKbd) & 0xF) * 4;
+    LM(MenuFlash) = (short)(LM(SPMisc2) >> 2) & 3;
+    LM(CaretTime) = (short)(LM(SPClikCaret) & 0xF) * 4;
+    LM(DoubleTime) = (short)(LM(SPClikCaret) & 0xF0) / 4;
 }
 
 OSErr Executor::InitUtil() /* IMII-380 */
@@ -717,8 +713,8 @@ OSErr Executor::InitUtil() /* IMII-380 */
 #endif
     if((err = openparam(&rn)) == noErr)
     {
-        count = CLC(sizeof(sp));
-        if(FSRead(CW(rn), &count, (Ptr)&sp) == noErr && sp.valid == VALID && count == CLC(sizeof(sp)))
+        count = sizeof(sp);
+        if(FSRead(rn, &count, (Ptr)&sp) == noErr && sp.valid == VALID && count == sizeof(sp))
         {
             LM(SPValid) = sp.valid;
             LM(SPATalkA) = sp.aTalkA;
@@ -728,11 +724,11 @@ OSErr Executor::InitUtil() /* IMII-380 */
             LM(SPPortB) = sp.portB;
             LM(SPAlarm) = sp.alarm;
             LM(SPFont) = sp.font;
-            LM(SPKbd) = CW(sp.kbdPrint) >> 8;
-            LM(SPPrint) = CW(sp.kbdPrint);
-            LM(SPVolCtl) = CW(sp.volClik) >> 8;
-            LM(SPClikCaret) = CW(sp.volClik);
-            LM(SPMisc2) = CW(sp.misc);
+            LM(SPKbd) = sp.kbdPrint >> 8;
+            LM(SPPrint) = sp.kbdPrint;
+            LM(SPVolCtl) = sp.volClik >> 8;
+            LM(SPClikCaret) = sp.volClik;
+            LM(SPMisc2) = sp.misc;
             badread = false;
         }
         else
@@ -744,7 +740,7 @@ OSErr Executor::InitUtil() /* IMII-380 */
     if(err)
         err = prInitErr;
     else
-        err = FSClose(CW(rn));
+        err = FSClose(rn);
     return err;
 }
 
@@ -771,9 +767,9 @@ OSErr Executor::WriteParam() /* IMII-382 */
         sp.portB = LM(SPPortB);
         sp.alarm = LM(SPAlarm);
         sp.font = LM(SPFont);
-        sp.kbdPrint = CW((short)(LM(SPKbd) << 8) | (LM(SPPrint) & 0xff));
-        sp.volClik = CW((short)(LM(SPVolCtl) << 8) | (LM(SPClikCaret) & 0xff));
-        sp.misc = CW(LM(SPMisc2));
+        sp.kbdPrint = (short)(LM(SPKbd) << 8) | (LM(SPPrint) & 0xff);
+        sp.volClik = (short)(LM(SPVolCtl) << 8) | (LM(SPClikCaret) & 0xff);
+        sp.misc = LM(SPMisc2);
         count = sizeof(sp);
         if(FSWrite(rn, guestref(count), (Ptr)&sp) == noErr && count == sizeof(sp))
             err = noErr;
@@ -789,43 +785,37 @@ OSErr Executor::WriteParam() /* IMII-382 */
 void Executor::Enqueue(QElemPtr e, QHdrPtr h)
 {
     GUEST<QElemPtr> *qpp;
-    virtual_int_state_t block;
 
-    block = block_virtual_ints();
-    for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && MR(*qpp) != e;
-        qpp = (GUEST<QElemPtr> *)MR(*qpp))
+    for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && *qpp != e;
+        qpp = (GUEST<QElemPtr> *)*qpp)
         ;
     if(!*qpp)
     {
         e->evQElem.qLink = 0;
         if(h->qTail)
-            MR(h->qTail)->evQElem.qLink = RM(e);
+            h->qTail->evQElem.qLink = e;
         else
-            h->qHead = RM(e);
-        h->qTail = RM(e);
+            h->qHead = e;
+        h->qTail = e;
     }
-    restore_virtual_ints(block);
 }
 
 OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
 {
-    GUEST<QElemPtr> *qpp;
+    GUEST<QElemPtr> *qpp;       // ### HORRIBLE REINTERPRET-CASTING CODE OBFUSCATION....
     OSErr retval;
-    virtual_int_state_t block;
 
     retval = qErr;
-    block = block_virtual_ints();
-    for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && MR(*qpp) != e;
-        qpp = (GUEST<QElemPtr> *)MR(*qpp))
+    for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && *qpp != e;
+        qpp = (GUEST<QElemPtr> *)*qpp)
         ;
     if(*qpp)
     {
         *qpp = e->evQElem.qLink;
-        if(MR(h->qTail) == e)
-            h->qTail = qpp == (GUEST<QElemPtr> *)&h->qHead ? nullptr : RM((QElemPtr)qpp);
+        if(h->qTail == e)
+            h->qTail = (qpp == (GUEST<QElemPtr> *)&h->qHead) ? nullptr : (QElemPtr)qpp;
         retval = noErr;
     }
-    restore_virtual_ints(block);
     return retval;
 }
 
@@ -847,7 +837,7 @@ void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
         TMTask tm;
         shouldbeawake = false;
 
-        tm.tmAddr = RM((ProcPtr)&ROMlib_wakeup);
+        tm.tmAddr = (ProcPtr)&ROMlib_wakeup;
         InsTime((QElemPtr)&tm);
 
         //      fprintf (stderr, "p");
@@ -855,25 +845,18 @@ void Executor::Delay(LONGINT n, GUEST<LONGINT> *ftp) /* IMII-384 */
         PrimeTime((QElemPtr)&tm, n * 1000 / 60);
         while(!shouldbeawake)
         {
-            syncint_wait();
-            check_virtual_interrupt();
+            syncint_wait_interrupt();
         }
         RmvTime((QElemPtr)&tm);
     }
 
     if(ftp)
-        *ftp = CL(TickCount());
+        *ftp = TickCount();
 }
 
 void Executor::C_SysBeep(INTEGER i) /* SYSTEM DEPENDENT */
 {
-#if defined(MAC)
-    DebugStr("\004Beep");
-#elif defined(X) || defined(MACOSX_) || defined(CYGWIN32)
-    host_beep_at_user();
-#else
-    write(1, "\7", 1);
-#endif
+    vdriver->beepAtUser();
 }
 
 char Executor::ROMlib_phoneyrom[10] = {
@@ -887,8 +870,8 @@ void Executor::Environs(GUEST<INTEGER> *rom, GUEST<INTEGER> *machine)
     rom8 = ((unsigned char *)ROMlib_phoneyrom)[8];
     rom9 = ((unsigned char *)ROMlib_phoneyrom)[9];
 
-    *rom = CW(rom9);
-    *machine = CW(rom8 + 1);
+    *rom = rom9;
+    *machine = rom8 + 1;
 }
 
 INTEGER ROMlib_processor = env68040;
@@ -897,14 +880,14 @@ OSErr Executor::SysEnvirons(INTEGER vers, SysEnvRecPtr p)
 {
     if(vers <= 0)
         /*-->*/ return envBadVers;
-    p->environsVersion = CW(vers);
-    p->machineType = CWC(53);
+    p->environsVersion = vers;
+    p->machineType = 53;
     p->systemVersion = LM(SysVersion);
 
-    p->processor = CWC(env68040);
+    p->processor = env68040;
     p->hasFPU = false;
     p->hasColorQD = true;
-    p->keyBoardType = CWC(envAExtendKbd);
+    p->keyBoardType = envAExtendKbd;
     p->atDrvrVersNum = 0;
     p->sysVRefNum = LM(BootDrive);
 
@@ -923,12 +906,12 @@ void Executor::RestoreA5()
 
 void Executor::GetMMUMode(GUEST<INTEGER> *ip) /* IMV-592 */
 {
-    *ip = CWC(TRUE32b);
+    *ip = TRUE32b;
 }
 
 void Executor::SwapMMUMode(Byte *bp) /* IMV-593 */
 {
-    *bp = CB(TRUE32b);
+    *bp = TRUE32b;
 }
 
 LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
@@ -988,7 +971,7 @@ LONGINT Executor::C_GetToolTrapAddress(INTEGER trap_no)
     d0 = trap_no;
     ROMlib_GetTrapAddress_helper(&d0, 0xA746, &a0);
     retval = (LONGINT)a0;
-    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    warning_trace_info("trap = 0x%x, retval = 0x%08x", trap_no, retval);
     return retval;
 }
 
@@ -1000,7 +983,7 @@ LONGINT Executor::C_GetOSTrapAddress(INTEGER trap_no)
     d0 = trap_no;
     ROMlib_GetTrapAddress_helper(&d0, 0xA346, &a0);
     retval = (LONGINT)a0;
-    warning_trace_info("trap = 0x%x, retval = %p", trap_no, retval);
+    warning_trace_info("trap = 0x%x, retval = 0x%08x", trap_no, retval);
     return retval;
 }
 

@@ -2,17 +2,18 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "FileMgr.h"
 #include "MemoryMgr.h"
 
 #include "rsys/mixed_mode.h"
 
-#include "rsys/file.h"
-#include <rsys/cpu.h>
+#include "file/file.h"
+#include <base/cpu.h>
 #include <PowerCore.h>
 #include <cassert>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -22,29 +23,29 @@ UniversalProcPtr Executor::C_NewRoutineDescriptor(
     UniversalProcPtr retval;
 
     if(!proc)
-        retval = NULL;
+        retval = nullptr;
     else
     {
         RoutineDescriptor *p;
 
         p = (RoutineDescriptor *)NewPtr(sizeof *p);
-        p->goMixedModeTrap = CWC(MIXED_MODE_TRAP);
+        p->goMixedModeTrap = MIXED_MODE_TRAP;
         ROMlib_destroy_blocks((syn68k_addr_t)
                                   US_TO_SYN68K(&p->goMixedModeTrap),
                               2, true);
-        p->version = CBC(kRoutineDescriptorVersion);
-        p->routineDescriptorFlags = CBC(0);
-        p->reserved1 = CLC(0);
-        p->reserved2 = CBC(0);
-        p->selectorInfo = CBC(0);
-        p->routineCount = CWC(0);
-        p->routineRecords[0].procInfo = CL(info);
-        p->routineRecords[0].reserved1 = CBC(0);
-        p->routineRecords[0].ISA = CB(isa);
-        p->routineRecords[0].routineFlags = CWC(kSelectorsAreNotIndexable);
-        p->routineRecords[0].procDescriptor = RM(proc);
-        p->routineRecords[0].reserved2 = CLC(0);
-        p->routineRecords[0].selector = CLC(0);
+        p->version = kRoutineDescriptorVersion;
+        p->routineDescriptorFlags = 0;
+        p->reserved1 = 0;
+        p->reserved2 = 0;
+        p->selectorInfo = 0;
+        p->routineCount = 0;
+        p->routineRecords[0].procInfo = info;
+        p->routineRecords[0].reserved1 = 0;
+        p->routineRecords[0].ISA = isa;
+        p->routineRecords[0].routineFlags = kSelectorsAreNotIndexable;
+        p->routineRecords[0].procDescriptor = proc;
+        p->routineRecords[0].reserved2 = 0;
+        p->routineRecords[0].selector = 0;
         retval = (UniversalProcPtr)p;
     }
     return retval;
@@ -61,7 +62,7 @@ UniversalProcPtr Executor::C_NewFatRoutineDescriptor(
 {
     warning_unimplemented(NULL_STRING);
     *(long *)-1 = -1; /* abort */
-    return NULL;
+    return nullptr;
 }
 
 OSErr Executor::C_SaveMixedModeState(void *statep, uint32_t vers)
@@ -100,9 +101,9 @@ namespace
             case 1:
                 return *((uint8_t*)p);
             case 2:
-                return CW(*(GUEST<uint16_t>*)p);
+                return *(GUEST<uint16_t>*)p;
             case 3:
-                return CL(*(GUEST<uint32_t>*)p);
+                return *(GUEST<uint32_t>*)p;
             default:
                 std::abort();
         }
@@ -115,10 +116,10 @@ namespace
                 *((uint8_t*)p) = val;
                 break;
             case 2:
-                *(GUEST<uint16_t>*)p = CW(val);
+                *(GUEST<uint16_t>*)p = val;
                 break;
             case 3:
-                *(GUEST<uint32_t>*)p = CL(val);
+                *(GUEST<uint32_t>*)p = val;
                 break;
         }
     }
@@ -156,13 +157,13 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
     RoutineRecord m68kroutine = {};
     const RoutineRecord* routine = nullptr;
 
-    if(theProcPtr->goMixedModeTrap == CWC(MIXED_MODE_TRAP))
+    if(theProcPtr->goMixedModeTrap == MIXED_MODE_TRAP)
     {
         const RoutineRecord *beginRoutines = &theProcPtr->routineRecords[0],
-                            *endRoutines = &theProcPtr->routineRecords[CW(theProcPtr->routineCount) + 1];
+                            *endRoutines = &theProcPtr->routineRecords[theProcPtr->routineCount + 1];
        
        routine = std::find_if(beginRoutines, endRoutines,
-                    [](const RoutineRecord& rr) { return rr.ISA == CBC(kPowerPCISA); });
+                    [](const RoutineRecord& rr) { return rr.ISA == kPowerPCISA; });
         if(routine == endRoutines)
             routine = beginRoutines;
     
@@ -175,12 +176,12 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
     else
     {
         assert(fromISA != kM68kISA);
-        m68kroutine.procDescriptor = RM((ProcPtr)theProcPtr);
-        m68kroutine.procInfo = CL(procinfo);
+        m68kroutine.procDescriptor = (ProcPtr)theProcPtr;
+        m68kroutine.procInfo = procinfo;
         routine = &m68kroutine;
     }
 
-    procinfo = CL(routine->procInfo);
+    procinfo = routine->procInfo;
     // Now, routine points to target routine, and procinfo is the corresponding procinfo.
 
     // Step 2/5: Parse the procinfo
@@ -278,7 +279,7 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
         PowerPCFrame& parentFrame = *ptr_from_longint<PowerPCFrame*>(cpu.r[1]);
 
         for(int i = 0; i < nParameters; i++)
-            paramValues[i] = (i+2) < 8 ? cpu.r[i+2+3] : CL(parentFrame.parameters[i+2]);
+            paramValues[i] = (i+2) < 8 ? cpu.r[i+2+3] : parentFrame.parameters[i+2].get();
     }
     else
         std::abort();
@@ -297,16 +298,16 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
             if(i < 8)
                 cpu.r[i+3] = paramValues[i];
             else
-                frame.parameters[i] = CL(paramValues[i]);
+                frame.parameters[i] = paramValues[i];
         }
 
-        frame.saveRTOC = CL(cpu.r[2]);
-        PPCProcDescriptor& proc = *(PPCProcDescriptor*) MR(routine->procDescriptor);
-        cpu.CIA = CL(proc.code);
-        cpu.r[2] = CL(proc.rtoc);
+        frame.saveRTOC = cpu.r[2];
+        PPCProcDescriptor& proc = *(PPCProcDescriptor*) routine->procDescriptor;
+        cpu.CIA = proc.code;
+        cpu.r[2] = proc.rtoc;
         cpu.lr = 0xFFFFFFFC;
         cpu.execute();
-        cpu.r[2] = CL(frame.saveRTOC);
+        cpu.r[2] = frame.saveRTOC;
 
         retval = cpu.r[3];
     }

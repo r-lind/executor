@@ -2,14 +2,14 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "ProcessMgr.h"
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"
 #include "ToolboxEvent.h"
 
-#include "rsys/mman.h"
+#include "mman/mman.h"
 #include "rsys/process.h"
 
 using namespace Executor;
@@ -20,8 +20,7 @@ using namespace Executor;
 
 declare_handle_type(size_resource);
 
-#define SIZE_FLAGS_X(size) (HxX(size, flags))
-#define SIZE_FLAGS(size) (CW(SIZE_FLAGS_X(size)))
+#define SIZE_FLAGS(size) ((*size)->flags)
 
 static size_resource_handle
 get_size_resource()
@@ -29,7 +28,7 @@ get_size_resource()
     Handle size;
 
     size = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), 0);
-    if(size == NULL)
+    if(size == nullptr)
         size = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), -1);
     return (size_resource_handle)size;
 }
@@ -55,9 +54,9 @@ static process_info_t *current_process_info;
 static const int default_process_mode_flags = 0;
 
 /* ### not currently used */
-static ProcessSerialNumber system_process = { CLC(0), CLC(kSystemProcess) };
-static ProcessSerialNumber no_process = { CLC(0), CLC(kNoProcess) };
-static ProcessSerialNumber current_process = { CLC(0), CLC(kCurrentProcess) };
+static ProcessSerialNumber system_process = { 0, kSystemProcess };
+static ProcessSerialNumber no_process = { 0, kNoProcess };
+static ProcessSerialNumber current_process = { 0, kCurrentProcess };
 
 void Executor::process_create(bool desk_accessory_p,
                               uint32_t type, uint32_t signature)
@@ -75,11 +74,11 @@ void Executor::process_create(bool desk_accessory_p,
     }
 
     /* ### we are seriously fucked */
-    if(info == NULL)
+    if(info == nullptr)
         gui_fatal("unable to allocate process info record");
 
     info->mode = ((size
-                       ? SIZE_FLAGS(size)
+                       ? toHost(SIZE_FLAGS(size))
                        : default_process_mode_flags)
                   | (desk_accessory_p
                          ? modeDeskAccessory
@@ -88,13 +87,13 @@ void Executor::process_create(bool desk_accessory_p,
     info->signature = signature;
 
     /* ### fixme; major bogosity */
-    info->size = (zone_size(MR(LM(ApplZone)))
+    info->size = (zone_size(LM(ApplZone))
                   /* + A5 world size */
                   /* + stack size */);
     info->launch_ticks = TickCount();
 
-    info->serial_number.highLongOfPSN = CL(-1);
-    info->serial_number.lowLongOfPSN = CL(next_free_psn++);
+    info->serial_number.highLongOfPSN = -1;
+    info->serial_number.lowLongOfPSN = next_free_psn++;
 
     info->next = process_info_list;
     process_info_list = info;
@@ -116,7 +115,7 @@ get_process_info(ProcessSerialNumber *serial_number)
         if(PSN_EQ_P(*serial_number, t->serial_number))
             return t;
     }
-    return NULL;
+    return nullptr;
 }
 
 OSErr Executor::C_GetCurrentProcess(ProcessSerialNumber *serial_number)
@@ -141,9 +140,9 @@ OSErr Executor::C_GetNextProcess(ProcessSerialNumber *serial_number)
     }
 
     t = get_process_info(serial_number);
-    if(t == NULL)
+    if(t == nullptr)
         return paramErr;
-    else if(t->next == NULL)
+    else if(t->next == nullptr)
     {
         memset(serial_number, 0, sizeof *serial_number);
         return procNotFound;
@@ -162,26 +161,26 @@ OSErr Executor::C_GetProcessInformation(ProcessSerialNumber *serial_number,
     int32_t current_ticks;
 
     info = get_process_info(serial_number);
-    if(info == NULL
+    if(info == nullptr
        || PROCESS_INFO_LENGTH(process_info) != sizeof *process_info)
         return paramErr;
 
     PROCESS_INFO_SERIAL_NUMBER(process_info) = info->serial_number;
-    PROCESS_INFO_TYPE_X(process_info) = CL(info->type);
-    PROCESS_INFO_SIGNATURE_X(process_info) = CL(info->signature);
-    PROCESS_INFO_MODE_X(process_info) = CL(info->mode);
-    PROCESS_INFO_LOCATION_X(process_info) = guest_cast<Ptr>(LM(ApplZone));
-    PROCESS_INFO_SIZE_X(process_info) = CL(info->size);
+    PROCESS_INFO_TYPE(process_info) = info->type;
+    PROCESS_INFO_SIGNATURE(process_info) = info->signature;
+    PROCESS_INFO_MODE(process_info) = info->mode;
+    PROCESS_INFO_LOCATION(process_info) = guest_cast<Ptr>(LM(ApplZone));
+    PROCESS_INFO_SIZE(process_info) = info->size;
 
     /* ### set current zone to applzone? */
-    PROCESS_INFO_FREE_MEM_X(process_info) = CL(FreeMem());
+    PROCESS_INFO_FREE_MEM(process_info) = FreeMem();
 
     PROCESS_INFO_LAUNCHER(process_info) = no_process;
 
-    PROCESS_INFO_LAUNCH_DATE_X(process_info) = CL(info->launch_ticks);
+    PROCESS_INFO_LAUNCH_DATE(process_info) = info->launch_ticks;
     current_ticks = TickCount();
-    PROCESS_INFO_ACTIVE_TIME_X(process_info)
-        = CL(current_ticks - info->launch_ticks);
+    PROCESS_INFO_ACTIVE_TIME(process_info)
+        = current_ticks - info->launch_ticks;
 
     return noErr;
 }
@@ -195,8 +194,8 @@ OSErr Executor::C_SameProcess(ProcessSerialNumber *serial_number0,
     info0 = get_process_info(serial_number0);
     info1 = get_process_info(serial_number1);
 
-    if(info0 == NULL
-       || info1 == NULL)
+    if(info0 == nullptr
+       || info1 == nullptr)
         return paramErr;
 
     *same_out = (info0 == info1);

@@ -4,14 +4,13 @@
 
 /* Forward declarations in IntlUtil.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "IntlUtil.h"
 #include "OSUtil.h"
 #include "ResourceMgr.h"
 #include "MemoryMgr.h"
 #include "BinaryDecimal.h"
-#include "rsys/glue.h"
-#include "rsys/resource.h"
+#include "res/resource.h"
 #include "rsys/hook.h"
 #include <ctype.h>
 
@@ -105,7 +104,7 @@ static void outn(INTEGER n, BOOLEAN leading0, char **opp)
 
 static void month(INTEGER n, Intl0Ptr int0p, char sep, char **opp)
 {
-    outn(n, Cx(int0p->shrtDateFmt) & mntLdingZ, opp);
+    outn(n, int0p->shrtDateFmt & mntLdingZ, opp);
     if(sep)
         *(*opp)++ = sep;
 }
@@ -116,7 +115,7 @@ static void month(INTEGER n, Intl0Ptr int0p, char sep, char **opp)
 
 static void day(INTEGER n, Intl0Ptr int0p, char sep, char **opp)
 {
-    outn(n, Cx(int0p->shrtDateFmt) & dayLdingZ, opp);
+    outn(n, int0p->shrtDateFmt & dayLdingZ, opp);
     if(sep)
         *(*opp)++ = sep;
 }
@@ -127,7 +126,7 @@ static void day(INTEGER n, Intl0Ptr int0p, char sep, char **opp)
 
 static void year(INTEGER n, Intl0Ptr int0p, char sep, char **opp)
 {
-    outn(Cx(int0p->shrtDateFmt) & century ? n : n % 100, false, opp);
+    outn(int0p->shrtDateFmt & century ? n : n % 100, false, opp);
     if(sep)
         *(*opp)++ = sep;
 }
@@ -148,54 +147,54 @@ void Executor::C_IUDatePString(LONGINT date, DateForm form, StringPtr p,
     op = (char *)p + 1;
     if(form == shortDate)
     {
-        if(h && (int0p = (Intl0Ptr)STARH(h)))
+        if(h && (int0p = (Intl0Ptr)*h))
         {
-            switch(Cx(int0p->dateOrder))
+            switch(int0p->dateOrder)
             {
                 case mdy:
-                    month(CW(dtr.month), int0p, Cx(int0p->dateSep), &op);
-                    day(CW(dtr.day), int0p, Cx(int0p->dateSep), &op);
-                    year(CW(dtr.year), int0p, 0, &op);
+                    month(dtr.month, int0p, int0p->dateSep, &op);
+                    day(dtr.day, int0p, int0p->dateSep, &op);
+                    year(dtr.year, int0p, 0, &op);
                     break;
                 case dmy:
-                    day(CW(dtr.day), int0p, Cx(int0p->dateSep), &op);
-                    month(CW(dtr.month), int0p, Cx(int0p->dateSep), &op);
-                    year(CW(dtr.year), int0p, 0, &op);
+                    day(dtr.day, int0p, int0p->dateSep, &op);
+                    month(dtr.month, int0p, int0p->dateSep, &op);
+                    year(dtr.year, int0p, 0, &op);
                     break;
                 case ymd:
-                    year(CW(dtr.year), int0p, Cx(int0p->dateSep), &op);
-                    month(CW(dtr.month), int0p, Cx(int0p->dateSep), &op);
-                    day(CW(dtr.day), int0p, 0, &op);
+                    year(dtr.year, int0p, int0p->dateSep, &op);
+                    month(dtr.month, int0p, int0p->dateSep, &op);
+                    day(dtr.day, int0p, 0, &op);
                     break;
             }
         }
     }
     else
     {
-        if(h && (int1p = (Intl1Ptr)STARH(h)))
+        if(h && (int1p = (Intl1Ptr)*h))
         {
-            abbrev = form == longDate ? 0 : Cx(int1p->abbrLen);
-            outl(Cx(int1p->st0), &op);
-            if(!Cx(int1p->suppressDay))
+            abbrev = form == longDate ? 0 : int1p->abbrLen;
+            outl(int1p->st0, &op);
+            if(!int1p->suppressDay)
             {
-                outs(int1p->days[CW(dtr.dayOfWeek) - 1], abbrev, &op);
-                outl(Cx(int1p->st1), &op);
+                outs(int1p->days[dtr.dayOfWeek - 1], abbrev, &op);
+                outl(int1p->st1, &op);
             }
-            if(Cx(int1p->lngDateFmt))
+            if(int1p->lngDateFmt)
             {
-                outs(int1p->months[CW(dtr.month) - 1], abbrev, &op);
-                outl(Cx(int1p->st2), &op);
-                outn(CW(dtr.day), Cx(int1p->dayLeading0), &op);
+                outs(int1p->months[dtr.month - 1], abbrev, &op);
+                outl(int1p->st2, &op);
+                outn(dtr.day, int1p->dayLeading0, &op);
             }
             else
             {
-                outn(CW(dtr.day), Cx(int1p->dayLeading0), &op);
-                outl(Cx(int1p->st2), &op);
-                outs(int1p->months[CW(dtr.month) - 1], abbrev, &op);
+                outn(dtr.day, int1p->dayLeading0, &op);
+                outl(int1p->st2, &op);
+                outs(int1p->months[dtr.month - 1], abbrev, &op);
             }
-            outl(Cx(int1p->st3), &op);
-            outn(CW(dtr.year), false, &op);
-            outl(Cx(int1p->st4), &op);
+            outl(int1p->st3, &op);
+            outn(dtr.year, false, &op);
+            outl(int1p->st4, &op);
         }
     }
     p[0] = op - (char *)p - 1;
@@ -228,8 +227,8 @@ Handle Executor::C_GetIntlResource(INTEGER id) /* IMI-505 */
     {
         Intl0Ptr int0p;
 
-        int0p = (Intl0Ptr)STARH(retval);
-        int0p->shrtDateFmt |= CBC(century);
+        int0p = (Intl0Ptr)*retval;
+        int0p->shrtDateFmt |= century;
     }
 
     return retval;
@@ -253,25 +252,25 @@ void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
         h = GetIntlResource(0);
 
     op = (char *)p + 1;
-    if(h && (int0p = (Intl0Ptr)STARH(h)))
+    if(h && (int0p = (Intl0Ptr)*h))
     {
         SecondsToDate(date, &dtr);
         if(int0p->timeCycle)
-            outn((CW(dtr.hour) % 12) == 0 ? 12 : CW(dtr.hour) % 12,
-                 Cx(int0p->timeFmt) & hrLeadingZ, &op);
+            outn((dtr.hour % 12) == 0 ? 12 : dtr.hour % 12,
+                 int0p->timeFmt & hrLeadingZ, &op);
         else
-            outn(CW(dtr.hour), Cx(int0p->timeFmt) & hrLeadingZ, &op);
+            outn(dtr.hour, int0p->timeFmt & hrLeadingZ, &op);
         *op++ = int0p->timeSep;
-        outn(CW(dtr.minute), Cx(int0p->timeFmt) & minLeadingZ, &op);
+        outn(dtr.minute, int0p->timeFmt & minLeadingZ, &op);
         if(secs)
         {
             *op++ = int0p->timeSep;
-            outn(CW(dtr.second), Cx(int0p->timeFmt) & secLeadingZ, &op);
+            outn(dtr.second, int0p->timeFmt & secLeadingZ, &op);
         }
         /* IMI-499 is misleading about the timenSuff fields.  The first four are
    used for AM, the second four for PM.  Yes, that's dumb.  But that's how
    the Mac works.  Sigh. */
-        if(!int0p->timeCycle && CW(dtr.hour) < 12)
+        if(!int0p->timeCycle && dtr.hour < 12)
             for(ip = (char *)&int0p->time1Suff, ep = ip + 4;
                 ip != ep && *ip;)
                 *op++ = *ip++;
@@ -279,10 +278,10 @@ void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
             for(ip = (char *)&int0p->time5Suff, ep = ip + 4;
                 ip != ep && *ip;)
                 *op++ = *ip++;
-        else if(CW(dtr.hour) < 12)
-            outl(Cx(int0p->mornStr), &op);
+        else if(dtr.hour < 12)
+            outl(int0p->mornStr, &op);
         else
-            outl(Cx(int0p->eveStr), &op);
+            outl(int0p->eveStr, &op);
     }
     p[0] = op - (char *)p - 1;
 }
@@ -298,7 +297,7 @@ BOOLEAN Executor::C_IsMetric() /* IMI-505 */
     Handle h;
 
     h = GetIntlResource(0);
-    return h ? ((Intl0Ptr)STARH(h))->metricSys : false;
+    return h ? ((Intl0Ptr)*h)->metricSys : false;
 }
 
 void Executor::C_SetIntlResource(INTEGER rn, INTEGER id, Handle newh) /* IMI-506 */
@@ -306,17 +305,17 @@ void Executor::C_SetIntlResource(INTEGER rn, INTEGER id, Handle newh) /* IMI-506
     INTEGER oldcurmap;
     Handle h;
 
-    oldcurmap = Cx(LM(CurMap));
+    oldcurmap = LM(CurMap);
     UseResFile(rn);
-    if(LM(ResErr) == CWC(noErr))
+    if(LM(ResErr) == noErr)
     {
         h = GetIntlResource(id);
         if(h && HomeResFile(h) == rn)
         {
             if(id == 0)
-                *(Intl0Ptr)STARH(h) = *(Intl0Ptr)STARH(newh);
+                *(Intl0Ptr)*h = *(Intl0Ptr)*newh;
             else
-                *(Intl1Ptr)STARH(h) = *(Intl1Ptr)STARH(newh);
+                *(Intl1Ptr)*h = *(Intl1Ptr)*newh;
             ChangedResource(h);
         }
         else
@@ -528,7 +527,7 @@ static INTEGER iuhelper(Ptr ptr1, Ptr ptr2, INTEGER len1, INTEGER len2,
 
     if((h = (Intl0Hndl)GetIntlResource(0)) && *h)
     {
-        switch((Hx(h, intl0Vers) >> 8) & 0xFF)
+        switch(((*h)->intl0Vers >> 8) & 0xFF)
         {
             case verBritain:
                 locp = (locptype)britainlocalization;

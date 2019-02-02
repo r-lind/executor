@@ -4,7 +4,7 @@
 
 /* Forward declarations in ScriptMgr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "IntlUtil.h"
 #include "ScriptMgr.h"
@@ -13,14 +13,14 @@
 #include "OSUtil.h"
 
 #include "rsys/hook.h"
-#include "rsys/quick.h"
-#include "rsys/cquick.h"
+#include "quickdraw/quick.h"
+#include "quickdraw/cquick.h"
 #include "rsys/osutil.h"
-#include "rsys/osevent.h"
-#include "rsys/print.h"
-#include "rsys/floatconv.h"
+#include "osevent/osevent.h"
+#include "print/print.h"
+#include "sane/floatconv.h"
 #include "rsys/string.h"
-#include "rsys/mman.h"
+#include "mman/mman.h"
 
 #include <ctype.h>
 
@@ -117,8 +117,8 @@ INTEGER Executor::C_Transliterate(Handle srch, Handle dsth, INTEGER target,
 {
     char *sp, *dp, *ep;
 
-    sp = (char *)STARH(srch);
-    dp = (char *)STARH(dsth);
+    sp = (char *)*srch;
+    dp = (char *)*dsth;
     ep = sp + GetHandleSize(srch);
     if(target & smTransLower)
     {
@@ -212,13 +212,13 @@ void Executor::C_MeasureJustified(Ptr text, int32_t length, Fixed slop,
 
     warning_unimplemented("slop = %d, run_pos = %d", slop, run_pos);
 
-    numerx.v = CW(numer.v);
-    numerx.h = CW(numer.h);
-    denomx.v = CW(denom.v);
-    denomx.h = CW(denom.h);
+    numerx.v = numer.v;
+    numerx.h = numer.h;
+    denomx.v = denom.v;
+    denomx.h = denom.h;
 
     xStdTxMeas(length, (uint8_t *)text, &numerx, &denomx,
-               NULL, (GUEST<int16_t> *)charLocs);
+               nullptr, (GUEST<int16_t> *)charLocs);
 }
 
 Boolean Executor::C_ParseTable(CharByteTable table)
@@ -314,12 +314,12 @@ void Executor::C_FindWord(Ptr textbufp, INTEGER length, INTEGER offset,
         ++stop)
         ;
 
-    offsets[0] = CW(start);
-    offsets[1] = CW(stop);
-    offsets[2] = CWC(0); /* Testing on Brute shows we should zero this memory */
-    offsets[3] = CWC(0);
-    offsets[4] = CWC(0);
-    offsets[5] = CWC(0);
+    offsets[0] = start;
+    offsets[1] = stop;
+    offsets[2] = 0; /* Testing on Brute shows we should zero this memory */
+    offsets[3] = 0;
+    offsets[4] = 0;
+    offsets[5] = 0;
     warning_unimplemented("poorly implemented");
 }
 
@@ -327,12 +327,12 @@ void Executor::C_HiliteText(Ptr textbufp, INTEGER firstoffset,
                             INTEGER secondoffset, GUEST<INTEGER> *offsets)
 {
     ROMlib_hook(script_notsupported);
-    offsets[0] = CW(firstoffset);
-    offsets[1] = CW(secondoffset);
-    offsets[2] = CWC(0);
-    offsets[3] = CWC(0);
-    offsets[4] = CWC(0);
-    offsets[5] = CWC(0);
+    offsets[0] = firstoffset;
+    offsets[1] = secondoffset;
+    offsets[2] = 0;
+    offsets[3] = 0;
+    offsets[4] = 0;
+    offsets[5] = 0;
 }
 
 static int16_t
@@ -353,17 +353,17 @@ void Executor::C_DrawJust(Ptr textbufp, int16_t length, int16_t slop)
     GUEST<Fixed> save_sp_extra_x;
     int n_spaces;
 
-    save_sp_extra_x = PORT_SP_EXTRA_X(thePort);
+    save_sp_extra_x = PORT_SP_EXTRA(qdGlobals().thePort);
     n_spaces = count_spaces(textbufp, length);
     if(n_spaces)
     {
         Fixed extra;
 
-        extra = CL(save_sp_extra_x) + FixRatio(slop, n_spaces);
-        PORT_SP_EXTRA_X(thePort) = CL(extra);
+        extra = save_sp_extra_x + FixRatio(slop, n_spaces);
+        PORT_SP_EXTRA(qdGlobals().thePort) = extra;
     }
     DrawText(textbufp, 0, length);
-    PORT_SP_EXTRA_X(thePort) = save_sp_extra_x;
+    PORT_SP_EXTRA(qdGlobals().thePort) = save_sp_extra_x;
 }
 
 static int
@@ -396,7 +396,7 @@ String2DateStatus Executor::C_StringToTime(
     GUEST<Ptr> *datetimep)
 {
     warning_unimplemented(NULL_STRING);
-    *lenusedp = CLC(0);
+    *lenusedp = 0;
     return (String2DateStatus)dateTimeNotFound;
 }
 
@@ -406,7 +406,7 @@ this_date_rec(DateTimeRec *p)
     GUEST<ULONGINT> now;
 
     GetDateTime(&now);
-    SecondsToDate(CL(now), p);
+    SecondsToDate(now, p);
 }
 
 static int
@@ -416,7 +416,7 @@ this_century(void)
     int retval;
 
     this_date_rec(&d);
-    retval = CW(d.year) / 100 * 100;
+    retval = d.year / 100 * 100;
     return retval;
 }
 
@@ -453,19 +453,19 @@ String2DateStatus Executor::C_StringToDate(
         else if(year_length < 3)
             year += this_century();
 
-        *length_used_ret = CL(offset);
+        *length_used_ret = offset;
 
         /* not clear what we should do with other fields, some should probably
 	 be zeroed */
 
-        date_time->year = CW(year);
-        date_time->month = CW(month);
-        date_time->day = CW(day);
+        date_time->year = year;
+        date_time->month = month;
+        date_time->day = day;
         retval = longDateFound;
     }
     else
     {
-        *length_used_ret = CLC(0);
+        *length_used_ret = 0;
         warning_unexpected(NULL_STRING);
         retval = (String2DateStatus)dateTimeNotFound;
     }
@@ -488,7 +488,7 @@ StyledLineBreakCode Executor::C_StyledLineBreak(
     int width = 0;
 
     /* ### are we losing information here? */
-    text_width = Fix2Long(CL(*text_width_fp));
+    text_width = Fix2Long(*text_width_fp);
 
     for(current_index = text_start, current_char = text[current_index];
         current_index < text_end;
@@ -497,7 +497,7 @@ StyledLineBreakCode Executor::C_StyledLineBreak(
         /* ### do we do this? */
         if(current_char == '\r')
         {
-            *text_offset = CL(current_index + 1);
+            *text_offset = current_index + 1;
             return smBreakWord;
         }
 
@@ -519,23 +519,23 @@ StyledLineBreakCode Executor::C_StyledLineBreak(
                 if(*text_offset)
                 {
                     /* beginning of the line, break here */
-                    *text_offset = CL(current_index - 1);
+                    *text_offset = current_index - 1;
                     return smBreakChar;
                 }
-                *text_offset = CL(current_index - 1);
+                *text_offset = current_index - 1;
                 return smBreakWord;
             }
             else
             {
-                *text_offset = CL(last_word_break);
+                *text_offset = last_word_break;
                 return smBreakWord;
             }
         }
     }
     /* if we got here, that means the run did not extend past the end of
      the current line */
-    *text_width_fp = CL(Long2Fix(text_width - width));
-    *text_offset = CL(current_index);
+    *text_width_fp = Long2Fix(text_width - width);
+    *text_offset = current_index;
     return smBreakOverflow;
 }
 
@@ -552,10 +552,10 @@ INTEGER Executor::C_ReplaceText(Handle base_text, Handle subst_text, Str15 key)
     LONGINT offset;
     LONGINT l;
 
-    p = (Ptr)STARH(subst_text);
+    p = (Ptr)*subst_text;
     len = GetHandleSize(subst_text);
     offset = 0;
-    while(retval >= 0 && (l = Munger(base_text, offset, (Ptr)key + 1, key[0], NULL, 1)) >= 0)
+    while(retval >= 0 && (l = Munger(base_text, offset, (Ptr)key + 1, key[0], nullptr, 1)) >= 0)
     {
         offset = Munger(base_text,
                         l, (Ptr)key + 1, key[0], p, len);
@@ -654,17 +654,17 @@ void Executor::C_LongDateToSeconds(LongDateRec *ldatep, GUEST<ULONGINT> *secs_ou
     LONGINT high, low;
     INTEGER hour;
 
-    hour = CW(ldatep->hour);
+    hour = ldatep->hour;
     if(ldatep->pm && hour < 12)
         hour += 12;
 
-    secs = ROMlib_long_long_secs(CW(ldatep->year), CW(ldatep->month),
-                                 CW(ldatep->day), hour,
-                                 CW(ldatep->minute), CW(ldatep->second));
+    secs = ROMlib_long_long_secs(ldatep->year, ldatep->month,
+                                 ldatep->day, hour,
+                                 ldatep->minute, ldatep->second);
     high = secs >> 32;
     low = secs;
-    secs_outp[0] = CL(high);
-    secs_outp[1] = CL(low);
+    secs_outp[0] = high;
+    secs_outp[1] = low;
 }
 
 void Executor::C_LongSecondsToDate(GUEST<ULONGINT> *secs_inp, LongDateRec *ldatep)
@@ -673,14 +673,14 @@ void Executor::C_LongSecondsToDate(GUEST<ULONGINT> *secs_inp, LongDateRec *ldate
     long long secs;
     INTEGER pm;
 
-    secs = ((long long)CL(secs_inp[0]) << 32) | CL(secs_inp[1]);
+    secs = ((long long)secs_inp[0] << 32) | secs_inp[1];
     date_to_swapped_fields(secs, &ldatep->year, &ldatep->month, &ldatep->day,
                            &ldatep->hour, &ldatep->minute, &ldatep->second,
                            &ldatep->dayOfWeek, &ldatep->dayOfYear,
                            &ldatep->weekOfYear);
 
-    pm = (CW(ldatep->hour) > 12) ? 1 : 0;
-    ldatep->pm = CW(pm);
+    pm = (ldatep->hour > 12) ? 1 : 0;
+    ldatep->pm = pm;
 }
 
 /*
@@ -768,10 +768,10 @@ void Executor::C_DrawJustified(Ptr textPtr, LONGINT textLength, Fixed slop,
     GUEST<Point> swapped_denom;
 
     warning_unimplemented("poorly implemented");
-    swapped_numer.h = CW(numer.h);
-    swapped_numer.v = CW(numer.v);
-    swapped_denom.h = CW(denom.h);
-    swapped_denom.v = CW(denom.v);
+    swapped_numer.h = numer.h;
+    swapped_numer.v = numer.v;
+    swapped_denom.h = denom.h;
+    swapped_denom.v = denom.v;
     text_helper(textLength, textPtr, &swapped_numer, &swapped_denom, 0, 0,
                 text_helper_draw);
 }
@@ -780,7 +780,7 @@ ScriptRunStatus Executor::C_FindScriptRun(
     Ptr textPtr, LONGINT textLen, GUEST<LONGINT> *lenUsedp)
 {
     warning_unimplemented(NULL_STRING);
-    *lenUsedp = CLC(1);
+    *lenUsedp = 1;
     return 0;
 }
 
@@ -800,10 +800,10 @@ INTEGER Executor::C_PixelToChar(Ptr textBuf, LONGINT textLen, Fixed slop,
 
     locs = (GUEST<INTEGER> *)alloca(sizeof(INTEGER) * (textLen + 1));
 
-    swapped_numer.h = CW(numer.h);
-    swapped_numer.v = CW(numer.v);
-    swapped_denom.h = CW(denom.h);
-    swapped_denom.v = CW(denom.v);
+    swapped_numer.h = numer.h;
+    swapped_numer.v = numer.v;
+    swapped_denom.h = denom.h;
+    swapped_denom.v = denom.v;
 
     int_pix_width = pixelWidth >> 16;
 
@@ -814,18 +814,18 @@ INTEGER Executor::C_PixelToChar(Ptr textBuf, LONGINT textLen, Fixed slop,
      to account for slop (probably better in the long run).  Right now,
      we do neither.  Ick. */
 
-    if(int_pix_width >= CW(locs[textLen]))
+    if(int_pix_width >= locs[textLen])
     {
         retval = textLen;
         *leadingEdgep = false;
-        *widthRemainingp = CL(pixelWidth - (CW(locs[textLen]) << 16));
+        *widthRemainingp = pixelWidth - (locs[textLen] << 16);
     }
     else
     {
-        *widthRemainingp = CLC(-1);
-        for(i = 0; int_pix_width > CW(locs[i]); ++i)
+        *widthRemainingp = -1;
+        for(i = 0; int_pix_width > locs[i]; ++i)
             ;
-        if((i > 0) && ((int_pix_width - CW(locs[i - 1])) > (CW(locs[i]) - int_pix_width)))
+        if((i > 0) && ((int_pix_width - locs[i - 1]) > (locs[i] - int_pix_width)))
         {
             retval = i - 1;
             *leadingEdgep = false;
@@ -849,10 +849,10 @@ INTEGER Executor::C_CharToPixel(Ptr textBuf, LONGINT textLen, Fixed slop,
 
     warning_unimplemented("poorly implemented");
 
-    swapped_numer.h = CW(numer.h);
-    swapped_numer.v = CW(numer.v);
-    swapped_denom.h = CW(denom.h);
-    swapped_denom.v = CW(denom.v);
+    swapped_numer.h = numer.h;
+    swapped_numer.v = numer.v;
+    swapped_denom.h = denom.h;
+    swapped_denom.v = denom.v;
     retval = text_helper(offset, textBuf, &swapped_numer, &swapped_denom,
                          0, 0, text_helper_measure);
     retval += (slop / textLen) >> 16;

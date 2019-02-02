@@ -1,5 +1,6 @@
 find_package(SDL)
 find_library(X11_LIBRARY X11)
+find_path (X11_INCLUDE_PATH X11/Xresource.h)
 
 if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
     set(OS_SPECIFIC)
@@ -17,6 +18,7 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
     endif()
 
     add_library(front-end-sdl
+        default_vdriver.h
         sdlevents.cpp
         sdl_mem.cpp
         sdlquit.cpp
@@ -25,7 +27,6 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         sdlwm.cpp
         syswm_map.cpp
         for_sam.h
-        host_vdriver.h
         map.h
         sdl.h
         SDL_bmp.h
@@ -37,14 +38,16 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         sdlX.h
         syswm_map.h
         syswm_vars.h
+        paramline.h
+        paramline.c
         ${OS_SPECIFIC}
         )
 
-    target_link_libraries(front-end-sdl syn68k ${SDL_LIBRARY})
+    target_link_libraries(front-end-sdl syn68k ${SDL_LIBRARY} romlib)
 
     if(UNIX AND NOT APPLE)
         target_link_libraries(front-end-sdl ${X11_LIBRARY})
     endif()
 
-    target_include_directories(front-end-sdl PUBLIC . ${SDL_INCLUDE_DIR})
+    target_include_directories(front-end-sdl PUBLIC . PRIVATE ${SDL_INCLUDE_DIR}/.. ${X11_INCLUDE_PATH})
 endif()

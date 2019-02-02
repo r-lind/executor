@@ -4,7 +4,7 @@
 
 /* Forward declarations in SegmentLdr.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "FileMgr.h"
 #include "SegmentLdr.h"
@@ -16,24 +16,23 @@
 #include "OSEvent.h"
 #include "WindowMgr.h"
 
-#include "rsys/hfs.h"
-#include "rsys/cpu.h"
-#include "rsys/notmac.h"
-#include "rsys/glue.h"
-#include "rsys/wind.h"
+#include "hfs/hfs.h"
+#include "base/cpu.h"
+#include "wind/wind.h"
 #include "rsys/segment.h"
-#include "rsys/host.h"
-#include "rsys/vdriver.h"
+#include "vdriver/vdriver.h"
 #include "rsys/executor.h"
-#include "rsys/flags.h"
-#include "rsys/prefs.h"
-#include "rsys/osevent.h"
-#include "rsys/cquick.h"
+#include "commandline/flags.h"
+#include "prefs/prefs.h"
+#include "osevent/osevent.h"
+#include "quickdraw/cquick.h"
 #include "rsys/desk.h"
-#include "rsys/dcache.h"
+#include "hfs/dcache.h"
 #include "rsys/launch.h"
+#include "rsys/paths.h"
 
 #include <ctype.h>
+#include <algorithm>
 
 #if defined(CYGWIN32)
 
@@ -114,60 +113,6 @@ void Executor::HWPriv(LONGINT d0, LONGINT a0)
     }
 }
 
-char *Executor::ROMlib_undotdot(char *origp)
-{
-    int dotcount, nleft;
-    char *p, *oldloc;
-    bool slashseen_p;
-
-    nleft = strlen(origp) + 1;
-    slashseen_p = false;
-    dotcount = -1;
-    for(p = origp; *p; p++, nleft--)
-    {
-        switch(*p)
-        {
-            case '/':
-                switch(dotcount)
-                {
-                    case 0: /* slash slash */
-                        BlockMoveData((Ptr)p + 1, (Ptr)p, (Size)nleft - 1);
-                        break;
-                    case 1: /* slash dot slash */
-                        BlockMoveData((Ptr)p + 1, (Ptr)p - 1, (Size)nleft - 1);
-                        p -= 2;
-                        dotcount = 0;
-                        break;
-                    case 2: /* slash dot dot slash */
-                        for(oldloc = p - 4; oldloc >= origp && *oldloc != '/'; --oldloc)
-                            ;
-                        if(oldloc < origp)
-                            oldloc = origp + 1;
-                        else
-                            ++oldloc;
-                        BlockMoveData((Ptr)p + 1, (Ptr)oldloc, (Size)nleft - 1);
-                        p = oldloc - 1;
-                        dotcount = 0;
-                        break;
-                    default:
-                        dotcount = 0;
-                        break;
-                }
-                slashseen_p = true;
-                break;
-            case '.':
-                if(slashseen_p)
-                    dotcount++;
-                break;
-            default:
-                slashseen_p = false;
-                dotcount = -1;
-                break;
-        }
-    }
-    return origp;
-}
-
 static void lastcomponent(StringPtr dest, StringPtr src)
 {
     unsigned char *c, *lastcolon;
@@ -183,37 +128,14 @@ static void lastcomponent(StringPtr dest, StringPtr src)
         n = src[0] - (lastcolon - (src + 1));
     }
     else
+    {
+        lastcolon = src + 1;
         n = src[0];
+    }
     dest[0] = n;
     memmove(dest + 1, lastcolon, n);
 }
 
-#if defined(MSDOS) || defined(CYGWIN32)
-static char *
-canonicalize_potential_windows_path(char *uname)
-{
-    char *p;
-
-    for(p = uname; *p; ++p)
-        if(*p == '\\')
-            *p = '/';
-
-    return uname;
-}
-#endif
-
-static bool
-full_pathname_p(char *uname)
-{
-    bool retval;
-
-    retval = uname[0] == '/';
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(!retval && uname[0] && uname[1] == ':' && uname[2] == '/')
-        retval = true;
-#endif
-    return retval;
-}
 
 static uint8_t
 hexval(char c)
@@ -257,138 +179,23 @@ colon_colon_copy(StringPtr dst, const char *src)
     save_dst[0] = dst - save_dst;
 }
 
-/*
- * This routine converts the UNIX path path to a pascal string that
- * starts with a colon whose individual components have been converted
- * from AppleDouble representation to Mac representation.  In theory we
- * could use this whether or not we were using the netatalk naming convention,
- * but since this is a recent addition to ROMlib and since we're about to
- * start building 2.1 candidates it makes sense to just use this in the
- * unsupported case and continue using the old code with non-netatalk naming.
- */
-
-#define MAC_LOCAL_FROM_UNIX_LOCAL(s)                                    \
-    ({                                                                  \
-        char *_s;                                                       \
-        unsigned char *retval;                                          \
-        int len;                                                        \
-        int count;                                                      \
-        char *next_slash;                                               \
-                                                                        \
-        _s = (s);                                                       \
-        len = strlen(_s);                                               \
-        retval = (unsigned char *)alloca(len + 2);                      \
-        retval[1] = ':';                                                \
-        count = 1;                                                      \
-                                                                        \
-        do                                                              \
-        {                                                               \
-            int component_len, shrinkage;                               \
-                                                                        \
-            next_slash = strchr(_s, '/');                               \
-            if(next_slash)                                              \
-                component_len = next_slash - _s;                        \
-            else                                                        \
-                component_len = strlen(_s);                             \
-            memcpy(retval + count + 1, _s, component_len);              \
-            shrinkage = ROMlib_UNIX7_to_Mac((char *)retval + count + 1, \
-                                            component_len);             \
-            count += component_len - shrinkage;                         \
-            if(next_slash)                                              \
-            {                                                           \
-                                                                        \
-                _s += component_len + 1; /* skip the '/', too */        \
-                retval[count + 1] = ':';                                \
-                ++count;                                                \
-            }                                                           \
-        } while(next_slash);                                            \
-                                                                        \
-        retval[0] = count;                                              \
-        retval;                                                         \
-    })
-
 static BOOLEAN argv_to_appfile(char *, AppFile *);
-void ROMlib_seginit(LONGINT, char **); /* INTERNAL */
 
 static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
 {
-    int namelen, pathlen;
-    unsigned char *path, *p;
-    VCBExtra *vcbp;
+    unsigned char *path;
     BOOLEAN retval;
-    INTEGER sysnamelen, totnamelen;
     CInfoPBRec cinfo;
     WDPBRec wpb;
-    struct stat sbuf;
+    
+    FSSpec spec;
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    uname = canonicalize_potential_windows_path(uname);
-#endif
-
-    if(uname && Ustat(uname, &sbuf) == 0)
+    if(auto unixSpec = nativePathToFSSpec(uname))
     {
-        if(!full_pathname_p(uname))
-        {
-            namelen = strlen(uname);
-            path = (unsigned char *)ALLOCA(MAXPATHLEN + 1 + namelen + 1);
-            if(getcwd((char *)path, MAXPATHLEN))
-            {
-                pathlen = strlen((char *)path);
-                path[pathlen] = '/';
-                if(uname[0] == '.' && uname[1] == '/')
-                    BlockMoveData((Ptr)uname + 2, (Ptr)(path + pathlen + 1),
-                                  (Size)namelen + 1 - 2);
-                else
-                    BlockMoveData((Ptr)uname, (Ptr)(path + pathlen + 1),
-                                  (Size)namelen + 1);
-                uname = (char *)path;
-#if defined(MSDOS) || defined(CYGWIN32)
-                uname = canonicalize_potential_windows_path(uname);
-#endif
-            }
-            else
-                warning_unexpected("getwd failed: expect trouble reading "
-                                   "resources");
-        }
-        ROMlib_automount(uname);
-        vcbp = (VCBExtra *)ROMlib_vcbbybiggestunixname(uname);
-        if(vcbp)
-        {
-            cinfo.hFileInfo.ioVRefNum = vcbp->vcb.vcbVRefNum;
-            wpb.ioNamePtr = 0;
-            sysnamelen = strlen(vcbp->unixname);
-            if(sysnamelen == 1 + SLASH_CHAR_OFFSET) /* don't remove leading
-						      '/' if that's
-						      all there is */
-            {
-                sysnamelen = 0;
-                uname += SLASH_CHAR_OFFSET;
-            }
-
-            /* NOTE: we can probably skip the following "if" and the else
-	     part and just use the "path = MAC_LOC..." line unconditionally,
-	     but I don't want to possibly introduce a subtle bug at the last
-	     minute before releasing 2.1 final. */
-
-            if(apple_double_quote_char == ':')
-                path = MAC_LOCAL_FROM_UNIX_LOCAL(uname + sysnamelen + 1);
-            else
-            {
-                totnamelen = strlen(uname);
-                pathlen = totnamelen - sysnamelen + 2; /* count & NUL */
-                path = (unsigned char *)alloca(pathlen);
-                strcpy((char *)path + 1, uname + sysnamelen); /* path has count and */
-                path[0] = pathlen - 2; /* is NUL terminated */
-                path[1] = ':';
-                for(p = path; *++p;)
-                    if(*p == '/')
-                        *p = ':';
-
-                path[0] -= ROMlib_UNIX7_to_Mac((char *)path + 1, path[0]);
-            }
-        }
-        else
-            path = 0; /* TODO:  Some sort of problem here */
+        spec = unixSpec.value();
+        cinfo.hFileInfo.ioVRefNum = spec.vRefNum;
+        cinfo.hFileInfo.ioDirID = spec.parID;
+        path = spec.name;
     }
     else
     {
@@ -397,17 +204,18 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
         path = (unsigned char *)alloca(len + 1);
         colon_colon_copy(path, uname);
         cinfo.hFileInfo.ioVRefNum = 0;
-        wpb.ioNamePtr = RM(path);
+        cinfo.hFileInfo.ioDirID = 0;
     }
-    cinfo.hFileInfo.ioNamePtr = RM(path);
-    cinfo.hFileInfo.ioFDirIndex = CWC(0);
-    cinfo.hFileInfo.ioDirID = 0;
+    
+    cinfo.hFileInfo.ioFDirIndex = 0;
+    cinfo.hFileInfo.ioNamePtr = path;
     if((retval = (PBGetCatInfo(&cinfo, false) == noErr)))
     {
         ap->fType = cinfo.hFileInfo.ioFlFndrInfo.fdType;
         ap->versNum = 0;
+        wpb.ioNamePtr = path;
         wpb.ioVRefNum = cinfo.hFileInfo.ioVRefNum;
-        wpb.ioWDProcID = TICKX("unix");
+        wpb.ioWDProcID = TICK("unix");
         wpb.ioWDDirID = cinfo.hFileInfo.ioFlParID;
         if(PBOpenWD(&wpb, false) == noErr)
         {
@@ -422,7 +230,7 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
     }
     else
     {
-        warning_unexpected("%s: unable to get info on `%s'\n", program_name,
+        warning_unexpected("%s: unable to get info on `%s'\n", ROMlib_appname.c_str(),
                            uname);
     }
     return retval;
@@ -435,7 +243,7 @@ static BOOLEAN argv_to_appfile(char *uname, AppFile *ap)
 #define PATH_SEPARATER ';'
 #endif
 
-void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
+void Executor::ROMlib_seginit(LONGINT argc, char **argv)
 {
     char *path, *firstcolon;
     char *fullpathname;
@@ -485,14 +293,14 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
     if(argv_to_appfile(fullpathname, &app))
     {
 #if 0
-	LM(CurApRefNum) = CW(OpenRFPerm(app.fName, CW(app.vRefNum), fsCurPerm));
+	LM(CurApRefNum) = OpenRFPerm(app.fName, app.vRefNum, fsCurPerm);
 #endif
-        LM(CurApName)[0] = MIN(app.fName[0], sizeof(LM(CurApName)) - 1);
+        LM(CurApName)[0] = std::min<uint8_t>(app.fName[0], sizeof(LM(CurApName)) - 1);
         BlockMoveData((Ptr)app.fName + 1, (Ptr)LM(CurApName) + 1, (Size)LM(CurApName)[0]);
     }
     else
     {
-        LM(CurApRefNum) = CWC(-1);
+        LM(CurApRefNum) = -1;
         LM(CurApName)[0] = 0;
     }
     saveZone = LM(TheZone);
@@ -501,9 +309,9 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
         NewHandle((Size)sizeof(finderinfo) - sizeof(AppFile));
     LM(TheZone) = saveZone;
 
-    LM(AppParmHandle) = RM((Handle)fh);
-    HxX(fh, count) = 0;
-    HxX(fh, message) = ROMlib_print ? CWC(appPrint) : CWC(appOpen);
+    LM(AppParmHandle) = (Handle)fh;
+    (*fh)->count = 0;
+    (*fh)->message = ROMlib_print ? appPrint : appOpen;
     if(fullpathname && fullpathname != argv[0])
         DisposePtr((Ptr)fullpathname);
     while(--argc > 0)
@@ -512,11 +320,11 @@ void Executor::ROMlib_seginit(LONGINT argc, char **argv) /* INTERNAL */
         if(argv_to_appfile(argv[0], &app))
         {
             ROMlib_exit = true;
-            newcount = Hx(fh, count) + 1;
-            HxX(fh, count) = CW(newcount);
+            newcount = (*fh)->count + 1;
+            (*fh)->count = newcount;
             SetHandleSize((Handle)fh,
-                            (char *)&HxX(fh, files)[newcount] - (char *)STARH(fh));
-            HxX(fh, files)[Hx(fh, count) - 1] = app;
+                            (char *)&(*fh)->files[newcount] - (char *)*fh);
+            (*fh)->files[(*fh)->count - 1] = app;
         }
     }
 }
@@ -527,9 +335,9 @@ void Executor::CountAppFiles(GUEST<INTEGER> *messagep,
     if(LM(AppParmHandle))
     {
         if(messagep)
-            *messagep = STARH((finderinfohand)MR(LM(AppParmHandle)))->message;
+            *messagep = (*(finderinfohand)LM(AppParmHandle))->message;
         if(countp)
-            *countp = STARH((finderinfohand)MR(LM(AppParmHandle)))->count;
+            *countp = (*(finderinfohand)LM(AppParmHandle))->count;
     }
     else
         *countp = 0;
@@ -537,15 +345,15 @@ void Executor::CountAppFiles(GUEST<INTEGER> *messagep,
 
 void Executor::GetAppFiles(INTEGER index, AppFile *filep) /* IMII-58 */
 {
-    *filep = STARH((finderinfohand)MR(LM(AppParmHandle)))->files[index - 1];
+    *filep = (*(finderinfohand)LM(AppParmHandle))->files[index - 1];
 }
 
 void Executor::ClrAppFiles(INTEGER index) /* IMII-58 */
 {
-    if(STARH((finderinfohand)MR(LM(AppParmHandle)))->files[index - 1].fType)
+    if((*(finderinfohand)LM(AppParmHandle))->files[index - 1].fType)
     {
-        STARH((finderinfohand)MR(LM(AppParmHandle)))->files[index - 1].fType = 0;
-        STARH((finderinfohand)MR(LM(AppParmHandle)))->count = CW(CW(STARH((finderinfohand)MR(LM(AppParmHandle)))->count) - 1);
+        (*(finderinfohand)LM(AppParmHandle))->files[index - 1].fType = 0;
+        (*(finderinfohand)LM(AppParmHandle))->count = (*(finderinfohand)LM(AppParmHandle))->count - 1;
     }
 }
 
@@ -565,8 +373,8 @@ static BOOLEAN valid_browser(void)
     OSErr err;
     FInfo finfo;
 
-    err = GetFInfo(LM(FinderName), CW(LM(BootDrive)), &finfo);
-    return !ROMlib_nobrowser && err == noErr && finfo.fdType == TICKX("APPL");
+    err = GetFInfo(LM(FinderName), LM(BootDrive), &finfo);
+    return !ROMlib_nobrowser && err == noErr && finfo.fdType == TICK("APPL");
 }
 
 static void launch_browser(void)
@@ -575,12 +383,12 @@ static void launch_browser(void)
    * if nothing was specified there, set the depth to the maximum
    * supported bits per pixel.
    */
-    SetDepth(MR(LM(MainDevice)),
+    SetDepth(LM(MainDevice),
              (flag_bpp
-                  ? MIN(flag_bpp, vdriver_max_bpp)
-                  : vdriver_max_bpp),
+                  ? std::min(flag_bpp, vdriver->maxBpp())
+                  : vdriver->maxBpp()),
              0, 0);
-    Launch(LM(FinderName), CW(LM(BootDrive)));
+    Launch(LM(FinderName), LM(BootDrive));
 }
 
 void Executor::C_ExitToShell()
@@ -591,7 +399,7 @@ void Executor::C_ExitToShell()
 #if 1
 
     Point pt;
-    static GUEST<SFTypeList> applonly = { CLC(FOURCC('A', 'P', 'P', 'L')) };
+    static GUEST<SFTypeList> applonly = { FOURCC('A', 'P', 'P', 'L') };
     SFReply reply;
     struct
     {
@@ -621,7 +429,7 @@ void Executor::C_ExitToShell()
     {
         /* remove global datastructures associated with each window
            remaining in the application's window list */
-        for(t_w = MR(LM(WindowList)); t_w; t_w = WINDOW_NEXT_WINDOW(t_w))
+        for(t_w = LM(WindowList); t_w; t_w = WINDOW_NEXT_WINDOW(t_w))
             pm_window_closed((WindowPtr)t_w);
     }
     LM(WindowList) = 0;
@@ -641,16 +449,16 @@ void Executor::C_ExitToShell()
         if(LM(QDExist) == EXIST_NO)
         {
             EM_A5 = US_TO_SYN68K(&a5space.tmpA5);
-            LM(CurrentA5) = guest_cast<Ptr>(CL(EM_A5));
+            LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
             InitGraf((Ptr)&a5space.qdthePort);
         }
         InitFonts();
         FlushEvents(everyEvent, 0);
         if(LM(WWExist) == EXIST_NO)
             InitWindows();
-        if(LM(TEScrpHandle) == guest_cast<Handle>(CLC(-1)) || LM(TEScrpHandle) == nullptr)
+        if(LM(TEScrpHandle) == guest_cast<Handle>(-1) || LM(TEScrpHandle) == nullptr)
             TEInit();
-        if(LM(DlgFont) == CWC(0) || LM(DlgFont) == CWC(-1))
+        if(LM(DlgFont) == 0 || LM(DlgFont) == -1)
             InitDialogs((ProcPtr)0);
         InitCursor();
 
@@ -673,10 +481,10 @@ void Executor::C_ExitToShell()
                 ROMlib_exit = 1;
             else
             {
-                LM(CurApName)[0] = MIN(reply.fName[0], 31);
+                LM(CurApName)[0] = std::min<uint8_t>(reply.fName[0], 31);
                 BlockMoveData((Ptr)reply.fName + 1, (Ptr)LM(CurApName) + 1,
                               (Size)LM(CurApName)[0]);
-                Launch(LM(CurApName), CW(reply.vRefNum));
+                Launch(LM(CurApName), reply.vRefNum);
             }
         }
     }
@@ -688,9 +496,6 @@ void Executor::C_ExitToShell()
 
     dcache_invalidate_all(true);
 
-#if defined(X)
-    autorepeatonX();
-#endif /* X */
     if(ROMlib_errorstring)
     {
         write(2, ROMlib_errorstring, strlen(ROMlib_errorstring));
@@ -707,7 +512,7 @@ void Executor::C_ExitToShell()
 #define MOVESPINSTR 0x3F3C
 #define LOADSEGTRAP 0xA9F0
 
-void Executor::C_LoadSeg(INTEGER volatile segno)
+void Executor::C_LoadSeg(INTEGER segno)
 {
     Handle newcode;
     unsigned short offbytes;
@@ -717,7 +522,7 @@ void Executor::C_LoadSeg(INTEGER volatile segno)
     LM(ResLoad) = -1; /* CricketDraw III's behaviour suggested this */
     newcode = GetResource(TICK("CODE"), segno);
     HLock(newcode);
-    taboff = CW(((GUEST<INTEGER> *)STARH(newcode))[0]);
+    taboff = ((GUEST<INTEGER> *)*newcode)[0];
     if((uint16_t)taboff == 0xA89F) /* magic compressed resource signature */
     {
         /* We are totally dead here.  We almost certainly can't use
@@ -728,17 +533,17 @@ void Executor::C_LoadSeg(INTEGER volatile segno)
         ROMlib_launch_failure = (system_version >= 0x700 ? launch_compressed_ge7 : launch_compressed_lt7);
         C_ExitToShell();
     }
-    savenentries = nentries = CW(((GUEST<INTEGER> *)STARH(newcode))[1]);
+    savenentries = nentries = ((GUEST<INTEGER> *)*newcode)[1];
 
-    saveptr = ptr = (GUEST<int16_t> *)((char *)SYN68K_TO_US(EM_A5) + taboff + Cx(LM(CurJTOffset)));
+    saveptr = ptr = (GUEST<int16_t> *)((char *)SYN68K_TO_US(EM_A5) + taboff + LM(CurJTOffset));
     while(--nentries >= 0)
     {
-        if(ptr[1] != CWC(JMPLINSTR))
+        if(ptr[1] != JMPLINSTR)
         {
-            offbytes = CW(*ptr);
-            *ptr++ = CW(segno);
-            *ptr++ = CWC(JMPLINSTR);
-            *(GUEST<LONGINT> *)ptr = CL(US_TO_SYN68K(STARH(newcode)) + offbytes + 4);
+            offbytes = *ptr;
+            *ptr++ = segno;
+            *ptr++ = JMPLINSTR;
+            *(GUEST<LONGINT> *)ptr = US_TO_SYN68K(*newcode) + offbytes + 4;
             ptr += 2;
         }
         else
@@ -748,7 +553,7 @@ void Executor::C_LoadSeg(INTEGER volatile segno)
                           true);
 }
 
-#define SEGNOOFP(p) (CW(((GUEST<INTEGER> *)p)[-1]))
+#define SEGNOOFP(p) (((GUEST<INTEGER> *)p)[-1])
 
 static void unpatch(Ptr segstart, Ptr p)
 {
@@ -757,11 +562,11 @@ static void unpatch(Ptr segstart, Ptr p)
 
     ip = (GUEST<INTEGER> *)p;
 
-    firstpc = MR(*(GUEST<Ptr> *)(p + 2));
+    firstpc = *(GUEST<Ptr> *)(p + 2);
     ip[1] = ip[-1]; /* the segment number */
-    ip[-1] = CW(firstpc - segstart - 4);
-    ip[0] = CWC(MOVESPINSTR);
-    ip[2] = CWC(LOADSEGTRAP);
+    ip[-1] = firstpc - segstart - 4;
+    ip[0] = MOVESPINSTR;
+    ip[2] = LOADSEGTRAP;
 }
 
 void Executor::C_UnloadSeg(Ptr addr)
@@ -772,13 +577,13 @@ void Executor::C_UnloadSeg(Ptr addr)
     Handle h;
     INTEGER segno;
 
-    if(*(GUEST<INTEGER> *)addr == CWC(JMPLINSTR))
+    if(*(GUEST<INTEGER> *)addr == JMPLINSTR)
     {
         segno = SEGNOOFP(addr);
         h = GetResource(TICK("CODE"), segno);
         if(!*h)
             LoadResource(h);
-        segstart = STARH(h);
+        segstart = *h;
         for(p = addr; SEGNOOFP(p) == segno; p += 8)
             unpatch(segstart, p);
 

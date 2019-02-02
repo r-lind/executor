@@ -11,10 +11,10 @@
 #include "SANE.h"
 #include "IntlUtil.h"
 #include <rsys/macros.h>
-#include <rsys/lowglobals.h>
+#include <base/lowglobals.h>
 
 #define MODULE_NAME ScriptMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -186,15 +186,13 @@ struct NumFormatStringRec
     GUEST<SignedByte[254]> data;
 };
 
-typedef union {
-    char a[2];
-    INTEGER b;
-} WideChar;
+typedef uint16_t WideChar;
 
 typedef struct
 {
-    INTEGER size PACKED;
-    WideChar data[10] PACKED;
+    GUEST_STRUCT;
+    GUEST<INTEGER> size;
+    GUEST<WideChar> data[10];
 } WideCharArr;
 
 struct NumberParts
@@ -443,6 +441,17 @@ extern INTEGER C_TransliterateText(Handle srch, Handle dsth, INTEGER target,
                                    LONGINT srcmask, ScriptCode script);
 PASCAL_SUBTRAP(TransliterateText, 0xA8B5, 0xC20E0018, ScriptUtil);
 
+static_assert(sizeof(DateCacheRec) == 512);
+static_assert(sizeof(LongDateRec) == 28);
+static_assert(sizeof(NumFormatStringRec) == 256);
+static_assert(sizeof(WideChar) == 2);
+static_assert(sizeof(WideCharArr) == 22);
+static_assert(sizeof(NumberParts) == 172);
+static_assert(sizeof(Extended80) == 10);
+static_assert(sizeof(ToggleResults) == 2);
+static_assert(sizeof(LongDateField) == 1);
+static_assert(sizeof(DateDelta) == 1);
+static_assert(sizeof(TogglePB) == 28);
 }
 
 #endif /* _SCRIPTMGR_H_ */

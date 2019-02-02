@@ -1,4 +1,4 @@
-#include "rsys/common.h"
+#include "base/common.h"
 
 /*
  * This file is a quick hack to hoist code from config/os/linux to where it
@@ -13,10 +13,10 @@
 #include <sys/mman.h>
 
 #include "rsys/os.h"
-#include "rsys/memsize.h"
-#include "rsys/mman.h"
-#include "rsys/system_error.h"
-#include "rsys/lowglobals.h"
+#include "mman/memsize.h"
+#include "mman/mman.h"
+#include "error/system_error.h"
+#include "base/lowglobals.h"
 
 #include "Gestalt.h"
 #include "SegmentLdr.h"
@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -94,7 +95,7 @@ guess_good_memory_settings(void)
     new_appl_size = physical_memory() / 4;
 
     if(new_appl_size > ROMlib_applzone_size)
-        ROMlib_applzone_size = MIN(MAX_APPLZONE_SIZE, new_appl_size);
+        ROMlib_applzone_size = std::min<unsigned long>(MAX_APPLZONE_SIZE, new_appl_size);
 }
 
 bool Executor::os_init(void)
@@ -180,20 +181,6 @@ ROMlib_launch_native_app(int n_filenames, char **filenames)
         execv(filenames[0], v);
 
     return 0;
-}
-
-bool Executor::host_has_spfcommon(void)
-{
-    return false;
-}
-
-bool
-Executor::host_spfcommon(host_spf_reply_block *replyp, const char *prompt,
-                         const char *incoming_filename, void *fp, void *filef, int numt,
-                         void *tl, getorput_t getorput, sf_flavor_t flavor,
-                         void *activeList, void *activateproc, void *yourdatap)
-{
-    return false;
 }
 
 #endif /* defined (LINUX) || defined (MACOSX) */

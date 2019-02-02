@@ -4,7 +4,7 @@
 #include "ResourceMgr.h"
 
 #define MODULE_NAME ScrapMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1986, 1989, 1990 by Abacus Research and Development, Inc.
@@ -52,5 +52,7 @@ PASCAL_TRAP(PutScrap, 0xA9FE);
 extern LONGINT C_GetScrap(Handle h, ResType rest,
                                       GUEST<LONGINT> *off);
 PASCAL_TRAP(GetScrap, 0xA9FD);
+
+static_assert(sizeof(ScrapStuff) == 16);
 }
 #endif /* __SCRAP__ */

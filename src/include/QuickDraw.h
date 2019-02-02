@@ -8,11 +8,11 @@
 
  */
 
-#include <rsys/common.h>
+#include <base/common.h>
 #include "ExMacTypes.h"
 
 #define MODULE_NAME QuickDraw
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -254,6 +254,7 @@ typedef enum { blend = 32,
 enum
 {
     pHiliteBit = 0,
+    hiliteBit = 7
 };
 
 enum
@@ -464,17 +465,25 @@ struct MatchRec
 
 typedef Byte *BytePtr;
 
-#define thePort (STARH(STARH((GUEST<GUEST<GrafPtr> *> *)SYN68K_TO_US(EM_A5))))
-#define thePortX ((*STARH((GUEST<GUEST<GrafPtr> *> *)SYN68K_TO_US(EM_A5))))
-#define white (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 8)
-#define black (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 16)
-#define gray (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 24)
-#define ltGray (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 32)
-#define dkGray (STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 40)
-#define arrowX (*(Cursor *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 108))
-#define screenBitsX (*(BitMap *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 122))
-#define randSeed CL(*(GUEST<LONGINT> *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 126))
-#define randSeedX ((*(GUEST<LONGINT> *)(STARH((GUEST<BytePtr> *)SYN68K_TO_US(EM_A5)) - 126)))
+struct QDGlobals
+{
+    char privates[76];
+    GUEST<int32_t> randSeed;
+    BitMap screenBits;
+    Cursor arrow;
+    Pattern dkGray;
+    Pattern ltGray;
+    Pattern gray;
+    Pattern black;
+    Pattern white;
+    GUEST<GrafPtr> thePort;
+};
+
+inline QDGlobals& qdGlobals()
+{
+    Ptr thePortPtr = *(GUEST<Ptr> *)SYN68K_TO_US(EM_A5);
+    return *(QDGlobals*)(thePortPtr - offsetof(QDGlobals, thePort));
+}
 
 const LowMemGlobal<INTEGER> ScrVRes { 0x102 }; // QuickDraw IMI-473 (true);
 const LowMemGlobal<INTEGER> ScrHRes { 0x104 }; // QuickDraw IMI-473 (true);
@@ -903,5 +912,27 @@ extern void C_IMVI_CopyDeepMask(
     INTEGER mode,
     RgnHandle maskRgn);
 PASCAL_TRAP(IMVI_CopyDeepMask, 0xAA51);
+
+static_assert(sizeof(Region) == 10);
+static_assert(sizeof(BitMap) == 14);
+static_assert(sizeof(Cursor) == 68);
+static_assert(sizeof(Polygon) == 14);
+static_assert(sizeof(FontInfo) == 8);
+static_assert(sizeof(QDProcs) == 52);
+static_assert(sizeof(GrafPort) == 108);
+static_assert(sizeof(Picture) == 10);
+static_assert(sizeof(PenState) == 18);
+static_assert(sizeof(RGBColor) == 6);
+static_assert(sizeof(HSVColor) == 6);
+static_assert(sizeof(HSLColor) == 6);
+static_assert(sizeof(CMYColor) == 6);
+static_assert(sizeof(ColorSpec) == 8);
+static_assert(sizeof(ColorTable) == 16);
+static_assert(sizeof(CQDProcs) == 80);
+static_assert(sizeof(PixMap) == 50);
+static_assert(sizeof(PixPat) == 28);
+static_assert(sizeof(CGrafPort) == 108);
+static_assert(sizeof(CCrsr) == 96);
+static_assert(sizeof(MatchRec) == 10);
 }
 #endif /* _QUICKDRAW_H_ */

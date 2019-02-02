@@ -6,12 +6,11 @@
  * Errors should be handled more cleanly.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
 #include "SegmentLdr.h"
-#include "rsys/notmac.h"
 #include "MemoryMgr.h"
 #include "FontMgr.h"
 #include "SysErr.h"
@@ -35,59 +34,54 @@
 #include "SoundDvr.h"
 #include "StartMgr.h"
 
-#include "rsys/cquick.h"
-#include "rsys/tesave.h"
-#include "rsys/mman.h"
-#include "rsys/menu.h"
-#include "rsys/prefs.h"
-#include "rsys/flags.h"
-#include "rsys/option.h"
-#include "rsys/host.h"
-#include "rsys/syncint.h"
-#include "rsys/vdriver.h"
-#include "rsys/vbl.h"
-#include "rsys/time.h"
+#include "quickdraw/cquick.h"
+#include "textedit/tesave.h"
+#include "mman/mman.h"
+#include "menu/menu.h"
+#include "prefs/prefs.h"
+#include "commandline/flags.h"
+#include "commandline/option.h"
+#include "time/syncint.h"
+#include "vdriver/vdriver.h"
+#include "time/vbl.h"
+#include "time/time.h"
 #include "rsys/segment.h"
 #include "rsys/version.h"
-#include "rsys/m68kint.h"
-#include "rsys/blockinterrupts.h"
-#include "rsys/rgbutil.h"
-#include "rsys/refresh.h"
+#include "base/m68kint.h"
+#include "quickdraw/rgbutil.h"
+#include "vdriver/refresh.h"
 #include "rsys/executor.h"
-#include "rsys/wind.h"
-#include "rsys/osevent.h"
-#include "rsys/image.h"
+#include "wind/wind.h"
+#include "osevent/osevent.h"
+#include "quickdraw/image.h"
 #include "rsys/dump.h"
-#include "rsys/file.h"
-#include "rsys/ctl.h"
-#include "rsys/parseopt.h"
-#include "rsys/print.h"
-#include "rsys/memsize.h"
-#include "rsys/stdfile.h"
-#include "rsys/autorefresh.h"
-#include "rsys/sounddriver.h"
-#include "rsys/dcache.h"
-#include "rsys/system_error.h"
-#include "rsys/filedouble.h"
-#include "rsys/option.h"
-#include "rsys/emustubs.h"
-#include "rsys/float.h"
+#include "file/file.h"
+#include "ctl/ctl.h"
+#include "commandline/parseopt.h"
+#include "print/print.h"
+#include "mman/memsize.h"
+#include "vdriver/autorefresh.h"
+#include "sound/sounddriver.h"
+#include "hfs/dcache.h"
+#include "error/system_error.h"
+#include "commandline/option.h"
+#include "base/emustubs.h"
+#include "sane/float.h"
+#include "rsys/paths.h"
 
 #include "rsys/os.h"
 #include "rsys/arch.h"
 #include "rsys/gestalt.h"
-#include "rsys/keyboards.h"
 #include "rsys/launch.h"
-#include "rsys/text.h"
+#include "quickdraw/text.h"
 #include "rsys/appearance.h"
-#include "rsys/hfs_plus.h"
-#include "rsys/cpu.h"
+#include "hfs/hfs_plus.h"
+#include "base/cpu.h"
 #include "rsys/debugger.h"
 #include <PowerCore.h>
 
-#include "rsys/check_structs.h"
+#include "default_vdriver.h"
 
-#include "paramline.h"
 
 static void setstartdir(char *);
 
@@ -106,17 +100,11 @@ static void setstartdir(char *);
 #include "win_print.h"
 #endif
 
-#if defined(X)
-#include "x.h"
-#endif
-
 #include <vector>
 
 using namespace Executor;
 using namespace std;
 
-/* optional resolution other than 72dpix72dpi for printing */
-INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
 
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
@@ -130,8 +118,6 @@ static bool use_native_code_p = true;
 
 const option_vec Executor::common_opts = {
     { "sticky", "sticky menus", opt_no_arg, "" },
-    { "pceditkeys", "have Delete key delete one character forward",
-      opt_no_arg, "" },
     { "nobrowser", "don't run Browser", opt_no_arg, "" },
     { "bpp", "default screen depth", opt_sep, "" },
     { "size", "default screen size", opt_sep, "" },
@@ -188,10 +174,8 @@ const option_vec Executor::common_opts = {
       "tell program to print file; not useful unless you also "
       "specify a program to run and one or more documents to print.",
       opt_no_arg, "" },
-#if defined(MACOSX_) || defined(LINUX)
     { "nodotfiles", "do not display filenames that begin with dot", opt_no_arg,
       "" },
-#endif
 #if 0
   { "noclock",     "disable timer",               opt_no_arg,   "" },
 #endif
@@ -216,7 +200,6 @@ const option_vec Executor::common_opts = {
     {
         "version", "print the Executor version", opt_no_arg, "",
     },
-#if defined(MALLOC_MAC_MEMORY)
     {
         "memory",
         "specify the total memory you want reserved for use by the programs "
@@ -245,7 +228,6 @@ const option_vec Executor::common_opts = {
                    "available to Executor's internal system software.",
         opt_sep, "",
     },
-#endif /* MALLOC_MAC_MEMORY */
     { "system",
       "specify the system version that executor reports to applications",
       opt_sep, "" },
@@ -256,12 +238,6 @@ const option_vec Executor::common_opts = {
     { "grayscale", "\
 specify that executor should run in grayscale mode even if it is \
 capable of color.",
-      opt_no_arg, "" },
-    { "netatalk", "use netatalk naming conventions for AppleDouble files",
-      opt_no_arg, "" },
-    { "afpd", "use afpd conventions for AppleDouble files (implies -netatalk)",
-      opt_no_arg, "" },
-    { "rsrc", "use native resource forks on Mac OS X",
       opt_no_arg, "" },
 
     { "cities", "Don't use Helvetica for Geneva, Courier for Monaco and Times "
@@ -310,11 +286,9 @@ capable of color.",
     { "clipleak", "UNSUPPORTED (ignored)", opt_no_arg, "" },
 #endif
 
-#if defined(X) || defined(SDL)
     { "scancodes", "different form of key mapping (may be useful in "
                    "conjunction with -keyboard)",
-      opt_no_arg, "" },
-#endif
+      opt_no_arg, "" }, // FIXME: only applies to some vdrivers (X11, SDL1 on CYGWIN)
 
     { "ppc", "try to execute the PPC native code if possible (UNSUPPORTED)", opt_no_arg, "" },
 
@@ -353,7 +327,7 @@ check_arg(string argname, int *arg, int min, int max)
     if(*arg < min || *arg > max)
     {
         fprintf(stderr, "%s: invalid value for `%s': must be between ",
-                program_name, argname.c_str());
+                ROMlib_appname.c_str(), argname.c_str());
         print_command_line_value(stderr, min);
         fputs(" and ", stderr);
         print_command_line_value(stderr, max);
@@ -362,12 +336,6 @@ check_arg(string argname, int *arg, int min, int max)
     }
 }
 
-char Executor::ROMlib_startdir[MAXPATHLEN];
-INTEGER ROMlib_startdirlen;
-#if defined(WIN32)
-char Executor::ROMlib_start_drive;
-#endif
-std::string Executor::ROMlib_appname;
 
 #if !defined(LINUX)
 #define SHELL "/bin/sh"
@@ -376,8 +344,6 @@ std::string Executor::ROMlib_appname;
 #define SHELL "/bin/bash"
 #define WHICH "type -path "
 #endif
-
-#define APPWRAP "/Executor.app"
 
 static void
 set_appname(char *argv0)
@@ -440,39 +406,22 @@ static void setstartdir(char *argv0)
     if(suffix)
         *suffix = 0;
     getcwd(savedir, sizeof savedir);
-    Uchdir(lookhere);
+    chdir(lookhere);
     if(suffix)
         *suffix = '/';
     getcwd(ROMlib_startdir, sizeof ROMlib_startdir);
-    Uchdir(savedir);
-    ROMlib_startdirlen = strlen(ROMlib_startdir) + 1;
+    chdir(savedir);
 #else /* defined(MSDOS) || defined(CYGWIN32) */
-
+    // TODO: replace by GetModuleFilename()
     if(argv0[1] == ':')
     {
         char *lastslash;
-#if 1
-        static char cd_to[] = "C:/";
 
         ROMlib_start_drive = argv0[0];
-        cd_to[0] = argv0[0];
-        Uchdir(cd_to);
-#if 0
-	strcpy(ROMlib_startdir, argv0 + 2);
-#else
-        /* We now include the drive letter in with ROMlib_startdir. */
-
         strcpy(ROMlib_startdir, argv0);
-#endif
-
-#else
-        strcpy(ROMlib_startdir, argv0);
-#endif
         lastslash = strrchr(ROMlib_startdir, '/');
-#if defined(WIN32)
         if(!lastslash)
             lastslash = strrchr(ROMlib_startdir, '\\');
-#endif
         if(lastslash)
             *lastslash = 0;
     }
@@ -481,7 +430,6 @@ static void setstartdir(char *argv0)
         ROMlib_start_drive = 0;
         strcpy(ROMlib_startdir, ".");
     }
-    ROMlib_startdirlen = strlen(ROMlib_startdir);
 #endif /* defined(MSDOS) */
 }
 
@@ -490,7 +438,7 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
 {
     static const char *trap_description[] = {
         /* I've only put the really interesting ones in. */
-        NULL, NULL, NULL, NULL,
+        nullptr, nullptr, nullptr, nullptr,
         "Illegal instruction",
         "Integer divide by zero",
         "CHK/CHK2",
@@ -499,8 +447,8 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
         "Trace",
         "A-line",
         "FPU",
-        NULL,
-        NULL,
+        nullptr,
+        nullptr,
         "Format error"
     };
     int trap_num;
@@ -553,7 +501,7 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
     }
 
     if(trap_num < (int)NELEM(trap_description)
-       && trap_description[trap_num] != NULL)
+       && trap_description[trap_num] != nullptr)
         gui_fatal("Fatal error:  unhandled trap %d at pc %s (%s)",
                   trap_num, pc_str, trap_description[trap_num]);
     else
@@ -569,8 +517,8 @@ setup_trap_vectors(void)
     syn68k_addr_t timer_callback;
 
     /* Set up the trap vector for the timer interrupt. */
-    timer_callback = callback_install(catchalarm, NULL);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = CL(timer_callback);
+    timer_callback = callback_install(catchalarm, nullptr);
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = timer_callback;
 
     getPowerCore().handleInterrupt = &catchalarmPowerPC;
 
@@ -604,42 +552,10 @@ setup_trap_vectors(void)
         {
             syn68k_addr_t c;
             c = callback_install(unhandled_trap, (void *)i);
-            *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(i * 4) = CL(c);
+            *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(i * 4) = c;
         }
 }
 
-static void illegal_mode(void) __attribute__((noreturn));
-
-static void
-illegal_mode(void)
-{
-    const vdriver_modes_t *vm;
-    int num_sizes, max_width, max_height, max_bpp;
-
-    vm = vdriver_mode_list;
-    num_sizes = vm->num_sizes;
-    max_bpp = vdriver_max_bpp;
-    if(num_sizes)
-    {
-        max_width = vm->size[num_sizes - 1].width;
-        max_height = vm->size[num_sizes - 1].height;
-    }
-    else
-        max_width = max_height = 0; /* quiet gcc */
-
-    vdriver_shutdown(); /* Just to be safe. */
-    if(num_sizes == 0)
-        fprintf(stderr, "Unable to find legal graphics mode.\n");
-    else
-    {
-        fprintf(stderr, "Invalid graphics mode.  Largest allowable "
-                        "screen %dx%d, %d bits per pixel.\n",
-                max_width, max_height, max_bpp);
-    }
-
-    /* Don't call ExitToShell here; ROMlib isn't set up enough yet to do that. */
-    exit(-1);
-}
 
 
 /* This is to tell people about the switch from "-applzone 4096" to
@@ -696,22 +612,12 @@ construct_command_line_string(int argc, char **argv)
 #define READ_IMPLIES_EXEC 0x0400000
 #endif
 
-#if defined(LINUX)
-extern char _etext, _end; /* boundaries of data+bss sections, supplied by the linker */
-#endif
-
 int main(int argc, char **argv)
 {
     char thingOnStack; /* used to determine an approximation of the stack base address */
-    check_structs();
 
     INTEGER i;
     uint32_t l;
-    virtual_int_state_t int_state;
-    static void (*reg_funcs[])(void) = {
-        vdriver_opt_register,
-        NULL,
-    };
     string arg;
 
 #if defined(LINUX) && defined(PERSONALITY_HACK)
@@ -728,8 +634,6 @@ int main(int argc, char **argv)
     }
 #endif
 
-    int grayscale_p = false;
-
     ROMlib_command_line = construct_command_line_string(argc, argv);
 
     if(!arch_init())
@@ -744,23 +648,18 @@ int main(int argc, char **argv)
         exit(-101);
     }
 
-    {
-        char *t;
-
-        t = strrchr(*argv, '/');
-        if(t)
-            program_name = &t[1];
-        else
-            program_name = *argv;
-    }
-
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();
 
-    ROMlib_WriteWhen(WriteInOSEvent);
-
     setstartdir(argv[0]);
     set_appname(argv[0]);
+
+    vdriver = new DefaultVDriver();
+    if(!vdriver->parseCommandLine(argc, argv))
+    {
+        fprintf(stderr, "Unable to initialize video driver.\n");
+        exit(-12);
+    }
 
     opt_init();
     common_db = opt_alloc_db();
@@ -770,14 +669,13 @@ int main(int argc, char **argv)
     opt_register_pre_note("usage: `executor [option...] "
                           "[program [document1 document2 ...]]'");
 
-    for(i = 0; reg_funcs[i]; i++)
-        (*reg_funcs[i])();
+    vdriver->registerOptions();
 
     if(!bad_arg_p)
         bad_arg_p = opt_parse(common_db, common_opts,
                               &argc, argv);
 
-    if(opt_val(common_db, "version", NULL))
+    if(opt_val(common_db, "version", nullptr))
     {
         fprintf(stdout, "%s\n", EXECUTOR_VERSION);
         exit(0);
@@ -787,7 +685,7 @@ int main(int argc, char **argv)
    * If they ask for help, it's not an error -- it should go to stdout
    */
 
-    if(opt_val(common_db, "help", NULL))
+    if(opt_val(common_db, "help", nullptr))
     {
         fprintf(stdout, "%s", opt_help_message());
         exit(0);
@@ -806,17 +704,15 @@ int main(int argc, char **argv)
     }
 
 #if defined(SDL)
-    if(opt_val(common_db, "fullscreen", NULL))
+    if(opt_val(common_db, "fullscreen", nullptr))
         ROMlib_fullscreen_p = true;
 
-    if(opt_val(common_db, "hwsurface", NULL))
+    if(opt_val(common_db, "hwsurface", nullptr))
         ROMlib_hwsurface_p = true;
 #endif
 
-#if defined(X) || (defined(CYGWIN32) && defined(SDL))
-    if(opt_val(common_db, "scancodes", NULL))
-        ROMlib_set_use_scancodes(true);
-#endif
+    if(opt_val(common_db, "scancodes", nullptr))
+        vdriver->setUseScancodes(true);
 
 #if defined(Sound_SDL_Sound)
 
@@ -825,10 +721,10 @@ int main(int argc, char **argv)
 
 #endif
 
-    if(opt_val(common_db, "ppc", NULL))
+    if(opt_val(common_db, "ppc", nullptr))
         ROMlib_set_ppc(true);
 
-    if(opt_val(common_db, "hfsplusro", NULL))
+    if(opt_val(common_db, "hfsplusro", nullptr))
         ROMlib_hfs_plus_support = true;
 
     if(opt_val(common_db, "size", &arg))
@@ -860,23 +756,14 @@ int main(int argc, char **argv)
         dcache_set_enabled(!nocache);
     }
 
-    use_native_code_p = !opt_val(common_db, "notnative", NULL);
+    use_native_code_p = !opt_val(common_db, "notnative", nullptr);
 
-    if(opt_val(common_db, "netatalk", NULL))
-        setup_resfork_format(ResForkFormat::netatalk);
-    else if(opt_val(common_db, "afpd", NULL))
-        setup_resfork_format(ResForkFormat::afpd);
-    else if(opt_val(common_db, "rsrc", NULL))
-        setup_resfork_format(ResForkFormat::native);
-    else
-        setup_resfork_format(ResForkFormat::standard);
-
-    substitute_fonts_p = !opt_val(common_db, "cities", NULL);
+    substitute_fonts_p = !opt_val(common_db, "cities", nullptr);
 
 #if defined(CYGWIN32)
-    if(opt_val(common_db, "die", NULL))
+    if(opt_val(common_db, "die", nullptr))
         uninstall_exception_handler();
-    if(opt_val(common_db, "noautoevents", NULL))
+    if(opt_val(common_db, "noautoevents", nullptr))
         set_timer_driven_events(false);
 #endif
 
@@ -926,17 +813,14 @@ int main(int argc, char **argv)
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
 
-    if(opt_val(common_db, "keyboards", NULL))
+    if(opt_val(common_db, "keyboards", nullptr))
         graphics_p = false;
 
 
     opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
-    opt_bool_val(common_db, "pceditkeys", &ROMlib_forward_del_p, &bad_arg_p);
     opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
-#if defined(MACOSX_) || defined(LINUX)
-    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);
-#endif
+    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);    // FIXME: currently ignored
 #if 0
   opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
 #endif
@@ -949,7 +833,7 @@ int main(int argc, char **argv)
     opt_int_val(common_db, "refresh", &ROMlib_refresh, &bad_arg_p);
     check_arg("refresh", &ROMlib_refresh, 0, 60);
 
-    opt_int_val(common_db, "grayscale", &grayscale_p, &bad_arg_p);
+    opt_bool_val(common_db, "grayscale", &flag_grayscale, &bad_arg_p);
 
 #if defined(LINUX)
     opt_bool_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
@@ -1010,7 +894,7 @@ int main(int argc, char **argv)
             if(argv[a][0] == '-')
             {
                 fprintf(stderr, "%s: unknown option `%s'\n",
-                        program_name, argv[a]);
+                        ROMlib_appname.c_str(), argv[a]);
                 bad_arg_p = true;
             }
         }
@@ -1020,65 +904,18 @@ int main(int argc, char **argv)
     {
         fprintf(stderr,
                 "Type \"%s -help\" for a list of command-line options.\n",
-                program_name);
+                ROMlib_appname.c_str());
         exit(-10);
     }
 
-    ROMlib_InitZones();
-
-#if SIZEOF_CHAR_P > 4
-    /*
-    On 64-bit platforms, there is no single ROMlib_offset, but rather
-    a four-element array. The high two bits of the 69K address are mapped
-    to an index in this array.
-    This way, we can access:
-        0 - the regular emulated memory
-        1 - video memory.
-        2 - local variables of executor's main thread
-        3 - executor's global variables (which includes syn68K callback addresses)
-
-    Block 0 is set up in ROMlib_InitZones.
-    Block 1 is set up later, when video memory is allocated.
-    Global variables are in block 3 so that we don't need to figure out
-    the exact boundaries for that address range.
-   */
-
-    // mark the slot as occupied until we explicitly set it later
-    ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 30);
-    ROMlib_sizes[1] = 0;
-
-    // assume an arbitrary maximum stack size of 16MB.
-    ROMlib_offsets[2] = (uintptr_t)&thingOnStack - 16 * 1024 * 1024;
-    ROMlib_offsets[2] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[2] -= (2UL << 30);
-    ROMlib_sizes[2] = 16 * 1024 * 1024;
-
-#if defined(LINUX)
-    ROMlib_offsets[3] = (uintptr_t)&_etext;
-    ROMlib_offsets[3] -= ROMlib_offsets[3] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = &_end - &_etext;
-#else
-    /* Mac OS X doesn't have _etext and _end, and the functions in
-       mach/getsect.h don't give the correct results when ASLR is active.
-       Win32 might also have a way to get the addresses, or it might not.
-
-       So we just use the address of a static variable and 512MB in each direction.
-     */
-    static char staticThing[32];
-    ROMlib_offsets[3] = (uintptr_t)&staticThing - 0x20000000;
-    ROMlib_offsets[3] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = 0x3FFFFFFF;
-#endif
-#endif
+    InitMemory(&thingOnStack);
 
     {
         uint32_t save_a7;
 
         save_a7 = EM_A7;
         /* Set up syn68k. */
-        initialize_68k_emulator(vdriver_system_busy,
+        initialize_68k_emulator(nullptr,
                                 use_native_code_p,
                                 (uint32_t *)SYN68K_TO_US(0),
                                 0);
@@ -1086,17 +923,7 @@ int main(int argc, char **argv)
         EM_A7 = save_a7;
     }
 
-    /* Block virtual interrupts, until the system is fully set up. */
-    int_state = block_virtual_ints();
-
-    if(graphics_p && !vdriver_init(0, 0, 0, false, &argc, argv))
-    {
-        fprintf(stderr, "Unable to initialize video driver.\n");
-        exit(-12);
-    }
-
-
-    if(opt_val(common_db, "logtraps", NULL))
+    if(opt_val(common_db, "logtraps", nullptr))
         Executor::traps::init(true);
     else
         Executor::traps::init(false);
@@ -1105,7 +932,7 @@ int main(int argc, char **argv)
     // of code that jumps to the former trap entry of ResourceStub. 
     l = ostraptable[0x0FC];
     static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
-        CWC((unsigned short)0x4EF9), CWC(0), CWC(0) /* Filled in below. */
+        (unsigned short)0x4EF9, 0, 0 /* Filled in below. */
     };
     ((unsigned char *)jmpl_to_ResourceStub)[2] = l >> 24;
     ((unsigned char *)jmpl_to_ResourceStub)[3] = l >> 16;
@@ -1119,12 +946,12 @@ int main(int argc, char **argv)
 
     memset(&LM(EventQueue), 0, sizeof(LM(EventQueue)));
     memset(&LM(VBLQueue), 0, sizeof(LM(VBLQueue)));
-    memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));
-    memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));
-    memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));
+    //memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));     // inited in ROMlib_fileinit
+    //memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));     // inited in ROMlib_fileinit
+    //memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));       // inited in ROMlib_fileinit
     LM(TESysJust) = 0;
     LM(BootDrive) = 0;
-    LM(DefVCBPtr) = 0;
+    //LM(DefVCBPtr) = 0;  // inited in ROMlib_fileinit
     LM(CurMap) = 0;
     LM(TopMapHndl) = 0;
     LM(DSAlertTab) = 0;
@@ -1141,38 +968,23 @@ int main(int argc, char **argv)
     LM(TheMenu) = 0;
     LM(MBarHook) = 0;
     LM(MenuHook) = 0;
-    LM(MenuCInfo) = NULL;
+    LM(MenuCInfo) = nullptr;
     LM(HeapEnd) = 0;
     LM(ApplLimit) = 0;
     LM(SoundActive) = soundactiveoff;
     LM(PortBUse) = 2; /* configured for Serial driver */
     memset(LM(KeyMap), 0, sizeof_KeyMap);
-    if(vdriver_grayscale_p || grayscale_p)
     {
-        /* Choose a nice light gray hilite color. */
-        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).blue = CWC((unsigned short)0xAAAA);
-    }
-    else
-    {
-        /* how about a nice yellow hilite color? no, it's ugly. */
-        LM(HiliteRGB).red = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).green = CWC((unsigned short)0xAAAA);
-        LM(HiliteRGB).blue = CWC((unsigned short)0xFFFF);
-    }
+        static GUEST<uint16_t> ret = (unsigned short)0x4E75;
 
-    {
-        static GUEST<uint16_t> ret = CWC((unsigned short)0x4E75);
-
-        LM(JCrsrTask) = RM((ProcPtr)&ret);
+        LM(JCrsrTask) = (ProcPtr)&ret;
     }
 
     SET_HILITE_BIT();
-    LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = CLC_NULL;
+    LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = nullptr;
 
-    LM(OneOne) = CLC(0x00010001);
-    LM(Lo3Bytes) = CLC(0xFFFFFF);
+    LM(OneOne) = 0x00010001;
+    LM(Lo3Bytes) = 0xFFFFFF;
     LM(DragHook) = 0;
     LM(TopMapHndl) = 0;
     LM(SysMapHndl) = 0;
@@ -1180,19 +992,19 @@ int main(int argc, char **argv)
     LM(MenuList) = 0;
     LM(MBSaveLoc) = 0;
 
-    LM(SysVersion) = CW(system_version);
-    LM(FSFCBLen) = CWC(94);
-    LM(ScrapState) = CWC(-1);
+    LM(SysVersion) = system_version;
+    //LM(FSFCBLen) = 94;   // inited in ROMlib_fileinit
+    LM(ScrapState) = -1;
 
     LM(TheZone) = LM(SysZone);
-    LM(UTableBase) = RM((DCtlHandlePtr)NewPtr(4 * NDEVICES));
-    memset(MR(LM(UTableBase)), 0, 4 * NDEVICES);
-    LM(UnitNtryCnt) = CW(NDEVICES);
+    LM(UTableBase) = (DCtlHandlePtr)NewPtr(4 * NDEVICES);
+    memset(LM(UTableBase), 0, 4 * NDEVICES);
+    LM(UnitNtryCnt) = NDEVICES;
     LM(TheZone) = LM(ApplZone);
 
-    LM(TEDoText) = RM((ProcPtr)&ROMlib_dotext); /* where should this go ? */
+    LM(TEDoText) = (ProcPtr)&ROMlib_dotext; /* where should this go ? */
 
-    LM(SCSIFlags) = CWC(0xEC00); /* scsi+clock+xparam+mmu+adb
+    LM(SCSIFlags) = 0xEC00; /* scsi+clock+xparam+mmu+adb
 				 (no fpu,aux or pwrmgr) */
 
     LM(MCLKPCmiss1) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 72 (MacLinkPC starts
@@ -1209,16 +1021,16 @@ int main(int argc, char **argv)
     LM(PrintErr) = 0;
     LM(mouseoffset) = 0;
     LM(heapcheck) = 0;
-    LM(DefltStack) = CLC(0x2000); /* nobody really cares about these two */
-    LM(MinStack) = CLC(0x400); /* values ... */
+    LM(DefltStack) = 0x2000; /* nobody really cares about these two */
+    LM(MinStack) = 0x400; /* values ... */
     LM(IAZNotify) = 0;
     LM(CurPitch) = 0;
-    LM(JSwapFont) = RM((ProcPtr)&FMSwapFont);
-    LM(JInitCrsr) = RM((ProcPtr)&InitCursor);
+    LM(JSwapFont) = (ProcPtr)&FMSwapFont;
+    LM(JInitCrsr) = (ProcPtr)&InitCursor;
 
-    LM(Key1Trans) = RM((Ptr)&stub_Key1Trans);
-    LM(Key2Trans) = RM((Ptr)&stub_Key2Trans);
-    LM(JFLUSH) = RM(&FlushCodeCache);
+    LM(Key1Trans) = (Ptr)&stub_Key1Trans;
+    LM(Key2Trans) = (Ptr)&stub_Key2Trans;
+    LM(JFLUSH) = &FlushCodeCache;
     LM(JResUnknown1) = LM(JFLUSH); /* I don't know what these are supposed to */
     LM(JResUnknown2) = LM(JFLUSH); /* do, but they're not called enough for
 				   us to worry about the cache flushing
@@ -1233,58 +1045,33 @@ int main(int argc, char **argv)
     LM(UnitNtryCnt) = 0; /* how many units in the table */
 
     LM(TheZone) = LM(SysZone);
-    LM(VIA) = RM(NewPtr(16 * 512)); /* IMIII-43 */
-    memset(MR(LM(VIA)), 0, (LONGINT)16 * 512);
-    *(char *)MR(LM(VIA)) = 0x80; /* Sound Off */
+    LM(VIA) = NewPtr(16 * 512); /* IMIII-43 */
+    memset(LM(VIA), 0, (LONGINT)16 * 512);
+    *(char *)LM(VIA) = 0x80; /* Sound Off */
 
 #define SCC_SIZE 1024
 
-    LM(SCCRd) = RM(NewPtrSysClear(SCC_SIZE));
-    LM(SCCWr) = RM(NewPtrSysClear(SCC_SIZE));
+    LM(SCCRd) = NewPtrSysClear(SCC_SIZE);
+    LM(SCCWr) = NewPtrSysClear(SCC_SIZE);
 
-    LM(SoundBase) = RM(NewPtr(370 * sizeof(INTEGER)));
+    LM(SoundBase) = NewPtr(370 * sizeof(INTEGER));
 #if 0
-    memset(CL(LM(SoundBase)), 0, (LONGINT) 370 * sizeof(INTEGER));
+    memset(LM(SoundBase), 0, (LONGINT) 370 * sizeof(INTEGER));
 #else /* !0 */
     for(i = 0; i < 370; ++i)
-        ((GUEST<INTEGER> *)MR(LM(SoundBase)))[i] = CWC(0x8000); /* reference 0 sound */
+        ((GUEST<INTEGER> *)LM(SoundBase))[i] = 0x8000; /* reference 0 sound */
 #endif /* !0 */
     LM(TheZone) = LM(ApplZone);
-    LM(HiliteMode) = CB(0xFF);
+    LM(HiliteMode) = 0xFF;
     /* Mac II has 0x3FFF here */
-    LM(ROM85) = CWC(0x3FFF);
+    LM(ROM85) = 0x3FFF;
 
     LM(loadtrap) = 0;
 
     if(graphics_p)
-    {
-        /* Set up the current graphics mode appropriately. */
-        if(!vdriver_set_mode(flag_width, flag_height, flag_bpp, grayscale_p))
-            illegal_mode();
-
-#if SIZEOF_CHAR_P > 4
-        if(vdriver_fbuf == 0)
-            abort();
-        ROMlib_offsets[1] = (uintptr_t)vdriver_fbuf;
-        ROMlib_offsets[1] -= (1UL << 30);
-        ROMlib_sizes[1] = vdriver_width * vdriver_height * 5; // ### //vdriver_row_bytes * vdriver_height;
-#endif
-
-        /* initialize the mac rgb_spec's */
-        make_rgb_spec(&mac_16bpp_rgb_spec,
-                      16, true, 0,
-                      5, 10, 5, 5, 5, 0,
-                      CL_RAW(GetCTSeed()));
-
-        make_rgb_spec(&mac_32bpp_rgb_spec,
-                      32, true, 0,
-                      8, 16, 8, 8, 8, 0,
-                      CL_RAW(GetCTSeed()));
-
-        gd_allocate_main_device();
-    }
-
-    ROMlib_eventinit(graphics_p);
+        ROMlib_InitGDevices();
+    
+    ROMlib_eventinit();
     hle_init();
 
     ROMlib_fileinit();
@@ -1307,7 +1094,7 @@ int main(int argc, char **argv)
         else
             keyboard_set_failed = false;
 
-        if(keyboard_set_failed || opt_val(common_db, "keyboards", NULL))
+        if(keyboard_set_failed || opt_val(common_db, "keyboards", nullptr))
             display_keyboard_choices();
     }
 
@@ -1316,7 +1103,7 @@ int main(int argc, char **argv)
     InitFonts();
 
 #if !defined(NDEBUG)
-    dump_init(NULL);
+    dump_init(nullptr);
 #endif
 
     /* see qColorutil.c */
@@ -1343,7 +1130,7 @@ int main(int argc, char **argv)
    */
     if(!syncint_init())
     {
-        vdriver_shutdown();
+        vdriver->shutdown();
         fputs("Fatal error:  unable to initialize timer.\n", stderr);
         exit(-11);
     }
@@ -1351,8 +1138,6 @@ int main(int argc, char **argv)
     sound_init();
 
     set_refresh_rate(ROMlib_refresh);
-
-    restore_virtual_ints(int_state);
 
     LM(WWExist) = LM(QDExist) = EXIST_NO;
 

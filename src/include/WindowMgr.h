@@ -12,7 +12,7 @@
 #include "EventMgr.h"
 
 #define MODULE_NAME WindowMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -187,7 +187,7 @@ LOWMEM_ACCESSOR(CurActivate);
 LOWMEM_ACCESSOR(CurDeactive);
 LOWMEM_ACCESSOR(GrayRgn);
 
-inline RgnHandle GetGrayRgn() { return MR(LM(GrayRgn)); }
+inline RgnHandle GetGrayRgn() { return LM(GrayRgn); }
 NOTRAP_FUNCTION2(GetGrayRgn);
 
 extern void C_SetWTitle(WindowPtr w, StringPtr t);
@@ -339,5 +339,9 @@ PASCAL_TRAP(SetDeskCPat, 0xAA47);
 
 extern BOOLEAN C_GetAuxWin(WindowPtr, GUEST<AuxWinHandle> *);
 PASCAL_TRAP(GetAuxWin, 0xAA42);
+
+static_assert(sizeof(WindowRecord) == 156);
+static_assert(sizeof(WStateData) == 16);
+static_assert(sizeof(AuxWinRec) == 28);
 }
 #endif /* __WINDOW__ */

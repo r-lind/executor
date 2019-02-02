@@ -5,7 +5,7 @@
 #include "PPC.h"
 
 #define MODULE_NAME ProcessMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 /*
  * Copyright 1995, 1996 by Abacus Research and Development, Inc.
@@ -106,27 +106,27 @@ typedef ProcessInfoRec *ProcessInfoPtr;
 #define PROCESS_INFO_SERIAL_NUMBER(info) ((info)->processNumber)
 #define PROCESS_INFO_LAUNCHER(info) ((info)->processLauncher)
 
-#define PROCESS_INFO_LENGTH_X(info) ((info)->processInfoLength)
-#define PROCESS_INFO_NAME_X(info) ((info)->processName)
-#define PROCESS_INFO_TYPE_X(info) ((info)->processType)
-#define PROCESS_INFO_SIGNATURE_X(info) ((info)->processSignature)
-#define PROCESS_INFO_MODE_X(info) ((info)->processMode)
-#define PROCESS_INFO_LOCATION_X(info) ((info)->processLocation)
-#define PROCESS_INFO_SIZE_X(info) ((info)->processSize)
-#define PROCESS_INFO_FREE_MEM_X(info) ((info)->processFreeMem)
-#define PROCESS_INFO_LAUNCH_DATE_X(info) ((info)->processLaunchDate)
-#define PROCESS_INFO_ACTIVE_TIME_X(info) ((info)->processActiveTime)
+#define PROCESS_INFO_LENGTH(info) ((info)->processInfoLength)
+#define PROCESS_INFO_NAME(info) ((info)->processName)
+#define PROCESS_INFO_TYPE(info) ((info)->processType)
+#define PROCESS_INFO_SIGNATURE(info) ((info)->processSignature)
+#define PROCESS_INFO_MODE(info) ((info)->processMode)
+#define PROCESS_INFO_LOCATION(info) ((info)->processLocation)
+#define PROCESS_INFO_SIZE(info) ((info)->processSize)
+#define PROCESS_INFO_FREE_MEM(info) ((info)->processFreeMem)
+#define PROCESS_INFO_LAUNCH_DATE(info) ((info)->processLaunchDate)
+#define PROCESS_INFO_ACTIVE_TIME(info) ((info)->processActiveTime)
 
-#define PROCESS_INFO_LENGTH(info) (CL(PROCESS_INFO_LENGTH_X(info)))
-#define PROCESS_INFO_NAME(info) (CL(PROCESS_INFO_NAME_X(info)))
-#define PROCESS_INFO_TYPE(info) (CL(PROCESS_INFO_TYPE_X(info)))
-#define PROCESS_INFO_SIGNATURE(info) (CL(PROCESS_INFO_SIGNATURE_X(info)))
-#define PROCESS_INFO_MODE(info) (CL(PROCESS_INFO_MODE_X(info)))
-#define PROCESS_INFO_LOCATION(info) (CL(PROCESS_INFO_LOCATION_X(info)))
-#define PROCESS_INFO_SIZE(info) (CL(PROCESS_INFO_SIZE_X(info)))
-#define PROCESS_INFO_FREE_MEM(info) (CL(PROCESS_INFO_FREE_MEM_X(info)))
-#define PROCESS_INFO_LAUNCH_DATE(info) (CL(PROCESS_INFO_LAUNCH_DATE_X(info)))
-#define PROCESS_INFO_ACTIVE_TIME(info) (CL(PROCESS_INFO_ACTIVE_TIME_X(info)))
+
+
+
+
+
+
+
+
+
+
 
 /* flags for the `processMode' field of the `ProcessInformationRec'
    record */
@@ -198,5 +198,9 @@ PASCAL_SUBTRAP(GetPortNameFromProcessSerialNumber, 0xA88F, 0x0046, OSDispatch);
 
 extern OSErr NewLaunch(StringPtr appl, INTEGER vrefnum,
                        LaunchParamBlockRec *lpbp);
+
+static_assert(sizeof(ProcessSerialNumber) == 8);
+static_assert(sizeof(LaunchParamBlockRec) == 44);
+static_assert(sizeof(ProcessInfoRec) == 60);
 }
 #endif

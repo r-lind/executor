@@ -28,34 +28,33 @@ typedef struct PEFContainerHeader
 } PEFContainerHeader_t;
 
 #define PEF_CONTAINER_TAG1_X(p) ((p)->tag1)
-#define PEF_CONTAINER_TAG1(p) (CL(PEF_CONTAINER_TAG1_X(p)))
+#define PEF_CONTAINER_TAG1(p) (PEF_CONTAINER_TAG1_X(p))
 
 #define PEF_CONTAINER_TAG2_X(p) ((p)->tag2)
-#define PEF_CONTAINER_TAG2(p) (CL(PEF_CONTAINER_TAG2_X(p)))
+#define PEF_CONTAINER_TAG2(p) (PEF_CONTAINER_TAG2_X(p))
 
-#define PEF_CONTAINER_ARCHITECTURE_X(p) ((p)->architecture)
-#define PEF_CONTAINER_ARCHITECTURE(p) (CL(PEF_CONTAINER_ARCHITECTURE_X(p)))
+#define PEF_CONTAINER_ARCHITECTURE(p) ((p)->architecture)
 
-#define PEF_CONTAINER_FORMAT_VERSION_X(p) ((p)->formatVersion)
-#define PEF_CONTAINER_FORMAT_VERSION(p) (CL(PEF_CONTAINER_FORMAT_VERSION_X(p)))
 
-#define PEF_CONTAINER_SECTION_COUNT_X(p) ((p)->sectionCount)
-#define PEF_CONTAINER_SECTION_COUNT(p) (CW(PEF_CONTAINER_SECTION_COUNT_X(p)))
+#define PEF_CONTAINER_FORMAT_VERSION(p) ((p)->formatVersion)
 
-#define PEF_CONTAINER_INSTSECTION_COUNT_X(p) ((p)->instSectionCount)
-#define PEF_CONTAINER_INSTSECTION_COUNT(p) (CW(PEF_CONTAINER_INSTSECTION_COUNT_X(p)))
 
-#define PEF_CONTAINER_DATE_X(p) ((p)->dateTimeStamp)
-#define PEF_CONTAINER_DATE(p) (CL (PEF_CONTAINER_DATE_X (p))
+#define PEF_CONTAINER_SECTION_COUNT(p) ((p)->sectionCount)
 
-#define PEF_CONTAINER_OLD_DEV_VERS_X(p) ((p)->oldDefVersion)
-#define PEF_CONTAINER_OLD_DEV_VERS(p) (CL(PEF_CONTAINER_OLD_DEV_VERS_X(p)))
 
-#define PEF_CONTAINER_OLD_IMP_VERS_X(p) ((p)->oldImpVersion)
-#define PEF_CONTAINER_OLD_IMP_VERS(p) (CL(PEF_CONTAINER_OLD_IMP_VERS_X(p)))
+#define PEF_CONTAINER_INSTSECTION_COUNT(p) ((p)->instSectionCount)
 
-#define PEF_CONTAINER_CURRENT_VERS_X(p) ((p)->currentVersion)
-#define PEF_CONTAINER_CURRENT_VERS(p) (CL(PEF_CONTAINER_CURRENT_VERS_X(p)))
+
+#define PEF_CONTAINER_DATE(p) ((p)->dateTimeStamp)
+
+#define PEF_CONTAINER_OLD_DEV_VERS(p) ((p)->oldDefVersion)
+
+
+#define PEF_CONTAINER_OLD_IMP_VERS(p) ((p)->oldImpVersion)
+
+
+#define PEF_CONTAINER_CURRENT_VERS(p) ((p)->currentVersion)
+
 
 typedef struct PEFSectionHeader
 {
@@ -72,20 +71,20 @@ typedef struct PEFSectionHeader
     GUEST<uint8_t> reservedA;
 } PEFSectionHeader_t;
 
-#define PEFSH_DEFAULT_ADDRESS_X(p) ((p)->defaultAddress)
-#define PEFSH_DEFAULT_ADDRESS(p) (CL(PEFSH_DEFAULT_ADDRESS_X(p)))
+#define PEFSH_DEFAULT_ADDRESS(p) ((p)->defaultAddress)
 
-#define PEFSH_TOTAL_SIZE_X(p) ((p)->totalSize)
-#define PEFSH_TOTAL_SIZE(p) (CL(PEFSH_TOTAL_SIZE_X(p)))
 
-#define PEFSH_UNPACKED_SIZE_X(p) ((p)->unpackedSize)
-#define PEFSH_UNPACKED_SIZE(p) (CL(PEFSH_UNPACKED_SIZE_X(p)))
+#define PEFSH_TOTAL_SIZE(p) ((p)->totalSize)
 
-#define PEFSH_PACKED_SIZE_X(p) ((p)->packedSize)
-#define PEFSH_PACKED_SIZE(p) (CL(PEFSH_PACKED_SIZE_X(p)))
 
-#define PEFSH_CONTAINER_OFFSET_X(p) ((p)->containerOffset)
-#define PEFSH_CONTAINER_OFFSET(p) (CL(PEFSH_CONTAINER_OFFSET_X(p)))
+#define PEFSH_UNPACKED_SIZE(p) ((p)->unpackedSize)
+
+
+#define PEFSH_PACKED_SIZE(p) ((p)->packedSize)
+
+
+#define PEFSH_CONTAINER_OFFSET(p) ((p)->containerOffset)
+
 
 #define PEFSH_SECTION_KIND(p) ((p)->sectionKind)
 #define PEFSH_SHARE_KIND(p) ((p)->shareKind)
@@ -110,47 +109,47 @@ typedef struct PEFLoaderInfoHeader
     GUEST<uint32_t> exportedSymbolCount;
 } PEFLoaderInfoHeader_t;
 
-#define PEFLIH_MAIN_SECTION_X(p) ((p)->mainSection)
-#define PEFLIH_MAIN_SECTION(p) (CL(PEFLIH_MAIN_SECTION_X(p)))
+#define PEFLIH_MAIN_SECTION(p) ((p)->mainSection)
 
-#define PEFLIH_MAIN_OFFSET_X(p) ((p)->mainOffset)
-#define PEFLIH_MAIN_OFFSET(p) (CL(PEFLIH_MAIN_OFFSET_X(p)))
 
-#define PEFLIH_INIT_SECTION_X(p) ((p)->initSection)
-#define PEFLIH_INIT_SECTION(p) (CL(PEFLIH_INIT_SECTION_X(p)))
+#define PEFLIH_MAIN_OFFSET(p) ((p)->mainOffset)
 
-#define PEFLIH_INIT_OFFSET_X(p) ((p)->initOffset)
-#define PEFLIH_INIT_OFFSET(p) (CL(PEFLIH_INIT_OFFSET_X(p)))
 
-#define PEFLIH_TERM_SECTION_X(p) ((p)->termSection)
-#define PEFLIH_TERM_SECTION(p) (CL(PEFLIH_TERM_SECTION_X(p)))
+#define PEFLIH_INIT_SECTION(p) ((p)->initSection)
 
-#define PEFLIH_TERM_OFFSET_X(p) ((p)->termOffset)
-#define PEFLIH_TERM_OFFSET(p) (CL(PEFLIH_TERM_OFFSET_X(p)))
 
-#define PEFLIH_IMPORTED_LIBRARY_COUNT_X(p) ((p)->importedLibraryCount)
-#define PEFLIH_IMPORTED_LIBRARY_COUNT(p) (CL(PEFLIH_IMPORTED_LIBRARY_COUNT_X(p)))
+#define PEFLIH_INIT_OFFSET(p) ((p)->initOffset)
 
-#define PEFLIH_IMPORTED_SYMBOL_COUNT_X(p) ((p)->totalImportedSymbolCount)
-#define PEFLIH_IMPORTED_SYMBOL_COUNT(p) (CL(PEFLIH_IMPORTED_SYMBOL_COUNT_X(p)))
 
-#define PEFLIH_RELOC_SECTION_COUNT_X(p) ((p)->relocSectionCount)
-#define PEFLIH_RELOC_SECTION_COUNT(p) (CL(PEFLIH_RELOC_SECTION_COUNT_X(p)))
+#define PEFLIH_TERM_SECTION(p) ((p)->termSection)
 
-#define PEFLIH_RELOC_INSTR_OFFSET_X(p) ((p)->relocInstrOffset)
-#define PEFLIH_RELOC_INSTR_OFFSET(p) (CL(PEFLIH_RELOC_INSTR_OFFSET_X(p)))
 
-#define PEFLIH_STRINGS_OFFSET_X(p) ((p)->loaderStringsOffset)
-#define PEFLIH_STRINGS_OFFSET(p) (CL(PEFLIH_STRINGS_OFFSET_X(p)))
+#define PEFLIH_TERM_OFFSET(p) ((p)->termOffset)
 
-#define PEFLIH_HASH_OFFSET_X(p) ((p)->exportHashOffset)
-#define PEFLIH_HASH_OFFSET(p) (CL(PEFLIH_HASH_OFFSET_X(p)))
 
-#define PEFLIH_HASH_TABLE_POWER_X(p) ((p)->exportHashTablePower)
-#define PEFLIH_HASH_TABLE_POWER(p) (CL(PEFLIH_HASH_TABLE_POWER_X(p)))
+#define PEFLIH_IMPORTED_LIBRARY_COUNT(p) ((p)->importedLibraryCount)
 
-#define PEFLIH_SYMBOL_COUNT_X(p) ((p)->exportedSymbolCount)
-#define PEFLIH_SYMBOL_COUNT(p) (CL(PEFLIH_SYMBOL_COUNT_X(p)))
+
+#define PEFLIH_IMPORTED_SYMBOL_COUNT(p) ((p)->totalImportedSymbolCount)
+
+
+#define PEFLIH_RELOC_SECTION_COUNT(p) ((p)->relocSectionCount)
+
+
+#define PEFLIH_RELOC_INSTR_OFFSET(p) ((p)->relocInstrOffset)
+
+
+#define PEFLIH_STRINGS_OFFSET(p) ((p)->loaderStringsOffset)
+
+
+#define PEFLIH_HASH_OFFSET(p) ((p)->exportHashOffset)
+
+
+#define PEFLIH_HASH_TABLE_POWER(p) ((p)->exportHashTablePower)
+
+
+#define PEFLIH_SYMBOL_COUNT(p) ((p)->exportedSymbolCount)
+
 
 typedef struct PEFImportedLibrary
 {
@@ -165,12 +164,12 @@ typedef struct PEFImportedLibrary
     GUEST<uint16_t> reservedB;
 } PEFImportedLibrary_t;
 
-#define PEFIL_NAME_OFFSET_X(p) ((p)->nameOffset)
-#define PEFIL_NAME_OFFSET(p) (CL(PEFIL_NAME_OFFSET_X(p)))
+#define PEFIL_NAME_OFFSET(p) ((p)->nameOffset)
 
-#define PEFIL_SYMBOL_COUNT_X(p) ((p)->importedSymbolCount)
 
-#define PEFIL_FIRST_SYMBOL_X(p) ((p)->firstImportedSymbol)
+#define PEFIL_SYMBOL_COUNT(p) ((p)->importedSymbolCount)
+
+#define PEFIL_FIRST_SYMBOL(p) ((p)->firstImportedSymbol)
 
 typedef struct PEFLoaderRelocationHeader
 {
@@ -181,14 +180,14 @@ typedef struct PEFLoaderRelocationHeader
     GUEST<uint32_t> firstRelocOffset;
 } PEFLoaderRelocationHeader_t;
 
-#define PEFRLH_RELOC_COUNT_X(p) ((p)->relocCount)
-#define PEFRLH_RELOC_COUNT(p) (CL(PEFRLH_RELOC_COUNT_X(p)))
+#define PEFRLH_RELOC_COUNT(p) ((p)->relocCount)
 
-#define PEFRLH_FIRST_RELOC_OFFSET_X(p) ((p)->firstRelocOffset)
-#define PEFRLH_FIRST_RELOC_OFFSET(p) (CL(PEFRLH_FIRST_RELOC_OFFSET_X(p)))
 
-#define PEFRLH_SECTION_INDEX_X(p) ((p)->sectionIndex)
-#define PEFRLH_SECTION_INDEX(p) (CW(PEFRLH_SECTION_INDEX_X(p)))
+#define PEFRLH_FIRST_RELOC_OFFSET(p) ((p)->firstRelocOffset)
+
+
+#define PEFRLH_SECTION_INDEX(p) ((p)->sectionIndex)
+
 
 enum
 {
@@ -220,16 +219,16 @@ struct PEFExportedSymbol
     GUEST<int16_t> sectionIndex;
 };
 
-#define PEFEXS_CLASS_AND_NAME_X(p) ((p)->classAndName)
-#define PEFEXS_CLASS_AND_NAME(p) (CL(PEFEXS_CLASS_AND_NAME_X(p)))
+#define PEFEXS_CLASS_AND_NAME(p) ((p)->classAndName)
+
 
 #define PEFEXS_NAME(p) (PEFEXS_CLASS_AND_NAME(p) & 0xffffff)
 
-#define PEFEXS_SYMBOL_VALUE_X(p) ((p)->symbolValue)
-#define PEFEXS_SYMBOL_VALUE(p) (CL(PEFEXS_SYMBOL_VALUE_X(p)))
+#define PEFEXS_SYMBOL_VALUE(p) ((p)->symbolValue)
 
-#define PEFEXS_SECTION_INDEX_X(p) ((p)->sectionIndex)
-#define PEFEXS_SECTION_INDEX(p) (CW(PEFEXS_SECTION_INDEX_X(p)))
+
+#define PEFEXS_SECTION_INDEX(p) ((p)->sectionIndex)
+
 
 enum
 {
@@ -260,5 +259,12 @@ pef_hash_t;
 
 extern PEFLoaderInfoHeader_t *ROMlib_build_pef_hash(const map_entry_t table[],
                                                     int count);
+
+static_assert(sizeof(PEFContainerHeader_t) == 40);
+static_assert(sizeof(PEFSectionHeader_t) == 28);
+static_assert(sizeof(PEFLoaderInfoHeader_t) == 56);
+static_assert(sizeof(PEFImportedLibrary_t) == 24);
+static_assert(sizeof(PEFLoaderRelocationHeader_t) == 12);
+static_assert(sizeof(PEFExportedSymbol) == 10);
 }
 #endif

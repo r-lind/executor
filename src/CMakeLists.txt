@@ -1,20 +1,14 @@
-project(Executor)
 cmake_minimum_required(VERSION 3.9)
-set(CMAKE_CXX_STANDARD 17)
 
 find_program(PERL_COMMAND perl)
 
-if(WIN32)
-else()
-find_library(DB_LIBRARY db)
-find_path(DB_INCLUDE_PATH db.h ndbm.h)
-include_directories(${DB_INCLUDE_PATH})
-endif()
+find_package(Boost COMPONENTS filesystem system)
 
 find_program(BISON_COMMAND bison)
 find_package(Threads REQUIRED)
 
 include_directories(include/)
+include_directories(.)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
 set(FRONT_END qt CACHE STRING "which front-end to use (qt, sdl2, sdl, x)")
@@ -62,139 +56,368 @@ endfunction()
 
 linkheader("config/os" "host-os-config.h" ${HOST_OS})
 linkheader("config/arch" "host-arch-config.h" ${HOST_ARCH})
-linkheader("config/front-ends" "front-end-config.h" ${FRONT_END})
+#linkheader("config/front-ends" "front-end-config.h" ${FRONT_END})
 linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
 
 add_executable(map_to_c map_to_c/map_to_c.cpp)
-add_executable(mkseedtables mkseedtables/mkseedtables.c)
-add_executable(mkultable mkultable/mkultable.c)
-add_executable(mksspairtable mksspairtable/mksspairtable.c)
 
 include_directories(config/os/${HOST_OS})
 
 set(MAP_FILES
-        active             arrow_down_inactive  arrow_right_active    arrow_up_inactive  ractive      zoom
-        apple              arrow_left_active    arrow_right_inactive  go_away            thumb_horiz
-        arrow_down_active  arrow_left_inactive  arrow_up_active       grow               thumb_vert
+        wind/active.map                 ctl/arrow_down_inactive.map
+        ctl/arrow_right_active.map      ctl/arrow_up_inactive.map
+        wind/ractive.map                wind/zoom.map
+        menu/apple.map                  ctl/arrow_left_active.map
+        ctl/arrow_right_inactive.map    wind/go_away.map
+        ctl/thumb_horiz.map             ctl/arrow_down_active.map
+        ctl/arrow_left_inactive.map     ctl/arrow_up_active.map
+        wind/grow.map                   ctl/thumb_vert.map
     )
 set(GENERATED_FILES)
 foreach(mapfile ${MAP_FILES})
+    get_filename_component(base ${mapfile} NAME_WE)
     add_custom_command(
-        OUTPUT ${mapfile}.cmap
-        DEPENDS ${mapfile}.map
-        COMMAND map_to_c < ${CMAKE_CURRENT_SOURCE_DIR}/${mapfile}.map > ${mapfile}.cmap
+        OUTPUT ${base}.cmap
+        DEPENDS ${mapfile}
+        COMMAND map_to_c < ${CMAKE_CURRENT_SOURCE_DIR}/${mapfile} > ${base}.cmap
         )
-    list(APPEND GENERATED_FILES ${mapfile}.cmap)
+    list(APPEND GENERATED_FILES ${base}.cmap)
 endforeach()
 
+
+add_custom_command(OUTPUT parse.tab.cpp
+        DEPENDS prefs/parse.ypp
+        COMMAND ${BISON_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/prefs/parse.ypp)
+list(APPEND GENERATED_FILES parse.tab.cpp)
+
+
+set(ctl_sources
+    #include/ControlMgr.h
+    ctl/ctl.h
+    ctl/ctlArrows.cpp ctl/ctlDisplay.cpp ctl/ctlIMIV.cpp ctl/ctlInit.cpp ctl/ctlMisc.cpp
+    ctl/ctlMouse.cpp ctl/ctlSet.cpp ctl/ctlSize.cpp ctl/ctlStddef.cpp ctl/ctlPopup.cpp)
+source_group(Controls FILES ${ctl_sources})
+
+set(dial_sources
+    #include/DialogMgr.h
+    dial/dial.h
+    dial/itm.h
+    dial/dialAlert.cpp dial/dialCreate.cpp dial/dialHandle.cpp dial/dialInit.cpp
+    dial/dialManip.cpp dial/dialDispatch.cpp dial/dialItem.cpp)
+source_group(Dialogs FILES ${dial_sources})
+
+set(file_sources
+    #include/FileMgr.h
+    file/file.h
+    file/volume.h
+
+    file/fileMisc.cpp
+    file/fileHighlevel.cpp  file/fileUnimplemented.cpp
+    file/volume.cpp
+    
+    file/localvolume/localvolume.h 
+    file/localvolume/localvolume.cpp 
+
+    file/localvolume/openfile.h
+
+    file/localvolume/item.h 
+    file/localvolume/item.cpp
+
+    file/localvolume/itemcache.h
+    file/localvolume/itemcache.cpp
+
+    file/localvolume/basilisk.h
+    file/localvolume/basilisk.cpp
+    file/localvolume/appledouble.h
+    file/localvolume/appledouble.cpp
+    file/localvolume/plain.h
+    file/localvolume/plain.cpp
+    file/localvolume/mac.h
+    file/localvolume/mac.cpp
+
+    file/localvolume/cnidmapper.h
+    file/localvolume/simplecnidmapper.h
+    file/localvolume/simplecnidmapper.cpp
+    file/localvolume/lmdbcnidmapper.h
+    file/localvolume/lmdbcnidmapper.cpp
+    )
+
+source_group(Files FILES ${file_sources})
+
+set(hfs_sources 
+    hfs/hfs.h
+    hfs/hfs_plus.h
+    hfs/partition.h
+    hfs/dcache.h
+    hfs/drive_flags.h
+    hfs/dcache.cpp
+    hfs/futzwithdosdisks.h
+    hfs/hfsBtree.cpp hfs/hfsChanging.cpp hfs/hfsCreate.cpp hfs/hfsFile.cpp
+    hfs/hfsHelper.cpp hfs/hfsHier.cpp hfs/hfsMisc.cpp hfs/hfsVolume.cpp
+    hfs/hfsWorkingdir.cpp hfs/hfsXbar.cpp hfs/futzwithdosdisks.cpp)
+source_group(HFS FILES ${hfs_sources})
+
+set(list_sources
+    list/list.h
+    list/listAccess.cpp list/listAddDel.cpp list/listCreate.cpp list/listDisplay.cpp
+    list/listMouse.cpp list/listOps.cpp list/listStdLDEF.cpp)
+source_group(Lists FILES ${list_sources})
+
+set(menu_sources
+    menu/menu.h
+    menu/menu.cpp menu/menuColor.cpp menu/menuV.cpp menu/stdmdef.cpp menu/stdmbdf.cpp)
+source_group(Menus FILES ${menu_sources})
+
+set(print_sources
+    print/print.h
+    print/nextprint.h
+    print/ini.h
+    print/ini.cpp 
+    print/PSstrings.h
+    print/PSstrings.cpp print/prError.cpp print/prInit.cpp print/prLowLevel.cpp
+    print/prPrinting.cpp print/prRecords.cpp print/PSprint.cpp )
+source_group(Printing FILES ${print_sources})
+
+set(qd_sources
+    quickdraw/quick.h
+    quickdraw/cquick.h    
+    quickdraw/depthconv.h
+    quickdraw/qcolor.h
+    quickdraw/rawblt.h
+    quickdraw/gworld.h
+    quickdraw/font.h
+    quickdraw/picture.h
+    quickdraw/region.h
+    quickdraw/rgbutil.h
+    quickdraw/srcblt.h
+    quickdraw/stdbits.h
+    quickdraw/xdata.h
+    quickdraw/xdblt.h
+    quickdraw/image.h
+    quickdraw/text.h
+
+    quickdraw/hintemplate.h
+
+    quickdraw/qBit.cpp quickdraw/qCConv.cpp quickdraw/qCGrafPort.cpp
+    quickdraw/qCRegular.cpp quickdraw/qColor.cpp quickdraw/qColorMgr.cpp
+    quickdraw/qColorutil.cpp quickdraw/qCursor.cpp quickdraw/qGrafport.cpp
+    quickdraw/qIMIV.cpp quickdraw/qIMV.cpp quickdraw/qIMVxfer.cpp
+    quickdraw/qMisc.cpp quickdraw/qPaletteMgr.cpp quickdraw/qPen.cpp
+    quickdraw/qPicstuff.cpp quickdraw/qPicture.cpp quickdraw/qPixMapConv.cpp
+    quickdraw/qPoint.cpp quickdraw/qPoly.cpp quickdraw/qRect.cpp
+    quickdraw/qRegion.cpp quickdraw/qRegular.cpp quickdraw/qScale.cpp
+    quickdraw/qStandard.cpp quickdraw/qStdArc.cpp quickdraw/qStdBits.cpp
+    quickdraw/qStdLine.cpp quickdraw/qStdOval.cpp quickdraw/qStdPic.cpp
+    quickdraw/qStdPoly.cpp quickdraw/qStdRRect.cpp quickdraw/qStdRect.cpp
+    quickdraw/qStdRgn.cpp quickdraw/qStdText.cpp quickdraw/qText.cpp
+    quickdraw/qGWorld.cpp quickdraw/qGDevice.cpp quickdraw/qIMVI.cpp
+    quickdraw/qHooks.cpp quickdraw/xdata.cpp quickdraw/xdblt.cpp
+    quickdraw/rawpatblt.cpp quickdraw/rawsrcblt.cpp quickdraw/srcblt.cpp
+     quickdraw/qPict2.cpp quickdraw/image.cpp
+    quickdraw/image_inits.cpp quickdraw/default_ctab_values.cpp
+    quickdraw/dcconvert.cpp quickdraw/rgbutil.cpp quickdraw/dcmaketables.cpp
+    quickdraw/fontIMVI.cpp quickdraw/font.cpp
+)
+
+source_group(QuickDraw FILES ${qd_sources})
+
+add_executable(mkseedtables quickdraw/mkseedtables/mkseedtables.c)
+add_executable(mkultable quickdraw/mkultable/mkultable.c)
+add_executable(mksspairtable quickdraw/mksspairtable/mksspairtable.c)
 add_custom_command(OUTPUT seedtables.ctable COMMAND mkseedtables > seedtables.ctable)
 add_custom_command(OUTPUT ultable.ctable COMMAND mkultable > ultable.ctable)
 add_custom_command(OUTPUT sspairtable.ctable COMMAND mksspairtable > sspairtable.ctable)
 list(APPEND GENERATED_FILES seedtables.ctable ultable.ctable sspairtable.ctable)
 
-
 add_custom_command(OUTPUT rawpatstubs.ctable
-    DEPENDS makerawblt.pl pat-blitters.tmpl
-    COMMAND ${PERL_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/makerawblt.pl
-        < ${CMAKE_CURRENT_SOURCE_DIR}/pat-blitters.tmpl
+    DEPENDS quickdraw/makerawblt.pl quickdraw/pat-blitters.tmpl
+    COMMAND ${PERL_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/quickdraw/makerawblt.pl
+        < ${CMAKE_CURRENT_SOURCE_DIR}/quickdraw/pat-blitters.tmpl
         > rawpatstubs.ctable)
 
 add_custom_command(OUTPUT rawsrcstubs.ctable
-    DEPENDS makerawblt.pl src-blitters.tmpl
-    COMMAND ${PERL_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/makerawblt.pl
-        < ${CMAKE_CURRENT_SOURCE_DIR}/src-blitters.tmpl
+    DEPENDS quickdraw/makerawblt.pl quickdraw/src-blitters.tmpl
+    COMMAND ${PERL_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/quickdraw/makerawblt.pl
+        < ${CMAKE_CURRENT_SOURCE_DIR}/quickdraw/src-blitters.tmpl
         > rawsrcstubs.ctable)
-
-add_custom_command(OUTPUT parse.tab.cpp
-        DEPENDS parse.ypp
-        COMMAND ${BISON_COMMAND} ${CMAKE_CURRENT_SOURCE_DIR}/parse.ypp)
-list(APPEND GENERATED_FILES rawpatstubs.ctable rawsrcstubs.ctable parse.tab.cpp)
+list(APPEND GENERATED_FILES rawpatstubs.ctable rawsrcstubs.ctable)
 
 
-set(ctl_sources ctlArrows.cpp ctlDisplay.cpp ctlIMIV.cpp ctlInit.cpp ctlMisc.cpp
-    ctlMouse.cpp ctlSet.cpp ctlSize.cpp ctlStddef.cpp ctlPopup.cpp)
-source_group(Controls FILES ${ctl_sources})
+set(res_sources
+    res/resource.h
 
-set(dial_sources dialAlert.cpp dialCreate.cpp dialHandle.cpp dialInit.cpp dialManip.cpp
-    dialDispatch.cpp dialItem.cpp)
-source_group(Dialogs FILES ${dial_sources})
+    res/resGet.cpp res/resGetinfo.cpp res/resGettype.cpp res/resIMIV.cpp
+    res/resInit.cpp res/resMisc.cpp res/resMod.cpp res/resOpen.cpp
+    res/resSetcur.cpp res/resPartial.cpp) 
 
-set(file_sources fileAccess.cpp fileCreate.cpp fileDirs.cpp fileDouble.cpp fileInfo.cpp
-    fileMisc.cpp fileVolumes.cpp fileHighlevel.cpp dcache.cpp)
-source_group(Files FILES ${file_sources})
-
-set(hfs_sources hfsBtree.cpp hfsChanging.cpp hfsCreate.cpp hfsFile.cpp hfsHelper.cpp
-    hfsHier.cpp hfsMisc.cpp hfsVolume.cpp hfsWorkingdir.cpp hfsXbar.cpp)
-source_group(HFS FILES ${hfs_sources})
-
-set(list_sources listAccess.cpp listAddDel.cpp listCreate.cpp listDisplay.cpp
-    listMouse.cpp listOps.cpp listStdLDEF.cpp)
-source_group(Lists FILES ${list_sources})
-
-set(menu_sources menu.cpp menuColor.cpp menuV.cpp stdmdef.cpp stdmbdf.cpp)
-source_group(Menus FILES ${menu_sources})
-
-set(print_sources PSstrings.cpp prError.cpp prInit.cpp prLowLevel.cpp
-    prPrinting.cpp prRecords.cpp PSprint.cpp )
-source_group(Printing FILES ${print_sources})
-
-set(qd_sources qBit.cpp qCConv.cpp qCGrafPort.cpp qCRegular.cpp qColor.cpp qColorMgr.cpp
-             qColorutil.cpp qCursor.cpp qGrafport.cpp qIMIV.cpp qIMV.cpp qIMVxfer.cpp
-             qMisc.cpp qPaletteMgr.cpp qPen.cpp qPicstuff.cpp qPicture.cpp
-             qPixMapConv.cpp qPoint.cpp qPoly.cpp qRect.cpp qRegion.cpp qRegular.cpp
-             qScale.cpp qStandard.cpp qStdArc.cpp qStdBits.cpp qStdLine.cpp qStdOval.cpp
-             qStdPic.cpp qStdPoly.cpp qStdRRect.cpp qStdRect.cpp qStdRgn.cpp
-             qStdText.cpp qText.cpp qGWorld.cpp qGDevice.cpp qIMVI.cpp qHooks.cpp
-             xdata.cpp xdblt.cpp rawpatblt.cpp rawsrcblt.cpp dirtyrect.cpp srcblt.cpp
-             qColorPicker.cpp qPict2.cpp image.cpp image_inits.cpp
-             default_ctab_values.cpp dcconvert.cpp rgbutil.cpp dcmaketables.cpp)
-source_group(QuickDraw FILES ${qd_sources})
-
-set(res_sources resGet.cpp resGetinfo.cpp resGettype.cpp resIMIV.cpp resInit.cpp
-    resMisc.cpp resMod.cpp resOpen.cpp resSetcur.cpp resPartial.cpp)
 source_group(Resources FILES ${res_sources})
 
-set(te_sources teAccess.cpp teDisplay.cpp teEdit.cpp teIMIV.cpp teIMV.cpp teInit.cpp
-    teInsert.cpp teMisc.cpp teScrap.cpp)
+set(te_sources
+    textedit/tesave.h
+
+    textedit/teAccess.cpp textedit/teDisplay.cpp textedit/teEdit.cpp 
+    textedit/teIMIV.cpp textedit/teIMV.cpp textedit/teInit.cpp
+    textedit/teInsert.cpp textedit/teMisc.cpp textedit/teScrap.cpp)
 source_group(TextEdit FILES ${te_sources})
 
-set(wind_sources windColor.cpp windDisplay.cpp windDocdef.cpp windInit.cpp windMisc.cpp
-    windMouse.cpp windSize.cpp windUpdate.cpp windRootless.cpp)
+set(wind_sources
+    wind/wind.h
+    
+    wind/windColor.cpp wind/windDisplay.cpp wind/windDocdef.cpp
+    wind/windInit.cpp wind/windMisc.cpp wind/windMouse.cpp wind/windSize.cpp
+    wind/windUpdate.cpp wind/windRootless.cpp)
 source_group(Windows FILES ${wind_sources})
 
-set(ae_sources AE.cpp AE_desc.cpp AE_hdlr.cpp AE_coercion.cpp)
+set(ae_sources
+    appleevent/apple_events.h
+    appleevent/AE.cpp appleevent/AE_desc.cpp appleevent/AE_hdlr.cpp
+    appleevent/AE_coercion.cpp)
 source_group(AppleEvents FILES ${ae_sources})
 
-set(sound_sources sounddriver.cpp sound.cpp soundIMVI.cpp soundfake.cpp snth5.cpp
+set(sound_sources
+    sound/sounddriver.h
+    sound/soundopts.h
+    sound/soundfake.h
+    
+    sound/sounddriver.cpp sound/sound.cpp sound/soundIMVI.cpp sound/soundfake.cpp
+    sound/snth5.cpp
+
     SpeechManager.cpp)
 if(HOST_OS STREQUAL macosx)
 set(sound_sources ${sound_sources} SpeechManager-MacBridge.mm)
 endif()
 source_group(Sound FILES ${sound_sources})
 
-set(num_sources bindec.cpp float4.cpp float5.cpp float7.cpp floatnext.cpp toolmath.cpp)
+set(num_sources
+    sane/float_fcw.h sane/float.h sane/floatconv.h
+    sane/float4.cpp sane/float5.cpp sane/float7.cpp sane/floatnext.cpp)
 source_group(Numerics FILES ${num_sources})
 
-set(misc_sources
-  traps.cpp logging.cpp builtinlibs.cpp
-  debugger.cpp cpu.cpp
-  desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp trapname.cpp font.cpp
-  gestalt.cpp globals.cpp iu.cpp launch.cpp main.cpp mman.cpp mmansubr.cpp notify.cpp hle.cpp
-  osevent.cpp osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
-  slash.cpp stdfile.cpp romlib_stubs.cpp syserr.cpp toolevent.cpp toolutil.cpp time.cpp
-  vbl.cpp syncint.cpp virtualint.cpp refresh.cpp autorefresh.cpp aboutbox.cpp
-  option.cpp parseopt.cpp parsenum.cpp
-  version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
-  process.cpp alias.cpp string.cpp tempmem.cpp edition.cpp fontIMVI.cpp balloon.cpp
-  error.cpp adb.cpp color_wheel_bits.cpp finder.cpp system_error.cpp ibm_keycodes.cpp
-  icon.cpp redrawscreen.cpp ini.cpp qt.cpp
-  paramline.c fauxdbm.cpp commtool.cpp cfm.cpp pef_hash.cpp
-  mixed_mode.cpp suffix_maps.cpp appearance.cpp lockrange.cpp
-  emustubs.cpp unix_like.cpp parse.ypp check_structs.cpp
-  executor.cpp  crc.cpp
-  prefpanel.cpp dispatcher.cpp options.cpp)
 
-set(include_sources hintemplate.h
+set(base_sources
+        # include/ExMacTypes.h
+        
+        base/common.h
+        base/mactype.h
+        base/lowglobals.h
+        base/functions.h
+        base/functions.impl.h
+        base/byteswap.h
+
+        base/m68kint.h
+        base/cpu.h
+        base/cpu.cpp    
+
+        base/traps.h
+        base/traps.impl.h
+        base/trapname.h
+        base/dispatcher.h
+        base/trapglue.h
+        base/logging.h
+        base/api-module.h
+        base/emustubs.h
+    
+        base/trapname.cpp
+        base/traps.cpp
+        base/dispatcher.cpp
+        base/emustubs.cpp
+        base/logging.cpp
+    
+        base/builtinlibs.h
+        base/builtinlibs.cpp
+    )
+source_group(Base FILES ${base_sources})
+
+set(vdriver_sources
+        vdriver/vdriver.cpp
+        vdriver/refresh.cpp
+        vdriver/autorefresh.cpp 
+        vdriver/dirtyrect.cpp
+        vdriver/dirtyrect.h
+        vdriver/autorefresh.h
+        vdriver/refresh.h
+        vdriver/vdriver.h
+    )
+
+set(mman_sources
+    mman/memsize.h
+    mman/mman.h
+    mman/mman_private.h
+    mman/tempalloc.h
+
+    mman/mman.cpp mman/mmansubr.cpp
+    mman/tempmem.cpp
+)
+
+set(time_sources
+        time/time.h
+        time/vbl.h
+        time/syncint.h
+
+        time/time.cpp
+        time/vbl.cpp
+        time/syncint.cpp
+    )
+
+set(osevent_sources
+        osevent/osevent.h
+        osevent/commonevt.h
+        osevent/hle.cpp
+        osevent/ibm_keycodes.cpp
+        osevent/osevent.cpp
+    )
+
+set(error_sources
+    error/error.h error/syserr.h error/system_error.h
+    error/error.cpp error/syserr.cpp error/system_error.cpp
+)
+
+set(commandline_sources
+    commandline/option.h
+    commandline/option.cpp
+
+    commandline/parseopt.h
+    commandline/parsenum.h
+    commandline/parseopt.cpp
+    commandline/parsenum.cpp
+
+    commandline/flags.h
+    )
+
+set(prefs_sources
+    prefs/prefs.h
+    prefs/parse.h
+    prefs/options.h
+    prefs/crc.h
+
+    prefs/parse.ypp
+    prefs/crc.cpp
+    prefs/options.cpp
+)
+
+set(misc_sources
+  debugger.cpp
+  desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp
+  gestalt.cpp iu.cpp launch.cpp  notify.cpp 
+   osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
+  slash.cpp stdfile.cpp romlib_stubs.cpp  toolevent.cpp toolutil.cpp 
+   aboutbox.cpp
+  version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
+  process.cpp alias.cpp string.cpp  edition.cpp  balloon.cpp
+   adb.cpp color_wheel_bits.cpp finder.cpp  
+  icon.cpp redrawscreen.cpp qt.cpp
+  commtool.cpp cfm.cpp pef_hash.cpp
+  mixed_mode.cpp appearance.cpp lockrange.cpp
+  unix_like.cpp
+  executor.cpp  
+  prefpanel.cpp
+  qColorPicker.cpp
+  bindec.cpp 
+  toolmath.cpp
+  macstrings.cpp
+  )
+
+set(include_sources 
                   include/ADB.h
                   include/AliasMgr.h
                   include/AppleEvents.h
@@ -226,7 +449,6 @@ set(include_sources hintemplate.h
                   include/OSEvent.h
                   include/OSUtil.h
                   include/Package.h
-                  include/paramline.h
                   include/PPC.h
                   include/PrintMgr.h
                   include/ProcessMgr.h
@@ -237,137 +459,46 @@ set(include_sources hintemplate.h
                   include/rsys/adb.h
                   include/rsys/alias.h
                   include/rsys/appearance.h
-                  include/rsys/apple_events.h
                   include/rsys/arch.h
                   include/rsys/arrowkeys.h
-                  include/rsys/autorefresh.h
-                  include/rsys/blockdev.h
-                  include/rsys/blockinterrupts.h
-                  include/rsys/builtinlibs.h
-                  include/rsys/byteswap.h
                   include/rsys/cfm.h
-                  include/rsys/check_structs.h
                   include/rsys/color_wheel_bits.h
-                  include/rsys/common.h
-                  include/rsys/commonevt.h
-                  include/rsys/cpu.h
-                  include/rsys/cquick.h
-                  include/rsys/crc.h
-                  include/rsys/ctl.h
-                  include/rsys/dcache.h
-                  include/rsys/depthconv.h
                   include/rsys/desk.h
                   include/rsys/device.h
-                  include/rsys/dial.h
-                  include/rsys/dirtyrect.h
-                  include/rsys/drive_flags.h
-                  include/rsys/dispatcher.h
                   include/rsys/dump.h
-                  include/rsys/emustubs.h
-                  include/rsys/error.h
                   include/rsys/everything.h
                   include/rsys/evil.h
                   include/rsys/executor.h
-                  include/rsys/fauxdbm.h
-                  include/rsys/file.h
-                  include/rsys/filedouble.h
-                  include/rsys/flags.h
-                  include/rsys/float.h
-                  include/rsys/float_fcw.h
-                  include/rsys/floatconv.h
-                  include/rsys/font.h
-                  include/rsys/functions.h
-                  include/rsys/functions.impl.h
+                  include/rsys/filesystem.h
                   include/rsys/gestalt.h
-                  include/rsys/glue.h
-                  include/rsys/gworld.h
-                  include/rsys/hfs.h
-                  include/rsys/hfs_plus.h
                   include/rsys/hook.h
-                  include/rsys/host.h
                   include/rsys/icon.h
-                  include/rsys/image.h
-                  include/rsys/ini.h
-                  include/rsys/itm.h
-                  include/rsys/iv.h
                   include/rsys/keyboard.h
-                  include/rsys/keyboards.h
                   include/rsys/launch.h
-                  include/rsys/list.h
                   include/rsys/lockunlock.h
-                  include/rsys/logging.h
-                  include/rsys/lowglobals.h
-                  include/rsys/m68kint.h
                   include/rsys/macros.h
-                  include/rsys/mactype.h
-                  include/rsys/memsize.h
-                  include/rsys/menu.h
+                  include/rsys/macstrings.h
                   include/rsys/mixed_mode.h
-                  include/rsys/mman.h
-                  include/rsys/mman_private.h
-                  include/rsys/next.h
-                  include/rsys/nextprint.h
                   include/rsys/noreturn.h
-                  include/rsys/notmac.h
-                  include/rsys/option.h
-                  include/rsys/options.h
                   include/rsys/os.h
-                  include/rsys/osevent.h
                   include/rsys/osutil.h
-                  include/rsys/parse.h
-                  include/rsys/parsenum.h
-                  include/rsys/parseopt.h
-                  include/rsys/partition.h
+                  include/rsys/paths.h
                   include/rsys/pef.h
-                  include/rsys/picture.h
                   include/rsys/prefpanel.h
-                  include/rsys/prefs.h
-                  include/rsys/print.h
                   include/rsys/process.h
-                  include/rsys/PSstrings.h
-                  include/rsys/qcolor.h
-                  include/rsys/quick.h
-                  include/rsys/rawblt.h
                   include/rsys/redrawscreen.h
-                  include/rsys/refresh.h
-                  include/rsys/region.h
-                  include/rsys/resource.h
-                  include/rsys/rgbutil.h
                   include/rsys/safe_alloca.h
                   include/rsys/scrap.h
                   include/rsys/screen-dump.h
                   include/rsys/segment.h
                   include/rsys/serial.h
                   include/rsys/slash.h
-                  include/rsys/sounddriver.h
-                  include/rsys/soundfake.h
-                  include/rsys/soundopts.h
-                  include/rsys/srcblt.h
-                  include/rsys/stdbits.h
                   include/rsys/stdfile.h
-                  include/rsys/stdio_smashage.h
                   include/rsys/string.h
-                  include/rsys/suffix_maps.h
-                  include/rsys/syncint.h
-                  include/rsys/syserr.h
-                  include/rsys/system_error.h
-                  include/rsys/tempalloc.h
-                  include/rsys/tesave.h
-                  include/rsys/text.h
-                  include/rsys/time.h
                   include/rsys/toolevent.h
                   include/rsys/toolutil.h
-                  include/rsys/trapglue.h
-                  include/rsys/trapname.h
-                  include/rsys/traps.h
-                  include/rsys/traps.impl.h
                   include/rsys/uniquefile.h
-                  include/rsys/vbl.h
-                  include/rsys/vdriver.h
                   include/rsys/version.h
-                  include/rsys/wind.h
-                  include/rsys/xdata.h
-                  include/rsys/xdblt.h
                   include/SANE.h
                   include/ScrapMgr.h
                   include/ScriptMgr.h
@@ -392,26 +523,49 @@ set(include_sources hintemplate.h
 
 include(trap_instances/trap_instances.cmake)
 
-set(sources ${ctl_sources} ${dial_sources} 
+set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
+    ${ctl_sources} ${dial_sources} 
     ${list_sources} ${menu_sources}
     ${print_sources} ${qd_sources} ${res_sources}
     ${te_sources} ${wind_sources} ${ae_sources}
     ${sound_sources} ${num_sources} ${misc_sources}
-    ${file_sources} ${hfs_sources}
+    ${file_sources} ${hfs_sources} ${time_sources} ${osevent_sources}
+    ${error_sources} ${commandline_sources} ${prefs_sources}
     ${trap_instance_sources}
     ${include_sources})
 
-add_executable(executor ${sources}
+add_library(romlib ${sources}
         ${GENERATED_FILES}
     )
 
-target_link_libraries(executor front-end-${FRONT_END} arch-${HOST_ARCH})
+target_include_directories(romlib PUBLIC . include/ ${CMAKE_CURRENT_BINARY_DIR})
+
+# front-end-${FRONT_END}
+target_link_libraries(romlib arch-${HOST_ARCH})
+target_link_libraries(romlib lmdb)
 
 if(HOST_OS STREQUAL win32 OR HOST_OS STREQUAL macosx)
-    target_link_libraries(executor os-${HOST_OS})
+    target_link_libraries(romlib os-${HOST_OS})
 else()
-    target_link_libraries(executor ${DB_LIBRARY})
+    target_link_libraries(romlib ${DB_LIBRARY})
 endif()
 
-target_link_libraries(executor Threads::Threads syn68k PowerCore mon)
+target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 
+#target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
+if(WIN32) # MXE hack
+    target_link_libraries(romlib ${Boost_LIBRARIES})
+else()
+    target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
+endif()
+target_link_libraries(romlib resources)
+
+add_executable(executor main.cpp)
+target_link_libraries(executor romlib front-end-${FRONT_END})
+
+if(APPLE)
+    set_target_properties(executor PROPERTIES
+            MACOSX_BUNDLE TRUE
+            MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
+        )
+endif()

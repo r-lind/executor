@@ -4,7 +4,7 @@
 
 /* Forward declarations in ToolboxUtil.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "ResourceMgr.h"
 #include "QuickDraw.h"
 #include "CQuickDraw.h"
@@ -12,17 +12,17 @@
 #include "OSUtil.h"
 #include "MemoryMgr.h"
 
-#include "rsys/cquick.h"
-#include "rsys/mman.h"
-#include "rsys/glue.h"
+#include "quickdraw/cquick.h"
+#include "mman/mman.h"
 #include "SANE.h"
-#include "rsys/float.h"
-#include "rsys/floatconv.h"
+#include "sane/float.h"
+#include "sane/floatconv.h"
 #include "rsys/string.h"
-#include "rsys/mman_private.h"
-#include "rsys/resource.h"
+#include "mman/mman_private.h"
+#include "res/resource.h"
 #include "rsys/toolutil.h"
 #include <string>
+#include <algorithm>
 
 using namespace Executor;
 
@@ -81,7 +81,7 @@ StringHandle Executor::C_NewString(StringPtr s)
     GUEST<Handle> retval;
 
     PtrToHand((Ptr)s, &retval, (LONGINT)U(s[0]) + 1);
-    return ((StringHandle)MR(retval));
+    return ((StringHandle)retval);
 }
 
 void Executor::C_SetString(StringHandle h, StringPtr s)
@@ -108,12 +108,10 @@ get_phoney_name_resource(void)
     if(!ROMlib_phoney_name_string)
     {
         string name = "";
-#if defined(linux) || defined(MACOSX_)
+#if defined(linux) || defined(MACOSX)
         name = string(getlogin());
         if(!name.length())
             name = string(getenv("LOGNAME"));
-        if(!name.length())
-            name = "";
 #endif
         int len;
 
@@ -122,7 +120,7 @@ get_phoney_name_resource(void)
         if(ROMlib_phoney_name_string)
         {
             HSetRBit((Handle)ROMlib_phoney_name_string);
-            str255_from_c_string(STARH(ROMlib_phoney_name_string), name.c_str());
+            str255_from_c_string(*ROMlib_phoney_name_string, name.c_str());
         }
     }
     return ROMlib_phoney_name_string;
@@ -145,12 +143,12 @@ void Executor::C_GetIndString(StringPtr s, INTEGER sid, INTEGER index)
 
     retval = GetResource(TICK("STR#"), sid);
     LoadResource(retval);
-    if(ResError() != noErr || *(INTEGER *)STARH(retval) < index)
+    if(ResError() != noErr || *(INTEGER *)*retval < index)
     {
         s[0] = 0;
         /*-->*/ return;
     }
-    p = (char *)STARH(retval) + 2;
+    p = (char *)*retval + 2;
     while(--index)
         p += 1 + U(*p);
     for(ep = p + 1 + U(*p), op = (char *)s; p != ep; *op++ = *p++)
@@ -194,8 +192,8 @@ LONGINT Executor::C_Munger(Handle h, LONGINT off, Ptr p1, LONGINT len1, Ptr p2,
     LONGINT retval;
 
     MM_SLAM("entry");
-    p = (char *)STARH(h) + off;
-    ep = (char *)STARH(h) + (hs = GetHandleSize(h));
+    p = (char *)*h + off;
+    ep = (char *)*h + (hs = GetHandleSize(h));
     if(p1 && len1)
     {
         while(!cmpstrings(p, ep, (char *)p1, len1))
@@ -204,12 +202,12 @@ LONGINT Executor::C_Munger(Handle h, LONGINT off, Ptr p1, LONGINT len1, Ptr p2,
             RETURN(-1);
         if(ep - p < len1)
         {
-            if(p != (char *)STARH(h) + off)
+            if(p != (char *)*h + off)
                 RETURN(-1);
             else
                 len1 = ep - p;
         }
-        off = p - (char *)STARH(h);
+        off = p - (char *)*h;
     }
     else if(len1 < 0)
         len1 = hs - off;
@@ -220,17 +218,17 @@ LONGINT Executor::C_Munger(Handle h, LONGINT off, Ptr p1, LONGINT len1, Ptr p2,
     {
         BlockMoveData((Ptr)p + len1, (Ptr)p + len2, tomove);
         SetHandleSize(h, hs + len2 - len1);
-        p = (char *)STARH(h) + off;
+        p = (char *)*h + off;
     }
     else if(len1 < len2)
     {
         SetHandleSize(h, hs + len2 - len1);
-        p = (char *)STARH(h) + off;
+        p = (char *)*h + off;
         BlockMoveData((Ptr)p + len1, (Ptr)p + len2, tomove);
     }
     while(len2--)
         *p++ = *p2++;
-    RETURN(p - (char *)STARH(h));
+    RETURN(p - (char *)*h);
 DONE:
     MM_SLAM("exit");
     EM_D0 &= 0xFFFF0000; /* for now ... we never have an error */
@@ -242,8 +240,8 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
 {
     char *ip, *op, *ep, *erp, *markp, c;
 
-    ip = (char *)MR(*sp);
-    op = (char *)MR(*dp);
+    ip = (char *)*sp;
+    op = (char *)*dp;
     ep = ip + len;
     erp = ip + len - 2;
     markp = op++;
@@ -270,8 +268,8 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
         }
         markp = op++;
     }
-    *sp = RM((Ptr)ip);
-    *dp = RM((Ptr)op - 1);
+    *sp = (Ptr)ip;
+    *dp = (Ptr)op - 1;
 }
 
 #define UNPACK_BITS_BODY(out_type)                                           \
@@ -280,8 +278,8 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
         const int8_t *ip;                                                      \
         out_type *op, *ep;                                                   \
                                                                              \
-        ip = (const int8_t *)MR(*sp);                                          \
-        op = (out_type *)MR(*dp);                                            \
+        ip = (const int8_t *)*sp;                                          \
+        op = (out_type *)*dp;                                            \
         ep = (out_type *)((int8_t *)op + len);                                 \
                                                                              \
         while(op < ep)                                                       \
@@ -291,20 +289,20 @@ void Executor::C_PackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
             {                                                                \
                 out_type v = *(out_type *)ip;                                \
                 ip += sizeof(out_type);                                      \
-                for(count = MIN(1 - count, ep - op); count > 0; count--)     \
+                for(count = std::min<int>(1 - count, ep - op); count > 0; count--)     \
                     *op++ = v;                                               \
             }                                                                \
             else                                                             \
             {                                                                \
-                unsigned bytes = MIN(count + 1, ep - op) * sizeof(out_type); \
+                unsigned bytes = std::min<int>(count + 1, ep - op) * sizeof(out_type); \
                 memmove(op, ip, bytes);                                      \
                 op += bytes / sizeof *op;                                    \
                 ip += bytes;                                                 \
             }                                                                \
         }                                                                    \
                                                                              \
-        *sp = RM((Ptr)ip);                                                   \
-        *dp = RM((Ptr)op);                                                   \
+        *sp = (Ptr)ip;                                                   \
+        *dp = (Ptr)op;                                                   \
     } while(false)
 
 void Executor::unpack_int16_t_bits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
@@ -397,24 +395,24 @@ void Executor::C_LongMul(LONGINT a, LONGINT b, Int64Bit *c)
     lb = b & 0xFFFF;
     halb = ha * lb;
     lahb = la * hb;
-    c->hiLong = CL(ha * hb);
-    c->loLong = CL(la * lb);
-    c->hiLong = CL(CL(c->hiLong) + (halb >> 16));
-    c->hiLong = CL(CL(c->hiLong) + (lahb >> 16));
-    carry = CL(c->loLong) >> 31;
-    c->loLong = CL(CL(c->loLong) + (halb << 16));
+    c->hiLong = ha * hb;
+    c->loLong = la * lb;
+    c->hiLong = c->hiLong + (halb >> 16);
+    c->hiLong = c->hiLong + (lahb >> 16);
+    carry = c->loLong >> 31;
+    c->loLong = c->loLong + (halb << 16);
     carry += (halb >> 15) & 1;
-    c->loLong = CL(CL(c->loLong) + (lahb << 16));
+    c->loLong = c->loLong + (lahb << 16);
     carry += (lahb >> 15) & 1;
     carry >>= 1;
-    c->hiLong = CL(CL(c->hiLong) + (carry));
+    c->hiLong = c->hiLong + (carry);
     if(sign == -1)
     {
         c->hiLong = ~c->hiLong;
         if(c->loLong)
-            c->loLong = CL(~CL(c->loLong) + 1);
+            c->loLong = ~c->loLong + 1;
         else
-            c->hiLong = CL(CL(c->hiLong) + 1);
+            c->hiLong = c->hiLong + 1;
     }
 }
 
@@ -430,11 +428,11 @@ void Executor::GetIndPattern(Byte *op, INTEGER plistid, INTEGER index)
 
     retval = GetResource(TICK("PAT#"), plistid);
     LoadResource(retval);
-    if(ResError() != noErr || *(INTEGER *)STARH(retval) < index)
+    if(ResError() != noErr || *(INTEGER *)*retval < index)
     {
         return;
     }
-    p = (char *)STARH(retval) + 2 + 8 * (index - 1);
+    p = (char *)*retval + 2 + 8 * (index - 1);
     for(ep = p + 8; p != ep; *op++ = *p++)
         ;
 }

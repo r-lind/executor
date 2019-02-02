@@ -9,5 +9,7 @@ typedef struct size_resource
     GUEST<int32_t> pref_size;
     GUEST<int32_t> min_size;
 } size_resource_t;
+
+static_assert(sizeof(size_resource_t) == 10);
 }
 #endif /* !defined (__rsys_process_h__) */

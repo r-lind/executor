@@ -16,7 +16,7 @@ namespace MacBridge
 Executor::NumVersion SpeechManagerVersion(void);
 int16_t SpeechBusy(void);
 int16_t SpeechBusySystemWide(void);
-Executor::OSErr CountVoices(int16_t *numVoices);
+Executor::OSErr CountVoices(Executor::GUEST<int16_t> *numVoices);
 Executor::OSErr DisposeSpeechChannel(Executor::SpeechChannel chan);
 Executor::OSErr SpeakString(Executor::Str255 textToBeSpoken);
 
@@ -28,9 +28,9 @@ Executor::OSErr NewSpeechChannel(Executor::VoiceSpec *voice, Executor::SpeechCha
 Executor::OSErr StopSpeechAt(Executor::SpeechChannel chan, int32_t whereToStop);
 Executor::OSErr PauseSpeechAt(Executor::SpeechChannel chan, int32_t whereToPause);
 Executor::OSErr SetSpeechRate(Executor::SpeechChannel chan, Executor::Fixed rate);
-Executor::OSErr GetSpeechRate(Executor::SpeechChannel chan, Executor::Fixed *rate);
+Executor::OSErr GetSpeechRate(Executor::SpeechChannel chan, Executor::GUEST<Executor::Fixed> *rate);
 Executor::OSErr SetSpeechPitch(Executor::SpeechChannel chan, Executor::Fixed pitch);
-Executor::OSErr GetSpeechPitch(Executor::SpeechChannel chan, Executor::Fixed *pitch);
+Executor::OSErr GetSpeechPitch(Executor::SpeechChannel chan, Executor::GUEST<Executor::Fixed> *pitch);
 Executor::OSErr UseDictionary(Executor::SpeechChannel chan, Executor::Handle dictionary);
 Executor::OSErr MakeVoiceSpec(Executor::OSType creator, Executor::OSType id, Executor::VoiceSpec *voice);
 Executor::OSErr GetVoiceDescription(

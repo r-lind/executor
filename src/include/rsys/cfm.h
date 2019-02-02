@@ -11,7 +11,7 @@
  */
 
 #define MODULE_NAME rsys_cfm
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -30,11 +30,11 @@ struct cfrg_resource_t
     GUEST<int32_t> n_descripts;
 };
 
-#define CFRG_VERSION_X(cfrg) ((cfgr)->version)
-#define CFRG_VERSION(cfrg) (CL(CFRG_VERSION_X(cfgr)))
+#define CFRG_VERSION(cfrg) ((cfgr)->version)
 
-#define CFRG_N_DESCRIPTS_X(cfrg) ((cfrg)->n_descripts)
-#define CFRG_N_DESCRIPTS(cfrg) (CL(CFRG_N_DESCRIPTS_X(cfrg)))
+
+#define CFRG_N_DESCRIPTS(cfrg) ((cfrg)->n_descripts)
+
 
 struct cfir_t
 {
@@ -55,23 +55,22 @@ struct cfir_t
     GUEST<unsigned char[1]> name;
 };
 
-#define CFIR_ISA_X(cfir) ((cfir)->isa)
-#define CFIR_ISA(cfir) (CL(CFIR_ISA_X(cfir)))
+#define CFIR_ISA(cfir) ((cfir)->isa)
 
-#define CFIR_TYPE_X(cfir) ((cfir)->fragment_type)
-#define CFIR_TYPE(cfir) (CB(CFIR_TYPE_X(cfir)))
 
-#define CFIR_LOCATION_X(cfir) ((cfir)->fragment_location)
-#define CFIR_LOCATION(cfir) CFIR_LOCATION_X(cfir)
+#define CFIR_TYPE(cfir) ((cfir)->fragment_type)
 
-#define CFIR_LENGTH_X(cfir) ((cfir)->cfir_length)
-#define CFIR_LENGTH(cfir) (CW(CFIR_LENGTH_X(cfir)))
 
-#define CFIR_OFFSET_TO_FRAGMENT_X(cfir) ((cfir)->offset_to_fragment)
-#define CFIR_OFFSET_TO_FRAGMENT(cfir) (CL(CFIR_OFFSET_TO_FRAGMENT_X(cfir)))
+#define CFIR_LOCATION(cfir) ((cfir)->fragment_location)
 
-#define CFIR_FRAGMENT_LENGTH_X(cfir) ((cfir)->fragment_length)
-#define CFIR_FRAGMENT_LENGTH(cfir) (CL(CFIR_FRAGMENT_LENGTH_X(cfir)))
+#define CFIR_LENGTH(cfir) ((cfir)->cfir_length)
+
+
+#define CFIR_OFFSET_TO_FRAGMENT(cfir) ((cfir)->offset_to_fragment)
+
+
+#define CFIR_FRAGMENT_LENGTH(cfir) ((cfir)->fragment_length)
+
 
 #define CFIR_NAME(cfir) ((cfir)->name)
 
@@ -217,14 +216,14 @@ struct lib_t
     GUEST<int32_t> first_symbol;
 };
 
-#define LIB_CID_X(l) ((l)->cid)
-#define LIB_CID(l) (MR(LIB_CID_X(l)))
+#define LIB_CID(l) ((l)->cid)
 
-#define LIB_N_SYMBOLS_X(l) ((l)->n_symbols)
-#define LIB_N_SYMBOLS(l) (CL(LIB_N_SYMBOLS_X(l)))
 
-#define LIB_FIRST_SYMBOL_X(l) ((l)->first_symbol)
-#define LIB_FIRST_SYMBOL(l) (CL(LIB_FIRST_SYMBOL_X(l)))
+#define LIB_N_SYMBOLS(l) ((l)->n_symbols)
+
+
+#define LIB_FIRST_SYMBOL(l) ((l)->first_symbol)
+
 
 struct CFragClosure_t
 {
@@ -233,8 +232,8 @@ struct CFragClosure_t
     GUEST<lib_t> libs[0];
 };
 
-#define N_LIBS_X(c) ((c)->n_libs)
-#define N_LIBS(c) (CL(N_LIBS_X(c)))
+#define N_LIBS(c) ((c)->n_libs)
+
 
 typedef CFragClosure_t *CFragClosureID;
 
@@ -271,6 +270,18 @@ PASCAL_SUBTRAP(GetIndSymbol, 0xAA5A, 0x0007, CodeFragmentDispatch);
 
 extern ConnectionID ROMlib_new_connection(uint32_t n_sects);
 extern void ROMlib_release_tracking_values(void);
+
+static_assert(sizeof(cfrg_resource_t) == 32);
+static_assert(sizeof(cfir_t) == 44);
+static_assert(sizeof(MemFragment) == 12);
+static_assert(sizeof(DiskFragment) == 12);
+static_assert(sizeof(SegmentedFragment) == 12);
+static_assert(sizeof(FragmentLocator) == 16);
+static_assert(sizeof(InitBlock) == 36);
+static_assert(sizeof(section_info_t) == 16);
+static_assert(sizeof(CFragConnection_t) == 28);
+static_assert(sizeof(lib_t) == 12);
+static_assert(sizeof(CFragClosure_t) == 4);
 }
 
 #endif

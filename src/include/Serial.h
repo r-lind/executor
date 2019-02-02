@@ -9,7 +9,7 @@
 #include <ExMacTypes.h>
 
 #define MODULE_NAME Serial
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -136,6 +136,8 @@ NOTRAP_FUNCTION2(SerGetBuf);
 extern OSErr SerStatus(INTEGER rn, SerStaRec *serstap);
 NOTRAP_FUNCTION2(SerStatus);
 
+static_assert(sizeof(SerShk) == 8);
+static_assert(sizeof(SerStaRec) == 8);
 }
 
 #endif /* __SERIAL__ */

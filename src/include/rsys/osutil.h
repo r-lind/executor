@@ -9,7 +9,7 @@
 #include "ExMacTypes.h"
 
 #define MODULE_NAME rsys_osutil
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -22,6 +22,9 @@ extern void date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp,
                                    GUEST<INTEGER> *hourp, GUEST<INTEGER> *minutep,
                                    GUEST<INTEGER> *secondp, GUEST<INTEGER> *dayofweekp,
                                    GUEST<INTEGER> *dayofyearp, GUEST<INTEGER> *weekofyearp);
+
+    // case insitive, diac insensitive
+extern int ROMlib_strcmp(const Byte *s1, const Byte *s2);
 
 extern void C_ROMlib_wakeup(void);
 PASCAL_FUNCTION(ROMlib_wakeup);

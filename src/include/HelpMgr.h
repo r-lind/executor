@@ -13,7 +13,7 @@
 #include "WindowMgr.h"
 
 #define MODULE_NAME HelpMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -137,6 +137,9 @@ extern OSErr C_HMGetIndHelpMsg(ResType type, INTEGER resid,
                                GUEST<INTEGER> *count);
 
 PASCAL_SUBTRAP(HMGetIndHelpMsg, 0xA830, 0x1306, Pack14);
+
+static_assert(sizeof(HMStringResType) == 4);
+static_assert(sizeof(HMMessageRecord) == 258);
 }
 
 #endif /* !_HELPMGR_H_ */

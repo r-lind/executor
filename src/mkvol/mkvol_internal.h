@@ -6,7 +6,7 @@
 #include <time.h>
 #include <assert.h>
 /*
- * NOTE: All the info here has been grabbed from rsys/hfs.h.
+ * NOTE: All the info here has been grabbed from hfs/hfs.h.
  *   I don't expect this stuff to change, but you never know ...
  */
 
@@ -24,13 +24,13 @@
 
 #if !defined(LITTLEENDIAN)
 
-#define CW(rhs) (rhs)
-#define CWC(rhs) (rhs)
-#define CL(rhs) (rhs)
-#define CLC(rhs) (rhs)
-#define CWC(rhs) (rhs)
-#define CB(rhs) (rhs)
-#define CBC(rhs) (rhs)
+#define rhs (rhs)
+#define rhs (rhs)
+#define rhs (rhs)
+#define rhs (rhs)
+#define rhs (rhs)
+#define rhs (rhs)
+#define rhs (rhs)
 
 #else /* defined(LITTLEENDIAN) */
 
@@ -39,12 +39,12 @@
 
 #define CLCreal(rhs) (((((unsigned int)(rhs)&0x000000FF) << 24) | (((unsigned int)(rhs)&0x0000FF00) << 8) | (((unsigned int)(rhs)&0x00FF0000) >> 8) | (((unsigned int)(rhs)&0xFF000000) >> 24)))
 
-#define CW(rhs) CWCreal(rhs)
-#define CWC(rhs) CWCreal(rhs)
-#define CL(rhs) CLCreal(rhs)
-#define CLC(rhs) CLCreal(rhs)
-#define CB(rhs) (rhs)
-#define CBC(rhs) (rhs)
+#define rhs CWCreal(rhs)
+#define rhs CWCreal(rhs)
+#define rhs CLCreal(rhs)
+#define rhs CLCreal(rhs)
+#define rhs (rhs)
+#define rhs (rhs)
 
 #endif /* defined(LITTLEENDIAN) */
 

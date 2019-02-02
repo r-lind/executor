@@ -4,16 +4,16 @@
 
 /* Forward declarations in DiskInit.h (DO NOT DELETE THIS LINE) */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "MemoryMgr.h"
 #include "FileMgr.h"
 #include "OSUtil.h"
-#include "rsys/common.h"
+#include "base/common.h"
 #include "DiskInit.h"
-#include "rsys/glue.h"
 #include "mkvol/mkvol.h"
-#include "rsys/hfs.h"
-#include "rsys/blockinterrupts.h"
+#include "hfs/hfs.h"
+#include "time/syncint.h"
+#include <algorithm>
 
 using namespace Executor;
 
@@ -71,18 +71,18 @@ raw_read_write(func_t func, our_file_info_t *op, LONGINT *lengthp,
     OSErr retval;
     ParamBlockRec pbr;
 
-    check_virtual_interrupt();
-    pbr.ioParam.ioVRefNum = CW(op->vref);
-    pbr.ioParam.ioRefNum = CW(op->dref);
-    pbr.ioParam.ioBuffer = RM((Ptr)buf);
-    pbr.ioParam.ioReqCount = CL(*lengthp);
-    pbr.ioParam.ioPosMode = CWC(fsFromStart);
-    pbr.ioParam.ioPosOffset = CL(op->pos);
+    syncint_check_interrupt();
+    pbr.ioParam.ioVRefNum = op->vref;
+    pbr.ioParam.ioRefNum = op->dref;
+    pbr.ioParam.ioBuffer = (Ptr)buf;
+    pbr.ioParam.ioReqCount = *lengthp;
+    pbr.ioParam.ioPosMode = fsFromStart;
+    pbr.ioParam.ioPosOffset = op->pos;
     retval = func(&pbr, false);
     if(retval == noErr)
     {
-        *lengthp = CL(pbr.ioParam.ioActCount);
-        op->pos += CL(pbr.ioParam.ioActCount);
+        *lengthp = pbr.ioParam.ioActCount;
+        op->pos += pbr.ioParam.ioActCount;
     }
     return retval;
 }
@@ -152,7 +152,7 @@ begin_track_buffering_for_write(void)
         length = 0;
     }
     else
-        retval = CW(LM(MemErr));
+        retval = LM(MemErr);
     return retval;
 }
 
@@ -195,7 +195,7 @@ writefunc(int magic, const void *buf, size_t buf_len)
         uint32_t n_bytes_left, n_to_copy;
 
         n_bytes_left = N_TRACK_BYTES - length;
-        n_to_copy = MIN(n_bytes_left, buf_len_remaining);
+        n_to_copy = std::min(n_bytes_left, buf_len_remaining);
         memcpy(track_bufp + length, bufp, n_to_copy);
         length += n_to_copy;
         if(length == N_TRACK_BYTES)

@@ -73,6 +73,15 @@ struct alias_parsed_t
     GUEST<alias_fullpath_ptr> fullpathp;
     GUEST<alias_tail_ptr> tailp;
 };
+
+static_assert(sizeof(Str27) == 28);
+static_assert(sizeof(alias_head_t) == 150);
+static_assert(sizeof(alias_parent_t) == 4);
+static_assert(sizeof(alias_unknown_000100_t) == 10);
+static_assert(sizeof(alias_fullpath_t) == 4);
+static_assert(sizeof(alias_tail_t) == 170);
+static_assert(sizeof(alias_parsed_t) == 20);
+
 }
 
 #endif /* !defined (__rsys_alias_h__) */

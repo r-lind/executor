@@ -7,3 +7,15 @@
 [submodule "cxmon"]
 	path = cxmon
 	url = https://github.com/autc04/cxmon.git
+[submodule "tests/googletest"]
+	path = tests/googletest
+	url = https://github.com/google/googletest.git
+[submodule "lmdb"]
+	path = lmdb
+	url = https://github.com/LMDB/lmdb.git
+[submodule "lmdbxx"]
+	path = lmdbxx
+	url = https://github.com/autc04/lmdbxx.git
+[submodule "cmrc"]
+	path = cmrc
+	url = https://github.com/vector-of-bool/cmrc.git

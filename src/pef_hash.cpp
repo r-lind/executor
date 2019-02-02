@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include "MemoryMgr.h"
 
@@ -147,7 +147,7 @@ update_export_hash_table(GUEST<uint32_t> *hashp, int hash_index, int first_index
     uint32_t new_value;
 
     new_value = ((run_count << CHAIN_COUNT_SHIFT) | (first_index & FIRST_INDEX_MASK));
-    hashp[hash_index] = CL(new_value);
+    hashp[hash_index] = new_value;
 }
 
 PEFLoaderInfoHeader_t *
@@ -193,18 +193,18 @@ Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
         int previous_index_of_first_element;
         uint32_t name_offset;
 
-        PEFLIH_MAIN_SECTION_X(retval) = CLC(-1);
-        PEFLIH_MAIN_OFFSET_X(retval) = CLC(-1);
-        PEFLIH_INIT_SECTION_X(retval) = CLC(-1);
-        PEFLIH_INIT_OFFSET_X(retval) = CLC(-1);
-        PEFLIH_TERM_SECTION_X(retval) = CLC(-1);
-        PEFLIH_TERM_OFFSET_X(retval) = CLC(-1);
+        PEFLIH_MAIN_SECTION(retval) = -1;
+        PEFLIH_MAIN_OFFSET(retval) = -1;
+        PEFLIH_INIT_SECTION(retval) = -1;
+        PEFLIH_INIT_OFFSET(retval) = -1;
+        PEFLIH_TERM_SECTION(retval) = -1;
+        PEFLIH_TERM_OFFSET(retval) = -1;
         /* totalImportedSymbolCount, relocSectionCount, relocInstrOffset
 	 are all already 0 */
-        PEFLIH_STRINGS_OFFSET_X(retval) = CL(string_table_offset);
-        PEFLIH_HASH_OFFSET_X(retval) = CL(hash_offset);
-        PEFLIH_HASH_TABLE_POWER_X(retval) = CL(hash_power);
-        PEFLIH_SYMBOL_COUNT_X(retval) = CL(count);
+        PEFLIH_STRINGS_OFFSET(retval) = string_table_offset;
+        PEFLIH_HASH_OFFSET(retval) = hash_offset;
+        PEFLIH_HASH_TABLE_POWER(retval) = hash_power;
+        PEFLIH_SYMBOL_COUNT(retval) = count;
 
         hashp = (decltype(hashp))((char *)retval + hash_offset);
         exportp = (decltype(exportp))((char *)retval + export_offset);
@@ -220,8 +220,8 @@ Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
                                                      strlen(table[i].symbol_name));
             sorted[i].hash_index = PEFHashTableIndex(sorted[i].hash_word,
                                                      hash_power);
-            sorted[i].class_and_name_x = CL((kPEFTVectSymbol << 24) | name_offset);
-            sorted[i].value = guest_cast<void *>(RM(table[i].value));
+            sorted[i].class_and_name_x = (kPEFTVectSymbol << 24) | name_offset;
+            sorted[i].value = guest_cast<void *>(table[i].value);
             length = strlen(table[i].symbol_name);
             memcpy(string_tablep + name_offset, table[i].symbol_name, length);
             name_offset += length;
@@ -246,10 +246,10 @@ Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
                 previous_hash_index = sorted[i].hash_index;
                 previous_index_of_first_element = i;
             }
-            exportp[i] = CL(sorted[i].hash_word);
-            PEFEXS_CLASS_AND_NAME_X(&symbol_tablep[i]) = sorted[i].class_and_name_x;
-            PEFEXS_SYMBOL_VALUE_X(&symbol_tablep[i]) = guest_cast<uint32_t>(sorted[i].value);
-            PEFEXS_SECTION_INDEX_X(&symbol_tablep[i]) = CWC(-2);
+            exportp[i] = sorted[i].hash_word;
+            PEFEXS_CLASS_AND_NAME(&symbol_tablep[i]) = sorted[i].class_and_name_x;
+            PEFEXS_SYMBOL_VALUE(&symbol_tablep[i]) = guest_cast<uint32_t>(sorted[i].value);
+            PEFEXS_SECTION_INDEX(&symbol_tablep[i]) = -2;
         }
         update_export_hash_table(hashp, previous_hash_index,
                                  previous_index_of_first_element,
@@ -266,15 +266,15 @@ lookup_by_index (const pef_hash_t *hashp, int index,
   PEFExportedSymbol *retval;
 
   if (index >= hashp->n_symbols)
-    retval = NULL;
+    retval = nullptr;
   else
     {
       int name_offset;
 
       retval = &hashp->symbol_table[index];
-      name_offset = CL (retval->classAndName) & NAME_MASK;
+      name_offset = retval->classAndName & NAME_MASK;
       *namep = hashp->symbol_names + name_offset;
-      *namelen = CL (hashp->export_key_table[index]) >> 16;
+      *namelen = hashp->export_key_table[index] >> 16;
     }
   
   return retval;
@@ -306,11 +306,11 @@ lookup_by_name(const ConnectionID connp,
     // FIXME: #warning get rid of this eventually
 
     if(connp == (ConnectionID)0x12348765)
-        return NULL;
+        return nullptr;
 
 #endif
 
-    lihp = MR(connp->lihp);
+    lihp = connp->lihp;
 
     hash_word = PEFComputeHashWord((unsigned char *)name, name_len);
     hash_index = PEFHashTableIndex(hash_word, PEFLIH_HASH_TABLE_POWER(lihp));
@@ -327,18 +327,18 @@ lookup_by_name(const ConnectionID connp,
     offset = PEFLIH_STRINGS_OFFSET(lihp);
     string_tablep = (decltype(string_tablep))((char *)lihp + offset);
 
-    chain_count_and_first_index = CL(hash_entries[hash_index]);
+    chain_count_and_first_index = hash_entries[hash_index];
     chain_count = ((chain_count_and_first_index >> CHAIN_COUNT_SHIFT)
                    & CHAIN_COUNT_MASK);
     index = ((chain_count_and_first_index >> FIRST_INDEX_SHIFT)
              & FIRST_INDEX_MASK);
-    hash_word_swapped = CL(hash_word);
+    hash_word_swapped = hash_word;
     for(past_index = index + chain_count;
         index < past_index && (export_key_table[index] != hash_word_swapped || strncmp(name, SYMBOL_NAME(&symbol_table[index], string_tablep), name_len) != 0);
         ++index)
         ;
     if(index >= past_index)
-        retval = NULL;
+        retval = nullptr;
     else
         retval = &symbol_table[index];
 
@@ -386,23 +386,23 @@ OSErr Executor::C_FindSymbol(ConnectionID connID, Str255 symName,
         uint32_t val;
 
         if(symClass)
-            *symClass = *(SymClass *)&PEFEXS_CLASS_AND_NAME_X(pefs);
+            *symClass = *(SymClass *)&PEFEXS_CLASS_AND_NAME(pefs);
         section_index = PEFEXS_SECTION_INDEX(pefs);
         val = PEFEXS_SYMBOL_VALUE(pefs);
         switch(section_index)
         {
             case -2: /* absolute address */
-                *symAddr = guest_cast<Ptr>(CL(val));
+                *symAddr = guest_cast<Ptr>(val);
                 break;
             case -3: /* re-exported */
                 warning_unimplemented("name = '%.*s', val = 0x%x", symName[0],
                                       symName + 1, val);
-                *symAddr = guest_cast<Ptr>(CL(val));
+                *symAddr = guest_cast<Ptr>(val);
                 break;
             default:
             {
                 GUEST<void*> sect_start = connID->sects[section_index].start;
-                *symAddr = RM(val + MR(guest_cast<Ptr>(sect_start)));
+                *symAddr = val + guest_cast<Ptr>(sect_start);
             }
             break;
         }

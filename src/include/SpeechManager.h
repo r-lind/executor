@@ -13,7 +13,7 @@
 #include "FileMgr.h"
 
 #define MODULE_NAME SpeechManager
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -99,7 +99,7 @@ int16_t C_SpeechBusy(void);
 PASCAL_SUBTRAP(SpeechBusy, 0xA800, 0x003C000C, SoundDispatch);
 int16_t C_SpeechBusySystemWide(void);
 PASCAL_SUBTRAP(SpeechBusySystemWide, 0xA800, 0x0040000C, SoundDispatch);
-OSErr C_CountVoices(int16_t *numVoices);
+OSErr C_CountVoices(GUEST<int16_t> *numVoices);
 PASCAL_SUBTRAP(CountVoices, 0xA800, 0x0108000C, SoundDispatch);
 OSErr C_DisposeSpeechChannel(SpeechChannel chan);
 PASCAL_SUBTRAP(DisposeSpeechChannel, 0xA800, 0x021C000C, SoundDispatch);
@@ -121,11 +121,11 @@ OSErr C_PauseSpeechAt(SpeechChannel chan, int32_t whereToPause);
 PASCAL_SUBTRAP(PauseSpeechAt, 0xA800, 0x0434000C, SoundDispatch);
 OSErr C_SetSpeechRate(SpeechChannel chan, Fixed rate);
 PASCAL_SUBTRAP(SetSpeechRate, 0xA800, 0x0444000C, SoundDispatch);
-OSErr C_GetSpeechRate(SpeechChannel chan, Fixed *rate);
+OSErr C_GetSpeechRate(SpeechChannel chan, GUEST<Fixed> *rate);
 PASCAL_SUBTRAP(GetSpeechRate, 0xA800, 0x0448000C, SoundDispatch);
 OSErr C_SetSpeechPitch(SpeechChannel chan, Fixed pitch);
 PASCAL_SUBTRAP(SetSpeechPitch, 0xA800, 0x044C000C, SoundDispatch);
-OSErr C_GetSpeechPitch(SpeechChannel chan, Fixed *pitch);
+OSErr C_GetSpeechPitch(SpeechChannel chan, GUEST<Fixed> *pitch);
 PASCAL_SUBTRAP(GetSpeechPitch, 0xA800, 0x0450000C, SoundDispatch);
 OSErr C_UseDictionary(SpeechChannel chan, Handle dictionary);
 PASCAL_SUBTRAP(UseDictionary, 0xA800, 0x0460000C, SoundDispatch);

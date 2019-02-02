@@ -6,7 +6,7 @@
 #include <rsys/macros.h>
 
 #define MODULE_NAME AliasMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {

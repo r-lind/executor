@@ -11,7 +11,7 @@
 #include "ControlMgr.h"
 
 #define MODULE_NAME ListMgr
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -104,6 +104,7 @@ PASCAL_SUBTRAP(LRect, 0xA9E7, 0x004C, Pack0);
 extern BOOLEAN
 C_LSearch(Ptr dp,
           INTEGER dl, Ptr proc, GUEST<Cell> *cellp, ListHandle list);
+PASCAL_SUBTRAP(LSearch, 0xA9E7, 0x0054, Pack0);
 extern void C_LSize(INTEGER width,
                                 INTEGER height, ListHandle list);
 PASCAL_SUBTRAP(LSize, 0xA9E7, 0x0060, Pack0);
@@ -171,5 +172,7 @@ PASCAL_SUBTRAP(LCellSize, 0xA9E7, 0x0014, Pack0);
 extern BOOLEAN C_LGetSelect(BOOLEAN next,
                                         GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LGetSelect, 0xA9E7, 0x003C, Pack0);
+
+static_assert(sizeof(ListRec) == 88);
 }
 #endif /* __LIST__ */

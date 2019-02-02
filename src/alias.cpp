@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 
 #include <stdarg.h>
 
@@ -11,8 +11,8 @@
 #include "MemoryMgr.h"
 #include "ToolboxUtil.h"
 
-#include "rsys/file.h"
-#include "rsys/hfs.h"
+#include "file/file.h"
+#include "hfs/hfs.h"
 #include "rsys/string.h"
 #if defined(CYGWIN32)
 #include "win_temp.h"
@@ -20,7 +20,7 @@
 
 #include "rsys/alias.h"
 
-#define paramErr (-50)
+#include <algorithm>
 
 using namespace Executor;
 
@@ -79,181 +79,15 @@ get_sys_vref_and_dirid(INTEGER *sys_vrefp, LONGINT *sys_diridp)
     WDPBRec wdp;
 
     wdp.ioVRefNum = LM(BootDrive);
-    wdp.ioWDIndex = CWC(0);
+    wdp.ioWDIndex = 0;
     wdp.ioNamePtr = nullptr;
     err = PBGetWDInfo(&wdp, false);
     if(err == noErr)
     {
-        *sys_vrefp = CW(wdp.ioWDVRefNum);
-        *sys_diridp = CL(wdp.ioWDDirID);
+        *sys_vrefp = wdp.ioWDVRefNum;
+        *sys_diridp = wdp.ioWDDirID;
     }
     return err;
-}
-
-static OSErr
-try_to_find(INTEGER vref, const char *str, INTEGER *vrefp, LONGINT *diridp)
-{
-    OSErr err;
-    HVCB *vcbp;
-
-    warning_trace_info("str = '%s'", str);
-    vcbp = ROMlib_vcbbybiggestunixname(str);
-
-    if(!vcbp)
-        err = nsvErr;
-    else
-    {
-        VCBExtra *vcbextrap;
-        struct stat sbuf;
-
-        vcbextrap = (VCBExtra *)vcbp;
-        warning_trace_info("unixname = '%s'", vcbextrap->unixname);
-        if(Ustat(str, &sbuf) < 0)
-        {
-            warning_trace_info("stat failed, errno = %d", errno);
-            err = ROMlib_maperrno();
-        }
-        else
-        {
-            warning_trace_info("ino = %ld, ufs.ino = %ld", (long)ST_INO(sbuf),
-                               (long)vcbextrap->u.ufs.ino);
-            if(vref != CW(vcbp->vcbVRefNum))
-                err = fnfErr;
-            else
-            {
-                *vrefp = vref;
-                if(ST_INO(sbuf) == vcbextrap->u.ufs.ino)
-                    *diridp = 2;
-                else
-                    *diridp = ST_INO(sbuf);
-                err = noErr;
-            }
-        }
-    }
-    warning_trace_info("err = %d", err);
-    return err;
-}
-
-static OSErr
-look_for_volume(const char *vol_name, INTEGER *vrefp, LONGINT *diridp)
-{
-    OSErr retval;
-    ParamBlockRec pbr;
-    Str255 pvol_name;
-
-    str255_from_c_string(pvol_name, vol_name);
-    pbr.volumeParam.ioNamePtr = RM(&pvol_name[0]);
-    pbr.volumeParam.ioVolIndex = CWC(-1);
-    pbr.volumeParam.ioVRefNum = CWC(0);
-    retval = PBGetVInfo(&pbr, false);
-    if(retval == noErr)
-    {
-        *vrefp = CW(pbr.volumeParam.ioVRefNum);
-        *diridp = 2;
-    }
-    return retval;
-}
-
-/*
- * We call this when we haven't been able to find what we want, so we
- * try to construct something ourselves.
- */
-
-static OSErr
-last_chance_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp,
-                               LONGINT *tmp_diridp)
-{
-    OSErr retval;
-    HParamBlockRec pb = {};
-
-    pb.volumeParam.ioVRefNum = CW(vref);
-    retval = PBHGetVInfo(&pb, false);
-    if(retval == noErr)
-    {
-        static const char *top_level_names[] = {
-            "\3tmp",
-            "\4temp",
-        };
-        int i;
-        OSErr err;
-
-        *tmp_vrefp = vref;
-
-        for(i = 0, err = fnfErr;
-            err != noErr && i < NELEM(top_level_names);
-            ++i)
-        {
-            CInfoPBRec hpb;
-
-            memset(&hpb, 0, sizeof hpb);
-            hpb.dirInfo.ioNamePtr = RM((StringPtr)top_level_names[i]);
-            hpb.dirInfo.ioVRefNum = pb.volumeParam.ioVRefNum;
-            hpb.dirInfo.ioDrDirID = CLC(2);
-            err = PBGetCatInfo(&hpb, false);
-            if(err == noErr && (hpb.hFileInfo.ioFlAttrib & ATTRIB_ISADIR))
-                *tmp_diridp = CL(hpb.dirInfo.ioDrDirID);
-        }
-        if(err != noErr)
-            *tmp_diridp = 2;
-    }
-
-    return retval;
-}
-
-static OSErr
-get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
-{
-    int i;
-    OSErr retval;
-    static const char *guesses[] = {
-
-#if !defined(MSDOS) && !defined(CYGWIN32)
-        "/tmp",
-#else
-#if defined(CYGWIN32)
-        NULL,
-#endif
-        "c:/tmp",
-        "c:/temp",
-        "c:/"
-#endif
-    };
-
-    {
-        static bool been_here_p = false;
-
-        if(!been_here_p)
-        {
-            int j;
-
-#if defined(CYGWIN32)
-            guesses[0] = win_temp();
-#endif
-
-            for(j = 0; j < (int)NELEM(guesses); ++j)
-            {
-                char *p;
-
-                if(guesses[j])
-                {
-                    p = (char *)alloca(strlen(guesses[j]) + 1);
-                    strcpy(p, guesses[j]);
-                    ROMlib_automount(p);
-                }
-            }
-            been_here_p = true;
-        }
-    }
-
-    retval = look_for_volume("tmp:", tmp_vrefp, tmp_diridp);
-
-    for(i = 0; retval != noErr && i < (int)NELEM(guesses); ++i)
-        retval = try_to_find(vref, guesses[i], tmp_vrefp, tmp_diridp);
-
-    if(retval != noErr)
-        retval = last_chance_tmp_vref_and_dirid(vref, tmp_vrefp, tmp_diridp);
-
-    return retval;
 }
 
 static OSErr
@@ -265,18 +99,48 @@ test_directory(INTEGER vref, LONGINT dirid, const char *sub_dirp,
     Str255 file_name;
 
     str255_from_c_string(file_name, sub_dirp);
-    cpb.hFileInfo.ioNamePtr = RM((StringPtr)file_name);
-    cpb.hFileInfo.ioVRefNum = CW(vref);
-    cpb.hFileInfo.ioFDirIndex = CWC(0);
-    cpb.hFileInfo.ioDirID = CL(dirid);
+    cpb.hFileInfo.ioNamePtr = (StringPtr)file_name;
+    cpb.hFileInfo.ioVRefNum = vref;
+    cpb.hFileInfo.ioFDirIndex = 0;
+    cpb.hFileInfo.ioDirID = dirid;
     err = PBGetCatInfo(&cpb, false);
     if(err == noErr && !(cpb.hFileInfo.ioFlAttrib & ATTRIB_ISADIR))
         err = dupFNErr;
     if(err == noErr)
-        *new_idp = CL(cpb.dirInfo.ioDrDirID);
+        *new_idp = cpb.dirInfo.ioDrDirID;
     return err;
 }
 
+
+static OSErr
+get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
+{
+    // FIXME: get proper paths
+    // FIXME: temp directory for other volumes?
+#ifdef WIN32
+    auto spec = nativePathToFSSpec("C:/temp");
+#else
+    auto spec = nativePathToFSSpec("/tmp");
+#endif
+    if(!spec)
+        return fnfErr;
+
+    CInfoPBRec cpb;
+
+    cpb.hFileInfo.ioNamePtr = spec->name;
+    cpb.hFileInfo.ioVRefNum = spec->vRefNum;
+    cpb.hFileInfo.ioFDirIndex = 0;
+    cpb.hFileInfo.ioDirID = spec->parID;
+    OSErr err = PBGetCatInfo(&cpb, false);
+    if(err == noErr && !(cpb.hFileInfo.ioFlAttrib & ATTRIB_ISADIR))
+        err = dupFNErr;
+    if(err == noErr)
+    {
+        *tmp_diridp = cpb.dirInfo.ioDrDirID;
+        *tmp_vrefp = spec->vRefNum;
+    }
+    return err;
+}
 static OSErr
 create_directory(INTEGER sys_vref, LONGINT sys_dirid, const char *sub_dirp,
                  LONGINT *new_idp)
@@ -307,8 +171,8 @@ OSErr Executor::C_FindFolder(int16_t vRefNum, OSType folderType,
                 retval = create_directory(sys_vref, sys_dirid, sub_dir, &new_id);
             if(retval == noErr)
             {
-                *foundVRefNum = CW(sys_vref);
-                *foundDirID = CL(new_id);
+                *foundVRefNum = sys_vref;
+                *foundDirID = new_id;
             }
         }
     }
@@ -325,8 +189,8 @@ OSErr Executor::C_FindFolder(int16_t vRefNum, OSType folderType,
                 {
                     /* NOTE: IMVI 9-44 tells us to not create System Folder if it
 	       doesn't already exist */
-                    *foundVRefNum = CW(sys_vref);
-                    *foundDirID = CL(sys_dirid);
+                    *foundVRefNum = sys_vref;
+                    *foundDirID = sys_dirid;
                 }
             }
             break;
@@ -346,8 +210,8 @@ OSErr Executor::C_FindFolder(int16_t vRefNum, OSType folderType,
                         warning_unimplemented("Didn't attempt to create folder");
                     if(retval == noErr)
                     {
-                        *foundVRefNum = CW(tmp_vref);
-                        *foundDirID = CL(tmp_dirid);
+                        *foundVRefNum = tmp_vref;
+                        *foundDirID = tmp_dirid;
                     }
                 }
                 break;
@@ -403,13 +267,13 @@ OSErr Executor::C_ResolveAlias(FSSpecPtr fromFile, AliasHandle alias,
 
     warning_unimplemented("stub for Launch WON'T WORK WITH FULL PATH SPEC");
     retval = noErr;
-    headp = (decltype(headp))STARH(alias);
+    headp = (decltype(headp))*alias;
     str255assign(volname, headp->volumeName);
     fs.parID = headp->ioDirID; /* NOT VALID IF THIS IS A FULL PATH SPEC */
     str255assign(fs.name, headp->fileName);
 
-    pb.volumeParam.ioNamePtr = RM((StringPtr)volname);
-    pb.volumeParam.ioVolIndex = CWC(-1);
+    pb.volumeParam.ioNamePtr = (StringPtr)volname;
+    pb.volumeParam.ioVolIndex = -1;
     pb.volumeParam.ioVRefNum = 0;
     retval = PBHGetVInfo(&pb, false);
     if(retval == noErr)
@@ -430,7 +294,7 @@ OSErr Executor::C_ResolveAliasFile(FSSpecPtr theSpec,
     OSErr retval;
 
     memset(&hpb, 0, sizeof hpb);
-    hpb.fileParam.ioNamePtr = RM((StringPtr)theSpec->name);
+    hpb.fileParam.ioNamePtr = (StringPtr)theSpec->name;
     hpb.fileParam.ioDirID = theSpec->parID;
     hpb.fileParam.ioVRefNum = theSpec->vRefNum;
     retval = PBHGetFInfo(&hpb, false);
@@ -490,20 +354,20 @@ parse2 (AliasHandle ah, const void *addrs[], int count)
       const alias_head_t *headp;
       const INTEGER *partp, *ep;
 		
-      headp = (alias_head_t *) STARH (ah);
+      headp = (alias_head_t *) *ah;
       partp = (INTEGER *) (&headp[1]);
-      ep = (INTEGER *) ((char *) headp + MIN (size, CW (headp->length)));
+      ep = (INTEGER *) ((char *) headp + std::min(size, headp->length));
       memset (addrs, 0, count * sizeof addrs[0]);
-      for (; partp < ep && *partp != CWC (-1);
-	   partp = (INTEGER *) ((char *) partp + EVENUP (4 + CW (partp[1]))))
+      for (; partp < ep && *partp != -1;
+	   partp = (INTEGER *) ((char *) partp + EVENUP (4 + partp[1])))
 	{
 	  int part;
 			
-	  part = CW (*partp);
+	  part = *partp;
 	  if (part < count)
 	    addrs[part] = partp + 1;
 	}
-      retval = *partp == CWC (-1) ? noErr : paramErr;
+      retval = *partp == -1 ? noErr : paramErr;
     }
 	
   return retval;
@@ -557,12 +421,12 @@ static void
 init_head(alias_head_t *headp, Str27 volumeName, Str31 fileName)
 {
     memset(headp, 0, sizeof *headp);
-    headp->usually_2 = CWC(2);
+    headp->usually_2 = 2;
     memcpy(headp->volumeName, volumeName, volumeName[0] + 1);
     memcpy(headp->fileName, fileName, fileName[0] + 1);
-    headp->mystery_words[0] = CWC(-1);
-    headp->mystery_words[1] = CWC(-1);
-    headp->mystery_words[3] = CWC(17);
+    headp->mystery_words[0] = -1;
+    headp->mystery_words[1] = -1;
+    headp->mystery_words[3] = 17;
 }
 
 static void
@@ -582,19 +446,19 @@ init_tail(alias_tail_t *tailp, Str32 zoneName, Str31 serverName,
     {
         int name_len;
 
-        name_len = MIN(GetHandleSize(h), 31);
-        memcpy(tailp->network_identity_owner_name, STARH(h), name_len);
+        name_len = std::min(GetHandleSize(h), 31);
+        memcpy(tailp->network_identity_owner_name, *h, name_len);
     }
-    tailp->weird_info[0] = CWC(0x00A8);
-    tailp->weird_info[1] = CWC(0x6166);
-    tailp->weird_info[2] = CWC(0x706D);
-    tailp->weird_info[5] = CWC(0x0003);
-    tailp->weird_info[6] = CWC(0x0018);
-    tailp->weird_info[7] = CWC(0x0039);
-    tailp->weird_info[8] = CWC(0x0059);
-    tailp->weird_info[9] = CWC(0x0075);
-    tailp->weird_info[10] = CWC(0x0095);
-    tailp->weird_info[11] = CWC(0x009E);
+    tailp->weird_info[0] = 0x00A8;
+    tailp->weird_info[1] = 0x6166;
+    tailp->weird_info[2] = 0x706D;
+    tailp->weird_info[5] = 0x0003;
+    tailp->weird_info[6] = 0x0018;
+    tailp->weird_info[7] = 0x0039;
+    tailp->weird_info[8] = 0x0059;
+    tailp->weird_info[9] = 0x0075;
+    tailp->weird_info[10] = 0x0095;
+    tailp->weird_info[11] = 0x009E;
 }
 
 static OSErr
@@ -628,8 +492,8 @@ assemble_pieces(GUEST<AliasHandle> *ahp, alias_head_t *headp, int n_pieces, ...)
     {
         char *op;
 
-        headp->length = CW(n_bytes_needed);
-        op = (char *)STARH(h);
+        headp->length = n_bytes_needed;
+        op = (char *)*h;
         memcpy(op, headp, sizeof(*headp));
         op += sizeof(*headp);
         va_start(va, n_pieces);
@@ -642,9 +506,9 @@ assemble_pieces(GUEST<AliasHandle> *ahp, alias_head_t *headp, int n_pieces, ...)
             void *p;
 
             tag = va_arg(va, int);
-            tag_x = CW(tag);
+            tag_x = tag;
             length = va_arg(va, int);
-            length_x = CW(length);
+            length_x = length;
             p = va_arg(va, void *);
             memcpy(op, &tag_x, sizeof tag_x);
             op += sizeof tag_x;
@@ -660,7 +524,7 @@ assemble_pieces(GUEST<AliasHandle> *ahp, alias_head_t *headp, int n_pieces, ...)
         op += sizeof(INTEGER);
         memset(op, 0, sizeof(INTEGER));
 
-        *ahp = RM((AliasHandle)h);
+        *ahp = (AliasHandle)h;
         retval = noErr;
     }
     return retval;
@@ -694,10 +558,10 @@ OSErr Executor::C_NewAliasMinimalFromFullPath(
             init_head(&head, volumeName, fileName);
             if(volumeName[0] < 27)
                 head.volumeName[volumeName[0] + 1] = ':';
-            head.zero_or_one = CWC(1);
-            head.zero_or_neg_one = CLC(-1);
-            head.ioDirID = CLC(-1);
-            head.ioFlCrDat = CLC(0);
+            head.zero_or_one = 1;
+            head.zero_or_neg_one = -1;
+            head.ioDirID = -1;
+            head.ioFlCrDat = 0;
             init_tail(&tail, zoneName, serverName, volumeName);
             retval = assemble_pieces(ahp, &head, 2,
                                      FULL_PATH_TAG, path_len, (void *)fullPath,
@@ -707,7 +571,7 @@ OSErr Executor::C_NewAliasMinimalFromFullPath(
     }
 
     if(retval != noErr)
-        *ahp = NULL;
+        *ahp = nullptr;
 
     return retval;
 }
@@ -720,7 +584,7 @@ OSErr Executor::C_NewAliasMinimal(FSSpecPtr fsp, GUEST<AliasHandle> *ahp)
 
     warning_unimplemented("not tested much");
     memset(&hpb, 0, sizeof hpb);
-    hpb.ioParam.ioNamePtr = RM(&volName[0]);
+    hpb.ioParam.ioNamePtr = &volName[0];
     hpb.ioParam.ioVRefNum = fsp->vRefNum;
     retval = PBHGetVInfo(&hpb, false);
     if(retval == noErr)
@@ -731,7 +595,7 @@ OSErr Executor::C_NewAliasMinimal(FSSpecPtr fsp, GUEST<AliasHandle> *ahp)
         head.ioVCrDate = hpb.volumeParam.ioVCrDate;
         head.ioVSigWord = hpb.volumeParam.ioVSigWord;
         memset(&hpb, 0, sizeof hpb);
-        hpb.ioParam.ioNamePtr = RM(&fsp->name[0]);
+        hpb.ioParam.ioNamePtr = &fsp->name[0];
         hpb.ioParam.ioVRefNum = fsp->vRefNum;
         hpb.fileParam.ioDirID = fsp->parID;
         retval = PBHGetFInfo(&hpb, false);
@@ -752,8 +616,8 @@ OSErr Executor::C_NewAliasMinimal(FSSpecPtr fsp, GUEST<AliasHandle> *ahp)
             {
                 int len;
 
-                len = MIN(GetHandleSize(h), 32);
-                memcpy(serverName, STARH(h), len);
+                len = std::min(GetHandleSize(h), 32);
+                memcpy(serverName, *h, len);
             }
             init_tail(&tail, (StringPtr) "\1*", serverName, volName);
             retval = assemble_pieces(ahp, &head, 1,
@@ -763,6 +627,6 @@ OSErr Executor::C_NewAliasMinimal(FSSpecPtr fsp, GUEST<AliasHandle> *ahp)
     }
 
     if(retval != noErr)
-        *ahp = NULL;
+        *ahp = nullptr;
     return retval;
 }

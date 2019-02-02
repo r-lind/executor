@@ -8,11 +8,17 @@
 
  */
 
-#include "rsys/mactype.h"
-#include "rsys/byteswap.h"
+#include "base/mactype.h"
+#include "base/byteswap.h"
 
 namespace Executor
 {
+typedef int16_t INTEGER;
+typedef int32_t LONGINT;
+typedef uint32_t ULONGINT;
+typedef int8_t BOOLEAN;
+
+typedef int16_t CharParameter; /* very important not to use this as char */
 
 typedef int8_t SignedByte;
 typedef uint8_t Byte;
@@ -27,6 +33,7 @@ typedef Byte Str32[33];
 typedef Byte Str63[64];
 typedef Byte Str255[256];
 typedef Byte *StringPtr;
+typedef const unsigned char *ConstStringPtr;
 
 typedef GUEST<StringPtr> *StringHandle;
 
@@ -48,6 +55,14 @@ typedef LONGINT Size;
 typedef INTEGER OSErr;
 typedef LONGINT OSType;
 typedef LONGINT ResType;
+
+class OSErrorException : public std::runtime_error
+{
+public:
+    OSErr code;
+
+    OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
+};
 
 struct QHdr
 {
@@ -79,7 +94,7 @@ struct NativePoint {
 };
 #endif
 
-#define ZEROPOINT(p) (p.v = CWC(0), p.h = CWC(0))
+#define ZEROPOINT(p) (p.v = 0, p.h = 0)
 
 struct Rect
 {
@@ -103,11 +118,11 @@ typedef Rect *RectPtr;
 
 inline short RECT_WIDTH(const Rect *r)
 {
-    return CW(r->right) - CW(r->left);
+    return r->right - r->left;
 }
 inline short RECT_HEIGHT(const Rect *r)
 {
-    return CW(r->bottom) - CW(r->top);
+    return r->bottom - r->top;
 }
 
 #define RECT_ZERO(r)                \
@@ -126,5 +141,8 @@ inline bool RECT_EQUAL_P(const Rect *r1, const Rect *r2)
 typedef INTEGER ScriptCode;
 typedef INTEGER LangCode;
 
+static_assert(sizeof(QHdr) == 10);
+static_assert(sizeof(Point) == 4);
+static_assert(sizeof(Rect) == 8);
 }
 #endif /* _MACTYPES_H_ */

@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "rsys/string.h"
 
 #include "MemoryMgr.h"
@@ -31,10 +31,10 @@ Executor::pstr_index_after(StringPtr p, char c, int i)
             p < ep && *p != c;
             p++)
             ;
-        return (p == ep) ? NULL : (char *)p;
+        return (p == ep) ? nullptr : (char *)p;
     }
     else
-        return NULL;
+        return nullptr;
 }
 
 static void strNassign(Str63 new1, const StringPtr old, int n)
@@ -74,6 +74,6 @@ Executor::stringhandle_from_c_string(const char *c_stringp)
 
     len = strlen(c_stringp) + 1;
     retval = (StringHandle)NewHandle(len);
-    str255_from_c_string(STARH(retval), c_stringp);
+    str255_from_c_string(*retval, c_stringp);
     return retval;
 }

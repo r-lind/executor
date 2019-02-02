@@ -49,6 +49,7 @@ so that host_vdriver.h may replace some of them with macros on systems
 where that is appropriate.  vdriver.h will not prototype any function
 that is defined as a macro by host_vdriver.h.
 
+// TODO: vdriver_cmdline
 
  -- Function: boolean_t vdriver_init (int MAX_WIDTH, int MAX_HEIGHT,
 				      int MAX_BPP, boolean_t FIXED_P,
@@ -82,6 +83,7 @@ that is defined as a macro by host_vdriver.h.
      It is of course safe to assume this flag is FALSE.  It is an
      error for MAX_WIDTH to be zero and for FIXED_P to be true.
 
+    // TODO: remove argc/argv from argument list
      ARGC and ARGV specify command line options given to the program.
      The vdriver can ignore these parameters, but if it wants to process
      any of these arguments, it should remove them from argv and adjust

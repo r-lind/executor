@@ -11,7 +11,7 @@
 #include "rsys/macros.h"
 
 #define MODULE_NAME SANE
-#include <rsys/api-module.h>
+#include <base/api-module.h>
 
 namespace Executor
 {
@@ -40,33 +40,13 @@ typedef comp_t native_comp_t;
 #endif /* Not LITTLEENDIAN */
 
 /* "Packed" IEEE 80 bit FP representation (zero field omitted). */
-/* Sign and exponent. */
 
-/* Mantissa. */
-typedef struct PACKED
+struct x80_t
 {
-    /* Sign and exponent. */
-    union {
-#if !defined(LITTLEENDIAN)
-        struct PACKED
-        { /* Here for added efficiency when BIGENDIAN. */
-            unsigned short sgn : 1;
-            unsigned short exp : 15;
-        } s;
-#endif
-        unsigned short sgn_and_exp;
-    } se;
-
-    /* Mantissa. */
-    union {
-        struct PACKED
-        {
-            ULONGINT man_hi;
-            ULONGINT man_lo;
-        } hilo;
-        unsigned long long man;
-    } man;
-} x80_t;
+    GUEST_STRUCT;
+    GUEST<uint16_t> sgn_and_exp;
+    GUEST<uint64_t> mantissa;
+};
 
 /* For backwards compatibility with old stuff. */
 typedef x80_t extended80;
@@ -310,5 +290,11 @@ PASCAL_SUBTRAP(ROMlib_Fgethv, 0xA9EB, 0x07, Pack4);
 extern void C_ROMlib_FnextX(uint8_t *x, uint8_t *y,
                                         unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FnextX, 0xA9EB, 0x13, Pack4);
+
+static_assert(sizeof(comp_t) == 8);
+static_assert(sizeof(native_comp_t) == 8);
+static_assert(sizeof(x80_t) == 10);
+static_assert(sizeof(Decimal) == 24);
+static_assert(sizeof(DecForm) == 4);
 }
 #endif

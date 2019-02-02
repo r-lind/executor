@@ -2,21 +2,21 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "base/common.h"
 #include "SysErr.h"
 #include "WindowMgr.h"
 #include "MenuMgr.h"
 #include "rsys/redrawscreen.h"
-#include "rsys/cquick.h"
-#include "rsys/vdriver.h"
+#include "quickdraw/cquick.h"
+#include "vdriver/vdriver.h"
 
 using namespace Executor;
 
 void Executor::redraw_screen(void)
 {
-    TheGDeviceGuard guard(MR(LM(MainDevice)));
-    vdriver_set_colors(0, 1 << vdriver_bpp,
-                       CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(MR(LM(MainDevice))))));
+    TheGDeviceGuard guard(LM(MainDevice));
+    vdriver->setColors(0, 1 << vdriver->bpp(),
+                       CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(LM(MainDevice)))));
 
     if(LM(WWExist) == EXIST_YES)
     {
@@ -27,7 +27,7 @@ void Executor::redraw_screen(void)
             RgnHandle screen_rgn;
             Rect b;
 
-            b = PIXMAP_BOUNDS(GD_PMAP(MR(LM(MainDevice))));
+            b = PIXMAP_BOUNDS(GD_PMAP(LM(MainDevice)));
             screen_rgn = NewRgn();
             RectRgn(screen_rgn, &b);
             PaintBehind(frontp, screen_rgn);

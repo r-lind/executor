@@ -2,7 +2,9 @@
  * Development, Inc.  All rights reserved.
  */
 
-#include "rsys/common.h"
+#include "sdl.h"
+#include "vdriver/vdriver.h"
+#include "base/common.h"
 #include "QuickDraw.h"
 #include "EventMgr.h"
 #include "SegmentLdr.h"
@@ -11,8 +13,8 @@
 #include "ScrapMgr.h"
 
 #include "rsys/segment.h"
-#include "rsys/m68kint.h"
-#include "rsys/osevent.h"
+#include "base/m68kint.h"
+#include "osevent/osevent.h"
 #include "rsys/keyboard.h"
 #include "rsys/adb.h"
 #include "rsys/scrap.h"
@@ -26,7 +28,7 @@ using namespace Executor;
 static bool use_scan_codes = false;
 
 void
-ROMlib_set_use_scancodes(bool val)
+SDLVideoDriver::setUseScancodes(bool val)
 {
     use_scan_codes = val;
 }
@@ -570,8 +572,8 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
                         keymod &= ~mod;
                 }
                 when = TickCount();
-                where.h = CW(LM(MouseLocation).h);
-                where.v = CW(LM(MouseLocation).v);
+                where.h = LM(MouseLocation).h;
+                where.v = LM(MouseLocation).v;
                 keywhat = ROMlib_xlate(mkvkey, keymod, down_p);
                 post_keytrans_key_events(down_p ? keyDown : keyUp,
                                          keywhat, when, where,
@@ -590,13 +592,18 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
     return (MAGIC_RTE_ADDRESS);
 }
 
+void SDLVideoDriver::pumpEvents()
+{
+    handle_sdl_events(/* dummy */ -1, /* dummy */ nullptr);
+}
+
 /* This function runs in a separate thread (usually) */
 int sdl_event_interrupt(const SDL_Event *event)
 {
     if(event->type == SDL_MOUSEMOTION)
     {
-        mouseloc.h = CW(event->motion.x);
-        mouseloc.v = CW(event->motion.y);
+        mouseloc.h = event->motion.x;
+        mouseloc.v = event->motion.y;
         interrupt_generate(M68K_MOUSE_MOVED_PRIORITY);
         return (0); /* Drop the event */
     }
@@ -623,10 +630,10 @@ void sdl_events_init(void)
     syn68k_addr_t event_callback;
 
     /* hook into syn68k synchronous interrupts */
-    mouse_callback = callback_install(handle_sdl_mouse, NULL);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4) = CL(mouse_callback);
-    event_callback = callback_install(handle_sdl_events, NULL);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = CL(event_callback);
+    mouse_callback = callback_install(handle_sdl_mouse, nullptr);
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4) = mouse_callback;
+    event_callback = callback_install(handle_sdl_events, nullptr);
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = event_callback;
 
     /* then set up a filter that triggers the event interrupt */
     SDL_SetEventFilter(sdl_event_interrupt);

@@ -4,7 +4,7 @@
 
 #undef _DARWIN_NO_64_BIT_INODE
 
-/* #include "rsys/common.h" */
+/* #include "base/common.h" */
 #if defined(__MINGW32__)
 #define CYGWIN32
 #endif
@@ -50,7 +50,7 @@ typedef enum { false,
                true } bool;
 #endif
 
-#include "rsys/parsenum.h"
+#include "commandline/parsenum.h"
 
 using namespace Executor;
 
@@ -163,44 +163,44 @@ write_volume_info(info_t *infop)
  */
     infop->nalblocks_in_desktop = infop->nalblocks_in_tree + 1;
 
-    bufu.vi.drSigWord = CWC(0x4244);
-    bufu.vi.drCrDate = CL(infop->time);
-    bufu.vi.drLsMod = CL(infop->time);
-    bufu.vi.drAtrb = CWC(0x100); /* clean unmount */
-    bufu.vi.drNmFls = CWC(1);
-    bufu.vi.drVBMSt = CWC(3);
-    bufu.vi.drAllocPtr = CWC(2 * infop->nalblocks_in_tree); /* NOTE:
+    bufu.vi.drSigWord = 0x4244;
+    bufu.vi.drCrDate = infop->time;
+    bufu.vi.drLsMod = infop->time;
+    bufu.vi.drAtrb = 0x100; /* clean unmount */
+    bufu.vi.drNmFls = 1;
+    bufu.vi.drVBMSt = 3;
+    bufu.vi.drAllocPtr = 2 * infop->nalblocks_in_tree; /* NOTE:
 			It is goofy to not count infop->nalblocks_in_desktop,
 			but that's the way it goes */
-    bufu.vi.drNmAlBlks = CW(nalblks);
-    bufu.vi.drAlBlkSiz = CL(infop->nsecs_in_alblock * SECSIZE);
-    bufu.vi.drClpSiz = CL(4 * CL(bufu.vi.drAlBlkSiz));
-    bufu.vi.drAlBlSt = CW(CW(bufu.vi.drVBMSt) + infop->nsecs_in_map);
-    bufu.vi.drNxtCNID = CLC(17);
-    bufu.vi.drFreeBks = CW(nalblks - 2 * infop->nalblocks_in_tree - infop->nalblocks_in_desktop);
+    bufu.vi.drNmAlBlks = nalblks;
+    bufu.vi.drAlBlkSiz = infop->nsecs_in_alblock * SECSIZE;
+    bufu.vi.drClpSiz = 4 * bufu.vi.drAlBlkSiz;
+    bufu.vi.drAlBlSt = bufu.vi.drVBMSt + infop->nsecs_in_map;
+    bufu.vi.drNxtCNID = 17;
+    bufu.vi.drFreeBks = nalblks - 2 * infop->nalblocks_in_tree - infop->nalblocks_in_desktop;
     bufu.vi.drVN[0] = strlen(infop->volume_name);
     memcpy(bufu.vi.drVN + 1, infop->volume_name,
            (unsigned char)bufu.vi.drVN[0]);
-    bufu.vi.drVolBkUp = CLC(0);
-    bufu.vi.drVSeqNum = CWC(0);
-    bufu.vi.drWrCnt = CLC(0);
-    bufu.vi.drXTClpSiz = CL(infop->nalblocks_in_tree * infop->nsecs_in_alblock
-                            * SECSIZE);
-    bufu.vi.drCTClpSiz = CL(infop->nalblocks_in_tree * infop->nsecs_in_alblock
-                            * SECSIZE);
-    bufu.vi.drNmRtDirs = CWC(0);
-    bufu.vi.drFilCnt = CLC(1);
-    bufu.vi.drDirCnt = CLC(0);
+    bufu.vi.drVolBkUp = 0;
+    bufu.vi.drVSeqNum = 0;
+    bufu.vi.drWrCnt = 0;
+    bufu.vi.drXTClpSiz = infop->nalblocks_in_tree * infop->nsecs_in_alblock
+                            * SECSIZE;
+    bufu.vi.drCTClpSiz = infop->nalblocks_in_tree * infop->nsecs_in_alblock
+                            * SECSIZE;
+    bufu.vi.drNmRtDirs = 0;
+    bufu.vi.drFilCnt = 1;
+    bufu.vi.drDirCnt = 0;
     /*  bufu.vi.drFndrInfo = zero */
-    bufu.vi.drVCSize = CWC(0);
-    bufu.vi.drVCBMSize = CWC(0);
-    bufu.vi.drCtlCSize = CWC(0);
+    bufu.vi.drVCSize = 0;
+    bufu.vi.drVCBMSize = 0;
+    bufu.vi.drCtlCSize = 0;
     bufu.vi.drXTFlSize = bufu.vi.drXTClpSiz;
-    bufu.vi.drXTExtRec[0].blockstart = CWC(0);
-    bufu.vi.drXTExtRec[0].blockcount = CW(infop->nalblocks_in_tree);
+    bufu.vi.drXTExtRec[0].blockstart = 0;
+    bufu.vi.drXTExtRec[0].blockcount = infop->nalblocks_in_tree;
     bufu.vi.drCTFlSize = bufu.vi.drCTClpSiz;
-    bufu.vi.drCTExtRec[0].blockstart = CW(infop->nalblocks_in_tree);
-    bufu.vi.drCTExtRec[0].blockcount = CW(infop->nalblocks_in_tree);
+    bufu.vi.drCTExtRec[0].blockstart = infop->nalblocks_in_tree;
+    bufu.vi.drCTExtRec[0].blockcount = infop->nalblocks_in_tree;
 
     WRITE_AND_RETURN_ERROR(infop, &bufu, sizeof(bufu));
     infop->nsecs_left -= 1;
@@ -245,13 +245,13 @@ fill_btblock0(info_t *infop, btree_enum_t btree_enum)
     assert(infop->nsecs_left >= 1);
     assert(sizeof(bt) == SECSIZE);
     my_bzero(&bt, sizeof(bt));
-    bt.type = CBC(01);
-    bt.dummy = CBC(0);
-    bt.hesthreejim = CWC(3);
-    bt.btnodesize = CWC(512);
-    bt.nnodes = CL(infop->nalblocks_in_tree * infop->nsecs_in_alblock);
+    bt.type = 01;
+    bt.dummy = 0;
+    bt.hesthreejim = 3;
+    bt.btnodesize = 512;
+    bt.nnodes = infop->nalblocks_in_tree * infop->nsecs_in_alblock;
 
-    if(CL(bt.nnodes) > 2048)
+    if(bt.nnodes > 2048)
     {
 #if defined(MKVOL_PROGRAM)
         fprintf(stderr, "\n"
@@ -263,34 +263,34 @@ fill_btblock0(info_t *infop, btree_enum_t btree_enum)
 #endif
     }
 
-    bt.nfreenodes = CL(CL(bt.nnodes) - 1);
-    bt.unknown2[0] = CLC(0x01f800f8);
-    bt.unknown2[1] = CLC(0x0078000e);
+    bt.nfreenodes = bt.nnodes - 1;
+    bt.unknown2[0] = 0x01f800f8;
+    bt.unknown2[1] = 0x0078000e;
 
     switch(btree_enum)
     {
         case extent:
-            bt.flink = CLC(0);
-            bt.blink = CLC(0);
-            bt.height = CLC(0);
-            bt.root = CLC(0);
-            bt.numentries = CLC(0);
-            bt.firstleaf = CLC(0);
-            bt.lastleaf = CLC(0);
-            bt.indexkeylen = CWC(7);
+            bt.flink = 0;
+            bt.blink = 0;
+            bt.height = 0;
+            bt.root = 0;
+            bt.numentries = 0;
+            bt.firstleaf = 0;
+            bt.lastleaf = 0;
+            bt.indexkeylen = 7;
             bt.map[0] = 0x80;
             break;
         case catalog:
-            bt.flink = CLC(0);
-            bt.blink = CLC(0);
-            bt.height = CLC(1);
-            bt.root = CLC(1);
-            bt.numentries = CLC(3);
-            bt.firstleaf = CLC(1);
-            bt.lastleaf = CLC(1);
-            bt.indexkeylen = CWC(37);
+            bt.flink = 0;
+            bt.blink = 0;
+            bt.height = 1;
+            bt.root = 1;
+            bt.numentries = 3;
+            bt.firstleaf = 1;
+            bt.lastleaf = 1;
+            bt.indexkeylen = 37;
             bt.map[0] = 0xC0;
-            bt.nfreenodes = CL(CL(bt.nfreenodes) - 1);
+            bt.nfreenodes = bt.nfreenodes - 1;
             break;
         default:
             assert(0);
@@ -349,86 +349,86 @@ write_catalog(info_t *infop)
     offsets = (unsigned short *)(buf + sizeof(buf));
 
     btp = (btnode *)buf;
-    btp->ndFLink = CLC(0);
-    btp->ndBLink = CLC(0);
-    btp->ndType = CBC(leafnode);
-    btp->ndLevel = CBC(1);
-    btp->ndNRecs = CWC(3);
+    btp->ndFLink = 0;
+    btp->ndBLink = 0;
+    btp->ndType = leafnode;
+    btp->ndLevel = 1;
+    btp->ndNRecs = 3;
 
     catkeyp = (catkey *)(btp + 1);
-    catkeyp->ckrResrv1 = CBC(0);
-    catkeyp->ckrParID = CLC(1);
+    catkeyp->ckrResrv1 = 0;
+    catkeyp->ckrParID = 1;
     catkeyp->ckrCName[0] = strlen(infop->volume_name);
     memcpy(catkeyp->ckrCName + 1, infop->volume_name,
            (unsigned char)catkeyp->ckrCName[0]);
     set_key_len(catkeyp);
 
     dirp = (directoryrec *)EVENUP((char *)catkeyp + catkeyp->ckrKeyLen);
-    dirp->cdrType = CBC(DIRTYPE);
-    dirp->cdrResrv2 = CBC(0);
-    dirp->dirFlags = CWC(0);
-    dirp->dirVal = CWC(1);
-    dirp->dirDirID = CLC(2);
-    dirp->dirCrDat = CL(infop->time);
-    dirp->dirMdDat = CL(infop->time);
-    dirp->dirBkDat = CLC(0);
+    dirp->cdrType = DIRTYPE;
+    dirp->cdrResrv2 = 0;
+    dirp->dirFlags = 0;
+    dirp->dirVal = 1;
+    dirp->dirDirID = 2;
+    dirp->dirCrDat = infop->time;
+    dirp->dirMdDat = infop->time;
+    dirp->dirBkDat = 0;
     /*
  * Leave dirUsrInfo, dirFndrInfo and dirResrv zero for now
  */
-    offsets[-1] = CW((char *)catkeyp - buf);
+    offsets[-1] = (char *)catkeyp - buf;
 
     catkeyp = (catkey *)(dirp + 1);
-    catkeyp->ckrResrv1 = CBC(0);
-    catkeyp->ckrParID = CLC(2);
+    catkeyp->ckrResrv1 = 0;
+    catkeyp->ckrParID = 2;
     catkeyp->ckrCName[0] = 0;
     set_key_len(catkeyp);
 
     threadp = (threadrec *)EVENUP((char *)catkeyp + catkeyp->ckrKeyLen);
-    threadp->cdrType = CBC(THREADTYPE);
-    threadp->cdrResrv2 = CBC(0);
-    threadp->thdParID = CLC(1);
+    threadp->cdrType = THREADTYPE;
+    threadp->cdrResrv2 = 0;
+    threadp->thdParID = 1;
     threadp->thdCName[0] = strlen(infop->volume_name);
     memcpy(threadp->thdCName + 1, infop->volume_name,
            (unsigned char)threadp->thdCName[0]);
 
-    offsets[-2] = CW((char *)catkeyp - buf);
+    offsets[-2] = (char *)catkeyp - buf;
 
     catkeyp = (catkey *)(threadp + 1);
-    catkeyp->ckrResrv1 = CBC(0);
-    catkeyp->ckrParID = CLC(2);
+    catkeyp->ckrResrv1 = 0;
+    catkeyp->ckrParID = 2;
     catkeyp->ckrCName[0] = strlen(DESKTOP);
     memcpy(catkeyp->ckrCName + 1, DESKTOP,
            (unsigned char)catkeyp->ckrCName[0]);
     set_key_len(catkeyp);
 
     filep = (filerec *)EVENUP((char *)catkeyp + catkeyp->ckrKeyLen);
-    filep->cdrType = CBC(FILETYPE);
-    filep->cdrResrv2 = CB(0);
-    filep->filFlags = CBC(0);
-    filep->filTyp = CBC(0);
-    filep->filUsrWds.fdType = CL(TICK("FNDR"));
-    filep->filUsrWds.fdCreator = CL(TICK("ERIK"));
-    filep->filUsrWds.fdFlags = CWC(fInvisible);
-    filep->filFlNum = CLC(16);
-    filep->filStBlk = CWC(0);
-    filep->filLgLen = CLC(0);
-    filep->filPyLen = CLC(0);
-    filep->filRStBlk = CWC(0);
-    filep->filRLgLen = CLC(321);
-    filep->filRPyLen = CLC(infop->nalblocks_in_desktop
-                           * infop->nsecs_in_alblock * SECSIZE);
-    filep->filCrDat = CL(infop->time);
-    filep->filMdDat = CL(infop->time);
-    filep->filBkDat = CLC(0);
+    filep->cdrType = FILETYPE;
+    filep->cdrResrv2 = 0;
+    filep->filFlags = 0;
+    filep->filTyp = 0;
+    filep->filUsrWds.fdType = TICK("FNDR");
+    filep->filUsrWds.fdCreator = TICK("ERIK");
+    filep->filUsrWds.fdFlags = fInvisible;
+    filep->filFlNum = 16;
+    filep->filStBlk = 0;
+    filep->filLgLen = 0;
+    filep->filPyLen = 0;
+    filep->filRStBlk = 0;
+    filep->filRLgLen = 321;
+    filep->filRPyLen = infop->nalblocks_in_desktop
+                           * infop->nsecs_in_alblock * SECSIZE;
+    filep->filCrDat = infop->time;
+    filep->filMdDat = infop->time;
+    filep->filBkDat = 0;
     /*  filep->filFndrInfo is not set up */
-    filep->filClpSize = CLC(0);
-    filep->filExtRec[0].blockstart = CWC(0);
-    filep->filExtRec[0].blockcount = CWC(0);
-    filep->filRExtRec[0].blockstart = CW(infop->nalblocks_in_tree * 2);
-    filep->filRExtRec[0].blockcount = CW(infop->nalblocks_in_desktop);
+    filep->filClpSize = 0;
+    filep->filExtRec[0].blockstart = 0;
+    filep->filExtRec[0].blockcount = 0;
+    filep->filRExtRec[0].blockstart = infop->nalblocks_in_tree * 2;
+    filep->filRExtRec[0].blockcount = infop->nalblocks_in_desktop;
 
-    offsets[-3] = CW((char *)catkeyp - buf);
-    offsets[-4] = CW((char *)(filep + 1) - buf);
+    offsets[-3] = (char *)catkeyp - buf;
+    offsets[-4] = (char *)(filep + 1) - buf;
     WRITE_AND_RETURN_ERROR(infop, buf, sizeof(buf));
 
     my_bzero(buf, sizeof(buf));
@@ -501,35 +501,35 @@ write_desktop(info_t *infop)
         char filler[SECSIZE - sizeof(res_data_t)];
     } buf = {
         {
-            CLC(256),
-            CLC(256 + DATLEN),
-            CLC(DATLEN),
-            CLC(MAPLEN),
+            256,
+            256 + DATLEN,
+            DATLEN,
+            MAPLEN,
             {
                 0, 0, 0, /* ... */
             },
             {
                 0, 0, 0, /* ... */
             },
-            CLC(DATLEN - sizeof(LONGINT)),
+            DATLEN - sizeof(LONGINT),
             //STR_NAME,
             { 10, 'F', 'i', 'n', 'd', 'e', 'r', ' ', '1', '.', '0' },
             {
                 { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
                 0x0000,
-                CWC(22 + 2 + 2 + 2), /* zeros ... nameoff */
-                CWC(MAPLEN),
-                CWC(1 - 1),
+                22 + 2 + 2 + 2, /* zeros ... nameoff */
+                MAPLEN,
+                1 - 1,
                 { 'S', 'T', 'R', ' ' },
-                CWC(1 - 1),
-                CWC(2 + 4 + 2 + 2), /* ntypesminus1 ... reflistoff1 */
-                CWC(STR_ID),
-                CWC(-1), /* no name */
+                1 - 1,
+                2 + 4 + 2 + 2, /* ntypesminus1 ... reflistoff1 */
+                STR_ID,
+                -1, /* no name */
 #if !defined(resPreload)
 #define resPreload 4
 #endif
-                CBC(resPreload),
+                resPreload,
                 { 0, 0, 0 },
                 0,
             },
@@ -970,7 +970,7 @@ int main(int argc, char *argv[])
 
     magic_file_to_delete_because_at_exit_is_flawed = hfv_name;
     atexit(cleanup);
-    if(freopen(hfv_name, "wb", stdout) == NULL)
+    if(freopen(hfv_name, "wb", stdout) == nullptr)
     {
         char errmsg[2048];
         sprintf(errmsg, "Could not open \"%s\"", hfv_name);

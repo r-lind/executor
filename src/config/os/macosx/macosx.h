@@ -17,16 +17,8 @@
 
 #include <signal.h>
 
-#if !defined(__GLIBC__) || __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 1)
-
-#undef GLIBC_DB1_INCLUDES_NDBM
-
-#else
-
-#define GLIBC_DB1_INCLUDES_NDBM
 #include <stdint.h>
 
-#endif
 
 #if !defined(MACOSX)
 #define MACOSX
@@ -52,19 +44,6 @@
 #define CONFIG_OFFSET_P 1 /* Use offset memory, at least for the first port */
 
 extern int ROMlib_launch_native_app(int n_filenames, char **filenames);
-
-/* #if !defined (GLIBC_DB1_INCLUDES_NDBM) */
-/* #include <ndbm.h> */
-/* #else */
-/* #include <db1/ndbm.h> */
-/* #endif */
-/* to be fixed, 12/08/03 */
-
-// DO NOT COMMIT THESE UNCONDITIONAL HACKS
-// #define	DB_DBM_HSEARCH	1
-// #include <db.h>
-
-#include <ndbm.h>
 
 #include <sys/param.h>
 #include <sys/mount.h>
