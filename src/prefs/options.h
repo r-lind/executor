@@ -32,10 +32,6 @@ extern int ROMlib_desired_bpp;
 #define ROMLIB_DEBUG_BIT (1 << 1)
 #define ROMLIB_REFRESH_BIT (1 << 2)
 #define ROMLIB_DIRTY_VARIANT_BIT (1 << 3)   /* unused */
-/*
- * NOTE: Don't change ROMLIB_STRIPADDRESSHACK_BIT.  It is assumed to be 1 << 4
- * in __StripAddress in stubs.s
- */
 #define ROMLIB_STRIPADDRESSHACK_BIT (1 << 4)     /* unused */
 #define ROMLIB_BLIT_OFTEN_BIT (1 << 5)
 #define ROMLIB_BLIT_OS_BIT (1 << 6)
