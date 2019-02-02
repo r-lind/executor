@@ -316,17 +316,24 @@ void InitApplZone(void)
 /* LM(ApplZone) must already be set before getting here */
 
 /* nisus writer demands that `LM(ApplLimit) - ZONE_BK_LIM (LM(ApplZone))' be
-     greater than (or equal to?) 16384 */
+     greater than 16384
+
+    On real classic Macs, the ApplZone starts out at some small size
+    and can later grow up to ApplLimit.
+    Decreasing ApplLimit before that happens means reserving more space
+    for the stack. That's probably what Nisus Writer wants to do.
+
+    FIXME: 16KB is probably not nearly enough for all cases
+    ... but many apps won't include a check like Nisus probably does.
+ */
 #define APPLZONE_SLOP 16384
 
     canonicalize_memory_sizes();
 
-#define INIT_APPLZONE_SIZE \
-    (ROMlib_applzone_size + APPLZONE_SLOP)
-
-    LM(HeapEnd) = (Ptr)(char *)LM(ApplZone)
-                 + INIT_APPLZONE_SIZE
-                 - (MIN_BLOCK_SIZE + APPLZONE_SLOP);
+    LM(HeapEnd) = (Ptr)LM(ApplZone)
+                 + ROMlib_applzone_size
+                 - MIN_BLOCK_SIZE
+                 - APPLZONE_SLOP;
 
     InitZone(0, 64, (Ptr)HEAPEND, (Zone *)LM(ApplZone));
     MM_SLAM("exit");
@@ -343,113 +350,27 @@ void print_mem_full_message(void)
 
 void ROMlib_InitZones()
 {
-    static bool beenhere = false;
-    static Ptr stack_begin, stack_end;
-    static unsigned long applzone_memory_segment_size;
-    int init_syszone_size;
-
-#if ERROR_SUPPORTED_P(ERROR_MEMORY_MANAGER_SLAM)
-    /* Temporarily turn off heap slamming while the heap is being set up. */
-    bool old_debug_enabled_p;
-    old_debug_enabled_p = error_set_enabled(ERROR_MEMORY_MANAGER_SLAM, false);
-#endif
-
-#define INIT_SYSZONE_SIZE \
-    (ROMlib_syszone_size)
-
-    if(!beenhere)
-    {
-        char *memory;
-        unsigned long total_allocated_memory, total_mac_visible_memory;
-        Ptr mem_top;
-
-        canonicalize_memory_sizes();
-
-#define STACK_SIZE ROMlib_stack_size
-
-        applzone_memory_segment_size = INIT_APPLZONE_SIZE;
-
-        /* Determine total allocated memory.  Round up to next 8K
-       * since that's the page size we pretend to have.
-       */
-        total_mac_visible_memory = (INIT_SYSZONE_SIZE
-                                    + INIT_APPLZONE_SIZE
-                                    + STACK_SIZE);
-        total_mac_visible_memory = (total_mac_visible_memory + 8191) & ~8191;
-
-        total_allocated_memory = (INIT_SYSZONE_SIZE
-                                  + applzone_memory_segment_size
-                                  + STACK_SIZE);
-        total_allocated_memory = (total_allocated_memory + 8191) & ~8191;
-        /* Note the memory in gestalt, rounded down the next 8K page multiple. */
-        gestalt_set_memory_size(total_mac_visible_memory);
-
-        /* Allocate memory for LM(SysZone), LM(ApplZone), and stack, contiguously. */
-        memory = (char *)malloc(total_allocated_memory);
-
-        if(memory == nullptr)
-        {
-            print_mem_full_message();
-            exit(-1);
-        }
-
-        /* can't assign to low-memory globals yet */
-
-        mem_top = (Ptr)memory + total_allocated_memory;
-
-        stack_begin = ((Ptr)memory
-                       + INIT_SYSZONE_SIZE
-                       + applzone_memory_segment_size);
-        stack_end = stack_begin + STACK_SIZE;
-
-        init_syszone_size = INIT_SYSZONE_SIZE;
-
-        ROMlib_offset = (uintptr_t)memory;
-#if SIZEOF_CHAR_P > 4
-        ROMlib_sizes[0] = total_allocated_memory;
-#endif
-        {
-            int low_global_room = (char *)&LM(lastlowglobal) - (char *)&LM(nilhandle);
-            memset(memory, ~0, low_global_room);
-            memory += low_global_room;
-            init_syszone_size -= low_global_room;
-        }
-
-        LM(MemTop) = mem_top;
-
-        LM(SysZone) = (THz)memory;
-        ROMlib_syszone = (uintptr_t)memory;
-        ROMlib_memtop = (uintptr_t)(memory + total_allocated_memory);
-        InitZone(0, 32, (Ptr)((uintptr_t)LM(SysZone) + init_syszone_size),
-                 (Zone *)LM(SysZone));
-        beenhere = true;
-    }
-
-    LM(ApplZone) = (THz)((Ptr)LM(SysZone) + INIT_SYSZONE_SIZE);
+    LM(ApplZone) = (THz)((Ptr)LM(SysZone) + ROMlib_syszone_size);
 
     Executor::InitApplZone();
 
-    LM(ApplLimit) = ((Ptr)LM(ApplZone) + INIT_APPLZONE_SIZE);
+    LM(ApplLimit) = ((Ptr)LM(ApplZone) + ROMlib_applzone_size);
 
-    // Why do we waste 32KB on the stack?
-    // It probably seemed necessary for compatibility with *something*.
-    // "MANDELSLOP" is such a descriptive name..
-#define MANDELSLOP (32L * 1024)
-    EM_A7 = US_TO_SYN68K(stack_end - 16 - MANDELSLOP);
+    EM_A7 = ptr_to_longint(LM(MemTop));
 
     LM(MemErr) = noErr;
-
-#if ERROR_SUPPORTED_P(ERROR_MEMORY_MANAGER_SLAM)
-    error_set_enabled(ERROR_MEMORY_MANAGER_SLAM, old_debug_enabled_p);
-#endif
 }
 
-
-void InitMemory(void *thingOnStack)
+static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
 {
-    ROMlib_InitZones();
-
-#if SIZEOF_CHAR_P > 4
+#if SIZEOF_CHAR_P == 4
+    /*
+    On 32-bit platforms, things are easy:
+    The global variable ROMlib_offset specifies the offset between
+    host addresses and guest addresses.
+    */
+    ROMlib_offset = (uintptr_t)base;
+#else
     /*
     On 64-bit platforms, there is no single ROMlib_offset, but rather
     a four-element array. The high two bits of the 69K address are mapped
@@ -460,11 +381,13 @@ void InitMemory(void *thingOnStack)
         2 - local variables of executor's main thread
         3 - executor's global variables (which includes syn68K callback addresses)
 
-    Block 0 is set up in ROMlib_InitZones.
     Block 1 is set up later, when video memory is allocated.
     Global variables are in block 3 so that we don't need to figure out
     the exact boundaries for that address range.
    */
+
+    ROMlib_offsets[0] = (uintptr_t)base;
+    ROMlib_sizes[0] = size;
 
     // mark the slot as occupied until we explicitly set it later
     ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 30);
@@ -495,6 +418,46 @@ void InitMemory(void *thingOnStack)
     ROMlib_sizes[3] = 0x3FFFFFFF;
 #endif
 #endif
+}
+void InitMemory(void *thingOnStack)
+{
+    canonicalize_memory_sizes();
+
+    /* Determine total allocated memory.  Round up to next 8K
+        * since that's the page size we pretend to have.
+        */
+
+    size_t total_allocated_memory =
+        ((ROMlib_syszone_size + ROMlib_applzone_size + ROMlib_stack_size)
+            + 8191) & ~8191;
+        ;
+    
+    /* Note the memory in gestalt, rounded up to the next 8K page multiple. */
+    gestalt_set_memory_size(total_allocated_memory);
+
+    /* Allocate memory for LM(SysZone), LM(ApplZone), and stack, contiguously. */
+    Ptr memory = (Ptr)malloc(total_allocated_memory);
+
+    if(!memory)
+    {
+        print_mem_full_message();
+        exit(-1);
+    }
+
+    SetupMemoryMapping(memory, total_allocated_memory, thingOnStack);
+
+    memset(memory, ~0, lastlowglobal.address);
+    LM(CurStackBase) = LM(BufPtr) = LM(MemTop)
+        = memory + total_allocated_memory;
+    LM(SysZone) = (THz)(memory + lastlowglobal.address);
+
+    ROMlib_syszone = (uintptr_t)LM(SysZone);
+    ROMlib_memtop = (uintptr_t)LM(MemTop);
+    InitZone(0, 32, memory + ROMlib_syszone_size, LM(SysZone));
+
+    ROMlib_InitZones();
+
+
 }
 
 void SetApplBase(Ptr newbase)

@@ -446,12 +446,14 @@ void Executor::ROMlib_sledgehammer_zone(THz zone, bool print_p,
 void Executor::ROMlib_sledgehammer_zones(const char *fn, const char *file, int lineno,
                                          const char *where, zone_info_t *info_array)
 {
-    ROMlib_sledgehammer_zone(LM(SysZone), false,
-                             fn, file, lineno, where,
-                             info_array ? &info_array[0] : nullptr);
-    ROMlib_sledgehammer_zone(LM(ApplZone), false,
-                             fn, file, lineno, where,
-                             info_array ? &info_array[1] : nullptr);
+    if(LM(SysZone) != THz(-1))
+        ROMlib_sledgehammer_zone(LM(SysZone), false,
+                                fn, file, lineno, where,
+                                info_array ? &info_array[0] : nullptr);
+    if(LM(ApplZone) != THz(-1))
+        ROMlib_sledgehammer_zone(LM(ApplZone), false,
+                                    fn, file, lineno, where,
+                                    info_array ? &info_array[1] : nullptr);
     if(LM(TheZone) != LM(SysZone)
        && LM(TheZone) != LM(ApplZone))
         ROMlib_sledgehammer_zone(LM(TheZone), false,

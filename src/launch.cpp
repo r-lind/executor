@@ -359,20 +359,18 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     Handle cfrg0;
     Handle h;
     vers_t *vp;
-    LONGINT abovea5, belowa5, jumplen, jumpoff;
-    GUEST<LONGINT> *lp;
-    INTEGER toskip;
-    Byte *p;
     WDPBRec wdpb;
-    char quickbytes[grafSize];
-    LONGINT tmpa5;
 
-    for(p = fName + fName[0] + 1; p > fName && *--p != ':';)
-        ;
-    toskip = p - fName;
-    LM(CurApName)[0] = std::min(fName[0] - toskip, 31);
-    BlockMoveData((Ptr)fName + 1 + toskip, (Ptr)LM(CurApName) + 1,
-                  (Size)LM(CurApName)[0]);
+    {
+        INTEGER toskip;
+        Byte *p;
+        for(p = fName + fName[0] + 1; p > fName && *--p != ':';)
+            ;
+        toskip = p - fName;
+        LM(CurApName)[0] = std::min(fName[0] - toskip, 31);
+        BlockMoveData((Ptr)fName + 1 + toskip, (Ptr)LM(CurApName) + 1,
+                    (Size)LM(CurApName)[0]);
+    }
     std::string appNameUTF8 = toUnicodeFilename(LM(CurApName)).string();
 #if 0
     Munger(LM(AppParmHandle), 2L*sizeof(INTEGER), (Ptr) 0,
@@ -513,23 +511,22 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
                 == SZisHighLevelEventAware);
     }
 
+    LM(BufPtr) = LM(MemTop);
+
     if(!code0)
     {
-        lp = 0; /* just to shut GCC up */
-        jumplen = jumpoff = 0; /* just to shut GCC up */
-        EM_A5 = US_TO_SYN68K(&tmpa5);
-        LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
-        InitGraf((Ptr)quickbytes + grafSize - 4);
+        LM(CurrentA5) = LM(BufPtr) - 4;
+        LM(CurStackBase) = LM(CurrentA5);       
     }
     else
     {
         HLock(code0);
 
-        lp = (GUEST<LONGINT> *)*code0;
-        abovea5 = *lp++;
-        belowa5 = *lp++;
-        jumplen = *lp++;
-        jumpoff = *lp++;
+        auto lp = (GUEST<LONGINT> *)*code0;
+        LONGINT abovea5 = *lp++;
+        LONGINT belowa5 = *lp++;
+        LONGINT jumplen = *lp++;
+        LONGINT jumpoff = *lp++;
 
         /*
 	 * NOTE: The stack initialization code that was here has been moved
@@ -537,35 +534,29 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
 	 */
         /* #warning Stack is getting reinitialized even when Chain is called ... */
 
-        EM_A7 -= abovea5 + belowa5;
-        LM(CurStackBase) = guest_cast<Ptr>(EM_A7);
+        LM(CurrentA5) = LM(BufPtr) - abovea5;
+        LM(CurStackBase) = LM(CurrentA5) - belowa5;
 
-        LM(CurrentA5) = LM(CurStackBase) + belowa5; /* set LM(CurrentA5) */
-        LM(BufPtr) = LM(CurrentA5) + abovea5;
         LM(CurJTOffset) = jumpoff;
-        EM_A5 = guest_cast<LONGINT>(LM(CurrentA5));
+        memcpy(LM(CurrentA5) + jumpoff, lp, jumplen); /* copy in the
+							 jump table */
     }
+    EM_A7 = ptr_to_longint(LM(CurStackBase));
+    EM_A5 = ptr_to_longint(LM(CurrentA5));
+
+    ROMlib_destroy_blocks(0, ~0, false);
 
     GetDateTime(&LM(Time));
     LM(ROMBase) = (Ptr)ROMlib_phoneyrom;
     LM(dodusesit) = LM(ROMBase);
     LM(QDExist) = LM(WWExist) = EXIST_NO;
     LM(TheZone) = LM(ApplZone);
+
+    // disallow moving relocatable blocks until this flag is reset
+    // in OSEventCommon(). Allegedly (according to some old comment found
+    // in that function), this is needed for some unspecified version of Excel.
     ROMlib_memnomove_p = true;
 
-    /*
- * NOTE: this memcpy has to be done after all local variables have been used
- *	 because it will quite possibly smash stuff that's on our stack.
- *	 In reality, we only see this if we compile without optimization,
- *	 but trust me, it was *very* confusing when this memcpy was up
- *	 before we were done with our local varibles.
- */
-    if(code0)
-    {
-        memcpy(LM(CurrentA5) + jumpoff, lp, jumplen); /* copy in the
-							 jump table */
-        ROMlib_destroy_blocks(0, ~0, false);
-    }
     SetCursor(*GetCursor(watchCursor));
 
     /* Call this routine in case the refresh value changed, either just
