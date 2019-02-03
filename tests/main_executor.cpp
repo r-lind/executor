@@ -3,6 +3,7 @@
 #include <FileMgr.h>
 #include <file/file.h>
 #include <MemoryMgr.h>
+#include <WindowMgr.h>
 
 using namespace Executor;
 
