@@ -63,6 +63,9 @@ typedef GUEST<ListPtr> *ListHandle;
 
 enum
 {
+    lGrowBox = 0x20,
+    lMysteryFlags = 0x14,
+    lDrawingModeOff = 8,
     lDoVAutoscroll = 2,
     lDoHAutoscroll = 1,
 };

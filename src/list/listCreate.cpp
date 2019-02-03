@@ -89,12 +89,6 @@ check_lists(void)
 }
 #endif
 
-/*
- * NOTE:  I really don't know what "grow" is for below.
- * This doesn't worry me too much because I suspect it was put in there
- * when people were thinking about having the scroll bars within "rview".
- */
-
 ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
                             INTEGER proc, WindowPtr wind, BOOLEAN draw,
                             BOOLEAN grow, BOOLEAN scrollh,
@@ -160,7 +154,14 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     lp->hScroll = 0;
     C_LCellSize(csize, retval); /* sets cellSize and visible */
 
-    lp->listFlags = draw ? DODRAW : 0;
+    lp->listFlags = lMysteryFlags;
+    
+    if(!draw)
+        lp->listFlags |= lDrawingModeOff;
+    
+    if(grow)
+        lp->listFlags |= lGrowBox;
+
     if(scrollv)
     {
         r = lp->rView;
@@ -168,6 +169,8 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
         r.left = r.right;
         r.right = r.right + (16);
         r.bottom = r.bottom + 1;
+        if(grow)
+            r.bottom -= 16;
         ROMlib_vminmax(&min, &max, lp);
         lp->vScroll = NewControl((WindowPtr)wind, &r, (StringPtr) "",
                                     draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0);

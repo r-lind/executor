@@ -22,9 +22,6 @@ extern void
 C_ldef0(INTEGER, BOOLEAN, Rect *, Cell, INTEGER, INTEGER, ListHandle);
 PASCAL_FUNCTION(ldef0);
 
-#define DODRAW 0x8 /* whether or not we should really draw */
-
-
 using listprocp = UPP<void (INTEGER mess, BOOLEAN sel, Rect *rectp,
                                  Cell cell, INTEGER off, INTEGER len, ListHandle lhand)>;
 

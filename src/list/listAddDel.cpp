@@ -66,7 +66,7 @@ INTEGER Executor::C_LAddColumn(INTEGER count, INTEGER coln,
         p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
 
-        if((*list)->listFlags & DODRAW)
+        if(((*list)->listFlags & lDrawingModeOff) == 0)
         {
             todraw = (*list)->dataBounds;
             todraw.left = coln;
@@ -125,7 +125,7 @@ INTEGER Executor::C_LAddRow(INTEGER count, INTEGER rown,
         p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
 
-        if((*list)->listFlags & DODRAW)
+        if(((*list)->listFlags & lDrawingModeOff) == 0)
         {
             todraw = (*list)->dataBounds;
             todraw.top = rown;
@@ -190,7 +190,7 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
         p.h = (*list)->cellSize.h;
         p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
-        if((*list)->listFlags & DODRAW)
+        if(((*list)->listFlags & lDrawingModeOff) == 0)
             EraseRect(&(*list)->rView);
         if((control = (*list)->hScroll))
             SetControlMaximum(control, (*control)->contrlMin);
@@ -286,7 +286,7 @@ void Executor::C_LDelColumn(INTEGER count, INTEGER coln,
             }
         }
 
-        if((*list)->listFlags & DODRAW)
+        if(((*list)->listFlags & lDrawingModeOff) == 0)
         {
             Rect eraser;
 
@@ -335,7 +335,7 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
         p.h = (*list)->cellSize.h;
         p.v = (*list)->cellSize.v;
         C_LCellSize(p, list); /* recalcs visible */
-        if((*list)->listFlags & DODRAW)
+        if(((*list)->listFlags & lDrawingModeOff) == 0)
             EraseRect(&(*list)->rView);
         if((control = (*list)->vScroll))
             SetControlMaximum(control, (*control)->contrlMin);
@@ -409,7 +409,7 @@ void Executor::C_LDelRow(INTEGER count, INTEGER rown,
             }
         }
 
-        if((*list)->listFlags & DODRAW)
+        if(((*list)->listFlags & lDrawingModeOff) == 0)
         {
             Rect eraser;
 

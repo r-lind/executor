@@ -198,7 +198,7 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
             if(cv)
             {
                 MoveControl(cv, newright, (*list)->rView.top - 1);
-                SizeControl(cv, 16, newbottom - (*list)->rView.top + 2);
+                SizeControl(cv, 16, newbottom - (*list)->rView.top + 2 - (((*list)->listFlags & lGrowBox) ? 16 : 0));
             }
             r.top = std::min(oldbottom, newbottom);
             r.bottom = std::max(oldbottom, newbottom);
@@ -233,7 +233,7 @@ void Executor::C_LSize(INTEGER width, INTEGER height,
             MoveControl(ch, (*list)->rView.left - 1, newbottom);
         if(cv)
         {
-            SizeControl(cv, 16, newbottom - (*list)->rView.top + 2);
+            SizeControl(cv, 16, newbottom - (*list)->rView.top + 2 - (((*list)->listFlags & lGrowBox) ? 16 : 0));
         }
         r.top = std::min(oldbottom, newbottom);
         r.bottom = std::max(oldbottom, newbottom);

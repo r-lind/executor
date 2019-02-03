@@ -104,7 +104,7 @@ static void cellhelper(AddOrRep addorrep, Ptr dp, INTEGER dl, Cell cell,
             while(++ip <= ep)
                 *ip = *ip + (delta);
         }
-        if((*list)->listFlags & DODRAW)
+        if(((*list)->listFlags & lDrawingModeOff) == 0)
             C_LDraw(cell, list);
     }
 }

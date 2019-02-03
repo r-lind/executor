@@ -50,7 +50,8 @@ void Executor::C_LSetDrawingMode(BOOLEAN draw, ListHandle list) /* IMIV-275 */
 {
     if(draw)
     {
-        (*list)->listFlags |= DODRAW;
+        (*list)->listFlags &= ~lDrawingModeOff;
+        
         if((*list)->lActive)
         {
             if((*list)->vScroll)
@@ -60,7 +61,7 @@ void Executor::C_LSetDrawingMode(BOOLEAN draw, ListHandle list) /* IMIV-275 */
         }
     }
     else
-        (*list)->listFlags &= ~DODRAW;
+        (*list)->listFlags |= lDrawingModeOff;
 }
 
 void Executor::C_LScroll(INTEGER ncol, INTEGER nrow,
@@ -119,7 +120,7 @@ void Executor::C_LScroll(INTEGER ncol, INTEGER nrow,
     if(nrow && (ch = (*list)->vScroll))
         SetControlValue(ch, (*list)->visible.top);
 
-    if((*list)->listFlags & DODRAW)
+    if(((*list)->listFlags & lDrawingModeOff) == 0)
     {
         rh = NewRgn();
         ScrollRect(&r, -ncol * (*list)->cellSize.h,
