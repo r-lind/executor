@@ -4,6 +4,8 @@
 #include <file/file.h>
 #include <MemoryMgr.h>
 #include <WindowMgr.h>
+#include <MenuMgr.h>
+#include <FontMgr.h>
 
 using namespace Executor;
 
@@ -62,15 +64,23 @@ public:
 
         vdriver = new MockVDriver();
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
-        
+        traps::init(false);
+
         LM(ResErrProc) = 0;
         InitResources();
         ROMlib_InitGDevices();
         LM(TheZone) = LM(ApplZone);
 
         ROMlib_color_init();
-
+        LM(WindowList) = nullptr;
+        LM(MenuList) = nullptr;
+        LM(MBDFHndl) = nullptr;
+        LM(MBSaveLoc) = nullptr;
+        EM_A5 = EM_A7 = ptr_to_longint(LM(MemTop)-4);
         InitGraf((Ptr)&qd.thePort);
+        InitFonts();
+        InitWindows();
+        InitMenus();
     }
 
     virtual void TearDown() override
