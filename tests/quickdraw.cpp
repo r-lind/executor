@@ -13,13 +13,29 @@ extern QDGlobals qd;
 
     // FIXME: Executor still defines Pattern as an array, rather than an array wrapped in a struct
 #define PATREF(pat) (pat)
+
+inline bool hasDeepGWorlds()
+{
+    return true;
+}
 #else
 #include <Quickdraw.h>
 #include <QDOffscreen.h>
+#include <Gestalt.h>
 
 #define PTR(x) (&x)
 #define PATREF(pat) (&(pat))
+
+
+inline bool hasDeepGWorlds()
+{
+    long resp;
+    if(Gestalt(gestaltQuickdrawFeatures, &resp))
+        return false;
+    return resp & (1 << gestaltHasDeepGWorlds);
+}
 #endif
+
 
 struct OffscreenPort
 {
@@ -116,6 +132,8 @@ TEST(QuickDraw, BWLine1)
 
 TEST(QuickDraw, GWorld8)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world(8);
 
     EraseRect(&world.r);
@@ -130,6 +148,8 @@ TEST(QuickDraw, GWorld8)
 
 TEST(QuickDraw, GWorld16)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world(16);
 
     EraseRect(&world.r);
@@ -142,6 +162,8 @@ TEST(QuickDraw, GWorld16)
 
 TEST(QuickDraw, GWorld32)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world(32);
 
     EraseRect(&world.r);
@@ -173,6 +195,8 @@ TEST(QuickDraw, BasicQDColorBW)
 
 TEST(QuickDraw, BasicQDColor32)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world(32);
 
 
@@ -200,6 +224,8 @@ TEST(QuickDraw, BasicQDColor32)
 
 TEST(QuickDraw, GrayPattern32)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world(32);
 
     FillRect(&world.r, PATREF(qd.gray));
@@ -211,6 +237,8 @@ TEST(QuickDraw, GrayPattern32)
 
 TEST(QuickDraw, GrayPattern8)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world(8);
 
     FillRect(&world.r, PATREF(qd.gray));
@@ -231,6 +259,8 @@ TEST(QuickDraw, GrayPattern1)
 
 TEST(QuickDraw, BlackPattern32)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world(32);
 
     FillRect(&world.r, PATREF(qd.black));
@@ -242,6 +272,8 @@ TEST(QuickDraw, BlackPattern32)
 
 TEST(QuickDraw, CopyBit8)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world1(8);
 
     world1.data(0,0) = 1;
@@ -273,6 +305,8 @@ TEST(QuickDraw, CopyBit8)
 
 TEST(QuickDraw, CopyBit32)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenWorld world1(32);
 
     world1.data(0,3) = 1;
@@ -304,6 +338,8 @@ TEST(QuickDraw, CopyBit32)
 
 TEST(QuickDraw, CopyMask8)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenPort mask;
 
     mask.data(0,0) = 0xC0;
@@ -333,6 +369,8 @@ TEST(QuickDraw, CopyMask8)
 
 TEST(QuickDraw, CopyMask32)
 {
+    if(!hasDeepGWorlds())
+        return;
     OffscreenPort mask;
 
     mask.data(0,0) = 0xC0;
