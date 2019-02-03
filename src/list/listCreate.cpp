@@ -169,8 +169,6 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
         r.left = r.right;
         r.right = r.right + (16);
         r.bottom = r.bottom + 1;
-        if(grow)
-            r.bottom -= 16;
         ROMlib_vminmax(&min, &max, lp);
         lp->vScroll = NewControl((WindowPtr)wind, &r, (StringPtr) "",
                                     draw && lp->lActive, min, min, max, scrollBarProc, (LONGINT)0);

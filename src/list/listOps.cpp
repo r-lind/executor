@@ -165,15 +165,13 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
         lp->cellSize.v = fi.ascent + fi.descent + fi.leading;
         SetPort(gp);
     }
-    lp->visible.right = lp->dataBounds.right;
-    lp->visible.bottom = lp->dataBounds.bottom;
+
     nh = (lp->rView.right - lp->rView.left + lp->cellSize.h - 1) / lp->cellSize.h;
     nv = (lp->rView.bottom - lp->rView.top + lp->cellSize.v - 1) / lp->cellSize.v;
-    if(lp->visible.right - lp->visible.left > nh)
-        lp->visible.right = lp->visible.left + nh;
+    
+    lp->visible.right = lp->visible.left + nh;
+    lp->visible.bottom = lp->visible.top + nv;
 
-    if(lp->visible.bottom - lp->visible.top > nv)
-        lp->visible.bottom = lp->visible.top + nv;
     {
         ControlHandle control;
 
