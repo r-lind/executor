@@ -111,7 +111,7 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     LISTDECL();
 
     noffs = (bounds->right - bounds->left) * (bounds->bottom - bounds->top) + 1;
-    retval = (ListHandle)NewHandle(sizeof(ListRec) - sizeof((*retval)->cellArray) + (noffs + 1) * sizeof(INTEGER));
+    retval = (ListHandle)NewHandle(sizeof(ListRec) - sizeof((*retval)->cellArray) + noffs * sizeof(INTEGER));
     if(!retval)
         /*-->*/ return 0; /* couldn't allocate memory */
 
@@ -149,9 +149,9 @@ ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
     lp->lastClick.v = -1;
     lp->refCon = 0;
     lp->userHandle = nullptr;
-    lp->maxIndex = noffs;
+    lp->maxIndex = (noffs-1) * 2;
     ip = (INTEGER *)lp->cellArray;
-    for(i = 0; i <= noffs; i++)
+    for(i = 0; i < noffs; i++)
         *ip++ = 0;
 
     lp->visible.top = bounds->top;
