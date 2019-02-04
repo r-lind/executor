@@ -68,17 +68,10 @@ BOOLEAN Executor::C_EmptyRect(Rect *r)
 
 void Executor::C_UnionRect(Rect *s1, Rect *s2, Rect *dest)
 {
-    if(EmptyRect(s1))
-        *dest = *s2;
-    else if(EmptyRect(s2))
-        *dest = *s1;
-    else
-    {
-        dest->top = std::min(s1->top, s2->top);
-        dest->left = std::min(s1->left, s2->left);
-        dest->bottom = std::max(s1->bottom, s2->bottom);
-        dest->right = std::max(s1->right, s2->right);
-    }
+    dest->top = std::min(s1->top, s2->top);
+    dest->left = std::min(s1->left, s2->left);
+    dest->bottom = std::max(s1->bottom, s2->bottom);
+    dest->right = std::max(s1->right, s2->right);
 }
 
 BOOLEAN Executor::C_PtInRect(Point p, Rect *r)

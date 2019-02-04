@@ -397,3 +397,35 @@ TEST(QuickDraw, CopyMask32)
     EXPECT_EQ(3, world2.data(1,3));
     EXPECT_EQ(255, world2.data(1,7));
 }
+
+TEST(QuickDraw, UnionRect)
+{
+    Rect r1,r2,r;
+    
+    r1 = {100,200,1000,2000};
+    r2 = {1,2,10,20};
+    UnionRect(&r1, &r2, &r);
+
+    EXPECT_EQ(1, r.top);
+    EXPECT_EQ(2, r.left);
+    EXPECT_EQ(1000, r.bottom);
+    EXPECT_EQ(2000, r.right);
+
+    r1 = {1000,2000,100,200};
+    r2 = {1,2,10,20};
+    UnionRect(&r1, &r2, &r);
+
+    EXPECT_EQ(1, r.top);
+    EXPECT_EQ(2, r.left);
+    EXPECT_EQ(100, r.bottom);
+    EXPECT_EQ(200, r.right);
+
+    r1 = {1,2,10,20};
+    r2 = {0,0,0,0};
+    UnionRect(&r1, &r2, &r);
+
+    EXPECT_EQ(0, r.top);
+    EXPECT_EQ(0, r.left);
+    EXPECT_EQ(10, r.bottom);
+    EXPECT_EQ(20, r.right);
+}
