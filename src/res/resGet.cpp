@@ -334,16 +334,26 @@ Handle Executor::C_GetResource(ResType typ, INTEGER id)
         return 0;
 #endif
 
-#if !defined(MAC)
+    // "Icky hack"
+    // Truer words were never spoken.
+    // Instead of looking for 'PACK' resources, which aren't there
+    // in Executor, return a completely unrelated ALRT instead.
+    // For some reason, if this is not done, ResEdit's Pixel editor fails
+    // with memFullErr (-108).
+    // My current theory is that some programs are checking
+    // GetResource('PACK', ...) to check whether some packages can be 
+    // loaded successfully.
+    // The hack had to be disabled for id 1 to support ResEdit's use of PACK 1.
+    // TODO: Verify theory and add some 'PACK' resources to system file instead of this hack.
     switch(typ)
     { /* fake out code resources */
 #define ICKYHACK
 #if defined(ICKYHACK)
         case FOURCC('P', 'A', 'C', 'K'):
-            return GetResource(TICK("ALRT"), -3995);
+            if(id != 1)
+                return GetResource(TICK("ALRT"), -3995);
 #endif /* ICKYHACK */
     }
-#endif /* !defined(MAC) */
 
     ROMlib_setreserr(ROMlib_typidtop(typ, id, &map, &rr));
     if(LM(ResErr) == resNotFound)
