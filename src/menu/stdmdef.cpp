@@ -720,12 +720,6 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
     tableHandle th;
     tablePtr tp;
     struct table::tableentry *tabp;
-    GUEST<GrafPtr> saveport_swapped;
-    GrafPtr saveport;
-
-    GetPort(&saveport_swapped);
-    saveport = saveport_swapped;
-    SetPort(wmgr_port);
 
     current_menu_rect = rp;
 
@@ -794,5 +788,4 @@ void Executor::C_mdef0(INTEGER mess, MenuHandle mh, Rect *rp, Point p,
     }
     HUnlock((Handle)th);
     DisposeHandle((Handle)th);
-    SetPort(saveport);
 }
