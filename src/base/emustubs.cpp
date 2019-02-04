@@ -25,21 +25,17 @@
 #include <rsys/mixed_mode.h>
 #include <base/cpu.h>
 
-namespace Executor
-{
+using namespace Executor;
+
 #define RTS() return POPADDR()
 
-#define STUB(x) syn68k_addr_t _##x(syn68k_addr_t ignoreme, \
-                                          void *ignoreme2)
-
-
 // QuickDraw.h
-void C_unknown574()
+void Executor::C_unknown574()
 {
 }
 
 // StartMgr.h
-STUB(GetDefaultStartup)
+RAW_68K_IMPLEMENTATION(GetDefaultStartup)
 {
     (SYN68K_TO_US(EM_A0))[0] = -1;
     (SYN68K_TO_US(EM_A0))[1] = -1;
@@ -48,37 +44,37 @@ STUB(GetDefaultStartup)
     RTS();
 }
 
-STUB(SetDefaultStartup)
+RAW_68K_IMPLEMENTATION(SetDefaultStartup)
 {
     RTS();
 }
 
-STUB(GetVideoDefault)
+RAW_68K_IMPLEMENTATION(GetVideoDefault)
 {
     (SYN68K_TO_US(EM_A0))[0] = 0; /* Q610 values */
     (SYN68K_TO_US(EM_A0))[1] = -56;
     RTS();
 }
 
-STUB(SetVideoDefault)
+RAW_68K_IMPLEMENTATION(SetVideoDefault)
 {
     RTS();
 }
 
-STUB(GetOSDefault)
+RAW_68K_IMPLEMENTATION(GetOSDefault)
 {
     (SYN68K_TO_US(EM_A0))[0] = 0; /* Q610 values */
     (SYN68K_TO_US(EM_A0))[1] = 1;
     RTS();
 }
 
-STUB(SetOSDefault)
+RAW_68K_IMPLEMENTATION(SetOSDefault)
 {
     RTS();
 }
 
 // OSUtil.h
-STUB(SwapMMUMode)
+RAW_68K_IMPLEMENTATION(SwapMMUMode)
 {
     EM_D0 &= 0xFFFFFF00;
     EM_D0 |= 0x00000001;
@@ -87,7 +83,7 @@ STUB(SwapMMUMode)
 }
 
 // SCSI.h - no header file
-STUB(SCSIDispatch)
+RAW_68K_IMPLEMENTATION(SCSIDispatch)
 {
     syn68k_addr_t retaddr;
 
@@ -100,7 +96,7 @@ STUB(SCSIDispatch)
 }
 
 // SegmentLdr.h
-STUB(Launch)
+RAW_68K_IMPLEMENTATION(Launch)
 {
     LaunchParamBlockRec *lpbp;
     StringPtr strp;
@@ -114,13 +110,13 @@ STUB(Launch)
     RTS();
 }
 
-STUB(Chain)
+RAW_68K_IMPLEMENTATION(Chain)
 {
     Chain(*(GUEST<StringPtr> *)SYN68K_TO_US(EM_A0), 0);
     RTS();
 }
 
-STUB(LoadSeg)
+RAW_68K_IMPLEMENTATION(LoadSeg)
 {
     syn68k_addr_t retaddr;
 
@@ -132,7 +128,7 @@ STUB(LoadSeg)
 }
 
 // ResourceMgr.h
-STUB(ResourceStub)
+RAW_68K_IMPLEMENTATION(ResourceStub)
 {
     EM_A0 = US_TO_SYN68K_CHECK0(ROMlib_mgetres2(
         (resmaphand)SYN68K_TO_US_CHECK0(EM_A4),
@@ -141,20 +137,20 @@ STUB(ResourceStub)
 }
 
 // DeviceMgr.h
-STUB(DrvrInstall)
+RAW_68K_IMPLEMENTATION(DrvrInstall)
 {
     EM_D0 = -1;
     RTS();
 }
 
-STUB(DrvrRemove)
+RAW_68K_IMPLEMENTATION(DrvrRemove)
 {
     EM_D0 = -1;
     RTS();    
 }
 
 // ADB.h
-STUB(ADBOp)
+RAW_68K_IMPLEMENTATION(ADBOp)
 {
     adbop_t *p;
 
@@ -166,7 +162,7 @@ STUB(ADBOp)
 }
 
 // ToolboxUtil.h
-STUB(Fix2X)
+RAW_68K_IMPLEMENTATION(Fix2X)
 {
     syn68k_addr_t retaddr;
     syn68k_addr_t retp;
@@ -183,7 +179,7 @@ STUB(Fix2X)
     return retaddr;
 }
 
-STUB(Frac2X)
+RAW_68K_IMPLEMENTATION(Frac2X)
 {
     syn68k_addr_t retaddr;
     syn68k_addr_t retp;
@@ -215,28 +211,28 @@ STUB(Frac2X)
     EM_D0 = (KeyTranslate(nullptr, uw, (LONGINT *)0) >> 16) & 0xFF; \
     RTS();
 
-STUB(Key1Trans);
-STUB(Key2Trans);
+RAW_68K_IMPLEMENTATION(Key1Trans);
+RAW_68K_IMPLEMENTATION(Key2Trans);
 
-STUB(Key1Trans)
+RAW_68K_IMPLEMENTATION(Key1Trans)
 {
     KEYTRANSMACRO();
 }
 
-STUB(Key2Trans)
+RAW_68K_IMPLEMENTATION(Key2Trans)
 {
     KEYTRANSMACRO();
 }
 
 // PPC.h
-STUB(IMVI_PPC)
+RAW_68K_IMPLEMENTATION(IMVI_PPC)
 {
     EM_D0 = paramErr; /* this is good enough for NetScape */
     RTS();
 }
 
 // CommTool.h
-STUB(CommToolboxDispatch)
+RAW_68K_IMPLEMENTATION(CommToolboxDispatch)
 {
     comm_toolbox_dispatch_args_t *arg_block;
     int selector;
@@ -285,7 +281,7 @@ STUB(CommToolboxDispatch)
 }
 
 // OSEvent.h
-STUB(PostEvent)
+RAW_68K_IMPLEMENTATION(PostEvent)
 {
     GUEST<EvQElPtr> qelemp;
 
@@ -299,7 +295,7 @@ STUB(PostEvent)
 #define DIACBIT (1 << 9)
 #define CASEBIT (1 << 10)
 
-STUB(EqualString)
+RAW_68K_IMPLEMENTATION(EqualString)
 {
     EM_D0 = !!ROMlib_RelString((unsigned char *)SYN68K_TO_US_CHECK0(EM_A0),
                                (unsigned char *)SYN68K_TO_US_CHECK0(EM_A1),
@@ -308,7 +304,7 @@ STUB(EqualString)
     RTS();
 }
 
-STUB(RelString)
+RAW_68K_IMPLEMENTATION(RelString)
 {
     EM_D0 = ROMlib_RelString((unsigned char *)SYN68K_TO_US_CHECK0(EM_A0),
                              (unsigned char *)SYN68K_TO_US_CHECK0(EM_A1),
@@ -317,7 +313,7 @@ STUB(RelString)
     RTS();
 }
 
-STUB(UpperString)
+RAW_68K_IMPLEMENTATION(UpperString)
 {
     long savea0;
 
@@ -328,13 +324,13 @@ STUB(UpperString)
     RTS();
 }
 
-STUB(IMVI_LowerText)
+RAW_68K_IMPLEMENTATION(IMVI_LowerText)
 {
     EM_D0 = resNotFound;
     RTS();
 }
 
-STUB(StripAddress)
+RAW_68K_IMPLEMENTATION(StripAddress)
 {
     RTS();
 }
@@ -346,19 +342,19 @@ STUB(StripAddress)
 
 /* #warning SlotManager not properly implemented */
 
-STUB(SlotManager)
+RAW_68K_IMPLEMENTATION(SlotManager)
 {
     EM_D0 = -300; /* smEmptySlot */
     RTS();
 }
 
-STUB(WackyQD32Trap)
+RAW_68K_IMPLEMENTATION(WackyQD32Trap)
 {
     gui_fatal("This trap shouldn't be called");
 }
 
 // MemoryMgr.h
-STUB(InitZone68K)
+RAW_68K_IMPLEMENTATION(InitZone68K)
 {
     initzonehiddenargs_t *ip;
 
@@ -370,7 +366,7 @@ STUB(InitZone68K)
 }
 
 // TimeMgr.h
-STUB(Microseconds)
+RAW_68K_IMPLEMENTATION(Microseconds)
 {
     unsigned long ms = msecs_elapsed();
     EM_D0 = ms * 1000;
@@ -383,7 +379,7 @@ STUB(Microseconds)
 // The following is documented as ReadLocation by Apple.
 // It fills in a structure pointe to by A0, which contains
 // location info about the Mac. As in, latitude, longitude and time zone.
-STUB(IMVI_ReadXPRam)
+RAW_68K_IMPLEMENTATION(IMVI_ReadXPRam)
 {
     /* I, ctm, don't have the specifics for ReadXPram, but Bolo suggests that
      when d0 is the value below that a 12 byte block is filled in, with some
@@ -486,7 +482,7 @@ static uint16_t bad_traps[10];
 static int n_bad_traps = 0;
 
 void
-ROMlib_reset_bad_trap_addresses(void)
+Executor::ROMlib_reset_bad_trap_addresses(void)
 {
     n_bad_traps = 0;
 }
@@ -510,7 +506,7 @@ add_to_bad_trap_addresses(bool tool_p, unsigned short index)
     }
 }
 
-STUB(bad_trap_unimplemented)
+RAW_68K_IMPLEMENTATION(bad_trap_unimplemented)
 {
     char buf[1024];
 
@@ -552,7 +548,7 @@ STUB(bad_trap_unimplemented)
 }
 
 void
-ROMlib_GetTrapAddress_helper(uint32_t *d0p, uint32_t d1, uint32_t *a0p)
+Executor::ROMlib_GetTrapAddress_helper(uint32_t *d0p, uint32_t d1, uint32_t *a0p)
 {
     bool tool_p;
 
@@ -579,13 +575,13 @@ ROMlib_GetTrapAddress_helper(uint32_t *d0p, uint32_t d1, uint32_t *a0p)
     *d0p = 0;
 }
 
-STUB(GetTrapAddress)
+RAW_68K_IMPLEMENTATION(GetTrapAddress)
 {
     ROMlib_GetTrapAddress_helper(&EM_D0, EM_D1, &EM_A0);
     RTS();
 }
 
-STUB(SetTrapAddress)
+RAW_68K_IMPLEMENTATION(SetTrapAddress)
 {
     syn68k_addr_t *tablep;
 
@@ -604,7 +600,7 @@ STUB(SetTrapAddress)
 /* unlike the 68k version, every unknown trap gets vectored to
    `Unimplemented ()' */
 
-STUB(Unimplemented)
+RAW_68K_IMPLEMENTATION(Unimplemented)
 {
     char buf[1024];
 
@@ -631,11 +627,9 @@ STUB(Unimplemented)
  * instead we pick up the return address from the stack
  */
 
-STUB(modeswitch)
+RAW_68K_IMPLEMENTATION(modeswitch)
 {
     RoutineDescriptor *theProcPtr = ptr_from_longint<RoutineDescriptor*>(POPADDR() - 2);
     uint32_t retaddr = ModeSwitch(theProcPtr, 0, kM68kISA);
     return retaddr;
-}
-
 }
