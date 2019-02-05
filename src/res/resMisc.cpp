@@ -20,7 +20,7 @@ INTEGER Executor::ROMlib_setreserr(INTEGER reserr) /* INTERNAL */
 
         EM_D0 = (unsigned short)reserr; /* TODO: is unsigned short
 							 correct? */
-        CALL_EMULATOR((syn68k_addr_t)CL_RAW((long)LM(ResErrProc).raw()));
+        CALL_EMULATOR(guest_cast<syn68k_addr_t>(LM(ResErrProc)));
     }
     return LM(ResErr);
 }

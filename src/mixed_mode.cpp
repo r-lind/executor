@@ -337,7 +337,7 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
                 break;
         }
 
-        CALL_EMULATOR(routine->procDescriptor.raw_host_order());
+        CALL_EMULATOR(guest_cast<uint32_t>(routine->procDescriptor));
 
         switch(convention)
         {
