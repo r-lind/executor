@@ -186,7 +186,7 @@ static bool isModifier(unsigned char virt, uint16_t *modstore)
 void SDL2VideoDriver::pumpEvents()
 {
     SDL_Event event;
-    static uint16_t keymod = 0;
+    static uint16_t keymod = btnState;
 
     while(SDL_PollEvent(&event))
     {

@@ -423,7 +423,7 @@ init_sdlk_to_mkv(void)
 #include "syswm_map.h"
 
 /* The current state of the keyboard modifiers */
-static uint16_t keymod = 0;
+static uint16_t keymod = btnState;
 static uint16_t right_button_keymod = 0;
 static GUEST<Point> mouseloc; /* To save mouse location at interrupt */
 
