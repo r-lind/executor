@@ -303,10 +303,8 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
 
         frame.saveRTOC = cpu.r[2];
         PPCProcDescriptor& proc = *(PPCProcDescriptor*) routine->procDescriptor;
-        cpu.CIA = proc.code;
         cpu.r[2] = proc.rtoc;
-        cpu.lr = 0xFFFFFFFC;
-        cpu.execute();
+        executePPC(proc.code);
         cpu.r[2] = frame.saveRTOC;
 
         retval = cpu.r[3];
@@ -337,7 +335,7 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
                 break;
         }
 
-        CALL_EMULATOR(guest_cast<uint32_t>(routine->procDescriptor));
+        execute68K(guest_cast<uint32_t>(routine->procDescriptor));
 
         switch(convention)
         {

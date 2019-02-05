@@ -331,7 +331,7 @@ static OSErr _PPostEvent(INTEGER evcode, LONGINT evmsg,
     else {
 	EM_A0 = evcode;
 	EM_D0 = evmsg;
-	CALL_EMULATOR((syn68k_addr_t) proc);
+	execute68K((syn68k_addr_t) proc);
 	retquelp = EM_A0;
 	ret = EM_D0;
     }

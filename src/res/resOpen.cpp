@@ -96,7 +96,7 @@ Handle Executor::ROMlib_mgetres(resmaphand map, resref *rr)
         EM_A3 = US_TO_SYN68K(rr);
         EM_A2 = US_TO_SYN68K(rr);
         EM_A0 = (LONGINT)ostraptable[0xFC];
-        CALL_EMULATOR(EM_A0);
+        execute68K(EM_A0);
         retval = (Handle)SYN68K_TO_US(EM_A0);
         EM_D0 = saved0;
         EM_D1 = saved1;

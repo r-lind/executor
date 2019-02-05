@@ -191,7 +191,7 @@ LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, Rect *limit,
             savea1 = EM_A1;
             savea2 = EM_A2;
             savea3 = EM_A3;
-            CALL_EMULATOR(US_TO_SYN68K(proc));
+            execute68K(US_TO_SYN68K(proc));
             EM_D0 = saved0;
             EM_D1 = saved1;
             EM_D2 = saved2;
@@ -468,7 +468,7 @@ void Executor::CALLDRAGHOOK(void)
         savea2 = EM_A2;
         savea3 = EM_A3;
         EM_D0 = 0;
-        CALL_EMULATOR(guest_cast<syn68k_addr_t>(LM(DragHook)));
+        execute68K(guest_cast<syn68k_addr_t>(LM(DragHook)));
         EM_D0 = saved0;
         EM_D1 = saved1;
         EM_D2 = saved2;
@@ -493,7 +493,7 @@ void Executor::WINDCALLDESKHOOK(void)
     savea2 = EM_A2;
     savea3 = EM_A3;
     EM_D0 = 0;
-    CALL_EMULATOR(guest_cast<syn68k_addr_t>(LM(DeskHook)));
+    execute68K(guest_cast<syn68k_addr_t>(LM(DeskHook)));
     EM_D0 = saved0;
     EM_D1 = saved1;
     EM_D2 = saved2;

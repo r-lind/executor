@@ -116,7 +116,7 @@ static void beginexecutingat(LONGINT startpc)
 					   initialized above */
     EM_A6 = 0x1EF;
 
-    CALL_EMULATOR(startpc);
+    execute68K(startpc);
     C_ExitToShell();
 }
 
@@ -218,8 +218,6 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             PowerCore& cpu = getPowerCore();
             cpu.r[2] = new_toc;
             cpu.r[1] = EM_A7-1024;
-            cpu.lr = 0xFFFFFFFC;
-            cpu.CIA = new_pc;
 
             cpu.syscall = &builtinlibs::handleSC;
 
@@ -228,8 +226,7 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
             cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
 
-            //C_Debugger();
-            cpu.execute();
+            executePPC(new_pc);
         }
     }
 

@@ -8,6 +8,7 @@
 #include <string.h>
 #include <tuple>
 
+#include <base/cpu.h>
 #include <PowerCore.h>
 
 namespace Executor
@@ -336,7 +337,7 @@ namespace callto68K
     {
         static void invoke68K(void *ptr)
         {
-            CALL_EMULATOR(US_TO_SYN68K(ptr));
+            execute68K(US_TO_SYN68K(ptr));
         }
     };
 
@@ -377,7 +378,7 @@ namespace callto68K
         {
             M68kReg saveregs[14];
             memcpy(saveregs, &EM_D1, sizeof(saveregs)); /* d1-d7/a0-a6 */
-            CALL_EMULATOR(US_TO_SYN68K(ptr));
+            execute68K(US_TO_SYN68K(ptr));
             memcpy(&EM_D1, saveregs, sizeof(saveregs)); /* d1-d7/a0-a6 */
         }
     };
@@ -406,7 +407,7 @@ namespace callto68K
     {
         static syn68k_addr_t invoke68K(void *ptr, syn68k_addr_t, void *)
         {
-            CALL_EMULATOR(US_TO_SYN68K(ptr));
+            execute68K(US_TO_SYN68K(ptr));
             return POPADDR();   // ###
         }
     };

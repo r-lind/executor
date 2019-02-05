@@ -18,6 +18,7 @@
 #include <rsys/hook.h>
 #include <quickdraw/region.h>
 #include <quickdraw/text.h>
+#include <base/cpu.h>
 
 using namespace Executor;
 
@@ -867,7 +868,7 @@ static inline BOOLEAN Executor::CALLCLIKOK(TEHandle teh)
             savea1 = EM_A1;
             savea2 = EM_A2;
             savea3 = EM_A3;
-            CALL_EMULATOR(US_TO_SYN68K(cp));
+            execute68K(US_TO_SYN68K(cp));
 
 #define USE_Z_BIT_NOT_D0_FOR_CLIK_DETERMINATION /* as per Tom Pittman */
 #if !defined(USE_Z_BIT_NOT_D0_FOR_CLIK_DETERMINATION)

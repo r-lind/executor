@@ -1,6 +1,7 @@
 #include <base/dispatcher.h>
 #include <base/common.h>
 #include <base/trapname.h>
+#include <base/cpu.h>
 
 /* #define MEMORY_WATCH */
 
@@ -339,7 +340,7 @@ syn68k_addr_t Executor::alinehandler(syn68k_addr_t pc, void *ignored)
             EM_A2 = (LONGINT)togoto;
             if(!(trapword & DONTSAVEA0BIT))
                 PUSHUL(EM_A0);
-            CALL_EMULATOR((syn68k_addr_t)togoto);
+            execute68K((syn68k_addr_t)togoto);
             if(!(trapword & DONTSAVEA0BIT))
                 EM_A0 = POPUL();
             EM_A1 = POPUL();

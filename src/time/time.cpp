@@ -140,7 +140,7 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
                         EM_A0 = US_TO_SYN68K(tm_addr);
                         EM_A1 = US_TO_SYN68K(qp);
 
-                        CALL_EMULATOR((syn68k_addr_t)EM_A0);
+                        execute68K((syn68k_addr_t)EM_A0);
                     }
                 }
             }

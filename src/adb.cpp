@@ -8,6 +8,7 @@
 #include <ADB.h>
 #include <rsys/adb.h>
 #include <osevent/osevent.h>
+#include <base/cpu.h>
 
 #include <stdarg.h>
 /*
@@ -143,7 +144,7 @@ call_patched_adb_vector(char *message)
     save_a0 = EM_A0;
     EM_D0 = SPOOFED_MOUSE_ADDR << 4; /* based on Apeiron's code */
     EM_A0 = US_TO_SYN68K(message);
-    CALL_EMULATOR((syn68k_addr_t)guest_cast<uint32_t>(adb_service_procp));
+    execute68K((syn68k_addr_t)guest_cast<uint32_t>(adb_service_procp));
     EM_D0 = save_d0;
     EM_A0 = save_a0;
 }

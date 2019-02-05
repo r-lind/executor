@@ -16,6 +16,7 @@
 #include <vdriver/vdriver.h>
 #include <vdriver/dirtyrect.h>
 #include <time/syncint.h>
+#include <base/cpu.h>
 
 using namespace Executor;
 
@@ -231,7 +232,7 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
             EM_A7 -= 128;
             PUSHADDR(US_TO_SYN68K(rgb));
             PUSHADDR(US_TO_SYN68K(&position));
-            CALL_EMULATOR(US_TO_SYN68K(search_fn));
+            execute68K(US_TO_SYN68K(search_fn));
             /* success_p = EM_D0; */
             success_p = POPUB();
             memcpy(cpu_state.regs, save_regs, 16 * sizeof cpu_state.regs[0]);

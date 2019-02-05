@@ -77,6 +77,8 @@ syn68k_addr_t callback_install (const F& func)
     return ::callback_install(
         [](syn68k_addr_t a, void * b) -> syn68k_addr_t
         {
+            currentCPUMode = CPUMode::m68k;
+            currentM68KPC = *ptr_from_longint<GUEST<uint32>*>(EM_A7);
             const F& f = *(const F*)b;
             return f(a);
         },

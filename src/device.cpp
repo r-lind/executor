@@ -123,7 +123,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
                 savea4 = EM_A4;
                 savea5 = EM_A5;
                 savea6 = EM_A6;
-                CALL_EMULATOR(US_TO_SYN68K((ProcPtr)procp));
+                execute68K(US_TO_SYN68K((ProcPtr)procp));
                 EM_D1 = saved1;
                 EM_D2 = saved2;
                 EM_D3 = saved3;

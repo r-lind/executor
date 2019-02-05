@@ -1923,7 +1923,7 @@ void EmptyHandle(Handle h)
         savea0 = EM_A0;
         savea1 = EM_A1;
         PUSHADDR(US_TO_SYN68K(h));
-        CALL_EMULATOR(US_TO_SYN68K(ZONE_PURGE_PROC(current_zone)));
+        execute68K(US_TO_SYN68K(ZONE_PURGE_PROC(current_zone)));
         EM_D0 = saved0;
         EM_D1 = saved1;
         EM_D2 = saved2;

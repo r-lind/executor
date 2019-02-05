@@ -897,7 +897,7 @@ void Executor::C_HiliteMenu(INTEGER mid)
 static inline void ROMlib_CALLMENUHOOK(menuhookp fp)
 {
     ROMlib_hook(menu_menuhooknumber);
-    CALL_EMULATOR(US_TO_SYN68K(fp));
+    execute68K(US_TO_SYN68K(fp));
 }
 
 #define CALLMBARHOOK(arg, fp) ROMlib_CALLMBARHOOK(arg, (mbarhookp)(fp))
@@ -907,7 +907,7 @@ static inline LONGINT ROMlib_CALLMBARHOOK(Rect *rp, mbarhookp fp)
     ROMlib_hook(menu_mbarhooknumber);
 
     PUSHADDR(US_TO_SYN68K(rp));
-    CALL_EMULATOR(US_TO_SYN68K(fp));
+    execute68K(US_TO_SYN68K(fp));
     return EM_D0;
 }
 

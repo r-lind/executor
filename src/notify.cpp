@@ -6,6 +6,7 @@
 #include <OSUtil.h>
 #include <NotifyMgr.h>
 #include <rsys/hook.h>
+#include <base/cpu.h>
 
 using namespace Executor;
 
@@ -47,7 +48,7 @@ OSErr Executor::NMInstall(NMRecPtr nmptr)
             savea0 = EM_A0;
             savea1 = EM_A1;
             PUSHADDR(US_TO_SYN68K(nmptr));
-            CALL_EMULATOR(guest_cast<uint32_t>(nmptr->nmResp));
+            execute68K(guest_cast<uint32_t>(nmptr->nmResp));
             EM_D0 = saved0;
             EM_D1 = saved1;
             EM_D2 = saved2;

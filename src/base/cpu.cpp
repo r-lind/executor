@@ -2,6 +2,12 @@
 #include <PowerCore.h>
 #include <prefs/prefs.h>
 
+namespace Executor
+{
+    CPUMode currentCPUMode = CPUMode::none;
+    syn68k_addr_t currentM68KPC = 0;
+}
+
 namespace
 {
     PowerCore powerCore;
@@ -10,6 +16,20 @@ namespace
 PowerCore& Executor::getPowerCore()
 {
     return powerCore;
+}
+
+void Executor::execute68K(uint32_t addr)
+{
+    currentCPUMode = CPUMode::m68k;
+    CALL_EMULATOR(addr);
+}
+void Executor::executePPC(uint32_t addr)
+{
+    currentCPUMode = CPUMode::ppc;
+    auto& cpu = getPowerCore();
+    cpu.CIA = addr;
+    cpu.lr = 0xFFFFFFFC;
+    cpu.execute();
 }
 
 

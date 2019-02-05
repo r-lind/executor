@@ -14,6 +14,7 @@
 #include <rsys/hook.h>
 #include <hfs/drive_flags.h>
 #include <rsys/filesystem.h>
+#include <base/cpu.h>
 
 #include <optional>
 #include <string>
@@ -180,7 +181,7 @@ typedef enum { NoIndex,
         savea3 = EM_A3;                         \
         EM_A0 = US_TO_SYN68K(pb);               \
         EM_D0 = err;                            \
-        CALL_EMULATOR(US_TO_SYN68K(compp));     \
+        execute68K(US_TO_SYN68K(compp));     \
         EM_D0 = saved0;                         \
         EM_D1 = saved1;                         \
         EM_D2 = saved2;                         \

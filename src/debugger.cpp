@@ -54,25 +54,36 @@ void Executor::InitDebugger()
     }, "es                       Exit To Shell\n");
 
     mon_add_command("r", [] {
-        PowerCore& cpu = getPowerCore();
-        fprintf(monout, "CIA = %08x   cr = %08x  ctr = %08x   lr = %08x\n", cpu.CIA, cpu.cr, cpu.ctr, cpu.lr);
-        fprintf(monout, "\n");
-        for(int i = 0; i < 32; i++)
+        if(currentCPUMode == CPUMode::ppc)
         {
-            fprintf(monout, "%sr%d =   %08x", i < 10 ? " " : "", i, cpu.r[i]);
-            if(i % 8 == 7)
-                fprintf(monout, "\n");
-            else
-                fprintf(monout, "  ");
+            PowerCore& cpu = getPowerCore();
+            fprintf(monout, "CIA = %08x   cr = %08x  ctr = %08x   lr = %08x\n", cpu.CIA, cpu.cr, cpu.ctr, cpu.lr);
+            fprintf(monout, "\n");
+            for(int i = 0; i < 32; i++)
+            {
+                fprintf(monout, "%sr%d =   %08x", i < 10 ? " " : "", i, cpu.r[i]);
+                if(i % 8 == 7)
+                    fprintf(monout, "\n");
+                else
+                    fprintf(monout, "  ");
+            }
+            fprintf(monout, "\n");
+            for(int i = 0; i < 32; i++)
+            {
+                fprintf(monout, "%sf%d = %10f", i < 10 ? " " : "", i, cpu.f[i]);
+                if(i % 8 == 7)
+                    fprintf(monout, "\n");
+                else
+                    fprintf(monout, "  ");
+            }
         }
-        fprintf(monout, "\n");
-        for(int i = 0; i < 32; i++)
+        else if(currentCPUMode == CPUMode::m68k)
         {
-            fprintf(monout, "%sf%d = %10f", i < 10 ? " " : "", i, cpu.f[i]);
-            if(i % 8 == 7)
-                fprintf(monout, "\n");
-            else
-                fprintf(monout, "  ");
+            fprintf(monout, "PC = %08x\n", currentM68KPC);
+            for(int i = 0; i < 8; i++)
+                fprintf(monout, "D%d = %08x%s", i, EM_DREG(i), i == 7 ? "\n" : " ");
+            for(int i = 0; i < 8; i++)
+                fprintf(monout, "A%d = %08x%s", i, EM_AREG(i), i == 7 ? "\n" : " ");
         }
         
     }, "r                        show ppc registers\n");
@@ -111,7 +122,11 @@ namespace
 void EnterDebugger()
 {
     InitDebugger();
-    mon_dot_address = getPowerCore().CIA;
+    if(currentCPUMode == CPUMode::ppc)
+        mon_dot_address = getPowerCore().CIA;
+    else if(currentCPUMode == CPUMode::m68k)
+        mon_dot_address = currentM68KPC;
+
     singlestep = false;
     const char *args[] = {"mon", "-m", "-r", nullptr};
     mon(3,args);

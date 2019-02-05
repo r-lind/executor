@@ -21,6 +21,7 @@
 #include <wind/wind.h>
 #include <rsys/hook.h>
 #include <rsys/aboutbox.h>
+#include <base/cpu.h>
 
 using namespace Executor;
 
@@ -113,7 +114,7 @@ void Executor::C_SystemClick(EventRecord *evp, WindowPtr wp)
                 ROMlib_hook(desk_deskhooknumber);
                 EM_D0 = -1;
                 EM_A0 = US_TO_SYN68K(evp);
-                CALL_EMULATOR((syn68k_addr_t)(guest_cast<LONGINT>(LM(DeskHook))));
+                execute68K((syn68k_addr_t)(guest_cast<LONGINT>(LM(DeskHook))));
             }
         }
     }

@@ -29,6 +29,7 @@
 #include <file/file.h>
 #include <hfs/hfs.h>
 #include <rsys/serial.h>
+#include <base/cpu.h>
 
 #if defined(CYGWIN32) || defined(WIN32)
 #include "win_serial.h"
@@ -278,7 +279,7 @@ void callcomp(ParmBlkPtr pbp, ProcPtr comp, OSErr err)
     EM_A0 = US_TO_SYN68K(pbp);
     EM_A1 = US_TO_SYN68K(comp);
     EM_D0 = (unsigned short)err; /* TODO: unsigned short ? */
-    CALL_EMULATOR((syn68k_addr_t)(uintptr_t)comp);
+    execute68K((syn68k_addr_t)(uintptr_t)comp);
 }
 
 #define DOCOMPLETION(pbp, err)                                                   \

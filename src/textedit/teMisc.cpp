@@ -21,6 +21,7 @@
 #include <rsys/hook.h>
 #include <quickdraw/text.h>
 #include <algorithm>
+#include <base/cpu.h>
 
 using namespace Executor;
 
@@ -619,7 +620,7 @@ int16_t Executor::ROMlib_call_TEDoText(TEPtr tp, int16_t first, int16_t last, in
             EM_D4 = (LONGINT)last;
             EM_D7 = (LONGINT)what;
             EM_A0 = CL_RAW(LM(TEDoText).raw());
-            CALL_EMULATOR(EM_A0);
+            execute68K(EM_A0);
             myd0 = EM_D0;
             EM_D2 = saved2;
             EM_D3 = saved3;

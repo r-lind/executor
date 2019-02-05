@@ -19,6 +19,7 @@
 
 #include <sound/soundopts.h>
 #include <prefs/prefs.h>
+#include <base/cpu.h>
 
 using namespace Executor;
 
@@ -117,7 +118,7 @@ void Executor::C_ROMlib_vcatch()
             EM_A0 = US_TO_SYN68K_CHECK0(vp);
             EM_A1 = guest_cast<LONGINT>(vp->vblAddr);
 
-            CALL_EMULATOR((syn68k_addr_t)EM_A1);
+            execute68K((syn68k_addr_t)EM_A1);
 
             LM(VBLQueue).qFlags &= ~VBUSY;
             if(vp->vblCount == 0)
