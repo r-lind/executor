@@ -73,7 +73,7 @@ msecs_elapsed()
 
 #define REALLONGTIME 0x7FFFFFFF
 
-syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
+static void catchalarmCommon()
 {
     ULONGINT diff;
     TMTask *qp;
@@ -187,13 +187,23 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
     cpu_state.ccv = saved_ccv;
     cpu_state.ccx = saved_ccx;
 
+        // TODO: on 68K, this sees the exception frame of the timer interrupt as well
     CheckForDebuggerInterrupt();
+}
 
+syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
+{
+    currentCPUMode = CPUMode::m68k;
+    currentM68KPC = *ptr_from_longint<GUEST<uint32_t>*>(EM_A7 + 2);
+
+    catchalarmCommon();
     return MAGIC_RTE_ADDRESS;
 }
 
 void Executor::catchalarmPowerPC(PowerCore&)
 {
+    currentCPUMode = CPUMode::ppc;
+
     auto& cpu = getPowerCore();
 
     PowerCoreState saveState = (PowerCoreState&)cpu;
@@ -202,7 +212,7 @@ void Executor::catchalarmPowerPC(PowerCore&)
 
     cpu.r[1] -= 128;
     EM_A7 = cpu.r[1];
-    catchalarm(0,0);
+    catchalarmCommon();
     cpu.r[1] += 128;
     EM_A7 = cpu.r[1];
 

@@ -132,6 +132,7 @@ void EnterDebugger()
     mon(3,args);
 
     getPowerCore().flushCache();
+    ROMlib_destroy_blocks(0, ~0, false);
 }
 
 }
