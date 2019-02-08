@@ -49,6 +49,28 @@ void Executor::InitDebugger()
             return *breakpoint_it;
     };
 
+    syn68k_debugger_callbacks.debugger = [](uint32_t addr) {
+        currentM68KPC = addr;
+        EnterDebugger();
+        return addr;
+    };
+    syn68k_debugger_callbacks.getNextBreakpoint = [](uint32_t addr) {
+        if(singlestep)
+        {
+            if(addr == singlestepFromAddr)
+                return addr + 1;
+            else
+                return addr;
+        }
+        
+        auto breakpoint_it = active_break_points.lower_bound(addr);
+        if(breakpoint_it == active_break_points.end())
+            return 0xFFFFFFFF;
+        else
+            return *breakpoint_it;
+    };
+
+
     mon_add_command("es", [] { 
         ExitToShell(); 
     }, "es                       Exit To Shell\n");
@@ -89,11 +111,13 @@ void Executor::InitDebugger()
     }, "r                        show ppc registers\n");
 
     mon_add_command("s", [] {
-        PowerCore& cpu = getPowerCore();
-
         mon_exit_requested = true;
         singlestep = true;
-        singlestepFromAddr = cpu.CIA;
+
+        if(currentCPUMode == CPUMode::ppc)
+            singlestepFromAddr = getPowerCore().CIA;
+        else
+            singlestepFromAddr = currentM68KPC;
     }, "s                        single step\n");
 
     mon_inited = true;

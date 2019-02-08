@@ -51,7 +51,7 @@ else()
     set(INSTALL_GTEST FALSE)
     include(GoogleTest)
 
-    add_executable(tests main_executor.cpp files.cpp files_internal.cpp quickdraw.cpp guestvalues.cpp listmgr.cpp)
+    add_executable(tests main_executor.cpp files.cpp files_internal.cpp quickdraw.cpp guestvalues.cpp listmgr.cpp cpu.cpp)
     add_subdirectory(googletest)
     target_link_libraries(tests gtest romlib)
     target_compile_definitions(tests PRIVATE -DEXECUTOR)
