@@ -41,31 +41,45 @@ namespace internal
     };
 }
 
-class GenericDispatcherTrap : public internal::DeferredInit
+class Entrypoint : public internal::DeferredInit
+{
+public:
+    Entrypoint(const char* name, const char* exportToLib = nullptr)
+        : name(name), libname(exportToLib) {}
+    virtual void init() override;
+
+    const char *name;
+    const char *libname;
+    bool breakpoint = false;
+};
+
+class GenericDispatcherTrap : public Entrypoint
 {
 public:
     virtual void addSelector(uint32_t sel, std::function<syn68k_addr_t(syn68k_addr_t)> handler) = 0;
+    GenericDispatcherTrap(const char* name, uint16_t trapno) : Entrypoint(name), trapno(trapno) {}
 protected:
     std::unordered_map<uint32_t, std::function<syn68k_addr_t(syn68k_addr_t)>> selectors;
+    uint16_t trapno;
 };
 
 template<class SelectorConvention>
 class DispatcherTrap : public GenericDispatcherTrap
 {
     static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, void* extra);
-    const char *name;
-    uint16_t trapno;
 public:
     virtual void init() override;
     virtual void addSelector(uint32_t sel, std::function<syn68k_addr_t(syn68k_addr_t)> handler) override;
-    DispatcherTrap(const char* name, uint16_t trapno) : name(name), trapno(trapno) {}
+
+    using GenericDispatcherTrap::GenericDispatcherTrap;
 };
+
 
 template<typename F, F* fptr, typename CallConv = callconv::Pascal>
 class WrappedFunction {};
 
 template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename CallConv>
-class WrappedFunction<Ret (Args...), fptr, CallConv> : public internal::DeferredInit
+class WrappedFunction<Ret (Args...), fptr, CallConv> : public Entrypoint
 {
 public:
     Ret operator()(Args... args) const
@@ -80,13 +94,11 @@ public:
 
     virtual void init() override;
 
-    WrappedFunction(const char* name, const char* exportToLib = nullptr);
+    using Entrypoint::Entrypoint;
 
     using UPPType = UPP<Ret (Args...), CallConv>;
 protected:
     UPPType guestFP;
-    const char *name;
-    const char *libname;
 };
 
 template<typename F, F* fptr, int trapno, typename CallConv = callconv::Pascal>
@@ -142,7 +154,7 @@ template<typename Trap, typename F, bool... flags>
 class TrapVariant;
 
 template<typename Trap, typename Ret, typename... Args, bool... flags>
-class TrapVariant<Trap, Ret (Args...), flags...>  : public internal::DeferredInit
+class TrapVariant<Trap, Ret (Args...), flags...>  : public Entrypoint
 {
     template<class T1>
     struct cast_any_t
@@ -283,6 +295,7 @@ private:
     NOTRAP_FUNCTION2(LMSet##NAME)
 
 void init(bool enableLogging);
+extern std::unordered_map<std::string, traps::Entrypoint*> entrypoints;
 
 }
 }

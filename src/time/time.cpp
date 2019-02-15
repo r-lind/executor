@@ -17,8 +17,8 @@
 #include <vdriver/refresh.h>
 #include <sound/soundopts.h>
 #include <base/cpu.h>
-#include <rsys/debugger.h>
 #include <PowerCore.h>
+#include <base/debugger.h>
 
 using namespace Executor;
 
@@ -186,9 +186,6 @@ static void catchalarmCommon()
     cpu_state.ccc = saved_ccc;
     cpu_state.ccv = saved_ccv;
     cpu_state.ccx = saved_ccx;
-
-        // TODO: on 68K, this sees the exception frame of the timer interrupt as well
-    CheckForDebuggerInterrupt();
 }
 
 syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
@@ -197,6 +194,10 @@ syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
     currentM68KPC = *ptr_from_longint<GUEST<uint32_t>*>(EM_A7 + 2);
 
     catchalarmCommon();
+
+    if(base::Debugger::instance && base::Debugger::instance->interruptRequested())
+        return base::Debugger::instance->nmi68K(interrupt_pc);
+
     return MAGIC_RTE_ADDRESS;
 }
 
@@ -217,6 +218,9 @@ void Executor::catchalarmPowerPC(PowerCore&)
     EM_A7 = cpu.r[1];
 
     (PowerCoreState&)cpu = saveState;
+
+    if(base::Debugger::instance && base::Debugger::instance->interruptRequested())
+        base::Debugger::instance->nmiPPC();
 }
 
 

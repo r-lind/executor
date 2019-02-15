@@ -77,7 +77,7 @@
 #include <rsys/appearance.h>
 #include <hfs/hfs_plus.h>
 #include <base/cpu.h>
-#include <rsys/debugger.h>
+#include <rsys/mon_debugger.h>
 #include <PowerCore.h>
 
 #include "default_vdriver.h"
@@ -1130,7 +1130,7 @@ int main(int argc, char **argv)
 #if defined(CYGWIN32)
     complain_if_no_ghostscript();
 #endif
-    InitDebugger();
+    InitMonDebugger();
     
     executor_main();
 

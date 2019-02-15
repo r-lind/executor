@@ -12,8 +12,19 @@
 
 using namespace Executor;
 
+syn68k_addr_t Executor::tooltraptable[NTOOLENTRIES]; /* Gets filled in at run time */
+syn68k_addr_t Executor::ostraptable[NOSENTRIES]; /* Gets filled in at run time */
+
+namespace Executor
+{
+RAW_68K_TRAP(Unimplemented, 0xA89F);
+void ReferenceAllTraps();
+}
+
 Executor::traps::internal::DeferredInit *Executor::traps::internal::DeferredInit::first = nullptr;
 Executor::traps::internal::DeferredInit *Executor::traps::internal::DeferredInit::last = nullptr;
+
+std::unordered_map<std::string, traps::Entrypoint*> Executor::traps::entrypoints;
 
 traps::internal::DeferredInit::DeferredInit()
     : next(nullptr)
@@ -33,13 +44,9 @@ void traps::internal::DeferredInit::initAll()
         p->init();
 }
 
-syn68k_addr_t Executor::tooltraptable[NTOOLENTRIES]; /* Gets filled in at run time */
-syn68k_addr_t Executor::ostraptable[NOSENTRIES]; /* Gets filled in at run time */
-
-namespace Executor
+void traps::Entrypoint::init()
 {
-RAW_68K_TRAP(Unimplemented, 0xA89F);
-void ReferenceAllTraps();
+    entrypoints[name] = this;
 }
 
 void traps::init(bool log)

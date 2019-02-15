@@ -1,4 +1,5 @@
-#include <rsys/debugger.h>
+#include <rsys/mon_debugger.h>
+#include <base/debugger.h>
 #include <OSUtil.h>
 
 #include <mon.h>
@@ -12,64 +13,32 @@
 
 using namespace Executor;
 
+
 namespace
 {
 bool mon_inited = false;
-bool singlestep = false;
+bool mon_singlestep = false;
 bool nmi = false;
-uint32_t singlestepFromAddr;
-
-void EnterDebugger();
 }
 
-void Executor::InitDebugger()
-{
-    if(mon_inited)
-        return;
 
+class MonDebugger : public base::Debugger
+{
+public:
+    MonDebugger();
+    ~MonDebugger();
+
+    virtual bool interruptRequested() override;
+    virtual DebuggerExit interact(DebuggerEntry e) override;
+};
+
+MonDebugger::MonDebugger()
+{
     mon_init();
     mon_read_byte = [](mon_addr_t addr) { return (uint32_t) *(uint8_t*)SYN68K_TO_US(addr); };
     mon_write_byte = [](mon_addr_t addr, uint32_t b) { *(uint8_t*)SYN68K_TO_US(addr) = (uint8_t) b; };
 
     PowerCore& cpu = getPowerCore();
-    cpu.debugger = [](PowerCore& cpu) { EnterDebugger(); };
-    cpu.getNextBreakpoint = [](uint32_t addr) {
-        if(singlestep)
-        {
-            if(addr == singlestepFromAddr)
-                return addr + 4;
-            else
-                return addr;
-        }
-        
-        auto breakpoint_it = active_break_points.lower_bound(addr);
-        if(breakpoint_it == active_break_points.end())
-            return 0xFFFFFFFF;
-        else
-            return *breakpoint_it;
-    };
-
-    syn68k_debugger_callbacks.debugger = [](uint32_t addr) {
-        currentM68KPC = addr;
-        EnterDebugger();
-        return addr;
-    };
-    syn68k_debugger_callbacks.getNextBreakpoint = [](uint32_t addr) {
-        if(singlestep)
-        {
-            if(addr == singlestepFromAddr)
-                return addr + 1;
-            else
-                return addr;
-        }
-        
-        auto breakpoint_it = active_break_points.lower_bound(addr);
-        if(breakpoint_it == active_break_points.end())
-            return 0xFFFFFFFF;
-        else
-            return *breakpoint_it;
-    };
-
 
     mon_add_command("es", [] { 
         ExitToShell(); 
@@ -110,17 +79,43 @@ void Executor::InitDebugger()
         
     }, "r                        show ppc registers\n");
 
+    mon_add_command("atb", [] {
+        if(mon_token != T_STRING)
+            fprintf(monout, "Usage: atb \"entrypoint\"\n");
+        else
+        {
+            std::string str = mon_string;
+            mon_get_token();
+            if(mon_token != T_END)
+                fprintf(monout, "Usage: atb \"entrypoint\"\n");
+            else if(auto p = traps::entrypoints.find(str); p != traps::entrypoints.end())
+                p->second->breakpoint = true;
+            else
+                fprintf(monout, "No such entrypoint: %s\n", str.c_str());
+        }
+    }, "atb                      break on entry point\n");
+
+    mon_add_command("atc", [] {
+        if(mon_token != T_STRING)
+            fprintf(monout, "Usage: atc \"entrypoint\"\n");
+        else
+        {
+            std::string str = mon_string;
+            mon_get_token();
+            if(mon_token != T_END)
+                fprintf(monout, "Usage: atc \"entrypoint\"\n");
+            else if(auto p = traps::entrypoints.find(str); p != traps::entrypoints.end())
+                p->second->breakpoint = false;
+            else
+                fprintf(monout, "No such entrypoint: %s\n", str.c_str());
+        }
+    }, "atc                      clear on entry point breakpoint\n");
+
     mon_add_command("s", [] {
         mon_exit_requested = true;
-        singlestep = true;
-
-        if(currentCPUMode == CPUMode::ppc)
-            singlestepFromAddr = getPowerCore().CIA;
-        else
-            singlestepFromAddr = currentM68KPC;
+        mon_singlestep = true;
     }, "s                        single step\n");
 
-    mon_inited = true;
 
 #ifndef WIN32
     struct sigaction act = {};
@@ -131,34 +126,28 @@ void Executor::InitDebugger()
 #endif
 }
 
-void Executor::CheckForDebuggerInterrupt()
+bool MonDebugger::interruptRequested()
 {
     if(nmi)
     {
         nmi = false;
-        EnterDebugger();
+        return true;
     }
+    else
+        return false;
 }
 
-namespace
+auto MonDebugger::interact(DebuggerEntry entry) -> DebuggerExit
 {
+    mon_dot_address = entry.addr;
 
-void EnterDebugger()
-{
-    InitDebugger();
-    if(currentCPUMode == CPUMode::ppc)
-        mon_dot_address = getPowerCore().CIA;
-    else if(currentCPUMode == CPUMode::m68k)
-        mon_dot_address = currentM68KPC;
-
-    singlestep = false;
+    mon_singlestep = false;
     const char *args[] = {"mon", "-m", "-r", nullptr};
     mon(3,args);
+    
+    breakpoints = active_break_points;
 
-    getPowerCore().flushCache();
-    ROMlib_destroy_blocks(0, ~0, false);
-}
-
+    return { entry.addr, mon_singlestep };
 }
 
 void Executor::C_DebugStr(StringPtr p)
@@ -173,5 +162,9 @@ void Executor::C_DebugStr(StringPtr p)
 
 void Executor::C_Debugger()
 {
-    EnterDebugger();
+}
+
+void Executor::InitMonDebugger()
+{
+    base::Debugger::instance = new MonDebugger();
 }
