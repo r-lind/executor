@@ -9,49 +9,102 @@
 
 using namespace Executor;
 
-TEST(CPU, execute68K)
+thread_local int breakHit;
+thread_local syn68k_addr_t stoppedAddr;
+
+class CPU : public testing::Test
+{
+public:
+    void m68k(std::initializer_list<uint16_t> code)
+    {
+        auto p = ptr_from_longint<GUEST<uint16_t>*>(BASE);
+        for(auto w : code)
+            *p++ = w;
+        
+        m68k();
+    }
+    void m68k()
+    {
+        destroy_blocks(0, ~0);
+        execute68K(BASE);
+    }
+
+    void ppc(std::initializer_list<uint32_t> code)
+    {
+        auto p = ptr_from_longint<GUEST<uint32_t>*>(BASE);
+        for(auto w : code)
+            *p++ = w;
+
+        ppc();
+    }
+
+    void ppc()
+    {
+        getPowerCore().flushCache();
+        executePPC(BASE);
+    }
+};
+
+class CPUSingleStep : public CPU
+{
+public:
+    CPUSingleStep()
+    {
+        breakHit = 0;
+        stoppedAddr = 0;
+
+        syn68k_debugger_callbacks.getNextBreakpoint = [](syn68k_addr_t addr) -> syn68k_addr_t {
+            if(stoppedAddr == addr)
+                return addr + 1;
+            else
+                return addr;
+        };
+        syn68k_debugger_callbacks.debugger = [](syn68k_addr_t addr) -> syn68k_addr_t {
+            breakHit++;
+            stoppedAddr = addr;
+            destroy_blocks(0, ~0);
+            return addr;
+        };
+    }
+
+    ~CPUSingleStep()
+    {
+        syn68k_debugger_callbacks.getNextBreakpoint = nullptr;
+        syn68k_debugger_callbacks.debugger = nullptr;
+    }
+};
+
+
+TEST_F(CPU, execute68K)
 {
     EM_D0 = 0;
-    auto p = WORDS;
-    *p++ = 0x4E71;  //  NOP
-    *p++ = 0x303C;  //  MOVE.W ___, d0
-    *p++ = 0x002A;  //         #42
-    *p++ = 0x4E75;  //  RTS
-    
-    ROMlib_destroy_blocks(BASE, 32, false);
-    execute68K(BASE);
+
+    m68k({
+        0x4E71,  //  NOP
+        0x303C,  //  MOVE.W ___, d0
+        0x002A,  //         #42
+        0x4E75   //  RTS
+    });
 
     EXPECT_EQ(42, EM_D0);
 }
 
-TEST(CPU, executePPC)
+TEST_F(CPU, executePPC)
 {
     getPowerCore().r[3] = 0;
-    auto p = LONGS;
-    *p++ = 0x60000000;  //  nop
-    *p++ = 0x38600036;  //  li r3, 54
-    *p++ = 0x3860002a;  //  li r4, 42
-    *p++ = 0x4e800020;  //  blr
-    
-    getPowerCore().flushCache();
-    executePPC(BASE);
+    ppc({
+        0x60000000,  //  nop
+        0x38600036,  //  li r3, 54
+        0x3860002a,  //  li r4, 42
+        0x4e800020   //  blr
+    });
 
     EXPECT_EQ(42, getPowerCore().r[3]);
 }
 
-TEST(CPU, breakpoint68K)
+TEST_F(CPU, breakpoint68K)
 {
-    EM_D0 = 0;
-    auto p = WORDS;
-    *p++ = 0x4E71;  //  NOP
-    *p++ = 0x303C;  //  MOVE.W ___, d0
-    *p++ = 0x0036;  //         #54
-    *p++ = 0x303C;  //  MOVE.W ___, d0
-    *p++ = 0x002A;  //         #42
-    *p++ = 0x4E75;  //  RTS
-
-    thread_local int breakHit;
-    thread_local syn68k_addr_t stoppedAddr, stoppedD0;
+    thread_local syn68k_addr_t stoppedD0;
     breakHit = 0;
     stoppedAddr = stoppedD0 = 0;
 
@@ -68,9 +121,16 @@ TEST(CPU, breakpoint68K)
         destroy_blocks(0, ~0);
         return addr;
     };
-    
-    destroy_blocks(0, ~0);
-    execute68K(BASE);
+
+    EM_D0 = 0;
+    m68k({
+        0x4E71,  //  NOP
+        0x303C,  //  MOVE.W ___, d0
+        0x0036,  //         #54
+        0x303C,  //  MOVE.W ___, d0
+        0x002A,  //         #42
+        0x4E75   //  RTS
+    });
 
     EXPECT_EQ(42, EM_D0);
     EXPECT_EQ(1, breakHit);
@@ -78,16 +138,11 @@ TEST(CPU, breakpoint68K)
     EXPECT_EQ(BASE + 6, stoppedAddr);
 }
 
-TEST(CPU, breakpointPPC)
+TEST_F(CPU, breakpointPPC)
 {
     auto& cpu = getPowerCore();
     cpu.r[3] = 0;
-    auto p = LONGS;
-    *p++ = 0x60000000;  //  nop
-    *p++ = 0x38600036;  //  li r3, 54
-    *p++ = 0x3860002a;  //  li r4, 42
-    *p++ = 0x4e800020;  //  blr
-    
+
     thread_local int breakHit;
     thread_local syn68k_addr_t stoppedAddr, stoppedR3;
     breakHit = 0;
@@ -106,8 +161,12 @@ TEST(CPU, breakpointPPC)
         cpu.flushCache();
     };
 
-    cpu.flushCache();
-    executePPC(BASE);
+    ppc({
+        0x60000000,  //  nop
+        0x38600036,  //  li r3, 54
+        0x3860002a,  //  li r4, 42
+        0x4e800020   //  blr
+    });
 
     EXPECT_EQ(42, cpu.r[3]);
     EXPECT_EQ(1, breakHit);
@@ -115,42 +174,60 @@ TEST(CPU, breakpointPPC)
     EXPECT_EQ(BASE + 8, stoppedAddr);
 }
 
-
-
-TEST(CPU, fib68K)
+TEST_F(CPUSingleStep, basic68K)
 {
-    auto p = WORDS;
+    m68k({
+        0x702a,  //          moveq #42, %d0
+        0x7215,  //          moveq #21, %d1
+        0x4e75   //          rts
+    });
+    EXPECT_EQ(42, EM_D0);
+    EXPECT_EQ(21, EM_D1);
+    EXPECT_EQ(3, breakHit);
+}
 
-    *p++ = 0x7200;  //          moveq #0, %d1
-    *p++ = 0x7401;  //          moveq #1, %d2
-    *p++ = 0x4a00;  // loop:    tst.b %d0
-    *p++ = 0x6708;  //          beq.s end
-    *p++ = 0xd282;  //          add.l %d2, %d1
-    *p++ = 0xc541;  //          exg %d2, %d1
-    *p++ = 0x5340;  //          subq #1, %d0
-    *p++ = 0x60f4;  //          bra.s loop
-    *p++ = 0x4e75;  // end:     rts
+TEST_F(CPUSingleStep, braSinglestep68K)
+{
+    m68k({
+        0x6002,  //         bra.s label
+        0x4e71,  //         nop
+        0x4e75   // label:  rts
+    });
+    EXPECT_EQ(2, breakHit);
+}
 
-    thread_local int breakHit;
-    thread_local syn68k_addr_t stoppedAddr = 0;
+TEST_F(CPUSingleStep, beqSinglestep68K)
+{
+    EM_D0 = 0;
+    m68k({
+        0x4a00,  //         tst.b %d0
+        0x6702,  //         beq.s label
+        0x4e71,  //         nop
+        0x4e75   // label:  rts
+    });
+    EXPECT_EQ(3, breakHit);
+
+    EM_D0 = 1;
     breakHit = 0;
+    m68k();
+    EXPECT_EQ(4, breakHit);
+}
 
-    syn68k_debugger_callbacks.getNextBreakpoint = [](syn68k_addr_t addr) -> syn68k_addr_t {
-        if(stoppedAddr == addr)
-            return addr + 1;
-        else
-            return addr;
-    };
-    syn68k_debugger_callbacks.debugger = [](syn68k_addr_t addr) -> syn68k_addr_t {
-        breakHit++;
-        stoppedAddr = addr;
-        destroy_blocks(0, ~0);
-        return addr;
-    };
-
+TEST_F(CPUSingleStep, fib68K)
+{
     EM_D0 = 7;
-    destroy_blocks(0, ~0);
-    execute68K(BASE);
+
+    m68k({
+        0x7200,  //         moveq #0, %d1
+        0x7401,  //         moveq #1, %d2
+        0x4a00,  // loop:   tst.b %d0
+        0x6708,  //         beq.s end
+        0xd282,  //         add.l %d2, %d1
+        0xc541,  //         exg %d2, %d1
+        0x5340,  //         subq #1, %d0
+        0x60f4,  //         bra.s loop
+        0x4e75   // end:    rts
+    });
 
     EXPECT_EQ(13, EM_D1);
 }
