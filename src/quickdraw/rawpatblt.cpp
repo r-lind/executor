@@ -200,7 +200,7 @@ fetch_next_y:
     ((void (*)(const blt_section_t *, uint8_t *, long, long))
          xdblt_stub_table[FUNC_PTR])(section,
                                      ((uint8_t *)xdblt_dst_baseaddr
-                                      + (y * xdblt_dst_row_bytes)),
+                                      + (y * (int)xdblt_dst_row_bytes)),
                                      num_rows, y);
 
 done_looping:
