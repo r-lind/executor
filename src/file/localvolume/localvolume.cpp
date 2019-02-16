@@ -354,6 +354,7 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8
             fcbx.fcb->fcbMdRByt |= WRITEBIT;
         fcbx.file = fileItem;
         refNum = fcbx.refNum;
+        fcbx.fcb->fcbDirID = item->parID();
 
         if(permission != fsRdPerm)
         {
