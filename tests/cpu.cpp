@@ -39,7 +39,6 @@ TEST(CPU, executePPC)
     EXPECT_EQ(42, getPowerCore().r[3]);
 }
 
-
 TEST(CPU, breakpoint68K)
 {
     EM_D0 = 0;
@@ -116,3 +115,42 @@ TEST(CPU, breakpointPPC)
     EXPECT_EQ(BASE + 8, stoppedAddr);
 }
 
+
+
+TEST(CPU, fib68K)
+{
+    auto p = WORDS;
+
+    *p++ = 0x7200;  //          moveq #0, %d1
+    *p++ = 0x7401;  //          moveq #1, %d2
+    *p++ = 0x4a00;  // loop:    tst.b %d0
+    *p++ = 0x6708;  //          beq.s end
+    *p++ = 0xd282;  //          add.l %d2, %d1
+    *p++ = 0xc541;  //          exg %d2, %d1
+    *p++ = 0x5340;  //          subq #1, %d0
+    *p++ = 0x60f4;  //          bra.s loop
+    *p++ = 0x4e75;  // end:     rts
+
+    thread_local int breakHit;
+    thread_local syn68k_addr_t stoppedAddr = 0;
+    breakHit = 0;
+
+    syn68k_debugger_callbacks.getNextBreakpoint = [](syn68k_addr_t addr) -> syn68k_addr_t {
+        if(stoppedAddr == addr)
+            return addr + 1;
+        else
+            return addr;
+    };
+    syn68k_debugger_callbacks.debugger = [](syn68k_addr_t addr) -> syn68k_addr_t {
+        breakHit++;
+        stoppedAddr = addr;
+        destroy_blocks(0, ~0);
+        return addr;
+    };
+
+    EM_D0 = 7;
+    destroy_blocks(0, ~0);
+    execute68K(BASE);
+
+    EXPECT_EQ(13, EM_D1);
+}
