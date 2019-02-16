@@ -77,6 +77,7 @@
 #include <rsys/appearance.h>
 #include <hfs/hfs_plus.h>
 #include <base/cpu.h>
+#include <base/debugger.h>
 #include <rsys/mon_debugger.h>
 #include <PowerCore.h>
 
@@ -300,7 +301,8 @@ capable of color.",
     { "hfsplusro", "unsupported -- do not use", opt_no_arg, "" },
 
     { "logtraps", "print every operating system and toolbox calls and their arguments", opt_no_arg, "" },
-    { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""}
+    { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""},
+    { "break", "break into debugger at program start", opt_no_arg, ""}
 };
 
 opt_database_t Executor::common_db;
@@ -864,6 +866,9 @@ int main(int argc, char **argv)
             bad_arg_p |= !parse_system_version(system_str);
     }
 
+    bool breakOnProcessStart = false;
+    opt_bool_val(common_db, "break", &breakOnProcessStart, &bad_arg_p);
+
     /* If we failed to parse our arguments properly, exit now.
    * I don't think we should call ExitToShell yet because the
    * rest of the system isn't initialized.
@@ -1131,7 +1136,8 @@ int main(int argc, char **argv)
     complain_if_no_ghostscript();
 #endif
     InitMonDebugger();
-    
+    base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
+
     executor_main();
 
     ExitToShell();

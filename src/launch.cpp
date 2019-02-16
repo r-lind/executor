@@ -3,6 +3,7 @@
  */
 
 #include <base/common.h>
+#include <base/debugger.h>
 
 #include <QuickDraw.h>
 #include <CQuickDraw.h>
@@ -116,6 +117,7 @@ static void beginexecutingat(LONGINT startpc)
 					   initialized above */
     EM_A6 = 0x1EF;
 
+    base::Debugger::instance->initProcess(startpc);
     execute68K(startpc);
     C_ExitToShell();
 }
@@ -226,6 +228,7 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
             cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
 
+            base::Debugger::instance->initProcess(new_pc);
             executePPC(new_pc);
         }
     }

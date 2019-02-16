@@ -113,3 +113,10 @@ uint32_t Debugger::getNextBreakpoint(uint32_t addr, uint32_t nextOffset)
     else
         return *breakpoint_it;
 }
+
+void Debugger::initProcess(uint32_t entrypoint)
+{
+    breakpoints.clear();
+    if(breakOnProcessEntry)
+        breakpoints.insert(entrypoint);
+}

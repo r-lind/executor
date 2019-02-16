@@ -23,6 +23,9 @@ namespace Executor
 
             virtual bool interruptRequested() { return false; }
 
+            void initProcess(uint32_t entrypoint);
+
+            void setBreakOnProcessEntry(bool dobreak) { breakOnProcessEntry = dobreak; }
         protected:
             enum class Reason
             {
@@ -58,6 +61,7 @@ namespace Executor
             bool singlestep = false;
             bool continuingFromEntrypoint = false;
             uint32_t singlestepFrom;
+            bool breakOnProcessEntry = false;
         };
     }
 }
