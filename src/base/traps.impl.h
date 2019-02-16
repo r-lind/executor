@@ -160,14 +160,22 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
         dispatcher.addSelector(selector,
             [this](syn68k_addr_t addr)
             {
+                if(this->breakpoint && base::Debugger::instance)
+                    if(auto ret = base::Debugger::instance->trapBreak68K(addr, this->name); ret != (uint32_t)~0)
+                        return ret;
+
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(this->name, fptr));
             }
         );
     else
         dispatcher.addSelector(selector,
-            [](syn68k_addr_t addr)
+            [this](syn68k_addr_t addr)
             {
+                if(this->breakpoint && base::Debugger::instance)
+                    if(auto ret = base::Debugger::instance->trapBreak68K(addr, this->name); ret != (uint32_t)~0)
+                        return ret;
+
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, fptr); 
             }
@@ -178,6 +186,11 @@ template<class SelectorConvention>
 syn68k_addr_t DispatcherTrap<SelectorConvention>::invokeFrom68K(syn68k_addr_t addr, void* extra)
 {
     DispatcherTrap<SelectorConvention>* self = (DispatcherTrap<SelectorConvention>*)extra;
+
+    if(self->breakpoint && base::Debugger::instance)
+        if(auto ret = base::Debugger::instance->trapBreak68K(addr, self->name); ret != (uint32_t)~0)
+            return ret;
+
     uint32 sel = SelectorConvention::get();
     auto it = self->selectors.find(sel);
     if(it != self->selectors.end())
