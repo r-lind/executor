@@ -2,6 +2,7 @@
 #include <base/cpu.h>
 #include <base/mactype.h>
 #include <PowerCore.h>
+#include <cassert>
 
 using namespace Executor;
 using namespace Executor::base;
@@ -49,10 +50,23 @@ uint32_t Debugger::interact1(DebuggerEntry entry)
 
 uint32_t Debugger::nmi68K(uint32_t /*interruptCallbackAddr*/)
 {
-    // FIXME: the debugger shouldn't be seeing the exception frame here
-    auto& addr = *ptr_from_longint<GUEST<uint32_t>*>(EM_A7 + 2);
-    addr = interact1({ Reason::nmi, nullptr, CPUMode::m68k, addr });
-    return MAGIC_RTE_ADDRESS;
+    uint16_t frameType = (*ptr_from_longint<GUEST<uint16_t>*>(EM_A7 + 6)) >> 12;
+    assert(frameType == 0);
+
+    uint16_t sr = *ptr_from_longint<GUEST<uint16_t>*>(EM_A7);
+	uint32_t addr = *ptr_from_longint<GUEST<uint32_t>*>(EM_A7 + 2);
+    EM_A7 += 8;
+
+    assert((cpu_state.sr & 0x3000) == (sr & 0x3000));    // we should not need to switch stacks
+    cpu_state.sr = sr & ~31;
+    cpu_state.ccc = sr & 1;
+    cpu_state.ccv = sr & 2;
+    cpu_state.ccnz = ~sr & 4;
+    cpu_state.ccn = sr & 8;
+    cpu_state.ccx = sr & 16;
+    interrupt_note_if_present();
+
+    return interact1({ Reason::nmi, nullptr, CPUMode::m68k, addr });
 }
 
 void Debugger::nmiPPC()
