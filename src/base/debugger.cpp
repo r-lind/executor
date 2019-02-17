@@ -69,6 +69,8 @@ uint32_t Debugger::trapBreak68K(uint32_t addr, const char *name)
         return ~0;
     }
 
+        // figure out whether this was invoked via a trap
+        // (as opposed to function pointer)
     uint32_t retaddr = *ptr_from_longint<GUEST<uint32_t>*>(EM_A7);
 
     uint16_t potentialTrap = *ptr_from_longint<GUEST<uint16_t>*>(retaddr-2);
@@ -81,6 +83,7 @@ uint32_t Debugger::trapBreak68K(uint32_t addr, const char *name)
             trapaddr = ostraptable[potentialTrap & 0xFF];
     }
 
+        // if it's a trap call, pop stuff from the stack
     if(trapaddr == addr)
     {
         addr = retaddr - 2;
@@ -103,15 +106,18 @@ uint32_t Debugger::trapBreakPPC(PowerCore& cpu, const char *name)
         return ~0;
     }
 
-    uint32_t addr = cpu.CIA;
+        // pop one stack frame so we are not in the emulator callback stub
+    cpu.CIA = cpu.lr -4;
+    cpu.r[2] = *ptr_from_longint<GUEST<uint32>*>(cpu.r[1]+0x14);
+    cpu.lr = *ptr_from_longint<GUEST<uint32>*>(cpu.r[1]+0x8);
 
+    uint32_t addr = cpu.CIA;
     uint32_t newAddr = interact1({ Reason::entrypoint, name, CPUMode::ppc, addr });
 
     if(addr == newAddr)
         continuingFromEntrypoint = true;
 
     return newAddr;
-
 }
 
 uint32_t Debugger::getNextBreakpoint(uint32_t addr, uint32_t nextOffset)
