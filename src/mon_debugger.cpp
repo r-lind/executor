@@ -3,6 +3,7 @@
 #include <OSUtil.h>
 
 #include <mon.h>
+#include <mon_disass.h>
 #include <base/cpu.h>
 #include <PowerCore.h>
 #include <syn68k_public.h>
@@ -140,6 +141,29 @@ bool MonDebugger::interruptRequested()
 auto MonDebugger::interact(DebuggerEntry entry) -> DebuggerExit
 {
     mon_dot_address = entry.addr;
+
+    const char* const cpus[] = { "none", "m68k", "ppc" };
+    const char* const reasons[] = { "Ctrl-C", "breakpoint", "singlestep", "api breakpoint", "Debugger call", "DebugStr call" };
+
+    currentCPUMode = entry.mode;
+
+    fprintf(stdout, "(%s) %s", cpus[(int)entry.mode], reasons[(int)entry.reason]);
+    if(entry.str)
+        fprintf(stdout, ": %s\n", entry.str);
+    else
+        fprintf(stdout, "\n");
+
+    if(entry.mode == CPUMode::m68k)
+    {
+        fprintf(stdout, "%08x: ", entry.addr);
+        disass_68k(stdout, entry.addr);
+    }
+    else if(entry.mode == CPUMode::ppc)
+    {
+        uint32_t w = mon_read_word(entry.addr);
+        fprintf(stdout, "%08x: %08x\t", entry.addr, w);
+        disass_ppc(stdout, entry.addr, w);
+    }
 
     mon_singlestep = false;
     const char *args[] = {"mon", "-m", "-r", nullptr};
