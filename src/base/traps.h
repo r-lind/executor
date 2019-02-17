@@ -174,8 +174,6 @@ public:
     TrapVariant(const Trap& trap, const char* name, const char* exportToLib = nullptr);
 private:
     const Trap& trap;
-    const char *name;
-    const char *libname;
 };
 
 #define EXTERN_FUNCTION_WRAPPER(NAME, FPTR, INIT, ...) \
