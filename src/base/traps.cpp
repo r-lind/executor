@@ -7,6 +7,7 @@
 #include <base/functions.impl.h>
 #include <base/logging.h>
 #include <base/dispatcher.h>
+#include <base/debugger.h>
 
 #include <assert.h>
 
@@ -48,6 +49,23 @@ void traps::Entrypoint::init()
 {
     entrypoints[name] = this;
 }
+
+uint32_t traps::Entrypoint::break68K(uint32_t addr)
+{
+    if(base::Debugger::instance)
+        return base::Debugger::instance->trapBreak68K(addr, name);
+    else
+        return (uint32_t)~0;
+}
+
+uint32_t traps::Entrypoint::breakPPC(PowerCore& cpu)
+{
+    if(base::Debugger::instance)
+        return base::Debugger::instance->trapBreakPPC(cpu, name);
+    else
+        return (uint32_t)~0;
+}
+
 
 void traps::init(bool log)
 {

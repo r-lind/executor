@@ -90,11 +90,28 @@ uint32_t Debugger::trapBreak68K(uint32_t addr, const char *name)
     uint32_t newAddr = interact1({ Reason::entrypoint, name, CPUMode::m68k, addr });
 
     if(addr == newAddr)
-    {
         continuingFromEntrypoint = true;
-    }
 
     return newAddr;
+}
+
+uint32_t Debugger::trapBreakPPC(PowerCore& cpu, const char *name)
+{
+    if(continuingFromEntrypoint)
+    {
+        continuingFromEntrypoint = false;
+        return ~0;
+    }
+
+    uint32_t addr = cpu.CIA;
+
+    uint32_t newAddr = interact1({ Reason::entrypoint, name, CPUMode::ppc, addr });
+
+    if(addr == newAddr)
+        continuingFromEntrypoint = true;
+
+    return newAddr;
+
 }
 
 uint32_t Debugger::getNextBreakpoint(uint32_t addr, uint32_t nextOffset)

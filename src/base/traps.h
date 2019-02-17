@@ -7,6 +7,8 @@
 #include <base/functions.h>
 #include <functional>
 
+class PowerCore;
+
 namespace Executor
 {
 
@@ -51,6 +53,26 @@ public:
     const char *name;
     const char *libname;
     bool breakpoint = false;
+
+protected:
+    uint32_t checkBreak68K(uint32_t addr)
+    {
+        if(breakpoint)
+            return break68K(addr);
+        else
+            return ~(uint32_t)0;
+    }
+
+    uint32_t checkBreakPPC(PowerCore& cpu)
+    {
+        if(breakpoint)
+            return breakPPC(cpu);
+        else
+            return ~(uint32_t)0;
+    }
+
+    uint32_t break68K(uint32_t addr);
+    uint32_t breakPPC(PowerCore& cpu);
 };
 
 class GenericDispatcherTrap : public Entrypoint

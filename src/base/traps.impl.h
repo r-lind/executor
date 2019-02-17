@@ -3,7 +3,6 @@
 #include <base/traps.h>
 #include <base/functions.impl.h>
 #include <base/logging.h>
-#include <base/debugger.h>
 
 #include <cassert>
 #include <iostream>
@@ -95,9 +94,8 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
                 [this](syn68k_addr_t addr)
                 {
-                    if(breakpoint && base::Debugger::instance)
-                        if(auto ret = base::Debugger::instance->trapBreak68K(addr, name); ret != (uint32_t)~0)
-                            return ret;
+                    if(auto ret = this->checkBreak68K(addr); ~ret)
+                        return ret;
 
                     return callfrom68K::Invoker<Ret (Args...), CallConv>
                         ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(name, fptr));
@@ -107,9 +105,8 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
                 [this](syn68k_addr_t addr)
                 {
-                    if(breakpoint && base::Debugger::instance)
-                        if(auto ret = base::Debugger::instance->trapBreak68K(addr, name); ret != (uint32_t)~0)
-                            return ret;
+                    if(auto ret = this->checkBreak68K(addr); ~ret)
+                        return ret;
 
                     return callfrom68K::Invoker<Ret (Args...), CallConv>
                         ::invokeFrom68K(addr, fptr);
@@ -120,11 +117,21 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
     {
         if(logging::enabled())
             builtinlibs::addPPCEntrypoint(libname, name,
-                [this](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, logging::makeLoggedFunction(name, fptr)); }
+                [this](PowerCore& cpu) { 
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+
+                    return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, logging::makeLoggedFunction(name, fptr)); 
+                }
             );
         else
             builtinlibs::addPPCEntrypoint(libname, name,
-                [](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, fptr); }
+                [this](PowerCore& cpu) { 
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+                    
+                    return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, fptr);
+                }
             );
     }
 }
@@ -160,9 +167,8 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
         dispatcher.addSelector(selector,
             [this](syn68k_addr_t addr)
             {
-                if(this->breakpoint && base::Debugger::instance)
-                    if(auto ret = base::Debugger::instance->trapBreak68K(addr, this->name); ret != (uint32_t)~0)
-                        return ret;
+                if(auto ret = this->checkBreak68K(addr); ~ret)
+                    return ret;
 
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(this->name, fptr));
@@ -172,9 +178,8 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
         dispatcher.addSelector(selector,
             [this](syn68k_addr_t addr)
             {
-                if(this->breakpoint && base::Debugger::instance)
-                    if(auto ret = base::Debugger::instance->trapBreak68K(addr, this->name); ret != (uint32_t)~0)
-                        return ret;
+                if(auto ret = this->checkBreak68K(addr); ~ret)
+                    return ret;
 
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, fptr); 
@@ -187,9 +192,8 @@ syn68k_addr_t DispatcherTrap<SelectorConvention>::invokeFrom68K(syn68k_addr_t ad
 {
     DispatcherTrap<SelectorConvention>* self = (DispatcherTrap<SelectorConvention>*)extra;
 
-    if(self->breakpoint && base::Debugger::instance)
-        if(auto ret = base::Debugger::instance->trapBreak68K(addr, self->name); ret != (uint32_t)~0)
-            return ret;
+    if(auto ret = self->checkBreak68K(addr); ~ret)
+        return ret;
 
     uint32 sel = SelectorConvention::get();
     auto it = self->selectors.find(sel);
@@ -237,6 +241,9 @@ void TrapVariant<Trap, Ret (Args...), flags...>::init()
             builtinlibs::addPPCEntrypoint(libname, name,
                 [this](PowerCore& cpu)
                 {
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+
                     return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu,
                         logging::makeLoggedFunction1<Ret (Args...)>(name, 
                             [this](Args... args) -> Ret { return (*this)(args...); }
@@ -249,6 +256,9 @@ void TrapVariant<Trap, Ret (Args...), flags...>::init()
             builtinlibs::addPPCEntrypoint(libname, name,
                 [this](PowerCore& cpu)
                 {
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+
                     return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu,
                         [this](Args... args) -> Ret { return (*this)(args...); }
                     );

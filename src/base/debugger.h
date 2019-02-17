@@ -18,6 +18,7 @@ namespace Executor
             uint32_t nmi68K(uint32_t addr);
             void nmiPPC();
             uint32_t trapBreak68K(uint32_t addr, const char *name);
+            uint32_t trapBreakPPC(PowerCore& cpu, const char *name);
 
             static Debugger *instance;
 
