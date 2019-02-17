@@ -87,26 +87,27 @@ syn68k_addr_t callback_install (const F& func)
 }
 
 template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename CallConv>
-WrappedFunction<Ret (Args...), fptr, CallConv>::WrappedFunction(const char* name, const char *exportToLib)
-    : name(name), libname(exportToLib)
-{
-}
-
-template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename CallConv>
 void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
 {
+    Entrypoint::init();
     if(logging::enabled())
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
                 [this](syn68k_addr_t addr)
-                { 
+                {
+                    if(auto ret = this->checkBreak68K(addr); ~ret)
+                        return ret;
+
                     return callfrom68K::Invoker<Ret (Args...), CallConv>
                         ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(name, fptr));
                 }
             ));    
     else
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
-                [](syn68k_addr_t addr)
+                [this](syn68k_addr_t addr)
                 {
+                    if(auto ret = this->checkBreak68K(addr); ~ret)
+                        return ret;
+
                     return callfrom68K::Invoker<Ret (Args...), CallConv>
                         ::invokeFrom68K(addr, fptr);
                 }
@@ -116,11 +117,21 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
     {
         if(logging::enabled())
             builtinlibs::addPPCEntrypoint(libname, name,
-                [this](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, logging::makeLoggedFunction(name, fptr)); }
+                [this](PowerCore& cpu) { 
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+
+                    return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, logging::makeLoggedFunction(name, fptr)); 
+                }
             );
         else
             builtinlibs::addPPCEntrypoint(libname, name,
-                [](PowerCore& cpu) { return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, fptr); }
+                [this](PowerCore& cpu) { 
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+                    
+                    return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu, fptr);
+                }
             );
     }
 }
@@ -156,14 +167,20 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
         dispatcher.addSelector(selector,
             [this](syn68k_addr_t addr)
             {
+                if(auto ret = this->checkBreak68K(addr); ~ret)
+                    return ret;
+
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(this->name, fptr));
             }
         );
     else
         dispatcher.addSelector(selector,
-            [](syn68k_addr_t addr)
+            [this](syn68k_addr_t addr)
             {
+                if(auto ret = this->checkBreak68K(addr); ~ret)
+                    return ret;
+
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, fptr); 
             }
@@ -174,6 +191,10 @@ template<class SelectorConvention>
 syn68k_addr_t DispatcherTrap<SelectorConvention>::invokeFrom68K(syn68k_addr_t addr, void* extra)
 {
     DispatcherTrap<SelectorConvention>* self = (DispatcherTrap<SelectorConvention>*)extra;
+
+    if(auto ret = self->checkBreak68K(addr); ~ret)
+        return ret;
+
     uint32 sel = SelectorConvention::get();
     auto it = self->selectors.find(sel);
     if(it != self->selectors.end())
@@ -194,6 +215,7 @@ void DispatcherTrap<SelectorConvention>::addSelector(uint32_t sel, std::function
 template<class SelectorConvention>
 void DispatcherTrap<SelectorConvention>::init()
 {
+    GenericDispatcherTrap::init();
     if(trapno)
     {
         ProcPtr guestFP = (ProcPtr)SYN68K_TO_US(::callback_install(&invokeFrom68K, this));
@@ -211,23 +233,43 @@ void DispatcherTrap<SelectorConvention>::init()
 template<typename Trap, typename Ret, typename... Args, bool... flags>
 void TrapVariant<Trap, Ret (Args...), flags...>::init()
 {
+    Entrypoint::init();
     if(libname)
     {
-        builtinlibs::addPPCEntrypoint(libname, name,
-            [this](PowerCore& cpu)
-            {
-                return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu,
-                    logging::makeLoggedFunction1<Ret (Args...)>(name, 
+        if(logging::enabled())
+        {
+            builtinlibs::addPPCEntrypoint(libname, name,
+                [this](PowerCore& cpu)
+                {
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+
+                    return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu,
+                        logging::makeLoggedFunction1<Ret (Args...)>(name, 
+                            [this](Args... args) -> Ret { return (*this)(args...); }
+                        )
+                    );
+                });
+        }
+        else
+        {
+            builtinlibs::addPPCEntrypoint(libname, name,
+                [this](PowerCore& cpu)
+                {
+                    if(auto ret = this->checkBreakPPC(cpu); ~ret)
+                        return ret;
+
+                    return callfromPPC::Invoker<Ret (Args...)>::invokeFromPPC(cpu,
                         [this](Args... args) -> Ret { return (*this)(args...); }
-                    )
-                );
-            });
+                    );
+                });
+        }
     }
 }
 
 template<typename Trap, typename Ret, typename... Args, bool... flags>
 TrapVariant<Trap, Ret (Args...), flags...>::TrapVariant(const Trap& trap, const char* name, const char* exportToLib)
-    : trap(trap), name(name), libname(exportToLib)
+    : Entrypoint(name, exportToLib), trap(trap)
 {
 }
 

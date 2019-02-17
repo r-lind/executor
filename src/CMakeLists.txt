@@ -325,6 +325,9 @@ set(base_sources
     
         base/builtinlibs.h
         base/builtinlibs.cpp
+
+        base/debugger.h
+        base/debugger.cpp
     )
 source_group(Base FILES ${base_sources})
 
@@ -397,7 +400,7 @@ set(prefs_sources
 )
 
 set(misc_sources
-  debugger.cpp
+  mon_debugger.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp
   gestalt.cpp iu.cpp launch.cpp  notify.cpp 
    osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
@@ -479,6 +482,7 @@ set(include_sources
                   include/rsys/macros.h
                   include/rsys/macstrings.h
                   include/rsys/mixed_mode.h
+                  include/rsys/mon_debugger.h
                   include/rsys/noreturn.h
                   include/rsys/os.h
                   include/rsys/osutil.h

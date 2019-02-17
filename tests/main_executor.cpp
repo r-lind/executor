@@ -14,6 +14,8 @@ QDGlobals qd;
 #include <vdriver/vdriver.h>
 #include <ResourceMgr.h>
 
+#include <PowerCore.h>
+
 class MockVDriver : public VideoDriver
 {
     virtual void setColors(int first_color, int num_colors,
@@ -66,6 +68,12 @@ public:
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
         traps::init(false);
 
+        PowerCore& cpu = getPowerCore();
+        cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
+        cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
+        cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
+        cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
+        
         LM(ResErrProc) = 0;
         InitResources();
         ROMlib_InitGDevices();
