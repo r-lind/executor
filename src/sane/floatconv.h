@@ -60,15 +60,29 @@ union ieee754_double {
 
 namespace Executor
 {
-EXTERN_INLINE ieee_t
-x80_to_ieee(const x80_t *x) ALWAYS_INLINE;
+//EXTERN_INLINE ieee_t
+//x80_to_ieee(const x80_t *x) ALWAYS_INLINE;
 
 EXTERN_INLINE ieee_t
 x80_to_ieee(const x80_t *x)
 {
     ieee_t retval;
+#if 1
+    uint64_t mant = x->mantissa;
+    uint16_t exp = x->sgn_and_exp;
 
-#if defined(mc68000)
+    /* If it's an Inf or NaN, be sure to set the "normalized" bit.
+     * 80387 requires this bit to be set (else Inf's become NaN's)
+     * but SANE doesn't care about it either way.
+     */
+    if((exp & 0x7FFF) == 0x7FFF)
+        mant |= 1LL<<63;
+
+    memcpy(&retval, &mant, 8);
+    memcpy((char*)&retval + 8, &exp, 2);
+    return retval;
+
+#elif defined(mc68000)
     volatile m68k_x96_t temp96;
 
     /* Construct the 96 bit FP memory representation. */
@@ -316,13 +330,22 @@ comp_to_ieee(const comp_t *cp)
     return retval;
 }
 
-EXTERN_INLINE void
-ieee_to_x80(ieee_t n, x80_t *x) ALWAYS_INLINE;
+/*EXTERN_INLINE void
+ieee_to_x80(ieee_t n, x80_t *x) ALWAYS_INLINE;*/
 
 EXTERN_INLINE void
 ieee_to_x80(ieee_t n, x80_t *x)
 {
-#if defined(mc68000)
+#if 1
+    uint64_t mant;
+    uint16_t exp;
+    memcpy(&mant, &n, 8);
+    memcpy(&exp, (char*)&n + 8, 2);
+
+    x->mantissa = mant;
+    x->sgn_and_exp = exp;
+
+#elif defined(mc68000)
     volatile m68k_x96_t temp96;
 
     /* Move the 96 bit representation to memory. */
