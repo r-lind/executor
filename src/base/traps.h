@@ -1,11 +1,12 @@
 #pragma once
 
-#include <stdint.h>
-#include <syn68k_public.h>
-#include <unordered_map>
-
 #include <base/functions.h>
+#include <syn68k_public.h>
+
+#include <stdint.h>
+#include <unordered_map>
 #include <functional>
+#include <string>
 
 class PowerCore;
 
