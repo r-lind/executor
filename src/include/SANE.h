@@ -16,28 +16,20 @@
 namespace Executor
 {
 /* Big-endian 64 bit "comp" data type.  Note that this has a NaN value! */
-typedef union {
+/*typedef union {
     struct
     {
         ULONGINT hi;
         ULONGINT lo;
     } hilo;
     signed long long val;
-} comp_t;
+} comp_t;*/
 
-/* Now we have a version of this in "native" byte order. */
-#if defined(LITTLEENDIAN)
-typedef union {
-    struct
-    {
-        ULONGINT lo;
-        ULONGINT hi;
-    } hilo;
-    signed long long val;
-} native_comp_t;
-#else /* Not LITTLEENDIAN */
-typedef comp_t native_comp_t;
-#endif /* Not LITTLEENDIAN */
+struct comp_t
+{
+    GUEST_STRUCT;
+    GUEST<int64_t> val;
+};
 
 /* "Packed" IEEE 80 bit FP representation (zero field omitted). */
 
@@ -292,7 +284,6 @@ extern void C_ROMlib_FnextX(uint8_t *x, uint8_t *y,
 PASCAL_SUBTRAP(ROMlib_FnextX, 0xA9EB, 0x13, Pack4);
 
 static_assert(sizeof(comp_t) == 8);
-static_assert(sizeof(native_comp_t) == 8);
 static_assert(sizeof(x80_t) == 10);
 static_assert(sizeof(Decimal) == 24);
 static_assert(sizeof(DecForm) == 4);

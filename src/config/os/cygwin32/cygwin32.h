@@ -73,12 +73,6 @@ struct timezone
 
 #define CONFIG_OFFSET_P 1 /* Mac memory is always offset */
 
-/* Specify which extra functions we need in float.h. */
-#define NEED_RINT
-#define NEED_LOGB
-#define NEED_SCALB
-#define NEED_LOG1P
-
 extern int geteuid(void);
 extern int Timer32_Init(void);
 

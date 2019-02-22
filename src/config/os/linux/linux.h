@@ -35,12 +35,6 @@
 #define REINSTALL_SIGNAL_HANDLER
 #endif /* !REINSTALL_SIGNAL_HANDLER */
 
-/* These functions don't exist in the math library, so use some
- * approximately correct versions of our own.
- */
-#define NEED_SCALB
-#define NEED_LOGB
-
 #define HAVE_MMAP
 
 /*
