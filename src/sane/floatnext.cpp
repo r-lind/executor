@@ -84,23 +84,23 @@ void Executor::C_ROMlib_FnextX(uint8_t *x, uint8_t *y, unsigned short sel)
             byte_size = 10;
             break;
         case FD_OPERAND:
-            xv = f64_to_ieee((const f64_t *)x);
-            yv = f64_to_ieee((const f64_t *)y);
+            xv = *(const GUEST<double>*)x;
+            yv = *(const GUEST<double>*)y;
             byte_size = 8;
             break;
         case FS_OPERAND:
-            xv = f32_to_ieee((const f32_t *)x);
-            yv = f32_to_ieee((const f32_t *)y);
+            xv = *(const GUEST<float>*)x;
+            yv = *(const GUEST<float>*)y;
             byte_size = 4;
             break;
         case FI_OPERAND:
-            xv = CW_RAW(*(short *)x);
-            yv = CW_RAW(*(short *)y);
+            xv = *(const GUEST<int16_t>*)x;
+            yv = *(const GUEST<int16_t>*)y;
             byte_size = 2;
             break;
         case FL_OPERAND:
-            xv = CL_RAW(*(long *)x);
-            yv = CL_RAW(*(long *)y);
+            xv = *(const GUEST<int32_t>*)x;
+            yv = *(const GUEST<int32_t>*)y;
             byte_size = 4;
             break;
         case FC_OPERAND:
@@ -177,16 +177,16 @@ done:
             result = x80_to_ieee((const x80_t *)x);
             break;
         case FD_OPERAND:
-            result = f64_to_ieee((const f64_t *)x);
+            result = *(const GUEST<double>*)x;
             break;
         case FS_OPERAND:
-            result = f32_to_ieee((const f32_t *)x);
+            result = *(const GUEST<float>*)x;
             break;
         case FI_OPERAND:
-            result = CW_RAW(*(short *)x);
+            result = *(const GUEST<int16_t>*)x;
             break;
         case FL_OPERAND:
-            result = CL_RAW(*(long *)x);
+            result = *(const GUEST<int32_t>*)x;
             break;
         case FC_OPERAND:
             result = comp_to_ieee((const comp_t *)x);

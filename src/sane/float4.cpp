@@ -466,8 +466,8 @@ void Executor::C_ROMlib_FscalbX(INTEGER *sp, x80_t *dp, unsigned short sel)
     DECLAREINOUT();
 
     /* FIXME - may lose precision! */
-    scale = CW_RAW(*(short *)sp);
-    ieee_to_x80(out = scalb(in = x80_to_ieee(dp), scale), dp);
+    scale = *(GUEST<int16_t> *)sp;
+    ieee_to_x80(out = scalbn(in = x80_to_ieee(dp), scale), dp);
 
     warning_floating_point("scalb(" IEEE_T_FORMAT ", %d) == " IEEE_T_FORMAT "",
                            (IEEE_T_PRINT_CAST)in, scale, (IEEE_T_PRINT_CAST)out);
@@ -477,7 +477,7 @@ void Executor::C_ROMlib_FlogbX(x80_t *dp, unsigned short sel)
 {
     DECLAREINOUT();
     /* FIXME - may lose precision! */
-    ieee_to_x80(out = logb(in = x80_to_ieee(dp)), dp);
+    ieee_to_x80(out = log2(in = x80_to_ieee(dp)), dp);
     warning_floating_point("logb(" IEEE_T_FORMAT ") == " IEEE_T_FORMAT "", (IEEE_T_PRINT_CAST)in, (IEEE_T_PRINT_CAST)out);
 }
 
@@ -554,16 +554,16 @@ void Executor::C_ROMlib_FtintX(x80_t *dp, unsigned short sel)
                 dest op(in1 = x80_to_ieee((const x80_t *)sp));                                              \
                 break;                                                                                      \
             case FD_OPERAND:                                                                                \
-                dest op(in1 = f64_to_ieee((const f64_t *)sp));                                              \
+                dest op(in1 = *(const GUEST<double>*)sp);                                                   \
                 break;                                                                                      \
             case FS_OPERAND:                                                                                \
-                dest op(in1 = f32_to_ieee((const f32_t *)sp));                                              \
+                dest op(in1 = *(const GUEST<float>*)sp);                                                    \
                 break;                                                                                      \
             case FI_OPERAND:                                                                                \
-                dest op(in1 = CW_RAW(*(short *)sp));                                                        \
+                dest op(in1 = *(const GUEST<int16_t>*)sp);                                                  \
                 break;                                                                                      \
             case FL_OPERAND:                                                                                \
-                dest op(in1 = CL_RAW(*(long *)(sp)));                                                       \
+                dest op(in1 = *(const GUEST<int32_t>*)sp);                                                  \
                 break;                                                                                      \
             case FC_OPERAND:                                                                                \
                 dest op(in1 = comp_to_ieee((const comp_t *)sp));                                            \
@@ -646,16 +646,16 @@ void Executor::C_ROMlib_FX2x(x80_t *sp, void *dp, unsigned short sel)
 #endif
             break;
         case FD_OPERAND:
-            ieee_to_f64(val, (f64_t *)dp);
+            *(GUEST<double>*)dp = val;
             break;
         case FS_OPERAND:
-            ieee_to_f32(val, (f32_t *)dp);
+            *(GUEST<float>*)dp = val;
             break;
         case FI_OPERAND:
-            *(short *)dp = CW_RAW((signed short)rint(val));
+            *(GUEST<int16_t>*)dp = rint(val);
             break;
         case FL_OPERAND:
-            *(long *)dp = CL_RAW((LONGINT)rint(val));
+            *(GUEST<int32_t>*)dp = rint(val);
             break;
         case FC_OPERAND:
             ieee_to_comp(val, (comp_t *)dp);
@@ -682,16 +682,16 @@ void Executor::C_ROMlib_Fremx(void *sp, x80_t *dp, unsigned short sel)
             n2 = x80_to_ieee((const x80_t *)sp);
             break;
         case FD_OPERAND:
-            n2 = f64_to_ieee((const f64_t *)sp);
+            n2 = *(GUEST<double>*)sp;
             break;
         case FS_OPERAND:
-            n2 = f32_to_ieee((const f32_t *)sp);
+            n2 = *(GUEST<float>*)sp;
             break;
         case FI_OPERAND:
-            n2 = CW_RAW(*(short *)sp);
+            n2 = *(GUEST<int16_t>*)sp;
             break;
         case FL_OPERAND:
-            n2 = CL_RAW(*(long *)sp);
+            n2 = *(GUEST<int32_t>*)sp;
             break;
         case FC_OPERAND:
             n2 = comp_to_ieee((const comp_t *)sp);
@@ -747,16 +747,16 @@ FCMP_RETURN_TYPE Executor::C_ROMlib_Fcmpx(
             n2 = x80_to_ieee((const x80_t *)sp);
             break;
         case FD_OPERAND:
-            n2 = f64_to_ieee((const f64_t *)sp);
+            n2 = *(const GUEST<double>*)sp;
             break;
         case FS_OPERAND:
-            n2 = f32_to_ieee((const f32_t *)sp);
+            n2 = *(const GUEST<float>*)sp;
             break;
         case FI_OPERAND:
-            n2 = CW_RAW(*(short *)sp);
+            n2 = *(const GUEST<int16_t>*)sp;
             break;
         case FL_OPERAND:
-            n2 = CL_RAW(*(long *)sp);
+            n2 = *(const GUEST<int32_t>*)sp;
             break;
         case FC_OPERAND:
             n2 = comp_to_ieee((const comp_t *)sp);
@@ -876,16 +876,16 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
             n = x80_to_ieee((const x80_t *)sp);
             break;
         case FD_OPERAND:
-            n = f64_to_ieee((const f64_t *)sp);
+            n = *(const GUEST<double>*)sp;
             break;
         case FS_OPERAND:
-            n = f32_to_ieee((const f32_t *)sp);
+            n = *(const GUEST<float>*)sp;
             break;
         case FI_OPERAND:
-            n = CW_RAW(*(short *)sp);
+            n = *(const GUEST<int16_t>*)sp;
             break;
         case FL_OPERAND:
-            n = CL_RAW(*(long *)sp);
+            n = *(const GUEST<int32_t>*)sp;
             break;
         case FC_OPERAND:
             n = comp_to_ieee((const comp_t *)sp);
@@ -1074,16 +1074,16 @@ void Executor::C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel)
             ieee_to_x80(n, (x80_t *)dp);
             break;
         case FD_OPERAND:
-            ieee_to_f64(n, (f64_t *)dp);
+            *(GUEST<double>*)dp = n;
             break;
         case FS_OPERAND:
-            ieee_to_f32(n, (f32_t *)dp);
+            *(GUEST<float>*)dp = n;
             break;
         case FI_OPERAND:
-            *(short *)dp = CW_RAW((signed short)rint(n));
+            *(GUEST<int16_t>*)dp = rint(n);
             break;
         case FL_OPERAND:
-            *(long *)dp = CL_RAW((LONGINT)rint(n));
+            *(GUEST<int32_t>*)dp = rint(n);
             break;
         case FC_OPERAND:
             ieee_to_comp(n, (comp_t *)dp);
