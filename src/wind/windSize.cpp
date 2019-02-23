@@ -229,21 +229,15 @@ LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, Rect *rp)
     r.bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 #endif
 
-    pinr.left = r.left + rp->left;
-    if(pinr.left <= r.left && rp->left > 0)
-        pinr.left = 32767;
+    pinr.left = startp.h - (r.right - r.left);
+    if(rp->left > 0)
+        pinr.left += rp->left - 1;
+    pinr.top    = startp.v - (r.bottom - r.top);
+    if(rp->top > 0)
+        pinr.top += rp->top - 1;
 
-    pinr.top = r.top + rp->top;
-    if(pinr.top <= r.top && rp->top > 0)
-        pinr.top = 32767;
-
-    pinr.right = r.left + rp->right;
-    if(pinr.right <= r.left && rp->right > 0)
-        pinr.right = 32767;
-
-    pinr.bottom = r.top + rp->bottom;
-    if(pinr.bottom <= r.top && rp->bottom > 0)
-        pinr.bottom = 32767;
+    pinr.right  = std::min(32767, startp.h - (r.right - r.left) + (int)rp->right);
+    pinr.bottom = std::min(32767, startp.v - (r.bottom - r.top) + (int)rp->bottom);
 
     gp = qdGlobals().thePort;
     SETUP_PORT((GrafPtr)LM(WMgrPort));
@@ -263,8 +257,7 @@ LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, Rect *rp)
             r.right = r.right + (ep.h - p.h);
             r.bottom = r.bottom + (ep.v - p.v);
             WINDCALL((WindowPtr)w, wGrow, ptr_to_longint(&r));
-            p.h = ep.h;
-            p.v = ep.v;
+            p = ep;
         }
         CALLDRAGHOOK();
     }
