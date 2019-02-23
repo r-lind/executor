@@ -305,9 +305,14 @@ static OSErr writemap(resmaphand map)
     if(terr != noErr)
         return (terr);
     lc = (*map)->rh.maplen;
+
+    auto saveAttr = (*map)->resfatr;
+    (*map)->resfatr &= ~mapChanged;
+
     terr = FSWriteAll((*map)->resfn, inout(lc), (Ptr)*map);
-    if(terr == noErr)
-        (*map)->resfatr &= ~(mapChanged);
+    if(terr != noErr)
+        (*map)->resfatr = saveAttr;
+
     return (terr);
 }
 
@@ -493,7 +498,7 @@ static void compactdata(resmaphand map)
     HSetState((Handle)st, ststate);
     HSetState((Handle)map, mapstate);
     (*map)->resfatr |= mapChanged;
-    (*map)->resfatr |= ~mapCompact;
+    (*map)->resfatr &= ~mapCompact;
     (*map)->rh.rmapoff = sizeof(reshead) + sizeof(rsrvrec) + datlen;
     (*map)->rh.datlen = datlen;
     DisposeHandle((Handle)st);
@@ -525,12 +530,12 @@ void Executor::C_UpdateResFile(INTEGER rn)
     if(err == noErr && (fp->fcflags & fcwriteperm))
     {
         needtowalk = true;
-        if((*map)->resfatr & (mapCompact))
+        if((*map)->resfatr & mapCompact)
         {
             compactdata(map);
             needtowalk = false;
         }
-        if((*map)->resfatr & (mapChanged))
+        if((*map)->resfatr & mapChanged)
         {
             if(needtowalk)
             {
