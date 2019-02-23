@@ -41,7 +41,7 @@ set(NATIVE_TEST_SOURCES
     )
 
 set(TEST_SOURCES
-        files.cpp quickdraw.cpp listmgr.cpp
+        files.cpp quickdraw.cpp listmgr.cpp resources.cpp
     )
 if(CMAKE_SYSTEM_NAME STREQUAL Retro68)
     list(APPEND TEST_SOURCES
