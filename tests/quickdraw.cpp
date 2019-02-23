@@ -1,41 +1,13 @@
 #include "gtest/gtest.h"
 
+#include "compat.h"
+
 #ifdef EXECUTOR
-#define AUTOMATIC_CONVERSIONS
-#include <QuickDraw.h>
 #include <CQuickDraw.h>
-#include <MemoryMgr.h>
-
-using namespace Executor;
-extern QDGlobals qd;
-
-#define PTR(x) (&inout(x))
-
-    // FIXME: Executor still defines Pattern as an array, rather than an array wrapped in a struct
-#define PATREF(pat) (pat)
-
-inline bool hasDeepGWorlds()
-{
-    return true;
-}
 #else
 #include <Quickdraw.h>
 #include <QDOffscreen.h>
-#include <Gestalt.h>
-
-#define PTR(x) (&x)
-#define PATREF(pat) (&(pat))
-
-
-inline bool hasDeepGWorlds()
-{
-    long resp;
-    if(Gestalt(gestaltQuickdrawFeatures, &resp))
-        return false;
-    return resp & (1 << gestaltHasDeepGWorlds);
-}
 #endif
-
 
 struct OffscreenPort
 {

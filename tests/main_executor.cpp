@@ -1,5 +1,4 @@
 #include "gtest/gtest.h"
-#define AUTOMATIC_CONVERSIONS
 #include <FileMgr.h>
 #include <file/file.h>
 #include <MemoryMgr.h>
@@ -15,6 +14,15 @@ QDGlobals qd;
 #include <ResourceMgr.h>
 
 #include <PowerCore.h>
+
+StringPtr PSTR(const char* s)
+{
+    size_t n = strlen(s);
+    StringPtr p = (StringPtr)NewPtr(n + 1);   // just leaking it
+    p[0] = n;
+    memcpy(p+1, s, n);
+    return p;
+}
 
 class MockVDriver : public VideoDriver
 {

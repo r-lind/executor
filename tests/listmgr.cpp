@@ -1,22 +1,12 @@
 #include "gtest/gtest.h"
 
+#include "compat.h"
 #ifdef EXECUTOR
-#define AUTOMATIC_CONVERSIONS
 #include <ListMgr.h>
 #include <WindowMgr.h>
-#include <MemoryMgr.h>
-
-using namespace Executor;
-
-#define PTR(x) (&inout(x))
-
 #else
 #include <Lists.h>
 #include <Windows.h>
-
-#define PTR(x) (&x)
-#define PATREF(pat) (&(pat))
-
 #endif
 
 struct ListMgr : public testing::Test

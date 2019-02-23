@@ -36,6 +36,20 @@ function(add_compilefail_tests filename)
 
 endfunction()
 
+set(NATIVE_TEST_SOURCES
+        files_internal.cpp guestvalues.cpp cpu.cpp
+    )
+
+set(TEST_SOURCES
+        files.cpp quickdraw.cpp listmgr.cpp
+    )
+if(CMAKE_SYSTEM_NAME STREQUAL Retro68)
+    list(APPEND TEST_SOURCES
+            sane.cpp
+        )
+endif()
+
+
 if(CMAKE_SYSTEM_NAME MATCHES Retro.*)
     #add_subdirectory(googletest)
     #target_link_libraries(tests gtest)
@@ -44,14 +58,19 @@ if(CMAKE_SYSTEM_NAME MATCHES Retro.*)
     include_directories("googletest/googletest/")
     add_definitions( -DGTEST_HAS_STREAM_REDIRECTION=0 -DGTEST_HAS_POSIX_RE=0 -DPATH_MAX=256)
 
-    add_application(tests main.cpp files.cpp quickdraw.cpp listmgr.cpp sane.cpp googletest/googletest/src/gtest-all.cc size.r)
+    add_application(tests
+        ${TEST_SOURCES} 
+        main.cpp googletest/googletest/src/gtest-all.cc size.r)
     set_target_properties(tests PROPERTIES LINK_FLAGS "-Wl,-gc-sections")
 
 else()
     set(INSTALL_GTEST FALSE)
     include(GoogleTest)
 
-    add_executable(tests main_executor.cpp files.cpp files_internal.cpp quickdraw.cpp guestvalues.cpp listmgr.cpp cpu.cpp)
+    add_executable(tests
+        ${TEST_SOURCES}
+        ${NATIVE_TEST_SOURCES}
+        main_executor.cpp)
     add_subdirectory(googletest)
     target_link_libraries(tests gtest romlib)
     target_compile_definitions(tests PRIVATE -DEXECUTOR)

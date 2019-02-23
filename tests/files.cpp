@@ -1,23 +1,10 @@
 #include "gtest/gtest.h"
 
+#include "compat.h"
+
 #ifdef EXECUTOR
-#define AUTOMATIC_CONVERSIONS
 #include <FileMgr.h>
 #include <DeviceMgr.h>
-#include <MemoryMgr.h>
-using namespace Executor;
-
-StringPtr PSTR(const char* s)
-{
-    size_t n = strlen(s);
-    StringPtr p = (StringPtr)NewPtr(n + 1);   // just leaking it
-    p[0] = n;
-    memcpy(p+1, s, n);
-    return p;
-}
-
-typedef signed char SInt8;
-typedef int32_t SInt32;
 
 enum
 {
@@ -46,19 +33,13 @@ enum
 GUEST<LONGINT> toIoMisc(long x) { return (LONGINT)x; }
 GUEST<LONGINT> toIoMisc(void* x) { return guest_cast<LONGINT>(x); }
 
-#define PTR(x) (&inout(x))
-
-
 #else
 #include <Files.h>
 #include <Devices.h>
 
-#define PSTR(s) StringPtr("\p" s)
-
 Ptr toIoMisc(long x) { return (Ptr)x; }
 Ptr toIoMisc(void* x) { return (Ptr)x; }
 
-#define PTR(x) (&x)
 #endif
 
 // Unanswered Questions:

@@ -1,4 +1,3 @@
-#define AUTOMATIC_CONVERSIONS
 #include <base/mactype.h>
 #include <base/byteswap.h>
 using namespace Executor;
