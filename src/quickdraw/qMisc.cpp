@@ -51,8 +51,6 @@ BOOLEAN Executor::C_GetPixel(INTEGER h, INTEGER v)
     unsigned char temp_fbuf[4];
     Rect src_rect, dst_rect;
 
-    gui_assert(!CGrafPort_p(qdGlobals().thePort));
-
     temp_bm.baseAddr = (Ptr)temp_fbuf;
     temp_bm.bounds.top = 0;
     temp_bm.bounds.bottom = 1;
