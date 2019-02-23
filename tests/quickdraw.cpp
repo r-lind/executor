@@ -7,6 +7,7 @@
 #else
 #include <Quickdraw.h>
 #include <QDOffscreen.h>
+#include <Windows.h>
 #endif
 
 struct OffscreenPort
@@ -400,4 +401,26 @@ TEST(QuickDraw, UnionRect)
     EXPECT_EQ(0, r.left);
     EXPECT_EQ(10, r.bottom);
     EXPECT_EQ(20, r.right);
+}
+
+TEST(QuickDraw, PinRect)
+{
+    auto pin = [](Rect& r, Point p) -> Point {
+        auto l = PinRect(&r, p);
+        return { (int16_t)(l >> 16), (int16_t)l };
+    };
+    Rect r = { 10,20,30,40 };
+    Point p;
+
+    p = pin(r, {15,25});
+    EXPECT_EQ(15, p.v);
+    EXPECT_EQ(25, p.h);
+
+    p = pin(r, {30,40});
+    EXPECT_EQ(29, p.v);
+    EXPECT_EQ(39, p.h);
+
+    p = pin(r, {35,45});
+    EXPECT_EQ(29, p.v);
+    EXPECT_EQ(39, p.h);
 }
