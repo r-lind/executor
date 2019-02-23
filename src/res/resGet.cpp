@@ -520,7 +520,10 @@ void Executor::C_ReleaseResource(Handle res)
     if(ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr)))
         /*-->*/ return;
     if(rr->ratr & resChanged)
-        ROMlib_wr(map, rr);
+        return;     // --> ROMlib_wr(map, rr);
+                    //     would be more sensible, but that's not what
+                    //     IM says. 
+
     if(LM(ResErr) != noErr || !rr->rhand)
         return;
     h = rr->rhand;
