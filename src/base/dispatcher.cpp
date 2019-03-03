@@ -181,19 +181,6 @@ enum
 #define ALINEEXCEPTIONFRAMESIZE 8
 #define WEIRDMAGIC (0x1F52)
 
-/*
- * FAKEPascalToCCall pushes a phoney return address and then calls
- * PascalToCCall and throws away the return value.  It will be something
- * like:
- *
- */
-
-#define FAKEPascalToCCall(xxx)                \
-    do                                        \
-    {                                         \
-        PUSHADDR(0xEACE4321);                 \
-        (void)PascalToCCall(0x87654231, xxx); \
-    } while(0)
 
 unsigned short Executor::mostrecenttrap;
 
@@ -271,85 +258,41 @@ syn68k_addr_t Executor::alinehandler(syn68k_addr_t pc, void *ignored)
     {
         trapno = trapword & TOOLMASK;
         togoto = tooltraptable[trapno];
+
         if(trapword & POPBIT)
             retval = POPADDR();
-#if defined(SHORTCIRCUIT_TRAPS)
-        if(togoto == toolstuff[trapno].orig)
-        {
-            if(toolstuff[trapno].ptoc.magic == (ULONGINT)-1)
-            {
-                syn68k_addr_t new_addr;
 
-                PUSHADDR(0x80014321); /* better not use this */
-                new_addr = (*(callback_handler_t)toolstuff[trapno].ptoc.wheretogo)(pc, (void *)0);
-                if(trapword == LOADSEGTRAPWORD)
-                    retval -= 6;
-                else if(trapword == MODESWITCHTRAPWORD)
-                    retval = new_addr;
-            }
-            else
-                FAKEPascalToCCall(&toolstuff[trapno].ptoc);
-        }
-        else
-#endif
-        {
-            PUSHADDR(retval); /* Where they'll return to */
-            retval = (syn68k_addr_t)togoto; /* Where they have patched */
-            /* us to go to */
-        }
+        PUSHADDR(retval); /* Where they'll return to */
+        retval = (syn68k_addr_t)togoto; /* Where they have patched */
+        /* us to go to */
     }
     else
     {
         trapno = trapword & OSMASK;
         togoto = ostraptable[trapno];
-#if defined(SHORTCIRCUIT_TRAPS)        
-        if(togoto == osstuff[trapno].orig)
-        {
-            uint32_t savea0, savea1, savea2, saved1, saved2;
-            
-            saved1 = EM_D1;
-            saved2 = EM_D2;
-            savea1 = EM_A1;
-            savea2 = EM_A2;
-            EM_D1 = trapword;
-            EM_D2 = (trapword & 0xFF) << 2;
-            EM_A2 = (LONGINT)togoto;
-            savea0 = EM_A0;
-            PUSHADDR(0x88A84321); /* better not use this */
-            (*(callback_handler_t)osstuff[trapno].func)(pc,
-                                                        callback_argument((syn68k_addr_t)togoto));
-            if(!(trapword & DONTSAVEA0BIT))
-                EM_A0 = savea0;
-            EM_D1 = saved1;
-            EM_D2 = saved2;
-            EM_A1 = savea1;
-            EM_A2 = savea2;
-        }
-        else
-#endif
-        {
-            PUSHADDR(retval);
-            PUSHUW(status);
-            PUSHUW(WEIRDMAGIC);
-            PUSHUL(EM_A2);
-            PUSHUL(EM_D2);
-            PUSHUL(EM_D1);
-            PUSHUL(EM_A1);
-            EM_D1 = trapword;
-            EM_D2 = (trapword & 0xFF) << 2;
-            EM_A2 = (LONGINT)togoto;
-            if(!(trapword & DONTSAVEA0BIT))
-                PUSHUL(EM_A0);
-            execute68K((syn68k_addr_t)togoto);
-            if(!(trapword & DONTSAVEA0BIT))
-                EM_A0 = POPUL();
-            EM_A1 = POPUL();
-            EM_D1 = POPUL();
-            EM_D2 = POPUL();
-            EM_A2 = POPUL();
-            EM_A7 += 4;
-            retval = POPADDR();
-        }
+
+        PUSHADDR(retval);
+        PUSHUW(status);
+        PUSHUW(WEIRDMAGIC);
+        PUSHUL(EM_A2);
+        PUSHUL(EM_D2);
+        PUSHUL(EM_D1);
+        PUSHUL(EM_A1);
+        EM_D1 = trapword;
+        EM_D2 = (trapword & 0xFF) << 2;
+        EM_A2 = (LONGINT)togoto;
+        if(!(trapword & DONTSAVEA0BIT))
+            PUSHUL(EM_A0);
+        execute68K((syn68k_addr_t)togoto);
+        if(!(trapword & DONTSAVEA0BIT))
+            EM_A0 = POPUL();
+        EM_A1 = POPUL();
+        EM_D1 = POPUL();
+        EM_D2 = POPUL();
+        EM_A2 = POPUL();
+        EM_A7 += 4;
+        retval = POPADDR();
+
         cpu_state.ccc = 0;
         cpu_state.ccn = (cpu_state.regs[0].sw.n < 0);
         cpu_state.ccv = 0;
