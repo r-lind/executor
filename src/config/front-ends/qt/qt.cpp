@@ -40,6 +40,8 @@ void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
 Q_IMPORT_PLUGIN(QWindowsIntegrationPlugin)
 #endif
 
+constexpr bool log_key_events = false;
+
 using namespace Executor;
 
 namespace Executor
@@ -101,7 +103,7 @@ public:
     {
         mousePressRelease(ev);
     }
-    
+
     void keyEvent(QKeyEvent *ev, bool down_p)
     {
         unsigned char mkvkey;
@@ -114,9 +116,11 @@ public:
             mkvkey = 0x89;// NOTAKEY
         else
             mkvkey = p->second;
-        if(ev->nativeScanCode() > 1 && ev->nativeScanCode() < NELEM(x_keycode_to_mac_virt))
+        if(mkvkey == 0x89 && ev->nativeScanCode() > 1 && ev->nativeScanCode() < NELEM(x_keycode_to_mac_virt))
         {
             mkvkey = x_keycode_to_mac_virt[ev->nativeScanCode()];
+            if constexpr(log_key_events)
+                std::cout << "mkvkey: " << ev->nativeScanCode() << " -> " << std::hex << (int)mkvkey << std::dec << std::endl;
         }
 #ifdef MACOSX
         if(ev->nativeVirtualKey())
@@ -153,6 +157,8 @@ public:
         where.h = LM(MouseLocation).h;
         where.v = LM(MouseLocation).v;
         keywhat = ROMlib_xlate(mkvkey, keymod, down_p);
+        if constexpr(log_key_events)
+            std::cout << "keywhat: " << std::hex << keywhat << std::dec << std::endl;
         post_keytrans_key_events(down_p ? keyDown : keyUp,
                              keywhat, when, where,
                              keymod, mkvkey);
@@ -161,13 +167,15 @@ public:
     
     void keyPressEvent(QKeyEvent *ev)
     {
-        std::cout << "press: " << std::hex << ev->key() << " " << ev->nativeScanCode() << " " << ev->nativeVirtualKey() << std::dec << std::endl;
+        if constexpr(log_key_events)
+            std::cout << "press: " << std::hex << ev->key() << " " << ev->nativeScanCode() << " " << ev->nativeVirtualKey() << std::dec << std::endl;
         if(!ev->isAutoRepeat())
             keyEvent(ev, true);
     }
     void keyReleaseEvent(QKeyEvent *ev)
     {
-        std::cout << "release\n";
+        if constexpr(log_key_events)
+            std::cout << "release\n";
         if(!ev->isAutoRepeat())
             keyEvent(ev, false);
     }
