@@ -13,7 +13,7 @@
 #include <ResourceMgr.h>
 #include <mman/mman.h>
 
-#define MODULE_NAME rsys_list
+#define MODULE_NAME list_list
 #include <base/api-module.h>
 
 namespace Executor

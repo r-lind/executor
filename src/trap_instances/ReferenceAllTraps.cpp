@@ -1,5 +1,14 @@
 namespace Executor {
     namespace ReferenceTraps {
+        void rsys_adb();
+        void rsys_cfm();
+        void rsys_gestalt();
+        void rsys_mixed_mode();
+        void rsys_osutil();
+        void rsys_serial();
+        void rsys_stdfile();
+        void base_emustubs();
+        void ctl_ctl();
         void ADB();
         void AliasMgr();
         void AppleEvents();
@@ -46,26 +55,26 @@ namespace Executor {
         void ToolboxUtil();
         void VRetraceMgr();
         void WindowMgr();
-        void rsys_adb();
-        void rsys_cfm();
-        void rsys_ctl();
-        void rsys_emustubs();
-        void rsys_gestalt();
-        void rsys_list();
-        void rsys_menu();
-        void rsys_mixed_mode();
-        void rsys_osutil();
-        void rsys_print();
-        void rsys_refresh();
-        void rsys_serial();
-        void rsys_soundopts();
-        void rsys_stdfile();
-        void rsys_tesave();
-        void rsys_vbl();
-        void rsys_wind();
+        void list_list();
+        void menu_menu();
+        void print_print();
+        void sound_soundopts();
+        void textedit_tesave();
+        void time_vbl();
+        void vdriver_refresh();
+        void wind_wind();
     }
     void ReferenceAllTraps()
     {
+        ReferenceTraps::rsys_adb();
+        ReferenceTraps::rsys_cfm();
+        ReferenceTraps::rsys_gestalt();
+        ReferenceTraps::rsys_mixed_mode();
+        ReferenceTraps::rsys_osutil();
+        ReferenceTraps::rsys_serial();
+        ReferenceTraps::rsys_stdfile();
+        ReferenceTraps::base_emustubs();
+        ReferenceTraps::ctl_ctl();
         ReferenceTraps::ADB();
         ReferenceTraps::AliasMgr();
         ReferenceTraps::AppleEvents();
@@ -112,22 +121,13 @@ namespace Executor {
         ReferenceTraps::ToolboxUtil();
         ReferenceTraps::VRetraceMgr();
         ReferenceTraps::WindowMgr();
-        ReferenceTraps::rsys_adb();
-        ReferenceTraps::rsys_cfm();
-        ReferenceTraps::rsys_ctl();
-        ReferenceTraps::rsys_emustubs();
-        ReferenceTraps::rsys_gestalt();
-        ReferenceTraps::rsys_list();
-        ReferenceTraps::rsys_menu();
-        ReferenceTraps::rsys_mixed_mode();
-        ReferenceTraps::rsys_osutil();
-        ReferenceTraps::rsys_print();
-        ReferenceTraps::rsys_refresh();
-        ReferenceTraps::rsys_serial();
-        ReferenceTraps::rsys_soundopts();
-        ReferenceTraps::rsys_stdfile();
-        ReferenceTraps::rsys_tesave();
-        ReferenceTraps::rsys_vbl();
-        ReferenceTraps::rsys_wind();
+        ReferenceTraps::list_list();
+        ReferenceTraps::menu_menu();
+        ReferenceTraps::print_print();
+        ReferenceTraps::sound_soundopts();
+        ReferenceTraps::textedit_tesave();
+        ReferenceTraps::time_vbl();
+        ReferenceTraps::vdriver_refresh();
+        ReferenceTraps::wind_wind();
     }
 }

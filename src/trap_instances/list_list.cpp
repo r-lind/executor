@@ -1,9 +1,9 @@
-#define INSTANTIATE_TRAPS_rsys_soundopts
-#include <sound/soundopts.h>
+#define INSTANTIATE_TRAPS_list_list
+#include <list/list.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {
 namespace ReferenceTraps {
-    void rsys_soundopts() {}
+    void list_list() {}
 }
 }

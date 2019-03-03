@@ -1,9 +1,9 @@
-#define INSTANTIATE_TRAPS_rsys_wind
-#include <wind/wind.h>
+#define INSTANTIATE_TRAPS_vdriver_refresh
+#include <vdriver/refresh.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {
 namespace ReferenceTraps {
-    void rsys_wind() {}
+    void vdriver_refresh() {}
 }
 }

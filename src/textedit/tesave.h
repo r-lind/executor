@@ -11,7 +11,7 @@
 #include <QuickDraw.h>
 #include <TextEdit.h>
 
-#define MODULE_NAME rsys_tesave
+#define MODULE_NAME textedit_tesave
 #include <base/api-module.h>
 
 namespace Executor

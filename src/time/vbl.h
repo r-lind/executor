@@ -3,7 +3,7 @@
 
 #include <base/traps.h>
 
-#define MODULE_NAME rsys_vbl
+#define MODULE_NAME time_vbl
 #include <base/api-module.h>
 
 namespace Executor

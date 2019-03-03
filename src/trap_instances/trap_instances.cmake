@@ -1,4 +1,13 @@
 set(trap_instance_sources
+		trap_instances/rsys_adb.cpp
+		trap_instances/rsys_cfm.cpp
+		trap_instances/rsys_gestalt.cpp
+		trap_instances/rsys_mixed_mode.cpp
+		trap_instances/rsys_osutil.cpp
+		trap_instances/rsys_serial.cpp
+		trap_instances/rsys_stdfile.cpp
+		trap_instances/base_emustubs.cpp
+		trap_instances/ctl_ctl.cpp
 		trap_instances/ADB.cpp
 		trap_instances/AliasMgr.cpp
 		trap_instances/AppleEvents.cpp
@@ -45,22 +54,13 @@ set(trap_instance_sources
 		trap_instances/ToolboxUtil.cpp
 		trap_instances/VRetraceMgr.cpp
 		trap_instances/WindowMgr.cpp
-		trap_instances/rsys_adb.cpp
-		trap_instances/rsys_cfm.cpp
-		trap_instances/rsys_ctl.cpp
-		trap_instances/rsys_emustubs.cpp
-		trap_instances/rsys_gestalt.cpp
-		trap_instances/rsys_list.cpp
-		trap_instances/rsys_menu.cpp
-		trap_instances/rsys_mixed_mode.cpp
-		trap_instances/rsys_osutil.cpp
-		trap_instances/rsys_print.cpp
-		trap_instances/rsys_refresh.cpp
-		trap_instances/rsys_serial.cpp
-		trap_instances/rsys_soundopts.cpp
-		trap_instances/rsys_stdfile.cpp
-		trap_instances/rsys_tesave.cpp
-		trap_instances/rsys_vbl.cpp
-		trap_instances/rsys_wind.cpp
+		trap_instances/list_list.cpp
+		trap_instances/menu_menu.cpp
+		trap_instances/print_print.cpp
+		trap_instances/sound_soundopts.cpp
+		trap_instances/textedit_tesave.cpp
+		trap_instances/time_vbl.cpp
+		trap_instances/vdriver_refresh.cpp
+		trap_instances/wind_wind.cpp
 		trap_instances/ReferenceAllTraps.cpp
 	)

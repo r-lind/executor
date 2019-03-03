@@ -3,7 +3,7 @@
 
 #include <ExMacTypes.h>
 
-#define MODULE_NAME rsys_refresh
+#define MODULE_NAME vdriver_refresh
 #include <base/api-module.h>
 
 namespace Executor

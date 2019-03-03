@@ -1,9 +1,9 @@
-#define INSTANTIATE_TRAPS_rsys_menu
-#include <menu/menu.h>
+#define INSTANTIATE_TRAPS_ctl_ctl
+#include <ctl/ctl.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {
 namespace ReferenceTraps {
-    void rsys_menu() {}
+    void ctl_ctl() {}
 }
 }

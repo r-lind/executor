@@ -1,9 +1,9 @@
-#define INSTANTIATE_TRAPS_rsys_tesave
-#include <textedit/tesave.h>
+#define INSTANTIATE_TRAPS_sound_soundopts
+#include <sound/soundopts.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {
 namespace ReferenceTraps {
-    void rsys_tesave() {}
+    void sound_soundopts() {}
 }
 }

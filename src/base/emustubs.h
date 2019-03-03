@@ -11,7 +11,7 @@
 #include <DialogMgr.h>
 #include <MemoryMgr.h>
 
-#define MODULE_NAME rsys_emustubs
+#define MODULE_NAME base_emustubs
 #include <base/api-module.h>
 
 namespace Executor

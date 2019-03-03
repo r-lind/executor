@@ -16,7 +16,7 @@
 #include <mman/mman.h>
 #include <quickdraw/cquick.h>
 
-#define MODULE_NAME rsys_ctl
+#define MODULE_NAME ctl_ctl
 #include <base/api-module.h>
 
 namespace Executor

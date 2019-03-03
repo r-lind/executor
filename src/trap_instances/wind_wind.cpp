@@ -1,9 +1,9 @@
-#define INSTANTIATE_TRAPS_rsys_ctl
-#include <ctl/ctl.h>
+#define INSTANTIATE_TRAPS_wind_wind
+#include <wind/wind.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {
 namespace ReferenceTraps {
-    void rsys_ctl() {}
+    void wind_wind() {}
 }
 }
