@@ -18,6 +18,7 @@ set(trap_instance_sources
 		trap_instances/DeviceMgr.cpp
 		trap_instances/DialogMgr.cpp
 		trap_instances/DiskInit.cpp
+		trap_instances/Displays.cpp
 		trap_instances/EditionMgr.cpp
 		trap_instances/FileMgr.cpp
 		trap_instances/Finder.cpp

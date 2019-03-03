@@ -19,6 +19,7 @@ namespace Executor {
         void DeviceMgr();
         void DialogMgr();
         void DiskInit();
+        void Displays();
         void EditionMgr();
         void FileMgr();
         void Finder();
@@ -85,6 +86,7 @@ namespace Executor {
         ReferenceTraps::DeviceMgr();
         ReferenceTraps::DialogMgr();
         ReferenceTraps::DiskInit();
+        ReferenceTraps::Displays();
         ReferenceTraps::EditionMgr();
         ReferenceTraps::FileMgr();
         ReferenceTraps::Finder();

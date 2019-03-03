@@ -217,6 +217,7 @@ set(qd_sources
     quickdraw/image_inits.cpp quickdraw/default_ctab_values.cpp
     quickdraw/dcconvert.cpp quickdraw/rgbutil.cpp quickdraw/dcmaketables.cpp
     quickdraw/fontIMVI.cpp quickdraw/font.cpp
+    quickdraw/displays.cpp
 )
 
 source_group(QuickDraw FILES ${qd_sources})
@@ -436,6 +437,7 @@ set(include_sources
                   include/DialogMgr.h
                   include/Disk.h
                   include/DiskInit.h
+                  include/Displays.h
                   include/EditionMgr.h
                   include/EventMgr.h
                   include/FileMgr.h
