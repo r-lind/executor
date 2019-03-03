@@ -24,6 +24,7 @@
 #include <rsys/executor.h>
 #include <rsys/mixed_mode.h>
 #include <base/cpu.h>
+#include <base/debugger.h>
 
 using namespace Executor;
 
@@ -604,22 +605,23 @@ RAW_68K_IMPLEMENTATION(Unimplemented)
 {
     char buf[1024];
 
-    switch(mostrecenttrap)
+    sprintf(buf,
+            "Fatal error.\r"
+            "encountered unknown, unimplemented trap `%X'.",
+            mostrecenttrap);
+    int button = system_error(buf, 0,
+                    "Quit", base::Debugger::instance ? "Debugger" : nullptr, nullptr,
+                    nullptr, nullptr, nullptr);
+
+    if(button == 0 || !base::Debugger::instance)
     {
-        default:
-            sprintf(buf,
-                    "Fatal error.\r"
-                    "encountered unknown, unimplemented trap `%X'.",
-                    mostrecenttrap);
-            system_error(buf, 0,
-                         "Restart", nullptr, nullptr,
-                         nullptr, nullptr, nullptr);
-            break;
+        ExitToShell();
     }
 
-    ExitToShell();
+    if(auto ret = base::Debugger::instance->trapBreak68K(trap_address, "Unimplemented"); ~ret)
+        return ret;
+
     RTS(); /* in case we want to get return from within gdb */
-    return /* dummy */ -1;
 }
 
 /*

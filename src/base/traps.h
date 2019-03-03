@@ -250,7 +250,7 @@ private:
     CREATE_FUNCTION_WRAPPER(stub_##NAME, &_##NAME, (#NAME), TrapFunction<decltype(_##NAME) COMMA &_##NAME COMMA TRAP COMMA callconv::Raw>)
 
 #define RAW_68K_IMPLEMENTATION(NAME) \
-        syn68k_addr_t Executor::_##NAME(syn68k_addr_t, void *)
+        syn68k_addr_t Executor::_##NAME(syn68k_addr_t trap_address [[maybe_unused]], void *)
 
 #define TRAP_VARIANT(NAME, IMPL_NAME, ...) \
     CREATE_FUNCTION_WRAPPER(NAME, , (stub_##IMPL_NAME, #NAME, "InterfaceLib"), TrapVariant<decltype(stub_##IMPL_NAME), __VA_ARGS__>)
