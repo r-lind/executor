@@ -3,6 +3,7 @@
 #include <base/traps.h>
 #include <base/functions.impl.h>
 #include <base/logging.h>
+#include <base/debugger.h>
 
 #include <cassert>
 #include <iostream>
@@ -194,7 +195,7 @@ syn68k_addr_t DispatcherTrap<SelectorConvention>::invokeFrom68K(syn68k_addr_t ad
     if(it != self->selectors.end())
     {
         if(auto ret = it->second.entrypoint->checkBreak68K(addr); ~ret)
-        return ret;
+            return ret;
 
         SelectorConvention::commit();
         return it->second.invoke(addr);
@@ -202,13 +203,13 @@ syn68k_addr_t DispatcherTrap<SelectorConvention>::invokeFrom68K(syn68k_addr_t ad
     else
     {
         std::cerr << "Unknown selector 0x" << std::hex << sel << " for trap " << self->name << std::endl;
-        /*if(base::Debugger::instance)
+        if(base::Debugger::instance)
         {
-            if(auto ret = base::Debugger::instance->trapBreak68K(addr, "Unimplemented"); ~ret)
+            if(auto ret = base::Debugger::instance->trapBreak68K(addr, "Unimplemented selector"); ~ret)
                 return ret;
             return POPADDR();
         }
-        else*/
+        else
             std::abort();
     }
 }
