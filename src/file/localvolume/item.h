@@ -23,18 +23,21 @@ using ItemPtr = std::shared_ptr<Item>;
 using DirectoryItemPtr = std::shared_ptr<DirectoryItem>;
 using FileItemPtr = std::shared_ptr<FileItem>;
 
-union ItemInfo
+struct ItemInfo
 {
-    struct {
-        FInfo info;
-        FXInfo xinfo;
-    } file;
-    struct {
-        DInfo info;
-        DXInfo xinfo;
-    } dir;
+    union {
+        struct {
+            FInfo info;
+            FXInfo xinfo;
+        } file;
+        struct {
+            DInfo info;
+            DXInfo xinfo;
+        } dir;
+    };
+    unsigned long modTime;
+    unsigned long creationTime;
 };
-
 
 class Item
 {

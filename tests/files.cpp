@@ -1129,7 +1129,7 @@ TEST_F(FileTest, GetFInfo)
     EXPECT_GE(ipb.dirInfo.ioDrCrDat, pb.fileParam.ioFlCrDat);
     EXPECT_GE(ipb.dirInfo.ioDrMdDat, pb.fileParam.ioFlMdDat);
     EXPECT_GE(pb.fileParam.ioFlCrDat, 0);
-    EXPECT_GE(pb.fileParam.ioFlMdDat, 0);
+    EXPECT_GT(pb.fileParam.ioFlMdDat, 0U);
 
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;
@@ -1379,27 +1379,27 @@ TEST_F(FileTest, SetFInfo)
 
 TEST_F(FileTest, SetFInfo_MdDat)
 {
-    constexpr unsigned long date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
+    constexpr uint32_t date = 86400U * 365U * 100U + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
 
     testSetFInfoCommon(
         [date](auto& hpb) {
             hpb.fileParam.ioFlMdDat = date;
         },
         [date](auto& hpb) {
-            EXPECT_EQ(date, hpb.fileParam.ioFlMdDat);
+            EXPECT_EQ(date, (uint32_t) hpb.fileParam.ioFlMdDat);
         }
     );
 }
 TEST_F(FileTest, SetFInfo_CrDat)
 {
-    constexpr unsigned long date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
+    constexpr uint32_t date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
 
     testSetFInfoCommon(
         [date](auto& hpb) {
             hpb.fileParam.ioFlCrDat = date;
         },
         [date](auto& hpb) {
-            EXPECT_EQ(date, hpb.fileParam.ioFlCrDat);
+            EXPECT_EQ(date, (uint32_t) hpb.fileParam.ioFlCrDat);
         }
     );
 }

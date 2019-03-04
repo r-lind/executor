@@ -442,9 +442,8 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         pb->hFileInfo.ioFlRLgLen = rsize;
         pb->hFileInfo.ioFlRLgLen = rsize;
 
-        // TODO:
-        // ioFlCrDat
-        // ioFlMdDat
+        pb->hFileInfo.ioFlMdDat = info.modTime;
+        pb->hFileInfo.ioFlCrDat = info.creationTime;
 
         if(infoKind == InfoKind::CatInfo)
         {
@@ -482,6 +481,8 @@ void LocalVolume::setInfoCommon(const ItemPtr& item, CInfoPBPtr pb, InfoKind inf
         else
             info = fitem->getInfo();
         info.file.info = pb->hFileInfo.ioFlFndrInfo;
+        info.modTime = pb->hFileInfo.ioFlMdDat;
+        info.creationTime = pb->hFileInfo.ioFlCrDat;
         try
         {
             fitem->setInfo(info);
@@ -492,8 +493,6 @@ void LocalVolume::setInfoCommon(const ItemPtr& item, CInfoPBPtr pb, InfoKind inf
             fitem->setInfo(info);
         }
         // TODO: if(infoKind == InfoKind::CatInfo)) ioFlBkDat
-        // TODO: pb->hFileInfo.ioFlCrDat
-        // TODO: pb->hFileInfo.ioFlMdDat
     }
     else
         throw OSErrorException(paramErr);   // TODO: item is a directory

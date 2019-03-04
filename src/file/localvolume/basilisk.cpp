@@ -56,8 +56,8 @@ ItemInfo BasiliskFileItem::getInfo()
 {
     fs::path finf = path().parent_path() / ".finf" / path().filename();
 
-    ItemInfo info = {};
-    fs::ifstream(finf, std::ios::binary).read((char*)&info, sizeof(info));
+    ItemInfo info = FileItem::getInfo();
+    fs::ifstream(finf, std::ios::binary).read((char*)&info, sizeof(info.file));
 
     return info;
 }
@@ -66,7 +66,8 @@ void BasiliskFileItem::setInfo(ItemInfo info)
 {
     fs::path finf = path().parent_path() / ".finf" / path().filename();
 
-    fs::ofstream(finf, std::ios::binary).write((char*)&info, sizeof(info));
+    FileItem::setInfo(info);
+    fs::ofstream(finf, std::ios::binary).write((char*)&info, sizeof(info.file));
 }
 
 void BasiliskFileItem::deleteItem()

@@ -29,13 +29,21 @@ void Item::moveItem(const fs::path& newPath, mac_string_view newName)
         name_ = newName;
 }
 
+const int64_t macToUnixEpoch = 86400 * (365 * (1970-1904) + (1970-1904)/4);
+
 ItemInfo Item::getInfo()
 {
-    return ItemInfo{};
+    ItemInfo info{};
+    info.modTime = fs::last_write_time(path()) + macToUnixEpoch;
+
+    return info;
 }
 
 void Item::setInfo(ItemInfo info)
 {
+    auto oldModTime = fs::last_write_time(path()) + macToUnixEpoch;
+    if(oldModTime != (int64_t)info.modTime)
+        fs::last_write_time(path(), info.modTime - macToUnixEpoch);
 }
 
 ItemPtr DirectoryItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID parID, CNID cnid,

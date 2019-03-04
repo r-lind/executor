@@ -58,16 +58,16 @@ std::unique_ptr<OpenFile> AppleDoubleFileItem::openRF()
 
 ItemInfo AppleDoubleFileItem::getInfo()
 {
-    ItemInfo info = {0};
-
-    access()->read(9, 0, &info, sizeof(info));
+    ItemInfo info = FileItem::getInfo();
+    access()->read(9, 0, &info, sizeof(info.file));
 
     return info;
 }
 
 void AppleDoubleFileItem::setInfo(ItemInfo info)
 {
-    access()->write(9, 0, &info, sizeof(info));
+    FileItem::setInfo(info);
+    access()->write(9, 0, &info, sizeof(info.file));
 }
 
 void AppleDoubleFileItem::deleteItem()
@@ -137,8 +137,7 @@ std::unique_ptr<OpenFile> AppleSingleFileItem::openRF()
 
 ItemInfo AppleSingleFileItem::getInfo()
 {
-    ItemInfo info = {0};
-
+    ItemInfo info = FileItem::getInfo();
     access()->read(9, 0, &info, sizeof(info));
 
     return info;
@@ -146,7 +145,8 @@ ItemInfo AppleSingleFileItem::getInfo()
 
 void AppleSingleFileItem::setInfo(ItemInfo info)
 {
-    access()->write(9, 0, &info, sizeof(info));
+    FileItem::setInfo(info);
+    access()->write(9, 0, &info, sizeof(info.file));
 }
 
 AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile)

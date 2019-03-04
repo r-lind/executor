@@ -143,8 +143,7 @@ std::unique_ptr<OpenFile> MacFileItem::openRF()
 
 ItemInfo MacFileItem::getInfo()
 {
-    ItemInfo info = {0};
-
+    ItemInfo info = FileItem::getInfo();
     getxattr(path().string().c_str(), XATTR_FINDERINFO_NAME, &info, 32, 0, 0);
 
     return info;
@@ -152,6 +151,7 @@ ItemInfo MacFileItem::getInfo()
 
 void MacFileItem::setInfo(ItemInfo info)
 {
+    FileItem::setInfo(info);
     setxattr(path().string().c_str(), XATTR_FINDERINFO_NAME, &info, 32, 0, 0);
     
     // TODO: errors

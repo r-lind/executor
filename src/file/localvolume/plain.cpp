@@ -106,7 +106,7 @@ std::unique_ptr<OpenFile> PlainFileItem::openRF()
 
 ItemInfo PlainFileItem::getInfo()
 {
-    ItemInfo info = {0};
+    ItemInfo info = FileItem::getInfo();
     info.file.info = {
         TICK("TEXT"),
         TICK("ttxt"),
@@ -119,6 +119,7 @@ ItemInfo PlainFileItem::getInfo()
 
 void PlainFileItem::setInfo(ItemInfo info)
 {
+    FileItem::setInfo(info);
     if(info.file.info.fdType != TICK("TEXT"))
         throw UpgradeRequiredException();
 }
