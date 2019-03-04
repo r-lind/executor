@@ -25,12 +25,14 @@ struct D0
 {
     static const uint32_t selectorMask = mask;
     static uint32_t get() { return EM_D0 & mask; }
+    static void commit() {}
 };
 template <uint32_t mask>
 struct D1
 {
     static const uint32_t selectorMask = mask;
     static uint32_t get() { return EM_D1 & mask; }
+    static void commit() {}
 };
 
 
@@ -38,12 +40,12 @@ template <uint32_t mask>
 struct StackWMasked
 {
     static const uint32_t selectorMask = mask;
-    static uint32_t get()
+    static uint32_t get() { return READUW(EM_A7 + 4) & mask; }
+    static void commit()
     {
         auto ret = POPADDR();
-        auto sel = POPUW();
+        EM_A7 += 2;
         PUSHADDR(ret);
-        return sel & mask;
     }
 };
 
@@ -51,22 +53,20 @@ template <uint32_t mask>
 struct StackLMasked
 {
     static const uint32_t selectorMask = mask;
-    static uint32_t get()
+    static uint32_t get() { return READUL(EM_A7 + 4) & mask; }
+    static void commit()
     {
         auto ret = POPADDR();
-        auto sel = POPUL();
+        EM_A7 += 4;
         PUSHADDR(ret);
-        return sel & mask;
     }
 };
 template <uint32_t mask>
 struct StackWLookahead
 {
     static const uint32_t selectorMask = mask;
-    static uint32_t get()
-    {
-        return READUW(EM_A7 + 4) & mask;
-    }
+    static uint32_t get() { return READUW(EM_A7 + 4) & mask; }
+    static void commit() {}
 };
 
 } /* end namespace selectors */
@@ -164,23 +164,17 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
 {
     WrappedFunction<Ret(Args...),fptr,CallConv>::init();
     if(logging::enabled())
-        dispatcher.addSelector(selector,
+        dispatcher.addSelector(selector, this,
             [this](syn68k_addr_t addr)
             {
-                if(auto ret = this->checkBreak68K(addr); ~ret)
-                    return ret;
-
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, logging::makeLoggedFunction<CallConv>(this->name, fptr));
             }
         );
     else
-        dispatcher.addSelector(selector,
+        dispatcher.addSelector(selector, this,
             [this](syn68k_addr_t addr)
             {
-                if(auto ret = this->checkBreak68K(addr); ~ret)
-                    return ret;
-
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, fptr); 
             }
@@ -198,18 +192,31 @@ syn68k_addr_t DispatcherTrap<SelectorConvention>::invokeFrom68K(syn68k_addr_t ad
     uint32 sel = SelectorConvention::get();
     auto it = self->selectors.find(sel);
     if(it != self->selectors.end())
-        return it->second(addr);
+    {
+        if(auto ret = it->second.entrypoint->checkBreak68K(addr); ~ret)
+        return ret;
+
+        SelectorConvention::commit();
+        return it->second.invoke(addr);
+    }
     else
     {
         std::cerr << "Unknown selector 0x" << std::hex << sel << " for trap " << self->name << std::endl;
-        std::abort();
+        /*if(base::Debugger::instance)
+        {
+            if(auto ret = base::Debugger::instance->trapBreak68K(addr, "Unimplemented"); ~ret)
+                return ret;
+            return POPADDR();
+        }
+        else*/
+            std::abort();
     }
 }
 
 template<class SelectorConvention>
-void DispatcherTrap<SelectorConvention>::addSelector(uint32_t sel, std::function<syn68k_addr_t(syn68k_addr_t)> handler)
+void DispatcherTrap<SelectorConvention>::addSelector(uint32_t sel, Entrypoint *ep, std::function<syn68k_addr_t(syn68k_addr_t)> handler)
 {
-    selectors[sel & SelectorConvention::selectorMask] = handler;
+    selectors[sel & SelectorConvention::selectorMask] = { ep, handler };
 }
 
 template<class SelectorConvention>

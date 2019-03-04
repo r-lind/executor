@@ -55,7 +55,6 @@ public:
     const char *libname;
     bool breakpoint = false;
 
-protected:
     uint32_t checkBreak68K(uint32_t addr)
     {
         if(breakpoint)
@@ -71,7 +70,7 @@ protected:
         else
             return ~(uint32_t)0;
     }
-
+private:
     uint32_t break68K(uint32_t addr);
     uint32_t breakPPC(PowerCore& cpu);
 };
@@ -79,10 +78,15 @@ protected:
 class GenericDispatcherTrap : public Entrypoint
 {
 public:
-    virtual void addSelector(uint32_t sel, std::function<syn68k_addr_t(syn68k_addr_t)> handler) = 0;
+    virtual void addSelector(uint32_t sel, Entrypoint* entrypoint, std::function<syn68k_addr_t(syn68k_addr_t)> handler) = 0;
     GenericDispatcherTrap(const char* name, uint16_t trapno) : Entrypoint(name), trapno(trapno) {}
 protected:
-    std::unordered_map<uint32_t, std::function<syn68k_addr_t(syn68k_addr_t)>> selectors;
+    struct SelectorEntry
+    {
+        Entrypoint* entrypoint;
+        std::function<syn68k_addr_t(syn68k_addr_t)> invoke;
+    };
+    std::unordered_map<uint32_t, SelectorEntry> selectors;
     uint16_t trapno;
 };
 
@@ -92,7 +96,7 @@ class DispatcherTrap : public GenericDispatcherTrap
     static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, void* extra);
 public:
     virtual void init() override;
-    virtual void addSelector(uint32_t sel, std::function<syn68k_addr_t(syn68k_addr_t)> handler) override;
+    virtual void addSelector(uint32_t sel, Entrypoint* entrypoint, std::function<syn68k_addr_t(syn68k_addr_t)> handler) override;
 
     using GenericDispatcherTrap::GenericDispatcherTrap;
 };
