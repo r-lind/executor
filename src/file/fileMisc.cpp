@@ -29,6 +29,10 @@
 //#include "dosdisk.h"
 #endif
 
+#ifndef S_ISDIR
+#define S_ISDIR(m) ((m) & S_IFDIR)
+#endif
+
 #include <ctype.h>
 #include <algorithm>
 
@@ -531,7 +535,7 @@ void Executor::InitPaths()
     fs::path systemFolder = ROMlib_SystemFolder;
 
     auto copyfile = [&](fs::path dest, auto from) {
-        fs::ofstream out(dest);
+        fs::ofstream out(dest, std::ios::binary);
         std::ostreambuf_iterator<char> begin_dest(out);
         std::copy(from.begin(), from.end(), begin_dest);
     };

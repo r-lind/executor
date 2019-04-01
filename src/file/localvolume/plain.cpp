@@ -1,6 +1,8 @@
 #include "plain.h"
 #include "host-os-config.h"
-#include <unistd.h>
+#if !defined(WIN32)
+    #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -31,11 +33,17 @@ PlainDataFork::~PlainDataFork()
 
 size_t PlainDataFork::getEOF()
 {
-    return lseek(fd, 0,SEEK_END);
+    if(fd <= 0)
+        return -1;
+    return lseek(fd, 0, SEEK_END);
 }
 void PlainDataFork::setEOF(size_t sz)
 {
+#if defined(WIN32)
+    chsize(fd, sz);
+#else
     ftruncate(fd, sz);
+#endif
 }
 
 size_t PlainDataFork::read(size_t offset, void *p, size_t n)

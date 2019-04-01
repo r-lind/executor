@@ -5,12 +5,21 @@
 
 #include <base/common.h>
 
+#define _WINSOCKAPI_    // Make sure windows.h doesn't #include <winsock.h>, which can redefine 'struct timeval'
 #include <windows.h>
+
 #include <stdio.h>
 #include <errno.h>
+#include <direct.h>
 
 #include "winfs.h"
 #include <rsys/lockunlock.h>
+
+#if _MSC_VER
+#ifndef MAXPATHLEN
+#define MAXPATHLEN _MAX_PATH
+#endif
+#endif
 
 using namespace Executor;
 
