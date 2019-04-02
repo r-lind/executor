@@ -14,7 +14,7 @@ addons:
       - libsdl2-dev
       - qt5-default
       - bison
-      - boost1.61
+      - boost1.63
 
 
 script:
