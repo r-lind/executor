@@ -37,18 +37,18 @@ struct Point
 template<typename T>
 T SwapTyped(T x) { return x; }
 #else
-inline unsigned char SwapTyped(unsigned char x) { return x; }
-inline signed char SwapTyped(signed char x) { return x; }
-inline char SwapTyped(char x) { return x; }
-
-inline uint16_t SwapTyped(uint16_t x) { return swap16(x); }
-inline int16_t SwapTyped(int16_t x) { return swap16((uint16_t)x); }
-
-inline uint32_t SwapTyped(uint32_t x) { return swap32(x); }
-inline int32_t SwapTyped(int32_t x) { return swap32((uint32_t)x); }
-
-inline uint64_t SwapTyped(uint64_t x) { return swap64(x); }
-inline int64_t SwapTyped(int64_t x) { return swap64((uint64_t)x); }
+template<typename T>
+auto SwapTyped(T x) -> std::enable_if_t<std::is_integral_v<T>, T>
+{
+    if constexpr(sizeof(T) == 1)
+        return x;
+    else if constexpr(sizeof(T) == 2)
+        return swap16((uint16_t)x);
+    else if constexpr(sizeof(T) == 4)
+        return swap32((uint32_t)x);
+    else if constexpr(sizeof(T) == 8)
+        return swap64((uint64_t)x);
+}
 #endif
 
 
