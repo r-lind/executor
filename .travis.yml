@@ -12,7 +12,7 @@ addons:
       - cmake
       - libsdl2-dev
       - qt5-default
-      - boost-all-dev
+      - libboost-all-dev
       - bison
 
 
