@@ -5,6 +5,7 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
+      - rexut/recoil
     packages:
       - gcc-8
       - g++-8
@@ -12,8 +13,8 @@ addons:
       - cmake
       - libsdl2-dev
       - qt5-default
-      - libboost-all-dev
       - bison
+      - boost1.61
 
 
 script:
