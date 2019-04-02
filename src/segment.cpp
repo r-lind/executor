@@ -196,6 +196,11 @@ void Executor::C_ExitToShell()
     static char beenhere = false;
     ALLOCABEGIN
 
+    if(ROMlib_launch_failure)
+    {
+        fprintf(stderr, "launch failure: %d\n", ROMlib_launch_failure);
+    }
+
 #if 1
 
     Point pt;

@@ -239,7 +239,8 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             executePPC(new_pc);
         }
     }
-
+    else
+        fprintf(stderr, "Code fragment not found\n");
     C_ExitToShell();
 }
 
