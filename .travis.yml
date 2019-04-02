@@ -1,3 +1,4 @@
+lang: cpp
 dist: xenial
 compiler: gcc
 sudo: required
@@ -5,7 +6,6 @@ addons:
   apt:
     sources:
       - ubuntu-toolchain-r-test
-      - rexut/recoil
     packages:
       - gcc-8
       - g++-8
@@ -14,8 +14,11 @@ addons:
       - libsdl2-dev
       - qt5-default
       - bison
-      - boost1.63
 
+before_script:
+  - sudo add-apt-repository ppa:rexut/recoil -y
+  - sudo apt-get update -
+  - sudo apt-get install boost1.63
 
 script:
   - mkdir build
