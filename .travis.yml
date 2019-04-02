@@ -12,6 +12,8 @@ addons:
       - cmake
       - libsdl2-dev
       - qt5-default
+      - boost-all-dev
+      - bison
 
 
 script:
