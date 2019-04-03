@@ -1,0 +1,34 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: ubuntu:cosmic
+
+    steps:
+      - run:
+          name: Installing
+          command: 'apt-get update && apt-get install -y git gcc g++ cmake libboost-all-dev bison qt5-default libsdl2-dev'
+
+      - checkout
+      - run:
+          name: Submodules
+          command: git submodule update --init --recursive
+      - run:
+          name: Configure
+          command: |
+            mkdir build
+            cd build
+            cmake ..
+
+      - run:
+          name: Build
+          command: |
+            cd build
+            make
+
+      - run:
+          name: Test
+          command: |
+            cd build
+            ctest .
+
