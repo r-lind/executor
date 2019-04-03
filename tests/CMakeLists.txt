@@ -81,4 +81,8 @@ else()
     gtest_discover_tests(tests)
 
     add_compilefail_tests(guestvalues.compfail.cpp)
+
+    set_property(DIRECTORY
+        APPEND PROPERTY TEST_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/test-properties.cmake"
+    )
 endif()

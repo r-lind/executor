@@ -30,5 +30,6 @@ jobs:
           name: Test
           command: |
             cd build
-            ctest .
+            ctest . -L xfail || true
+            ctest . -LE xfail
 
