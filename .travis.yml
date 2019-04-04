@@ -16,7 +16,7 @@ addons:
 
 before_script:
   - sudo add-apt-repository ppa:rexut/recoil -y
-  - sudo add-apt-repository ppa:beineri/opt-qt-5.11.1-xenial
+  - sudo add-apt-repository ppa:beineri/opt-qt-5.11.1-xenial -y
   - sudo apt-get update -
   - sudo apt-get install boost1.63
   - sudo apt install qt511-meta-full
