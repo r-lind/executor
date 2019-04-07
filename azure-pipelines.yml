@@ -13,4 +13,4 @@ steps:
     cd build
     cmake -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DFRONT_END=qt -T"llvm" ..
     cmake --build .
-displayName: 'cmake'
+  displayName: 'cmake'
