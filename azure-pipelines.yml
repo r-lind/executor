@@ -6,6 +6,9 @@ pool:
 
 steps:
 - script: |
+    choco install llvm --yes
+  displayName: 'install llvm'
+- script: |
     vcpkg install sdl2
   displayName: 'vcpkg install'
 - script: |
