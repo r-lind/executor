@@ -7,13 +7,23 @@ pool:
 steps:
 - script: |
     choco install llvm --yes
+    choco install ninja --yes
+    set PATH=C:\Program Files\LLVM\bin;%PATH%
+    clang-cl --version    
   displayName: 'install llvm'
+#- script: |
+#    vcpkg install sdl2
+#  displayName: 'vcpkg install'
 - script: |
-    vcpkg install sdl2
-  displayName: 'vcpkg install'
-- script: |
+    call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
     mkdir build
     cd build
-    cmake -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -DFRONT_END=qt -T"llvm" ..
+    cmake -G Ninja ^
+      -DCMAKE_BUILD_TYPE=Release ^
+      -DCMAKE_C_COMPILER=clang-cl ^
+      -DCMAKE_CXX_COMPILER=clang-cl ^
+      -DFRONT_END=qt ^
+      ..
+    #-DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake     
     cmake --build .
   displayName: 'cmake'
