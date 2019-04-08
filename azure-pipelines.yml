@@ -15,6 +15,7 @@ steps:
 #    vcpkg install sdl2
 #  displayName: 'vcpkg install'
 - script: |
+    set PATH=C:\Program Files\LLVM\bin;%PATH%
     call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
     mkdir build
     cd build
