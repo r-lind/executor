@@ -16,9 +16,10 @@ steps:
     python -m aqt 5.11.3 windows desktop win64_msvc2017_64
   displayName: 'install qt'
 - script: |
-    dir C:\Qt\5.11.3
-    dir C:/Program Files/Boost/1.69.0
-    dir C:/Program Files/Boost/1.69.0/include/boost-1_69
+    set
+    dir C:\Qt
+    dir "C:/Program Files/Boost/1.69.0"
+    dir "C:/Program Files/Boost/1.69.0/include/boost-1_69"
   displayName: 'show dirs'
 - script: |
     choco install llvm ninja winflexbison3 --yes
