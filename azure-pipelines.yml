@@ -13,7 +13,7 @@ steps:
     cd \
     mkdir Qt
     cd Qt
-    python -m aqt 5.11.3 windows win64_msvc2017_64
+    python -m aqt 5.11.3 windows desktop win64_msvc2017_64
   displayName: 'install qt'
 - script: |
     choco install llvm ninja winflexbison3 --yes
