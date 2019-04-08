@@ -8,8 +8,7 @@ steps:
 - checkout: self
   submodules: true
 - script: |
-    choco install llvm --yes
-    choco install ninja --yes
+    choco install llvm ninja winflexbison3 --yes
     set PATH=C:\Program Files\LLVM\bin;%PATH%
     clang-cl --version    
   displayName: 'install llvm'
@@ -27,6 +26,6 @@ steps:
       -DCMAKE_CXX_COMPILER=clang-cl ^
       -DFRONT_END=qt ^
       ..
-    #-DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake     
     cmake --build .
   displayName: 'cmake'
+#-DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake     
