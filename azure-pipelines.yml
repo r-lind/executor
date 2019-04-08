@@ -5,6 +5,8 @@ pool:
   vmImage: 'vs2017-win2016'
 
 steps:
+- checkout: self
+  submodules: true
 - script: |
     choco install llvm --yes
     choco install ninja --yes
