@@ -11,13 +11,11 @@ steps:
     pip install aqtinstall
     C:
     cd \
-    mkdir Qt
-    cd Qt
     python -m aqt 5.11.3 windows desktop win64_msvc2017_64
   displayName: 'install qt'
 - script: |
     set
-    dir C:\Qt\Qt5.11.3
+    dir C:\Qt5.11.3\5.11.3
     dir "C:/Program Files/Boost/1.69.0"
     dir "C:/Program Files/Boost/1.69.0/lib"
     dir "C:/Program Files/Boost/1.69.0/libs"
