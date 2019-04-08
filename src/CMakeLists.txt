@@ -1,5 +1,3 @@
-cmake_minimum_required(VERSION 3.9)
-
 find_program(PERL_COMMAND perl)
 if(NOT PERL_COMMAND)
     message(FATAL_ERROR "Cannot find command: 'perl' (needed for building!)")

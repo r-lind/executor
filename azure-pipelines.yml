@@ -17,8 +17,10 @@ steps:
   displayName: 'install qt'
 - script: |
     set
-    dir C:\Qt
+    dir C:\Qt\Qt.5.11.3
     dir "C:/Program Files/Boost/1.69.0"
+    dir "C:/Program Files/Boost/1.69.0/lib"
+    dir "C:/Program Files/Boost/1.69.0/libs"
     dir "C:/Program Files/Boost/1.69.0/include/boost-1_69"
   displayName: 'show dirs'
 - script: |
