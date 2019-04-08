@@ -25,6 +25,7 @@ steps:
       -DCMAKE_C_COMPILER=clang-cl ^
       -DCMAKE_CXX_COMPILER=clang-cl ^
       -DFRONT_END=qt ^
+      -DBISON_COMMAND=win_bison ^
       ..
     cmake --build .
   displayName: 'cmake'
