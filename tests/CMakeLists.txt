@@ -64,7 +64,8 @@ if(CMAKE_SYSTEM_NAME MATCHES Retro.*)
     set_target_properties(tests PROPERTIES LINK_FLAGS "-Wl,-gc-sections")
 
 else()
-    set(INSTALL_GTEST FALSE)
+    set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
+	set( gtest_force_shared_crt ON CACHE BOOL "Always use msvcrt.dll" FORCE)
     include(GoogleTest)
 
     add_executable(tests

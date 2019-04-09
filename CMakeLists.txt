@@ -64,7 +64,4 @@ add_subdirectory(syn68k)
 add_subdirectory(PowerCore)
 add_subdirectory(cxmon)
 add_subdirectory(src)
-if(NOT WIN32)
-    # Test code does not, yet, compile on Windows
-    add_subdirectory(tests)
-endif()
+add_subdirectory(tests)
