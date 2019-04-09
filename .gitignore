@@ -7,3 +7,5 @@ xcode
 CMakeLists.txt.user
 core
 test_detail.xml
+CMakeSettings.json
+.vs
