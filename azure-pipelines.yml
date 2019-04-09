@@ -41,6 +41,7 @@ steps:
       -DFRONT_END=qt ^
       -DBISON_COMMAND=win_bison ^
       -DCMAKE_PREFIX_PATH=C:\Qt5.11.3\5.11.3\msvc2017_64\lib\cmake ^
+      -DBoost_COMPILER=-vc141 ^
       ..
     cmake --build .
 
