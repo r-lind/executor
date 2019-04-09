@@ -12,9 +12,6 @@ cmake_policy(SET CMP0074 NEW) # don't ignore _ROOT variables (Boost_ROOT)
 
 if(WIN32)
     add_compile_options(
-        # Limit to compiling as a 32-bit-app, for now, as some things fail to compile otherwise
-        -m32
-
         # Prevent currently-non-compiling assembly functions from being included 
         -DNO_FAST_CC_FUNCS
 
