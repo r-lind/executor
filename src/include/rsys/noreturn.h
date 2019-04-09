@@ -6,15 +6,15 @@
  *_NORET_2_ after the end.
  */
 
-#if !defined(__GNUC__)
-#define _NORET_1_
-#define _NORET_2_
-#elif __GNUC__ < 2 || (__GNUC__ == 2 && __GNUC_MINOR__ < 5)
-#define _NORET_1_ volatile
-#define _NORET_2_
-#else /* GNUC > 2.4 */
+#ifdef __GNUC__
 #define _NORET_1_
 #define _NORET_2_ __attribute__((noreturn))
-#endif /* GNUC > 2.4 */
+#elif defined(_MSC_VER)
+#define _NORET_1_ __declspec(noreturn)
+#define _NORET_2_
+#else
+#define _NORET_1_
+#define _NORET_2_
+#endif
 
 #endif /* !_RSYS_NORETURN_H_ */
