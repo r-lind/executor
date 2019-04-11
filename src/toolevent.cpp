@@ -375,12 +375,6 @@ static BOOLEAN doevent(INTEGER em, EventRecord *evt,
                     redraw_screen();
                     break;
                 // case 0x1c: // command shift 8
-#if defined(SUPPORT_LOG_ERR_TO_RAM)
-                case 0x19: /* command shift 9: Dump RAM error log */
-                    retval = false;
-                    error_dump_ram_err_buf("\n *** cmd-shift-9 pressed ***\n");
-                    break;
-#endif
             }
             if(!retval)
                 evt->what = nullEvent;

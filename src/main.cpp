@@ -147,12 +147,6 @@ const option_vec Executor::common_opts = {
       opt_no_arg, "" },
     { "nosound", "disable any sound hardware",
       opt_no_arg, "" },
-#if defined(SUPPORT_LOG_ERR_TO_RAM)
-    { "ramlog",
-      "log debugging information to RAM; alt-shift-7 dumps the "
-      "accrued error log out via the normal mechanism.",
-      opt_no_arg, "" },
-#endif
 
 #if defined(MSDOS) || defined(CYGWIN32)
     { "macdrives", "drive letters that represent Mac formatted media",
@@ -840,15 +834,6 @@ int main(int argc, char **argv)
                 ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
         }
     }
-
-#if defined(SUPPORT_LOG_ERR_TO_RAM)
-    {
-        int log;
-        log = 0;
-        opt_int_val(common_db, "ramlog", &log, &bad_arg_p);
-        log_err_to_ram_p = (log != 0);
-    }
-#endif
 
     {
         string appearance_str;
