@@ -597,8 +597,6 @@ int main(int argc, char **argv)
 {
     char thingOnStack; /* used to determine an approximation of the stack base address */
 
-    INTEGER i;
-    uint32_t l;
     string arg;
 
 #if defined(LINUX) && defined(PERSONALITY_HACK)
@@ -904,18 +902,18 @@ int main(int argc, char **argv)
     else
         Executor::traps::init(false);
 
-    // Mystery Hack: Replace the trap entry for ResourceStub by a piece
-    // of code that jumps to the former trap entry of ResourceStub. 
-    l = ostraptable[0x0FC];
-    static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
-        (unsigned short)0x4EF9, 0, 0 /* Filled in below. */
-    };
-    ((unsigned char *)jmpl_to_ResourceStub)[2] = l >> 24;
-    ((unsigned char *)jmpl_to_ResourceStub)[3] = l >> 16;
-    ((unsigned char *)jmpl_to_ResourceStub)[4] = l >> 8;
-    ((unsigned char *)jmpl_to_ResourceStub)[5] = l;
-    ostraptable[0xFC] = US_TO_SYN68K(jmpl_to_ResourceStub);
-    // End Mystery Hack
+    {   // Mystery Hack: Replace the trap entry for ResourceStub by a piece
+        // of code that jumps to the former trap entry of ResourceStub. 
+        uint32_t l = ostraptable[0x0FC];
+        static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
+            (unsigned short)0x4EF9, 0, 0 /* Filled in below. */
+        };
+        ((unsigned char *)jmpl_to_ResourceStub)[2] = l >> 24;
+        ((unsigned char *)jmpl_to_ResourceStub)[3] = l >> 16;
+        ((unsigned char *)jmpl_to_ResourceStub)[4] = l >> 8;
+        ((unsigned char *)jmpl_to_ResourceStub)[5] = l;
+        ostraptable[0xFC] = US_TO_SYN68K(jmpl_to_ResourceStub);
+    }   // End Mystery Hack
 
     LM(Ticks) = 0;
     LM(nilhandle) = 0; /* so nil dereferences "work" */
@@ -1034,7 +1032,7 @@ int main(int argc, char **argv)
 #if 0
     memset(LM(SoundBase), 0, (LONGINT) 370 * sizeof(INTEGER));
 #else /* !0 */
-    for(i = 0; i < 370; ++i)
+    for(int i = 0; i < 370; ++i)
         ((GUEST<INTEGER> *)LM(SoundBase))[i] = 0x8000; /* reference 0 sound */
 #endif /* !0 */
     LM(TheZone) = LM(ApplZone);
