@@ -83,6 +83,12 @@
 
 #include "default_vdriver.h"
 
+#if defined(LINUX) && defined(PERSONALITY_HACK)
+#include <sys/personality.h>
+#define READ_IMPLIES_EXEC 0x0400000
+#endif
+
+
 
 static void setstartdir(char *);
 
@@ -116,8 +122,12 @@ static bool bad_arg_p = false;
 static bool graphics_p = true;
 
 static bool use_native_code_p = true;
+static bool breakOnProcessStart = false;
+static bool logtraps = false;
+static std::string keyboard;
+static bool list_keyboards_p = false;
 
-const option_vec Executor::common_opts = {
+static const option_vec common_opts = {
     { "sticky", "sticky menus", opt_no_arg, "" },
     { "nobrowser", "don't run Browser", opt_no_arg, "" },
     { "bpp", "default screen depth", opt_sep, "" },
@@ -298,8 +308,6 @@ capable of color.",
     { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""},
     { "break", "break into debugger at program start", opt_no_arg, ""}
 };
-
-opt_database_t Executor::common_db;
 
 /* Prints the specified value in a representation appropriate for command
  * line switches.
@@ -587,58 +595,10 @@ construct_command_line_string(int argc, char **argv)
     return s;
 }
 
-
-#if defined(LINUX) && defined(PERSONALITY_HACK)
-#include <sys/personality.h>
-#define READ_IMPLIES_EXEC 0x0400000
-#endif
-
-int main(int argc, char **argv)
+void parseCommandLine(int argc, char **argv)
 {
-    char thingOnStack; /* used to determine an approximation of the stack base address */
-
+    opt_database_t common_db;
     string arg;
-
-#if defined(LINUX) && defined(PERSONALITY_HACK)
-    int pers;
-
-    // TODO: figure out how much of this is still necessary.
-    // MMAP_PAGE_ZERO should be unnecessary now,
-    // but the 32-bit optimized assembly stuff might need READ_IMPLIES_EXEC.
-    pers = personality(0xffffffff);
-    if((pers & MMAP_PAGE_ZERO) == 0)
-    {
-        if(personality(pers | MMAP_PAGE_ZERO | READ_IMPLIES_EXEC) == 0)
-            execv(argv[0], argv);
-    }
-#endif
-
-    ROMlib_command_line = construct_command_line_string(argc, argv);
-
-    if(!arch_init())
-    {
-        fprintf(stderr, "Unable to initialize CPU information.\n");
-        exit(-100);
-    }
-
-    if(!os_init())
-    {
-        fprintf(stderr, "Unable to initialize operating system features.\n");
-        exit(-101);
-    }
-
-    /* Guarantee various time variables are set up properly. */
-    msecs_elapsed();
-
-    setstartdir(argv[0]);
-    set_appname(argv[0]);
-
-    vdriver = new DefaultVDriver();
-    if(!vdriver->parseCommandLine(argc, argv))
-    {
-        fprintf(stderr, "Unable to initialize video driver.\n");
-        exit(-12);
-    }
 
     opt_init();
     common_db = opt_alloc_db();
@@ -849,8 +809,11 @@ int main(int argc, char **argv)
             bad_arg_p |= !parse_system_version(system_str);
     }
 
-    bool breakOnProcessStart = false;
     opt_bool_val(common_db, "break", &breakOnProcessStart, &bad_arg_p);
+    opt_bool_val(common_db, "logtraps", &logtraps, &bad_arg_p);
+
+    opt_val(common_db, "keyboard", &keyboard);
+    opt_bool_val(common_db, "keyboards", &list_keyboards_p, &bad_arg_p);
 
     /* If we failed to parse our arguments properly, exit now.
    * I don't think we should call ExitToShell yet because the
@@ -881,28 +844,11 @@ int main(int argc, char **argv)
                 ROMlib_appname.c_str());
         exit(-10);
     }
+}
 
-    InitMemory(&thingOnStack);
-
-    {
-        uint32_t save_a7;
-
-        save_a7 = EM_A7;
-        /* Set up syn68k. */
-        initialize_68k_emulator(nullptr,
-                                use_native_code_p,
-                                (uint32_t *)SYN68K_TO_US(0),
-                                0);
-
-        EM_A7 = save_a7;
-    }
-
-    if(opt_val(common_db, "logtraps", nullptr))
-        Executor::traps::init(true);
-    else
-        Executor::traps::init(false);
-
-    {   // Mystery Hack: Replace the trap entry for ResourceStub by a piece
+void InitLowMem()
+{
+{   // Mystery Hack: Replace the trap entry for ResourceStub by a piece
         // of code that jumps to the former trap entry of ResourceStub. 
         uint32_t l = ostraptable[0x0FC];
         static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
@@ -1041,6 +987,73 @@ int main(int argc, char **argv)
     LM(ROM85) = 0x3FFF;
 
     LM(loadtrap) = 0;
+}
+
+int main(int argc, char **argv)
+{
+    char thingOnStack; /* used to determine an approximation of the stack base address */
+
+#if defined(LINUX) && defined(PERSONALITY_HACK)
+    int pers;
+
+    // TODO: figure out how much of this is still necessary.
+    // MMAP_PAGE_ZERO should be unnecessary now,
+    // but the 32-bit optimized assembly stuff might need READ_IMPLIES_EXEC.
+    pers = personality(0xffffffff);
+    if((pers & MMAP_PAGE_ZERO) == 0)
+    {
+        if(personality(pers | MMAP_PAGE_ZERO | READ_IMPLIES_EXEC) == 0)
+            execv(argv[0], argv);
+    }
+#endif
+
+    ROMlib_command_line = construct_command_line_string(argc, argv);
+
+    if(!arch_init())
+    {
+        fprintf(stderr, "Unable to initialize CPU information.\n");
+        exit(-100);
+    }
+
+    if(!os_init())
+    {
+        fprintf(stderr, "Unable to initialize operating system features.\n");
+        exit(-101);
+    }
+
+    /* Guarantee various time variables are set up properly. */
+    msecs_elapsed();
+
+    setstartdir(argv[0]);
+    set_appname(argv[0]);
+
+    vdriver = new DefaultVDriver();
+    if(!vdriver->parseCommandLine(argc, argv))
+    {
+        fprintf(stderr, "Unable to initialize video driver.\n");
+        exit(-12);
+    }
+
+    parseCommandLine(argc, argv);
+
+    InitMemory(&thingOnStack);
+
+    {
+        uint32_t save_a7;
+
+        save_a7 = EM_A7;
+        /* Set up syn68k. */
+        initialize_68k_emulator(nullptr,
+                                use_native_code_p,
+                                (uint32_t *)SYN68K_TO_US(0),
+                                0);
+
+        EM_A7 = save_a7;
+    }
+
+    Executor::traps::init(logtraps);
+
+    InitLowMem();
 
     if(graphics_p)
         ROMlib_InitGDevices();
@@ -1057,18 +1070,16 @@ int main(int argc, char **argv)
     ROMlib_set_system_version(system_version);
 
     {
-        bool keyboard_set_failed;
+        bool keyboard_set_failed = false;
 
-        if(opt_val(common_db, "keyboard", &arg))
+        if(!keyboard.empty())
         {
-            keyboard_set_failed = !ROMlib_set_keyboard(arg.c_str());
+            keyboard_set_failed = !ROMlib_set_keyboard(keyboard.c_str());
             if(keyboard_set_failed)
-                printf("``%s'' is not an available keyboard\n", arg.c_str());
+                printf("``%s'' is not an available keyboard\n", keyboard.c_str());
         }
-        else
-            keyboard_set_failed = false;
 
-        if(keyboard_set_failed || opt_val(common_db, "keyboards", nullptr))
+        if(keyboard_set_failed || list_keyboards_p)
             display_keyboard_choices();
     }
 
