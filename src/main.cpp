@@ -848,7 +848,7 @@ void parseCommandLine(int argc, char **argv)
 
 void InitLowMem()
 {
-{   // Mystery Hack: Replace the trap entry for ResourceStub by a piece
+    {   // Mystery Hack: Replace the trap entry for ResourceStub by a piece
         // of code that jumps to the former trap entry of ResourceStub. 
         uint32_t l = ostraptable[0x0FC];
         static GUEST<uint16_t> jmpl_to_ResourceStub[3] = {
@@ -987,6 +987,7 @@ void InitLowMem()
     LM(ROM85) = 0x3FFF;
 
     LM(loadtrap) = 0;
+    LM(WWExist) = LM(QDExist) = EXIST_NO;
 }
 
 int main(int argc, char **argv)
@@ -1038,21 +1039,14 @@ int main(int argc, char **argv)
 
     InitMemory(&thingOnStack);
 
-    {
-        uint32_t save_a7;
+    initialize_68k_emulator(nullptr,
+                            use_native_code_p,
+                            (uint32_t *)SYN68K_TO_US(0),
+                            0);
 
-        save_a7 = EM_A7;
-        /* Set up syn68k. */
-        initialize_68k_emulator(nullptr,
-                                use_native_code_p,
-                                (uint32_t *)SYN68K_TO_US(0),
-                                0);
-
-        EM_A7 = save_a7;
-    }
+    EM_A7 = ptr_to_longint(LM(CurStackBase));
 
     Executor::traps::init(logtraps);
-
     InitLowMem();
 
     if(graphics_p)
@@ -1091,15 +1085,11 @@ int main(int argc, char **argv)
     dump_init(nullptr);
 #endif
 
-    /* see qColorutil.c */
     ROMlib_color_init();
 
     wind_color_init();
-    /* must be called after `ROMlib_color_init ()' */
-    image_inits();
-
-    /* must be after `image_inits ()' */
-    sb_ctl_init();
+    image_inits();  // must be called after `ROMlib_color_init ()'
+    sb_ctl_init();  //  must be after `image_inits ()'
 
     AE_init();
 
@@ -1110,21 +1100,11 @@ int main(int argc, char **argv)
 
     setup_trap_vectors();
 
-    /* Set up timer interrupts.  We need to do this after everything else
-   * has been initialized.
-   */
-    if(!syncint_init())
-    {
-        vdriver->shutdown();
-        fputs("Fatal error:  unable to initialize timer.\n", stderr);
-        exit(-11);
-    }
+    syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
 
     sound_init();
 
     set_refresh_rate(ROMlib_refresh);
-
-    LM(WWExist) = LM(QDExist) = EXIST_NO;
 
 #if defined(CYGWIN32)
     complain_if_no_ghostscript();
