@@ -425,6 +425,7 @@ set(misc_sources
   bindec.cpp 
   toolmath.cpp
   macstrings.cpp
+  init.cpp
   )
 
 set(include_sources 
