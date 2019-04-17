@@ -447,7 +447,7 @@ construct_command_line_string(int argc, char **argv)
     return s;
 }
 
-void parseCommandLine(int argc, char **argv)
+static void parseCommandLine(int& argc, char **argv)
 {
     opt_database_t common_db;
     string arg;
