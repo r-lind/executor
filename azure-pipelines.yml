@@ -2,6 +2,7 @@ trigger:
 - master
 jobs:
 - job: Windows
+  condition: false
   pool:
     vmImage: 'vs2017-win2016'
 
