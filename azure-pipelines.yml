@@ -70,6 +70,7 @@ jobs:
     inputs:
       testResultsFormat: 'CTest'
       testResultsFiles: build/Testing/**/*.xml
+      buildPlatform: 'x86_64-macos'
 
 - job: Linux
   pool:
@@ -89,6 +90,7 @@ jobs:
     inputs:
       testResultsFormat: 'CTest'
       testResultsFiles: build/Testing/**/*.xml
+      buildPlatform: 'x86_64-linux'
 
 
 - job: Linux32
@@ -109,3 +111,4 @@ jobs:
     inputs:
       testResultsFormat: 'CTest'
       testResultsFiles: build/Testing/**/*.xml
+      buildPlatform: 'i386-linux'
