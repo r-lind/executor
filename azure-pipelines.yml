@@ -77,7 +77,7 @@ jobs:
       docker build -f docker/Dockerfile.x86_64 . -t executor-buildtools64
     displayName: 'install prerequisites'
   - script: |
-      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'mkdir -p build && cd build && cmake .. && ninja'
+      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'mkdir -p build && cd build && cmake .. -G Ninja && ninja'
     displayName: 'build'
   - script: |
       docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && ctest . -LE xfail'
