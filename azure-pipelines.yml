@@ -67,8 +67,9 @@ jobs:
       cd build
       ctest . -LE xfail
   - task: PublishTestResults@2
-    testResultsFormat: 'CTest'
-    testResultsFiles: build/Testing/**/*.xml
+    inputs:
+      testResultsFormat: 'CTest'
+      testResultsFiles: build/Testing/**/*.xml
 
 - job: Linux
   pool:
@@ -85,8 +86,9 @@ jobs:
   - script: |
       docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && ctest . -LE xfail'
   - task: PublishTestResults@2
-    testResultsFormat: 'CTest'
-    testResultsFiles: build/Testing/**/*.xml
+    inputs:
+      testResultsFormat: 'CTest'
+      testResultsFiles: build/Testing/**/*.xml
 
 
 - job: Linux32
@@ -104,5 +106,6 @@ jobs:
   - script: |
       docker run --rm -v `pwd`:/files executor-buildtools32 sh -c 'cd build && ctest . -LE xfail'
   - task: PublishTestResults@2
-    testResultsFormat: 'CTest'
-    testResultsFiles: build/Testing/**/*.xml
+    inputs:
+      testResultsFormat: 'CTest'
+      testResultsFiles: build/Testing/**/*.xml
