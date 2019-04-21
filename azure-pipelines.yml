@@ -65,7 +65,7 @@ jobs:
     displayName: build
   - script: |
       cd build
-      ctest . -LE xfail
+      ctest . -LE xfail --no-compress-output -T test || true
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'CTest'
@@ -84,7 +84,7 @@ jobs:
       docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'mkdir -p build && cd build && cmake .. -G Ninja && cmake --build .'
     displayName: 'build'
   - script: |
-      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && ctest . -LE xfail'
+      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && ctest . -LE xfail --no-compress-output -T test || true'
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'CTest'
@@ -104,7 +104,7 @@ jobs:
       docker run --rm -v `pwd`:/files executor-buildtools32 sh -c 'mkdir -p build && cd build && cmake .. -G Ninja && cmake --build .'
     displayName: 'build'
   - script: |
-      docker run --rm -v `pwd`:/files executor-buildtools32 sh -c 'cd build && ctest . -LE xfail'
+      docker run --rm -v `pwd`:/files executor-buildtools32 sh -c 'cd build && ctest . -LE xfail --no-compress-output -T test || true'
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'CTest'
