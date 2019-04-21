@@ -66,3 +66,18 @@ jobs:
   - script: |
       cd build
       ctest . -LE xfail
+
+- job: Linux
+  pool:
+    vmImage: 'ubuntu-16.04'
+  steps:
+  - checkout: self
+    submodules: true
+  - script: |
+      docker build -f docker/Dockerfile.x86_64 . -t executor-buildtools64
+    displayName: 'install prerequisites'
+  - script: |
+      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'mkdir -p build && cd build && cmake .. && ninja'
+    displayName: 'build'
+  - script: |
+      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && ctest . -LE xfail'
