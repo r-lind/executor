@@ -82,7 +82,8 @@ public:
         cpu.memoryBases[1] = nullptr;
         cpu.memoryBases[2] = nullptr;
         cpu.memoryBases[3] = nullptr;
-#elif SIZEOF_CHAR_P >= 8        cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
+#elif SIZEOF_CHAR_P >= 8        
+        cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
         cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
         cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
         cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
