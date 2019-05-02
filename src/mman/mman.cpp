@@ -26,7 +26,7 @@
 #include <algorithm>
 
 #if defined(LINUX)
-extern char __data_start, _end; /* boundaries of data+bss sections, supplied by the linker */
+extern char _etext, __data_start, _end; /* boundaries of data+bss sections, supplied by the linker */
 #endif
 
 namespace Executor
