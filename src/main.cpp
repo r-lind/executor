@@ -159,8 +159,7 @@ static const option_vec common_opts = {
       "tell program to print file; not useful unless you also "
       "specify a program to run and one or more documents to print.",
       opt_no_arg, "" },
-    { "nodotfiles", "do not display filenames that begin with dot", opt_no_arg,
-      "" },
+
 #if 0
   { "noclock",     "disable timer",               opt_no_arg,   "" },
 #endif
@@ -611,8 +610,7 @@ static void parseCommandLine(int& argc, char **argv)
     opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
     opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
-    opt_bool_val(common_db, "nodotfiles", &ROMlib_no_dot_files, &bad_arg_p);    // FIXME: currently ignored
-    opt_bool_val(common_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);    // FIXME: currently ignored
+    opt_bool_val(common_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);
 #if 0
   opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
 #endif
