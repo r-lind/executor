@@ -438,7 +438,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 #if SIZEOF_CHAR_P > 4
     // code duplication with ROMlib_InitGDevices() below
     ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
-    ROMlib_offsets[1] -= (1UL << 30);
+    ROMlib_offsets[1] -= (1UL << (ADDRESS_BITS-2));
     ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5;
 #endif
 
@@ -530,7 +530,7 @@ void Executor::ROMlib_InitGDevices()
     if(vdriver->framebuffer() == 0)
         abort();
     ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
-    ROMlib_offsets[1] -= (1UL << 30);
+    ROMlib_offsets[1] -= (1UL << (ADDRESS_BITS - 2));
     ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5; // ### //vdriver->rowBytes() * vdriver->height();
 #endif
 

@@ -26,7 +26,7 @@
 #include <algorithm>
 
 #if defined(LINUX)
-extern char _etext, _end; /* boundaries of data+bss sections, supplied by the linker */
+extern char __data_start, _end; /* boundaries of data+bss sections, supplied by the linker */
 #endif
 
 namespace Executor
@@ -363,13 +363,45 @@ void ROMlib_InitZones()
 
 static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
 {
-#if SIZEOF_CHAR_P == 4
+#if SIZEOF_CHAR_P == 4 && !defined(TWENTYFOUR_BIT_ADDRESSING)
     /*
     On 32-bit platforms, things are easy:
     The global variable ROMlib_offset specifies the offset between
     host addresses and guest addresses.
     */
     ROMlib_offset = (uintptr_t)base;
+#elif defined(TWENTYFOUR_BIT_ADDRESSING)
+    ROMlib_offsets[0] = (uintptr_t)base;
+    ROMlib_sizes[0] = size;
+
+    // mark the slot as occupied until we explicitly set it later
+    ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 22);
+    ROMlib_sizes[1] = 0;
+
+    // assume a maximum stack size of 4MB.
+    ROMlib_offsets[2] = (uintptr_t)thingOnStack - 4 * 1024 * 1024 + 4096;
+    ROMlib_offsets[2] -= ROMlib_offsets[2] & 3;
+    ROMlib_offsets[2] -= (2UL << 22);
+    ROMlib_sizes[2] = 4 * 1024 * 1024;
+
+#if defined(LINUX)
+    ROMlib_offsets[3] = (uintptr_t)&__data_start;
+    ROMlib_offsets[3] -= ROMlib_offsets[3] & 3;
+    ROMlib_offsets[3] -= (3UL << 22);
+    ROMlib_sizes[3] = &_end - &__data_start;
+#else
+    /* Mac OS X doesn't have _etext and _end, and the functions in
+       mach/getsect.h don't give the correct results when ASLR is active.
+       Win32 might also have a way to get the addresses, or it might not.
+
+       So we just use the address of a static variable and 512MB in each direction.
+     */
+    static char staticThing[32];
+    ROMlib_offsets[3] = (uintptr_t)&staticThing - 0x200000;
+    ROMlib_offsets[3] -= ROMlib_offsets[2] & 3;
+    ROMlib_offsets[3] -= (3UL << 22);
+    ROMlib_sizes[3] = 0x3FFFFF;
+#endif
 #else
     /*
     On 64-bit platforms, there is no single ROMlib_offset, but rather
