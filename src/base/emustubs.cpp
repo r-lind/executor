@@ -331,12 +331,6 @@ RAW_68K_IMPLEMENTATION(IMVI_LowerText)
     RTS();
 }
 
-RAW_68K_IMPLEMENTATION(StripAddress)
-{
-    RTS();
-}
-
-
 /*
  * This is just to trick out NIH Image... it's really not supported
  */

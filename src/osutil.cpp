@@ -899,19 +899,27 @@ void Executor::RestoreA5()
 
 #define TRUE32b 1
 
-void Executor::GetMMUMode(GUEST<INTEGER> *ip) /* IMV-592 */
+Byte Executor::GetMMUMode() /* IMV-592 */
 {
-    *ip = TRUE32b;
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+    return 0;
+#else
+    return TRUE32b;
+#endif
 }
 
 void Executor::SwapMMUMode(Byte *bp) /* IMV-593 */
 {
-    *bp = TRUE32b;
+    *bp = GetMMUMode();
 }
 
-LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
+uint32_t Executor::StripAddress(uint32_t l) /* IMV-593 */
 {
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+    return l & 0xFFFFFF;
+#else
     return l;
+#endif
 }
 
 void Executor::C_MakeDataExecutable(void *ptr, uint32_t sz)

@@ -250,9 +250,11 @@ extern void SetUpA5(void);
 extern void RestoreA5(void);
 #undef GetMMUMode
 #undef SwapMMUMode
-extern void GetMMUMode(GUEST<INTEGER> *ip);
+extern Byte GetMMUMode();
 extern void SwapMMUMode(Byte *bp);
-extern LONGINT StripAddress(LONGINT l);
+
+extern uint32_t StripAddress(uint32_t l);
+REGISTER_TRAP2(StripAddress, 0xA055, D0(D0));
 
 extern void C_DebugStr(StringPtr p);
 PASCAL_TRAP(DebugStr, 0xABFF);
