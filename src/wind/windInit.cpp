@@ -202,6 +202,7 @@ Executor may die without warning because of this mismatch",
     /* only issue warnings once */
     size_info.application_p = false;
 
+#ifndef TWENTYFOUR_BIT_ADDRESSING
     if((!size_info.size_resource_present_p
         || (size_info.size_flags & SZis32BitCompatible) != SZis32BitCompatible)
        && !ROMlib_nowarn32)
@@ -213,6 +214,7 @@ Executor may die without warning because of this mismatch",
                      "Continue", "Restart", nullptr,
                      nullptr, C_ExitToShell, nullptr);
     }
+#endif
 
     if(size_info.size_resource_present_p
        && ROMlib_applzone_size < size_info.preferred_size)
