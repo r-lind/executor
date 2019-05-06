@@ -1089,7 +1089,7 @@ void ReallocateHandle(Handle h, Size size)
             return;
         }
 
-        state = BLOCK_STATE(oldb);
+        state = HANDLE_STATE(h,oldb);
         if(PSIZE(oldb) >= (uint32_t)size)
         {
             ROMlib_setupblock(oldb, size, REL, h, state);
@@ -1121,7 +1121,7 @@ void ReallocateHandle(Handle h, Size size)
     }
 
     ROMlib_setupblock(newb, size, REL, h, state);
-    SETMASTER(h, BLOCK_DATA(newb));
+    SETMASTER(h, BLOCK_DATA(newb), state);
 
     if(oldb)
         ROMlib_freeblock(oldb);
@@ -1538,7 +1538,8 @@ repeat:
                 *target = *src;
 
                 SETMASTER(BLOCK_TO_HANDLE(current_zone, src),
-                          BLOCK_DATA(target));
+                          BLOCK_DATA(target),
+                          HANDLE_STATE(BLOCK_TO_HANDLE(current_zone, src), src));
 
                 BlockMove(BLOCK_DATA(src), BLOCK_DATA(target), LSIZE(src));
 
@@ -1976,7 +1977,7 @@ void EmptyHandle(Handle h)
     }
 
     ROMlib_freeblock(b);
-    SETMASTER(h, nullptr);
+    SETMASTER(h, nullptr, 0);
 
     LM(TheZone) = save_zone;
     MM_SLAM("exit");
@@ -2009,7 +2010,7 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         block_header_t *db = HANDLE_TO_BLOCK(dh);
         block_header_t *sb = HANDLE_TO_BLOCK(sh);
         ROMlib_freeblock(db);
-        SETMASTER(dh, *sh);
+        SETMASTER(dh, *sh, HANDLE_STATE(sh,sb));
         BLOCK_LOCATION_OFFSET(sb) = (Ptr)dh - (Ptr)LM(TheZone);
         *sh = guest_cast<Ptr>(ZONE_HFST_FREE(LM(TheZone)));
         ZONE_HFST_FREE(LM(TheZone)) = (Ptr)sh;

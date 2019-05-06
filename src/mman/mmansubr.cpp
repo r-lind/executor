@@ -247,7 +247,7 @@ handle_addr_info:
         return;
     }
 
-    state = BLOCK_STATE(ptr_block);
+    state = HANDLE_STATE(handle, ptr_block);
 
     ptr_data_start = (char *)BLOCK_DATA(ptr_block);
     ptr_data_size = LSIZE(ptr_block);
@@ -469,10 +469,10 @@ mm_set_block_fields_common(block_header_t *block,
                            unsigned size_correction,
                            uint32_t physical_size)
 {
-    BLOCK_SET_STATE(block, state);
-    BLOCK_SET_USE(block, use);
-    BLOCK_SET_SIZEC(block, size_correction);
-    BLOCK_SET_PSIZE(block, physical_size);
+    SET_BLOCK_STATE(block, state);
+    SETUSE(block, use);
+    SETSIZEC(block, size_correction);
+    SETPSIZE(block, physical_size);
 
     BLOCK_SET_RESERVED(block);
 }
@@ -615,7 +615,7 @@ void Executor::ROMlib_coalesce(block_header_t *block)
             HEAP_DEATH();
     }
 
-    BLOCK_SET_PSIZE(block, total_free);
+    SETPSIZE(block, total_free);
 
     if(ZONE_ALLOC_PTR(current_zone) >= block
        && (char *)ZONE_ALLOC_PTR(current_zone) <= (char *)block + total_free)
@@ -653,9 +653,10 @@ void Executor::ROMlib_moveblock(block_header_t *oldl, block_header_t *newl,
     if(USE(oldl) != REL || ROMlib_locked(oldl))
         gui_abort();
 
-    ROMlib_setupblock(newl, newsize, REL, master, BLOCK_STATE(oldl));
+    auto state = HANDLE_STATE(master, oldl);
+    ROMlib_setupblock(newl, newsize, REL, master, state);
     BlockMove(BLOCK_DATA(oldl), BLOCK_DATA(newl), LSIZE(oldl));
-    SETMASTER(master, BLOCK_DATA(newl));
+    SETMASTER(master, BLOCK_DATA(newl), state);
     ROMlib_freeblock(oldl);
 }
 

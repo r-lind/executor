@@ -93,10 +93,6 @@ extern uintptr_t ROMlib_memtop;
 #define POINTER_TO_BLOCK(pointer) \
     ((block_header_t *)((char *)(pointer)-HDRSIZE))
 
-/* extract the handle state bits */
-#define HANDLE_STATE(handle, block) \
-    ((block)->master_ptr_flags)
-
 #define FREE_BLOCK_STATE (0x1A)
 #define STATE_BITS (LOCKBIT | PURGEBIT | RSRCBIT)
 #define EMPTY_STATE (0)
@@ -105,14 +101,30 @@ extern uintptr_t ROMlib_memtop;
 #define BLOCK_STATE(block) \
     ((block)->master_ptr_flags)
 
-#define SET_HANDLE_STATE(handle, block, state) \
-    ((block)->master_ptr_flags = (state))
-
 #define SET_BLOCK_STATE(block, state) \
     ((block)->master_ptr_flags = (state))
 
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+/* extract the handle state bits */
+#define HANDLE_STATE(handle, block) \
+    ((handle)->raw_host_order() >> 24)
+
+#define SET_HANDLE_STATE(handle, block, state) \
+    ((handle)->raw_host_order( ((handle)->raw_host_order() & 0xFFFFFF) | ((state) << 24)))
+
 /* set the master pointer of a handle to a given value */
-#define SETMASTER(handle, ptr) (*handle = (Ptr)ptr)
+#define SETMASTER(handle, ptr, state) ((handle)->raw_host_order(((state) << 24) | guestvalues::GuestTypeTraits<Ptr>::host_to_reg((Ptr)ptr)))
+#else
+/* extract the handle state bits */
+#define HANDLE_STATE(handle, block) \
+    ((block)->master_ptr_flags)
+
+#define SET_HANDLE_STATE(handle, block, state) \
+    ((block)->master_ptr_flags = (state))
+
+/* set the master pointer of a handle to a given value */
+#define SETMASTER(handle, ptr, state) (*handle = (Ptr)ptr)
+#endif
 
 #define BLOCK_NEXT(block) \
     ((block_header_t *)((char *)(block) + PSIZE(block)))
@@ -120,11 +132,7 @@ extern uintptr_t ROMlib_memtop;
 #define LSIZE(block) \
     (PSIZE(block) - SIZEC(block) - HDRSIZE)
 
-/* ### bogo compat */
-#define BLOCK_SET_STATE(block, state) SET_BLOCK_STATE(block, state)
-#define BLOCK_SET_USE(block, use) SETUSE(block, use)
-#define BLOCK_SET_SIZEC(block, sizec) SETSIZEC(block, sizec)
-#define BLOCK_SET_PSIZE(block, psize) SETPSIZE(block, psize)
+
 #define BLOCK_SET_LOCATION_OFFSET(block, loc) \
     ((block)->location_u = loc)
 #define BLOCK_SET_LOCATION_ZONE(block, loc) \
