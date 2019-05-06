@@ -46,11 +46,11 @@ bool logging::canConvertBack(const void* p)
 {
     if(!p || p == (const void*) -1)
         return true;
-#if SIZEOF_CHAR_P == 4
+#if SIZEOF_CHAR_P == 4 && !defined(TWENTYFOUR_BIT_ADDRESSING)
     bool valid = true;
 #else
     bool valid = false;
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < OFFSET_TABLE_SIZE; i++)
     {
         if((uintptr_t)p >= ROMlib_offsets[i] &&
             (uintptr_t)p < ROMlib_offsets[i] + ROMlib_sizes[i])
@@ -66,11 +66,11 @@ bool logging::validAddress(const void* p)
         return false;
     if( (uintptr_t)p & 1 )
         return false;
-#if SIZEOF_CHAR_P == 4
+#if SIZEOF_CHAR_P == 4 && !defined(TWENTYFOUR_BIT_ADDRESSING)
     bool valid = true;
 #else
     bool valid = false;
-    for(int i = 0; i < 4; i++)
+    for(int i = 0; i < OFFSET_TABLE_SIZE; i++)
     {
         if((uintptr_t)p >= ROMlib_offsets[i] &&
             (uintptr_t)p < ROMlib_offsets[i] + ROMlib_sizes[i])

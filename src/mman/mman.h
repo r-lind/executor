@@ -401,6 +401,8 @@ public:
         HSetState(handle, state);
     }
 };
+
+void SetupVideoMemoryMapping(void *base, size_t size);
 }
 
 #endif /* !_MMAN_PUBLIC_H_ */
