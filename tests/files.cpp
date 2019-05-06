@@ -913,21 +913,24 @@ void setEOF(short refNum, long n)
 
 void eofCommon(short refNum)
 {
+    char zeroes[8] = {0,0,0,0,0,0,0,0};
         // earlier system versions deliver undefined data when a file is grown using SetEOF
         // in Mac OS X 10.4 + classic + MacOS 9, the test also passes without the following line:
-    doWrite(refNum, 0, "\0\0\0\0\0\0\0\0", 8);
+    doWrite(refNum, 0, zeroes, 8);
 
     setEOF(refNum, 4);
-    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0", 4));
+    EXPECT_TRUE(verifyContents(refNum, zeroes, 4));
 
     setEOF(refNum, 8);
-    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0\0\0\0\0", 8));
+    EXPECT_TRUE(verifyContents(refNum, zeroes, 8));
 
     setEOF(refNum, 4);
-    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0", 4));
+    EXPECT_TRUE(verifyContents(refNum, zeroes, 4));
 
     doWrite(refNum, 6, "a", 1);
-    EXPECT_TRUE(verifyContents(refNum, "\0\0\0\0\0\0a", 7));
+
+    char zeroesAndA[7] = {0,0,0,0,0,0,'a'};
+    EXPECT_TRUE(verifyContents(refNum, zeroesAndA, 7));
 
     doWrite(refNum, 0, "Hello, world.", 13);
     EXPECT_TRUE(verifyContents(refNum, "Hello, world.", 13));
