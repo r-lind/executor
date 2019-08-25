@@ -2002,22 +2002,6 @@ do_new_folder(fltype *f)
     return retval;
 }
 
-#if 0
-static void
-rep_from_host_reply_block(reply_u *repp,
-                          const host_spf_reply_block *host_reply)
-{
-}
-#endif
-
-static bool
-is_normal_dlgid(getorput_t getorput, INTEGER dig)
-{
-    return getorput == get
-        ? dig == getDlgID || dig == sfGetDialogID
-        : dig == putDlgID || dig == sfPutDialogID;
-}
-
 void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
                reply_u rep, INTEGER dig, filter_u fp, file_filter_u filef,
                INTEGER numt, GUEST<SFTypeList> tl, getorput_t getorput,
