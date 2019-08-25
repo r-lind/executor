@@ -2671,7 +2671,7 @@ const char *trap_name_array[0x1000] = {
     "SetStdCProcs", /* 0xAA4E */
     "CalcCMask", /* 0xAA4F */
     "SeedCFill", /* 0xAA50 */
-    "IMVI_CopyDeepMask", /* 0xAA51 */
+    "CopyDeepMask", /* 0xAA51 */
     "HighLevelFSDispatch", /* 0xAA52 */
     "AA53", /* 0xAA53 */
     "AA54", /* 0xAA54 */
@@ -3695,7 +3695,7 @@ const char *trap_name_array[0x1000] = {
     "SetStdCProcs", /* 0xAE4E */
     "CalcCMask", /* 0xAE4F */
     "SeedCFill", /* 0xAE50 */
-    "IMVI_CopyDeepMask", /* 0xAE51 */
+    "CopyDeepMask", /* 0xAE51 */
     "HighLevelFSDispatch", /* 0xAE52 */
     "AE53", /* 0xAE53 */
     "AE54", /* 0xAE54 */

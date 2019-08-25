@@ -133,7 +133,6 @@ PASCAL_TRAP(GetResInfo, 0xA9A8);
 extern INTEGER C_GetResAttrs(Handle res);
 PASCAL_TRAP(GetResAttrs, 0xA9A6);
 
-extern LONGINT ROMlib_SizeResource(Handle res, BOOLEAN usehandle);
 extern LONGINT C_GetResourceSizeOnDisk(Handle res);
 PASCAL_TRAP(GetResourceSizeOnDisk, 0xA9A5);
 

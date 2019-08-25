@@ -241,15 +241,17 @@ struct PenState
 /* IMV stuff is used when we parse Version 2 pictures, but the IMV calls
    are not supported in V1.0 */
 
-typedef enum { blend = 32,
-               addPin,
-               addOver,
-               subPin,
-               transparent,
-               adMax,
-               subOver,
-               adMin,
-               mask = 64 } colormodes;
+enum {
+    blend = 32,
+    addPin,
+    addOver,
+    subPin,
+    transparent,
+    adMax,
+    subOver,
+    adMin,
+    mask = 64
+};
 
 enum
 {
@@ -299,18 +301,6 @@ struct ColorSpec
     GUEST_STRUCT;
     GUEST<INTEGER> value;
     GUEST<RGBColor> rgb;
-};
-
-struct NativeRGBColor
-{
-    unsigned short red;
-    unsigned short green;
-    unsigned short blue;
-};
-struct NativeColorSpec
-{
-    INTEGER value;
-    NativeRGBColor rgb;
 };
 
 typedef ColorSpec cSpecArray[1]; /* can't use 0 */
@@ -372,13 +362,6 @@ typedef struct PixMap
 } * PixMapPtr;
 
 typedef GUEST<PixMapPtr> *PixMapHandle;
-
-enum pixmap_pixel_types
-{
-    chunky_pixel_type,
-    chunky_planar_pixel_type,
-    planar_pixel_type,
-};
 
 enum
 {
@@ -744,8 +727,6 @@ extern BOOLEAN C_EqualRgn(RgnHandle r1, RgnHandle r2);
 PASCAL_TRAP(EqualRgn, 0xA8E3);
 extern BOOLEAN C_EmptyRgn(RgnHandle rh);
 PASCAL_TRAP(EmptyRgn, 0xA8E2);
-extern void ROMlib_printrgn(RgnHandle h);
-extern void ROMlib_printpairs(INTEGER *p, LONGINT n);
 extern void C_FrameRect(Rect *r);
 PASCAL_TRAP(FrameRect, 0xA8A1);
 extern void C_PaintRect(Rect *r);
@@ -830,7 +811,6 @@ extern void StdBitsPicSaveFlag(const BitMap *srcbmp,
                                const Rect *srcrp, const Rect *dstrp,
                                INTEGER mode, RgnHandle mask, BOOLEAN savepic);
 
-extern void ROMlib_printsegs(INTEGER *ip);
 extern void C_StdLine(Point p);
 PASCAL_TRAP(StdLine, 0xA890);
 extern void C_StdOval(GrafVerb v, Rect *rp);
@@ -857,8 +837,6 @@ PASCAL_TRAP(StdText, 0xA882);
 extern INTEGER C_StdTxMeas(INTEGER n, Ptr p,
                                        GUEST<Point> *nump, GUEST<Point> *denp, FontInfo *finfop);
 PASCAL_TRAP(StdTxMeas, 0xA8ED);
-extern INTEGER ROMlib_StdTxMeas(LONGINT n, Ptr p,
-                                GUEST<Point> *nump, GUEST<Point> *denp, FontInfo *finfop);
 extern void C_MeasureText(INTEGER n, Ptr text,
                                       Ptr chars);
 PASCAL_TRAP(MeasureText, 0xA837);
@@ -902,7 +880,7 @@ extern void C_CalcCMask(BitMap *srcbp, BitMap *dstbp,
                                     Rect *srcrp, Rect *dstrp, RGBColor *seedrgbp, ProcPtr matchprocp,
                                     LONGINT matchdata);
 PASCAL_TRAP(CalcCMask, 0xAA4F);
-extern void C_IMVI_CopyDeepMask(
+extern void C_CopyDeepMask(
     BitMap *srcBits,
     BitMap *maskBits,
     BitMap *dstBits,
@@ -911,7 +889,7 @@ extern void C_IMVI_CopyDeepMask(
     Rect *dstRect,
     INTEGER mode,
     RgnHandle maskRgn);
-PASCAL_TRAP(IMVI_CopyDeepMask, 0xAA51);
+PASCAL_TRAP(CopyDeepMask, 0xAA51);
 
 static_assert(sizeof(Region) == 10);
 static_assert(sizeof(BitMap) == 14);

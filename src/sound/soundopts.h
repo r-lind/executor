@@ -80,8 +80,8 @@ struct ModifierStub
 #define SND_CHAN_CURRENT_DB(c) (SND_CHAN_FIRSTMOD(c)->current_db)
 #define SND_CHAN_DBHP(c) (SND_CHAN_FIRSTMOD(c)->dbhp)
 
-#define SND_CHAN_CMDINPROG_P(c) (SND_CHAN_FLAGS(c) & CHAN_CMDINPROG_FLAG)
-#define SND_CHAN_DBINPROG_P(c) (SND_CHAN_FLAGS(c) & CHAN_DBINPROG_FLAG)
+#define SND_CHAN_CMDINPROG_P(c) ((c)->flags & CHAN_CMDINPROG_FLAG)
+#define SND_CHAN_DBINPROG_P(c) ((c)->flags & CHAN_DBINPROG_FLAG)
 
 extern int ROMlib_SND_RATE;
 #define SND_RATE ROMlib_SND_RATE

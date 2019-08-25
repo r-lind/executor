@@ -1719,8 +1719,7 @@ short Executor::NeXTPrTxMeas(LONGINT n, Ptr p, GUEST<Point> *nump, GUEST<Point> 
     short retval;
 
     num.h = num.v = den.h = den.v = 0x100;
-    retval = ROMlib_StdTxMeas(n,
-                              (Ptr)p, &num, &den, nullptr);
+    retval = C_StdTxMeas(n, (Ptr)p, &num, &den, nullptr);
     return (float)retval * num.h / den.h;
 }
 

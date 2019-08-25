@@ -60,7 +60,7 @@ Fract Executor::C_FracSin(Fixed x) /* IMIV-64 */
     return X2Frac(&z);
 }
 
-Fixed Executor::FixATan2(LONGINT x, LONGINT y) /* IMIV-65 */
+Fixed Executor::C_FixATan2(LONGINT x, LONGINT y) /* IMIV-65 */
 {
     Extended z;
 
@@ -72,10 +72,6 @@ Fixed Executor::FixATan2(LONGINT x, LONGINT y) /* IMIV-65 */
     }
     z = atan2((double)y, (double)x);
     return X2Fix(&z);
-}
-Fixed Executor::C_FixAtan2(LONGINT x, LONGINT y) /* IMIV-65 */
-{
-    return FixATan2(x, y);
 }
 
 Fract Executor::C_FracCos(Fixed x) /* IMIV-64 */

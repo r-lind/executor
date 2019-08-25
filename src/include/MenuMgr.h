@@ -58,24 +58,6 @@ typedef struct MCEntry
     GUEST<RGBColor> mctRGB3;
     GUEST<RGBColor> mctRGB4;
     GUEST<INTEGER> mctReserved;
-
-    MCEntry() = default;
-    MCEntry(GUEST<INTEGER> mctID,
-            GUEST<INTEGER> mctItem,
-            GUEST<RGBColor> mctRGB1,
-            GUEST<RGBColor> mctRGB2,
-            GUEST<RGBColor> mctRGB3,
-            GUEST<RGBColor> mctRGB4,
-            GUEST<INTEGER> mctReserved)
-        : mctID(mctID)
-        , mctItem(mctItem)
-        , mctRGB1(mctRGB1)
-        , mctRGB2(mctRGB2)
-        , mctRGB3(mctRGB3)
-        , mctRGB4(mctRGB4)
-        , mctReserved(mctReserved)
-    {
-    }
 } * MCEntryPtr;
 
 typedef MCEntry MCTable[1];
@@ -206,7 +188,6 @@ PASCAL_TRAP(GetMenuHandle, 0xA949);
 extern void C_SetMenuFlash(INTEGER i);
 PASCAL_TRAP(SetMenuFlash, 0xA94A);
 
-extern BOOLEAN ROMlib_shouldalarm(void);
 extern void C_InitProcMenu(INTEGER mbid);
 PASCAL_TRAP(InitProcMenu, 0xA808);
 

@@ -81,6 +81,12 @@ const LowMemGlobal<Ptr> SoundBase { 0x266 }; // SoundDvr IMIII-21 (true-b);
 const LowMemGlobal<Byte> SoundLevel { 0x27F }; // SoundDvr IMII-234 (false);
 const LowMemGlobal<INTEGER> CurPitch { 0x280 }; // SoundDvr IMII-226 (true-b);
 
+extern void StartSound(Ptr srec, LONGINT nb, ProcPtr comp);
+extern void StopSound(void);
+extern BOOLEAN SoundDone(void);
+extern void GetSoundVol(INTEGER *volp);
+extern void SetSoundVol(INTEGER vol);
+
 static_assert(sizeof(FFSynthRec) == 30008);
 static_assert(sizeof(Tone) == 6);
 static_assert(sizeof(SWSynthRec) == 30008);

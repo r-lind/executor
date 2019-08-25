@@ -33,6 +33,26 @@ get_size_resource()
     return (size_resource_handle)size;
 }
 
+#define PSN_EQ_P(psn0, psn1)                      \
+    ((psn0).highLongOfPSN == (psn1).highLongOfPSN \
+     && (psn0).lowLongOfPSN == (psn1).lowLongOfPSN)
+
+#define PROCESS_INFO_SERIAL_NUMBER(info) ((info)->processNumber)
+#define PROCESS_INFO_LAUNCHER(info) ((info)->processLauncher)
+
+#define PROCESS_INFO_LENGTH(info) ((info)->processInfoLength)
+#define PROCESS_INFO_NAME(info) ((info)->processName)
+#define PROCESS_INFO_TYPE(info) ((info)->processType)
+#define PROCESS_INFO_SIGNATURE(info) ((info)->processSignature)
+#define PROCESS_INFO_MODE(info) ((info)->processMode)
+#define PROCESS_INFO_LOCATION(info) ((info)->processLocation)
+#define PROCESS_INFO_SIZE(info) ((info)->processSize)
+#define PROCESS_INFO_FREE_MEM(info) ((info)->processFreeMem)
+#define PROCESS_INFO_LAUNCH_DATE(info) ((info)->processLaunchDate)
+#define PROCESS_INFO_ACTIVE_TIME(info) ((info)->processActiveTime)
+
+
+
 #pragma pack(push, 2)
 typedef struct process_info
 {

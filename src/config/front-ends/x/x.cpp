@@ -9,7 +9,6 @@
 #include <ScrapMgr.h>
 #include <OSUtil.h>
 
-#include <osevent/commonevt.h>
 #include <vdriver/dirtyrect.h>
 #include <rsys/keyboard.h>
 #include <rsys/scrap.h>

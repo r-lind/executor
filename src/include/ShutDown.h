@@ -15,7 +15,7 @@ enum
     sdOnRestart = 2,
     sdOnUnmount = 4,
     sdOnDrivers = 8,
-    sdOnRestartOrPower = (sdOnPowerOff + sdOnRestart),
+    sdOnRestartOrPower = sdOnPowerOff | sdOnRestart,
 };
 
 DISPATCHER_TRAP(ShutDown, 0xA895, StackW);

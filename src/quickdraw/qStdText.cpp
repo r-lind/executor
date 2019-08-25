@@ -762,12 +762,6 @@ INTEGER Executor::C_StdTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
     return xStdTxMeas(n, (unsigned char *)p, nump, denp, finfop, nullptr);
 }
 
-INTEGER Executor::ROMlib_StdTxMeas(LONGINT n, Ptr p, GUEST<Point> *nump,
-                                   GUEST<Point> *denp, FontInfo *finfop)
-{
-    return xStdTxMeas(n, (unsigned char *)p, nump, denp, finfop, nullptr);
-}
-
 void Executor::C_MeasureText(INTEGER n, Ptr text, Ptr chars) /* IMIV-25 */
 {
     GUEST<Point> num, den;

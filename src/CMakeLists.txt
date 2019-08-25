@@ -370,7 +370,6 @@ set(time_sources
 
 set(osevent_sources
         osevent/osevent.h
-        osevent/commonevt.h
         osevent/hle.cpp
         osevent/ibm_keycodes.cpp
         osevent/osevent.cpp

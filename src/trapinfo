@@ -2655,7 +2655,7 @@
 0xAA4E	SetStdCProcs
 0xAA4F	CalcCMask
 0xAA50	SeedCFill
-0xAA51	IMVI_CopyDeepMask
+0xAA51	CopyDeepMask
 0xAA52	HighLevelFSDispatch FSMakeFSSpec FSpOpenDF FSpOpenRF FSpCreate FSpDirCrate FSpDirCreate FSpDelete FSpGetFInfo FSpSetFInfo FSpSetFLock FSpRstFLock FSpRename FSpCatMove FSpOpenResFile FSpCreateResFile FSpExchangeFiles
 0xAA53	
 0xAA54	

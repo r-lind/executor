@@ -4,8 +4,6 @@
 #include <EventMgr.h>
 #include <PPC.h>
 
-#include <osevent/commonevt.h>
-
 #define MODULE_NAME OSEvent
 #include <base/api-module.h>
 
@@ -116,9 +114,6 @@ struct D0Minus1Boolean
 };
 }
 
-extern void ROMlib_eventdep(void);
-extern void insertcommonevent(char *xeventp, commonevent *comevtp);
-extern void ROMlib_zapmap(LONGINT loc, LONGINT val);
 extern OSErr PPostEvent(INTEGER evcode,
                                 LONGINT evmsg, GUEST<EvQElPtr> *qelp);
 extern OSErr ROMlib_PPostEvent(INTEGER evcode, LONGINT evmsg,
@@ -174,12 +169,6 @@ extern Boolean C_GetSpecificHighLevelEvent(GetSpecificFilterProcPtr fn, Ptr data
 PASCAL_SUBTRAP(GetSpecificHighLevelEvent, 0xA88F, 0x0045, OSDispatch);
 extern OSErr C_PostHighLevelEvent(EventRecord *evt, Ptr receiver_id, int32_t refcon, Ptr msg_buf, int32_t msg_length, int32_t post_options);
 PASCAL_SUBTRAP(PostHighLevelEvent, 0xA88F, 0x0034, OSDispatch);
-
-/* #### move to rsys/foo.h */
-extern bool hle_get_event(EventRecord *evt, bool remflag);
-extern void hle_init(void);
-extern void hle_reinit(void);
-extern void hle_reset(void);
 
 static_assert(sizeof(EvQEl) == 22);
 static_assert(sizeof(TargetID) == 252);

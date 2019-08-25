@@ -167,8 +167,6 @@ enum
     diffVolErr = -1303,
 };
 
-#pragma pack(push, 2)
-
 typedef struct
 {
     GUEST_STRUCT;
@@ -573,8 +571,6 @@ const LowMemGlobal<Ptr> ToExtFS { 0x3F2 }; // FileMgr IMIV-212 (false);
 const LowMemGlobal<INTEGER> FSFCBLen { 0x3F6 }; // FileMgr IMIV-97 (true);
 
 
-#pragma pack(pop)
-
 extern OSErr FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
 NOTRAP_FUNCTION2(FSOpen);
 extern OSErr OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
@@ -601,7 +597,6 @@ NOTRAP_FUNCTION2(AllocContig);
 extern OSErr FSClose(INTEGER rn);
 NOTRAP_FUNCTION2(FSClose);
 
-extern void ROMlib_rewinddir(void);
 extern OSErr Create(StringPtr filen, INTEGER vrn, OSType creator,
                     OSType filtyp);
 NOTRAP_FUNCTION2(Create);

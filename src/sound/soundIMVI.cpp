@@ -222,7 +222,7 @@ OSErr Executor::C_SndPlayDoubleBuffer(SndChannelPtr chanp,
       */
             SND_CHAN_TIME(chanp) = 0;
             SND_CHAN_CURRENT_START(chanp) = 0;
-            SND_CHAN_FLAGS(chanp) |= CHAN_DBINPROG_FLAG;
+            chanp->flags |= CHAN_DBINPROG_FLAG;
             SOUND_GO();
             retval = noErr;
             break;

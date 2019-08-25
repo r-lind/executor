@@ -12,15 +12,18 @@
 #define MODULE_NAME Iconutil
 #include <base/api-module.h>
 
-#define large1BitMask (FOURCC('I', 'C', 'N', '#'))
-#define large4BitData (FOURCC('i', 'c', 'l', '4'))
-#define large8BitData (FOURCC('i', 'c', 'l', '8'))
-#define small1BitMask (FOURCC('i', 'c', 's', '#'))
-#define small4BitData (FOURCC('i', 'c', 's', '4'))
-#define small8BitData (FOURCC('i', 'c', 's', '8'))
-#define mini1BitMask (FOURCC('i', 'c', 'm', '#'))
-#define mini4BitData (FOURCC('i', 'c', 'm', '4'))
-#define mini8BitData (FOURCC('i', 'c', 'm', '8'))
+enum
+{
+    large1BitMask = FOURCC('I', 'C', 'N', '#'),
+    large4BitData = FOURCC('i', 'c', 'l', '4'),
+    large8BitData = FOURCC('i', 'c', 'l', '8'),
+    small1BitMask = FOURCC('i', 'c', 's', '#'),
+    small4BitData = FOURCC('i', 'c', 's', '4'),
+    small8BitData = FOURCC('i', 'c', 's', '8'),
+    mini1BitMask = FOURCC('i', 'c', 'm', '#'),
+    mini4BitData = FOURCC('i', 'c', 'm', '4'),
+    mini8BitData = FOURCC('i', 'c', 'm', '8'),
+};
 
 namespace Executor
 {

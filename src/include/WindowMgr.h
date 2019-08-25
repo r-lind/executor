@@ -98,9 +98,7 @@ enum
 typedef GrafPtr WindowPtr;
 
 typedef CGrafPtr CWindowPtr;
-}
-namespace Executor
-{
+
 typedef struct __cr ControlRecord;
 typedef ControlRecord *ControlPtr;
 

@@ -22,6 +22,18 @@ using namespace Executor;
 
 INTEGER ROMlib_qd_error;
 
+struct NativeRGBColor
+{
+    unsigned short red;
+    unsigned short green;
+    unsigned short blue;
+};
+struct NativeColorSpec
+{
+    INTEGER value;
+    NativeRGBColor rgb;
+};
+
 INTEGER Executor::C_QDError()
 {
     /* #warning "make QDError work for real" */

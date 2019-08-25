@@ -223,7 +223,7 @@ Executor::ROMlib_get_index_and_bit(LONGINT loc, int *indexp, uint8_t *bitp)
     return retval;
 }
 
-void Executor::ROMlib_zapmap(LONGINT loc, LONGINT val)
+static void ROMlib_zapmap(LONGINT loc, LONGINT val)
 {
     int i;
     uint8_t bit;

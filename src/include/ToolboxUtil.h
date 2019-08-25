@@ -36,12 +36,7 @@ struct Int64Bit
     GUEST<LONGINT> loLong;
 };
 
-#if 1 || !defined(__alpha)
 typedef Pattern *PatPtr;
-#else /* defined(__alpha) */
-typedef char *PatPtr;
-// FIXME: #warning "Bad PatPtr def ... 'cause of problems with my gcc mods -- ctm"
-#endif /* defined(__alpha) */
 
 typedef GUEST<PatPtr> *PatHandle;
 
@@ -52,9 +47,8 @@ PASCAL_TRAP(FracSqrt, 0xA849);
 extern Fract C_FracSin(Fixed x);
 PASCAL_TRAP(FracSin, 0xA848);
 
-extern Fixed FixATan2(LONGINT x, LONGINT y);
-extern Fixed C_FixAtan2(LONGINT x, LONGINT y);
-PASCAL_TRAP(FixAtan2, 0xA818);
+extern Fixed C_FixATan2(LONGINT x, LONGINT y);
+PASCAL_TRAP(FixATan2, 0xA818);
 
 extern Fract C_FracCos(Fixed x);
 PASCAL_TRAP(FracCos, 0xA847);

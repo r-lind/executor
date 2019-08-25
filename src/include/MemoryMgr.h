@@ -165,12 +165,6 @@ extern void _PurgeSpace_flags(GUEST<Size> *totalp, GUEST<Size> *contigp, bool sy
 REGISTER_FLAG_TRAP(_PurgeSpace_flags, PurgeSpace, PurgeSpaceSys,
     0xA062, void(GUEST<Size> *, GUEST<Size> *), void (Out<int32_t,D0>, Out<int32_t,A0>, TrapBit<SYSBIT>));
 
-/* ### cliff bogofunc; should go away */
-extern void ROMlib_installhandle(Handle sh, Handle dh);
-
-extern void ROMlib_InitZones();
-extern void InitMemory(void *thingOnStack);
-
 extern OSErr C_MemError(void);
 NOTRAP_FUNCTION(MemError);
 

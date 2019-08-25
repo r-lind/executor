@@ -55,9 +55,6 @@ typedef struct SndChannel
     GUEST<SndCommand[stdQLength]> queue;
 } * SndChannelPtr;
 
-#define SND_CHAN_FLAGS(c) (c->flags)
-
-
 enum
 {
     nullCmd,
@@ -209,12 +206,10 @@ typedef struct _SCSTATUS
     GUEST<LONGINT> scCPULoad;
 } SCStatus, *SCStatusPtr;
 
-#if 1 /* stub definitions */
 typedef void *SMStatusPtr;
 typedef LONGINT NumVersion;
 typedef void *AudioSelectionPtr;
 typedef void *SPBPtr;
-#endif
 
 typedef uint32_t UnsignedFixed;
 typedef Ptr CompressionInfoPtr;
@@ -389,11 +384,6 @@ extern OSErr C_SndSetInfo(SndChannelPtr chan, OSType selector,
                                void *infoPtr);
 PASCAL_SUBTRAP(SndSetInfo, 0xA800, 0x06400018, SoundDispatch);
 
-extern void StartSound(Ptr srec, LONGINT nb, ProcPtr comp);
-extern void StopSound(void);
-extern BOOLEAN SoundDone(void);
-extern void GetSoundVol(INTEGER *volp);
-extern void SetSoundVol(INTEGER vol);
 extern OSErr C_SndPlay(SndChannelPtr chanp, Handle sndh,
                             BOOLEAN async);
 PASCAL_TRAP(SndPlay, 0xA805);

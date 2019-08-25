@@ -49,6 +49,7 @@ extern mextp ROMlib_mitemtop(MenuHandle mh, INTEGER item, StringPtr *ssp);
 extern INTEGER ROMlib_mentosix(INTEGER mid);
 extern LONGINT ROMlib_menuhelper(MenuHandle mh, Rect *saver, LONGINT where,
                                  BOOLEAN ispopup, INTEGER ndisplayed);
+extern BOOLEAN ROMlib_shouldalarm(void);
 
 #define mbDraw 0
 #define mbHit 1

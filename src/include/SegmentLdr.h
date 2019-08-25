@@ -16,7 +16,6 @@
 
 namespace Executor
 {
-//extern _NORET_1_ void C_ExitToShell(void) _NORET_2_;
 extern void C_ExitToShell(void);
 PASCAL_TRAP(ExitToShell, 0xA9F4);
 

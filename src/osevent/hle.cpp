@@ -6,6 +6,7 @@
 
 #include <OSEvent.h>
 #include <MemoryMgr.h>
+#include <osevent/osevent.h>
 #include <base/functions.impl.h>
 
 using namespace Executor;

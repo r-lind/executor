@@ -13,14 +13,14 @@
 
  */
 
+namespace Executor
+{
 enum
 {
     noScrapErr = (-100),
     noTypeErr = (-102),
 };
 
-namespace Executor
-{
 struct ScrapStuff
 {
     GUEST_STRUCT;

@@ -52,5 +52,10 @@ extern uint16_t ROMlib_right_to_left_key_map(uint16_t what);
 
 extern bool ROMlib_get_index_and_bit(LONGINT loc, int *indexp,
                                      uint8_t *bitp);
+
+extern bool hle_get_event(EventRecord *evt, bool remflag);
+extern void hle_init(void);
+extern void hle_reinit(void);
+extern void hle_reset(void);
 }
 #endif

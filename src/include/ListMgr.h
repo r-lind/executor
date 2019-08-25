@@ -17,12 +17,7 @@ namespace Executor
 {
 typedef Point Cell;
 
-#if 1 || !defined(__alpha)
 typedef Byte DataArray[32001];
-#else /* defined(__alpha) */
-typedef Byte DataArray;
-// FIXME: #warning incorrect typedef to make gcc happy
-#endif /* defined(__alpha) */
 
 typedef DataArray *DataPtr;
 

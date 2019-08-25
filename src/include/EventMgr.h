@@ -71,8 +71,8 @@ enum
     shiftKey = 512,
     alphaLock = 1024,
     optionKey = 2048,
+    ControlKey = 4096,
 };
-#define ControlKey 4096 /* IM V-196 */
 
 enum
 {

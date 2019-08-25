@@ -85,6 +85,7 @@ extern void ROMlib_PICWRITE(Ptr addr, INTEGER count);
 
 extern RgnHandle ROMlib_circrgn(Rect *rp);
 extern void ROMlib_initport(GrafPtr p);
+extern void ROMlib_printrgn(RgnHandle h);
 
 static_assert(sizeof(ccrsr_res) == 148);
 }

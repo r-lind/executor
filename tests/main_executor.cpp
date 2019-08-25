@@ -2,6 +2,7 @@
 #include <FileMgr.h>
 #include <file/file.h>
 #include <MemoryMgr.h>
+#include <mman/mman.h>
 #include <WindowMgr.h>
 #include <MenuMgr.h>
 #include <FontMgr.h>

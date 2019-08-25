@@ -445,7 +445,7 @@ void Executor::C_CopyMask(BitMap *src_bogo_map, BitMap *mask_bogo_map,
     TEMP_ALLOC_FREE(temp_mask_bits);
 }
 
-void Executor::C_IMVI_CopyDeepMask(BitMap *srcBits, BitMap *maskBits,
+void Executor::C_CopyDeepMask(BitMap *srcBits, BitMap *maskBits,
                                    BitMap *dstBits, Rect *srcRect,
                                    Rect *maskRect, Rect *dstRect, INTEGER mode,
                                    RgnHandle maskRgn)

@@ -341,7 +341,7 @@ PixMapHandle Executor::C_NewPixMap()
         memset(*pixmap, 0, sizeof(PixMap));
         (*pixmap)->rowBytes = PIXMAP_DEFAULT_ROW_BYTES;
         PIXMAP_HRES(pixmap) = PIXMAP_VRES(pixmap) = 72 << 16;
-        PIXMAP_PIXEL_TYPE(pixmap) = chunky_pixel_type;
+        PIXMAP_PIXEL_TYPE(pixmap) = 0;
         PIXMAP_CMP_COUNT(pixmap) = 1;
     }
 
