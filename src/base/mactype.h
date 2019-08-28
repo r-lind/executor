@@ -24,6 +24,8 @@
 namespace Executor
 {
 
+#define BEGIN_EXECUTOR_ONLY /* marker for parsing executor header files */
+#define END_EXECUTOR_ONLY   /* marker for parsing executor header files */
 
 struct Point
 {

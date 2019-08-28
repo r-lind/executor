@@ -19,6 +19,7 @@
 #include <quickdraw/region.h>
 #include <quickdraw/text.h>
 #include <base/cpu.h>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 

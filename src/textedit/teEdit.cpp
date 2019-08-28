@@ -21,6 +21,7 @@
 #include <quickdraw/text.h>
 #include <prefs/prefs.h>
 #include <vdriver/vdriver.h>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 

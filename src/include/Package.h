@@ -32,6 +32,8 @@ PASCAL_TRAP(InitPack, 0xA9E5);
 extern void C_InitAllPacks(void);
 PASCAL_TRAP(InitAllPacks, 0xA9E6);
 
+BEGIN_EXECUTOR_ONLY
 RAW_68K_TRAP(Pack1, 0xA9E8);
+END_EXECUTOR_ONLY
 }
 #endif /* __PACKAGE__ */

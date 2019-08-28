@@ -83,7 +83,9 @@ const LowMemGlobal<Byte> TmpResLoad { 0xB9F }; // ResourceMgr IMIV-19 (false);
 
 DISPATCHER_TRAP(ResourceDispatch, 0xA822, D0<0xF>);
 
+BEGIN_EXECUTOR_ONLY
 RAW_68K_TRAP(ResourceStub, 0xA0FC); // defined in emustubs.cpp
+END_EXECUTOR_ONLY
 
 extern void C_SetResLoad(BOOLEAN load);
 PASCAL_TRAP(SetResLoad, 0xA99B);
@@ -112,7 +114,7 @@ PASCAL_TRAP(GetNamedResource, 0xA9A1);
 extern Handle C_Get1NamedResource(ResType typ,
                                               StringPtr s);
 PASCAL_TRAP(Get1NamedResource, 0xA820);
-extern void C_LoadResource(Handle volatile res);
+extern void C_LoadResource(Handle res);
 PASCAL_TRAP(LoadResource, 0xA9A2);
 
 extern void C_ReleaseResource(Handle res);

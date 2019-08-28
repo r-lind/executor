@@ -410,7 +410,7 @@ extern void C_ProtectEntry(INTEGER, BOOLEAN);
 PASCAL_TRAP(ProtectEntry, 0xAA3D);
 extern void C_ReserveEntry(INTEGER, BOOLEAN);
 PASCAL_TRAP(ReserveEntry, 0xAA3E);
-extern void C_SetEntries(INTEGER, INTEGER, ColorSpec * /* cSpecArray */);
+extern void C_SetEntries(INTEGER, INTEGER, ColorSpec * cSpecArray);
 PASCAL_TRAP(SetEntries, 0xAA3F);
 extern void C_AddSearch(ProcPtr);
 PASCAL_TRAP(AddSearch, 0xAA3A);

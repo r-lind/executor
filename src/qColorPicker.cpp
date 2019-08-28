@@ -21,6 +21,7 @@
 #include <rsys/color_wheel_bits.h>
 #include <osevent/osevent.h>
 #include <prefs/options.h>
+#include <textedit/textedit.h>
 
 #include <ctype.h>
 #define _USE_MATH_DEFINES

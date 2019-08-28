@@ -25,6 +25,7 @@
 #include <rsys/dump.h>
 #include <rsys/string.h>
 #include <mman/mman_private.h>
+#include <textedit/textedit.h>
 
 #include <print/print.h>
 

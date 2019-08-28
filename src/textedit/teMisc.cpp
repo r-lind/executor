@@ -22,6 +22,7 @@
 #include <quickdraw/text.h>
 #include <algorithm>
 #include <base/cpu.h>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 

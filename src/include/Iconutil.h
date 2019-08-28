@@ -12,6 +12,9 @@
 #define MODULE_NAME Iconutil
 #include <base/api-module.h>
 
+
+namespace Executor
+{
 enum
 {
     large1BitMask = FOURCC('I', 'C', 'N', '#'),
@@ -25,8 +28,6 @@ enum
     mini8BitData = FOURCC('i', 'c', 'm', '8'),
 };
 
-namespace Executor
-{
 /* IconAlignmentType values */
 enum
 {

@@ -405,8 +405,6 @@ OSErr Executor::C_AERemoveCoercionHandler(
 
 #define k_special_sel1 (FOURCC('\000', '\000', '\000', '\000'))
 
-syn68k_addr_t Executor::AE_OSL_select_fn;
-
 OSErr Executor::C_AEInstallSpecialHandler(
     AEKeyword function_class, EventHandlerProcPtr hdlr_fn,
     Boolean system_handler_p)
@@ -419,14 +417,6 @@ OSErr Executor::C_AEInstallSpecialHandler(
 
     if(hdlr_fn == nullptr)
         AE_RETURN_ERROR(paramErr);
-
-    /* #### OSL internal */
-    if(function_class == keySelectProc)
-    {
-        AE_OSL_select_fn = US_TO_SYN68K((void *)hdlr_fn);
-        warning_unimplemented("AEInstallSpecialHandler: keySelectProc set");
-        AE_RETURN_ERROR(noErr);
-    }
 
     table = hdlr_table(system_handler_p, special);
 

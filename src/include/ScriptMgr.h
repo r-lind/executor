@@ -397,6 +397,7 @@ extern INTEGER C_CharToPixel(
     Point denom);
 PASCAL_SUBTRAP(CharToPixel, 0xA8B5, 0x821C0030, ScriptUtil);
 
+BEGIN_EXECUTOR_ONLY
 extern void C_LowercaseText(
     Ptr textp,
     INTEGER len,
@@ -428,6 +429,7 @@ extern void C_TextUtilFunctions(
     INTEGER len,
     ScriptCode script);
 PASCAL_SUBTRAP(TextUtilFunctions, 0xA8B5, 0x800AFFB6, ScriptUtil);
+END_EXECUTOR_ONLY
 
 extern INTEGER C_CharacterByteType(Ptr textBuf, INTEGER textOffset,
                                    ScriptCode script);

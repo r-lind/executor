@@ -20,6 +20,7 @@
 #include <ctl/ctl.h>
 #include <mman/mman.h>
 #include <res/resource.h>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 
@@ -219,12 +220,10 @@ ROMlib_new_dialog_common(DialogPtr dp,
     WINDOW_KIND(dp) = dialogKind;
 
     {
-        Rect emptyrect;
+        Rect emptyrect = {};
         TEHandle te;
 
-        RECT_ZERO(&emptyrect);
-
-        /************************ DO NOT CHECK THIS IN ****************
+     /************************ DO NOT CHECK THIS IN ****************
 	 if (color_p && item_color_table_h)
 	   te = TEStyleNew (&emptyrect, &emptyrect);
 	 else

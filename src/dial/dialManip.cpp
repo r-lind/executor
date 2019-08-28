@@ -16,6 +16,7 @@
 #include <ctl/ctl.h>
 #include <quickdraw/cquick.h>
 #include <mman/mman.h>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 

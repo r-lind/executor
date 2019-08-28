@@ -56,6 +56,7 @@ typedef INTEGER OSErr;
 typedef LONGINT OSType;
 typedef LONGINT ResType;
 
+BEGIN_EXECUTOR_ONLY
 class OSErrorException : public std::runtime_error
 {
 public:
@@ -63,16 +64,19 @@ public:
 
     OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
 };
+END_EXECUTOR_ONLY
+
+union QElem;
+typedef QElem *QElemPtr;
 
 struct QHdr
 {
     GUEST_STRUCT;
     GUEST<INTEGER> qFlags;
-    GUEST<union __qe *> qHead; /* actually QElemPtr */
-    GUEST<union __qe *> qTail; /* actually QElemPtr */
+    GUEST<QElemPtr> qHead;
+    GUEST<QElemPtr> qTail;
 };
 typedef QHdr *QHdrPtr;
-typedef union __qe *QElemPtr;
 
 enum
 {
@@ -87,14 +91,7 @@ struct Point { GUEST_STRUCT;
     GUEST< INTEGER> v;
     GUEST< INTEGER> h;
 };
-
-struct NativePoint {
-    INTEGER v;
-    INTEGER h;
-};
 #endif
-
-#define ZEROPOINT(p) (p.v = 0, p.h = 0)
 
 struct Rect
 {
@@ -104,18 +101,11 @@ struct Rect
     GUEST<INTEGER> bottom;
     GUEST<INTEGER> right;
 
-    Rect() = default;
-    Rect(GUEST<INTEGER> t, GUEST<INTEGER> l, GUEST<INTEGER> b, GUEST<INTEGER> r)
-        : top(t)
-        , left(l)
-        , bottom(b)
-        , right(r)
-    {
-    }
 };
 
 typedef Rect *RectPtr;
 
+BEGIN_EXECUTOR_ONLY
 inline short RECT_WIDTH(const Rect *r)
 {
     return r->right - r->left;
@@ -124,18 +114,7 @@ inline short RECT_HEIGHT(const Rect *r)
 {
     return r->bottom - r->top;
 }
-
-#define RECT_ZERO(r)                \
-    do                              \
-        memset(r, 0, sizeof(Rect)); \
-    while(false)
-
-inline bool RECT_EQUAL_P(const Rect *r1, const Rect *r2)
-{
-    const uint32_t *__p1 = (const uint32_t *)(r1);
-    const uint32_t *__p2 = (const uint32_t *)(r2);
-    return __p1[0] == __p2[0] && __p1[1] == __p2[1];
-}
+END_EXECUTOR_ONLY
 
 /* from IntlUtil.h */
 typedef INTEGER ScriptCode;

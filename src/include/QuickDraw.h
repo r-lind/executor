@@ -462,12 +462,6 @@ struct QDGlobals
     GUEST<GrafPtr> thePort;
 };
 
-inline QDGlobals& qdGlobals()
-{
-    Ptr thePortPtr = *(GUEST<Ptr> *)SYN68K_TO_US(EM_A5);
-    return *(QDGlobals*)(thePortPtr - offsetof(QDGlobals, thePort));
-}
-
 const LowMemGlobal<INTEGER> ScrVRes { 0x102 }; // QuickDraw IMI-473 (true);
 const LowMemGlobal<INTEGER> ScrHRes { 0x104 }; // QuickDraw IMI-473 (true);
 const LowMemGlobal<INTEGER> ScreenRow { 0x106 }; // QuickDraw ThinkC (true);
@@ -912,5 +906,14 @@ static_assert(sizeof(PixPat) == 28);
 static_assert(sizeof(CGrafPort) == 108);
 static_assert(sizeof(CCrsr) == 96);
 static_assert(sizeof(MatchRec) == 10);
+
+BEGIN_EXECUTOR_ONLY
+inline QDGlobals& qdGlobals()
+{
+    Ptr thePortPtr = *(GUEST<Ptr> *)SYN68K_TO_US(EM_A5);
+    return *(QDGlobals*)(thePortPtr - offsetof(QDGlobals, thePort));
+}
+END_EXECUTOR_ONLY
+
 }
 #endif /* _QUICKDRAW_H_ */

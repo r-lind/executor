@@ -104,10 +104,12 @@ struct SerStaRec
     GUEST<Byte> modemStatus;// unimplemented
 };
 
+BEGIN_EXECUTOR_ONLY
 const char *const MODEMINAME = ".AIn";
 const char *const MODEMONAME = ".AOut";
 const char *const PRNTRINAME = ".AIn";
 const char *const PRNTRONAME = ".AOut";
+END_EXECUTOR_ONLY
 
 enum
 {

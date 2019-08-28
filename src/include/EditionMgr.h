@@ -17,16 +17,6 @@
 
 namespace Executor
 {
-#define declare_subtypes(type)                \
-    typedef struct type##Record type##Record; \
-    typedef type##Record *type##Ptr;          \
-    typedef GUEST<type##Ptr> *type##Handle
-
-#define declare_record_subtypes(type) \
-    typedef struct type type;         \
-    typedef type *type##Ptr;          \
-    typedef GUEST<type##Ptr> *type##Handle
-
 typedef int32_t TimeStamp;
 typedef Handle EditionRefNum;
 typedef int16_t UpdateMode;
@@ -54,7 +44,8 @@ struct SectionRecord
     GUEST<EditionRefNum> refNum;
 };
 
-declare_record_subtypes(Section);
+typedef SectionRecord *SectionPtr;
+typedef GUEST<SectionPtr> *SectionHandle;
 
 struct EditionContainerSpec
 {

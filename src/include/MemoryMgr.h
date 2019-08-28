@@ -94,6 +94,7 @@ const LowMemGlobal<LONGINT> OneOne { 0xA02 }; // MemoryMgr IMI-85 (true);
 const LowMemGlobal<LONGINT> MinusOne { 0xA06 }; // MemoryMgr IMI-85 (true);
 const LowMemGlobal<Byte[12]> ApplScratch { 0xA78 }; // MemoryMgr IMI-85 (true);
 
+BEGIN_EXECUTOR_ONLY
 /* traps which can have a `sys' or `clear' bit set */
 #define SYSBIT (1 << 10)
 #define CLRBIT (1 << 9)
@@ -118,8 +119,8 @@ namespace callconv
             return ret;
         }
     };
-
 }
+END_EXECUTOR_ONLY
 
 extern Handle _NewEmptyHandle_flags(bool sys_p);
 REGISTER_FLAG_TRAP(_NewEmptyHandle_flags, NewEmptyHandle, NewEmptyHandleSys,

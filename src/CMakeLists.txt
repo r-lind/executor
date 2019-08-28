@@ -260,6 +260,7 @@ source_group(Resources FILES ${res_sources})
 
 set(te_sources
     textedit/tesave.h
+    textedit/textedit.h
 
     textedit/teAccess.cpp textedit/teDisplay.cpp textedit/teEdit.cpp 
     textedit/teIMIV.cpp textedit/teIMV.cpp textedit/teInit.cpp

@@ -128,7 +128,7 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
     {
         case RGN_SMALL_SIZE + sizeof(INTEGER):
         it_is_empty:
-            RECT_ZERO(&RGN_BBOX(rh));
+            RGN_BBOX(rh) = {};
             RGN_SET_SMALL(rh);
             break;
         case RGN_SMALL_SIZE + 9 * sizeof(INTEGER):

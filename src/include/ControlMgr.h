@@ -88,7 +88,7 @@ enum
     cTextColor = 2,
     cThumbColor = 3,
 };
-/* #define ???		4 */
+
 enum
 {
     cArrowsColorLight = 5,
@@ -103,10 +103,6 @@ enum
     cTingeDark = 14,
 };
 
-}
-
-namespace Executor
-{
 using ControlActionUPP = UPP<void(ControlHandle, int16_t)>;
 
 struct __cr

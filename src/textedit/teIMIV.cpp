@@ -13,6 +13,7 @@
 #include <quickdraw/cquick.h>
 #include <mman/mman.h>
 #include <algorithm>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 

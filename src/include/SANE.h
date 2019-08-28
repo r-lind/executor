@@ -114,7 +114,7 @@ enum
 
 enum
 {
-    FI2X = (FI_OPERAND + Fx2X_OPCODE),
+    FI2X = (FI_OPERAND | Fx2X_OPCODE),
 };
 
 #define FCMP_RETURN_TYPE void

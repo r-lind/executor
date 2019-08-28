@@ -27,6 +27,7 @@
 #include <osevent/osevent.h>
 #include <rsys/paths.h>
 #include <algorithm>
+#include <textedit/textedit.h>
 
 #include <cmrc/cmrc.hpp>
 

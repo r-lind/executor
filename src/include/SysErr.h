@@ -23,7 +23,9 @@ const LowMemGlobal<Rect> DSAlertRect { 0x3F8 }; // SysErr IMII-362 (true);
 const LowMemGlobal<Byte> WWExist { 0x8F2 }; // SysError SysEqu.a (true);
 const LowMemGlobal<Byte> QDExist { 0x8F3 }; // SysError SysEqu.a (true);
 
+BEGIN_EXECUTOR_ONLY
 extern char syserr_msg[];
+END_EXECUTOR_ONLY
 
 extern void C_SysError(short errorcode);
 PASCAL_TRAP(SysError, 0xA9C9);

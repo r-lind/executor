@@ -50,23 +50,23 @@ enum
 
 enum
 {
-    propFont = ((INTEGER)0x9000),
-    prpFntH = ((INTEGER)0x9001),
-    prpFntW = ((INTEGER)0x9002),
-    prpFntHW = ((INTEGER)0x9003),
+    propFont = 0x9000,
+    prpFntH = 0x9001,
+    prpFntW = 0x9002,
+    prpFntHW = 0x9003,
 };
 
 enum
 {
-    fixedFont = ((INTEGER)0xB000),
-    fxdFntH = ((INTEGER)0xB001),
-    fxdFntW = ((INTEGER)0xB002),
-    fxdFntHW = ((INTEGER)0xB003),
+    fixedFont = 0xB000,
+    fxdFntH = 0xB001,
+    fxdFntW = 0xB002,
+    fxdFntHW = 0xB003,
 };
 
 enum
 {
-    fontWid = ((INTEGER)0xACB0),
+    fontWid = 0xACB0,
 };
 
 struct FMetricRec

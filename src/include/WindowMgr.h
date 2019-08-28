@@ -185,8 +185,10 @@ LOWMEM_ACCESSOR(CurActivate);
 LOWMEM_ACCESSOR(CurDeactive);
 LOWMEM_ACCESSOR(GrayRgn);
 
+BEGIN_EXECUTOR_ONLY
 inline RgnHandle GetGrayRgn() { return LM(GrayRgn); }
 NOTRAP_FUNCTION2(GetGrayRgn);
+END_EXECUTOR_ONLY
 
 extern void C_SetWTitle(WindowPtr w, StringPtr t);
 PASCAL_TRAP(SetWTitle, 0xA91A);

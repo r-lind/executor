@@ -77,7 +77,9 @@ struct SIZEResource
     GUEST<int32_t> minimum_size;
 };
 
-typedef struct size_info    /* executor-only struct */
+BEGIN_EXECUTOR_ONLY
+/* executor-only struct */
+typedef struct size_info
 {
     int16_t size_flags;
     int32_t preferred_size;
@@ -87,6 +89,7 @@ typedef struct size_info    /* executor-only struct */
 } size_info_t;
 
 extern size_info_t size_info;
+END_EXECUTOR_ONLY
 
 const LowMemGlobal<INTEGER> monkeylives { 0x100 }; // OSEvent SysEqu.a (true-b);
 const LowMemGlobal<INTEGER> SysEvtMask { 0x144 }; // OSEvent IMII-70 (true);
@@ -97,6 +100,7 @@ const LowMemGlobal<Point> MTemp { 0x828 }; // QuickDraw PegLeg (True-b);
 const LowMemGlobal<Point> MouseLocation { 0x82C }; // QuickDraw Vamp (true);
 const LowMemGlobal<Point> MouseLocation2 { 0x830 }; // QuickDraw MacAttack (true);
 
+BEGIN_EXECUTOR_ONLY
 namespace callconv
 {
 struct D0Minus1Boolean
@@ -113,6 +117,7 @@ struct D0Minus1Boolean
 
 };
 }
+END_EXECUTOR_ONLY
 
 extern OSErr PPostEvent(INTEGER evcode,
                                 LONGINT evmsg, GUEST<EvQElPtr> *qelp);

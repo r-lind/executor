@@ -57,14 +57,13 @@ typedef enum { dummyType,
                evType,
                fsQType } QTypes;
 
-union __qe {
+union QElem {
     VBLTask vblQElem;
     ParamBlockRec ioQElem;
     DrvQEl drvQElem;
     EvQEl evQElem;
     VCB vcbQElem;
 };
-typedef union __qe QElem;
 
 struct DateTimeRec
 {
@@ -227,11 +226,9 @@ extern LONGINT C_GetToolTrapAddress(INTEGER n);
 NOTRAP_FUNCTION(GetToolTrapAddress);
 extern void C_SetToolTrapAddress(LONGINT addr, INTEGER n);
 NOTRAP_FUNCTION(SetToolTrapAddress);
-inline LONGINT C_GetToolboxTrapAddress(INTEGER n)
-    { return C_GetToolTrapAddress(n); }
+extern LONGINT C_GetToolboxTrapAddress(INTEGER n);
 NOTRAP_FUNCTION(GetToolboxTrapAddress);
-inline void C_SetToolboxTrapAddress(LONGINT addr, INTEGER n)
-    { C_SetToolTrapAddress(addr,n); }
+extern void C_SetToolboxTrapAddress(LONGINT addr, INTEGER n);
 NOTRAP_FUNCTION(SetToolboxTrapAddress);
 
 

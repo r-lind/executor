@@ -156,7 +156,7 @@ void Executor::ROMlib_sizergn(RgnHandle rh, bool special_p) /* INTERNAL */
     {
         SetHandleSize((Handle)rh, RGN_SMALL_SIZE);
         RGN_SET_SMALL(rh);
-        RECT_ZERO(&RGN_BBOX(rh));
+        RGN_BBOX(rh) = {};
     }
     else
     {
@@ -219,7 +219,7 @@ void Executor::C_SetEmptyRgn(RgnHandle rh)
 {
     SetHandleSize((Handle)rh, RGN_SMALL_SIZE);
     RGN_SET_SMALL(rh);
-    RECT_ZERO(&RGN_BBOX(rh));
+    RGN_BBOX(rh) = {};
 }
 
 void Executor::C_SetRectRgn(RgnHandle rh, INTEGER left, INTEGER top,
@@ -1208,7 +1208,7 @@ void Executor::C_InsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv)
 #if defined(INSANEBUTNECESSARY)
         rp = &RGN_BBOX(rh);
         if(rp->top >= rp->bottom || rp->left >= rp->right)
-            RECT_ZERO(rp);
+            *rp = {};
 #endif /* INSANEBUTNECESSARY */
     }
     else

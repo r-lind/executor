@@ -468,14 +468,14 @@ Handle Executor::C_Get1NamedResource(ResType typ, StringPtr s) /* IMIV-16 */
     return (getnamedmapresource(map, typ, s));
 }
 
-void Executor::C_LoadResource(Handle volatile res)
+void Executor::C_LoadResource(Handle res)
 {
     resmaphand map;
     typref *tr;
     resref *rr;
     GUEST<int16_t> savemap;
 
-    volatile LONGINT savea0d0[2];
+    LONGINT savea0d0[2];
     savea0d0[0] = EM_D0;
     savea0d0[1] = EM_A0;
 

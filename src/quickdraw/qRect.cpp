@@ -37,7 +37,7 @@ void Executor::C_InsetRect(Rect *r, INTEGER dh, INTEGER dv)
 
 #if defined(INCOMPATIBLEBUTSANE)
     if(r->top >= r->bottom || r->left >= r->right)
-        RECT_ZERO(r);
+        *r = {};
 #endif /* INCOMPATIBLEBUTSANE */
 }
 
@@ -56,7 +56,7 @@ BOOLEAN Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
     }
     else
     {
-        RECT_ZERO(dest);
+        *dest = {};
         return false;
     }
 }
@@ -129,7 +129,7 @@ void Executor::C_PtToAngle(Rect *rp, Point p, GUEST<INTEGER> *angle)
 
 BOOLEAN Executor::C_EqualRect(const Rect *r1, const Rect *r2)
 {
-    return RECT_EQUAL_P(r1, r2);
+    return *reinterpret_cast<const uint64_t*>(r1) == *reinterpret_cast<const uint64_t*>(r2);
 }
 
 /* see regular.c for {Frame, Paint, Erase, Invert, Fill} Rect */

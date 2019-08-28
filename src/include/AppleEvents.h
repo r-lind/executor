@@ -10,6 +10,7 @@
 
 #include <EventMgr.h>
 #include <NotifyMgr.h>
+#include <rsys/macros.h>
 
 #define MODULE_NAME AppleEvents
 #include <base/api-module.h>
@@ -234,6 +235,7 @@ extern OSErr C__AE_hdlr_install(AE_hdlr_table_h, int32_t,
                                             AE_hdlr_t *);
 PASCAL_SUBTRAP(_AE_hdlr_install, 0xA816, 0x0831, Pack8);
 
+BEGIN_EXECUTOR_ONLY
 /* private */
 
 extern bool send_application_open_aevt_p;
@@ -249,6 +251,7 @@ extern bool application_accepts_open_app_aevt_p;
             warning_unexpected("error `%d'", _error_); \
         return _error_;                                \
     } while(0)
+END_EXECUTOR_ONLY
 
 enum
 {
@@ -277,37 +280,37 @@ enum
 
 /* types */
 
-#define typeFSS (FOURCC('f', 's', 's', ' '))
+enum
+{
+    typeFSS = FOURCC('f', 's', 's', ' '),
 
-#define typeAEList (FOURCC('l', 'i', 's', 't'))
-#define typeAERecord (FOURCC('r', 'e', 'c', 'o'))
-#define typeAppleEvent (FOURCC('a', 'e', 'v', 't'))
-#define typeProcessSerialNumber (FOURCC('p', 's', 'n', ' '))
-#define typeNull (FOURCC('n', 'u', 'l', 'l'))
-#define typeApplSignature (FOURCC('s', 'i', 'g', 'n'))
+    typeAEList = FOURCC('l', 'i', 's', 't'),
+    typeAERecord = FOURCC('r', 'e', 'c', 'o'),
+    typeAppleEvent = FOURCC('a', 'e', 'v', 't'),
+    typeProcessSerialNumber = FOURCC('p', 's', 'n', ' '),
+    typeNull = FOURCC('n', 'u', 'l', 'l'),
+    typeApplSignature = FOURCC('s', 'i', 'g', 'n'),
 
-#define typeType (FOURCC('t', 'y', 'p', 'e'))
-#define typeWildCard (FOURCC('*', '*', '*', '*'))
-#define typeAlias (FOURCC('a', 'l', 'i', 's'))
+    typeType = FOURCC('t', 'y', 'p', 'e'),
+    typeWildCard = FOURCC('*', '*', '*', '*'),
+    typeAlias = FOURCC('a', 'l', 'i', 's'),
 
-#define keyAddressAttr (FOURCC('a', 'd', 'd', 'r'))
-#define keyEventClassAttr (FOURCC('e', 'v', 'c', 'l'))
-#define keyEventIDAttr (FOURCC('e', 'v', 'i', 'd'))
-#define keyProcessSerialNumber (FOURCC('p', 's', 'n', ' '))
+    keyAddressAttr = FOURCC('a', 'd', 'd', 'r'),
+    keyEventClassAttr = FOURCC('e', 'v', 'c', 'l'),
+    keyEventIDAttr = FOURCC('e', 'v', 'i', 'd'),
+    keyProcessSerialNumber = FOURCC('p', 's', 'n', ' '),
 
-#define keyDirectObject (FOURCC('-', '-', '-', '-'))
+    keyDirectObject = FOURCC('-', '-', '-', '-'),
 
-#define kCoreEventClass (FOURCC('a', 'e', 'v', 't'))
-#define kAEOpenApplication (FOURCC('o', 'a', 'p', 'p'))
-#define kAEOpenDocuments (FOURCC('o', 'd', 'o', 'c'))
-#define kAEPrintDocuments (FOURCC('p', 'd', 'o', 'c'))
-#define kAEAnswer (FOURCC('a', 'n', 's', 'r'))
-#define kAEQuitApplication (FOURCC('q', 'u', 'i', 't'))
+    kCoreEventClass = FOURCC('a', 'e', 'v', 't'),
+    kAEOpenApplication = FOURCC('o', 'a', 'p', 'p'),
+    kAEOpenDocuments = FOURCC('o', 'd', 'o', 'c'),
+    kAEPrintDocuments = FOURCC('p', 'd', 'o', 'c'),
+    kAEAnswer = FOURCC('a', 'n', 's', 'r'),
+    kAEQuitApplication = FOURCC('q', 'u', 'i', 't'),
 
-#define keySelectProc (FOURCC('s', 'e', 'l', 'h'))
-
-/* #### OSL internal */
-extern syn68k_addr_t /*ProcPtr*/ AE_OSL_select_fn;
+    keySelectProc = FOURCC('s', 'e', 'l', 'h'),
+};
 
 const LowMemGlobal<AE_info_ptr> AE_info { 0x2B6 }; // AppleEvents AEGizmo (true);
 

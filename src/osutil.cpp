@@ -1006,6 +1006,10 @@ void Executor::C_SetToolTrapAddress(LONGINT addr, INTEGER trapnum)
     NSetTrapAddress(addr, trapnum, kToolboxTrapType);
 }
 
+void Executor::C_SetToolboxTrapAddress(LONGINT addr, INTEGER trapnum)
+{
+    C_SetToolTrapAddress(addr, trapnum);
+}
 
 LONGINT Executor::C_GetToolTrapAddress(INTEGER trap_no)
 {
@@ -1017,6 +1021,10 @@ LONGINT Executor::C_GetToolTrapAddress(INTEGER trap_no)
     retval = (LONGINT)a0;
     warning_trace_info("trap = 0x%x, retval = 0x%08x", trap_no, retval);
     return retval;
+}
+LONGINT Executor::C_GetToolboxTrapAddress(INTEGER trap_no)
+{
+    return C_GetToolTrapAddress(trap_no);
 }
 
 LONGINT Executor::C_GetOSTrapAddress(INTEGER trap_no)

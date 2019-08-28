@@ -60,7 +60,7 @@ PASCAL_TRAP(GetAppParms, 0xA9F5);
 extern void C_UnloadSeg(Ptr addr);
 PASCAL_TRAP(UnloadSeg, 0xA9F1);
 
-extern void C_LoadSeg(INTEGER volatile segno);
+extern void C_LoadSeg(INTEGER segno);
 
 static_assert(sizeof(AppFile) == 264);
 }

@@ -150,8 +150,11 @@ extern OSErr C_SameProcess(ProcessSerialNumber *serial_number0,
                                        ProcessSerialNumber *serial_number1,
                                        Boolean *same_out);
 PASCAL_SUBTRAP(SameProcess, 0xA88F, 0x003D, OSDispatch);
+
+BEGIN_EXECUTOR_ONLY
 extern OSErr C_GetFrontProcess(ProcessSerialNumber *serial_number, int32_t dummy = -1);
 PASCAL_SUBTRAP(GetFrontProcess, 0xA88F, 0x0039, OSDispatch);
+END_EXECUTOR_ONLY
 
 extern OSErr C_SetFrontProcess(ProcessSerialNumber *serial_number);
 PASCAL_SUBTRAP(SetFrontProcess, 0xA88F, 0x003B, OSDispatch);

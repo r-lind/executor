@@ -14,6 +14,10 @@
 
  */
 
+
+namespace Executor
+{
+BEGIN_EXECUTOR_ONLY
 //So as to not conflict with OS X defines
 #undef PBGetVInfo
 #undef PBXGetVolInfo
@@ -94,9 +98,8 @@
 #undef PBDTDelete
 #undef PBSetFInfo
 #undef PBGetFInfo
+END_EXECUTOR_ONLY
 
-namespace Executor
-{
 enum
 {
     fOnDesk = 1,

@@ -53,7 +53,10 @@ enum
     iPrIOCtl = 5,
 };
 
+BEGIN_EXECUTOR_ONLY
 const char *const sPrDrvr = ".Print";
+END_EXECUTOR_ONLY
+
 enum
 {
     iPrDrvrRef = (-3),

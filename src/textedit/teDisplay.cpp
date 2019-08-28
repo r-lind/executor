@@ -14,6 +14,7 @@
 #include <wind/wind.h>
 #include <textedit/tesave.h>
 #include <quickdraw/region.h>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 

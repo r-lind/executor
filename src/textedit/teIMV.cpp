@@ -19,6 +19,7 @@
 #include <textedit/tesave.h>
 #include <rsys/hook.h>
 #include <algorithm>
+#include <textedit/textedit.h>
 
 using namespace Executor;
 
