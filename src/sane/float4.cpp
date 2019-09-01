@@ -731,7 +731,7 @@ void Executor::C_ROMlib_Fremx(void *sp, x80_t *dp, unsigned short sel)
 #define CCX cpu_state.ccx
 #define CCNZ cpu_state.ccnz
 
-FCMP_RETURN_TYPE Executor::C_ROMlib_Fcmpx(
+void Executor::C_ROMlib_Fcmpx(
     void *sp, x80_t *dp, unsigned short sel)
 {
     DECLAREIN2();
@@ -798,7 +798,7 @@ FCMP_RETURN_TYPE Executor::C_ROMlib_Fcmpx(
                            CCC, CCN, CCV, CCX, !CCNZ);
 }
 
-FCMP_RETURN_TYPE Executor::C_ROMlib_FcpXx(
+void Executor::C_ROMlib_FcpXx(
     void *sp, x80_t *dp, unsigned short sel)
 {
     warning_floating_point(NULL_STRING);

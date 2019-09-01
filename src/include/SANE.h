@@ -95,7 +95,7 @@ struct DecForm
     GUEST<INTEGER> digits;
 };
 
-#define Decstr char *
+typedef char * Decstr;
 
 enum
 {
@@ -116,8 +116,6 @@ enum
 {
     FI2X = (FI_OPERAND | Fx2X_OPCODE),
 };
-
-#define FCMP_RETURN_TYPE void
 
 DISPATCHER_TRAP(Pack4, 0xA9EB, StackWLookahead<0xFF>);
 DISPATCHER_TRAP(Pack5, 0xA9EC, StackWMasked<0xFF>);
@@ -183,11 +181,11 @@ PASCAL_SUBTRAP(ROMlib_Fdivx, 0xA9EB, 0x06, Pack4);
 extern void C_ROMlib_Fremx(void *sp,
                                        extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fremx, 0xA9EB, 0x0C, Pack4);
-extern FCMP_RETURN_TYPE C_ROMlib_Fcmpx(void *sp, extended80 *
+extern void C_ROMlib_Fcmpx(void *sp, extended80 *
                                                                  dp,
                                                    unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fcmpx, 0xA9EB, 0x08, Pack4);
-extern FCMP_RETURN_TYPE C_ROMlib_FcpXx(void *sp, extended80 *
+extern void C_ROMlib_FcpXx(void *sp, extended80 *
                                                                  dp,
                                                    unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FcpXx, 0xA9EB, 0x0A, Pack4);

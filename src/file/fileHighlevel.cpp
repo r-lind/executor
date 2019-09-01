@@ -835,7 +835,7 @@ OSErr Executor::Create(StringPtr filen, INTEGER vrn, OSType creator,
     pbr.fileParam.ioFlFndrInfo.fdType = filtyp;
     pbr.fileParam.ioFlFndrInfo.fdCreator = creator;
     pbr.fileParam.ioFlFndrInfo.fdFlags = 0;
-    pbr.fileParam.ioFlFndrInfo.fdLocation = {0,0};
+    pbr.fileParam.ioFlFndrInfo.fdLocation = Point{0,0};
     pbr.fileParam.ioFlFndrInfo.fdFldr = 0;
 
     GetDateTime(&t);
