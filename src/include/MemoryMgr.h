@@ -23,7 +23,7 @@ enum
     memPurErr = (-112),
     memWZErr = (-111),
 };
-//enum { memAZErr	 = -113 };
+
 enum
 {
     nilHandleErr = (-109),
