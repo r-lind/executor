@@ -166,7 +166,6 @@ enum
 {
     flLckedErr = (-45),
     fBusyErr = (-47),
-    noTypeErr = (-102),
     userCanceledErr = (-128),
     editionMgrInitErr = (-450),
     badSectionErr = (-451),

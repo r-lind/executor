@@ -1663,10 +1663,9 @@ void _PurgeMem_flags(Size sizeneeded, bool sys_p)
     MM_SLAM("exit");
 }
 
-static void
-BlockMove_and_possibly_flush_cache(Ptr src, Ptr dst, Size cnt,
-                                   bool flush_p)
+void _BlockMove_flags(Ptr src, Ptr dst, Size cnt, bool flush_p)
 {
+    MM_SLAM("entry");
     if(cnt > 0)
     {
         /* ugly, but probably better than crashing when we try to
@@ -1683,25 +1682,7 @@ BlockMove_and_possibly_flush_cache(Ptr src, Ptr dst, Size cnt,
             ROMlib_destroy_blocks(US_TO_SYN68K(dst), cnt, true);
     }
 
-    /* don't use `SET_MEM_ERR' since that will do a heap slam and we
-     will lose */
-    LM(MemErr) = noErr;
-}
-
-void C_BlockMove(Ptr src, Ptr dst, Size cnt)
-{
-    BlockMove_and_possibly_flush_cache(src, dst, cnt, true);
-}
-
-void C_BlockMoveData(Ptr src, Ptr dst, Size cnt)
-{
-    BlockMove_and_possibly_flush_cache(src, dst, cnt, false);
-}
-
-void BlockMove_the_trap(Ptr src, Ptr dst, Size cnt, bool flush_p)
-{
-    MM_SLAM("entry");
-    BlockMove_and_possibly_flush_cache(src, dst, cnt, flush_p);
+    SET_MEM_ERR(noErr);
     MM_SLAM("exit");
 }
 

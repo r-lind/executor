@@ -133,8 +133,10 @@ enum
 
 EXTERN_DISPATCHER_TRAP(OSDispatch, 0xA88F, StackW);
 
+BEGIN_EXECUTOR_ONLY
 extern void process_create(bool desk_accessory_p,
                            uint32_t type, uint32_t signature);
+END_EXECUTOR_ONLY
 
 extern OSErr C_GetCurrentProcess(ProcessSerialNumber *serial_number);
 PASCAL_SUBTRAP(GetCurrentProcess, 0xA88F, 0x0037, OSDispatch);

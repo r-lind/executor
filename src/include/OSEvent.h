@@ -64,11 +64,6 @@ typedef enum {
     SZreserved4 = (1 << 0)
 } SZ_t;
 
-/*
- * The first three fields are used to dereference mac memory.  The two
- * extra booleans are for our own use.
- */
-
 struct SIZEResource
 {
     GUEST_STRUCT;
