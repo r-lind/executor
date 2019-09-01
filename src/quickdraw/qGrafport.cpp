@@ -18,11 +18,11 @@
 
 using namespace Executor;
 
-void Executor::C_InitGraf(Ptr gp)
+void Executor::C_InitGraf(GUEST<GrafPtr> *gp)
 {
     PixMapHandle main_gd_pixmap;
 
-    (*(GUEST<Ptr> *)SYN68K_TO_US(EM_A5)) = gp;
+    (*(GUEST<GUEST<GrafPtr>*> *)SYN68K_TO_US(EM_A5)) = gp;
 
     main_gd_pixmap = GD_PMAP(LM(MainDevice));
 

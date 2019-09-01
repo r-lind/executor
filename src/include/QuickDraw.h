@@ -530,7 +530,7 @@ extern void C_ObscureCursor(void);
 PASCAL_TRAP(ObscureCursor, 0xA856);
 extern void C_ShieldCursor(Rect *rp, Point p);
 PASCAL_TRAP(ShieldCursor, 0xA855);
-extern void C_InitGraf(Ptr gp);
+extern void C_InitGraf(GUEST<GrafPtr> *gp);
 PASCAL_TRAP(InitGraf, 0xA86E);
 extern void C_SetPort(GrafPtr p);
 PASCAL_TRAP(SetPort, 0xA873);

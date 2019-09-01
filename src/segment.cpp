@@ -208,8 +208,7 @@ void Executor::C_ExitToShell()
     SFReply reply;
     struct
     {
-        char quickbytes[grafSize];
-        GUEST<GrafPtr> qdthePort;
+        QDGlobals qd;
         GUEST<LONGINT> tmpA5;
     } a5space;
     WindowPeek t_w;
@@ -255,7 +254,7 @@ void Executor::C_ExitToShell()
         {
             EM_A5 = US_TO_SYN68K(&a5space.tmpA5);
             LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
-            InitGraf((Ptr)&a5space.qdthePort);
+            InitGraf(&a5space.qd.thePort);
         }
         InitFonts();
         FlushEvents(everyEvent, 0);

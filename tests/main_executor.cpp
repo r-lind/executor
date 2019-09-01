@@ -101,7 +101,7 @@ public:
         LM(MBDFHndl) = nullptr;
         LM(MBSaveLoc) = nullptr;
         EM_A5 = EM_A7 = ptr_to_longint(LM(MemTop)-4);
-        InitGraf((Ptr)&qd.thePort);
+        InitGraf(&qd.thePort);
         InitFonts();
         InitWindows();
         InitMenus();

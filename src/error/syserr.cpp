@@ -252,7 +252,7 @@ void Executor::C_SysError(short errorcode)
     GUEST<RgnPtr> rp;
     Rect r;
     struct adef *ap;
-    char quickbytes[grafSize];
+    QDGlobals quickbytes;
     INTEGER offsetx, offsety;
     Rect main_gd_rect;
 
@@ -305,7 +305,7 @@ void Executor::C_SysError(short errorcode)
 /* 4. Allocate and re-initialize QuickDraw */
     EM_A5 = US_TO_SYN68K(&tmpa5);
     LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
-    InitGraf((Ptr)quickbytes + sizeof(quickbytes) - 4);
+    InitGraf(&quickbytes.thePort);
     ROMlib_initport(&alertport);
     SetPort(&alertport);
     InitCursor();

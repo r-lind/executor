@@ -57,7 +57,7 @@ static void SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
 
 void Executor::executor_main(void)
 {
-    char quickbytes[grafSize];
+    QDGlobals quickbytes;
     LONGINT tmpA5;
     GUEST<INTEGER> mess, count_s;
     INTEGER count;
@@ -70,7 +70,7 @@ void Executor::executor_main(void)
 
     EM_A5 = US_TO_SYN68K(&tmpA5);
     LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
-    InitGraf((Ptr)quickbytes + sizeof(quickbytes) - 4);
+    InitGraf(&quickbytes.thePort);
     InitFonts();
     InitCRM();
     FlushEvents(everyEvent, 0);
