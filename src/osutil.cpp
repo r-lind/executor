@@ -766,7 +766,7 @@ OSErr Executor::WriteParam() /* IMII-382 */
         sp.volClik = (short)(LM(SPVolCtl) << 8) | (LM(SPClikCaret) & 0xff);
         sp.misc = LM(SPMisc2);
         count = sizeof(sp);
-        if(FSWrite(rn, inout(count), (Ptr)&sp) == noErr && count == sizeof(sp))
+        if(FSWrite(rn, inout(count), &sp) == noErr && count == sizeof(sp))
             err = noErr;
         deriveglobals();
         ROMlib_beepedonce = false;
@@ -909,7 +909,7 @@ void Executor::SwapMMUMode(Byte *bp) /* IMV-593 */
     *bp = TRUE32b;
 }
 
-LONGINT Executor::StripAddress(LONGINT l) /* IMV-593 */
+Ptr Executor::StripAddress(Ptr l) /* IMV-593 */
 {
     return l;
 }

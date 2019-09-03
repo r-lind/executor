@@ -571,13 +571,13 @@ OSErr Executor::OpenDF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV
 }
 
 
-OSErr Executor::FSRead(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp) /* IMIV-109 */
+OSErr Executor::FSRead(INTEGER rn, GUEST<LONGINT> *count, void* buffp) /* IMIV-109 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
     pbr.ioParam.ioRefNum = rn;
-    pbr.ioParam.ioBuffer = buffp;
+    pbr.ioParam.ioBuffer = (Ptr)buffp;
     pbr.ioParam.ioReqCount = *count;
     pbr.ioParam.ioPosMode = fsAtMark;
     temp = PBRead(&pbr, 0);
@@ -598,13 +598,13 @@ Executor::FSReadAll(INTEGER rn, GUEST<LONGINT> *countp, Ptr buffp)
     return retval;
 }
 
-OSErr Executor::FSWrite(INTEGER rn, GUEST<LONGINT> *count, Ptr buffp) /* IMIV-110 */
+OSErr Executor::FSWrite(INTEGER rn, GUEST<LONGINT> *count, const void* buffp) /* IMIV-110 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
     pbr.ioParam.ioRefNum = rn;
-    pbr.ioParam.ioBuffer = buffp;
+    pbr.ioParam.ioBuffer = (Ptr)buffp;
     pbr.ioParam.ioReqCount = *count;
     pbr.ioParam.ioPosMode = fsAtMark;
     temp = PBWrite(&pbr, 0);

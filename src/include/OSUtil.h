@@ -249,7 +249,7 @@ extern void RestoreA5(void);
 #undef SwapMMUMode
 extern void GetMMUMode(GUEST<INTEGER> *ip);
 extern void SwapMMUMode(Byte *bp);
-extern LONGINT StripAddress(LONGINT l);
+extern Ptr StripAddress(Ptr l);
 
 extern void C_DebugStr(StringPtr p);
 PASCAL_TRAP(DebugStr, 0xABFF);

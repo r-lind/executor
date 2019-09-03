@@ -22,10 +22,17 @@ typedef int16_t CharParameter; /* very important not to use this as char */
 
 typedef int8_t SignedByte;
 typedef uint8_t Byte;
-typedef int8_t *Ptr;
+typedef char *Ptr;
 typedef GUEST<Ptr> *Handle;
 
 typedef int8_t Boolean;
+
+typedef int8_t SInt8;
+typedef uint8_t UInt8;
+typedef int16_t SInt16;
+typedef uint16_t UInt16;
+typedef int32_t SInt32;
+typedef uint32_t UInt32;
 
 typedef Byte Str15[16];
 typedef Byte Str31[32];
