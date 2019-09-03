@@ -247,14 +247,14 @@ private:
     CREATE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA callconv::Register<__VA_ARGS__>>)
     
 #define RAW_68K_FUNCTION(NAME) \
-    syn68k_addr_t _##NAME(syn68k_addr_t, void *); \
-    CREATE_FUNCTION_WRAPPER(stub_##NAME, &_##NAME, (#NAME), WrappedFunction<decltype(_##NAME) COMMA &_##NAME COMMA callconv::Raw>)
+    syn68k_addr_t RAW_##NAME(syn68k_addr_t, void *); \
+    CREATE_FUNCTION_WRAPPER(stub_##NAME, &RAW_##NAME, (#NAME), WrappedFunction<decltype(RAW_##NAME) COMMA &RAW_##NAME COMMA callconv::Raw>)
 #define RAW_68K_TRAP(NAME, TRAP) \
-    syn68k_addr_t _##NAME(syn68k_addr_t, void *); \
-    CREATE_FUNCTION_WRAPPER(stub_##NAME, &_##NAME, (#NAME), TrapFunction<decltype(_##NAME) COMMA &_##NAME COMMA TRAP COMMA callconv::Raw>)
+    syn68k_addr_t RAW_##NAME(syn68k_addr_t, void *); \
+    CREATE_FUNCTION_WRAPPER(stub_##NAME, &RAW_##NAME, (#NAME), TrapFunction<decltype(RAW_##NAME) COMMA &RAW_##NAME COMMA TRAP COMMA callconv::Raw>)
 
 #define RAW_68K_IMPLEMENTATION(NAME) \
-        syn68k_addr_t Executor::_##NAME(syn68k_addr_t trap_address [[maybe_unused]], void *)
+        syn68k_addr_t Executor::RAW_##NAME(syn68k_addr_t trap_address [[maybe_unused]], void *)
 
 #define TRAP_VARIANT(NAME, IMPL_NAME, ...) \
     CREATE_FUNCTION_WRAPPER(NAME, , (stub_##IMPL_NAME, #NAME, "InterfaceLib"), TrapVariant<decltype(stub_##IMPL_NAME), __VA_ARGS__>)

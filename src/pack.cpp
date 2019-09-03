@@ -28,14 +28,14 @@ RAW_68K_IMPLEMENTATION(Pack1)
 {
     // For ResEdit, which uses PACK 1 to implement
     // its bitmap image editor.
-    Handle pack1 = GetResource('PACK', 1);
+    Handle pack1 = GetResource(TICK("PACK"), 1);
     gui_assert(pack1);
     HLock(pack1);
     
     // Install the PACK as the new implementation for this trap
     auto addr = ptr_to_longint(*pack1);
     ROMlib_destroy_blocks(addr, GetHandleSize(pack1), false);
-    NSetTrapAddress(addr, 0xA9E8, kToolboxTrapType);
+    NSetTrapAddress((ProcPtr)*pack1, 0xA9E8, kToolboxTrapType);
 
     return addr;    // forward to the PACK
 }

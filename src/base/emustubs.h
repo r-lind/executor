@@ -63,10 +63,11 @@ struct initzonehiddenargs_t
     GUEST<GrowZoneProcPtr> pGrowZone;
 };
 
-extern void ROMlib_GetTrapAddress_helper(uint32_t *d0p, uint32_t d1, uint32_t *a0p);
 extern void ROMlib_reset_bad_trap_addresses(void);
 
 RAW_68K_TRAP(Unimplemented, 0xA89F);
+RAW_68K_FUNCTION(bad_trap_unimplemented);
+
 RAW_68K_TRAP(SwapMMUMode, 0xA05D);
 RAW_68K_TRAP(Launch, 0xA9F2);
 RAW_68K_TRAP(Chain, 0xA9F3);
@@ -76,8 +77,6 @@ RAW_68K_TRAP(SlotManager, 0xA06E);
 RAW_68K_TRAP(EqualString, 0xA03C);
 RAW_68K_TRAP(DrvrInstall, 0xA03D);
 RAW_68K_TRAP(DrvrRemove, 0xA03E);
-RAW_68K_TRAP(GetTrapAddress, 0xA146);
-RAW_68K_TRAP(SetTrapAddress, 0xA047);
 RAW_68K_TRAP(RelString, 0xA050);
 RAW_68K_TRAP(UpperString, 0xA054);
 RAW_68K_TRAP(ADBOp, 0xA07C);
@@ -100,7 +99,6 @@ RAW_68K_TRAP(SetVideoDefault, 0xA081);
 RAW_68K_TRAP(GetOSDefault, 0xA084);
 RAW_68K_TRAP(SetOSDefault, 0xA083);
 RAW_68K_TRAP(IMVI_ReadXPRam, 0xA051);
-RAW_68K_FUNCTION(bad_trap_unimplemented);
 RAW_68K_TRAP(IMVI_PPC, 0xA0DD);
 
 static_assert(sizeof(adbop_t) == 12);

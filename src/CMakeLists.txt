@@ -335,6 +335,8 @@ set(base_sources
 
         base/debugger.h
         base/debugger.cpp
+
+        base/patches.cpp
     )
 source_group(Base FILES ${base_sources})
 

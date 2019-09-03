@@ -212,25 +212,30 @@ REGISTER_TRAP2(Dequeue, 0xA96E, D0(A0,A1), SaveA1D1D2);
 //extern void SetTrapAddress(LONGINT addr,
 //                           INTEGER n);
 
-extern LONGINT C_NGetTrapAddress(INTEGER n, TrapType ttype);
+extern ProcPtr C_NGetTrapAddress(INTEGER n, TrapType ttype);
 NOTRAP_FUNCTION(NGetTrapAddress);
-extern void C_NSetTrapAddress(LONGINT addr, INTEGER n, TrapType ttype);
+extern void C_NSetTrapAddress(ProcPtr addr, INTEGER n, TrapType ttype);
 NOTRAP_FUNCTION(NSetTrapAddress);
 
-// trap implementation in emustubs for historical reasons (TODO: clean this up)
-extern LONGINT C_GetOSTrapAddress(INTEGER n);
-NOTRAP_FUNCTION(GetOSTrapAddress);
-extern void C_SetOSTrapAddress(LONGINT addr, INTEGER n);
-NOTRAP_FUNCTION(SetOSTrapAddress);
-extern LONGINT C_GetToolTrapAddress(INTEGER n);
-NOTRAP_FUNCTION(GetToolTrapAddress);
-extern void C_SetToolTrapAddress(LONGINT addr, INTEGER n);
-NOTRAP_FUNCTION(SetToolTrapAddress);
-extern LONGINT C_GetToolboxTrapAddress(INTEGER n);
+extern ProcPtr _GetTrapAddress_flags(INTEGER n, bool newTraps, bool tool);
+REGISTER_2FLAG_TRAP(_GetTrapAddress_flags, 
+    GetTrapAddress, INVALID_GetTrapAddress, GetOSTrapAddress, GetToolTrapAddress, 
+    0xA146, ProcPtr(INTEGER), A0(D0, TrapBit<0x200>, TrapBit<0x400>), ClearD0);
+
+extern void _SetTrapAddress_flags(ProcPtr addr, INTEGER n, bool newTraps, bool tool);
+REGISTER_2FLAG_TRAP(_SetTrapAddress_flags, 
+    SetTrapAddress, INVALID_SetTrapAddress, SetOSTrapAddress, SetToolTrapAddress, 
+    0xA047, void(ProcPtr,INTEGER), void(A0, D0, TrapBit<0x200>, TrapBit<0x400>), ClearD0);
+
+extern ProcPtr C_GetToolboxTrapAddress(INTEGER n);
 NOTRAP_FUNCTION(GetToolboxTrapAddress);
-extern void C_SetToolboxTrapAddress(LONGINT addr, INTEGER n);
+extern void C_SetToolboxTrapAddress(ProcPtr addr, INTEGER n);
 NOTRAP_FUNCTION(SetToolboxTrapAddress);
 
+enum
+{
+    _Unimplemented = 0xA89F
+};
 
 extern void Delay(LONGINT n, GUEST<LONGINT> *ftp);
 REGISTER_TRAP2(Delay, 0xA03B, void(A0,Out<LONGINT,D0>));
