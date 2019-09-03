@@ -19,6 +19,8 @@ struct finderinfo
 extern void InitAppFiles(int argc, char **argv);
 extern void empty_timer_queues(void);
 
+extern void C_LoadSeg(INTEGER segno);
+
 static_assert(sizeof(finderinfo) == 268);
 }
 #endif /* !_SEGMENT_H_ */

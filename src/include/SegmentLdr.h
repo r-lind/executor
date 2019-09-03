@@ -50,8 +50,11 @@ extern void CountAppFiles(GUEST<INTEGER> *messagep,
                           GUEST<INTEGER> *countp);
 extern void GetAppFiles(INTEGER index, AppFile *filep);
 extern void ClrAppFiles(INTEGER index);
+
+BEGIN_EXECUTOR_ONLY
 extern void Launch(StringPtr appl, INTEGER vrefnum);
 extern void Chain(StringPtr appl, INTEGER vrefnum);
+END_EXECUTOR_ONLY
 
 extern void C_GetAppParms(StringPtr namep,
                                       GUEST<INTEGER> *rnp, GUEST<Handle> *aphandp);
@@ -60,7 +63,13 @@ PASCAL_TRAP(GetAppParms, 0xA9F5);
 extern void C_UnloadSeg(Ptr addr);
 PASCAL_TRAP(UnloadSeg, 0xA9F1);
 
-extern void C_LoadSeg(INTEGER segno);
+enum
+{
+    _LoadSeg = 0xA9F0,
+    _UnLoadSeg = 0xA9F1,
+    _Launch = 0xA9F2,
+    _Chain = 0xA9F3
+};
 
 static_assert(sizeof(AppFile) == 264);
 }
