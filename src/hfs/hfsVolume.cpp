@@ -522,10 +522,10 @@ Executor::hfsPBMountVol(ParmBlkPtr pb, LONGINT floppyfd, LONGINT offset, LONGINT
                     if(!(flags & DRIVE_FLAGS_LOCKED))
                     {
                         OSErr err2;
-                        signed char buffer[PHYSBSIZE + 3];
-                        signed char *buf;
+                        char buffer[PHYSBSIZE + 3];
+                        Ptr buf;
 
-                        buf = (signed char *)(((uintptr_t)buffer + 3) & ~3L);
+                        buf = (Ptr)(((uintptr_t)buffer + 3) & ~3L);
                         err2 = ROMlib_transphysblk(&((VCBExtra *)vcbp)->u.hfs,
                                                    (ULONGINT)VOLUMEINFOBLOCKNO
                                                        * PHYSBSIZE,
