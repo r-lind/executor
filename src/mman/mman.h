@@ -408,6 +408,7 @@ extern void ROMlib_installhandle(Handle sh, Handle dh);
 extern void ROMlib_InitZones();
 extern void InitMemory(void *thingOnStack);
 
+void SetupVideoMemoryMapping(void *base, size_t size);
 }
 
 #endif /* !_MMAN_PUBLIC_H_ */

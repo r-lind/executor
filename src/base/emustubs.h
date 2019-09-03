@@ -80,7 +80,6 @@ RAW_68K_TRAP(GetTrapAddress, 0xA146);
 RAW_68K_TRAP(SetTrapAddress, 0xA047);
 RAW_68K_TRAP(RelString, 0xA050);
 RAW_68K_TRAP(UpperString, 0xA054);
-RAW_68K_TRAP(StripAddress, 0xA055);
 RAW_68K_TRAP(ADBOp, 0xA07C);
 RAW_68K_TRAP(Microseconds, 0xA193);
 //RAW_68K_TRAP(Gestalt, 0xA1AD);

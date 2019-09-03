@@ -435,12 +435,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     if(vdriver->framebuffer() == nullptr)
         gui_fatal("vdriver not initialized, unable to change bpp");
 
-#if SIZEOF_CHAR_P > 4
-    // code duplication with ROMlib_InitGDevices() below
-    ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
-    ROMlib_offsets[1] -= (1UL << 30);
-    ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5;
-#endif
+    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
 
     gd_set_bpp(gdh, !vdriver->isGrayscale(), vdriver->isFixedCLUT(), bpp);
 
@@ -526,13 +521,9 @@ void Executor::ROMlib_InitGDevices()
         exit(-12);
     }
 
-#if SIZEOF_CHAR_P > 4
     if(vdriver->framebuffer() == 0)
         abort();
-    ROMlib_offsets[1] = (uintptr_t)vdriver->framebuffer();
-    ROMlib_offsets[1] -= (1UL << 30);
-    ROMlib_sizes[1] = vdriver->width() * vdriver->height() * 5; // ### //vdriver->rowBytes() * vdriver->height();
-#endif
+    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
 
     if(vdriver->isGrayscale())
     {

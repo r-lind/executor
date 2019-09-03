@@ -899,18 +899,24 @@ void Executor::RestoreA5()
 
 #define TRUE32b 1
 
-void Executor::GetMMUMode(GUEST<INTEGER> *ip) /* IMV-592 */
+Byte Executor::GetMMUMode() /* IMV-592 */
 {
-    *ip = TRUE32b;
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+    return 0;
+#else
+    return TRUE32b;
+#endif
 }
 
 void Executor::SwapMMUMode(Byte *bp) /* IMV-593 */
 {
-    *bp = TRUE32b;
+    *bp = GetMMUMode();
 }
 
 Ptr Executor::StripAddress(Ptr l) /* IMV-593 */
 {
+    // TWENTYFOUR_BIT_ADDRESSING:
+    //      address will be stripped by the conversion from guest to host address and back.
     return l;
 }
 

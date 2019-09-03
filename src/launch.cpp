@@ -750,7 +750,11 @@ static void reset_low_globals(void)
 
     LM(HiliteMode) = 0xFF; /* I think this is correct */
     LM(ROM85) = 0x3FFF; /* We be color now */
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+    LM(MMU32Bit) = 0x00;
+#else
     LM(MMU32Bit) = 0x01;
+#endif
     LM(loadtrap) = 0;
     *(GUEST<LONGINT> *)SYN68K_TO_US(0x1008) = 0x4; /* Quark XPress 3.0 references 0x1008
 					explicitly.  It takes the value

@@ -26,7 +26,7 @@
 #include <algorithm>
 
 #if defined(LINUX)
-extern char _etext, _end; /* boundaries of data+bss sections, supplied by the linker */
+extern char _etext, __data_start, _end; /* boundaries of data+bss sections, supplied by the linker */
 #endif
 
 namespace Executor
@@ -361,15 +361,70 @@ void ROMlib_InitZones()
     LM(MemErr) = noErr;
 }
 
+#if SIZEOF_CHAR_P != 4 || defined(TWENTYFOUR_BIT_ADDRESSING)
+static void SetupOneMemoryMapping(size_t index, uintptr_t base, size_t size)
+{
+    ROMlib_offsets[index] = base;
+    ROMlib_offsets[index] -= index << (ADDRESS_BITS - OFFSET_TABLE_BITS);
+    ROMlib_sizes[index] = size;
+}
+static void SetupMultiMemoryMapping(size_t index, size_t n, uintptr_t base, size_t size)
+{
+    const size_t blockSize = 1 << (ADDRESS_BITS - OFFSET_TABLE_BITS);
+    for(size_t i = 0; i < n; i++)
+    {
+        size_t size1 = std::min(blockSize, size < i * blockSize ? 0 : size - i * blockSize);
+        SetupOneMemoryMapping(index + i, base + i * blockSize, size1);
+    }
+}
+#endif
+
+void SetupVideoMemoryMapping(void *base, size_t size)
+{
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+    SetupMultiMemoryMapping(2, 2, (uintptr_t)base, size);
+#elif SIZEOF_CHAR_P != 4
+    SetupOneMemoryMapping(1, (uintptr_t)base, size);
+#endif
+}
+
 static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
 {
-#if SIZEOF_CHAR_P == 4
+#if SIZEOF_CHAR_P == 4 && !defined(TWENTYFOUR_BIT_ADDRESSING)
     /*
     On 32-bit platforms, things are easy:
     The global variable ROMlib_offset specifies the offset between
     host addresses and guest addresses.
     */
     ROMlib_offset = (uintptr_t)base;
+#elif defined(TWENTYFOUR_BIT_ADDRESSING)
+    SetupMultiMemoryMapping(0, 2, (uintptr_t)base, size);
+
+    // assume a maximum stack size of 4MB.
+    SetupMultiMemoryMapping(4, 2, ((uintptr_t)thingOnStack - 4 * 1024 * 1024 + 4096) & ~3ULL, 4 * 1024 * 1024);
+
+    //SetupOneMemoryMapping(6, ((uintptr_t)"a string literal" - 1024*1024) & ~3ULL, 2*1024*1024);
+
+    static std::unordered_map<void*, Ptr> remapped;
+    remapOutOfRangeAddressCallback = [](void *ptr) -> void* {
+        if(auto it = remapped.find(ptr); it != remapped.end())
+            return it->second;
+        char *p = (char*)ptr;
+        int n = 0;
+        while(*p++ && n < 128)
+            ++n;
+        Ptr dst = NewPtrSys(n+1);
+        memcpy(dst, ptr, n+1);
+        remapped[ptr] = dst;
+        return dst;
+    };
+
+#if defined(LINUX)
+    SetupOneMemoryMapping(7, (uintptr_t)&__data_start & ~3ULL, &_end - &__data_start);
+#else
+    static char staticThing[32];
+    SetupOneMemoryMapping(7, (uintptr_t)&staticThing - 1024*1024 & ~3ULL, 2*1024*1024);
+#endif
 #else
     /*
     On 64-bit platforms, there is no single ROMlib_offset, but rather
@@ -386,24 +441,18 @@ static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
     the exact boundaries for that address range.
    */
 
-    ROMlib_offsets[0] = (uintptr_t)base;
-    ROMlib_sizes[0] = size;
+    SetupOneMemoryMapping(0, (uintptr_t)base, size);
 
     // mark the slot as occupied until we explicitly set it later
-    ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 30);
-    ROMlib_sizes[1] = 0;
+    //ROMlib_offsets[1] = 0xFFFFFFFFFFFFFFFF - (1UL << 30);
+    //ROMlib_sizes[1] = 0;
 
     // assume an arbitrary maximum stack size of 16MB.
-    ROMlib_offsets[2] = (uintptr_t)thingOnStack - 16 * 1024 * 1024;
-    ROMlib_offsets[2] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[2] -= (2UL << 30);
-    ROMlib_sizes[2] = 16 * 1024 * 1024 + 4096;  // 4KB of slop above the "thingOnStack"
+    // ... 4KB of slop above the "thingOnStack"
+    SetupOneMemoryMapping(2, ((uintptr_t)thingOnStack - 16 * 1024 * 1024 + 4096) & ~3ULL, 16 * 1024 * 1024 + 4096);
 
 #if defined(LINUX)
-    ROMlib_offsets[3] = (uintptr_t)&_etext;
-    ROMlib_offsets[3] -= ROMlib_offsets[3] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = &_end - &_etext;
+    SetupOneMemoryMapping(3, (uintptr_t)&_etext & ~3ULL, &_end - &_etext);
 #else
     /* Mac OS X doesn't have _etext and _end, and the functions in
        mach/getsect.h don't give the correct results when ASLR is active.
@@ -412,10 +461,7 @@ static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
        So we just use the address of a static variable and 512MB in each direction.
      */
     static char staticThing[32];
-    ROMlib_offsets[3] = (uintptr_t)&staticThing - 0x20000000;
-    ROMlib_offsets[3] -= ROMlib_offsets[2] & 3;
-    ROMlib_offsets[3] -= (3UL << 30);
-    ROMlib_sizes[3] = 0x3FFFFFFF;
+    SetupOneMemoryMapping(3, (uintptr_t)&staticThing - 0x20000000 & ~3ULL, 0x3FFFFFFF);
 #endif
 #endif
 }
@@ -1043,7 +1089,7 @@ void ReallocateHandle(Handle h, Size size)
             return;
         }
 
-        state = BLOCK_STATE(oldb);
+        state = HANDLE_STATE(h,oldb);
         if(PSIZE(oldb) >= (uint32_t)size)
         {
             ROMlib_setupblock(oldb, size, REL, h, state);
@@ -1075,7 +1121,7 @@ void ReallocateHandle(Handle h, Size size)
     }
 
     ROMlib_setupblock(newb, size, REL, h, state);
-    SETMASTER(h, BLOCK_DATA(newb));
+    SETMASTER(h, BLOCK_DATA(newb), state);
 
     if(oldb)
         ROMlib_freeblock(oldb);
@@ -1492,7 +1538,8 @@ repeat:
                 *target = *src;
 
                 SETMASTER(BLOCK_TO_HANDLE(current_zone, src),
-                          BLOCK_DATA(target));
+                          BLOCK_DATA(target),
+                          HANDLE_STATE(BLOCK_TO_HANDLE(current_zone, src), src));
 
                 BlockMove(BLOCK_DATA(src), BLOCK_DATA(target), LSIZE(src));
 
@@ -1911,7 +1958,7 @@ void EmptyHandle(Handle h)
     }
 
     ROMlib_freeblock(b);
-    SETMASTER(h, nullptr);
+    SETMASTER(h, nullptr, 0);
 
     LM(TheZone) = save_zone;
     MM_SLAM("exit");
@@ -1944,7 +1991,7 @@ void ROMlib_installhandle(Handle sh, Handle dh)
         block_header_t *db = HANDLE_TO_BLOCK(dh);
         block_header_t *sb = HANDLE_TO_BLOCK(sh);
         ROMlib_freeblock(db);
-        SETMASTER(dh, *sh);
+        SETMASTER(dh, *sh, HANDLE_STATE(sh,sb));
         BLOCK_LOCATION_OFFSET(sb) = (Ptr)dh - (Ptr)LM(TheZone);
         *sh = guest_cast<Ptr>(ZONE_HFST_FREE(LM(TheZone)));
         ZONE_HFST_FREE(LM(TheZone)) = (Ptr)sh;
