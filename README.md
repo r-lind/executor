@@ -17,6 +17,7 @@ Executor 2000 feature highlights:
   - Builds and runs on modern 64-bit Linux and macOS (Windows support is planned).
   - Rootless - emulated windows are part of your desktop.
   - PowerPC support (well, not many Apps will run, but it's there)
+  - 24-bit addressing support (compile-time option: `-DTWENTYFOUR=YES`)
   - Support for native Mac resource forks (Mac version)
   - Exchange files with Basilisk & SheepShaver
   - Lots of code cleanup, according to my own definition of "clean"
@@ -95,6 +96,10 @@ cd build
 cmake ..
 cmake --build .
 ```
+
+If you want to build executor with 24-bit addressing, use
+`cmake .. -DTWENTYFOUR=YES` instead of the regular `cmake ..` command. Note that
+this will limit you to about 4MB of emulated RAM and break PowerPC support.
 
 When `./build/src/executor` is first invoked, it will automatically install its
 fake Mac system file and the `Browser` finder replacement to `~/.executor/`, so
