@@ -42,6 +42,25 @@ enum
 
 enum
 {
+    kFontIDNewYork = newYork,
+    kFontIDGeneva = geneva,
+    kFontIDMonaco = monaco,
+    kFontIDVenice = venice,
+    kFontIDLondon = london,
+    kFontIDAthens = athens,
+    kFontIDSanFrancisco = sanFran,
+    kFontIDToronto = toronto,
+    kFontIDCairo = cairo,
+    kFontIDLosAngeles = losAngeles,
+    kFontIDTimes = times,
+    kFontIDHelvetica = helvetica,
+    kFontIDCourier = courier,
+    kFontIDSymbol = symbol,
+    kFontIDTaliesin = taliesin
+};
+
+enum
+{
     commandMark = 0x11,
     checkMark = 0x12,
     diamondMark = 0x13,
