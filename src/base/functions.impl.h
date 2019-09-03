@@ -17,33 +17,25 @@ namespace Executor
 namespace callconv
 {
 
-template<int n> struct A
-{
-    template<typename T>
-    operator T() { return EM_AREG(n); }
-    template<typename T>
-    operator T*() { return ptr_from_longint<T*>(EM_AREG(n)); }
-    template<typename T>
-    operator UPP<T>() { return UPP<T>(ptr_from_longint<ProcPtr>(EM_AREG(n))); }
-
-    static void set(uint32_t x) { EM_AREG(n) = x; }
-    static void set(void *x) { EM_AREG(n) = ptr_to_longint(x); }
-    template<class T, class CC>
-    static void set(UPP<T,CC> x) { EM_AREG(n) = ptr_to_longint((void*)x); }
-
-    template<class T>
-    static void afterCall(T) {}
-};
-
 template<int n> struct D
 {
     template<typename T>
-    operator T() { return EM_DREG(n); }
-    static void set(uint32_t x) { EM_DREG(n) = x; }
+    operator T() { return cpu_state.regs[n].ul.n; }
+    template<typename T>
+    operator T*() { return ptr_from_longint<T*>(cpu_state.regs[n].ul.n); }
+    template<typename T>
+    operator UPP<T>() { return UPP<T>(ptr_from_longint<ProcPtr>(cpu_state.regs[n].ul.n)); }
+
+    static void set(uint32_t x) { cpu_state.regs[n].ul.n = x; }
+    static void set(void *x) { cpu_state.regs[n].ul.n = ptr_to_longint(x); }
+    template<class T, class CC>
+    static void set(UPP<T,CC> x) { cpu_state.regs[n].ul.n = ptr_to_longint((void*)x); }
 
     template<class T>
     static void afterCall(T) {}
 };
+
+template<int n> struct A : D<n+8> {};
 
 struct D0HighWord
 {
