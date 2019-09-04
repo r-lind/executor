@@ -254,7 +254,8 @@ extern void RestoreA5(void);
 #undef SwapMMUMode
 extern Byte GetMMUMode();
 extern void SwapMMUMode(Byte *bp);
-extern Ptr StripAddress(Ptr l);
+
+extern uint32_t StripAddress(uint32_t l);
 REGISTER_TRAP2(StripAddress, 0xA055, D0(D0));
 
 extern void C_DebugStr(StringPtr p);

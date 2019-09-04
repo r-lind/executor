@@ -913,11 +913,13 @@ void Executor::SwapMMUMode(Byte *bp) /* IMV-593 */
     *bp = GetMMUMode();
 }
 
-Ptr Executor::StripAddress(Ptr l) /* IMV-593 */
+uint32_t Executor::StripAddress(uint32_t l) /* IMV-593 */
 {
-    // TWENTYFOUR_BIT_ADDRESSING:
-    //      address will be stripped by the conversion from guest to host address and back.
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+    return l & 0xFFFFFF;
+#else
     return l;
+#endif
 }
 
 void Executor::C_MakeDataExecutable(void *ptr, uint32_t sz)
