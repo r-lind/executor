@@ -631,14 +631,14 @@ static void doimage(LONGINT verb, Rect *rp, GrafPtr thePortp)
     {
         default:
         case paintVerb:
-            patp = thePortp->pnPat;
+            patp = thePortp->pnPat.pat;
             break;
         case eraseVerb:
-            patp = thePortp->bkPat;
+            patp = thePortp->bkPat.pat;
             pnMode = patCopy;
             break;
         case fillVerb:
-            patp = thePortp->fillPat;
+            patp = thePortp->fillPat.pat;
             pnMode = patCopy;
             break;
     }

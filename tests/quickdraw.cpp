@@ -151,13 +151,13 @@ TEST(QuickDraw, BasicQDColorBW)
 {
     OffscreenPort port;
 
-    FillRect(&port.r, PATREF(qd.gray));
+    FillRect(&port.r, &qd.gray);
     EXPECT_EQ(0x80, port.data(0,0));
     EXPECT_EQ(0x40, port.data(1,0));
     
     ForeColor(whiteColor);
     BackColor(redColor);
-    FillRect(&port.r, PATREF(qd.gray));
+    FillRect(&port.r, &qd.gray);
 
     EXPECT_EQ(0x40, port.data(0,0));
     EXPECT_EQ(0x80, port.data(1,0));
@@ -173,7 +173,7 @@ TEST(QuickDraw, BasicQDColor32)
     OffscreenWorld world(32);
 
 
-    FillRect(&world.r, PATREF(qd.gray));
+    FillRect(&world.r, &qd.gray);
     EXPECT_EQ(0x00000000, world.data32(0,0));
     EXPECT_EQ(0x00FFFFFF, world.data32(0,1));
     EXPECT_EQ(0x00FFFFFF, world.data32(1,0));
@@ -187,7 +187,7 @@ TEST(QuickDraw, BasicQDColor32)
     EXPECT_EQ(0x00FFFFFF, world.world->fgColor);
     EXPECT_EQ(rgbRed, world.world->bkColor);
 
-    FillRect(&world.r, PATREF(qd.gray));
+    FillRect(&world.r, &qd.gray);
 
     EXPECT_EQ(0x00FFFFFF, world.data32(0,0));
     EXPECT_EQ(rgbRed, world.data32(0,1));
@@ -201,7 +201,7 @@ TEST(QuickDraw, GrayPattern32)
         return;
     OffscreenWorld world(32);
 
-    FillRect(&world.r, PATREF(qd.gray));
+    FillRect(&world.r, &qd.gray);
     EXPECT_EQ(0x00000000, world.data32(0,0));
     EXPECT_EQ(0x00FFFFFF, world.data32(0,1));
     EXPECT_EQ(0x00FFFFFF, world.data32(1,0));
@@ -214,7 +214,7 @@ TEST(QuickDraw, GrayPattern8)
         return;
     OffscreenWorld world(8);
 
-    FillRect(&world.r, PATREF(qd.gray));
+    FillRect(&world.r, &qd.gray);
     EXPECT_EQ(0xFF, world.data(0,0));
     EXPECT_EQ(0x00, world.data(0,1));
     EXPECT_EQ(0x00, world.data(1,0));
@@ -225,7 +225,7 @@ TEST(QuickDraw, GrayPattern1)
 {
     OffscreenPort port;
 
-    FillRect(&port.r, PATREF(qd.gray));
+    FillRect(&port.r, &qd.gray);
     EXPECT_EQ(0x80, port.data(0,0));
     EXPECT_EQ(0x40, port.data(1,0));
 }
@@ -236,7 +236,7 @@ TEST(QuickDraw, BlackPattern32)
         return;
     OffscreenWorld world(32);
 
-    FillRect(&world.r, PATREF(qd.black));
+    FillRect(&world.r, &qd.black);
     EXPECT_EQ(0x00000000, world.data32(0,0));
     EXPECT_EQ(0x00000000, world.data32(0,1));
     EXPECT_EQ(0x00000000, world.data32(1,0));

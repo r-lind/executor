@@ -51,7 +51,7 @@ extern bool xdblt_xdata_complex(RgnHandle rh, int mode,
                                 xdata_t *x, PixMap *dst_bitmap);
 extern bool xdblt_pattern(RgnHandle rh, int mode,
                           int pat_x_rotate_count, int pat_y_rotate_count,
-                          const Pattern pattern, PixMap *dst,
+                          const Pattern& pattern, PixMap *dst,
                           uint32_t fg_color, uint32_t bk_color);
 }
 

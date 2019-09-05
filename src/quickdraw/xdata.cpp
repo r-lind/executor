@@ -36,7 +36,7 @@ bool Executor::update_xdata_if_needed(xdata_handle_t xh, PixPat *pixpat,
 }
 
 static void
-raw_bits_for_pattern(const Pattern pattern, PixMap *target,
+raw_bits_for_pattern(const Pattern& pattern, PixMap *target,
                      uint32_t *bits, int *row_bytes)
 {
     /* this is a template pattern to be used as the source
@@ -97,7 +97,7 @@ raw_bits_for_pattern(const Pattern pattern, PixMap *target,
     CTabHandle fg_bk_ctab;
     int dst_row_bytes, target_depth;
 
-    pattern_pixmap_tmpl.baseAddr = (Ptr)&pattern[0];
+    pattern_pixmap_tmpl.baseAddr = (Ptr)&pattern.pat[0];
     fg_bk_ctab = validate_fg_bk_ctab();
     pattern_pixmap_tmpl.pmTable = ROMlib_bw_ctab;
     conv_table = (CTabPtr)alloca(CTAB_STORAGE_FOR_SIZE(1));
@@ -468,7 +468,7 @@ Executor::xdata_for_pixpat_with_space(PixPat *pixpat, PixMap *target,
 }
 
 xdata_handle_t
-Executor::xdata_for_pattern(const Pattern pattern, PixMap *target)
+Executor::xdata_for_pattern(const Pattern& pattern, PixMap *target)
 {
     xdata_handle_t xh;
 

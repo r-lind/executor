@@ -132,7 +132,7 @@ LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, Rect *limit,
     p.h = startp.h;
     p.v = startp.v;
     GetPenState(&ps);
-    PenPat(LM(DragPattern));
+    PenPat(&LM(DragPattern));
     PenMode(notPatXor);
     if((drawn = PtInRect(p, slop)))
     {
@@ -221,7 +221,7 @@ LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, Rect *limit,
 LONGINT Executor::C_DragGrayRgn(RgnHandle rgn, Point startp, Rect *limit,
                                 Rect *slop, INTEGER axis, ProcPtr proc)
 {
-    PATASSIGN(LM(DragPattern), qdGlobals().gray);
+    LM(DragPattern) = qdGlobals().gray;
     return DragTheRgn(rgn, startp, limit, slop, axis, proc);
 }
 
@@ -330,7 +330,7 @@ void Executor::C_PaintOne(WindowPeek w, RgnHandle clobbered)
                 && PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice))) > 2)
                     FillCRgn(clobbered, LM(DeskCPat));
                 else
-                    FillRgn(clobbered, LM(DeskPattern));
+                    FillRgn(clobbered, &LM(DeskPattern));
             }
         }
     }

@@ -63,7 +63,7 @@ extern xdata_handle_t xdata_for_pixpat_with_space(PixPat *pixpat,
 #define xdata_for_pixpat(p, d)        \
     xdata_for_pixpat_with_space(p, d, \
                                 (xdata_handle_t)NewHandle(sizeof(xdata_t)))
-extern xdata_handle_t xdata_for_pattern(const Pattern pattern,
+extern xdata_handle_t xdata_for_pattern(const Pattern& pattern,
                                         PixMapPtr target);
 extern void xdata_free(xdata_handle_t x);
 }

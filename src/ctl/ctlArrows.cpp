@@ -350,7 +350,7 @@ void draw_page(ControlHandle ctl)
      currently hilited */
     RGBForeColor(&current_ctl_colors[page_bk]);
     RGBBackColor(&current_ctl_colors[page_fg]);
-    FillRect(&r, qdGlobals().ltGray);
+    FillRect(&r, &qdGlobals().ltGray);
 
     rp = &(*static_cast<RgnHandle>(CTL_DATA(ctl)))->rgnBBox;
     rp->top = rp->bottom = 0;

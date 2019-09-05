@@ -35,11 +35,11 @@ void Executor::C_InvertRect(Rect *r)
     CALLRECT(invert, r);
 }
 
-void Executor::C_FillRect(Rect *r, Pattern pat)
+void Executor::C_FillRect(Rect *r, const Pattern *pat)
 {
     if(!EmptyRgn(PORT_VIS_REGION(qdGlobals().thePort)))
     {
-        ROMlib_fill_pat(pat);
+        ROMlib_fill_pat(*pat);
         CALLRECT(fill, r);
     }
 }
@@ -64,9 +64,9 @@ void Executor::C_InvertOval(Rect *r)
     CALLOVAL(invert, r);
 }
 
-void Executor::C_FillOval(Rect *r, Pattern pat)
+void Executor::C_FillOval(Rect *r, const Pattern *pat)
 {
-    ROMlib_fill_pat(pat);
+    ROMlib_fill_pat(*pat);
     CALLOVAL(fill, r);
 }
 
@@ -90,9 +90,9 @@ void Executor::C_InvertRoundRect(Rect *r, INTEGER ow, INTEGER oh)
     CALLRRECT(invert, r, ow, oh);
 }
 
-void Executor::C_FillRoundRect(Rect *r, INTEGER ow, INTEGER oh, Pattern pat)
+void Executor::C_FillRoundRect(Rect *r, INTEGER ow, INTEGER oh, const Pattern *pat)
 {
-    ROMlib_fill_pat(pat);
+    ROMlib_fill_pat(*pat);
     CALLRRECT(fill, r, ow, oh);
 }
 
@@ -116,9 +116,9 @@ void Executor::C_InvertArc(Rect *r, INTEGER start, INTEGER angle)
     CALLARC(invert, r, start, angle);
 }
 
-void Executor::C_FillArc(Rect *r, INTEGER start, INTEGER angle, Pattern pat)
+void Executor::C_FillArc(Rect *r, INTEGER start, INTEGER angle, const Pattern *pat)
 {
-    ROMlib_fill_pat(pat);
+    ROMlib_fill_pat(*pat);
     CALLARC(fill, r, start, angle);
 }
 
@@ -142,9 +142,9 @@ void Executor::C_InvertRgn(RgnHandle rh)
     CALLRGN(invert, rh);
 }
 
-void Executor::C_FillRgn(RgnHandle rh, Pattern pat)
+void Executor::C_FillRgn(RgnHandle rh, const Pattern *pat)
 {
-    ROMlib_fill_pat(pat);
+    ROMlib_fill_pat(*pat);
     CALLRGN(fill, rh);
 }
 
@@ -168,8 +168,8 @@ void Executor::C_InvertPoly(PolyHandle poly)
     CALLPOLY(invert, poly);
 }
 
-void Executor::C_FillPoly(PolyHandle poly, Pattern pat)
+void Executor::C_FillPoly(PolyHandle poly, const Pattern *pat)
 {
-    ROMlib_fill_pat(pat);
+    ROMlib_fill_pat(*pat);
     CALLPOLY(fill, poly);
 }

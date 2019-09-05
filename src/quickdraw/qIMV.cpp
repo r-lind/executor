@@ -149,7 +149,7 @@ void Executor::C_SetCPixel(INTEGER h, INTEGER v, RGBColor *pixelp)
     RGBForeColor(pixelp);
     PenMode(patCopy);
 
-    FillRect(&temp_rect, qdGlobals().black);
+    FillRect(&temp_rect, &qdGlobals().black);
 
     PORT_FG_COLOR(port) = save_fg;
     if(cgrafport_p)

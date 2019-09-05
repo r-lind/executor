@@ -105,7 +105,11 @@ struct BitMap
     GUEST<Rect> bounds;
 };
 
-typedef Byte Pattern[8];
+struct Pattern
+{
+    GUEST_STRUCT;
+    Byte pat[8];
+};
 typedef INTEGER Bits16[16];
 
 struct Cursor
@@ -558,7 +562,7 @@ extern void C_GetClip(RgnHandle r);
 PASCAL_TRAP(GetClip, 0xA87A);
 extern void C_ClipRect(Rect *r);
 PASCAL_TRAP(ClipRect, 0xA87B);
-extern void C_BackPat(Pattern pp);
+extern void C_BackPat(const Pattern* pp);
 PASCAL_TRAP(BackPat, 0xA87C);
 extern void C_SeedFill(Ptr srcp, Ptr dstp,
                                    INTEGER srcr, INTEGER dstr, INTEGER height, INTEGER width,
@@ -609,7 +613,7 @@ extern void C_PenSize(INTEGER w, INTEGER h);
 PASCAL_TRAP(PenSize, 0xA89B);
 extern void C_PenMode(INTEGER m);
 PASCAL_TRAP(PenMode, 0xA89C);
-extern void C_PenPat(Pattern pp);
+extern void C_PenPat(const Pattern *pp);
 PASCAL_TRAP(PenPat, 0xA89D);
 extern void C_PenNormal(void);
 PASCAL_TRAP(PenNormal, 0xA89E);
@@ -729,7 +733,7 @@ extern void C_EraseRect(Rect *r);
 PASCAL_TRAP(EraseRect, 0xA8A3);
 extern void C_InvertRect(Rect *r);
 PASCAL_TRAP(InvertRect, 0xA8A4);
-extern void C_FillRect(Rect *r, Pattern pat);
+extern void C_FillRect(Rect *r, const Pattern *pat);
 PASCAL_TRAP(FillRect, 0xA8A5);
 extern void C_FrameOval(Rect *r);
 PASCAL_TRAP(FrameOval, 0xA8B7);
@@ -739,7 +743,7 @@ extern void C_EraseOval(Rect *r);
 PASCAL_TRAP(EraseOval, 0xA8B9);
 extern void C_InvertOval(Rect *r);
 PASCAL_TRAP(InvertOval, 0xA8BA);
-extern void C_FillOval(Rect *r, Pattern pat);
+extern void C_FillOval(Rect *r, const Pattern *pat);
 PASCAL_TRAP(FillOval, 0xA8BB);
 extern void C_FrameRoundRect(Rect *r, INTEGER ow,
                                          INTEGER oh);
@@ -754,7 +758,7 @@ extern void C_InvertRoundRect(Rect *r, INTEGER ow,
                                           INTEGER oh);
 PASCAL_TRAP(InvertRoundRect, 0xA8B3);
 extern void C_FillRoundRect(Rect *r, INTEGER ow,
-                                        INTEGER oh, Pattern pat);
+                                        INTEGER oh, const Pattern *pat);
 PASCAL_TRAP(FillRoundRect, 0xA8B4);
 extern void C_FrameArc(Rect *r, INTEGER start,
                                    INTEGER angle);
@@ -769,7 +773,7 @@ extern void C_InvertArc(Rect *r, INTEGER start,
                                     INTEGER angle);
 PASCAL_TRAP(InvertArc, 0xA8C1);
 extern void C_FillArc(Rect *r, INTEGER start,
-                                  INTEGER angle, Pattern pat);
+                                  INTEGER angle, const Pattern *pat);
 PASCAL_TRAP(FillArc, 0xA8C2);
 extern void C_FrameRgn(RgnHandle rh);
 PASCAL_TRAP(FrameRgn, 0xA8D2);
@@ -779,7 +783,7 @@ extern void C_EraseRgn(RgnHandle rh);
 PASCAL_TRAP(EraseRgn, 0xA8D4);
 extern void C_InvertRgn(RgnHandle rh);
 PASCAL_TRAP(InvertRgn, 0xA8D5);
-extern void C_FillRgn(RgnHandle rh, Pattern pat);
+extern void C_FillRgn(RgnHandle rh, const Pattern *pat);
 PASCAL_TRAP(FillRgn, 0xA8D6);
 extern void C_FramePoly(PolyHandle poly);
 PASCAL_TRAP(FramePoly, 0xA8C6);
@@ -789,7 +793,7 @@ extern void C_ErasePoly(PolyHandle poly);
 PASCAL_TRAP(ErasePoly, 0xA8C8);
 extern void C_InvertPoly(PolyHandle poly);
 PASCAL_TRAP(InvertPoly, 0xA8C9);
-extern void C_FillPoly(PolyHandle poly, Pattern pat);
+extern void C_FillPoly(PolyHandle poly, const Pattern *pat);
 PASCAL_TRAP(FillPoly, 0xA8CA);
 extern void C_SetStdProcs(QDProcs *procs);
 PASCAL_TRAP(SetStdProcs, 0xA8EA);

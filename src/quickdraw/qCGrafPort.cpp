@@ -99,8 +99,8 @@ void Executor::C_InitCPort(CGrafPtr p)
     PORT_POLY_SAVE(p) = nullptr;
     PORT_GRAF_PROCS(p) = nullptr;
 
-    PenPat(qdGlobals().black);
-    BackPat(qdGlobals().white);
+    PenPat(&qdGlobals().black);
+    BackPat(&qdGlobals().white);
 
     /* hack */
     ROMlib_fill_pat(qdGlobals().black);
@@ -247,7 +247,7 @@ void Executor::C_PenPixPat(PixPatHandle new_pen)
         CPORT_PEN_PIXPAT(theCPort) = new_pen;
     }
     else
-        PATASSIGN(PORT_PEN_PAT(qdGlobals().thePort), PIXPAT_1DATA(new_pen));
+        PORT_PEN_PAT(qdGlobals().thePort) = PIXPAT_1DATA(new_pen);
 }
 
 void Executor::C_BackPixPat(PixPatHandle new_bk)
@@ -266,7 +266,7 @@ void Executor::C_BackPixPat(PixPatHandle new_bk)
         CPORT_BK_PIXPAT(theCPort) = new_bk;
     }
     else
-        PATASSIGN(PORT_BK_PAT(qdGlobals().thePort), PIXPAT_1DATA(new_bk));
+        PORT_BK_PAT(qdGlobals().thePort) = PIXPAT_1DATA(new_bk);
 }
 
 void Executor::ROMlib_fill_pixpat(PixPatHandle new_fill)
@@ -287,7 +287,7 @@ void Executor::ROMlib_fill_pixpat(PixPatHandle new_fill)
         CPORT_FILL_PIXPAT(theCPort) = new_fill;
     }
     else
-        PATASSIGN(PORT_BK_PAT(qdGlobals().thePort), PIXPAT_1DATA(new_fill));
+        PORT_BK_PAT(qdGlobals().thePort) = PIXPAT_1DATA(new_fill);
 }
 
 /* where is FillPixPat */
@@ -523,7 +523,7 @@ void Executor::C_CopyPixPat(PixPatHandle src, PixPatHandle dst)
     SetHandleSize(PIXPAT_DATA(dst), data_size);
     memcpy(*PIXPAT_DATA(dst), *PIXPAT_DATA(src), data_size);
     PIXPAT_XVALID(dst) = -1;
-    PATASSIGN(PIXPAT_1DATA(dst), PIXPAT_1DATA(src));
+    PIXPAT_1DATA(dst) = PIXPAT_1DATA(src);
 }
 
 void Executor::C_MakeRGBPat(PixPatHandle pixpat, RGBColor *color)

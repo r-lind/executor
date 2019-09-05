@@ -243,8 +243,8 @@ void Executor::dump_rect(Rect *r)
 void Executor::dump_pattern(Pattern x)
 {
     iprintf((o_fp, "%s0x%02x%02x%02x%02x%02x%02x%02x%02x;\n", field_name.c_str(),
-             x[0], x[1], x[2], x[3],
-             x[4], x[5], x[6], x[7]));
+             x.pat[0], x.pat[1], x.pat[2], x.pat[3],
+             x.pat[4], x.pat[5], x.pat[6], x.pat[7]));
     fflush(o_fp);
 }
 

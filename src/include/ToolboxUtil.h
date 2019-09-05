@@ -40,7 +40,6 @@ typedef Pattern *PatPtr;
 
 typedef GUEST<PatPtr> *PatHandle;
 
-/* DO NOT DELETE THIS LINE */
 extern Fract C_FracSqrt(Fract x);
 PASCAL_TRAP(FracSqrt, 0xA849);
 

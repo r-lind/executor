@@ -68,7 +68,7 @@ PicHandle Executor::ROMlib_OpenPicture_helper(
     (*pch)->picclip = temprh;
     /* -32766 below is an attempt to force a reload */
     SetRectRgn((*pch)->picclip, -32766, -32766, 32767, 32767);
-    PATASSIGN((*pch)->picbkpat, qdGlobals().white);
+    (*pch)->picbkpat = qdGlobals().white;
     (*pch)->picfont = 0;
     (*pch)->picface = 0;
     (*pch)->picfiller = 0;
@@ -86,8 +86,8 @@ PicHandle Executor::ROMlib_OpenPicture_helper(
     (*pch)->picpnsize.h = 1;
     (*pch)->picpnsize.v = 1;
     (*pch)->picpnmode = patCopy;
-    PATASSIGN((*pch)->picpnpat, qdGlobals().black);
-    PATASSIGN((*pch)->picfillpat, qdGlobals().black);
+    (*pch)->picpnpat = qdGlobals().black;
+    (*pch)->picfillpat = qdGlobals().black;
     (*pch)->piclastrect.top = 0;
     (*pch)->piclastrect.left = 0;
     (*pch)->piclastrect.bottom = 0;
@@ -130,8 +130,8 @@ static BOOLEAN EqualPat(Pattern pat1, Pattern pat2)
 {
     LONGINT *lp1, *lp2;
 
-    lp1 = (LONGINT *)pat1;
-    lp2 = (LONGINT *)pat2;
+    lp1 = (LONGINT *)pat1.pat;
+    lp2 = (LONGINT *)pat2.pat;
     return lp1[0] == lp2[0] && lp1[1] == lp2[1];
 }
 
@@ -139,9 +139,9 @@ static void updateapat(Pattern srcpat, Pattern dstpat, INTEGER opcode)
 {
     if(!EqualPat(srcpat, dstpat))
     {
-        PATASSIGN(dstpat, srcpat);
+        dstpat = srcpat;
         PICOP(opcode);
-        PICWRITE(srcpat, sizeof(Pattern));
+        PICWRITE(&srcpat, sizeof(Pattern));
     }
 }
 

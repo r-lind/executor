@@ -173,7 +173,7 @@ void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
         }
         if(content_color)
             RGBBackColor(content_color);
-        FillRgn(WINDOW_CONT_REGION(w), qdGlobals().white);
+        FillRgn(WINDOW_CONT_REGION(w), &qdGlobals().white);
         if(content_color)
             RGBBackColor(&ROMlib_white_rgb_color);
 

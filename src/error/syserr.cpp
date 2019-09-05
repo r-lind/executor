@@ -321,7 +321,7 @@ void Executor::C_SysError(short errorcode)
     else
     {
         r = LM(DSAlertRect);
-        FillRect(&r, qdGlobals().white);
+        FillRect(&r, &qdGlobals().white);
 #if defined(OLDSTYLEALERT)
         r.right = r.right - (2);
         r.bottom = r.bottom - (2);

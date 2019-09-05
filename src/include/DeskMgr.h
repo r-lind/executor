@@ -36,7 +36,6 @@ enum
 
 const LowMemGlobal<Byte> SEvtEnb { 0x15C }; // DeskMgr IMI-443 (false);
 
-/* DO NOT DELETE THIS LINE */
 extern INTEGER C_OpenDeskAcc(
     ConstStringPtr acc);
 PASCAL_TRAP(OpenDeskAcc, 0xA9B6);

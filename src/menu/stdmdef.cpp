@@ -454,9 +454,9 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
                 r = rtmp;
                 r.left = new_left;
                 PenMode(notPatBic);
-                PenPat(qdGlobals().gray);
+                PenPat(&qdGlobals().gray);
                 PaintRect(&r);
-                PenPat(qdGlobals().black);
+                PenPat(&qdGlobals().black);
                 PenMode(patCopy);
             }
         }
@@ -465,9 +465,9 @@ draw_item(Rect *rp, struct table::tableentry *tp, int32_t bit, int item, MenuHan
     if(dither_p)
     {
         PenMode(notPatBic);
-        PenPat(qdGlobals().gray);
+        PenPat(&qdGlobals().gray);
         PaintRect(&rtmp);
-        PenPat(qdGlobals().black);
+        PenPat(&qdGlobals().black);
         PenMode(patCopy);
     }
     cleanup_icon_info(&icon_info);

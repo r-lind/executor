@@ -26,14 +26,6 @@
 #define str255assign(d, s) \
     (memcpy(d, s, uint8_t((s)[0]) + 1))
 
-#define PATASSIGN(dest, src)                                 \
-    (((uint32_t *)(dest))[0] = ((const uint32_t *)(src))[0], \
-     ((uint32_t *)(dest))[1] = ((const uint32_t *)(src))[1])
-
-#define PATTERNS_EQUAL_P(p1, p2)                                \
-    (((const uint32_t *)(p1))[0] == ((const uint32_t *)(p2))[0] \
-     && ((const uint32_t *)(p1))[1] == ((const uint32_t *)(p2))[1])
-
 #define FOURCC(a, b, c, d) ((((uint32_t)(uint8_t)(a)) << 24)   \
                        | (((uint32_t)(uint8_t)(b)) << 16) \
                        | (((uint32_t)(uint8_t)(c)) << 8)  \

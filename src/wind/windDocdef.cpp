@@ -561,7 +561,7 @@ void draw_frame(GrafPtr w, int draw_zoom_p, bool goaway_override)
 
     PenSize(1, 1);
     /* draw with the current foreground color */
-    PenPat(qdGlobals().black);
+    PenPat(&qdGlobals().black);
     PenMode(patCopy);
 
     /* bounds of the title bar */
@@ -765,7 +765,7 @@ void draw_grow_icon(GrafPtr w)
     right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
     bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
-    PenPat(qdGlobals().black);
+    PenPat(&qdGlobals().black);
     PenSize(1, 1);
     PenMode(patCopy);
 
@@ -801,7 +801,7 @@ void erase_grow_icon(GrafPtr w)
     right = PORT_RECT(w).right - PORT_BOUNDS(w).left;
     bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
-    PenPat(qdGlobals().black);
+    PenPat(&qdGlobals().black);
     PenSize(1, 1);
     PenMode(patCopy);
     MoveTo(left, bottom - 15);
@@ -809,7 +809,7 @@ void erase_grow_icon(GrafPtr w)
     MoveTo(right - 15, top);
     LineTo(right - 15, bottom - 1);
     SetRect(&r, right - 14, bottom - 14, right, bottom);
-    FillRect(&r, qdGlobals().white);
+    FillRect(&r, &qdGlobals().white);
 }
 
 LONGINT
@@ -1179,7 +1179,7 @@ void hilite_rounded_window(WindowPeek w,
     SectRgn(rh1, rh2, rh1);
 
     RGBForeColor(title_bar_bk);
-    PenPat(qdGlobals().black);
+    PenPat(&qdGlobals().black);
     PaintRgn(rh1);
 
     DisposeRgn(rh2);
@@ -1198,7 +1198,7 @@ void draw_rounded_doc(GrafPtr w)
     bottom = PORT_RECT(w).bottom - PORT_BOUNDS(w).top;
 
     SetRect(&r, left - 1, top - 19, right + 1, top);
-    FillRect(&r, qdGlobals().white);
+    FillRect(&r, &qdGlobals().white);
     RGBForeColor(frame);
     FrameRgn(WINDOW_STRUCT_REGION(w));
     PenSize(1, 1);

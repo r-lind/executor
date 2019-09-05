@@ -623,13 +623,13 @@ extern void ctl_color_init(void);
 extern CTabHandle ROMlib_empty_ctab(int size);
 extern void ROMlib_copy_ctab(CTabHandle src, CTabHandle dst);
 
-extern PixPatHandle ROMlib_pattern_to_pixpat(Pattern p);
+extern PixPatHandle ROMlib_pattern_to_pixpat(const Pattern& p);
 
 extern void ROMlib_blt_pn(RgnHandle, INTEGER);
 extern void ROMlib_blt_fill(RgnHandle, INTEGER);
 extern void ROMlib_blt_bk(RgnHandle, INTEGER);
 
-extern void ROMlib_fill_pat(Pattern);
+extern void ROMlib_fill_pat(const Pattern&);
 extern void ROMlib_fill_pixpat(PixPatHandle);
 
 extern RGBColor *ROMlib_qd_color_to_rgb(LONGINT);

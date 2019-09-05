@@ -109,7 +109,7 @@ void validate_colors_for_control(ControlHandle ctl)
         }
 
         current_control_colors[frame_color] = ctl_ctab_colors[frame_color];
-        PATASSIGN(frame_pattern, qdGlobals().black);
+        frame_pattern = qdGlobals().black;
     }
     else
     {
@@ -119,11 +119,11 @@ void validate_colors_for_control(ControlHandle ctl)
                              &current_control_colors[frame_color]))
         {
             current_control_colors[frame_color] = ctl_ctab_colors[frame_color];
-            PATASSIGN(frame_pattern, qdGlobals().gray);
+            frame_pattern = qdGlobals().gray;
         }
         else
         {
-            PATASSIGN(frame_pattern, qdGlobals().black);
+            frame_pattern = qdGlobals().black;
         }
 
         text_mode = grayishTextOr;
@@ -255,7 +255,7 @@ draw_push(ControlHandle c, int16_t part)
 
     /* frame in the frame color */
     RGBForeColor(&current_control_colors[frame_color]);
-    PenPat(frame_pattern);
+    PenPat(&frame_pattern);
     FrameRoundRect(&r, h, v);
 
     /* inset the rect by a pixel so that drawing cannot overlap the oval */
@@ -308,7 +308,7 @@ draw_check(ControlHandle c, int16_t part)
     EraseRect(&r);
 
     RGBForeColor(&current_control_colors[frame_color]);
-    PenPat(frame_pattern);
+    PenPat(&frame_pattern);
     if(CTL_HILITE(c) == inCheckBox)
         PenSize(2, 2);
     FrameRect(&r);
@@ -343,7 +343,7 @@ draw_radio(ControlHandle c, int16_t part)
     if(CTL_HILITE(c) == inCheckBox)
         PenSize(2, 2);
     RGBForeColor(&current_control_colors[frame_color]);
-    PenPat(frame_pattern);
+    PenPat(&frame_pattern);
     FrameOval(&r);
     if(CTL_VALUE(c))
     {

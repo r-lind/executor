@@ -860,9 +860,9 @@ void Executor::C_ROMlib_orientation(DialogPtr dp, INTEGER which)
     PenSize(1, 1);
     InsetRect(&r, 1, 1);
     if((which == LAYOUT_PORTRAIT_NO) != (ROMlib_paper_orientation == "Portrait"))
-        PenPat(qdGlobals().white);
+        PenPat(&qdGlobals().white);
     FrameRect(&r);
-    PenPat(qdGlobals().black);
+    PenPat(&qdGlobals().black);
 }
 
 std::string Executor::ROMlib_PrintersIni;

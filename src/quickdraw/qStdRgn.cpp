@@ -262,7 +262,7 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
 #define BLT_PAT_FANCY(rh, mode, pixpat_accessor, pattern_accessor)            \
     do                                                                        \
     {                                                                         \
-        GrafPtr the_port = qdGlobals().thePort;                                           \
+        GrafPtr the_port = qdGlobals().thePort;                               \
         if(CGrafPort_p(the_port))                                             \
         {                                                                     \
             PixMapHandle cport_pmap = CPORT_PIXMAP((CGrafPtr)the_port);       \
@@ -270,15 +270,15 @@ const uint32_t Executor::ROMlib_pixel_size_mask[6] = {
             blt_fancy_pat_mode_to_pixmap(rh, mode,                            \
                                          pixpat_accessor((CGrafPtr)           \
                                                              the_port),       \
-                                         nullptr, *cport_pmap);            \
+                                         nullptr, *cport_pmap);               \
         }                                                                     \
         else if(active_screen_addr_p(&the_port->portBits))                    \
         {                                                                     \
             PixMap copy_of_screen;                                            \
             copy_of_screen = **GD_PMAP(LM(TheGDevice));                       \
             copy_of_screen.bounds = the_port->portBits.bounds;                \
-            blt_fancy_pat_mode_to_pixmap(rh, mode, nullptr,                      \
-                                         pattern_accessor(the_port),          \
+            blt_fancy_pat_mode_to_pixmap(rh, mode, nullptr,                   \
+                                         &pattern_accessor(the_port),         \
                                          &copy_of_screen);                    \
         }                                                                     \
         else                                                                  \
@@ -462,7 +462,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
 static void
 blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
                              PixPatHandle pixpat_handle,
-                             Pattern pattern, /* valid iff !pixpat_handle */
+                             Pattern *pattern, /* valid iff !pixpat_handle */
                              PixMap *pixmap)
 {
     PixMap converted_pm;
@@ -482,7 +482,7 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
 
     if(!pixpat_handle)
     {
-        xh = xdata_for_pattern(pattern, pixmap);
+        xh = xdata_for_pattern(*pattern, pixmap);
         apply_fg_bk_p = true;
     }
     else

@@ -7,9 +7,6 @@
 using namespace Executor;
 extern QDGlobals qd;
 
-    // FIXME: Executor still defines Pattern as an array, rather than an array wrapped in a struct
-#define PATREF(pat) (pat)
-
 inline bool hasDeepGWorlds()
 {
     return true;
@@ -30,9 +27,6 @@ template<typename T> T& out(T& x) { return x; }
 template<typename T> T& inout(T& x) { return x; }
 
 template<typename T> using GUEST = T;
-
-#define PATREF(pat) (&(pat))
-
 
 inline bool hasDeepGWorlds()
 {

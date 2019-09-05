@@ -29,7 +29,7 @@ using namespace Executor;
         }                                                            \
         else                                                         \
         {                                                            \
-            PATASSIGN(PORT_FILL_PAT(qdGlobals().thePort), PIXPAT_1DATA(pixpat)); \
+            PORT_FILL_PAT(qdGlobals().thePort) = PIXPAT_1DATA(pixpat); \
             CALLxxx;                                                 \
         }                                                            \
     } while(false)

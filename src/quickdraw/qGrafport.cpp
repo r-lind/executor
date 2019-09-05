@@ -31,7 +31,7 @@ void Executor::C_InitGraf(GUEST<GrafPtr> *gp)
     qdGlobals().screenBits.rowBytes = PIXMAP_ROWBYTES(main_gd_pixmap) / PIXMAP_PIXEL_SIZE(main_gd_pixmap);
     qdGlobals().screenBits.bounds = PIXMAP_BOUNDS(main_gd_pixmap);
 
-#define patinit(d, s) (*(GUEST<LONGINT> *)d = s, *((GUEST<LONGINT> *)d + 1) = s)
+#define patinit(d, s) (*(GUEST<LONGINT> *)(d.pat) = s, *((GUEST<LONGINT> *)(d.pat) + 1) = s)
 
     TheZoneGuard guard(LM(SysZone));
 
@@ -82,9 +82,9 @@ void Executor::ROMlib_initport(GrafPtr p) /* INTERNAL */
     PORT_DEVICE(p) = 0;
     PORT_BITS(p) = qdGlobals().screenBits;
     PORT_RECT(p) = qdGlobals().screenBits.bounds;
-    PATASSIGN(PORT_BK_PAT(p), qdGlobals().white);
-    PATASSIGN(PORT_FILL_PAT(p), qdGlobals().black);
-    PATASSIGN(PORT_PEN_PAT(p), qdGlobals().black);
+    PORT_BK_PAT(p) = qdGlobals().white;
+    PORT_FILL_PAT(p) = qdGlobals().black;
+    PORT_PEN_PAT(p) = qdGlobals().black;
     PORT_PEN_LOC(p).h = PORT_PEN_LOC(p).v = 0;
     PORT_PEN_SIZE(p).h = PORT_PEN_SIZE(p).v = 1;
     PORT_PEN_MODE(p) = patCopy;
@@ -243,7 +243,7 @@ void Executor::C_ClipRect(Rect *r)
     RectRgn(PORT_CLIP_REGION(qdGlobals().thePort), &r_copy);
 }
 
-void Executor::C_BackPat(Pattern pp)
+void Executor::C_BackPat(const Pattern * pp)
 {
     if(CGrafPort_p(qdGlobals().thePort))
     {
@@ -251,13 +251,13 @@ void Executor::C_BackPat(Pattern pp)
 
         old_bk = CPORT_BK_PIXPAT(theCPort);
         if(old_bk && PIXPAT_TYPE(old_bk) == pixpat_type_orig)
-            PATASSIGN(PIXPAT_1DATA(old_bk), pp);
+            PIXPAT_1DATA(old_bk) = *pp;
         else
         {
             PixPatHandle new_bk = NewPixPat();
 
             PIXPAT_TYPE(new_bk) = 0;
-            PATASSIGN(PIXPAT_1DATA(new_bk), pp);
+            PIXPAT_1DATA(new_bk) = *pp;
             BackPixPat(new_bk);
         }
         /*
@@ -268,10 +268,10 @@ void Executor::C_BackPat(Pattern pp)
         /* #warning BackPat not currently implemented properly ... */
     }
     else
-        PATASSIGN(PORT_BK_PAT(qdGlobals().thePort), pp);
+        PORT_BK_PAT(qdGlobals().thePort) = *pp;
 }
 
-void Executor::ROMlib_fill_pat(Pattern pp) /* INTERNAL */
+void Executor::ROMlib_fill_pat(const Pattern& pp) /* INTERNAL */
 {
     if(CGrafPort_p(qdGlobals().thePort))
     {
@@ -279,13 +279,13 @@ void Executor::ROMlib_fill_pat(Pattern pp) /* INTERNAL */
 
         old_fill = CPORT_FILL_PIXPAT(theCPort);
         if(PIXPAT_TYPE(old_fill) == pixpat_type_orig)
-            PATASSIGN(PIXPAT_1DATA(old_fill), pp);
+            PIXPAT_1DATA(old_fill) = pp;
         else
         {
             PixPatHandle new_fill = NewPixPat();
 
             PIXPAT_TYPE(new_fill) = 0;
-            PATASSIGN(PIXPAT_1DATA(new_fill), pp);
+            PIXPAT_1DATA(new_fill) = pp;
 
             ROMlib_fill_pixpat(new_fill);
         }
@@ -295,5 +295,5 @@ void Executor::ROMlib_fill_pat(Pattern pp) /* INTERNAL */
         /* #warning ROMlib_fill_pat not currently implemented properly... */
     }
     else
-        PATASSIGN(PORT_FILL_PAT(qdGlobals().thePort), pp);
+        PORT_FILL_PAT(qdGlobals().thePort) = pp;
 }

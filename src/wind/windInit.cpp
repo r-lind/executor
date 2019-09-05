@@ -86,7 +86,7 @@ void Executor::C_InitWindows()
             USE_DESKCPAT_VAR &= ~USE_DESKCPAT_BIT;
         InitPalettes();
         InitMenus();
-        PATASSIGN(LM(DeskPattern), *ph);
+        LM(DeskPattern) = **ph;
         LM(GrayRgn) = NewRgn();
 
         OpenRgn();
@@ -106,9 +106,9 @@ void Executor::C_InitWindows()
         PaintRgn(corners);
         CopyRgn(LM(GrayRgn), PORT_VIS_REGION(wmgr_port));
         DiffRgn(LM(GrayRgn), mrgn, LM(GrayRgn));
-        PenPat(qdGlobals().white);
+        PenPat(&qdGlobals().white);
         PaintRgn(mrgn);
-        PenPat(qdGlobals().black);
+        PenPat(&qdGlobals().black);
         MoveTo(0, LM(MBarHeight) - 1);
         Line(GD_BOUNDS(LM(TheGDevice)).right, 0);
         if(!ROMlib_rootless_drawdesk(LM(GrayRgn)))
@@ -117,7 +117,7 @@ void Executor::C_InitWindows()
             && PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice))) > 2)
                 FillCRgn(LM(GrayRgn), LM(DeskCPat));
             else
-                FillRgn(LM(GrayRgn), LM(DeskPattern));
+                FillRgn(LM(GrayRgn), &LM(DeskPattern));
         }
         DisposeRgn(mrgn);
         DisposeRgn(corners);
@@ -127,7 +127,7 @@ void Executor::C_InitWindows()
         LM(PaintWhite) = -1;
         LM(DeskHook) = nullptr;
         LM(GhostWindow) = nullptr;
-        PATASSIGN(LM(DragPattern), qdGlobals().gray);
+        LM(DragPattern) = qdGlobals().gray;
     }
     ROMlib_rootless_update();
 
@@ -260,7 +260,7 @@ void Executor::C_SetDeskCPat(PixPatHandle ph)
     else
     {
         bw_ph = GetPattern(deskPatID);
-        PATASSIGN(LM(DeskPattern), *bw_ph);
+        LM(DeskPattern) = **bw_ph;
         USE_DESKCPAT_VAR &= ~USE_DESKCPAT_BIT;
     }
     PaintOne((WindowPeek)0, LM(GrayRgn));
@@ -394,7 +394,7 @@ ROMlib_new_window_common(WindowPeek w,
         WINDCALL((WindowPtr)w, wCalcRgns, 0);
         SetClip(WINDOW_STRUCT_REGION(w));
         ClipAbove(w);
-        PenPat(qdGlobals().black);
+        PenPat(&qdGlobals().black);
         WINDCALL((WindowPtr)w, wDraw, 0);
         CalcVis(w);
         EraseRgn(WINDOW_CONT_REGION(w));

@@ -112,11 +112,11 @@ draw_menu_title(muelem *elt,
             DrawString((StringPtr)title);
         if(dither_title_p)
         {
-            PenPat(qdGlobals().gray);
+            PenPat(&qdGlobals().gray);
             PenMode(notPatBic);
             PaintRect(&dstr);
             PenMode(patCopy);
-            PenPat(qdGlobals().black);
+            PenPat(&qdGlobals().black);
         }
         /* resent the fg/bk colors */
         RGBForeColor(&ROMlib_black_rgb_color);

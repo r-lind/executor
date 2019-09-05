@@ -279,7 +279,7 @@ void Executor::ROMlib_tesave(tesave *t, TEHandle teh)
     PORT_TX_SIZE(qdGlobals().thePort) = tp->txSize;
     PORT_TX_FACE(qdGlobals().thePort) = tp->txFace;
 
-    PenPat(qdGlobals().black);
+    PenPat(&qdGlobals().black);
 
     t->_tsaveclip = PORT_CLIP_REGION(qdGlobals().thePort);
     PORT_CLIP_REGION(qdGlobals().thePort) = NewRgn();

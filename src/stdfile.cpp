@@ -270,9 +270,9 @@ static void flupdate(fltype *f, INTEGER st, INTEGER n)
         {
             r.bottom = r.top + f->fllinht;
             PenMode(notPatBic);
-            PenPat(qdGlobals().gray);
+            PenPat(&qdGlobals().gray);
             PaintRect(&r);
-            PenPat(qdGlobals().black);
+            PenPat(&qdGlobals().black);
             PenMode(patCopy);
             r.bottom = f->flascent;
         }
@@ -801,7 +801,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
                      WINDFL(dp)->flnmlin);
             break;
         case getDotted:
-            FillRect(&r, qdGlobals().gray);
+            FillRect(&r, &qdGlobals().gray);
             break;
         case getDiskName:
             /*  case putDiskName:	getDiskName and putDiskName are the same */

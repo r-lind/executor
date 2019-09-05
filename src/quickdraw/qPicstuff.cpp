@@ -444,7 +444,7 @@ static void setpicclip(RgnHandle rh)
     SetClip(rh);
 }
 
-static void W_BackPat(Pattern pp)
+static void W_BackPat(const Pattern *pp)
 {
     BackPat(pp);
 }
@@ -579,7 +579,7 @@ static void W_PenMode(INTEGER m)
     PenMode(m);
 }
 
-static void W_PenPat(Pattern pp)
+static void W_PenPat(const Pattern *pp)
 {
     PenPat(pp);
 }
@@ -1404,14 +1404,8 @@ static void eatColorTable(PixMapPtr pixmap)
 
 static void eatPattern(Pattern pat)
 {
-    pat[0] = eatByte();
-    pat[1] = eatByte();
-    pat[2] = eatByte();
-    pat[3] = eatByte();
-    pat[4] = eatByte();
-    pat[5] = eatByte();
-    pat[6] = eatByte();
-    pat[7] = eatByte();
+    for(int i = 0; i < 8; i++)
+        pat.pat[i] = eatByte();
 }
 
 static void eatPixPat(PixPatHandle pixpat)
@@ -1602,9 +1596,9 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
     }
 
     /* These will replace the junk pixpats we just installed. */
-    BackPat(qdGlobals().white);
+    BackPat(&qdGlobals().white);
     ROMlib_fill_pat(qdGlobals().black);
-    PenPat(qdGlobals().black);
+    PenPat(&qdGlobals().black);
 
     /* Free these up now, since they are no longer used. */
     if(CGrafPort_p(the_port))
@@ -1955,7 +1949,7 @@ void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
                     (*(void (*)(LONGINT))f)(lng);
                     break;
                 case xxx1(PAT):
-                    (*(void (*)(Pattern))f)(ourpattern);
+                    (*(void (*)(const Pattern*))f)(&ourpattern);
                     break;
                 case xxx1(PNT):
                     (*(void (*)(Point))f)(points[0]);

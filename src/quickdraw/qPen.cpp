@@ -52,13 +52,13 @@ void Executor::C_GetPenState(PenState *ps)
  */
         if(PIXPAT_TYPE(pen_pixpat) == pixpat_type_orig)
             /* #warning GetPenState not necessarily implemented correctly... */
-            PATASSIGN(ps->pnPat, PIXPAT_1DATA(pen_pixpat));
+            ps->pnPat = PIXPAT_1DATA(pen_pixpat);
         else
         {
             /* high bit indicates there is a pixpat (not a pattern)
 	     stored in the pnPat field */
             ps->pnMode |= 0x8000;
-            *(PixPatHandle *)&ps->pnPat[0] = pen_pixpat;
+            *(PixPatHandle *)&ps->pnPat.pat[0] = pen_pixpat;
         }
     }
     else
@@ -76,12 +76,12 @@ void Executor::C_SetPenState(PenState *ps)
     if(ps->pnMode & 0x8000)
     {
         PORT_PEN_MODE(qdGlobals().thePort) = ps->pnMode & ~0x8000;
-        PenPixPat(*(PixPatHandle *)&ps->pnPat[0]);
+        PenPixPat(*(PixPatHandle *)&ps->pnPat.pat[0]);
     }
     else
     {
         PORT_PEN_MODE(qdGlobals().thePort) = ps->pnMode;
-        PenPat(ps->pnPat);
+        PenPat(&ps->pnPat);
     }
 }
 
@@ -142,7 +142,7 @@ void Executor::C_PenMode(INTEGER m)
         PORT_PEN_MODE(qdGlobals().thePort) = m;
 }
 
-void Executor::C_PenPat(Pattern pp)
+void Executor::C_PenPat(const Pattern *pp)
 {
     if(qdGlobals().thePort)
     {
@@ -152,20 +152,20 @@ void Executor::C_PenPat(Pattern pp)
 
             old_pen = CPORT_PEN_PIXPAT(theCPort);
             if(PIXPAT_TYPE(old_pen) == pixpat_type_orig)
-                PATASSIGN(PIXPAT_1DATA(old_pen), pp);
+                PIXPAT_1DATA(old_pen) = *pp;
             else
             {
                 PixPatHandle new_pen = NewPixPat();
 
                 PIXPAT_TYPE(new_pen) = 0;
-                PATASSIGN(PIXPAT_1DATA(new_pen), pp);
+                PIXPAT_1DATA(new_pen) = *pp;
 
                 PenPixPat(new_pen);
             }
             /* #warning PenPat not currently implemented correctly... */
         }
         else
-            PATASSIGN(PORT_PEN_PAT(qdGlobals().thePort), pp);
+            PORT_PEN_PAT(qdGlobals().thePort) = *pp;
     }
 }
 
@@ -175,7 +175,7 @@ void Executor::C_PenNormal()
     {
         PenSize(1, 1);
         PenMode(patCopy);
-        PenPat(qdGlobals().black);
+        PenPat(&qdGlobals().black);
     }
 }
 

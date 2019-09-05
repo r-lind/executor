@@ -723,7 +723,7 @@ canonicalize_pat_value_for_mode(uint32_t v, int mode, uint32_t fg_color,
 
 bool Executor::xdblt_pattern(RgnHandle rh, int mode,
                              int pat_x_rotate_count, int pat_y_rotate_count,
-                             const Pattern pattern, PixMap *dst,
+                             const Pattern& pattern, PixMap *dst,
                              uint32_t fg_color, uint32_t bk_color)
 {
     uint32_t v, mask, tile, *p, *end;
@@ -767,8 +767,8 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
     /* See if the pattern is 0x0000000000000000 or 0xFFFFFFFFFFFFFFFF.
    * These are _extremely_ common cases.
    */
-    v = *(const uint32_t *)pattern;
-    if((v + 1U) <= 1U && v == ((const uint32_t *)pattern)[1])
+    v = *(const uint32_t *)pattern.pat;
+    if((v + 1U) <= 1U && v == ((const uint32_t *)pattern.pat)[1])
     {
         update_dirty_p = do_short_narrow_pattern(rh, mode, v, dst, fg_color,
                                                  bk_color, log2_bpp,

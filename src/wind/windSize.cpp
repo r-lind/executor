@@ -196,14 +196,14 @@ void Executor::C_DragWindow(WindowPtr wp, Point p, Rect *rp)
     do                      \
     {                       \
         SetPort(p);         \
-        PenPat(qdGlobals().gray);       \
+        PenPat(&qdGlobals().gray);       \
         PenMode(notPatXor); \
     } while(false)
 
 #define RESTORE_PORT(p)   \
     do                    \
     {                     \
-        PenPat(qdGlobals().black);    \
+        PenPat(&qdGlobals().black);    \
         PenMode(patCopy); \
         SetPort(p);       \
     } while(false)

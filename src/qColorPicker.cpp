@@ -664,10 +664,10 @@ compare_box_update(void)
     /* draw the color comparison box */
 
     RGBForeColor(&orig_color);
-    FillRect(orig_compare_box_bounds, qdGlobals().black);
+    FillRect(orig_compare_box_bounds, &qdGlobals().black);
 
     RGBForeColor(&current_color);
-    FillRect(current_compare_box_bounds, qdGlobals().black);
+    FillRect(current_compare_box_bounds, &qdGlobals().black);
 
     PenSize(2, 2);
     ForeColor(blackColor);
