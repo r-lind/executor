@@ -190,7 +190,7 @@ inline RgnHandle GetGrayRgn() { return LM(GrayRgn); }
 NOTRAP_FUNCTION2(GetGrayRgn);
 END_EXECUTOR_ONLY
 
-extern void C_SetWTitle(WindowPtr w, StringPtr t);
+extern void C_SetWTitle(WindowPtr w, ConstStringPtr t);
 PASCAL_TRAP(SetWTitle, 0xA91A);
 
 extern void C_GetWTitle(WindowPtr w, StringPtr t);
@@ -230,7 +230,7 @@ extern void C_GetWMgrPort(GUEST<GrafPtr> *wp);
 PASCAL_TRAP(GetWMgrPort, 0xA910);
 
 extern WindowPtr C_NewWindow(Ptr wst, Rect *r,
-                                         StringPtr title, BOOLEAN vis, INTEGER procid, WindowPtr behind,
+                                         ConstStringPtr title, BOOLEAN vis, INTEGER procid, WindowPtr behind,
                                          BOOLEAN gaflag, LONGINT rc);
 PASCAL_TRAP(NewWindow, 0xA913);
 extern WindowPtr C_GetNewWindow(INTEGER wid, Ptr wst,

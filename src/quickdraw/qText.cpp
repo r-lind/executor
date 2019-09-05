@@ -55,7 +55,7 @@ void Executor::C_DrawChar(CharParameter thec)
     CALLTEXT(1, (Ptr)&c, p, p);
 }
 
-void Executor::C_DrawString(StringPtr s)
+void Executor::C_DrawString(ConstStringPtr s)
 {
     Point p;
 
@@ -94,7 +94,7 @@ INTEGER Executor::C_CharWidth(CharParameter thec)
     return FixMul((LONGINT)retval << 16, (Fixed)np.h << 8) / ((LONGINT)dp.h << 8);
 }
 
-INTEGER Executor::C_StringWidth(StringPtr s)
+INTEGER Executor::C_StringWidth(ConstStringPtr s)
 {
     GUEST<Point> np, dp;
     INTEGER retval;

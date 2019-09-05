@@ -168,13 +168,13 @@ PASCAL_SUBTRAP(SetIntlResource, 0xA9ED, 0x0008, Pack6);
 extern INTEGER C_IUMagString(Ptr ptr1, Ptr ptr2, INTEGER len1, INTEGER len2);
 PASCAL_SUBTRAP(IUMagString, 0xA9ED, 0x000A, Pack6);
 
-extern INTEGER IUCompString(StringPtr str1,
-                            StringPtr str2);
+extern INTEGER IUCompString(ConstStringPtr str1,
+                            ConstStringPtr str2);
 extern INTEGER C_IUMagIDString(Ptr ptr1,
                                            Ptr ptr2, INTEGER len1, INTEGER len2);
 PASCAL_SUBTRAP(IUMagIDString, 0xA9ED, 0x000C, Pack6);
-extern INTEGER IUEqualString(StringPtr str1,
-                             StringPtr str2);
+extern INTEGER IUEqualString(ConstStringPtr str1,
+                             ConstStringPtr str2);
 extern void C_IUMystery(Ptr arg1, Ptr arg2,
                                     INTEGER arg3, INTEGER arg4);
 PASCAL_SUBTRAP(IUMystery, 0xA9ED, 0x0012, Pack6);

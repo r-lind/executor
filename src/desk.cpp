@@ -25,7 +25,7 @@
 
 using namespace Executor;
 
-INTEGER Executor::C_OpenDeskAcc(Str255 acc) /* IMI-440 */
+INTEGER Executor::C_OpenDeskAcc(ConstStringPtr acc) /* IMI-440 */
 {
     // THINK Reference says that OpenDeskAcc's return value
     // is undefined on error. This returns zero - otherwise

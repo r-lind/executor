@@ -15,7 +15,7 @@
 
 using namespace Executor;
 
-void Executor::C_SetWTitle(WindowPtr w, StringPtr t)
+void Executor::C_SetWTitle(WindowPtr w, ConstStringPtr t)
 {
     if(!w || !t)
         return;

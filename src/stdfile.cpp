@@ -2002,7 +2002,7 @@ do_new_folder(fltype *f)
     return retval;
 }
 
-void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
+void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_u dh,
                reply_u rep, INTEGER dig, filter_u fp, file_filter_u filef,
                INTEGER numt, GUEST<SFTypeList> tl, getorput_t getorput,
                sf_flavor_t flavor, Ptr activeList,
@@ -2390,7 +2390,7 @@ void spfcommon(Point p, StringPtr prompt, StringPtr name, dialog_hook_u dh,
     }
 }
 
-void Executor::C_SFPPutFile(Point p, StringPtr prompt, StringPtr name,
+void Executor::C_SFPPutFile(Point p, ConstStringPtr prompt, ConstStringPtr name,
                             DlgHookProcPtr dh, SFReply *rep, INTEGER dig,
                             ModalFilterProcPtr fp)
 {
@@ -2407,13 +2407,13 @@ void Executor::C_SFPPutFile(Point p, StringPtr prompt, StringPtr name,
               nullptr, put, original_sf, 0, 0, 0);
 }
 
-void Executor::C_SFPutFile(Point p, StringPtr prompt, StringPtr name,
+void Executor::C_SFPutFile(Point p, ConstStringPtr prompt, ConstStringPtr name,
                            DlgHookProcPtr dh, SFReply *rep)
 {
     SFPPutFile(p, prompt, name, dh, rep, putDlgID, nullptr);
 }
 
-void Executor::C_SFPGetFile(Point p, StringPtr prompt, FileFilterProcPtr filef,
+void Executor::C_SFPGetFile(Point p, ConstStringPtr prompt, FileFilterProcPtr filef,
                             INTEGER numt, GUEST<SFTypeList> tl,
                             DlgHookProcPtr dh, SFReply *rep, INTEGER dig,
                             ModalFilterProcPtr fp)
@@ -2432,14 +2432,14 @@ void Executor::C_SFPGetFile(Point p, StringPtr prompt, FileFilterProcPtr filef,
               numt, tl, get, original_sf, 0, 0, 0);
 }
 
-void Executor::C_SFGetFile(Point p, StringPtr prompt, FileFilterProcPtr filef,
+void Executor::C_SFGetFile(Point p, ConstStringPtr prompt, FileFilterProcPtr filef,
                            INTEGER numt, GUEST<SFTypeList> tl,
                            DlgHookProcPtr dh, SFReply *rep)
 {
     SFPGetFile(p, prompt, filef, numt, tl, dh, rep, getDlgID, nullptr);
 }
 
-void Executor::C_CustomPutFile(Str255 prompt, Str255 defaultName,
+void Executor::C_CustomPutFile(ConstStringPtr prompt, ConstStringPtr defaultName,
                                StandardFileReply *replyp, INTEGER dlgid,
                                Point where, DlgHookYDProcPtr dlghook,
                                ModalFilterYDProcPtr filterproc, Ptr activeList,
@@ -2510,7 +2510,7 @@ void Executor::C_StandardGetFile(FileFilterProcPtr filef, INTEGER numt,
               filteru, file_filteru, numt, tl, get, new_sf, 0, 0, 0);
 }
 
-void Executor::C_StandardPutFile(Str255 prompt, Str255 defaultname,
+void Executor::C_StandardPutFile(ConstStringPtr prompt, ConstStringPtr defaultname,
                                  StandardFileReply *replyp)
 {
     Point p;

@@ -23,8 +23,8 @@ using namespace Executor;
 static itmp htoip(Handle h, WindowPeek *wp_return, int16_t *nop_return,
                   SignedByte *flags_return);
 
-void Executor::C_ParamText(StringPtr p0, StringPtr p1, StringPtr p2,
-                           StringPtr p3) /* IMI-421 */
+void Executor::C_ParamText(ConstStringPtr p0, ConstStringPtr p1, ConstStringPtr p2,
+                           ConstStringPtr p3) /* IMI-421 */
 {
     if(p0)
         PtrToXHand((Ptr)p0, LM(DAStrings)[0], (LONGINT)U(p0[0]) + 1);
@@ -300,7 +300,7 @@ void Executor::C_GetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
     }
 }
 
-void Executor::C_SetDialogItemText(Handle item, StringPtr text) /* IMI-422 */
+void Executor::C_SetDialogItemText(Handle item, ConstStringPtr text) /* IMI-422 */
 {
     if(item) /* put this test in for Golf 6.0's sake */
     {

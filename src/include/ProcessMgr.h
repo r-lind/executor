@@ -172,7 +172,7 @@ extern OSErr C_GetPortNameFromProcessSerialNumber(PPCPortPtr port_name,
                                                               ProcessSerialNumber *serial_number);
 PASCAL_SUBTRAP(GetPortNameFromProcessSerialNumber, 0xA88F, 0x0046, OSDispatch);
 
-extern OSErr NewLaunch(StringPtr appl, INTEGER vrefnum,
+extern OSErr NewLaunch(ConstStringPtr appl, INTEGER vrefnum,
                        LaunchParamBlockRec *lpbp);
 
 static_assert(sizeof(ProcessSerialNumber) == 8);

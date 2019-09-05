@@ -265,7 +265,7 @@ LONGINT Executor::ROMlib_RelString(const unsigned char *s1, const unsigned char 
     return 0;
 }
 
-INTEGER Executor::RelString(StringPtr s1, StringPtr s2, BOOLEAN casesig,
+INTEGER Executor::RelString(ConstStringPtr s1, ConstStringPtr s2, BOOLEAN casesig,
                                BOOLEAN diacsig)
 {
     return ROMlib_RelString((unsigned char *)s1 + 1, (unsigned char *)s2 + 1,
@@ -273,7 +273,7 @@ INTEGER Executor::RelString(StringPtr s1, StringPtr s2, BOOLEAN casesig,
                             (LONGINT)(unsigned char)s1[0] << 16 | (unsigned char)s2[0]);
 }
 
-BOOLEAN Executor::EqualString(StringPtr s1, StringPtr s2, BOOLEAN casesig,
+BOOLEAN Executor::EqualString(ConstStringPtr s1, ConstStringPtr s2, BOOLEAN casesig,
                                  BOOLEAN diacsig)
 {
     return RelString(s1, s2, casesig, diacsig) ? false : true;

@@ -343,7 +343,7 @@ extern FormatStatus C_ExtendedToString(Extended80 *xp,
                                                    NumFormatStringRec *formatp, NumberParts *partsp, Str255 string);
 PASCAL_SUBTRAP(ExtendedToString, 0xA8B5, 0x8210FFE8, ScriptUtil);
 
-extern FormatStatus C_StringToFormatRec(Str255 in_string,
+extern FormatStatus C_StringToFormatRec(ConstStringPtr in_string,
                                                     NumberParts *partsp, NumFormatStringRec *out_string);
 PASCAL_SUBTRAP(StringToFormatRec, 0xA8B5, 0x820CFFEC, ScriptUtil);
 

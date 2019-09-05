@@ -117,7 +117,7 @@ void Executor::ROMlib_GetFontName(LONGINT fnum, char *fnam)
     GetFontName(fnum, (StringPtr)fnam);
 }
 
-void Executor::C_GetFNum(StringPtr fnam, GUEST<INTEGER> *fnum) /* IMI-223 */
+void Executor::C_GetFNum(ConstStringPtr fnam, GUEST<INTEGER> *fnum) /* IMI-223 */
 {
     Handle h;
     GUEST<ResType> rest;

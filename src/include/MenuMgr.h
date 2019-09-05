@@ -89,7 +89,7 @@ PASCAL_TRAP(ClearMenuBar, 0xA934);
 extern void C_InitMenus(void);
 PASCAL_TRAP(InitMenus, 0xA930);
 
-extern MenuHandle C_NewMenu(INTEGER mid, StringPtr str);
+extern MenuHandle C_NewMenu(INTEGER mid, ConstStringPtr str);
 PASCAL_TRAP(NewMenu, 0xA931);
 
 extern void C_CalcMenuSize(MenuHandle mh);
@@ -101,7 +101,7 @@ PASCAL_TRAP(GetMenu, 0xA9BF);
 extern void C_DisposeMenu(MenuHandle mh);
 PASCAL_TRAP(DisposeMenu, 0xA932);
 
-extern void C_AppendMenu(MenuHandle mh, StringPtr str);
+extern void C_AppendMenu(MenuHandle mh, ConstStringPtr str);
 PASCAL_TRAP(AppendMenu, 0xA933);
 
 extern void C_AppendResMenu(MenuHandle mh, ResType restype);
@@ -113,7 +113,7 @@ PASCAL_TRAP(DeleteMenuItem, 0xA952);
 extern void C_InsertResMenu(MenuHandle mh, ResType restype,
                                         INTEGER after);
 PASCAL_TRAP(InsertResMenu, 0xA951);
-extern void C_InsertMenuItem(MenuHandle mh, StringPtr str,
+extern void C_InsertMenuItem(MenuHandle mh, ConstStringPtr str,
                                       INTEGER after);
 PASCAL_TRAP(InsertMenuItem, 0xA826);
 extern void C_InsertMenu(MenuHandle mh, INTEGER before);
@@ -147,7 +147,7 @@ extern LONGINT C_MenuKey(CharParameter thec);
 PASCAL_TRAP(MenuKey, 0xA93E);
 
 extern void C_SetMenuItemText(MenuHandle mh, INTEGER item,
-                                  StringPtr str);
+                                  ConstStringPtr str);
 PASCAL_TRAP(SetMenuItemText, 0xA947);
 extern void C_GetMenuItemText(MenuHandle mh, INTEGER item,
                                   StringPtr str);

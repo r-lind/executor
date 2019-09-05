@@ -157,7 +157,7 @@ FILE_TRAP(PBControl, ParmBlkPtr, 0xA004);
 FILE_TRAP(PBStatus, ParmBlkPtr, 0xA005);
 FILE_TRAP(PBKillIO, ParmBlkPtr, 0xA006);
 
-extern OSErr OpenDriver(StringPtr name, GUEST<INTEGER> *rnp);
+extern OSErr OpenDriver(ConstStringPtr name, GUEST<INTEGER> *rnp);
 NOTRAP_FUNCTION2(OpenDriver);
 extern OSErr CloseDriver(INTEGER rn);
 NOTRAP_FUNCTION2(CloseDriver);

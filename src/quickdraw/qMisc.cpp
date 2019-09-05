@@ -83,7 +83,7 @@ static INTEGER fromhex(char c)
         return (c - 'a' + 10);
 }
 
-void Executor::C_StuffHex(Ptr p, StringPtr s)
+void Executor::C_StuffHex(Ptr p, ConstStringPtr s)
 {
     char *sp, *ep;
     unsigned len;

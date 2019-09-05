@@ -66,7 +66,7 @@ OSErr Executor::C_DisposeSpeechChannel(SpeechChannel chan)
 #endif
 }
 
-OSErr Executor::C_SpeakString(Str255 textToBeSpoken)
+OSErr Executor::C_SpeakString(ConstStringPtr textToBeSpoken)
 {
 #ifdef MACOSX
     return MacBridge::SpeakString(textToBeSpoken);

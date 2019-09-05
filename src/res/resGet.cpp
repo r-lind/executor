@@ -27,7 +27,7 @@ using namespace Executor;
 
 static INTEGER countmapresources(resmaphand, ResType);
 static Handle getindmapresource(resmaphand, ResType, INTEGER *);
-static Handle getnamedmapresource(resmaphand, ResType, StringPtr);
+static Handle getnamedmapresource(resmaphand, ResType, ConstStringPtr);
 
 void Executor::C_SetResLoad(BOOLEAN load)
 {
@@ -403,7 +403,7 @@ Handle Executor::C_Get1Resource(ResType typ, INTEGER id) /* IMIV-16 */
     return retval;
 }
 
-static Handle getnamedmapresource(resmaphand map, ResType typ, StringPtr nam)
+static Handle getnamedmapresource(resmaphand map, ResType typ, ConstStringPtr nam)
 {
     INTEGER i, j;
     typref *tr;
@@ -424,7 +424,7 @@ static Handle getnamedmapresource(resmaphand map, ResType typ, StringPtr nam)
     return (0);
 }
 
-Handle Executor::C_GetNamedResource(ResType typ, StringPtr nam)
+Handle Executor::C_GetNamedResource(ResType typ, ConstStringPtr nam)
 {
     Handle retval;
 
@@ -455,7 +455,7 @@ DONE:
     return retval;
 }
 
-Handle Executor::C_Get1NamedResource(ResType typ, StringPtr s) /* IMIV-16 */
+Handle Executor::C_Get1NamedResource(ResType typ, ConstStringPtr s) /* IMIV-16 */
 {
     resmaphand map;
 

@@ -76,7 +76,7 @@ INTEGER Executor::C_FixRound(Fixed x)
     return ((x >> 16) + ((x & 0x8000L) != 0));
 }
 
-StringHandle Executor::C_NewString(StringPtr s)
+StringHandle Executor::C_NewString(ConstStringPtr s)
 {
     GUEST<Handle> retval;
 
@@ -84,7 +84,7 @@ StringHandle Executor::C_NewString(StringPtr s)
     return ((StringHandle)retval);
 }
 
-void Executor::C_SetString(StringHandle h, StringPtr s)
+void Executor::C_SetString(StringHandle h, ConstStringPtr s)
 {
     PtrToXHand((Ptr)s, (Handle)h, (LONGINT)U(s[0]) + 1);
 }

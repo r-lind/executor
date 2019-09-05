@@ -176,9 +176,9 @@ REGISTER_TRAP2(PtrAndHand, 0xA9EF, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD
 
 extern LONGINT ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
                                 BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0);
-extern INTEGER RelString(StringPtr s1, StringPtr s2,
+extern INTEGER RelString(ConstStringPtr s1, ConstStringPtr s2,
                                  BOOLEAN casesig, BOOLEAN diacsig);
-extern BOOLEAN EqualString(StringPtr s1, StringPtr s2,
+extern BOOLEAN EqualString(ConstStringPtr s1, ConstStringPtr s2,
                                    BOOLEAN casesig, BOOLEAN diacsig);
 extern void ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len);
 extern void UpperString(StringPtr s, BOOLEAN diac);
@@ -258,7 +258,7 @@ extern void SwapMMUMode(Byte *bp);
 extern uint32_t StripAddress(uint32_t l);
 REGISTER_TRAP2(StripAddress, 0xA055, D0(D0));
 
-extern void C_DebugStr(StringPtr p);
+extern void C_DebugStr(ConstStringPtr p);
 PASCAL_TRAP(DebugStr, 0xABFF);
 
 extern void C_Debugger();

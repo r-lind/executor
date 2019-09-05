@@ -234,7 +234,7 @@ extern void C_GetFontName(INTEGER fnum,
                                       StringPtr fnam);
 PASCAL_TRAP(GetFontName, 0xA8FF);
 extern void ROMlib_GetFontName(LONGINT fnum, char *fnam);
-extern void C_GetFNum(StringPtr fnam,
+extern void C_GetFNum(ConstStringPtr fnam,
                                   GUEST<INTEGER> *fnum);
 PASCAL_TRAP(GetFNum, 0xA900);
 extern BOOLEAN C_RealFont(INTEGER fnum,

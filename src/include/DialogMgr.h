@@ -164,7 +164,7 @@ PASCAL_TRAP(CouldDialog, 0xA979);
 extern void C_FreeDialog(INTEGER id);
 PASCAL_TRAP(FreeDialog, 0xA97A);
 extern DialogPtr C_NewDialog(Ptr dst,
-                                         Rect *r, StringPtr tit, BOOLEAN vis, INTEGER procid,
+                                         Rect *r, ConstStringPtr tit, BOOLEAN vis, INTEGER procid,
                                          WindowPtr behind, BOOLEAN gaflag, LONGINT rc, Handle items);
 PASCAL_TRAP(NewDialog, 0xA97D);
 extern DialogPtr C_GetNewDialog(INTEGER id,
@@ -206,8 +206,8 @@ PASCAL_TRAP(ErrorSound, 0xA98C);
 extern void C_InitDialogs(ProcPtr rp);
 PASCAL_TRAP(InitDialogs, 0xA97B);
 extern void SetDialogFont(INTEGER i);
-extern void C_ParamText(StringPtr p0,
-                                    StringPtr p1, StringPtr p2, StringPtr p3);
+extern void C_ParamText(ConstStringPtr p0,
+                                    ConstStringPtr p1, ConstStringPtr p2, ConstStringPtr p3);
 PASCAL_TRAP(ParamText, 0xA98B);
 extern void C_GetDialogItem(DialogPtr dp,
                                    INTEGER itemno, GUEST<INTEGER> *itype, GUEST<Handle> *item, Rect *r);
@@ -219,7 +219,7 @@ extern void C_GetDialogItemText(Handle item,
                                    StringPtr text);
 PASCAL_TRAP(GetDialogItemText, 0xA990);
 extern void C_SetDialogItemText(Handle item,
-                                   StringPtr text);
+                                   ConstStringPtr text);
 PASCAL_TRAP(SetDialogItemText, 0xA98F);
 extern void C_SelectDialogItemText(DialogPtr dp,
                                    INTEGER itemno, INTEGER start, INTEGER stop);
@@ -233,7 +233,7 @@ extern void C_ShowDialogItem(DialogPtr dp,
                                     INTEGER item);
 PASCAL_TRAP(ShowDialogItem, 0xA828);
 
-extern CDialogPtr C_NewColorDialog(Ptr, Rect *, StringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT, Handle);
+extern CDialogPtr C_NewColorDialog(Ptr, Rect *, ConstStringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT, Handle);
 PASCAL_TRAP(NewColorDialog, 0xAA4B);
 
 extern OSErr C_GetStdFilterProc(GUEST<ProcPtr> *proc);

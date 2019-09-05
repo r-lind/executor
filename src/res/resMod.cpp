@@ -20,7 +20,7 @@ typedef res_sorttype_t *sorttypeptr;
 typedef GUEST<sorttypeptr> *sorttypehand;
 
 static LONGINT addtype(resmaphand, ResType);
-static LONGINT addname(resmaphand, StringPtr);
+static LONGINT addname(resmaphand, ConstStringPtr);
 static OSErr writemap(resmaphand);
 static void fillst(sorttypehand, resref *, resref *);
 static void getdat(INTEGER, LONGINT, LONGINT, Handle *);
@@ -28,7 +28,7 @@ static void putdat(INTEGER, LONGINT, LONGINT *, Handle);
 static LONGINT walkst(res_sorttype_t *, res_sorttype_t *, INTEGER, LONGINT);
 static void compactdata(resmaphand);
 
-void Executor::C_SetResInfo(Handle res, INTEGER id, StringPtr name)
+void Executor::C_SetResInfo(Handle res, INTEGER id, ConstStringPtr name)
 {
     resmaphand map;
     typref *tr;
@@ -130,7 +130,7 @@ static LONGINT addtype(resmaphand map, ResType typ)
     return (off);
 }
 
-static LONGINT addname(resmaphand map, StringPtr name)
+static LONGINT addname(resmaphand map, ConstStringPtr name)
 {
     LONGINT retval;
 
@@ -151,7 +151,7 @@ static LONGINT addname(resmaphand map, StringPtr name)
 }
 
 void Executor::C_AddResource(Handle data, ResType typ, INTEGER id,
-                             StringPtr name)
+                             ConstStringPtr name)
 {
     LONGINT toff, roff;
     typref *tr, *tr2;

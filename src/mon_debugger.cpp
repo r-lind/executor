@@ -174,7 +174,7 @@ auto MonDebugger::interact(DebuggerEntry entry) -> DebuggerExit
     return { entry.addr, mon_singlestep };
 }
 
-void Executor::C_DebugStr(StringPtr p)
+void Executor::C_DebugStr(ConstStringPtr p)
 {
     int i;
 

@@ -108,11 +108,10 @@ PASCAL_TRAP(GetResource, 0xA9A0);
 extern Handle C_Get1Resource(ResType typ,
                                          INTEGER id);
 PASCAL_TRAP(Get1Resource, 0xA81F);
-extern Handle C_GetNamedResource(ResType typ, StringPtr nam);
+extern Handle C_GetNamedResource(ResType typ, ConstStringPtr nam);
 PASCAL_TRAP(GetNamedResource, 0xA9A1);
 
-extern Handle C_Get1NamedResource(ResType typ,
-                                              StringPtr s);
+extern Handle C_Get1NamedResource(ResType typ, ConstStringPtr s);
 PASCAL_TRAP(Get1NamedResource, 0xA820);
 extern void C_LoadResource(Handle res);
 PASCAL_TRAP(LoadResource, 0xA9A2);
@@ -175,7 +174,7 @@ extern void C_SetResFileAttrs(INTEGER rn, INTEGER attrs);
 PASCAL_TRAP(SetResFileAttrs, 0xA9F7);
 
 extern void C_SetResInfo(Handle res, INTEGER id,
-                                     StringPtr name);
+                                     ConstStringPtr name);
 PASCAL_TRAP(SetResInfo, 0xA9A9);
 extern void C_SetResAttrs(Handle res, INTEGER attrs);
 PASCAL_TRAP(SetResAttrs, 0xA9A7);
@@ -184,7 +183,7 @@ extern void C_ChangedResource(Handle res);
 PASCAL_TRAP(ChangedResource, 0xA9AA);
 
 extern void C_AddResource(Handle data, ResType typ,
-                                      INTEGER id, StringPtr name);
+                                      INTEGER id, ConstStringPtr name);
 PASCAL_TRAP(AddResource, 0xA9AB);
 extern void C_RemoveResource(Handle res);
 PASCAL_TRAP(RemoveResource, 0xA9AD);
@@ -198,13 +197,13 @@ PASCAL_TRAP(WriteResource, 0xA9B0);
 extern void C_SetResPurge(BOOLEAN install);
 PASCAL_TRAP(SetResPurge, 0xA993);
 
-extern void C_CreateResFile(StringPtr fn);
+extern void C_CreateResFile(ConstStringPtr fn);
 PASCAL_TRAP(CreateResFile, 0xA9B1);
 
-extern INTEGER C_OpenRFPerm(StringPtr fn,
+extern INTEGER C_OpenRFPerm(ConstStringPtr fn,
                                         INTEGER vref, Byte perm);
 PASCAL_TRAP(OpenRFPerm, 0xA9C4);
-extern INTEGER C_OpenResFile(StringPtr fn);
+extern INTEGER C_OpenResFile(ConstStringPtr fn);
 PASCAL_TRAP(OpenResFile, 0xA997);
 
 extern void C_CloseResFile(INTEGER rn);

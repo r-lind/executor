@@ -277,7 +277,7 @@ extern OSErr C_SndRecordToFile(ProcPtr filterp, Point corner,
                                     OSType quality, INTEGER refnum);
 PASCAL_SUBTRAP(SndRecordToFile, 0xA800, 0x07080014, SoundDispatch);
 
-extern OSErr C_SPBOpenDevice(Str255 name, INTEGER permission,
+extern OSErr C_SPBOpenDevice(ConstStringPtr name, INTEGER permission,
                                   GUEST<LONGINT> *inrefnump);
 PASCAL_SUBTRAP(SPBOpenDevice, 0xA800, 0x05180014, SoundDispatch);
 
@@ -324,13 +324,13 @@ extern OSErr C_SetupAIFFHeader(INTEGER refnum, INTEGER numchannels,
                                     LONGINT numbytes, LONGINT numframes);
 PASCAL_SUBTRAP(SetupAIFFHeader, 0xA800, 0x0B4C0014, SoundDispatch);
 
-extern OSErr C_SPBSignInDevice(INTEGER refnum, Str255 name);
+extern OSErr C_SPBSignInDevice(INTEGER refnum, ConstStringPtr name);
 PASCAL_SUBTRAP(SPBSignInDevice, 0xA800, 0x030C0014, SoundDispatch);
 
 extern OSErr C_SPBSignOutDevice(INTEGER refnum);
 PASCAL_SUBTRAP(SPBSignOutDevice, 0xA800, 0x01100014, SoundDispatch);
 
-extern OSErr C_SPBGetIndexedDevice(INTEGER count, Str255 name,
+extern OSErr C_SPBGetIndexedDevice(INTEGER count, ConstStringPtr name,
                                         GUEST<Handle> *deviceiconhandlep);
 PASCAL_SUBTRAP(SPBGetIndexedDevice, 0xA800, 0x05140014, SoundDispatch);
 
@@ -368,11 +368,11 @@ extern OSErr C_GetCompressionInfo(INTEGER compressionID, OSType format,
                                        CompressionInfoPtr cp);
 PASCAL_SUBTRAP(GetCompressionInfo, 0xA800, 0x07100018, SoundDispatch);
 
-extern OSErr C_SetSoundPreference(OSType theType, Str255 name,
+extern OSErr C_SetSoundPreference(OSType theType, ConstStringPtr name,
                                        Handle settings);
 PASCAL_SUBTRAP(SetSoundPreference, 0xA800, 0x06340018, SoundDispatch);
 
-extern OSErr C_GetSoundPreference(OSType theType, Str255 name,
+extern OSErr C_GetSoundPreference(OSType theType, ConstStringPtr name,
                                        Handle settings);
 PASCAL_SUBTRAP(GetSoundPreference, 0xA800, 0x06380018, SoundDispatch);
 

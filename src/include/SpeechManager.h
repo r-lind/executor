@@ -103,7 +103,7 @@ OSErr C_CountVoices(GUEST<int16_t> *numVoices);
 PASCAL_SUBTRAP(CountVoices, 0xA800, 0x0108000C, SoundDispatch);
 OSErr C_DisposeSpeechChannel(SpeechChannel chan);
 PASCAL_SUBTRAP(DisposeSpeechChannel, 0xA800, 0x021C000C, SoundDispatch);
-OSErr C_SpeakString(Str255 textToBeSpoken);
+OSErr C_SpeakString(ConstStringPtr textToBeSpoken);
 PASCAL_SUBTRAP(SpeakString, 0xA800, 0x0220000C, SoundDispatch);
 
 OSErr C_StopSpeech(SpeechChannel chan);

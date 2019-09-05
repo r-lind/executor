@@ -62,10 +62,10 @@ PASCAL_TRAP(FixMul, 0xA868);
 extern INTEGER C_FixRound(Fixed x);
 PASCAL_TRAP(FixRound, 0xA86C);
 
-extern StringHandle C_NewString(StringPtr s);
+extern StringHandle C_NewString(ConstStringPtr s);
 PASCAL_TRAP(NewString, 0xA906);
 
-extern void C_SetString(StringHandle h, StringPtr s);
+extern void C_SetString(StringHandle h, ConstStringPtr s);
 PASCAL_TRAP(SetString, 0xA907);
 
 extern StringHandle C_GetString(INTEGER i);

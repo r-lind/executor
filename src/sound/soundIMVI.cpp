@@ -283,7 +283,7 @@ OSErr Executor::C_SndRecordToFile(ProcPtr filterp, Point corner,
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
-OSErr Executor::C_SPBOpenDevice(Str255 name, INTEGER permission,
+OSErr Executor::C_SPBOpenDevice(ConstStringPtr name, INTEGER permission,
                                 GUEST<LONGINT> *inrefnump)
 {
     /* #warning SPBOpenDevice not implemented */
@@ -381,7 +381,7 @@ OSErr Executor::C_SetupAIFFHeader(INTEGER refnum, INTEGER numchannels,
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
-OSErr Executor::C_SPBSignInDevice(INTEGER refnum, Str255 name)
+OSErr Executor::C_SPBSignInDevice(INTEGER refnum, ConstStringPtr name)
 {
     /* #warning SPBSignInDevice not implemented */
     warning_sound_log(NULL_STRING);
@@ -395,7 +395,7 @@ OSErr Executor::C_SPBSignOutDevice(INTEGER refnum)
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
-OSErr Executor::C_SPBGetIndexedDevice(INTEGER count, Str255 name,
+OSErr Executor::C_SPBGetIndexedDevice(INTEGER count, ConstStringPtr name,
                                       GUEST<Handle> *deviceiconhandlep)
 {
     /* #warning SPBGetIndexedDevice not implemented */
@@ -540,7 +540,7 @@ OSErr Executor::C_GetCompressionInfo(INTEGER compressionID, OSType format,
     return retval;
 }
 
-OSErr Executor::C_SetSoundPreference(OSType theType, Str255 name,
+OSErr Executor::C_SetSoundPreference(OSType theType, ConstStringPtr name,
                                      Handle settings)
 {
     OSErr retval;
@@ -551,7 +551,7 @@ OSErr Executor::C_SetSoundPreference(OSType theType, Str255 name,
     return retval;
 }
 
-OSErr Executor::C_GetSoundPreference(OSType theType, Str255 name,
+OSErr Executor::C_GetSoundPreference(OSType theType, ConstStringPtr name,
                                      Handle settings)
 {
     OSErr retval;

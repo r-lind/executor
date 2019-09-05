@@ -328,7 +328,7 @@ extern void fs_err_hook(OSErr);
 
 #endif
 
-extern void HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
+extern void HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, ConstStringPtr name,
                                   OSType creator, OSType type,
                                   ScriptCode script);
 

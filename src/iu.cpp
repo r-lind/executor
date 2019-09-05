@@ -587,7 +587,7 @@ INTEGER Executor::C_IUMagString(Ptr ptr1, Ptr ptr2, INTEGER len1,
     return iuhelper(ptr1, ptr2, len1, len2, false);
 }
 
-INTEGER Executor::IUCompString(StringPtr str1, StringPtr str2) /* IMI-506 */
+INTEGER Executor::IUCompString(ConstStringPtr str1, ConstStringPtr str2) /* IMI-506 */
 {
     return IUMagString((Ptr)(str1 + 1), (Ptr)(str2 + 1), str1[0], str2[0]);
 }
@@ -598,7 +598,7 @@ INTEGER Executor::C_IUMagIDString(Ptr ptr1, Ptr ptr2, INTEGER len1,
     return iuhelper(ptr1, ptr2, len1, len2, true);
 }
 
-INTEGER Executor::IUEqualString(StringPtr str1, StringPtr str2) /* IMI-506 */
+INTEGER Executor::IUEqualString(ConstStringPtr str1, ConstStringPtr str2) /* IMI-506 */
 {
     return IUMagIDString((Ptr)(str1 + 1), (Ptr)(str2 + 1), str1[0], str2[0]);
 }

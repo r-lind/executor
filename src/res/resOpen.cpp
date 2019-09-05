@@ -20,7 +20,7 @@
 using namespace Executor;
 
 void
-Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
+Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, ConstStringPtr name,
                                 OSType creator, OSType type, ScriptCode script)
 {
     INTEGER f;
@@ -63,12 +63,12 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, Str255 name,
     ROMlib_setreserr(FSClose(f));
 }
 
-void Executor::C_CreateResFile(StringPtr fn)
+void Executor::C_CreateResFile(ConstStringPtr fn)
 {
     HCreateResFile_helper(0, 0, fn, TICK("????"), TICK("????"), 0);
 }
 
-void Executor::C_HCreateResFile(INTEGER vrefnum, LONGINT parid, Str255 name)
+void Executor::C_HCreateResFile(INTEGER vrefnum, LONGINT parid, ConstStringPtr name)
 {
     HCreateResFile_helper(vrefnum, parid, name, TICK("????"), TICK("????"), 0);
 }
@@ -389,7 +389,7 @@ resmaphand Executor::ROMlib_rntohandl(INTEGER rn, Handle *pph) /* INTERNAL */
     return (map);
 }
 
-INTEGER Executor::C_OpenRFPerm(StringPtr fn, INTEGER vref,
+INTEGER Executor::C_OpenRFPerm(ConstStringPtr fn, INTEGER vref,
                                Byte perm) /* IMIV-17 */
 {
     INTEGER retval;
@@ -398,7 +398,7 @@ INTEGER Executor::C_OpenRFPerm(StringPtr fn, INTEGER vref,
     return retval;
 }
 
-INTEGER Executor::C_OpenResFile(StringPtr fn)
+INTEGER Executor::C_OpenResFile(ConstStringPtr fn)
 {
     return OpenRFPerm(fn, 0, fsCurPerm);
 }
@@ -495,7 +495,7 @@ already_open_res_file(GUEST<INTEGER> swapped_vref, GUEST<LONGINT> swapped_file_n
     return retval;
 }
 
-INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
+INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, ConstStringPtr fn,
                                  SignedByte perm)
 {
     INTEGER f;
@@ -529,7 +529,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
             return -1;
         }
 
-        cpb.hFileInfo.ioNamePtr = fn;
+        cpb.hFileInfo.ioNamePtr = (StringPtr)fn;
         cpb.hFileInfo.ioVRefNum = vref;
         cpb.hFileInfo.ioFDirIndex = 0;
         cpb.hFileInfo.ioDirID = dirid;
@@ -552,7 +552,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, Str255 fn,
         /*-->*/ return -1;
 
     ROMlib_invalar();
-    pbr.ioParam.ioNamePtr = fn;
+    pbr.ioParam.ioNamePtr = (StringPtr)fn;
     pbr.ioParam.ioVRefNum = vref;
     pbr.fileParam.ioFDirIndex = 0;
     pbr.ioParam.ioPermssn = perm;

@@ -190,7 +190,7 @@ void Executor::C_InitMenus()
     DrawMenuBar();
 }
 
-MenuHandle Executor::C_NewMenu(INTEGER mid, StringPtr str)
+MenuHandle Executor::C_NewMenu(INTEGER mid, ConstStringPtr str)
 {
     MenuHandle retval;
     GUEST<Handle> temph;
@@ -312,7 +312,7 @@ typedef struct
 static void toend(MenuHandle, endinfo *);
 static void app(StringPtr, char, char, char, char, char, endinfo *);
 static void handleinsert(Handle, StringPtr);
-static void xInsertResMenu(MenuHandle, StringPtr, ResType, INTEGER);
+static void xInsertResMenu(MenuHandle, ConstStringPtr, ResType, INTEGER);
 
 static void toend(MenuHandle mh, endinfo *eip)
 {
@@ -370,7 +370,7 @@ static void app(StringPtr str, char icon, char marker, char style,
     eip->menoff = menuop - (char *)(*eip->menh);
 }
 
-void Executor::C_AppendMenu(MenuHandle mh, StringPtr str)
+void Executor::C_AppendMenu(MenuHandle mh, ConstStringPtr str)
 {
     Str255 tempstr;
     char *ip, *op;
@@ -581,7 +581,7 @@ void Executor::C_DeleteMenuItem(MenuHandle mh, INTEGER item) /* IMIV-56 */
     }
 }
 
-static void xInsertResMenu(MenuHandle mh, StringPtr str, ResType restype,
+static void xInsertResMenu(MenuHandle mh, ConstStringPtr str, ResType restype,
                            INTEGER after)
 {
     LONGINT oldeflags;
@@ -649,7 +649,7 @@ void Executor::C_InsertResMenu(MenuHandle mh, ResType restype, INTEGER after)
         xInsertResMenu(mh, (StringPtr)0, restype, after);
 }
 
-void Executor::C_InsertMenuItem(MenuHandle mh, StringPtr str,
+void Executor::C_InsertMenuItem(MenuHandle mh, ConstStringPtr str,
                              INTEGER after) /* IMIV-55 */
 {
     if(mh)
@@ -1443,7 +1443,7 @@ LONGINT Executor::C_MenuKey(CharParameter thec)
     return (0L);
 }
 
-void Executor::C_SetMenuItemText(MenuHandle mh, INTEGER item, StringPtr str)
+void Executor::C_SetMenuItemText(MenuHandle mh, INTEGER item, ConstStringPtr str)
 {
     int oldsize, newsize, growth;
     Size hsize, nbyte;

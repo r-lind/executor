@@ -395,14 +395,14 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
     return err;
 }
 
-OSErr Executor::OpenDriver(StringPtr name, GUEST<INTEGER> *rnp) /* IMII-178 */
+OSErr Executor::OpenDriver(ConstStringPtr name, GUEST<INTEGER> *rnp) /* IMII-178 */
 {
     ParamBlockRec pb;
     OSErr retval;
 
     pb.ioParam.ioRefNum = 0; /* so we can't get garbage for ioRefNum. */
     pb.ioParam.ioPermssn = fsCurPerm;
-    pb.ioParam.ioNamePtr = name;
+    pb.ioParam.ioNamePtr = (StringPtr)name;
     retval = ROMlib_driveropen(&pb, false);
     *rnp = pb.ioParam.ioRefNum;
     fs_err_hook(retval);

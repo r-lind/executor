@@ -243,7 +243,7 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
 launch_failure_t Executor::ROMlib_launch_failure = launch_no_failure;
 INTEGER Executor::ROMlib_exevrefnum;
 
-static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
+static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
                         LaunchParamBlockRec *lpbp)
 {
     OSErr err;
@@ -256,7 +256,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
 
     {
         INTEGER toskip;
-        Byte *p;
+        const Byte *p;
         for(p = fName + fName[0] + 1; p > fName && *--p != ':';)
             ;
         toskip = p - fName;
@@ -273,7 +273,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     {
         CInfoPBRec hpb;
 
-        hpb.hFileInfo.ioNamePtr = &fName[0];
+        hpb.hFileInfo.ioNamePtr = (StringPtr) &fName[0];
         hpb.hFileInfo.ioVRefNum = vRefNum;
         hpb.hFileInfo.ioFDirIndex = 0;
         hpb.hFileInfo.ioDirID = 0;
@@ -468,7 +468,7 @@ static void launchchain(StringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
     }
 }
 
-void Executor::Chain(StringPtr fName, INTEGER vRefNum)
+void Executor::Chain(ConstStringPtr fName, INTEGER vRefNum)
 {
     launchchain(fName, vRefNum, false, 0);
 }
@@ -902,7 +902,7 @@ static void reinitialize_things(void)
 }
 
 OSErr
-Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRec *lpbp)
+Executor::NewLaunch(ConstStringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRec *lpbp)
 {
     OSErr retval;
     static char beenhere = false;
@@ -991,7 +991,7 @@ Executor::NewLaunch(StringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBlockRe
     return retval;
 }
 
-void Executor::Launch(StringPtr fName_arg, INTEGER vRefNum_arg)
+void Executor::Launch(ConstStringPtr fName_arg, INTEGER vRefNum_arg)
 {
     NewLaunch(fName_arg, vRefNum_arg, 0);
 }

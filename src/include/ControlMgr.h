@@ -152,7 +152,7 @@ struct AuxCtlRec
 const LowMemGlobal<AuxCtlHandle> AuxCtlHead { 0xCD4 }; // ControlMgr IMV-216 (true);
 
 extern void C_SetControlTitle(ControlHandle c,
-                                    StringPtr t);
+                                    ConstStringPtr t);
 PASCAL_TRAP(SetControlTitle, 0xA95F);
 extern void C_GetControlTitle(ControlHandle c,
                                     StringPtr t);
@@ -176,7 +176,7 @@ extern void C_UpdateControls(WindowPtr wp,
                                       RgnHandle rh);
 PASCAL_TRAP(UpdateControls, 0xA953);
 extern ControlHandle C_NewControl(WindowPtr wst, Rect *r,
-                                              StringPtr title, BOOLEAN vis, INTEGER value, INTEGER min,
+                                              ConstStringPtr title, BOOLEAN vis, INTEGER value, INTEGER min,
                                               INTEGER max, INTEGER procid, LONGINT rc);
 PASCAL_TRAP(NewControl, 0xA954);
 extern ControlHandle C_GetNewControl(

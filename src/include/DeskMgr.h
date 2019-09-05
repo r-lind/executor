@@ -38,7 +38,7 @@ const LowMemGlobal<Byte> SEvtEnb { 0x15C }; // DeskMgr IMI-443 (false);
 
 /* DO NOT DELETE THIS LINE */
 extern INTEGER C_OpenDeskAcc(
-    Str255 acc);
+    ConstStringPtr acc);
 PASCAL_TRAP(OpenDeskAcc, 0xA9B6);
 extern void C_CloseDeskAcc(INTEGER rn);
 PASCAL_TRAP(CloseDeskAcc, 0xA9B7);

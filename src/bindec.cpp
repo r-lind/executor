@@ -48,10 +48,10 @@ void Executor::C_NumToString(LONGINT l, StringPtr s)
     s[0] = p - (s + 1);
 }
 
-void Executor::C_StringToNum(StringPtr s, GUEST<LONGINT> *lp)
+void Executor::C_StringToNum(ConstStringPtr s, GUEST<LONGINT> *lp)
 {
-    char *p = (char *)s + 1;
-    char *ep = p + s[0];
+    const unsigned char *p = s + 1;
+    const unsigned char *ep = p + s[0];
     LONGINT l = 0;
     int sign = 1;
 

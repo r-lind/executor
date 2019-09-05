@@ -52,8 +52,8 @@ extern void GetAppFiles(INTEGER index, AppFile *filep);
 extern void ClrAppFiles(INTEGER index);
 
 BEGIN_EXECUTOR_ONLY
-extern void Launch(StringPtr appl, INTEGER vrefnum);
-extern void Chain(StringPtr appl, INTEGER vrefnum);
+extern void Launch(ConstStringPtr appl, INTEGER vrefnum);
+extern void Chain(ConstStringPtr appl, INTEGER vrefnum);
 END_EXECUTOR_ONLY
 
 extern void C_GetAppParms(StringPtr namep,

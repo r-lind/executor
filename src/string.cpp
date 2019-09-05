@@ -37,7 +37,7 @@ Executor::pstr_index_after(StringPtr p, char c, int i)
         return nullptr;
 }
 
-static void strNassign(Str63 new1, const StringPtr old, int n)
+static void strNassign(Str63 new1, ConstStringPtr old, int n)
 {
     int old_length, new_length;
 
@@ -56,12 +56,12 @@ static void strNassign(Str63 new1, const StringPtr old, int n)
     memcpy(new1 + 1, old + 1, new_length);
 }
 
-void Executor::str63assign(Str63 new1, const StringPtr old)
+void Executor::str63assign(Str63 new1, ConstStringPtr old)
 {
     strNassign(new1, old, 63);
 }
 
-void Executor::str31assign(Str63 new1, const StringPtr old)
+void Executor::str31assign(Str63 new1, ConstStringPtr old)
 {
     strNassign(new1, old, 31);
 }

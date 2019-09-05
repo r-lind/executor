@@ -574,11 +574,11 @@ const LowMemGlobal<Ptr> ToExtFS { 0x3F2 }; // FileMgr IMIV-212 (false);
 const LowMemGlobal<INTEGER> FSFCBLen { 0x3F6 }; // FileMgr IMIV-97 (true);
 
 
-extern OSErr FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
+extern OSErr FSOpen(ConstStringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
 NOTRAP_FUNCTION2(FSOpen);
-extern OSErr OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
+extern OSErr OpenRF(ConstStringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
 NOTRAP_FUNCTION2(OpenRF);
-extern OSErr OpenDF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
+extern OSErr OpenDF(ConstStringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn);
 NOTRAP_FUNCTION2(OpenDF);
 extern OSErr FSRead(INTEGER rn, GUEST<LONGINT> *count, void* buffp);
 NOTRAP_FUNCTION2(FSRead);
@@ -600,25 +600,25 @@ NOTRAP_FUNCTION2(AllocContig);
 extern OSErr FSClose(INTEGER rn);
 NOTRAP_FUNCTION2(FSClose);
 
-extern OSErr Create(StringPtr filen, INTEGER vrn, OSType creator,
+extern OSErr Create(ConstStringPtr filen, INTEGER vrn, OSType creator,
                     OSType filtyp);
 NOTRAP_FUNCTION2(Create);
-extern OSErr FSDelete(StringPtr filen, INTEGER vrn);
+extern OSErr FSDelete(ConstStringPtr filen, INTEGER vrn);
 NOTRAP_FUNCTION2(FSDelete);
-extern OSErr GetFInfo(StringPtr filen, INTEGER vrn, FInfo *fndrinfo);
+extern OSErr GetFInfo(ConstStringPtr filen, INTEGER vrn, FInfo *fndrinfo);
 NOTRAP_FUNCTION2(GetFInfo);
-extern OSErr HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name,
+extern OSErr HGetFInfo(INTEGER vref, LONGINT dirid, ConstStringPtr name,
                        FInfo *fndrinfo);
 NOTRAP_FUNCTION2(HGetFInfo);
-extern OSErr SetFInfo(StringPtr filen, INTEGER vrn,
+extern OSErr SetFInfo(ConstStringPtr filen, INTEGER vrn,
                       FInfo *fndrinfo);
 NOTRAP_FUNCTION2(SetFInfo);
-extern OSErr SetFLock(StringPtr filen, INTEGER vrn);
+extern OSErr SetFLock(ConstStringPtr filen, INTEGER vrn);
 NOTRAP_FUNCTION2(SetFLock);
-extern OSErr RstFLock(StringPtr filen, INTEGER vrn);
+extern OSErr RstFLock(ConstStringPtr filen, INTEGER vrn);
 NOTRAP_FUNCTION2(RstFLock);
-extern OSErr Rename(StringPtr filen, INTEGER vrn,
-                    StringPtr newf);
+extern OSErr Rename(ConstStringPtr filen, INTEGER vrn,
+                    ConstStringPtr newf);
 NOTRAP_FUNCTION2(Rename);
 extern void C_FInitQueue(void);
 PASCAL_TRAP(FInitQueue, 0xA016);
@@ -634,13 +634,13 @@ extern OSErr GetVInfo(INTEGER drv, StringPtr voln,
 extern OSErr GetVRefNum(INTEGER prn, GUEST<INTEGER> *vrn);
 extern OSErr GetVol(StringPtr voln, GUEST<INTEGER> *vrn);
 NOTRAP_FUNCTION2(GetVol);
-extern OSErr SetVol(StringPtr voln, INTEGER vrn);
+extern OSErr SetVol(ConstStringPtr voln, INTEGER vrn);
 NOTRAP_FUNCTION2(SetVol);
-extern OSErr FlushVol(StringPtr voln, INTEGER vrn);
+extern OSErr FlushVol(ConstStringPtr voln, INTEGER vrn);
 NOTRAP_FUNCTION2(FlushVol);
-extern OSErr UnmountVol(StringPtr voln, INTEGER vrn);
+extern OSErr UnmountVol(ConstStringPtr voln, INTEGER vrn);
 NOTRAP_FUNCTION2(UnmountVol);
-extern OSErr Eject(StringPtr voln, INTEGER vrn);
+extern OSErr Eject(ConstStringPtr voln, INTEGER vrn);
 NOTRAP_FUNCTION2(Eject);
 
 extern OSErr PBAllocContig(ParmBlkPtr pb, BOOLEAN async);
@@ -825,7 +825,7 @@ FILE_SUBTRAP(PBHOpenDeny, HParmBlkPtr, 0xA260, 0x38, FSDispatch);
 DISPATCHER_TRAP(HighLevelFSDispatch, 0xAA52, D0<0xF>);
 
 extern OSErr C_FSMakeFSSpec(int16_t vRefNum, int32_t dir_id,
-                                        Str255 file_name, FSSpecPtr spec);
+                                        ConstStringPtr file_name, FSSpecPtr spec);
 PASCAL_SUBTRAP(FSMakeFSSpec, 0xAA52, 0x0001, HighLevelFSDispatch);
 extern OSErr C_FSpExchangeFiles(FSSpecPtr src, FSSpecPtr dst);
 PASCAL_SUBTRAP(FSpExchangeFiles, 0xAA52, 0x000F, HighLevelFSDispatch);
@@ -853,7 +853,7 @@ extern OSErr C_FSpSetFLock(FSSpecPtr spec);
 PASCAL_SUBTRAP(FSpSetFLock, 0xAA52, 0x0009, HighLevelFSDispatch);
 extern OSErr C_FSpRstFLock(FSSpecPtr spec);
 PASCAL_SUBTRAP(FSpRstFLock, 0xAA52, 0x000A, HighLevelFSDispatch);
-extern OSErr C_FSpRename(FSSpecPtr spec, Str255 new_name);
+extern OSErr C_FSpRename(FSSpecPtr spec, ConstStringPtr new_name);
 PASCAL_SUBTRAP(FSpRename, 0xAA52, 0x000B, HighLevelFSDispatch);
 extern OSErr C_FSpCatMove(FSSpecPtr src, FSSpecPtr dst);
 PASCAL_SUBTRAP(FSpCatMove, 0xAA52, 0x000C, HighLevelFSDispatch);
@@ -864,23 +864,23 @@ PASCAL_SUBTRAP(FSpCreateResFile, 0xAA52, 0x000E, HighLevelFSDispatch);
 extern INTEGER C_FSpOpenResFile(FSSpecPtr spec, SignedByte perms);
 PASCAL_SUBTRAP(FSpOpenResFile, 0xAA52, 0x000D, HighLevelFSDispatch);
 extern INTEGER C_HOpenResFile(INTEGER vref, LONGINT dirid,
-                                          Str255 file_name, SignedByte perm);
+                                          ConstStringPtr file_name, SignedByte perm);
 PASCAL_TRAP(HOpenResFile, 0xA81A);
 extern void C_HCreateResFile(INTEGER vrefnum, LONGINT parid,
-                                         Str255 name);
+                                         ConstStringPtr name);
 PASCAL_TRAP(HCreateResFile, 0xA81B);
 
-extern OSErr HCreate(INTEGER vref, LONGINT dirid, Str255 name, OSType creator,
+extern OSErr HCreate(INTEGER vref, LONGINT dirid, ConstStringPtr name, OSType creator,
                      OSType type);
 NOTRAP_FUNCTION2(HCreate);
 
-extern OSErr HOpenRF(INTEGER vref, LONGINT dirid, Str255 name,
+extern OSErr HOpenRF(INTEGER vref, LONGINT dirid, ConstStringPtr name,
                      SignedByte perm, GUEST<INTEGER> *refp);
 NOTRAP_FUNCTION2(HOpenRF);
-extern OSErr HOpen(INTEGER vref, LONGINT dirid, Str255 name,
+extern OSErr HOpen(INTEGER vref, LONGINT dirid, ConstStringPtr name,
                      SignedByte perm, GUEST<INTEGER> *refp);
 NOTRAP_FUNCTION2(HOpen);
-extern OSErr HOpenDF(INTEGER vref, LONGINT dirid, Str255 name,
+extern OSErr HOpenDF(INTEGER vref, LONGINT dirid, ConstStringPtr name,
                      SignedByte perm, GUEST<INTEGER> *refp);
 NOTRAP_FUNCTION2(HOpenDF);
 

@@ -29,10 +29,10 @@ using namespace Executor;
  */
 
 static void
-extract_name(Str255 dest, StringPtr source)
+extract_name(Str255 dest, ConstStringPtr source)
 {
     int len, new_len;
-    Byte *p;
+    const Byte *p;
 
     len = source[0];
     if(source[len] == ':') /* ignore trailing ':' */
@@ -45,7 +45,7 @@ extract_name(Str255 dest, StringPtr source)
 }
 
 OSErr Executor::C_FSMakeFSSpec(int16_t vRefNum, int32_t dir_id,
-                               Str255 file_name, FSSpecPtr spec)
+                               ConstStringPtr file_name, FSSpecPtr spec)
 {
     Str255 local_file_name;
     OSErr retval;
@@ -328,7 +328,7 @@ OSErr Executor::C_FSpRstFLock(FSSpecPtr spec)
     return lock_helper(spec, PBHRstFLock);
 }
 
-OSErr Executor::C_FSpRename(FSSpecPtr spec, Str255 new_name)
+OSErr Executor::C_FSpRename(FSSpecPtr spec, ConstStringPtr new_name)
 {
     OSErr retval;
     HParamBlockRec hpb;
@@ -380,12 +380,12 @@ INTEGER Executor::C_FSpOpenResFile(FSSpecPtr spec, SignedByte perms)
    calls that are handy to use elsewhere, so they're included here. */
 
 OSErr
-Executor::HCreate(INTEGER vref, LONGINT dirid, Str255 name, OSType creator, OSType type)
+Executor::HCreate(INTEGER vref, LONGINT dirid, ConstStringPtr name, OSType creator, OSType type)
 {
     HParamBlockRec hpb;
     OSErr retval;
 
-    hpb.fileParam.ioNamePtr = name;
+    hpb.fileParam.ioNamePtr = (StringPtr)name;
     hpb.fileParam.ioVRefNum = vref;
     hpb.fileParam.ioDirID = dirid;
     retval = PBHCreate(&hpb, false);
@@ -405,13 +405,13 @@ Executor::HCreate(INTEGER vref, LONGINT dirid, Str255 name, OSType creator, OSTy
 }
 
 OSErr
-Executor::HOpenRF(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
+Executor::HOpenRF(INTEGER vref, LONGINT dirid, ConstStringPtr name, SignedByte perm,
                   GUEST<INTEGER> *refp)
 {
     HParamBlockRec hpb;
     OSErr retval;
 
-    hpb.fileParam.ioNamePtr = name;
+    hpb.fileParam.ioNamePtr = (StringPtr)name;
     hpb.fileParam.ioVRefNum = vref;
     hpb.ioParam.ioPermssn = perm;
     hpb.ioParam.ioMisc = 0;
@@ -423,13 +423,13 @@ Executor::HOpenRF(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
 }
 
 OSErr
-Executor::HOpenDF(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
+Executor::HOpenDF(INTEGER vref, LONGINT dirid, ConstStringPtr name, SignedByte perm,
                   GUEST<INTEGER> *refp)
 {
     HParamBlockRec hpb;
     OSErr retval;
 
-    hpb.fileParam.ioNamePtr = name;
+    hpb.fileParam.ioNamePtr = (StringPtr)name;
     hpb.fileParam.ioVRefNum = vref;
     hpb.ioParam.ioPermssn = perm;
     hpb.ioParam.ioMisc = 0;
@@ -441,13 +441,13 @@ Executor::HOpenDF(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
 }
 
 OSErr
-Executor::HOpen(INTEGER vref, LONGINT dirid, Str255 name, SignedByte perm,
+Executor::HOpen(INTEGER vref, LONGINT dirid, ConstStringPtr name, SignedByte perm,
                   GUEST<INTEGER> *refp)
 {
     HParamBlockRec hpb;
     OSErr retval;
 
-    hpb.fileParam.ioNamePtr = name;
+    hpb.fileParam.ioNamePtr = (StringPtr)name;
     hpb.fileParam.ioVRefNum = vref;
     hpb.ioParam.ioPermssn = perm;
     hpb.ioParam.ioMisc = 0;
@@ -467,7 +467,7 @@ OSErr Executor::GetVInfo(INTEGER drv, StringPtr voln, GUEST<INTEGER> *vrn,
 
     pbr.volumeParam.ioVolIndex = 0;
     pbr.volumeParam.ioVRefNum = drv;
-    pbr.volumeParam.ioNamePtr = voln;
+    pbr.volumeParam.ioNamePtr = (StringPtr)voln;
     temp = PBGetVInfo(&pbr, 0);
     *vrn = pbr.volumeParam.ioVRefNum;
     *freeb = pbr.volumeParam.ioVFrBlk * pbr.volumeParam.ioVAlBlkSiz;
@@ -485,49 +485,49 @@ OSErr Executor::GetVol(StringPtr voln, GUEST<INTEGER> *vrn) /* IMIV-107 */
     return (temp);
 }
 
-OSErr Executor::SetVol(StringPtr voln, INTEGER vrn) /* IMIV-107 */
+OSErr Executor::SetVol(ConstStringPtr voln, INTEGER vrn) /* IMIV-107 */
 {
     ParamBlockRec pbr;
 
-    pbr.volumeParam.ioNamePtr = voln;
+    pbr.volumeParam.ioNamePtr = (StringPtr)voln;
     pbr.volumeParam.ioVRefNum = vrn;
     return (PBSetVol(&pbr, 0));
 }
 
-OSErr Executor::FlushVol(StringPtr voln, INTEGER vrn) /* IMIV-108 */
+OSErr Executor::FlushVol(ConstStringPtr voln, INTEGER vrn) /* IMIV-108 */
 {
     ParamBlockRec pbr;
 
-    pbr.ioParam.ioNamePtr = voln;
+    pbr.ioParam.ioNamePtr = (StringPtr)voln;
     pbr.ioParam.ioVRefNum = vrn;
     return (PBFlushVol(&pbr, 0));
 }
 
-OSErr Executor::UnmountVol(StringPtr voln, INTEGER vrn) /* IMIV-108 */
+OSErr Executor::UnmountVol(ConstStringPtr voln, INTEGER vrn) /* IMIV-108 */
 {
     ParamBlockRec pbr;
 
-    pbr.ioParam.ioNamePtr = voln;
+    pbr.ioParam.ioNamePtr = (StringPtr)voln;
     pbr.ioParam.ioVRefNum = vrn;
     return (PBUnmountVol(&pbr));
 }
 
-OSErr Executor::Eject(StringPtr voln, INTEGER vrn) /* IMIV-108 */
+OSErr Executor::Eject(ConstStringPtr voln, INTEGER vrn) /* IMIV-108 */
 {
     ParamBlockRec pbr;
 
-    pbr.ioParam.ioNamePtr = voln;
+    pbr.ioParam.ioNamePtr = (StringPtr)voln;
     pbr.ioParam.ioVRefNum = vrn;
     return (PBEject(&pbr));
 }
 
 
-OSErr Executor::FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
+OSErr Executor::FSOpen(ConstStringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
-    pbr.ioParam.ioNamePtr = filen;
+    pbr.ioParam.ioNamePtr = (StringPtr)filen;
     pbr.ioParam.ioVRefNum = vrn;
     pbr.ioParam.ioVersNum = 0;
     pbr.ioParam.ioPermssn = fsCurPerm;
@@ -538,12 +538,12 @@ OSErr Executor::FSOpen(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV
     return (temp);
 }
 
-OSErr Executor::OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
+OSErr Executor::OpenRF(ConstStringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
-    pbr.ioParam.ioNamePtr = filen;
+    pbr.ioParam.ioNamePtr = (StringPtr)filen;
     pbr.ioParam.ioVRefNum = vrn;
     pbr.ioParam.ioVersNum = 0;
     pbr.ioParam.ioPermssn = fsCurPerm;
@@ -554,12 +554,12 @@ OSErr Executor::OpenRF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV
     return (temp);
 }
 
-OSErr Executor::OpenDF(StringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
+OSErr Executor::OpenDF(ConstStringPtr filen, INTEGER vrn, GUEST<INTEGER> *rn) /* IMIV-109 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
-    pbr.ioParam.ioNamePtr = filen;
+    pbr.ioParam.ioNamePtr = (StringPtr)filen;
     pbr.ioParam.ioVRefNum = vrn;
     pbr.ioParam.ioVersNum = 0;
     pbr.ioParam.ioPermssn = fsCurPerm;
@@ -714,13 +714,13 @@ OSErr Executor::FSClose(INTEGER rn) /* IMIV-112 */
 }
 
 
-OSErr Executor::GetFInfo(StringPtr filen, INTEGER vrn,
+OSErr Executor::GetFInfo(ConstStringPtr filen, INTEGER vrn,
                          FInfo *fndrinfo) /* IMIV-113 */
 {
     ParamBlockRec pbr;
     OSErr temp;
 
-    pbr.fileParam.ioNamePtr = filen;
+    pbr.fileParam.ioNamePtr = (StringPtr)filen;
     pbr.fileParam.ioVRefNum = vrn;
     pbr.fileParam.ioFVersNum = 0;
     pbr.fileParam.ioFDirIndex = 0;
@@ -736,13 +736,13 @@ OSErr Executor::GetFInfo(StringPtr filen, INTEGER vrn,
     return temp;
 }
 
-OSErr Executor::HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name, FInfo *fndrinfo)
+OSErr Executor::HGetFInfo(INTEGER vref, LONGINT dirid, ConstStringPtr name, FInfo *fndrinfo)
 {
     HParamBlockRec pbr;
     OSErr retval;
 
     memset(&pbr, 0, sizeof pbr);
-    pbr.fileParam.ioNamePtr = name;
+    pbr.fileParam.ioNamePtr = (StringPtr)name;
     pbr.fileParam.ioVRefNum = vref;
     pbr.fileParam.ioDirID = dirid;
     retval = PBHGetFInfo(&pbr, false);
@@ -758,14 +758,14 @@ OSErr Executor::HGetFInfo(INTEGER vref, LONGINT dirid, Str255 name, FInfo *fndri
     return retval;
 }
 
-OSErr Executor::SetFInfo(StringPtr filen, INTEGER vrn,
+OSErr Executor::SetFInfo(ConstStringPtr filen, INTEGER vrn,
                          FInfo *fndrinfo) /* IMIV-114 */
 {
     ParamBlockRec pbr;
     OSErr temp;
     GUEST<ULONGINT> t;
 
-    pbr.fileParam.ioNamePtr = filen;
+    pbr.fileParam.ioNamePtr = (StringPtr)filen;
     pbr.fileParam.ioVRefNum = vrn;
     pbr.fileParam.ioFVersNum = 0;
     pbr.fileParam.ioFDirIndex = 0;
@@ -784,32 +784,32 @@ OSErr Executor::SetFInfo(StringPtr filen, INTEGER vrn,
     return (PBSetFInfo(&pbr, 0));
 }
 
-OSErr Executor::SetFLock(StringPtr filen, INTEGER vrn) /* IMIV-114 */
+OSErr Executor::SetFLock(ConstStringPtr filen, INTEGER vrn) /* IMIV-114 */
 {
     ParamBlockRec pbr;
 
-    pbr.fileParam.ioNamePtr = filen;
+    pbr.fileParam.ioNamePtr = (StringPtr)filen;
     pbr.fileParam.ioVRefNum = vrn;
     pbr.fileParam.ioFVersNum = 0;
     return (PBSetFLock(&pbr, 0));
 }
 
-OSErr Executor::RstFLock(StringPtr filen, INTEGER vrn) /* IMIV-114 */
+OSErr Executor::RstFLock(ConstStringPtr filen, INTEGER vrn) /* IMIV-114 */
 {
     ParamBlockRec pbr;
 
-    pbr.fileParam.ioNamePtr = filen;
+    pbr.fileParam.ioNamePtr = (StringPtr)filen;
     pbr.fileParam.ioVRefNum = vrn;
     pbr.fileParam.ioFVersNum = 0;
     return (PBRstFLock(&pbr, 0));
 }
 
-OSErr Executor::Rename(StringPtr filen, INTEGER vrn,
-                       StringPtr newf) /* IMIV-114 */
+OSErr Executor::Rename(ConstStringPtr filen, INTEGER vrn,
+                       ConstStringPtr newf) /* IMIV-114 */
 {
     ParamBlockRec pbr;
 
-    pbr.ioParam.ioNamePtr = filen;
+    pbr.ioParam.ioNamePtr = (StringPtr)filen;
     pbr.ioParam.ioVRefNum = vrn;
     pbr.ioParam.ioVersNum = 0;
     pbr.ioParam.ioMisc = guest_cast<LONGINT>(newf);
@@ -817,14 +817,14 @@ OSErr Executor::Rename(StringPtr filen, INTEGER vrn,
 }
 
 
-OSErr Executor::Create(StringPtr filen, INTEGER vrn, OSType creator,
+OSErr Executor::Create(ConstStringPtr filen, INTEGER vrn, OSType creator,
                        OSType filtyp) /* IMIV-112 */
 {
     ParamBlockRec pbr;
     OSErr temp;
     GUEST<ULONGINT> t;
 
-    pbr.fileParam.ioNamePtr = filen;
+    pbr.fileParam.ioNamePtr = (StringPtr)filen;
     pbr.fileParam.ioVRefNum = vrn;
     pbr.fileParam.ioFVersNum = 0;
 
@@ -852,11 +852,11 @@ OSErr Executor::Create(StringPtr filen, INTEGER vrn, OSType creator,
     return temp == fnfErr ? noErr : temp;
 }
 
-OSErr Executor::FSDelete(StringPtr filen, INTEGER vrn) /* IMIV-113 */
+OSErr Executor::FSDelete(ConstStringPtr filen, INTEGER vrn) /* IMIV-113 */
 {
     ParamBlockRec pbr;
 
-    pbr.fileParam.ioNamePtr = filen;
+    pbr.fileParam.ioNamePtr = (StringPtr)filen;
     pbr.fileParam.ioVRefNum = vrn;
     pbr.fileParam.ioFVersNum = 0;
     return (PBDelete(&pbr, 0));

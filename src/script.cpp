@@ -608,7 +608,7 @@ FormatStatus Executor::C_ExtendedToString(
 }
 
 FormatStatus Executor::C_StringToFormatRec(
-    Str255 in_string, NumberParts *partsp,
+    ConstStringPtr in_string, NumberParts *partsp,
     NumFormatStringRec *out_string) /* TTS TODO */
 {
     FormatStatus retval;
