@@ -137,19 +137,6 @@ typedef RoutineDescriptor *UniversalProcPtr;
 #define STACK_ROUTINE_PARAMETER(arg, n) \
     ((n) << (kStackParameterPhase + ((arg)-1) * kStackParameterWidth))
 
-extern long CallUniversalProc_from_native(UniversalProcPtr proc,
-                                          ProcInfoType info, ...);
-
-typedef enum {
-    args_via_stdarg,
-    args_via_68k_stack,
-    args_via_68k_regs,
-} where_args_t;
-
-extern long
-CallUniversalProc_from_native_common(va_list ap, where_args_t where,
-                                     ProcPtr proc, ProcInfoType info);
-
 DISPATCHER_TRAP(MixedModeDispatch, 0xAA59, D0W);
 
 extern UniversalProcPtr C_NewRoutineDescriptor(ProcPtr proc,
