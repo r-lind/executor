@@ -93,7 +93,7 @@ typedef struct SysEnvRec
 
 enum
 {
-    SYSRECVNUM = 2,
+    curSysEnvVers = 2,
 };
 
 /* sysEnv machine types */

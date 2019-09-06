@@ -886,7 +886,7 @@ OSErr Executor::SysEnvirons(INTEGER vers, SysEnvRecPtr p)
     p->atDrvrVersNum = 0;
     p->sysVRefNum = LM(BootDrive);
 
-    return vers <= SYSRECVNUM ? noErr : envVersTooBig;
+    return vers <= curSysEnvVers ? noErr : envVersTooBig;
 }
 
 void Executor::SetUpA5()
