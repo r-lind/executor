@@ -5,7 +5,7 @@
 #include <stdint.h>
 #include <ExMacTypes.h>
 
-#define MODULE_NAME rsys_mixed_mode
+#define MODULE_NAME MixedMode
 #include <base/api-module.h>
 
 namespace Executor

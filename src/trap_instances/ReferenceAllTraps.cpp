@@ -3,7 +3,6 @@ namespace Executor {
         void rsys_adb();
         void rsys_cfm();
         void rsys_gestalt();
-        void rsys_mixed_mode();
         void rsys_osutil();
         void rsys_serial();
         void rsys_stdfile();
@@ -31,6 +30,7 @@ namespace Executor {
         void ListMgr();
         void MemoryMgr();
         void MenuMgr();
+        void MixedMode();
         void NotifyMgr();
         void OSEvent();
         void OSUtil();
@@ -70,7 +70,6 @@ namespace Executor {
         ReferenceTraps::rsys_adb();
         ReferenceTraps::rsys_cfm();
         ReferenceTraps::rsys_gestalt();
-        ReferenceTraps::rsys_mixed_mode();
         ReferenceTraps::rsys_osutil();
         ReferenceTraps::rsys_serial();
         ReferenceTraps::rsys_stdfile();
@@ -98,6 +97,7 @@ namespace Executor {
         ReferenceTraps::ListMgr();
         ReferenceTraps::MemoryMgr();
         ReferenceTraps::MenuMgr();
+        ReferenceTraps::MixedMode();
         ReferenceTraps::NotifyMgr();
         ReferenceTraps::OSEvent();
         ReferenceTraps::OSUtil();

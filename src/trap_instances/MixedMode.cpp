@@ -1,9 +1,9 @@
-#define INSTANTIATE_TRAPS_rsys_mixed_mode
-#include <rsys/mixed_mode.h>
+#define INSTANTIATE_TRAPS_MixedMode
+#include <MixedMode.h>
 
 // Function for preventing the linker from considering the static constructors in this module unused
 namespace Executor {
 namespace ReferenceTraps {
-    void rsys_mixed_mode() {}
+    void MixedMode() {}
 }
 }

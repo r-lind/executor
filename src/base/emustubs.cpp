@@ -19,7 +19,7 @@
 #include <time/time.h>
 #include <prefs/prefs.h>
 #include <base/emustubs.h>
-#include <rsys/mixed_mode.h>
+#include <MixedMode.h>
 #include <base/cpu.h>
 
 using namespace Executor;

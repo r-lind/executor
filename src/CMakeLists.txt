@@ -491,7 +491,6 @@ set(include_sources
                   include/rsys/lockunlock.h
                   include/rsys/macros.h
                   include/rsys/macstrings.h
-                  include/rsys/mixed_mode.h
                   include/rsys/mon_debugger.h
                   include/rsys/noreturn.h
                   include/rsys/os.h
@@ -532,6 +531,7 @@ set(include_sources
                   include/VDriver.h
                   include/VRetraceMgr.h
                   include/WindowMgr.h
+                  include/MixedMode.h
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
 

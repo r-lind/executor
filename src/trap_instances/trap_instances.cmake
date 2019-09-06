@@ -2,7 +2,6 @@ set(trap_instance_sources
 		trap_instances/rsys_adb.cpp
 		trap_instances/rsys_cfm.cpp
 		trap_instances/rsys_gestalt.cpp
-		trap_instances/rsys_mixed_mode.cpp
 		trap_instances/rsys_osutil.cpp
 		trap_instances/rsys_serial.cpp
 		trap_instances/rsys_stdfile.cpp
@@ -30,6 +29,7 @@ set(trap_instance_sources
 		trap_instances/ListMgr.cpp
 		trap_instances/MemoryMgr.cpp
 		trap_instances/MenuMgr.cpp
+		trap_instances/MixedMode.cpp
 		trap_instances/NotifyMgr.cpp
 		trap_instances/OSEvent.cpp
 		trap_instances/OSUtil.cpp

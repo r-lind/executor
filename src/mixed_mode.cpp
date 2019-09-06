@@ -7,7 +7,7 @@
 #include <FileMgr.h>
 #include <MemoryMgr.h>
 
-#include <rsys/mixed_mode.h>
+#include <MixedMode.h>
 
 #include <file/file.h>
 #include <base/cpu.h>
