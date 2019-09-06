@@ -40,7 +40,7 @@ using namespace Executor;
  */
 
 static unsigned char *nextbytep;
-static getPicProc_t procp;
+static QDGetPicUPP procp;
 
 typedef void (*pfv)();
 
