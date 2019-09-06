@@ -28,6 +28,7 @@ namespace selectors
     using StackW = StackWMasked<>;
     using StackL = StackLMasked<>;
     template <uint32_t mask = 0xFFFF> struct StackWLookahead;
+    using TrapBits = D1<0x600>;
 }
 
 namespace internal
