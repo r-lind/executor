@@ -100,8 +100,8 @@ enum
     noMaskFoundErr = (-1000),
 };
 
-typedef ProcPtr IconActionProcPtr;
-typedef ProcPtr IconGetterProcPtr;
+typedef ProcPtr IconActionUPP;
+typedef ProcPtr IconGetterUPP;
 
 typedef uint32_t IconSelectorValue;
 typedef int16_t IconAlignmentType;
@@ -131,7 +131,7 @@ PASCAL_SUBTRAP(PlotIconID, 0xABC9, 0x0500, IconDispatch);
 extern OSErr C_PlotIconMethod(const Rect *rect,
                                           IconAlignmentType align,
                                           IconTransformType transform,
-                                          IconGetterProcPtr method,
+                                          IconGetterUPP method,
                                           void *data);
 PASCAL_SUBTRAP(PlotIconMethod, 0xABC9, 0x0805, IconDispatch);
 extern void C_PlotCIcon(const Rect *rect, CIconHandle icon);
@@ -181,7 +181,7 @@ extern OSErr C_PlotIconSuite(const Rect *rect,
 PASCAL_SUBTRAP(PlotIconSuite, 0xABC9, 0x0603, IconDispatch);
 extern OSErr C_ForEachIconDo(Handle suite,
                                          IconSelectorValue selector,
-                                         IconActionProcPtr action,
+                                         IconActionUPP action,
                                          void *data);
 PASCAL_SUBTRAP(ForEachIconDo, 0xABC9, 0x080A, IconDispatch);
 extern short C_GetSuiteLabel(Handle suite);
@@ -205,7 +205,7 @@ extern OSErr C_IconIDToRgn(RgnHandle rgn, const Rect *rect,
 PASCAL_SUBTRAP(IconIDToRgn, 0xABC9, 0x0613, IconDispatch);
 extern OSErr C_IconMethodToRgn(RgnHandle rgn, const Rect *rect,
                                            IconAlignmentType align,
-                                           IconGetterProcPtr method,
+                                           IconGetterUPP method,
                                            void *data);
 PASCAL_SUBTRAP(IconMethodToRgn, 0xABC9, 0x0915, IconDispatch);
 
@@ -220,7 +220,7 @@ extern Boolean C_PtInIconID(Point test_pt, const Rect *rect,
 PASCAL_SUBTRAP(PtInIconID, 0xABC9, 0x060D, IconDispatch);
 extern Boolean C_PtInIconMethod(Point test_pt, const Rect *rect,
                                             IconAlignmentType align,
-                                            IconGetterProcPtr method,
+                                            IconGetterUPP method,
                                             void *data);
 PASCAL_SUBTRAP(PtInIconMethod, 0xABC9, 0x090F, IconDispatch);
 extern Boolean C_RectInIconSuite(const Rect *test_rect,
@@ -236,11 +236,11 @@ PASCAL_SUBTRAP(RectInIconID, 0xABC9, 0x0610, IconDispatch);
 extern Boolean C_RectInIconMethod(const Rect *test_rect,
                                               const Rect *rect,
                                               IconAlignmentType align,
-                                              IconGetterProcPtr method,
+                                              IconGetterUPP method,
                                               void *data);
 PASCAL_SUBTRAP(RectInIconMethod, 0xABC9, 0x0912, IconDispatch);
 extern OSErr C_MakeIconCache(Handle *cache,
-                                         IconGetterProcPtr make_icon,
+                                         IconGetterUPP make_icon,
                                          void *data);
 PASCAL_SUBTRAP(MakeIconCache, 0xABC9, 0x0604, IconDispatch);
 extern OSErr C_LoadIconCache(const Rect *rect,
@@ -253,10 +253,10 @@ PASCAL_SUBTRAP(GetIconCacheData, 0xABC9, 0x0419, IconDispatch);
 extern OSErr C_SetIconCacheData(Handle cache, void *data);
 PASCAL_SUBTRAP(SetIconCacheData, 0xABC9, 0x041A, IconDispatch);
 extern OSErr C_GetIconCacheProc(Handle cache,
-                                            IconGetterProcPtr *proc);
+                                            IconGetterUPP *proc);
 PASCAL_SUBTRAP(GetIconCacheProc, 0xABC9, 0x041B, IconDispatch);
 extern OSErr C_SetIconCacheProc(Handle cache,
-                                            IconGetterProcPtr proc);
+                                            IconGetterUPP proc);
 PASCAL_SUBTRAP(SetIconCacheProc, 0xABC9, 0x041C, IconDispatch);
 
 static_assert(sizeof(CIcon) == 84);

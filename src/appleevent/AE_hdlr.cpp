@@ -221,7 +221,7 @@ bool Executor::application_accepts_open_app_aevt_p;
 
 OSErr Executor::C_AEInstallEventHandler(AEEventClass event_class,
                                         AEEventID event_id,
-                                        EventHandlerProcPtr hdlr_fn,
+                                        EventHandlerUPP hdlr_fn,
                                         int32_t refcon,
                                         Boolean system_handler_p)
 {
@@ -265,7 +265,7 @@ dummy(void)
 
 OSErr Executor::C_AEGetEventHandler(AEEventClass event_class,
                                     AEEventID event_id,
-                                    GUEST<EventHandlerProcPtr> *hdlr,
+                                    GUEST<EventHandlerUPP> *hdlr,
                                     GUEST<int32_t> *refcon,
                                     Boolean system_handler_p)
 {
@@ -294,7 +294,7 @@ OSErr Executor::C_AEGetEventHandler(AEEventClass event_class,
         AE_RETURN_ERROR(err);
 
     /* warning: `elt' is a pointer into an unlocked handle */
-    *hdlr = guest_cast<EventHandlerProcPtr>(elt->hdlr.fn);
+    *hdlr = guest_cast<EventHandlerUPP>(elt->hdlr.fn);
     *refcon = elt->hdlr.refcon;
 
     /* hack because various applications complain if they get sent
@@ -306,7 +306,7 @@ OSErr Executor::C_AEGetEventHandler(AEEventClass event_class,
 
 OSErr Executor::C_AERemoveEventHandler(AEEventClass event_class,
                                        AEEventID event_id,
-                                       EventHandlerProcPtr hdlr,
+                                       EventHandlerUPP hdlr,
                                        Boolean system_handler_p)
 {
     AE_hdlr_table_h table;
@@ -324,7 +324,7 @@ OSErr Executor::C_AERemoveEventHandler(AEEventClass event_class,
 /* coercion handler functions */
 
 OSErr Executor::C_AEInstallCoercionHandler(
-    DescType from_type, DescType to_type, CoerceDescProcPtr hdlr_fn,
+    DescType from_type, DescType to_type, CoerceDescUPP hdlr_fn,
     int32_t refcon, Boolean from_type_is_desc_p, Boolean system_handler_p)
 {
     AE_hdlr_table_h table;
@@ -357,7 +357,7 @@ OSErr Executor::C_AEInstallCoercionHandler(
 }
 
 OSErr Executor::C_AEGetCoercionHandler(DescType from_type, DescType to_type,
-                                       GUEST<CoerceDescProcPtr> *hdlr_out,
+                                       GUEST<CoerceDescUPP> *hdlr_out,
                                        GUEST<int32_t> *refcon_out,
                                        GUEST<Boolean> *from_type_is_desc_p_out,
                                        Boolean system_handler_p)
@@ -377,7 +377,7 @@ OSErr Executor::C_AEGetCoercionHandler(DescType from_type, DescType to_type,
         AE_RETURN_ERROR(err);
 
     /* warning: `elt' is a pointer into an unlocked handle */
-    *hdlr_out = guest_cast<CoerceDescProcPtr>(elt->hdlr.fn);
+    *hdlr_out = guest_cast<CoerceDescUPP>(elt->hdlr.fn);
     *refcon_out = elt->hdlr.refcon;
 
     /* #### *from_type_is_desc_p_out = elt->flag; */
@@ -386,7 +386,7 @@ OSErr Executor::C_AEGetCoercionHandler(DescType from_type, DescType to_type,
 }
 
 OSErr Executor::C_AERemoveCoercionHandler(
-    DescType from_type, DescType to_type, CoerceDescProcPtr hdlr,
+    DescType from_type, DescType to_type, CoerceDescUPP hdlr,
     Boolean system_handler_p)
 {
     AE_hdlr_table_h table;
@@ -406,7 +406,7 @@ OSErr Executor::C_AERemoveCoercionHandler(
 #define k_special_sel1 (FOURCC('\000', '\000', '\000', '\000'))
 
 OSErr Executor::C_AEInstallSpecialHandler(
-    AEKeyword function_class, EventHandlerProcPtr hdlr_fn,
+    AEKeyword function_class, EventHandlerUPP hdlr_fn,
     Boolean system_handler_p)
 {
     AE_hdlr_table_h table;
@@ -437,7 +437,7 @@ OSErr Executor::C_AEInstallSpecialHandler(
 }
 
 OSErr Executor::C_AEGetSpecialHandler(AEKeyword function_class,
-                                      GUEST<EventHandlerProcPtr> *hdlr_out,
+                                      GUEST<EventHandlerUPP> *hdlr_out,
                                       Boolean system_handler_p)
 {
     AE_hdlr_table_h table;
@@ -455,13 +455,13 @@ OSErr Executor::C_AEGetSpecialHandler(AEKeyword function_class,
         AE_RETURN_ERROR(err);
 
     /* warning: `elt' is a pointer into an unlocked handle */
-    *hdlr_out = guest_cast<EventHandlerProcPtr>(elt->hdlr.fn);
+    *hdlr_out = guest_cast<EventHandlerUPP>(elt->hdlr.fn);
 
     AE_RETURN_ERROR(noErr);
 }
 
 OSErr Executor::C_AERemoveSpecialHandler(
-    AEKeyword function_class, EventHandlerProcPtr hdlr,
+    AEKeyword function_class, EventHandlerUPP hdlr,
     Boolean system_handler_p)
 {
     AE_hdlr_table_h table;

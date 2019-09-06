@@ -60,7 +60,7 @@ struct initzonehiddenargs_t
     GUEST<voidptr> startPtr;
     GUEST<voidptr> limitPtr;
     GUEST<INTEGER> cMoreMasters;
-    GUEST<GrowZoneProcPtr> pGrowZone;
+    GUEST<GrowZoneUPP> pGrowZone;
 };
 
 extern void ROMlib_reset_bad_trap_addresses(void);

@@ -672,7 +672,7 @@ BOOLEAN Executor::C_ROMlib_numsonlyfilterproc(
 }
 
 static void
-set_userItem(DialogPtr dp, INTEGER itemno, UserItemProcPtr funcp)
+set_userItem(DialogPtr dp, INTEGER itemno, UserItemUPP funcp)
 {
     Rect r;
     GUEST<INTEGER> unused;

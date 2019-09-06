@@ -38,7 +38,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
     ramdriverhand ramdh;
     DCtlHandle h;
     OSErr retval;
-    DriverProcPtr procp;
+    DriverUPP procp;
 
     devicen = -p->cntrlParam.ioCRefNum - 1;
     if(devicen < 0 || devicen >= NDEVICES)
@@ -85,19 +85,19 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
             switch(routine)
             {
                 case Open:
-                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrOpen);
+                    procp = (DriverUPP)(*ramdh + (*ramdh)->drvrOpen);
                     break;
                 case Prime:
-                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrPrime);
+                    procp = (DriverUPP)(*ramdh + (*ramdh)->drvrPrime);
                     break;
                 case Ctl:
-                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrCtl);
+                    procp = (DriverUPP)(*ramdh + (*ramdh)->drvrCtl);
                     break;
                 case Stat:
-                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrStatus);
+                    procp = (DriverUPP)(*ramdh + (*ramdh)->drvrStatus);
                     break;
                 case Close:
-                    procp = (DriverProcPtr)(*ramdh + (*ramdh)->drvrClose);
+                    procp = (DriverUPP)(*ramdh + (*ramdh)->drvrClose);
                     break;
                 default:
                     procp = 0;

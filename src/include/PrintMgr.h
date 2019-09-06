@@ -172,8 +172,8 @@ typedef struct TPrDlg
 {
     GUEST_STRUCT;
     GUEST<DialogRecord> dlg;
-    GUEST<ModalFilterProcPtr> pFltrProc;
-    GUEST<UserItemProcPtr> pItemProc;
+    GUEST<ModalFilterUPP> pFltrProc;
+    GUEST<UserItemUPP> pItemProc;
     GUEST<THPrint> hPrintUsr;
     GUEST<BOOLEAN> fDoIt;
     GUEST<BOOLEAN> fDone;

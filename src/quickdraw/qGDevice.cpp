@@ -314,7 +314,7 @@ GDHandle Executor::C_GetNextDevice(GDHandle cur_device)
 }
 
 void Executor::C_DeviceLoop(RgnHandle rgn,
-                            DeviceLoopDrawingProcPtr drawing_proc,
+                            DeviceLoopDrawingUPP drawing_proc,
                             LONGINT user_data, DeviceLoopFlags flags)
 {
     GDHandle gd;

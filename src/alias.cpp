@@ -314,7 +314,7 @@ OSErr Executor::C_ResolveAliasFile(FSSpecPtr theSpec,
 OSErr Executor::C_MatchAlias(FSSpecPtr fromFile, int32_t rulesMask,
                              AliasHandle alias, int16_t *aliasCount,
                              FSSpecArrayPtr aliasList, Boolean *needsUpdate,
-                             AliasFilterProcPtr aliasFilter, Ptr yourDataPtr)
+                             AliasFilterUPP aliasFilter, Ptr yourDataPtr)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;

@@ -110,7 +110,7 @@ inline int _FindWindow(Point pt, WindowPtr *wp)
    small, but THEGDEVICE_SAVE_EXCURSION prevents us from using #if, so
    we have a lot of replicated code.  This is scary and should be fixed. */
 
-void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI-415 */
+void Executor::C_ModalDialog(ModalFilterUPP fp, GUEST<INTEGER> *item) /* IMI-415 */
 {
     /*
    * The code used to save qdGlobals().thePort and restore it at the end of the
@@ -124,7 +124,7 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
     DialogPeek dp;
     GUEST<DialogPtr> ndp;
     TEHandle idle;
-    ModalFilterProcPtr fp2;
+    ModalFilterUPP fp2;
     Point whereunswapped;
     bool done;
 
@@ -183,7 +183,7 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
 
 #else /* defined (ALLOW_MOVABLE_MODAL) */
 
-void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI-415 */
+void Executor::C_ModalDialog(ModalFilterUPP fp, GUEST<INTEGER> *item) /* IMI-415 */
 {
     /*
    * The code used to save qdGlobals().thePort and restore it at the end of the
@@ -198,7 +198,7 @@ void Executor::C_ModalDialog(ModalFilterProcPtr fp, GUEST<INTEGER> *item) /* IMI
     DialogPeek dp;
     GUEST<DialogPtr> ndp;
     TEHandle idle;
-    ModalFilterProcPtr fp2;
+    ModalFilterUPP fp2;
     Point whereunswapped;
     bool done;
 

@@ -56,7 +56,7 @@ struct CProcRec
 };
 
 typedef UPP<void(INTEGER depth, INTEGER deviceFlags, GDHandle targetDevice, LONGINT userData)>
-    DeviceLoopDrawingProcPtr;
+    DeviceLoopDrawingUPP;
 
 struct GDevice
 {
@@ -366,7 +366,7 @@ extern GDHandle C_GetMaxDevice(Rect *);
 PASCAL_TRAP(GetMaxDevice, 0xAA27);
 extern GDHandle C_GetNextDevice(GDHandle);
 PASCAL_TRAP(GetNextDevice, 0xAA2B);
-extern void C_DeviceLoop(RgnHandle, DeviceLoopDrawingProcPtr, LONGINT, DeviceLoopFlags);
+extern void C_DeviceLoop(RgnHandle, DeviceLoopDrawingUPP, LONGINT, DeviceLoopFlags);
 PASCAL_TRAP(DeviceLoop, 0xABCA);
 extern BOOLEAN C_TestDeviceAttribute(GDHandle, INTEGER);
 PASCAL_TRAP(TestDeviceAttribute, 0xAA2C);

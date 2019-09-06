@@ -29,15 +29,15 @@ typedef DCtlEntry *DCtlPtr;
 typedef GUEST<DCtlPtr> *DCtlHandle;
 typedef GUEST<DCtlHandle> *DCtlHandlePtr;
 
-using DriverProcPtr = UPP<OSErr (ParmBlkPtr, DCtlPtr), Register<D0(A0, A1)>>;
+using DriverUPP = UPP<OSErr (ParmBlkPtr, DCtlPtr), Register<D0(A0, A1)>>;
 
 typedef struct
 {
-    GUEST<DriverProcPtr> udrvrOpen;
-    GUEST<DriverProcPtr> udrvrPrime; /* read and write */
-    GUEST<DriverProcPtr> udrvrCtl; /* control and killio */
-    GUEST<DriverProcPtr> udrvrStatus;
-    GUEST<DriverProcPtr> udrvrClose;
+    GUEST<DriverUPP> udrvrOpen;
+    GUEST<DriverUPP> udrvrPrime; /* read and write */
+    GUEST<DriverUPP> udrvrCtl; /* control and killio */
+    GUEST<DriverUPP> udrvrStatus;
+    GUEST<DriverUPP> udrvrClose;
     Str255 udrvrName;
 } umacdriver, *umacdriverptr;
 
@@ -127,11 +127,11 @@ enum
 
 typedef struct
 {
-    DriverProcPtr open;
-    DriverProcPtr prime;
-    DriverProcPtr ctl;
-    DriverProcPtr status;
-    DriverProcPtr close;
+    DriverUPP open;
+    DriverUPP prime;
+    DriverUPP ctl;
+    DriverUPP status;
+    DriverUPP close;
     StringPtr name;
     INTEGER refnum;
 } driverinfo;

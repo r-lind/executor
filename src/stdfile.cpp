@@ -57,18 +57,18 @@ typedef union {
 } reply_u;
 
 typedef union {
-    FileFilterProcPtr oflfilef;
-    FileFilterYDProcPtr cflfilef;
+    FileFilterUPP oflfilef;
+    FileFilterYDUPP cflfilef;
 } file_filter_u;
 
 typedef union {
-    ModalFilterProcPtr ofilterp;
-    ModalFilterYDProcPtr cfilterp;
+    ModalFilterUPP ofilterp;
+    ModalFilterYDUPP cfilterp;
 } filter_u;
 
 typedef union {
-    DlgHookProcPtr odh;
-    DlgHookYDProcPtr cdh;
+    DlgHookUPP odh;
+    DlgHookYDUPP cdh;
 } dialog_hook_u;
 
 typedef struct
@@ -2006,7 +2006,7 @@ void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_
                reply_u rep, INTEGER dig, filter_u fp, file_filter_u filef,
                INTEGER numt, GUEST<SFTypeList> tl, getorput_t getorput,
                sf_flavor_t flavor, Ptr activeList,
-               ActivateYDProcPtr activateproc, void *yourdatap)
+               ActivateYDUPP activateproc, void *yourdatap)
 {
     bool reply_valid;
 
@@ -2391,8 +2391,8 @@ void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_
 }
 
 void Executor::C_SFPPutFile(Point p, ConstStringPtr prompt, ConstStringPtr name,
-                            DlgHookProcPtr dh, SFReply *rep, INTEGER dig,
-                            ModalFilterProcPtr fp)
+                            DlgHookUPP dh, SFReply *rep, INTEGER dig,
+                            ModalFilterUPP fp)
 {
     dialog_hook_u dhu;
     reply_u repu;
@@ -2408,15 +2408,15 @@ void Executor::C_SFPPutFile(Point p, ConstStringPtr prompt, ConstStringPtr name,
 }
 
 void Executor::C_SFPutFile(Point p, ConstStringPtr prompt, ConstStringPtr name,
-                           DlgHookProcPtr dh, SFReply *rep)
+                           DlgHookUPP dh, SFReply *rep)
 {
     SFPPutFile(p, prompt, name, dh, rep, putDlgID, nullptr);
 }
 
-void Executor::C_SFPGetFile(Point p, ConstStringPtr prompt, FileFilterProcPtr filef,
+void Executor::C_SFPGetFile(Point p, ConstStringPtr prompt, FileFilterUPP filef,
                             INTEGER numt, GUEST<SFTypeList> tl,
-                            DlgHookProcPtr dh, SFReply *rep, INTEGER dig,
-                            ModalFilterProcPtr fp)
+                            DlgHookUPP dh, SFReply *rep, INTEGER dig,
+                            ModalFilterUPP fp)
 {
     dialog_hook_u dhu;
     reply_u repu;
@@ -2432,18 +2432,18 @@ void Executor::C_SFPGetFile(Point p, ConstStringPtr prompt, FileFilterProcPtr fi
               numt, tl, get, original_sf, 0, 0, 0);
 }
 
-void Executor::C_SFGetFile(Point p, ConstStringPtr prompt, FileFilterProcPtr filef,
+void Executor::C_SFGetFile(Point p, ConstStringPtr prompt, FileFilterUPP filef,
                            INTEGER numt, GUEST<SFTypeList> tl,
-                           DlgHookProcPtr dh, SFReply *rep)
+                           DlgHookUPP dh, SFReply *rep)
 {
     SFPGetFile(p, prompt, filef, numt, tl, dh, rep, getDlgID, nullptr);
 }
 
 void Executor::C_CustomPutFile(ConstStringPtr prompt, ConstStringPtr defaultName,
                                StandardFileReply *replyp, INTEGER dlgid,
-                               Point where, DlgHookYDProcPtr dlghook,
-                               ModalFilterYDProcPtr filterproc, Ptr activeList,
-                               ActivateYDProcPtr activateproc, void *yourdatap)
+                               Point where, DlgHookYDUPP dlghook,
+                               ModalFilterYDUPP filterproc, Ptr activeList,
+                               ActivateYDUPP activateproc, void *yourdatap)
 {
     dialog_hook_u dhu;
     reply_u repu;
@@ -2463,12 +2463,12 @@ void Executor::C_CustomPutFile(ConstStringPtr prompt, ConstStringPtr defaultName
               activateproc, yourdatap);
 }
 
-void Executor::C_CustomGetFile(FileFilterYDProcPtr filefilter,
+void Executor::C_CustomGetFile(FileFilterYDUPP filefilter,
                                INTEGER numtypes, GUEST<SFTypeList> typelist,
                                StandardFileReply *replyp, INTEGER dlgid,
-                               Point where, DlgHookYDProcPtr dlghook,
-                               ModalFilterYDProcPtr filterproc, Ptr activeList,
-                               ActivateYDProcPtr activateproc, void *yourdatap)
+                               Point where, DlgHookYDUPP dlghook,
+                               ModalFilterYDUPP filterproc, Ptr activeList,
+                               ActivateYDUPP activateproc, void *yourdatap)
 {
     dialog_hook_u dhu;
     reply_u repu;
@@ -2489,7 +2489,7 @@ void Executor::C_CustomGetFile(FileFilterYDProcPtr filefilter,
               yourdatap);
 }
 
-void Executor::C_StandardGetFile(FileFilterProcPtr filef, INTEGER numt,
+void Executor::C_StandardGetFile(FileFilterUPP filef, INTEGER numt,
                                  GUEST<SFTypeList> tl,
                                  StandardFileReply *replyp)
 {

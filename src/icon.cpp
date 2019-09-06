@@ -48,7 +48,7 @@ OSErr Executor::C_PlotIconID(const Rect *rect, IconAlignmentType align,
 
 OSErr Executor::C_PlotIconMethod(const Rect *rect, IconAlignmentType align,
                                  IconTransformType transform,
-                                 IconGetterProcPtr method, void *data)
+                                 IconGetterUPP method, void *data)
 {
     warning_unimplemented(NULL_STRING);
     ICON_RETURN_ERROR(paramErr);
@@ -544,7 +544,7 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
 }
 
 OSErr Executor::C_ForEachIconDo(Handle suite, IconSelectorValue selector,
-                                IconActionProcPtr action, void *data)
+                                IconActionUPP action, void *data)
 {
     warning_unimplemented(NULL_STRING);
     ICON_RETURN_ERROR(paramErr);
@@ -705,7 +705,7 @@ OSErr Executor::C_IconIDToRgn(RgnHandle rgn, const Rect *rect,
 
 OSErr Executor::C_IconMethodToRgn(RgnHandle rgn, const Rect *rect,
                                   IconAlignmentType align,
-                                  IconGetterProcPtr method, void *data)
+                                  IconGetterUPP method, void *data)
 {
     warning_unimplemented(NULL_STRING);
     ICON_RETURN_ERROR(paramErr);
@@ -730,7 +730,7 @@ Boolean Executor::C_PtInIconID(Point test_pt, const Rect *rect,
 
 Boolean Executor::C_PtInIconMethod(Point test_pt, const Rect *rect,
                                    IconAlignmentType align,
-                                   IconGetterProcPtr method, void *data)
+                                   IconGetterUPP method, void *data)
 {
     warning_unimplemented(NULL_STRING);
     return false;
@@ -752,13 +752,13 @@ Boolean Executor::C_RectInIconID(const Rect *test_rect, const Rect *rect,
 
 Boolean Executor::C_RectInIconMethod(const Rect *test_rect, const Rect *rect,
                                      IconAlignmentType align,
-                                     IconGetterProcPtr method, void *data)
+                                     IconGetterUPP method, void *data)
 {
     warning_unimplemented(NULL_STRING);
     return false;
 }
 
-OSErr Executor::C_MakeIconCache(Handle *cache, IconGetterProcPtr make_icon,
+OSErr Executor::C_MakeIconCache(Handle *cache, IconGetterUPP make_icon,
                                 void *data)
 {
     warning_unimplemented(NULL_STRING);
@@ -784,13 +784,13 @@ OSErr Executor::C_SetIconCacheData(Handle cache, void *data)
     ICON_RETURN_ERROR(paramErr);
 }
 
-OSErr Executor::C_GetIconCacheProc(Handle cache, IconGetterProcPtr *proc)
+OSErr Executor::C_GetIconCacheProc(Handle cache, IconGetterUPP *proc)
 {
     warning_unimplemented(NULL_STRING);
     ICON_RETURN_ERROR(paramErr);
 }
 
-OSErr Executor::C_SetIconCacheProc(Handle cache, IconGetterProcPtr proc)
+OSErr Executor::C_SetIconCacheProc(Handle cache, IconGetterUPP proc)
 {
     warning_unimplemented(NULL_STRING);
     ICON_RETURN_ERROR(paramErr);

@@ -23,10 +23,10 @@ typedef int16_t UpdateMode;
 typedef SignedByte SectionType;
 typedef char FormatType[4];
 
-typedef ProcPtr ExpDialogHookProcPtr;
-typedef ProcPtr ExpModalFilterProcPtr;
-typedef ProcPtr FormatIOProcPtr;
-typedef ProcPtr EditionOpenerProcPtr;
+typedef ProcPtr ExpDialogHookUPP;
+typedef ProcPtr ExpModalFilterUPP;
+typedef ProcPtr FormatIOUPP;
+typedef ProcPtr EditionOpenerUPP;
 
 struct SectionRecord
 {
@@ -130,7 +130,7 @@ struct EditionOpenerParamBlock
     GUEST<FSSpecPtr> document;
     GUEST<OSType> fdCreator;
     GUEST<int32_t> ioRefNum;
-    GUEST<FormatIOProcPtr> ioProc;
+    GUEST<FormatIOUPP> ioProc;
     GUEST<Boolean> success;
     GUEST<SignedByte> formatsMask;
 };
@@ -251,22 +251,22 @@ PASCAL_SUBTRAP(SectionOptionsDialog, 0xA82D, 0x023A, Pack11);
 
 extern OSErr C_NewSubscriberExpDialog(NewSubscriberReplyPtr reply, Point where,
                                                   int16_t expnasion_ditl_res_id,
-                                                  ExpDialogHookProcPtr dialog_hook,
-                                                  ExpModalFilterProcPtr filter_hook,
+                                                  ExpDialogHookUPP dialog_hook,
+                                                  ExpModalFilterUPP filter_hook,
                                                   Ptr data);
 PASCAL_SUBTRAP(NewSubscriberExpDialog, 0xA82D, 0x0B34, Pack11);
 
 extern OSErr C_NewPublisherExpDialog(NewPublisherReplyPtr reply, Point where,
                                                  int16_t expnasion_ditl_res_id,
-                                                 ExpDialogHookProcPtr dialog_hook,
-                                                 ExpModalFilterProcPtr filter_hook,
+                                                 ExpDialogHookUPP dialog_hook,
+                                                 ExpModalFilterUPP filter_hook,
                                                  Ptr data);
 PASCAL_SUBTRAP(NewPublisherExpDialog, 0xA82D, 0x0B38, Pack11);
 
 extern OSErr C_SectionOptionsExpDialog(SectionOptionsReply *reply,
                                                    Point where, int16_t expnasion_ditl_res_id,
-                                                   ExpDialogHookProcPtr dialog_hook,
-                                                   ExpModalFilterProcPtr filter_hook,
+                                                   ExpDialogHookUPP dialog_hook,
+                                                   ExpModalFilterUPP filter_hook,
                                                    Ptr data);
 PASCAL_SUBTRAP(SectionOptionsExpDialog, 0xA82D, 0x0B3C, Pack11);
 
@@ -283,19 +283,19 @@ extern OSErr C_GetStandardFormats(EditionContainerSpecPtr container,
                                               Handle publisher_alias,
                                               Handle formats);
 PASCAL_SUBTRAP(GetStandardFormats, 0xA82D, 0x0A28, Pack11);
-extern OSErr C_GetEditionOpenerProc(EditionOpenerProcPtr *opener);
+extern OSErr C_GetEditionOpenerProc(EditionOpenerUPP *opener);
 PASCAL_SUBTRAP(GetEditionOpenerProc, 0xA82D, 0x022A, Pack11);
-extern OSErr C_SetEditionOpenerProc(EditionOpenerProcPtr opener);
+extern OSErr C_SetEditionOpenerProc(EditionOpenerUPP opener);
 PASCAL_SUBTRAP(SetEditionOpenerProc, 0xA82D, 0x022C, Pack11);
 
 extern OSErr C_CallEditionOpenerProc(EditionOpenerVerb selector,
                                                  EditionOpenerParamBlock *param_block,
-                                                 EditionOpenerProcPtr opener);
+                                                 EditionOpenerUPP opener);
 PASCAL_SUBTRAP(CallEditionOpenerProc, 0xA82D, 0x052E, Pack11);
 
 extern OSErr C_CallFormatIOProc(FormatIOVerb selector,
                                             FormatIOParamBlock *param_block,
-                                            FormatIOProcPtr proc);
+                                            FormatIOUPP proc);
 PASCAL_SUBTRAP(CallFormatIOProc, 0xA82D, 0x0530, Pack11);
 
 static_assert(sizeof(SectionRecord) == 36);

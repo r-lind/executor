@@ -99,7 +99,7 @@ OSErr Executor::C_AcceptHighLevelEvent(TargetID *sender_id_return,
 }
 
 Boolean Executor::C_GetSpecificHighLevelEvent(
-    GetSpecificFilterProcPtr fn, Ptr data, OSErr *err_return)
+    GetSpecificFilterUPP fn, Ptr data, OSErr *err_return)
 {
     hle_q_elt_t *t, **prev;
 

@@ -146,7 +146,7 @@ OSErr Executor::C_SectionOptionsDialog(SectionOptionsReply *reply)
 
 OSErr Executor::C_NewSubscriberExpDialog(
     NewSubscriberReplyPtr reply, Point where, int16_t expnasion_ditl_res_id,
-    ExpDialogHookProcPtr dialog_hook, ExpModalFilterProcPtr filter_hook,
+    ExpDialogHookUPP dialog_hook, ExpModalFilterUPP filter_hook,
     Ptr data)
 {
     warning_unimplemented(NULL_STRING);
@@ -156,8 +156,8 @@ OSErr Executor::C_NewSubscriberExpDialog(
 OSErr Executor::C_NewPublisherExpDialog(NewPublisherReplyPtr reply,
                                         Point where,
                                         int16_t expnasion_ditl_res_id,
-                                        ExpDialogHookProcPtr dialog_hook,
-                                        ExpModalFilterProcPtr filter_hook,
+                                        ExpDialogHookUPP dialog_hook,
+                                        ExpModalFilterUPP filter_hook,
                                         Ptr data)
 {
     warning_unimplemented(NULL_STRING);
@@ -166,7 +166,7 @@ OSErr Executor::C_NewPublisherExpDialog(NewPublisherReplyPtr reply,
 
 OSErr Executor::C_SectionOptionsExpDialog(
     SectionOptionsReply *reply, Point where, int16_t expnasion_ditl_res_id,
-    ExpDialogHookProcPtr dialog_hook, ExpModalFilterProcPtr filter_hook,
+    ExpDialogHookUPP dialog_hook, ExpModalFilterUPP filter_hook,
     Ptr data)
 {
     warning_unimplemented(NULL_STRING);
@@ -195,13 +195,13 @@ OSErr Executor::C_GetStandardFormats(EditionContainerSpecPtr container,
     return paramErr;
 }
 
-OSErr Executor::C_GetEditionOpenerProc(EditionOpenerProcPtr *opener)
+OSErr Executor::C_GetEditionOpenerProc(EditionOpenerUPP *opener)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
 }
 
-OSErr Executor::C_SetEditionOpenerProc(EditionOpenerProcPtr opener)
+OSErr Executor::C_SetEditionOpenerProc(EditionOpenerUPP opener)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
@@ -209,7 +209,7 @@ OSErr Executor::C_SetEditionOpenerProc(EditionOpenerProcPtr opener)
 
 OSErr Executor::C_CallEditionOpenerProc(EditionOpenerVerb selector,
                                         EditionOpenerParamBlock *param_block,
-                                        EditionOpenerProcPtr opener)
+                                        EditionOpenerUPP opener)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
@@ -217,7 +217,7 @@ OSErr Executor::C_CallEditionOpenerProc(EditionOpenerVerb selector,
 
 OSErr Executor::C_CallFormatIOProc(FormatIOVerb selector,
                                    FormatIOParamBlock *param_block,
-                                   FormatIOProcPtr proc)
+                                   FormatIOUPP proc)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;

@@ -38,8 +38,8 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
 
     AppleEvent *evt = (AppleEvent *)alloca(sizeof *evt);
 
-    GUEST<EventHandlerProcPtr> hdlr_s;
-    EventHandlerProcPtr hdlr;
+    GUEST<EventHandlerUPP> hdlr_s;
+    EventHandlerUPP hdlr;
     Handle evt_data;
     GUEST<Size> evt_data_size;
     GUEST<int32_t> refcon_s;
@@ -136,8 +136,8 @@ OSErr Executor::C_AEProcessAppleEvent(EventRecord *evtrec)
 
 OSErr Executor::C_AESend(AppleEvent *evt, AppleEvent *reply,
                          AESendMode send_mode, AESendPriority send_priority,
-                         int32_t timeout, IdleProcPtr idle_proc,
-                         EventFilterProcPtr filter_proc)
+                         int32_t timeout, IdleUPP idle_proc,
+                         EventFilterUPP filter_proc)
 {
     AEDesc *target = (AEDesc *)alloca(sizeof *target);
     GUEST<DescType> target_type_s, dummy_type;
@@ -263,7 +263,7 @@ OSErr Executor::C_AESuspendTheCurrentEvent(AppleEvent *evt)
 }
 
 OSErr Executor::C_AEResumeTheCurrentEvent(
-    AppleEvent *evt, AppleEvent *reply, EventHandlerProcPtr dispatcher,
+    AppleEvent *evt, AppleEvent *reply, EventHandlerUPP dispatcher,
     int32_t refcon)
 {
     warning_unimplemented(NULL_STRING);
@@ -323,7 +323,7 @@ OSErr Executor::C_AEGetInteractionAllowed(AEInteractionAllowed *level_out)
 }
 
 OSErr Executor::C_AEInteractWithUser(int32_t timeout, NMRecPtr nm_req,
-                                     IdleProcPtr idle_proc)
+                                     IdleUPP idle_proc)
 {
     warning_unimplemented(NULL_STRING);
     AE_RETURN_ERROR(noErr);
@@ -342,7 +342,7 @@ OSErr Executor::C_AEResetTimer(AppleEvent *evt)
 OSErr Executor::C_AECoercePtr(DescType data_type, Ptr data, Size data_size,
                               DescType result_type, AEDesc *desc_out)
 {
-    GUEST<CoerceDescProcPtr> coercion_hdlr_s;
+    GUEST<CoerceDescUPP> coercion_hdlr_s;
     GUEST<int32_t> refcon_s;
     Boolean is_desc_hdlr_p;
     OSErr err;
@@ -369,7 +369,7 @@ OSErr Executor::C_AECoercePtr(DescType data_type, Ptr data, Size data_size,
     }
 
     /* swap things to a normal state */
-    CoerceDescProcPtr coercion_hdlr = coercion_hdlr_s;
+    CoerceDescUPP coercion_hdlr = coercion_hdlr_s;
     int32_t refcon = refcon_s;
 
     if(is_desc_hdlr_p)
@@ -386,7 +386,7 @@ OSErr Executor::C_AECoercePtr(DescType data_type, Ptr data, Size data_size,
     }
     else
     {
-        CoercePtrProcPtr ptr_coercion_hdlr((void *)coercion_hdlr);
+        CoercePtrUPP ptr_coercion_hdlr((void *)coercion_hdlr);
         err = ptr_coercion_hdlr(data_type, data, data_size, result_type,
                                 refcon, desc_out);
     }
@@ -467,9 +467,9 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
 OSErr Executor::C_AECoerceDesc(AEDesc *desc, DescType result_type,
                                AEDesc *desc_out)
 {
-    GUEST<CoerceDescProcPtr> coercion_hdlr_s;
+    GUEST<CoerceDescUPP> coercion_hdlr_s;
     GUEST<int32_t> refcon_s;
-    CoerceDescProcPtr coercion_hdlr;
+    CoerceDescUPP coercion_hdlr;
     int32_t refcon;
     GUEST<Boolean> is_desc_hdlr_p;
     DescType desc_type;
@@ -520,7 +520,7 @@ OSErr Executor::C_AECoerceDesc(AEDesc *desc, DescType result_type,
 
         {
             HLockGuard guard(desc_data);
-            CoercePtrProcPtr ptr_coercion_hdlr((void *)coercion_hdlr);
+            CoercePtrUPP ptr_coercion_hdlr((void *)coercion_hdlr);
             err = ptr_coercion_hdlr(desc_type, *desc_data,
                                     GetHandleSize(desc_data),
                                     result_type, refcon, desc_out);

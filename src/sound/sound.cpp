@@ -390,7 +390,7 @@ OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
 GUEST<SndChannelPtr> Executor::allchans;
 
 OSErr Executor::C_SndNewChannel(GUEST<SndChannelPtr> *chanpp, INTEGER synth,
-                                LONGINT init, SndCallbackProcPtr userroutinep)
+                                LONGINT init, SndCallbackUPP userroutinep)
 {
     SndChannelPtr chanp;
     OSErr retval;

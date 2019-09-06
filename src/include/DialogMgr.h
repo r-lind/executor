@@ -129,31 +129,31 @@ enum
     doFontName = 32768,
 };
 
-typedef UPP<void(INTEGER soundNumber)> SoundProcPtr;
-typedef UPP<Boolean(DialogPtr theDialog, EventRecord *theEvent, GUEST<INTEGER> *itemHit)> ModalFilterProcPtr;
-typedef UPP<Boolean(DialogPtr theDialog, EventRecord *theEvent, GUEST<INTEGER> *itemHit, void *yourDataPtr)> ModalFilterYDProcPtr;
-typedef UPP<void(DialogPtr theDialog, INTEGER itemNo)> UserItemProcPtr;
+typedef UPP<void(INTEGER soundNumber)> SoundUPP;
+typedef UPP<Boolean(DialogPtr theDialog, EventRecord *theEvent, GUEST<INTEGER> *itemHit)> ModalFilterUPP;
+typedef UPP<Boolean(DialogPtr theDialog, EventRecord *theEvent, GUEST<INTEGER> *itemHit, void *yourDataPtr)> ModalFilterYDUPP;
+typedef UPP<void(DialogPtr theDialog, INTEGER itemNo)> UserItemUPP;
 
 const LowMemGlobal<ProcPtr> ResumeProc { 0xA8C }; // DialogMgr IMI-411 (true);
 const LowMemGlobal<INTEGER> ANumber { 0xA98 }; // DialogMgr IMI-423 (true);
 const LowMemGlobal<INTEGER> ACount { 0xA9A }; // DialogMgr IMI-423 (true);
-const LowMemGlobal<SoundProcPtr> DABeeper { 0xA9C }; // DialogMgr IMI-411 (true);
+const LowMemGlobal<SoundUPP> DABeeper { 0xA9C }; // DialogMgr IMI-411 (true);
 const LowMemGlobal<Handle[4]> DAStrings { 0xAA0 }; // DialogMgr IMI-421 (true);
 const LowMemGlobal<INTEGER> DlgFont { 0xAFA }; // DialogMgr IMI-412 (true);
 
 DISPATCHER_TRAP(DialogDispatch, 0xAA68, D0W);
 
 extern INTEGER C_Alert(INTEGER id,
-                                   ModalFilterProcPtr fp);
+                                   ModalFilterUPP fp);
 PASCAL_TRAP(Alert, 0xA985);
 extern INTEGER C_StopAlert(INTEGER id,
-                                       ModalFilterProcPtr fp);
+                                       ModalFilterUPP fp);
 PASCAL_TRAP(StopAlert, 0xA986);
 extern INTEGER C_NoteAlert(INTEGER id,
-                                       ModalFilterProcPtr fp);
+                                       ModalFilterUPP fp);
 PASCAL_TRAP(NoteAlert, 0xA987);
 extern INTEGER C_CautionAlert(INTEGER id,
-                                          ModalFilterProcPtr fp);
+                                          ModalFilterUPP fp);
 PASCAL_TRAP(CautionAlert, 0xA988);
 extern void C_CouldAlert(INTEGER id);
 PASCAL_TRAP(CouldAlert, 0xA989);
@@ -178,7 +178,7 @@ extern BOOLEAN C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                                       GUEST<INTEGER> *ith);
 PASCAL_FUNCTION(ROMlib_myfilt);
 
-extern void C_ModalDialog(ModalFilterProcPtr fp,
+extern void C_ModalDialog(ModalFilterUPP fp,
                                       GUEST<INTEGER> *item);
 PASCAL_TRAP(ModalDialog, 0xA991);
 extern BOOLEAN C_IsDialogEvent(
@@ -201,7 +201,7 @@ extern void DialogPaste(DialogPtr dp);
 extern void DialogDelete(DialogPtr dp);
 extern void C_ROMlib_mysound(INTEGER i);
 PASCAL_FUNCTION(ROMlib_mysound);
-extern void C_ErrorSound(SoundProcPtr sp);
+extern void C_ErrorSound(SoundUPP sp);
 PASCAL_TRAP(ErrorSound, 0xA98C);
 extern void C_InitDialogs(ProcPtr rp);
 PASCAL_TRAP(InitDialogs, 0xA97B);

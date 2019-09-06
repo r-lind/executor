@@ -38,7 +38,7 @@ static icon_item_template_t icon_item_template = {
     /* to be filled in later */ (short)-1,
 };
 
-INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
+INTEGER Executor::C_Alert(INTEGER id, ModalFilterUPP fp) /* IMI-418 */
 {
     alth ah;
     Handle ih;
@@ -170,19 +170,19 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterProcPtr fp) /* IMI-418 */
     return hit;
 }
 
-INTEGER Executor::C_StopAlert(INTEGER id, ModalFilterProcPtr fp) /* IMI-419 */
+INTEGER Executor::C_StopAlert(INTEGER id, ModalFilterUPP fp) /* IMI-419 */
 {
     alert_extra_icon_id = stopIcon;
     return Alert(id, fp);
 }
 
-INTEGER Executor::C_NoteAlert(INTEGER id, ModalFilterProcPtr fp) /* IMI-420 */
+INTEGER Executor::C_NoteAlert(INTEGER id, ModalFilterUPP fp) /* IMI-420 */
 {
     alert_extra_icon_id = noteIcon;
     return Alert(id, fp);
 }
 
-INTEGER Executor::C_CautionAlert(INTEGER id, ModalFilterProcPtr fp) /* IMI-420 */
+INTEGER Executor::C_CautionAlert(INTEGER id, ModalFilterUPP fp) /* IMI-420 */
 {
     alert_extra_icon_id = cautionIcon;
     return Alert(id, fp);

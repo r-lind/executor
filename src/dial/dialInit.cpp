@@ -22,7 +22,7 @@ void Executor::C_ROMlib_mysound(INTEGER i)
         SysBeep(5);
 }
 
-void Executor::C_ErrorSound(SoundProcPtr sp) /* IMI-411 */
+void Executor::C_ErrorSound(SoundUPP sp) /* IMI-411 */
 {
     LM(DABeeper) = sp;
 }

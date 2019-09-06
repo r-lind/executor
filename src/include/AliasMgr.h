@@ -10,7 +10,7 @@
 
 namespace Executor
 {
-typedef ProcPtr AliasFilterProcPtr;
+typedef ProcPtr AliasFilterUPP;
 typedef Handle AliasHandle;
 typedef int16_t AliasTypeInfo;
 
@@ -71,7 +71,7 @@ extern OSErr C_MatchAlias(FSSpecPtr fromFile, int32_t rulesMask,
                                       AliasHandle alias, int16_t *aliasCount,
                                       FSSpecArrayPtr aliasList,
                                       Boolean *needsUpdate,
-                                      AliasFilterProcPtr aliasFilter,
+                                      AliasFilterUPP aliasFilter,
                                       Ptr yourDataPtr);
 PASCAL_SUBTRAP(MatchAlias, 0xA823, 0x0005, AliasDispatch);
 extern OSErr C_GetAliasInfo(AliasHandle alias,

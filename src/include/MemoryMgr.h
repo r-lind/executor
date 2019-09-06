@@ -39,7 +39,7 @@ enum
     memSCErr = (-116),
 };
 
-typedef UPP<LONGINT(Size)> GrowZoneProcPtr;
+typedef UPP<LONGINT(Size)> GrowZoneUPP;
 
 struct block_header_t;
 
@@ -50,7 +50,7 @@ struct Zone
     GUEST<Ptr> purgePtr;
     GUEST<Ptr> hFstFree;
     GUEST<LONGINT> zcbFree;
-    GUEST<GrowZoneProcPtr> gzProc;
+    GUEST<GrowZoneUPP> gzProc;
     GUEST<INTEGER> moreMast;
     GUEST<INTEGER> flags;
     GUEST<INTEGER> cntRel;
@@ -192,7 +192,7 @@ REGISTER_TRAP2(SetApplBase, 0xA057, void (A0), ReturnMemErr<D0>);
 extern void MoreMasters(void);
 REGISTER_TRAP2(MoreMasters, 0xA036, void (), ReturnMemErr<D0>);
 
-extern void InitZone(GrowZoneProcPtr pGrowZone, int16_t cMoreMasters,
+extern void InitZone(GrowZoneUPP pGrowZone, int16_t cMoreMasters,
                      Ptr limitPtr, THz startPtr);
 NOTRAP_FUNCTION2(InitZone);
 
@@ -231,7 +231,7 @@ extern void MoveHHi(Handle h);
 REGISTER_TRAP2(MoveHHi, 0xA064, void (A0), ReturnMemErr<D0>);
 extern void SetApplLimit(Ptr newlimit);
 REGISTER_TRAP2(SetApplLimit, 0xA02D, void (A0), ReturnMemErr<D0>);
-extern void SetGrowZone(GrowZoneProcPtr newgz);
+extern void SetGrowZone(GrowZoneUPP newgz);
 REGISTER_TRAP2(SetGrowZone, 0xA04B, void (A0), ReturnMemErr<D0>);
 extern void EmptyHandle(Handle h);
 REGISTER_TRAP2(EmptyHandle, 0xA02B, void (A0), ReturnMemErr<D0>);

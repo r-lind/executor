@@ -132,7 +132,7 @@ static OSErr
 start_playing(SndChannelPtr chanp, SndDoubleBufferHeaderPtr paramp,
               int which_buf)
 {
-    SndDoubleBackProcPtr pp;
+    SndDoubleBackUPP pp;
     static bool task_inserted = false;
 
     pp = paramp->dbhDoubleBack;
@@ -175,7 +175,7 @@ start_playing(SndChannelPtr chanp, SndDoubleBufferHeaderPtr paramp,
 void Executor::C_sound_timer_handler()
 {
     SndDoubleBufferPtr dbp;
-    SndDoubleBackProcPtr pp;
+    SndDoubleBackUPP pp;
     int current_buffer;
 
     if(call_back_info.headp)
