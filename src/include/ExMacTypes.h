@@ -45,6 +45,8 @@ typedef ConstStringPtr ConstStr255Param;
 
 typedef GUEST<StringPtr> *StringHandle;
 
+struct RoutineDescriptor;
+typedef RoutineDescriptor *UniversalProcPtr;
 
 typedef LONGINT Fixed, Fract;
 
