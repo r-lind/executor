@@ -373,7 +373,7 @@ static void unpatch(Ptr segstart, Ptr p)
     ip[2] = LOADSEGTRAP;
 }
 
-void Executor::C_UnloadSeg(Ptr addr)
+void Executor::C_UnloadSeg(void* addr)
 {
     Ptr p, segstart;
     char *top, *bottom;
@@ -388,12 +388,12 @@ void Executor::C_UnloadSeg(Ptr addr)
         if(!*h)
             LoadResource(h);
         segstart = *h;
-        for(p = addr; SEGNOOFP(p) == segno; p += 8)
+        for(p = Ptr(addr); SEGNOOFP(p) == segno; p += 8)
             unpatch(segstart, p);
 
         bottom = (char *)p;
 
-        for(p = addr - 8; SEGNOOFP(p) == segno; p -= 8)
+        for(p = Ptr(addr) - 8; SEGNOOFP(p) == segno; p -= 8)
             unpatch(segstart, p);
 
         top = (char *)p + 6; /* +8 that we didn't zap, -2 that we went

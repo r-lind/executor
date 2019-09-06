@@ -60,7 +60,7 @@ extern void C_GetAppParms(StringPtr namep,
                                       GUEST<INTEGER> *rnp, GUEST<Handle> *aphandp);
 PASCAL_TRAP(GetAppParms, 0xA9F5);
 
-extern void C_UnloadSeg(Ptr addr);
+extern void C_UnloadSeg(void* addr);
 PASCAL_TRAP(UnloadSeg, 0xA9F1);
 
 enum
