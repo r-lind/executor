@@ -10,7 +10,6 @@
 
 #include <EventMgr.h>
 #include <NotifyMgr.h>
-#include <rsys/macros.h>
 
 #define MODULE_NAME AppleEvents
 #include <base/api-module.h>

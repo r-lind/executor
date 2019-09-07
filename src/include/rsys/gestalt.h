@@ -7,7 +7,6 @@
 #define _RSYS_GESTALT_H_
 
 #include <ExMacTypes.h>
-#include <rsys/macros.h>
 
 #define MODULE_NAME rsys_gestalt
 #include <base/api-module.h>

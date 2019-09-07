@@ -2,7 +2,6 @@
 #define _cfm_h_
 
 #include <FileMgr.h>
-#include <rsys/macros.h>
 
 /*
  * Copyright 2000 by Abacus Research and Development, Inc.

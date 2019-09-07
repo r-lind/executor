@@ -10,7 +10,6 @@
 
 #include <SANE.h>
 #include <IntlUtil.h>
-#include <rsys/macros.h>
 #include <base/lowglobals.h>
 
 #define MODULE_NAME ScriptMgr
