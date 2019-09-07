@@ -25,14 +25,6 @@ using namespace Executor;
 
 #define N_BUTTONS (3)
 
-/* sanity defines */
-
-#define _NewCWindow(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) \
-    ((WindowPtr)NewCWindow(arg0, arg1, arg2, arg3, arg4,            \
-                           (CWindowPtr)(arg5), arg6, arg7))
-
-#pragma pack(push, 2)
-
 struct button
 {
     ControlHandle ctl;
@@ -55,7 +47,6 @@ static const char *message;
 static int default_button;
 
 static Rect message_rect;
-#pragma pack(pop)
 
 static struct button *
 event_loop(void)
@@ -200,7 +191,7 @@ int Executor::system_error(const char *_message, int _default_button,
      for this window will determine it's eventual size, at which point
      it will be resized and made visible */
 
-    msg_window = _NewCWindow(nullptr, &dummy_rect,
+    msg_window = NewCWindow(nullptr, &dummy_rect,
                              /* no title */
                              nullptr,
                              /* invisible */

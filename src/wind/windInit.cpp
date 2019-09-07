@@ -415,7 +415,7 @@ ROMlib_new_window_common(WindowPeek w,
     SetPort(save_port);
 }
 
-WindowPtr Executor::C_NewWindow(Ptr window_storage, const Rect *bounds,
+WindowPtr Executor::C_NewWindow(void* window_storage, const Rect *bounds,
                                 ConstStringPtr title, BOOLEAN visible_p,
                                 INTEGER proc_id, WindowPtr behind,
                                 BOOLEAN go_away_flag, LONGINT ref_con)
@@ -459,9 +459,9 @@ WindowPtr Executor::C_NewWindow(Ptr window_storage, const Rect *bounds,
     return (WindowPtr)w;
 }
 
-CWindowPtr Executor::C_NewCWindow(Ptr window_storage, const Rect *bounds,
+WindowPtr Executor::C_NewCWindow(void* window_storage, const Rect *bounds,
                                   ConstStringPtr title, BOOLEAN visible_p,
-                                  INTEGER proc_id, CWindowPtr behind,
+                                  INTEGER proc_id, WindowPtr behind,
                                   BOOLEAN go_away_flag, LONGINT ref_con)
 {
     WindowPeek w;
@@ -479,25 +479,24 @@ CWindowPtr Executor::C_NewCWindow(Ptr window_storage, const Rect *bounds,
                              bounds, title, visible_p, proc_id,
                              (WindowPtr)behind,
                              go_away_flag, ref_con);
-    return (CWindowPtr)w;
+    return (WindowPtr)w;
 }
 
 typedef windrestype *windrestypeptr;
 
 typedef GUEST<windrestypeptr> *windrestypehand;
 
-CWindowPtr Executor::C_GetNewCWindow(INTEGER window_id, Ptr window_storage,
-                                     CWindowPtr behind)
+WindowPtr Executor::C_GetNewCWindow(INTEGER window_id, void* window_storage,
+                                     WindowPtr behind)
 {
-
-    CWindowPtr new_cwin;
+    WindowPtr new_cwin;
     windrestypehand win_res;
     Handle win_ctab_res;
     PaletteHandle palette;
 
     win_res = (windrestypehand)ROMlib_getrestid(TICK("WIND"), window_id);
-    if(win_res == nullptr)
-        return (CWindowPtr)nullptr;
+    if(!win_res)
+        return nullptr;
 
     new_cwin = NewCWindow(window_storage, &(*win_res)->_wrect,
                           (StringPtr)((char *)&(*win_res)->_wrect + 18),
@@ -510,7 +509,7 @@ CWindowPtr Executor::C_GetNewCWindow(INTEGER window_id, Ptr window_storage,
     if(win_ctab_res != nullptr)
     {
         ThePortGuard guard(qdGlobals().thePort);
-        SetWinColor((WindowPtr)new_cwin, (CTabHandle)win_ctab_res);
+        SetWinColor(new_cwin, (CTabHandle)win_ctab_res);
     }
 
     /* if this is a color window we must check if a palette
@@ -523,7 +522,7 @@ CWindowPtr Executor::C_GetNewCWindow(INTEGER window_id, Ptr window_storage,
     return new_cwin;
 }
 
-WindowPtr Executor::C_GetNewWindow(INTEGER wid, Ptr wst, WindowPtr behind)
+WindowPtr Executor::C_GetNewWindow(INTEGER wid, void* wst, WindowPtr behind)
 {
     windrestypehand wh;
     WindowPtr tp;

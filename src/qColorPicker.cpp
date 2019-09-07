@@ -32,9 +32,6 @@ using namespace Executor;
 
 /* sanity defines */
 
-#define _NewCWindow(arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7) \
-    ((WindowPtr)NewCWindow(arg0, arg1, arg2, arg3, arg4,            \
-                           (CWindowPtr)(arg5), arg6, arg7))
 
 template<typename T> T sqr(T v) { return v * v; }
 
@@ -1332,7 +1329,7 @@ BOOLEAN Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
     compute_bounds(where);
     color_wheel_init();
 
-    color_picker_window = _NewCWindow(nullptr, color_picker_window_bounds,
+    color_picker_window = NewCWindow(nullptr, color_picker_window_bounds,
                                       /* no title */
                                       nullptr,
                                       /* visible */

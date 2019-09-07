@@ -432,11 +432,6 @@ PASCAL_TRAP(GetPixPat, 0xAA0C);
 extern INTEGER C_QDError();
 PASCAL_TRAP(QDError, 0xAA40);
 
-extern CWindowPtr C_NewCWindow(Ptr, const Rect *, ConstStringPtr, BOOLEAN, INTEGER, CWindowPtr, BOOLEAN, LONGINT);
-PASCAL_TRAP(NewCWindow, 0xAA45);
-extern CWindowPtr C_GetNewCWindow(INTEGER, Ptr, CWindowPtr);
-PASCAL_TRAP(GetNewCWindow, 0xAA46);
-
 extern void C_CMY2RGB(CMYColor *, RGBColor *);
 PASCAL_SUBTRAP(CMY2RGB, 0xA82E, 0x0003, Pack12);
 extern void C_RGB2CMY(RGBColor *, CMYColor *);

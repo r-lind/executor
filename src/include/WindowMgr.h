@@ -244,14 +244,20 @@ PASCAL_TRAP(InitWindows, 0xA912);
 extern void C_GetWMgrPort(GUEST<GrafPtr> *wp);
 PASCAL_TRAP(GetWMgrPort, 0xA910);
 
-extern WindowPtr C_NewWindow(Ptr wst, const Rect *r,
+extern WindowPtr C_NewWindow(void* wst, const Rect *r,
                                          ConstStringPtr title, BOOLEAN vis, INTEGER procid, WindowPtr behind,
                                          BOOLEAN gaflag, LONGINT rc);
 PASCAL_TRAP(NewWindow, 0xA913);
-extern WindowPtr C_GetNewWindow(INTEGER wid, Ptr wst,
+extern WindowPtr C_GetNewWindow(INTEGER wid, void* wst,
                                             WindowPtr behind);
 PASCAL_TRAP(GetNewWindow, 0xA9BD);
 extern void C_CloseWindow(WindowPtr w);
+
+extern WindowPtr C_NewCWindow(void *storage, const Rect *, ConstStringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT);
+PASCAL_TRAP(NewCWindow, 0xAA45);
+extern WindowPtr C_GetNewCWindow(INTEGER, void*, WindowPtr);
+PASCAL_TRAP(GetNewCWindow, 0xAA46);
+
 PASCAL_TRAP(CloseWindow, 0xA92D);
 
 extern void C_DisposeWindow(WindowPtr w);

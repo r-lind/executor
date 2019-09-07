@@ -319,9 +319,9 @@ create_about_box()
             (vdriver->height() + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
 
     /* Create the window. */
-    about_box = (WindowPtr)NewCWindow(nullptr, &about_box_bounds,
+    about_box = NewCWindow(nullptr, &about_box_bounds,
                                       (StringPtr) "\016About Executor",
-                                      false, dBoxProc, (CWindowPtr)-1,
+                                      false, dBoxProc, (WindowPtr)-1,
                                       true, /* go away flag */
                                       -5 /* unused */);
     ThePortGuard guard(about_box);

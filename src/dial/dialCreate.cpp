@@ -185,7 +185,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
     if(color_p)
     {
         NewCWindow((Ptr)dp, bounds, title, visible_p,
-                   proc_id, (CWindowPtr)behind, go_away_flag, ref_con);
+                   proc_id, behind, go_away_flag, ref_con);
         if(w_ctab && CTAB_SIZE(w_ctab) > -1)
         {
             ThePortGuard guard(qdGlobals().thePort);
@@ -271,19 +271,19 @@ ROMlib_new_dialog_common(DialogPtr dp,
 }
 
 /* IM-MTE calls this NewColorDialog () */
-CDialogPtr Executor::C_NewColorDialog(Ptr storage, const Rect *bounds, ConstStringPtr title,
+DialogPtr Executor::C_NewColorDialog(void* storage, const Rect *bounds, ConstStringPtr title,
                                   BOOLEAN visible_p, INTEGER proc_id,
                                   WindowPtr behind, BOOLEAN go_away_flag,
                                   LONGINT ref_con, Handle items) /* IMI-412 */
 {
-    return (CDialogPtr)ROMlib_new_dialog_common((DialogPtr)storage,
+    return ROMlib_new_dialog_common((DialogPtr)storage,
                                                 /* color */ true, nullptr, nullptr,
                                                 bounds, title, visible_p, proc_id,
                                                 behind, go_away_flag, ref_con,
                                                 items);
 }
 
-DialogPtr Executor::C_NewDialog(Ptr storage, const Rect *bounds, ConstStringPtr title,
+DialogPtr Executor::C_NewDialog(void* storage, const Rect *bounds, ConstStringPtr title,
                                 BOOLEAN visible_p, INTEGER proc_id,
                                 WindowPtr behind, BOOLEAN go_away_flag,
                                 LONGINT ref_con, Handle items) /* IMI-412 */
@@ -359,7 +359,7 @@ void Executor::dialog_compute_rect(Rect *dialog_rect, Rect *dst_rect,
     }
 }
 
-DialogPtr Executor::C_GetNewDialog(INTEGER id, Ptr dst,
+DialogPtr Executor::C_GetNewDialog(INTEGER id, void* dst,
                                    WindowPtr behind) /* IMI-413 */
 {
     dlogh dialog_res_h;

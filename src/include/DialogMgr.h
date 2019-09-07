@@ -163,12 +163,12 @@ extern void C_CouldDialog(INTEGER id);
 PASCAL_TRAP(CouldDialog, 0xA979);
 extern void C_FreeDialog(INTEGER id);
 PASCAL_TRAP(FreeDialog, 0xA97A);
-extern DialogPtr C_NewDialog(Ptr dst,
+extern DialogPtr C_NewDialog(void* dst,
                             const Rect *r, ConstStringPtr tit, BOOLEAN vis, INTEGER procid,
                             WindowPtr behind, BOOLEAN gaflag, LONGINT rc, Handle items);
 PASCAL_TRAP(NewDialog, 0xA97D);
 extern DialogPtr C_GetNewDialog(INTEGER id,
-                                            Ptr dst, WindowPtr behind);
+                                            void* dst, WindowPtr behind);
 PASCAL_TRAP(GetNewDialog, 0xA97C);
 extern void C_CloseDialog(DialogPtr dp);
 PASCAL_TRAP(CloseDialog, 0xA982);
@@ -233,7 +233,7 @@ extern void C_ShowDialogItem(DialogPtr dp,
                                     INTEGER item);
 PASCAL_TRAP(ShowDialogItem, 0xA828);
 
-extern CDialogPtr C_NewColorDialog(Ptr, const Rect *, ConstStringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT, Handle);
+extern DialogPtr C_NewColorDialog(void*, const Rect *, ConstStringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT, Handle);
 PASCAL_TRAP(NewColorDialog, 0xAA4B);
 
 extern OSErr C_GetStdFilterProc(GUEST<ProcPtr> *proc);
