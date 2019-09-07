@@ -100,7 +100,7 @@ namespace callconv
 {
 struct D0Minus1Boolean
 {
-    operator bool() { return EM_D0 != 0; }
+    operator bool() { return EM_D0 == 0; }
 
     static void set(bool b)
     {
