@@ -718,13 +718,13 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
     }
 
     AE_RETURN_ERROR(AECreateDesc(typeAppleEvent,
-                                 (Ptr)event_data, event_size,
+                                 event_data, event_size,
                                  evt_out));
 }
 
 /* generic descriptor functions */
 
-OSErr Executor::C_AECreateDesc(DescType type, Ptr data, Size data_size,
+OSErr Executor::C_AECreateDesc(DescType type, void* data, Size data_size,
                                AEDesc *desc_out)
 {
     Handle h;

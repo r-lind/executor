@@ -120,6 +120,24 @@ enum
     kAEKeyDescArray
 };
 
+enum
+{
+    kAutoGenerateReturnID = -1,
+    kAnyTransactionID = 0
+};
+
+enum
+{
+    kAENormalPriority = 0,
+    kAEHighPriority = 1
+};
+
+enum
+{
+    kAEDefaultTimeout = -1,
+    kNoTimeOut = -2
+};
+
 typedef union AEArrayData {
     GUEST<int16_t> AEDataArray[1];
     int8_t AEPackedArray[1];
@@ -133,9 +151,9 @@ typedef AEArrayData *AEArrayDataPointer;
 typedef ProcPtr IdleUPP;
 typedef ProcPtr EventFilterUPP;
 
-typedef UPP<OSErr(AppleEvent *evt, AppleEvent *reply, int32_t refcon)> EventHandlerUPP;
-typedef UPP<OSErr(DescType data_type, Ptr data, Size data_size, DescType to_type, int32_t refcon, AEDesc *desc_out)> CoercePtrUPP;
-typedef UPP<OSErr(AEDesc *desc, DescType to_type, int32_t refcon, AEDesc *desc_out)> CoerceDescUPP;
+typedef UPP<OSErr(const AppleEvent *evt, AppleEvent *reply, int32_t refcon)> AEEventHandlerUPP;
+typedef UPP<OSErr(DescType data_type, Ptr data, Size data_size, DescType to_type, int32_t refcon, AEDesc *desc_out)> AECoercePtrUPP;
+typedef UPP<OSErr(AEDesc *desc, DescType to_type, int32_t refcon, AEDesc *desc_out)> AECoerceDescUPP;
 
 /* #### internal */
 
@@ -295,13 +313,30 @@ enum
     typeWildCard = FOURCC('*', '*', '*', '*'),
     typeAlias = FOURCC('a', 'l', 'i', 's'),
 
+    typeBoolean = TICK("bool"),
+    typeChar = TICK("TEXT"),
+    typeSInt16 = TICK("shor"),
+    typeSInt32 = TICK("long"),
+    typeUInt32 = TICK("magn"),
+    typeSInt64 = TICK("comp"),
+    typeIEEE32BitFloatingPoint = TICK("sing"),
+    typeIEEE64BitFloatingPoint = TICK("doub"),
+    type128BitFloatingPoint = TICK("ldbl"),
+    typeDecimalStruct = TICK("decm")
+};
+
+enum
+{
     keyAddressAttr = FOURCC('a', 'd', 'd', 'r'),
     keyEventClassAttr = FOURCC('e', 'v', 'c', 'l'),
     keyEventIDAttr = FOURCC('e', 'v', 'i', 'd'),
     keyProcessSerialNumber = FOURCC('p', 's', 'n', ' '),
 
     keyDirectObject = FOURCC('-', '-', '-', '-'),
+};
 
+enum
+{
     kCoreEventClass = FOURCC('a', 'e', 'v', 't'),
     kAEOpenApplication = FOURCC('o', 'a', 'p', 'p'),
     kAEOpenDocuments = FOURCC('o', 'd', 'o', 'c'),
@@ -317,12 +352,12 @@ const LowMemGlobal<AE_info_ptr> AE_info { 0x2B6 }; // AppleEvents AEGizmo (true)
 /* prototypes go here */
 
 extern OSErr C_AEGetCoercionHandler(DescType from_type, DescType to_type,
-                                                GUEST<CoerceDescUPP> *hdlr_out, GUEST<int32_t> *refcon_out,
+                                                GUEST<AECoerceDescUPP> *hdlr_out, GUEST<int32_t> *refcon_out,
                                                 GUEST<Boolean> *from_type_is_desc_p_out, Boolean system_handler_p);
 PASCAL_SUBTRAP(AEGetCoercionHandler, 0xA816, 0x0B24, Pack8);
 
 extern OSErr C_AECreateDesc(DescType type,
-                                        Ptr data, Size data_size,
+                                        void* data, Size data_size,
                                         AEDesc *desc_out);
 PASCAL_SUBTRAP(AECreateDesc, 0xA816, 0x0825, Pack8);
 extern OSErr C_AEDisposeDesc(AEDesc *desc);
@@ -377,7 +412,7 @@ extern OSErr C_AESuspendTheCurrentEvent(AppleEvent *evt);
 PASCAL_SUBTRAP(AESuspendTheCurrentEvent, 0xA816, 0x022B, Pack8);
 
 extern OSErr C_AEResumeTheCurrentEvent(AppleEvent *evt, AppleEvent *reply,
-                                                   EventHandlerUPP dispatcher,
+                                                   AEEventHandlerUPP dispatcher,
                                                    int32_t refcon);
 PASCAL_SUBTRAP(AEResumeTheCurrentEvent, 0xA816, 0x0818, Pack8);
 
@@ -402,16 +437,16 @@ extern OSErr C_AEDeleteParam(AERecord *record, AEKeyword keyword);
 PASCAL_SUBTRAP(AEDeleteParam, 0xA816, 0x0413, Pack8);
 
 extern OSErr C_AEInstallSpecialHandler(AEKeyword function_class,
-                                                   EventHandlerUPP hdlr,
+                                                   AEEventHandlerUPP hdlr,
                                                    Boolean system_handler_p);
 PASCAL_SUBTRAP(AEInstallSpecialHandler, 0xA816, 0x0500, Pack8);
 
 extern OSErr C_AERemoveSpecialHandler(AEKeyword function_class,
-                                                  EventHandlerUPP hdlr,
+                                                  AEEventHandlerUPP hdlr,
                                                   Boolean system_handler_p);
 PASCAL_SUBTRAP(AERemoveSpecialHandler, 0xA816, 0x0501, Pack8);
 extern OSErr C_AEGetSpecialHandler(AEKeyword function_class,
-                                               GUEST<EventHandlerUPP> *hdlr_out,
+                                               GUEST<AEEventHandlerUPP> *hdlr_out,
                                                Boolean system_handler_p);
 PASCAL_SUBTRAP(AEGetSpecialHandler, 0xA816, 0x052D, Pack8);
 
@@ -427,13 +462,13 @@ PASCAL_SUBTRAP(AECoercePtr, 0xA816, 0x0A02, Pack8);
 
 extern OSErr C_AEGetEventHandler(AEEventClass event_class,
                                              AEEventID event_id,
-                                             GUEST<EventHandlerUPP> *hdlr, GUEST<int32_t> *refcon,
+                                             GUEST<AEEventHandlerUPP> *hdlr, GUEST<int32_t> *refcon,
                                              Boolean system_handler_p);
 PASCAL_SUBTRAP(AEGetEventHandler, 0xA816, 0x0921, Pack8);
 
 extern OSErr C_AERemoveEventHandler(AEEventClass event_class,
                                                 AEEventID event_id,
-                                                EventHandlerUPP hdlr,
+                                                AEEventHandlerUPP hdlr,
                                                 Boolean system_handler_p);
 PASCAL_SUBTRAP(AERemoveEventHandler, 0xA816, 0x0720, Pack8);
 
@@ -476,15 +511,15 @@ extern OSErr C_AECreateAppleEvent(AEEventClass event_class, AEEventID event_id,
 PASCAL_SUBTRAP(AECreateAppleEvent, 0xA816, 0x0B14, Pack8);
 
 extern OSErr C_AEInstallCoercionHandler(DescType from_type, DescType to_type,
-                                                    CoerceDescUPP hdlr, int32_t refcon, Boolean from_type_is_desc_p, Boolean system_handler_p);
+                                                    AECoerceDescUPP hdlr, int32_t refcon, Boolean from_type_is_desc_p, Boolean system_handler_p);
 PASCAL_SUBTRAP(AEInstallCoercionHandler, 0xA816, 0x0A22, Pack8);
 
 extern OSErr C_AEInstallEventHandler(AEEventClass event_class, AEEventID event_id,
-                                                 EventHandlerUPP hdlr, int32_t refcon, Boolean system_handler_p);
+                                                 AEEventHandlerUPP hdlr, int32_t refcon, Boolean system_handler_p);
 PASCAL_SUBTRAP(AEInstallEventHandler, 0xA816, 0x091F, Pack8);
 
 extern OSErr C_AERemoveCoercionHandler(DescType from_type, DescType to_type,
-                                                   CoerceDescUPP hdlr, Boolean system_handler_p);
+                                                   AECoerceDescUPP hdlr, Boolean system_handler_p);
 PASCAL_SUBTRAP(AERemoveCoercionHandler, 0xA816, 0x0723, Pack8);
 
 extern OSErr C_AEPutArray(AEDescList *list, AEArrayType type,
