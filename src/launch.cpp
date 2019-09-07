@@ -995,3 +995,14 @@ void Executor::Launch(ConstStringPtr fName_arg, INTEGER vRefNum_arg)
 {
     NewLaunch(fName_arg, vRefNum_arg, 0);
 }
+
+OSErr Executor::LaunchApplication(LaunchParamBlockRec *lpbp)
+{
+    StringPtr strp;
+
+    if(lpbp->launchBlockID == extendedBlock)
+        strp = 0;
+    else
+        strp = *(GUEST<StringPtr> *)lpbp;
+    return NewLaunch(strp, 0, lpbp);
+}

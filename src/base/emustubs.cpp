@@ -93,20 +93,6 @@ RAW_68K_IMPLEMENTATION(SCSIDispatch)
 }
 
 // SegmentLdr.h
-RAW_68K_IMPLEMENTATION(Launch)
-{
-    LaunchParamBlockRec *lpbp;
-    StringPtr strp;
-
-    lpbp = (LaunchParamBlockRec *)SYN68K_TO_US(EM_A0);
-    if(lpbp->launchBlockID == extendedBlock)
-        strp = 0;
-    else
-        strp = *(GUEST<StringPtr> *)lpbp;
-    EM_D0 = NewLaunch(strp, 0, lpbp);
-    RTS();
-}
-
 RAW_68K_IMPLEMENTATION(Chain)
 {
     Chain(*(GUEST<StringPtr> *)SYN68K_TO_US(EM_A0), 0);
