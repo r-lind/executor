@@ -242,7 +242,7 @@ void _gui_fatal(const char *file, int line, const char *fn,
 
     if(LM(WWExist) == EXIST_YES)
     {
-        char buf[10240];
+        char buf[10340];
 
         /* Make sure the screen is sane. */
         SetGDevice(LM(MainDevice));

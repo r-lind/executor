@@ -1185,10 +1185,6 @@ bool X11VideoDriver::init()
     int num_green_bits, low_green_bit;
     int num_blue_bits, low_blue_bit;
     char *geom;
-    char *t_str;
-
-
-
 
     get_bool_resource("privateColormap", &private_cmap_p);
 

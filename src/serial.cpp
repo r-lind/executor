@@ -298,7 +298,6 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     hiddenh h;
 #if defined(LINUX) || defined(MACOSX)
     const char *devname;
-    LONGINT fd, ourpid, theirpid, newfd;
 #endif
 
     err = noErr;
