@@ -175,8 +175,7 @@ int16_t MacBridge::SpeechBusy (void)
 {
   BeginSpeech();
   @autoreleasepool {
-    return internalSynthesizer.
-    ing;
+    return internalSynthesizer.speaking;
   }
 }
 
