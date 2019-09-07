@@ -59,7 +59,6 @@ enum
     gestaltResourceMgrAttr = FOURCC('r', 's', 'r', 'c'),
     gestaltScriptCount = FOURCC('s', 'c', 'r', '#'),
     gestaltScriptMgrVersion = FOURCC('s', 'c', 'r', 'i'),
-    gestaltSerialAttr = FOURCC('s', 'e', 'r', ' '),
     gestaltSoundAttr = FOURCC('s', 'n', 'd', ' '),  
     gestaltSpeechAttr = FOURCC('t','t','s','c'),
     gestaltStandardFileAttr = FOURCC('s', 't', 'd', 'f'),
@@ -199,6 +198,23 @@ enum
     gestaltUnknownErr = -5550,
     gestaltDupSelectorErr = -5552,
     gestaltLocationErr = -5553,
+};
+
+enum
+{
+    gestaltSerialAttr = FOURCC('s', 'e', 'r', ' '),
+    gestaltHasGPIaToDCDa = 0,
+    gestaltHasGPIaToRTxCa = 1,
+    gestaltHasGPIbToDCDb = 2,
+    gestaltHidePortA = 3,
+    gestaltHidePortB = 4,
+    gestaltPortADisabled = 5,
+    gestaltPortBDisabled = 6
+};
+
+enum
+{
+    gestaltOpenTpt = FOURCC('o', 't', 'a', 'n')
 };
 
 using SelectorFunctionUPP = UPP<OSErr(OSType, GUEST<LONGINT> *)>;
