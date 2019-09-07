@@ -18,7 +18,7 @@ int16_t SpeechBusy(void);
 int16_t SpeechBusySystemWide(void);
 Executor::OSErr CountVoices(Executor::GUEST<int16_t> *numVoices);
 Executor::OSErr DisposeSpeechChannel(Executor::SpeechChannel chan);
-Executor::OSErr SpeakString(Executor::Str255 textToBeSpoken);
+Executor::OSErr SpeakString(Executor::ConstStr255Param textToBeSpoken);
 
 Executor::OSErr StopSpeech(Executor::SpeechChannel chan);
 Executor::OSErr ContinueSpeech(Executor::SpeechChannel chan);

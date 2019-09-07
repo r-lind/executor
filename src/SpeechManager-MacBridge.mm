@@ -188,7 +188,8 @@ int16_t MacBridge::SpeechBusy (void)
 {
   BeginSpeech();
   @autoreleasepool {
-    return internalSynthesizer.speaking;
+    return internalSynthesizer.
+    ing;
   }
 }
 
@@ -226,7 +227,7 @@ Executor::OSErr MacBridge::DisposeSpeechChannel(Executor::SpeechChannel chan)
   return Executor::noErr;
 }
 
-Executor::OSErr MacBridge::SpeakString (Executor::Str255 textToBeSpoken)
+Executor::OSErr MacBridge::SpeakString (Executor::ConstStr255Param textToBeSpoken)
 {
   BeginSpeech();
   @autoreleasepool {
