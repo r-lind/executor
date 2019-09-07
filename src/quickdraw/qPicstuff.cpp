@@ -1482,7 +1482,7 @@ static unsigned short nextop(INTEGER vers)
 
 #define SE(x) ((x & 0x80) ? x | (~0 ^ 0xff) : x & 0xff) /* sign extend */
 
-void Executor::C_DrawPicture(PicHandle pic, Rect *destrp)
+void Executor::C_DrawPicture(PicHandle pic, const Rect *destrp)
 {
     INTEGER words[2], *wp;
     Point points[2], *pp;

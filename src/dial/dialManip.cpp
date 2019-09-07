@@ -256,7 +256,7 @@ settexth(DialogPeek dp, itmp ip, int item_no)
 }
 
 void Executor::C_SetDialogItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
-                          Handle item, Rect *r) /* IMI-421 */
+                          Handle item, const Rect *r) /* IMI-421 */
 {
 
     SignedByte flags;

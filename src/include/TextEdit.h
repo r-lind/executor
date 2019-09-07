@@ -235,10 +235,10 @@ PASCAL_TRAP(TEGetText, 0xA9CB);
 extern void C_TESetAlignment(INTEGER j, TEHandle teh);
 PASCAL_TRAP(TESetAlignment, 0xA9DF);
 
-extern void C_TEUpdate(Rect *r, TEHandle teh);
+extern void C_TEUpdate(const Rect *r, TEHandle teh);
 PASCAL_TRAP(TEUpdate, 0xA9D3);
 
-extern void C_TETextBox(Ptr p, LONGINT ln, Rect *r,
+extern void C_TETextBox(Ptr p, LONGINT ln, const Rect *r,
                         INTEGER j);
 PASCAL_TRAP(TETextBox, 0xA9CE);
 extern void C_TEScroll(INTEGER dh, INTEGER dv, TEHandle teh);
@@ -272,7 +272,7 @@ PASCAL_TRAP(TESelView, 0xA811);
 extern void C_TEAutoView(BOOLEAN autoflag,
                          TEHandle teh);
 PASCAL_TRAP(TEAutoView, 0xA813);
-extern TEHandle C_TEStyleNew(Rect *dst, Rect *view);
+extern TEHandle C_TEStyleNew(const Rect *dst, const Rect *view);
 PASCAL_TRAP(TEStyleNew, 0xA83E);
 
 extern void C_TESetStyleHandle(TEStyleHandle theHandle,
@@ -323,7 +323,7 @@ PASCAL_SUBTRAP(TENumStyles, 0xA83D, 0x000D, TEDispatch);
 extern void C_TEInit(void);
 PASCAL_TRAP(TEInit, 0xA9CC);
 
-extern TEHandle C_TENew(Rect *dst, Rect *view);
+extern TEHandle C_TENew(const Rect *dst, const Rect *view);
 PASCAL_TRAP(TENew, 0xA9D2);
 
 extern void C_TEDispose(TEHandle teh);

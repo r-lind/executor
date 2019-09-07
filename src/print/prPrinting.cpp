@@ -58,12 +58,12 @@ static bool page_is_open = false;
 LONGINT Executor::pagewanted = 0;
 static int lastpagewanted = 0;
 
-void Executor::C_donotPrArc(GrafVerb verb, Rect *r, INTEGER starta,
+void Executor::C_donotPrArc(GrafVerb verb, const Rect *r, INTEGER starta,
                             INTEGER arca)
 {
 }
 
-void Executor::C_PrArc(GrafVerb verb, Rect *r, INTEGER starta, INTEGER arca)
+void Executor::C_PrArc(GrafVerb verb, const Rect *r, INTEGER starta, INTEGER arca)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrArc(verb, r, starta, arca, qdGlobals().thePort);
@@ -98,11 +98,11 @@ void Executor::C_PrLine(Point p)
     }
 }
 
-void Executor::C_donotPrOval(GrafVerb v, Rect *rp)
+void Executor::C_donotPrOval(GrafVerb v, const Rect *rp)
 {
 }
 
-void Executor::C_PrOval(GrafVerb v, Rect *rp)
+void Executor::C_PrOval(GrafVerb v, const Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrOval(v, rp, qdGlobals().thePort);
@@ -155,22 +155,22 @@ void Executor::C_PrPoly(GrafVerb verb, PolyHandle ph)
         NeXTPrPoly(verb, ph, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrRRect(GrafVerb verb, Rect *r, INTEGER width,
+void Executor::C_donotPrRRect(GrafVerb verb, const Rect *r, INTEGER width,
                               INTEGER height)
 {
 }
 
-void Executor::C_PrRRect(GrafVerb verb, Rect *r, INTEGER width, INTEGER height)
+void Executor::C_PrRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER height)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrRRect(verb, r, width, height, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrRect(GrafVerb v, Rect *rp)
+void Executor::C_donotPrRect(GrafVerb v, const Rect *rp)
 {
 }
 
-void Executor::C_PrRect(GrafVerb v, Rect *rp)
+void Executor::C_PrRect(GrafVerb v, const Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrRect(v, rp, qdGlobals().thePort);

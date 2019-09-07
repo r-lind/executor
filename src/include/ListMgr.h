@@ -96,12 +96,10 @@ PASCAL_SUBTRAP(LGetCellDataLocation, 0xA9E7, 0x0034, Pack0);
 extern BOOLEAN C_LNextCell(BOOLEAN hnext,
                                        BOOLEAN vnext, GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LNextCell, 0xA9E7, 0x0048, Pack0);
-extern void C_LRect(Rect *cellrect,
-                                Cell cell, ListHandle list);
+extern void C_LRect(Rect *cellrect, Cell cell, ListHandle list);
 PASCAL_SUBTRAP(LRect, 0xA9E7, 0x004C, Pack0);
 extern BOOLEAN
-C_LSearch(Ptr dp,
-          INTEGER dl, Ptr proc, GUEST<Cell> *cellp, ListHandle list);
+C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LSearch, 0xA9E7, 0x0054, Pack0);
 extern void C_LSize(INTEGER width,
                                 INTEGER height, ListHandle list);
@@ -118,8 +116,8 @@ PASCAL_SUBTRAP(LDelColumn, 0xA9E7, 0x0020, Pack0);
 extern void C_LDelRow(INTEGER count,
                                   INTEGER rown, ListHandle list);
 PASCAL_SUBTRAP(LDelRow, 0xA9E7, 0x0024, Pack0);
-extern ListHandle C_LNew(Rect *rview,
-                                     Rect *bounds, Point csize, INTEGER proc, WindowPtr wind,
+extern ListHandle C_LNew(const Rect *rview,
+                                     const Rect *bounds, Point csize, INTEGER proc, WindowPtr wind,
                                      BOOLEAN draw, BOOLEAN grow, BOOLEAN scrollh, BOOLEAN scrollv);
 PASCAL_SUBTRAP(LNew, 0xA9E7, 0x0044, Pack0);
 extern void C_LDispose(ListHandle list);

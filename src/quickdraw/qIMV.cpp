@@ -190,8 +190,8 @@ default_search_proc_stub(syn68k_addr_t dummy_addr, void *dummy)
     return retval;
 }
 
-void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
-                           Rect *dstrp, int16_t seedh, int16_t seedv,
+void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, const Rect *srcrp,
+                           const Rect *dstrp, int16_t seedh, int16_t seedv,
                            ProcPtr matchprocp, int32_t matchdata)
 {
     MatchRec mr;
@@ -274,8 +274,8 @@ void Executor::C_SeedCFill(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
     TEMP_ALLOC_FREE(temp_bitmap2_bits);
 }
 
-void Executor::C_CalcCMask(BitMap *srcbp, BitMap *dstbp, Rect *srcrp,
-                           Rect *dstrp, RGBColor *seedrgbp, ProcPtr matchprocp,
+void Executor::C_CalcCMask(BitMap *srcbp, BitMap *dstbp, const Rect *srcrp,
+                           const Rect *dstrp, RGBColor *seedrgbp, ProcPtr matchprocp,
                            int32_t matchdata)
 {
     MatchRec mr;

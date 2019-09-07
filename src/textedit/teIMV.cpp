@@ -425,7 +425,7 @@ te_add_attrs_to_range(TEHandle te,
     te_style_combine_runs(te_style);
 }
 
-TEHandle Executor::C_TEStyleNew(Rect *dst, Rect *view)
+TEHandle Executor::C_TEStyleNew(const Rect *dst, const Rect *view)
 {
     FontInfo font_info;
     int16_t font_height;

@@ -114,8 +114,8 @@ struct piccache
 extern void ROMlib_textpicupdate(Point num, Point den);
 extern void ROMlib_drawingpicupdate(void);
 extern void ROMlib_drawingverbpicupdate(GrafVerb v);
-extern void ROMlib_drawingverbrectpicupdate(GrafVerb v, Rect *rp);
-extern void ROMlib_drawingverbrectovalpicupdate(GrafVerb v, Rect *rp,
+extern void ROMlib_drawingverbrectpicupdate(GrafVerb v, const Rect *rp);
+extern void ROMlib_drawingverbrectovalpicupdate(GrafVerb v, const Rect *rp,
                                                 GUEST<Point> *ovp);
 
 #define INITIALPICSIZE 0x100

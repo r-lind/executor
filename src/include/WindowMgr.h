@@ -244,7 +244,7 @@ PASCAL_TRAP(InitWindows, 0xA912);
 extern void C_GetWMgrPort(GUEST<GrafPtr> *wp);
 PASCAL_TRAP(GetWMgrPort, 0xA910);
 
-extern WindowPtr C_NewWindow(Ptr wst, Rect *r,
+extern WindowPtr C_NewWindow(Ptr wst, const Rect *r,
                                          ConstStringPtr title, BOOLEAN vis, INTEGER procid, WindowPtr behind,
                                          BOOLEAN gaflag, LONGINT rc);
 PASCAL_TRAP(NewWindow, 0xA913);
@@ -269,14 +269,14 @@ PASCAL_TRAP(SetWindowPic, 0xA92E);
 extern PicHandle C_GetWindowPic(WindowPtr w);
 PASCAL_TRAP(GetWindowPic, 0xA92F);
 
-extern LONGINT C_PinRect(Rect *r, Point p);
+extern LONGINT C_PinRect(const Rect *r, Point p);
 PASCAL_TRAP(PinRect, 0xA94E);
 
 extern LONGINT C_DragTheRgn(RgnHandle rgn, Point startp,
-                                        Rect *limit, Rect *slop, INTEGER axis, ProcPtr proc);
+                                        const Rect *limit, const Rect *slop, INTEGER axis, ProcPtr proc);
 PASCAL_TRAP(DragTheRgn, 0xA926);
 extern LONGINT C_DragGrayRgn(RgnHandle rgn, Point startp,
-                                         Rect *limit, Rect *slop, INTEGER axis, ProcPtr proc);
+                                         const Rect *limit, const Rect *slop, INTEGER axis, ProcPtr proc);
 PASCAL_TRAP(DragGrayRgn, 0xA905);
 extern void C_ClipAbove(WindowPeek w);
 PASCAL_TRAP(ClipAbove, 0xA90B);
@@ -320,22 +320,22 @@ PASCAL_TRAP(ZoomWindow, 0xA83A);
 extern void C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v,
                                      BOOLEAN front);
 PASCAL_TRAP(MoveWindow, 0xA91B);
-extern void C_DragWindow(WindowPtr wp, Point p, Rect *rp);
+extern void C_DragWindow(WindowPtr wp, Point p, const Rect *rp);
 PASCAL_TRAP(DragWindow, 0xA925);
 
 extern LONGINT C_GrowWindow(WindowPtr w, Point startp,
-                                        Rect *rp);
+                                        const Rect *rp);
 PASCAL_TRAP(GrowWindow, 0xA92B);
 extern void C_SizeWindow(WindowPtr w, INTEGER width,
                                      INTEGER height, BOOLEAN flag);
 PASCAL_TRAP(SizeWindow, 0xA91D);
-extern void C_InvalRect(Rect *r);
+extern void C_InvalRect(const Rect *r);
 PASCAL_TRAP(InvalRect, 0xA928);
 
 extern void C_InvalRgn(RgnHandle r);
 PASCAL_TRAP(InvalRgn, 0xA927);
 
-extern void C_ValidRect(Rect *r);
+extern void C_ValidRect(const Rect *r);
 PASCAL_TRAP(ValidRect, 0xA92A);
 
 extern void C_ValidRgn(RgnHandle r);

@@ -99,7 +99,7 @@ PicHandle Executor::C_GetWindowPic(WindowPtr w)
  * Note, below we do what the mac does, rather than what IMI-294 says
  */
 
-LONGINT Executor::C_PinRect(Rect *r, Point p)
+LONGINT Executor::C_PinRect(const Rect *r, Point p)
 {
     if(p.h < r->left)
         p.h = r->left;
@@ -113,8 +113,8 @@ LONGINT Executor::C_PinRect(Rect *r, Point p)
     return (((LONGINT)p.v << 16) | (unsigned short)p.h);
 }
 
-LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, Rect *limit,
-                               Rect *slop, INTEGER axis, ProcPtr proc)
+LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, const Rect *limit,
+                               const Rect *slop, INTEGER axis, ProcPtr proc)
 {
     RgnHandle rh;
     PenState ps;
@@ -218,8 +218,8 @@ LONGINT Executor::C_DragTheRgn(RgnHandle rgn, Point startp, Rect *limit,
         return 0x80008000;
 }
 
-LONGINT Executor::C_DragGrayRgn(RgnHandle rgn, Point startp, Rect *limit,
-                                Rect *slop, INTEGER axis, ProcPtr proc)
+LONGINT Executor::C_DragGrayRgn(RgnHandle rgn, Point startp, const Rect *limit,
+                                const Rect *slop, INTEGER axis, ProcPtr proc)
 {
     LM(DragPattern) = qdGlobals().gray;
     return DragTheRgn(rgn, startp, limit, slop, axis, proc);

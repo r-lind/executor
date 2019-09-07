@@ -32,7 +32,7 @@ void Executor::C_TEInit()
  */
 static GUEST<uint16_t> default_clik_loop[2] = { 0x7001, 0x4E75 };
 
-TEHandle Executor::C_TENew(Rect *dst, Rect *view)
+TEHandle Executor::C_TENew(const Rect *dst, const Rect *view)
 {
     TEHandle teh;
     FontInfo finfo;

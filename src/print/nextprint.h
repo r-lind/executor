@@ -21,19 +21,19 @@ typedef enum {
     fillVerb
 } comverb_t;
 
-extern void NeXTPrArc(LONGINT verb, Rect *r, LONGINT starta, LONGINT arca,
+extern void NeXTPrArc(LONGINT verb, const Rect *r, LONGINT starta, LONGINT arca,
                       GrafPtr gp);
 extern void NeXTPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dstrp,
                        LONGINT mode, RgnHandle mask, GrafPtr gp);
 extern void NeXTPrLine(Point to, GrafPtr gp);
-extern void NeXTPrOval(LONGINT v, Rect *rp, GrafPtr gp);
+extern void NeXTPrOval(LONGINT v, const Rect *rp, GrafPtr gp);
 extern void NeXTsendps(LONGINT size, Ptr textbufp);
 extern void NeXTPrGetPic(Ptr dp, LONGINT bc, GrafPtr gp);
 extern void NeXTPrPutPic(Ptr sp, LONGINT bc, GrafPtr gp);
 extern void NeXTPrPoly(LONGINT verb, PolyHandle ph, GrafPtr gp);
-extern void NeXTPrRRect(LONGINT verb, Rect *r, LONGINT width, LONGINT height,
+extern void NeXTPrRRect(LONGINT verb, const Rect *r, LONGINT width, LONGINT height,
                         GrafPtr gp);
-extern void NeXTPrRect(LONGINT v, Rect *rp, GrafPtr gp);
+extern void NeXTPrRect(LONGINT v, const Rect *rp, GrafPtr gp);
 extern void NeXTPrRgn(LONGINT verb, RgnHandle rgn, GrafPtr gp);
 extern void NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
                        GrafPtr gp);

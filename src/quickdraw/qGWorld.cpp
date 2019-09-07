@@ -119,7 +119,7 @@ void delete_gw_info(gw_info_t *gw_info)
 }
 
 QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
-                            INTEGER depth, Rect *bounds, CTabHandle ctab,
+                            INTEGER depth, const Rect *bounds, CTabHandle ctab,
                             GDHandle gw_gd, GWorldFlags flags)
 {
     PixMapHandle gw_pixmap, gd_pixmap;
@@ -347,7 +347,7 @@ void Executor::C_UnlockPixels(PixMapHandle pixels)
 }
 
 GWorldFlags Executor::C_UpdateGWorld(GUEST<GWorldPtr> *graphics_world,
-                                     INTEGER depth, Rect *bounds,
+                                     INTEGER depth, const Rect *bounds,
                                      CTabHandle ctab, GDHandle a_gdevice,
                                      GWorldFlags flags)
 {
@@ -647,7 +647,7 @@ Ptr Executor::C_GetPixBaseAddr(PixMapHandle pixels)
         return *(Handle)PIXMAP_BASEADDR(pixels);
 }
 
-QDErr Executor::C_NewScreenBuffer(Rect *global_rect, Boolean purgeable_p,
+QDErr Executor::C_NewScreenBuffer(const Rect *global_rect, Boolean purgeable_p,
                                   GUEST<GDHandle> *graphics_device,
                                   GUEST<PixMapHandle> *offscreen_pixmap)
 {
@@ -755,7 +755,7 @@ PixMapHandle Executor::C_GetGWorldPixMap(GWorldPtr port)
         return CPORT_PIXMAP(port);
 }
 
-QDErr Executor::C_NewTempScreenBuffer(Rect *global_rect, Boolean purgeable_p,
+QDErr Executor::C_NewTempScreenBuffer(const Rect *global_rect, Boolean purgeable_p,
                                       GUEST<GDHandle> *graphics_device,
                                       GUEST<PixMapHandle> *offscreen_pixmap)
 {

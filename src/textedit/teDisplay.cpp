@@ -26,7 +26,7 @@ void Executor::C_TESetAlignment(INTEGER j, TEHandle teh)
     TE_SLAM(teh);
 }
 
-void Executor::C_TEUpdate(Rect *r, TEHandle te)
+void Executor::C_TEUpdate(const Rect *r, TEHandle te)
 {
     TE_SLAM(te);
     if(!ROMlib_emptyvis)
@@ -42,7 +42,7 @@ void Executor::C_TEUpdate(Rect *r, TEHandle te)
     TE_SLAM(te);
 }
 
-void Executor::C_TETextBox(Ptr p, int32_t ln, Rect *r, int16_t j)
+void Executor::C_TETextBox(Ptr p, int32_t ln, const Rect *r, int16_t j)
 {
     TEHandle teh;
     Rect viewrect;

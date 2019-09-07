@@ -14,7 +14,7 @@
 
 using namespace Executor;
 
-void Executor::C_StdRect(GrafVerb v, Rect *rp)
+void Executor::C_StdRect(GrafVerb v, const Rect *rp)
 {
     RgnHandle rh, rh2;
     PAUSEDECL;

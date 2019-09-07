@@ -229,10 +229,10 @@ extern BOOLEAN C_PrDlgMain(THPrint hPrint, ProcPtr initfptr);
 PASCAL_SUBTRAP(PrDlgMain, 0xA8FD, 0x4A040894, PrGlue);
 extern void C_PrGeneral(Ptr pData);
 PASCAL_SUBTRAP(PrGeneral, 0xA8FD, 0x70070480, PrGlue);
-extern void C_donotPrArc(GrafVerb verb, Rect *r,
+extern void C_donotPrArc(GrafVerb verb, const Rect *r,
                                      INTEGER starta, INTEGER arca);
 PASCAL_FUNCTION(donotPrArc);
-extern void C_PrArc(GrafVerb verb, Rect *r, INTEGER starta,
+extern void C_PrArc(GrafVerb verb, const Rect *r, INTEGER starta,
                                 INTEGER arca);
 PASCAL_FUNCTION(PrArc);
 extern void C_donotPrBits(const BitMap *srcbmp, const Rect *srcrp,
@@ -246,9 +246,9 @@ extern void C_donotPrLine(Point p);
 PASCAL_FUNCTION(donotPrLine);
 extern void C_PrLine(Point p);
 PASCAL_FUNCTION(PrLine);
-extern void C_donotPrOval(GrafVerb v, Rect *rp);
+extern void C_donotPrOval(GrafVerb v, const Rect *rp);
 PASCAL_FUNCTION(donotPrOval);
-extern void C_PrOval(GrafVerb v, Rect *rp);
+extern void C_PrOval(GrafVerb v, const Rect *rp);
 PASCAL_FUNCTION(PrOval);
 extern void C_textasPS(INTEGER n, Ptr textbufp,
                                    Point num, Point den);
@@ -265,16 +265,16 @@ extern void C_donotPrPoly(GrafVerb verb, PolyHandle ph);
 PASCAL_FUNCTION(donotPrPoly);
 extern void C_PrPoly(GrafVerb verb, PolyHandle ph);
 PASCAL_FUNCTION(PrPoly);
-extern void C_donotPrRRect(GrafVerb verb, Rect *r,
+extern void C_donotPrRRect(GrafVerb verb, const Rect *r,
                                        INTEGER width, INTEGER height);
 PASCAL_FUNCTION(donotPrRRect);
-extern void C_PrRRect(GrafVerb verb, Rect *r, INTEGER width,
+extern void C_PrRRect(GrafVerb verb, const Rect *r, INTEGER width,
                                   INTEGER height);
 PASCAL_FUNCTION(PrRRect);
 
-extern void C_donotPrRect(GrafVerb v, Rect *rp);
+extern void C_donotPrRect(GrafVerb v, const Rect *rp);
 PASCAL_FUNCTION(donotPrRect);
-extern void C_PrRect(GrafVerb v, Rect *rp);
+extern void C_PrRect(GrafVerb v, const Rect *rp);
 PASCAL_FUNCTION(PrRect);
 extern void C_donotPrRgn(GrafVerb verb, RgnHandle rgn);
 PASCAL_FUNCTION(donotPrRgn);

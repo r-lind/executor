@@ -36,7 +36,7 @@ void Executor::C_MoveControl(ControlHandle c, INTEGER h, INTEGER v) /* IMI-325 *
     }
 }
 
-void Executor::C_DragControl(ControlHandle c, Point p, Rect *limit, Rect *slop,
+void Executor::C_DragControl(ControlHandle c, Point p, const Rect *limit, const Rect *slop,
                              INTEGER axis) /* IMI-325 */
 {
     RgnHandle rh;

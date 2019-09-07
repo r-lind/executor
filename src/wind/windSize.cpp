@@ -161,7 +161,7 @@ void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
     }
 }
 
-void Executor::C_DragWindow(WindowPtr wp, Point p, Rect *rp)
+void Executor::C_DragWindow(WindowPtr wp, Point p, const Rect *rp)
 {
     RgnHandle rh;
     LONGINT l;
@@ -208,7 +208,7 @@ void Executor::C_DragWindow(WindowPtr wp, Point p, Rect *rp)
         SetPort(p);       \
     } while(false)
 
-LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, Rect *rp)
+LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, const Rect *rp)
 {
     EventRecord ev;
     GrafPtr gp;

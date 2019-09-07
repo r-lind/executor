@@ -16,10 +16,10 @@
 
 using namespace Executor;
 
-static BOOLEAN EquivRect(Rect *, Rect *);
+static BOOLEAN EquivRect(const Rect *, const Rect *);
 static INTEGER fromhex(char c);
 
-static BOOLEAN EquivRect(Rect *rp1, Rect *rp2)
+static BOOLEAN EquivRect(const Rect *rp1, const Rect *rp2)
 {
     return rp1->bottom - rp1->top == rp2->bottom - rp2->top && rp1->right - rp1->left == rp2->right - rp2->left;
 }
@@ -98,7 +98,7 @@ void Executor::C_StuffHex(Ptr p, ConstStringPtr s)
         *p = (*p & 0xF) | (fromhex(*sp) << 4);
 }
 
-void Executor::C_ScalePt(GUEST<Point> *pt, Rect *srcr, Rect *dstr)
+void Executor::C_ScalePt(GUEST<Point> *pt, const Rect *srcr, const Rect *dstr)
 {
     INTEGER srcdh, srcdv, dstdh, dstdv;
 
@@ -119,7 +119,7 @@ void Executor::C_ScalePt(GUEST<Point> *pt, Rect *srcr, Rect *dstr)
     }
 }
 
-void Executor::C_MapPt(GUEST<Point> *pt, Rect *srcr, Rect *dstr)
+void Executor::C_MapPt(GUEST<Point> *pt, const Rect *srcr, const Rect *dstr)
 {
     INTEGER srcdh, srcdv, dstdh, dstdv;
 
@@ -136,7 +136,7 @@ void Executor::C_MapPt(GUEST<Point> *pt, Rect *srcr, Rect *dstr)
     pt->v = pt->v + (dstr->top);
 }
 
-void Executor::C_MapRect(Rect *r, Rect *srcr, Rect *dstr)
+void Executor::C_MapRect(Rect *r, const Rect *srcr, const Rect *dstr)
 {
     MapPt((GUEST<Point> *)&r->top, srcr, dstr);
     MapPt((GUEST<Point> *)&r->bottom, srcr, dstr);
@@ -147,7 +147,7 @@ void Executor::C_MapRect(Rect *r, Rect *srcr, Rect *dstr)
 #define MAPV(y) (y = UNFIX((y - yoff1) * ycoff) + yoff2)
 #define UNFIX(x) ((x) >> 16)
 
-void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
+void Executor::C_MapRgn(RgnHandle rh, const Rect *srcr, const Rect *dstr)
 {
     GUEST<INTEGER> *ip, *op, *saveop;
     INTEGER oldv, newv, *tempp, srcdh, dstdh, srcdv, dstdv;
@@ -250,7 +250,7 @@ void Executor::C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr)
     }
 }
 
-void Executor::C_MapPoly(PolyHandle poly, Rect *srcr, Rect *dstr)
+void Executor::C_MapPoly(PolyHandle poly, const Rect *srcr, const Rect *dstr)
 {
     GUEST<Point> *ip, *ep;
 

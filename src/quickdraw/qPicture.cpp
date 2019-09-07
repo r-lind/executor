@@ -100,7 +100,7 @@ PicHandle Executor::ROMlib_OpenPicture_helper(
     return (ph);
 }
 
-PicHandle Executor::C_OpenPicture(Rect *pf)
+PicHandle Executor::C_OpenPicture(const Rect *pf)
 {
     PicHandle retval;
 
@@ -392,7 +392,7 @@ void Executor::ROMlib_drawingverbpicupdate(GrafVerb v)
     }
 }
 
-void Executor::ROMlib_drawingverbrectpicupdate(GrafVerb v, Rect *rp)
+void Executor::ROMlib_drawingverbrectpicupdate(GrafVerb v, const Rect *rp)
 {
     piccachehand pch;
 
@@ -402,7 +402,7 @@ void Executor::ROMlib_drawingverbrectpicupdate(GrafVerb v, Rect *rp)
 }
 
 void Executor::ROMlib_drawingverbrectovalpicupdate(
-    GrafVerb v, Rect *rp, GUEST<Point> *ovp)
+    GrafVerb v, const Rect *rp, GUEST<Point> *ovp)
 {
     ROMlib_drawingverbrectpicupdate(v, rp);
     updateoval(ovp);

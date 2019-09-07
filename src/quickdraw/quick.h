@@ -54,10 +54,10 @@ extern void ROMlib_restorecursor(void);
 /* Declare functions in qHooks.c. */
 extern void ROMlib_CALLTEXT(INTEGER bc, Ptr bufp, Point num, Point den);
 extern void ROMlib_CALLLINE(Point p);
-extern void ROMlib_CALLRECT(GrafVerb v, Rect *rp);
-extern void ROMlib_CALLOVAL(GrafVerb v, Rect *rp);
-extern void ROMlib_CALLRRECT(GrafVerb v, Rect *rp, INTEGER ow, INTEGER oh);
-extern void ROMlib_CALLARC(GrafVerb v, Rect *rp, INTEGER starta,
+extern void ROMlib_CALLRECT(GrafVerb v, const Rect *rp);
+extern void ROMlib_CALLOVAL(GrafVerb v, const Rect *rp);
+extern void ROMlib_CALLRRECT(GrafVerb v, const Rect *rp, INTEGER ow, INTEGER oh);
+extern void ROMlib_CALLARC(GrafVerb v, const Rect *rp, INTEGER starta,
                            INTEGER arca);
 extern void ROMlib_CALLRGN(GrafVerb v, RgnHandle rh);
 extern void ROMlib_CALLPOLY(GrafVerb v, PolyHandle rh);
@@ -83,7 +83,7 @@ extern void ROMlib_PICWRITE(Ptr addr, INTEGER count);
 #define PICWRITE(a, c) ROMlib_PICWRITE((Ptr)(a), (c)) /* Cast is handy. */
 
 
-extern RgnHandle ROMlib_circrgn(Rect *rp);
+extern RgnHandle ROMlib_circrgn(const Rect *rp);
 extern void ROMlib_initport(GrafPtr p);
 extern void ROMlib_printrgn(RgnHandle h);
 

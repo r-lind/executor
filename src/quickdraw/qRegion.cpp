@@ -230,7 +230,7 @@ void Executor::C_SetRectRgn(RgnHandle rh, INTEGER left, INTEGER top,
     RGN_SET_SMALL(rh);
 }
 
-void Executor::C_RectRgn(RgnHandle rh, Rect *rect)
+void Executor::C_RectRgn(RgnHandle rh, const Rect *rect)
 {
     Rect r;
 
@@ -1474,7 +1474,7 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     ALLOCAEND
 }
 
-BOOLEAN Executor::C_RectInRgn(Rect *rp, RgnHandle rh) /* IMIV-23 */
+BOOLEAN Executor::C_RectInRgn(const Rect *rp, RgnHandle rh) /* IMIV-23 */
 {
     RgnHandle newrh;
     BOOLEAN retval;

@@ -15,27 +15,27 @@
 
 using namespace Executor;
 
-void Executor::C_FrameRect(Rect *r)
+void Executor::C_FrameRect(const Rect *r)
 {
     CALLRECT(frame, r);
 }
 
-void Executor::C_PaintRect(Rect *r)
+void Executor::C_PaintRect(const Rect *r)
 {
     CALLRECT(paint, r);
 }
 
-void Executor::C_EraseRect(Rect *r)
+void Executor::C_EraseRect(const Rect *r)
 {
     CALLRECT(erase, r);
 }
 
-void Executor::C_InvertRect(Rect *r)
+void Executor::C_InvertRect(const Rect *r)
 {
     CALLRECT(invert, r);
 }
 
-void Executor::C_FillRect(Rect *r, const Pattern *pat)
+void Executor::C_FillRect(const Rect *r, const Pattern *pat)
 {
     if(!EmptyRgn(PORT_VIS_REGION(qdGlobals().thePort)))
     {
@@ -44,79 +44,79 @@ void Executor::C_FillRect(Rect *r, const Pattern *pat)
     }
 }
 
-void Executor::C_FrameOval(Rect *r)
+void Executor::C_FrameOval(const Rect *r)
 {
     CALLOVAL(frame, r);
 }
 
-void Executor::C_PaintOval(Rect *r)
+void Executor::C_PaintOval(const Rect *r)
 {
     CALLOVAL(paint, r);
 }
 
-void Executor::C_EraseOval(Rect *r)
+void Executor::C_EraseOval(const Rect *r)
 {
     CALLOVAL(erase, r);
 }
 
-void Executor::C_InvertOval(Rect *r)
+void Executor::C_InvertOval(const Rect *r)
 {
     CALLOVAL(invert, r);
 }
 
-void Executor::C_FillOval(Rect *r, const Pattern *pat)
+void Executor::C_FillOval(const Rect *r, const Pattern *pat)
 {
     ROMlib_fill_pat(*pat);
     CALLOVAL(fill, r);
 }
 
-void Executor::C_FrameRoundRect(Rect *r, INTEGER ow, INTEGER oh)
+void Executor::C_FrameRoundRect(const Rect *r, INTEGER ow, INTEGER oh)
 {
     CALLRRECT(frame, r, ow, oh);
 }
 
-void Executor::C_PaintRoundRect(Rect *r, INTEGER ow, INTEGER oh)
+void Executor::C_PaintRoundRect(const Rect *r, INTEGER ow, INTEGER oh)
 {
     CALLRRECT(paint, r, ow, oh);
 }
 
-void Executor::C_EraseRoundRect(Rect *r, INTEGER ow, INTEGER oh)
+void Executor::C_EraseRoundRect(const Rect *r, INTEGER ow, INTEGER oh)
 {
     CALLRRECT(erase, r, ow, oh);
 }
 
-void Executor::C_InvertRoundRect(Rect *r, INTEGER ow, INTEGER oh)
+void Executor::C_InvertRoundRect(const Rect *r, INTEGER ow, INTEGER oh)
 {
     CALLRRECT(invert, r, ow, oh);
 }
 
-void Executor::C_FillRoundRect(Rect *r, INTEGER ow, INTEGER oh, const Pattern *pat)
+void Executor::C_FillRoundRect(const Rect *r, INTEGER ow, INTEGER oh, const Pattern *pat)
 {
     ROMlib_fill_pat(*pat);
     CALLRRECT(fill, r, ow, oh);
 }
 
-void Executor::C_FrameArc(Rect *r, INTEGER start, INTEGER angle)
+void Executor::C_FrameArc(const Rect *r, INTEGER start, INTEGER angle)
 {
     CALLARC(frame, r, start, angle);
 }
 
-void Executor::C_PaintArc(Rect *r, INTEGER start, INTEGER angle)
+void Executor::C_PaintArc(const Rect *r, INTEGER start, INTEGER angle)
 {
     CALLARC(paint, r, start, angle);
 }
 
-void Executor::C_EraseArc(Rect *r, INTEGER start, INTEGER angle)
+void Executor::C_EraseArc(const Rect *r, INTEGER start, INTEGER angle)
 {
     CALLARC(erase, r, start, angle);
 }
 
-void Executor::C_InvertArc(Rect *r, INTEGER start, INTEGER angle)
+void Executor::C_InvertArc(const Rect *r, INTEGER start, INTEGER angle)
 {
     CALLARC(invert, r, start, angle);
 }
 
-void Executor::C_FillArc(Rect *r, INTEGER start, INTEGER angle, const Pattern *pat)
+void Executor::C_FillArc(const Rect *r, INTEGER start, INTEGER angle, const Pattern *pat)
 {
     ROMlib_fill_pat(*pat);
     CALLARC(fill, r, start, angle);

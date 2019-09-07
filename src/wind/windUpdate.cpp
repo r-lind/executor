@@ -12,7 +12,7 @@
 
 using namespace Executor;
 
-void Executor::C_InvalRect(Rect *r)
+void Executor::C_InvalRect(const Rect *r)
 {
     if(qdGlobals().thePort)
     {
@@ -48,7 +48,7 @@ void Executor::C_InvalRgn(RgnHandle r)
     OffsetRgn(r, left, top);
 }
 
-void Executor::C_ValidRect(Rect *r)
+void Executor::C_ValidRect(const Rect *r)
 {
     RgnHandle rh;
 

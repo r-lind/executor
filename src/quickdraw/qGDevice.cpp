@@ -298,7 +298,7 @@ GDHandle Executor::C_GetMainDevice()
     return retval;
 }
 
-GDHandle Executor::C_GetMaxDevice(Rect *globalRect)
+GDHandle Executor::C_GetMaxDevice(const Rect *globalRect)
 {
     /* FIXME:
      currently we have only a single device, so that has

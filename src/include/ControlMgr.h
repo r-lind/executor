@@ -175,7 +175,7 @@ PASCAL_TRAP(Draw1Control, 0xA96D);
 extern void C_UpdateControls(WindowPtr wp,
                                       RgnHandle rh);
 PASCAL_TRAP(UpdateControls, 0xA953);
-extern ControlHandle C_NewControl(WindowPtr wst, Rect *r,
+extern ControlHandle C_NewControl(WindowPtr wst, const Rect *r,
                                               ConstStringPtr title, BOOLEAN vis, INTEGER value, INTEGER min,
                                               INTEGER max, INTEGER procid, LONGINT rc);
 PASCAL_TRAP(NewControl, 0xA954);
@@ -237,7 +237,7 @@ extern void C_MoveControl(ControlHandle c,
                                       INTEGER h, INTEGER v);
 PASCAL_TRAP(MoveControl, 0xA959);
 extern void C_DragControl(ControlHandle c,
-                                      Point p, Rect *limit, Rect *slop, INTEGER axis);
+                                      Point p, const Rect *limit, const Rect *slop, INTEGER axis);
 PASCAL_TRAP(DragControl, 0xA967);
 extern void C_SizeControl(ControlHandle c,
                                       INTEGER width, INTEGER height);

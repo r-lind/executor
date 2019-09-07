@@ -89,7 +89,7 @@ check_lists(void)
 }
 #endif
 
-ListHandle Executor::C_LNew(Rect *rview, Rect *bounds, Point csize,
+ListHandle Executor::C_LNew(const Rect *rview, const Rect *bounds, Point csize,
                             INTEGER proc, WindowPtr wind, BOOLEAN draw,
                             BOOLEAN grow, BOOLEAN scrollh,
                             BOOLEAN scrollv) /* IMIV-270 */

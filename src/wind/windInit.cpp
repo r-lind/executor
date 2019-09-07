@@ -269,7 +269,7 @@ void Executor::C_SetDeskCPat(PixPatHandle ph)
 static void
 ROMlib_new_window_common(WindowPeek w,
                          int allocated_p, int cwindow_p,
-                         Rect *bounds, ConstStringPtr title, BOOLEAN visible_p,
+                         const Rect *bounds, ConstStringPtr title, BOOLEAN visible_p,
                          INTEGER proc_id, WindowPtr behind,
                          BOOLEAN go_away_flag, LONGINT ref_con)
 {
@@ -415,7 +415,7 @@ ROMlib_new_window_common(WindowPeek w,
     SetPort(save_port);
 }
 
-WindowPtr Executor::C_NewWindow(Ptr window_storage, Rect *bounds,
+WindowPtr Executor::C_NewWindow(Ptr window_storage, const Rect *bounds,
                                 ConstStringPtr title, BOOLEAN visible_p,
                                 INTEGER proc_id, WindowPtr behind,
                                 BOOLEAN go_away_flag, LONGINT ref_con)
@@ -459,7 +459,7 @@ WindowPtr Executor::C_NewWindow(Ptr window_storage, Rect *bounds,
     return (WindowPtr)w;
 }
 
-CWindowPtr Executor::C_NewCWindow(Ptr window_storage, Rect *bounds,
+CWindowPtr Executor::C_NewCWindow(Ptr window_storage, const Rect *bounds,
                                   ConstStringPtr title, BOOLEAN visible_p,
                                   INTEGER proc_id, CWindowPtr behind,
                                   BOOLEAN go_away_flag, LONGINT ref_con)

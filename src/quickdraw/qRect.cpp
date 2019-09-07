@@ -61,12 +61,12 @@ BOOLEAN Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
     }
 }
 
-BOOLEAN Executor::C_EmptyRect(Rect *r)
+BOOLEAN Executor::C_EmptyRect(const Rect *r)
 {
     return (r->top >= r->bottom || r->left >= r->right);
 }
 
-void Executor::C_UnionRect(Rect *s1, Rect *s2, Rect *dest)
+void Executor::C_UnionRect(const Rect *s1, const Rect *s2, Rect *dest)
 {
     dest->top = std::min(s1->top, s2->top);
     dest->left = std::min(s1->left, s2->left);
@@ -74,7 +74,7 @@ void Executor::C_UnionRect(Rect *s1, Rect *s2, Rect *dest)
     dest->right = std::max(s1->right, s2->right);
 }
 
-BOOLEAN Executor::C_PtInRect(Point p, Rect *r)
+BOOLEAN Executor::C_PtInRect(Point p, const Rect *r)
 {
     BOOLEAN retval;
 
@@ -93,7 +93,7 @@ void Executor::C_Pt2Rect(Point p1, Point p2, Rect *dest)
     dest->right = std::max(p1.h, p2.h);
 }
 
-void Executor::C_PtToAngle(Rect *rp, Point p, GUEST<INTEGER> *angle)
+void Executor::C_PtToAngle(const Rect *rp, Point p, GUEST<INTEGER> *angle)
 {
     int a, dx, dy;
 

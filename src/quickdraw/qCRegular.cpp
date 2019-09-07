@@ -34,7 +34,7 @@ using namespace Executor;
         }                                                            \
     } while(false)
 
-void Executor::C_FillCRect(Rect *r, PixPatHandle pixpat)
+void Executor::C_FillCRect(const Rect *r, PixPatHandle pixpat)
 {
     /* #warning "restore settings after FillCxxx?" */
     FillCxxx(CALLRECT(fill, r));

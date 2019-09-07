@@ -348,7 +348,7 @@ void Executor::C_CalcMask(Ptr srcp, Ptr dstp, INTEGER srcr, INTEGER dstr,
 
 static void
 copy_mask_1(BitMap *src_bm, BitMap *mask_bm, BitMap *dst_bm,
-            Rect *src_rect, Rect *mask_rect, Rect *dst_rect)
+            const Rect *src_rect, const Rect *mask_rect, const Rect *dst_rect)
 {
     RgnHandle mask_rgn;
 
@@ -415,8 +415,8 @@ copy_mask_1(BitMap *src_bm, BitMap *mask_bm, BitMap *dst_bm,
 }
 
 void Executor::C_CopyMask(BitMap *src_bogo_map, BitMap *mask_bogo_map,
-                          BitMap *dst_bogo_map, Rect *src_rect,
-                          Rect *mask_rect, Rect *dst_rect) /* IMIV-24 */
+                          BitMap *dst_bogo_map, const Rect *src_rect,
+                          const Rect *mask_rect, const Rect *dst_rect) /* IMIV-24 */
 {
     BitMap mask_bm;
     void *mask_bits;
@@ -446,8 +446,8 @@ void Executor::C_CopyMask(BitMap *src_bogo_map, BitMap *mask_bogo_map,
 }
 
 void Executor::C_CopyDeepMask(BitMap *srcBits, BitMap *maskBits,
-                                   BitMap *dstBits, Rect *srcRect,
-                                   Rect *maskRect, Rect *dstRect, INTEGER mode,
+                                   BitMap *dstBits, const Rect *srcRect,
+                                   const Rect *maskRect, const Rect *dstRect, INTEGER mode,
                                    RgnHandle maskRgn)
 {
     warning_unimplemented("poorly implemented");

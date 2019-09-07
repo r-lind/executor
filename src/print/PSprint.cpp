@@ -616,7 +616,7 @@ graymatch(unsigned char patp[8], INTEGER pnMode,
     return retval;
 }
 
-static void doimage(LONGINT verb, Rect *rp, GrafPtr thePortp)
+static void doimage(LONGINT verb, const Rect *rp, GrafPtr thePortp)
 {
     unsigned char *patp, pat[8], c, *bytes, *p;
     int rowbytes, i, j, toshift, numbytesneeded;
@@ -1231,7 +1231,7 @@ void pnupdate(GrafPtr thePortp)
     /* TODO: more stuff here */
 }
 
-void Executor::NeXTPrArc(LONGINT verb, Rect *rp, LONGINT starta, LONGINT arca,
+void Executor::NeXTPrArc(LONGINT verb, const Rect *rp, LONGINT starta, LONGINT arca,
                          GrafPtr thePortp)
 {
     if(rp->left != rp->right && rp->top != rp->bottom) /* ignore empty rectangles */
@@ -1561,7 +1561,7 @@ void Executor::NeXTPrLine(Point to, GrafPtr thePortp)
     }
 }
 
-void Executor::NeXTPrOval(LONGINT verb, Rect *rp, GrafPtr thePortp)
+void Executor::NeXTPrOval(LONGINT verb, const Rect *rp, GrafPtr thePortp)
 {
     NeXTPrArc(verb, rp, 0, 360, thePortp);
 }
@@ -1624,7 +1624,7 @@ void Executor::NeXTPrPoly(LONGINT verb, PolyHandle ph, GrafPtr thePortp)
     }
 }
 
-void Executor::NeXTPrRRect(LONGINT verb, Rect *rp, LONGINT width, LONGINT height,
+void Executor::NeXTPrRRect(LONGINT verb, const Rect *rp, LONGINT width, LONGINT height,
                            GrafPtr thePortp)
 {
     float sfactor, midy, rt, rb, rl, rr, sfactor2;
@@ -1678,7 +1678,7 @@ void Executor::NeXTPrRRect(LONGINT verb, Rect *rp, LONGINT width, LONGINT height
     }
 }
 
-void Executor::NeXTPrRect(LONGINT verb, Rect *rp, GrafPtr thePortp)
+void Executor::NeXTPrRect(LONGINT verb, const Rect *rp, GrafPtr thePortp)
 {
     short psh, psv;
 

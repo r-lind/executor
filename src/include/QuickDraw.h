@@ -157,10 +157,10 @@ struct FontInfo
 
 using QDTextUPP = UPP<void(INTEGER bc, Ptr textb, Point num, Point den)>;
 using QDLineUPP = UPP<void(Point drawto)>;
-using QDRectUPP = UPP<void(GrafVerb verb, Rect *rp)>;
-using QDRRectUPP = UPP<void(GrafVerb verb, Rect *rp, INTEGER ow, INTEGER oh)>;
-using QDOvalUPP = UPP<void(GrafVerb verb, Rect *rp)>;
-using QDArcUPP = UPP<void(GrafVerb verb, Rect *rp, INTEGER ang, INTEGER arc)>;
+using QDRectUPP = UPP<void(GrafVerb verb, const Rect *rp)>;
+using QDRRectUPP = UPP<void(GrafVerb verb, const Rect *rp, INTEGER ow, INTEGER oh)>;
+using QDOvalUPP = UPP<void(GrafVerb verb, const Rect *rp)>;
+using QDArcUPP = UPP<void(GrafVerb verb, const Rect *rp, INTEGER ang, INTEGER arc)>;
 using QDPolyUPP = UPP<void(GrafVerb verb, PolyHandle poly)>;
 using QDRgnUPP = UPP<void(GrafVerb verb, RgnHandle rgn)>;
 using QDBitsUPP = UPP<void(const BitMap *srcb, const Rect *srcr, const Rect *dstr, INTEGER mod, RgnHandle mask)>;
@@ -574,9 +574,8 @@ extern void C_CalcMask(Ptr srcp, Ptr dstp,
                                    INTEGER srcr, INTEGER dstr, INTEGER height, INTEGER width);
 PASCAL_TRAP(CalcMask, 0xA838);
 extern void C_CopyMask(BitMap *srcbp,
-                                   BitMap *mskbp, BitMap *dstbp, Rect *srcrp, Rect *
-                                                                                  mskrp,
-                                   Rect *dstrp);
+                        BitMap *mskbp, BitMap *dstbp, const Rect *srcrp,
+                        const Rect * mskrp, const Rect *dstrp);
 PASCAL_TRAP(CopyMask, 0xA817);
 extern INTEGER *GetMaskTable(void);
 extern void C_CharExtra(Fixed Extra);
@@ -590,16 +589,15 @@ extern BOOLEAN C_GetPixel(INTEGER h, INTEGER v);
 PASCAL_TRAP(GetPixel, 0xA865);
 extern void C_StuffHex(Ptr p, ConstStringPtr s);
 PASCAL_TRAP(StuffHex, 0xA866);
-extern void C_ScalePt(GUEST<Point> *pt, Rect *srcr, Rect *dstr);
+extern void C_ScalePt(GUEST<Point> *pt, const Rect *srcr, const Rect *dstr);
 PASCAL_TRAP(ScalePt, 0xA8F8);
-extern void C_MapPt(GUEST<Point> *pt, Rect *srcr, Rect *dstr);
+extern void C_MapPt(GUEST<Point> *pt, const Rect *srcr, const Rect *dstr);
 PASCAL_TRAP(MapPt, 0xA8F9);
-extern void C_MapRect(Rect *r, Rect *srcr, Rect *dstr);
+extern void C_MapRect(Rect *r, const Rect *srcr, const Rect *dstr);
 PASCAL_TRAP(MapRect, 0xA8FA);
-extern void C_MapRgn(RgnHandle rh, Rect *srcr, Rect *dstr);
+extern void C_MapRgn(RgnHandle rh, const Rect *srcr, const Rect *dstr);
 PASCAL_TRAP(MapRgn, 0xA8FB);
-extern void C_MapPoly(PolyHandle poly, Rect *srcr,
-                                  Rect *dstr);
+extern void C_MapPoly(PolyHandle poly, const Rect *srcr, const Rect *dstr);
 PASCAL_TRAP(MapPoly, 0xA8FC);
 extern void C_HidePen(void);
 PASCAL_TRAP(HidePen, 0xA896);
@@ -627,9 +625,9 @@ extern void C_LineTo(INTEGER h, INTEGER v);
 PASCAL_TRAP(LineTo, 0xA891);
 extern void C_Line(INTEGER dh, INTEGER dv);
 PASCAL_TRAP(Line, 0xA892);
-extern void C_DrawPicture(PicHandle pic, Rect *destrp);
+extern void C_DrawPicture(PicHandle pic, const Rect *destrp);
 PASCAL_TRAP(DrawPicture, 0xA8F6);
-extern PicHandle C_OpenPicture(Rect *pf);
+extern PicHandle C_OpenPicture(const Rect *pf);
 PASCAL_TRAP(OpenPicture, 0xA8F3);
 extern void C_ClosePicture(void);
 PASCAL_TRAP(ClosePicture, 0xA8F4);
@@ -670,17 +668,17 @@ PASCAL_TRAP(OffsetRect, 0xA8A8);
 extern void C_InsetRect(Rect *r, INTEGER dh, INTEGER dv);
 PASCAL_TRAP(InsetRect, 0xA8A9);
 
-extern BOOLEAN C_EmptyRect(Rect *r);
+extern BOOLEAN C_EmptyRect(const Rect *r);
 PASCAL_TRAP(EmptyRect, 0xA8AE);
 extern BOOLEAN C_SectRect(const Rect *s1, const Rect *s2, Rect *dest);
 PASCAL_TRAP(SectRect, 0xA8AA);
-extern void C_UnionRect(Rect *s1, Rect *s2, Rect *dest);
+extern void C_UnionRect(const Rect *s1, const Rect *s2, Rect *dest);
 PASCAL_TRAP(UnionRect, 0xA8AB);
-extern BOOLEAN C_PtInRect(Point p, Rect *r);
+extern BOOLEAN C_PtInRect(Point p, const Rect *r);
 PASCAL_TRAP(PtInRect, 0xA8AD);
 extern void C_Pt2Rect(Point p1, Point p2, Rect *dest);
 PASCAL_TRAP(Pt2Rect, 0xA8AC);
-extern void C_PtToAngle(Rect *rp, Point p, GUEST<INTEGER> *angle);
+extern void C_PtToAngle(const Rect *rp, Point p, GUEST<INTEGER> *angle);
 PASCAL_TRAP(PtToAngle, 0xA8C3);
 extern BOOLEAN C_EqualRect(const Rect *r1, const Rect *r2);
 PASCAL_TRAP(EqualRect, 0xA8A6);
@@ -699,7 +697,7 @@ PASCAL_TRAP(SetEmptyRgn, 0xA8DD);
 extern void C_SetRectRgn(RgnHandle rh, INTEGER left,
                                      INTEGER top, INTEGER right, INTEGER bottom);
 PASCAL_TRAP(SetRectRgn, 0xA8DE);
-extern void C_RectRgn(RgnHandle rh, Rect *rect);
+extern void C_RectRgn(RgnHandle rh, const Rect *rect);
 PASCAL_TRAP(RectRgn, 0xA8DF);
 extern void C_OffsetRgn(RgnHandle rh, INTEGER dh,
                                     INTEGER dv);
@@ -720,62 +718,52 @@ PASCAL_TRAP(DiffRgn, 0xA8E6);
 extern void C_XorRgn(RgnHandle s1, RgnHandle s2,
                                  RgnHandle dest);
 PASCAL_TRAP(XorRgn, 0xA8E7);
-extern BOOLEAN C_RectInRgn(Rect *rp,
+extern BOOLEAN C_RectInRgn(const Rect *rp,
                                        RgnHandle rh);
 PASCAL_TRAP(RectInRgn, 0xA8E9);
 extern BOOLEAN C_EqualRgn(RgnHandle r1, RgnHandle r2);
 PASCAL_TRAP(EqualRgn, 0xA8E3);
 extern BOOLEAN C_EmptyRgn(RgnHandle rh);
 PASCAL_TRAP(EmptyRgn, 0xA8E2);
-extern void C_FrameRect(Rect *r);
+extern void C_FrameRect(const Rect *r);
 PASCAL_TRAP(FrameRect, 0xA8A1);
-extern void C_PaintRect(Rect *r);
+extern void C_PaintRect(const Rect *r);
 PASCAL_TRAP(PaintRect, 0xA8A2);
-extern void C_EraseRect(Rect *r);
+extern void C_EraseRect(const Rect *r);
 PASCAL_TRAP(EraseRect, 0xA8A3);
-extern void C_InvertRect(Rect *r);
+extern void C_InvertRect(const Rect *r);
 PASCAL_TRAP(InvertRect, 0xA8A4);
-extern void C_FillRect(Rect *r, const Pattern *pat);
+extern void C_FillRect(const Rect *r, const Pattern *pat);
 PASCAL_TRAP(FillRect, 0xA8A5);
-extern void C_FrameOval(Rect *r);
+extern void C_FrameOval(const Rect *r);
 PASCAL_TRAP(FrameOval, 0xA8B7);
-extern void C_PaintOval(Rect *r);
+extern void C_PaintOval(const Rect *r);
 PASCAL_TRAP(PaintOval, 0xA8B8);
-extern void C_EraseOval(Rect *r);
+extern void C_EraseOval(const Rect *r);
 PASCAL_TRAP(EraseOval, 0xA8B9);
-extern void C_InvertOval(Rect *r);
+extern void C_InvertOval(const Rect *r);
 PASCAL_TRAP(InvertOval, 0xA8BA);
-extern void C_FillOval(Rect *r, const Pattern *pat);
+extern void C_FillOval(const Rect *r, const Pattern *pat);
 PASCAL_TRAP(FillOval, 0xA8BB);
-extern void C_FrameRoundRect(Rect *r, INTEGER ow,
-                                         INTEGER oh);
+extern void C_FrameRoundRect(const Rect *r, INTEGER ow, INTEGER oh);
 PASCAL_TRAP(FrameRoundRect, 0xA8B0);
-extern void C_PaintRoundRect(Rect *r, INTEGER ow,
-                                         INTEGER oh);
+extern void C_PaintRoundRect(const Rect *r, INTEGER ow, INTEGER oh);
 PASCAL_TRAP(PaintRoundRect, 0xA8B1);
-extern void C_EraseRoundRect(Rect *r, INTEGER ow,
-                                         INTEGER oh);
+extern void C_EraseRoundRect(const Rect *r, INTEGER ow, INTEGER oh);
 PASCAL_TRAP(EraseRoundRect, 0xA8B2);
-extern void C_InvertRoundRect(Rect *r, INTEGER ow,
-                                          INTEGER oh);
+extern void C_InvertRoundRect(const Rect *r, INTEGER ow, INTEGER oh);
 PASCAL_TRAP(InvertRoundRect, 0xA8B3);
-extern void C_FillRoundRect(Rect *r, INTEGER ow,
-                                        INTEGER oh, const Pattern *pat);
+extern void C_FillRoundRect(const Rect *r, INTEGER ow, INTEGER oh, const Pattern *pat);
 PASCAL_TRAP(FillRoundRect, 0xA8B4);
-extern void C_FrameArc(Rect *r, INTEGER start,
-                                   INTEGER angle);
+extern void C_FrameArc(const Rect *r, INTEGER start, INTEGER angle);
 PASCAL_TRAP(FrameArc, 0xA8BE);
-extern void C_PaintArc(Rect *r, INTEGER start,
-                                   INTEGER angle);
+extern void C_PaintArc(const Rect *r, INTEGER start, INTEGER angle);
 PASCAL_TRAP(PaintArc, 0xA8BF);
-extern void C_EraseArc(Rect *r, INTEGER start,
-                                   INTEGER angle);
+extern void C_EraseArc(const Rect *r, INTEGER start, INTEGER angle);
 PASCAL_TRAP(EraseArc, 0xA8C0);
-extern void C_InvertArc(Rect *r, INTEGER start,
-                                    INTEGER angle);
+extern void C_InvertArc(const Rect *r, INTEGER start, INTEGER angle);
 PASCAL_TRAP(InvertArc, 0xA8C1);
-extern void C_FillArc(Rect *r, INTEGER start,
-                                  INTEGER angle, const Pattern *pat);
+extern void C_FillArc(const Rect *r, INTEGER start, INTEGER angle, const Pattern *pat);
 PASCAL_TRAP(FillArc, 0xA8C2);
 extern void C_FrameRgn(RgnHandle rh);
 PASCAL_TRAP(FrameRgn, 0xA8D2);
@@ -799,8 +787,7 @@ extern void C_FillPoly(PolyHandle poly, const Pattern *pat);
 PASCAL_TRAP(FillPoly, 0xA8CA);
 extern void C_SetStdProcs(QDProcs *procs);
 PASCAL_TRAP(SetStdProcs, 0xA8EA);
-extern void C_StdArc(GrafVerb verb, Rect *r,
-                                 INTEGER starta, INTEGER arca);
+extern void C_StdArc(GrafVerb verb, const Rect *r, INTEGER starta, INTEGER arca);
 PASCAL_TRAP(StdArc, 0xA8BD);
 
 extern void C_StdBits(const BitMap *srcbmp,
@@ -813,7 +800,7 @@ extern void StdBitsPicSaveFlag(const BitMap *srcbmp,
 
 extern void C_StdLine(Point p);
 PASCAL_TRAP(StdLine, 0xA890);
-extern void C_StdOval(GrafVerb v, Rect *rp);
+extern void C_StdOval(GrafVerb v, const Rect *rp);
 PASCAL_TRAP(StdOval, 0xA8B6);
 extern void C_StdComment(INTEGER kind, INTEGER size,
                                      Handle hand);
@@ -824,10 +811,10 @@ extern void C_StdPutPic(const void *sp, INTEGER bc);
 PASCAL_TRAP(StdPutPic, 0xA8F0);
 extern void C_StdPoly(GrafVerb verb, PolyHandle ph);
 PASCAL_TRAP(StdPoly, 0xA8C5);
-extern void C_StdRRect(GrafVerb verb, Rect *r,
+extern void C_StdRRect(GrafVerb verb, const Rect *r,
                                    INTEGER width, INTEGER height);
 PASCAL_TRAP(StdRRect, 0xA8AF);
-extern void C_StdRect(GrafVerb v, Rect *rp);
+extern void C_StdRect(GrafVerb v, const Rect *rp);
 PASCAL_TRAP(StdRect, 0xA8A0);
 extern void C_StdRgn(GrafVerb verb, RgnHandle rgn);
 PASCAL_TRAP(StdRgn, 0xA8D1);
@@ -872,21 +859,21 @@ extern void C_SetCPixel(INTEGER h, INTEGER v,
 PASCAL_TRAP(SetCPixel, 0xAA16);
 
 extern void C_SeedCFill(BitMap *srcbp, BitMap *dstbp,
-                                    Rect *srcrp, Rect *dstrp, INTEGER seedh, INTEGER seedv,
+                                    const Rect *srcrp, const Rect *dstrp, INTEGER seedh, INTEGER seedv,
                                     ProcPtr matchprocp, LONGINT matchdata);
 PASCAL_TRAP(SeedCFill, 0xAA50);
 
 extern void C_CalcCMask(BitMap *srcbp, BitMap *dstbp,
-                                    Rect *srcrp, Rect *dstrp, RGBColor *seedrgbp, ProcPtr matchprocp,
+                                    const Rect *srcrp, const Rect *dstrp, RGBColor *seedrgbp, ProcPtr matchprocp,
                                     LONGINT matchdata);
 PASCAL_TRAP(CalcCMask, 0xAA4F);
 extern void C_CopyDeepMask(
     BitMap *srcBits,
     BitMap *maskBits,
     BitMap *dstBits,
-    Rect *srcRect,
-    Rect *maskRect,
-    Rect *dstRect,
+    const Rect *srcRect,
+    const Rect *maskRect,
+    const Rect *dstRect,
     INTEGER mode,
     RgnHandle maskRgn);
 PASCAL_TRAP(CopyDeepMask, 0xAA51);

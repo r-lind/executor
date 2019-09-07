@@ -168,7 +168,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
                          bool color_p,
                          CTabHandle w_ctab,
                          Handle item_color_table_h,
-                         Rect *bounds, ConstStringPtr title,
+                         const Rect *bounds, ConstStringPtr title,
                          bool visible_p,
                          int16_t proc_id, WindowPtr behind,
                          bool go_away_flag,
@@ -271,7 +271,7 @@ ROMlib_new_dialog_common(DialogPtr dp,
 }
 
 /* IM-MTE calls this NewColorDialog () */
-CDialogPtr Executor::C_NewColorDialog(Ptr storage, Rect *bounds, ConstStringPtr title,
+CDialogPtr Executor::C_NewColorDialog(Ptr storage, const Rect *bounds, ConstStringPtr title,
                                   BOOLEAN visible_p, INTEGER proc_id,
                                   WindowPtr behind, BOOLEAN go_away_flag,
                                   LONGINT ref_con, Handle items) /* IMI-412 */
@@ -283,7 +283,7 @@ CDialogPtr Executor::C_NewColorDialog(Ptr storage, Rect *bounds, ConstStringPtr 
                                                 items);
 }
 
-DialogPtr Executor::C_NewDialog(Ptr storage, Rect *bounds, ConstStringPtr title,
+DialogPtr Executor::C_NewDialog(Ptr storage, const Rect *bounds, ConstStringPtr title,
                                 BOOLEAN visible_p, INTEGER proc_id,
                                 WindowPtr behind, BOOLEAN go_away_flag,
                                 LONGINT ref_con, Handle items) /* IMI-412 */

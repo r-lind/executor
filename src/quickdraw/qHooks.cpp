@@ -61,7 +61,7 @@ void Executor::ROMlib_CALLLINE(Point p)
         C_StdLine(p);
 }
 
-void Executor::ROMlib_CALLRECT(GrafVerb v, Rect *rp)
+void Executor::ROMlib_CALLRECT(GrafVerb v, const Rect *rp)
 {
     QDProcsPtr gp;
     QDRectUPP pp;
@@ -76,7 +76,7 @@ void Executor::ROMlib_CALLRECT(GrafVerb v, Rect *rp)
         C_StdRect(v, rp);
 }
 
-void Executor::ROMlib_CALLOVAL(GrafVerb v, Rect *rp)
+void Executor::ROMlib_CALLOVAL(GrafVerb v, const Rect *rp)
 {
     QDProcsPtr gp;
     QDOvalUPP pp;
@@ -91,7 +91,7 @@ void Executor::ROMlib_CALLOVAL(GrafVerb v, Rect *rp)
         C_StdOval(v, rp);
 }
 
-void Executor::ROMlib_CALLRRECT(GrafVerb v, Rect *rp, INTEGER ow, INTEGER oh)
+void Executor::ROMlib_CALLRRECT(GrafVerb v, const Rect *rp, INTEGER ow, INTEGER oh)
 {
     QDProcsPtr gp;
     QDRRectUPP pp;
@@ -106,7 +106,7 @@ void Executor::ROMlib_CALLRRECT(GrafVerb v, Rect *rp, INTEGER ow, INTEGER oh)
         C_StdRRect(v, rp, ow, oh);
 }
 
-void Executor::ROMlib_CALLARC(GrafVerb v, Rect *rp, INTEGER starta, INTEGER arca)
+void Executor::ROMlib_CALLARC(GrafVerb v, const Rect *rp, INTEGER starta, INTEGER arca)
 {
     QDProcsPtr gp;
     QDArcUPP pp;
