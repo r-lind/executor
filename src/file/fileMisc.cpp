@@ -63,7 +63,7 @@ int ROMlib_lasterrnomapped;
 #define install_errno(uerr, merr)         \
     do                                    \
     {                                     \
-        gui_assert(uerr < NELEM(xtable)); \
+        gui_assert(uerr < std::size(xtable)); \
         xtable[uerr] = merr;              \
     } while(false);
 
@@ -78,7 +78,7 @@ OSErr Executor::ROMlib_maperrno() /* INTERNAL */
     {
         int i;
 
-        for(i = 0; i < (int)NELEM(xtable); ++i)
+        for(i = 0; i < (int)std::size(xtable); ++i)
             xtable[i] = fsDSIntErr;
 
         install_errno(0, noErr);
@@ -115,7 +115,7 @@ OSErr Executor::ROMlib_maperrno() /* INTERNAL */
     errno_save = errno;
     ROMlib_lasterrnomapped = errno_save;
 
-    if(errno_save < 0 || errno_save >= (int)NELEM(xtable))
+    if(errno_save < 0 || errno_save >= (int)std::size(xtable))
         retval = fsDSIntErr;
     else
         retval = xtable[errno_save];

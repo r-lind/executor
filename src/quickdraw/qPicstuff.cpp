@@ -1675,7 +1675,7 @@ void Executor::C_DrawPicture(PicHandle pic, const Rect *destrp)
         pp = points;
         bp = bytes;
         rp = rects;
-        if(opcode < NELEM(wparray))
+        if(opcode < std::size(wparray))
         {
             for(ac = wparray[opcode].argcode, sc = scalevalues[ac >> 28],
             ac &= ARGMASK;
@@ -1934,7 +1934,7 @@ void Executor::C_DrawPicture(PicHandle pic, const Rect *destrp)
         {
             vers = bytes[0];
         }
-        else if(opcode < NELEM(wparray))
+        else if(opcode < std::size(wparray))
         {
             f = wparray[opcode].func;
             switch(wparray[opcode].argcode & ARGMASK)

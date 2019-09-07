@@ -769,7 +769,7 @@ static void reset_low_globals(void)
     {
         int i;
 
-        for(i = 0; i < (int)NELEM(LM(AppPacks)); ++i)
+        for(i = 0; i < (int)std::size(LM(AppPacks)); ++i)
             LM(AppPacks)[i] = 0;
     }
     LM(SysEvtMask) = ~(1L << keyUp); /* EVERYTHING except keyUp */

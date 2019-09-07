@@ -281,11 +281,11 @@ pseudo_get_rom_resource(ResType typ, INTEGER id)
         { "FOND"_4, 3 }
     };
 
-    for(i = 0; (i < (int)NELEM(pseudo_rom_table) && (pseudo_rom_table[i].type != typ
+    for(i = 0; (i < (int)std::size(pseudo_rom_table) && (pseudo_rom_table[i].type != typ
                                                      || pseudo_rom_table[i].id != id));
         ++i)
         ;
-    if(i < (int)NELEM(pseudo_rom_table))
+    if(i < (int)std::size(pseudo_rom_table))
     {
         GUEST<INTEGER> save_map;
 

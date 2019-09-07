@@ -531,11 +531,11 @@ static long yylex( void ) {
 
 	      if (!sorted)
 		{
-		  qsort (reserved, NELEM (reserved), sizeof reserved[0], cmp);
+		  qsort (reserved, std::size (reserved), sizeof reserved[0], cmp);
 		  sorted = 1;
 		}
 	    }
-	    retval = binfind(freechar, reserved, NELEM (reserved));
+	    retval = binfind(freechar, reserved, std::size (reserved));
 	    if (!retval)
 		warning_unexpected ("unknown reserved word parsing configuration file (line %ld)", linecount);
 	    return retval;

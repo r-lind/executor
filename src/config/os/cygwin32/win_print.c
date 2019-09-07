@@ -443,7 +443,7 @@ find_preferred_dll(char **libstringpp)
 
     retval = NULL;
     memset(&dll_info, 0, sizeof dll_info);
-    for(i = 0; !retval && i < (int)NELEM(software_keys); ++i)
+    for(i = 0; !retval && i < (int)std::size(software_keys); ++i)
         retval = new_find_preferred_dll(software_keys[i], &dll_info, libstringpp);
 
     if(!retval) /* no new one -- revert to old defaults */
@@ -730,14 +730,14 @@ get_info(win_printp_t *wpp, int physx, int physy,
 
                     if((dmp->dmFields & DM_PAPERWIDTH) && dmp->dmPaperWidth)
                         infop->physx = MMETERS(dmp->dmPaperWidth) / 10;
-                    else if((unsigned)dmp->dmPaperSize < NELEM(paper_sizes))
+                    else if((unsigned)dmp->dmPaperSize < std::size(paper_sizes))
                         infop->physx = paper_sizes[dmp->dmPaperSize].x_pts;
                     else
                         infop->physx = INCHES(8.5);
 
                     if((dmp->dmFields & DM_PAPERLENGTH) && dmp->dmPaperLength)
                         infop->physy = MMETERS(dmp->dmPaperLength) / 10;
-                    else if((unsigned)dmp->dmPaperSize < NELEM(paper_sizes))
+                    else if((unsigned)dmp->dmPaperSize < std::size(paper_sizes))
                         infop->physy = paper_sizes[dmp->dmPaperSize].y_pts;
                     else
                         infop->physy = INCHES(11);
@@ -879,7 +879,7 @@ print_file(win_printp_t wp, const char *spool_namep, uint32_t *last_errorp)
             argv[6] = papersize;
             argv[7] = resolution;
 
-            if(gsdll_init(gsdll_callback, NULL, NELEM(argv) - 1, argv) != 0)
+            if(gsdll_init(gsdll_callback, NULL, std::size(argv) - 1, argv) != 0)
             {
                 retval = false;
                 if(last_errorp)

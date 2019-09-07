@@ -594,7 +594,7 @@ graymatch(unsigned char patp[8], INTEGER pnMode,
         }
         else
         {
-            for(i = 0; !retval && i < (int)NELEM(table); ++i)
+            for(i = 0; !retval && i < (int)std::size(table); ++i)
             {
                 float darkness;
 
@@ -873,12 +873,12 @@ static void findpreferred(StringPtr fname, int index, char *retval)
 {
     int i;
 
-    for(i = 0; i < (int)NELEM(fonttable); ++i)
+    for(i = 0; i < (int)std::size(fonttable); ++i)
     {
         if(match255c(fname, (char *)fonttable[i].macfontname))
             /*-->*/ break;
     }
-    if(i < (int)NELEM(fonttable))
+    if(i < (int)std::size(fonttable))
         sprintf(retval, "%s%s", fonttable[i].nextfontname,
                 fonttable[i].suffix[index]);
     else
@@ -972,9 +972,9 @@ static int matchpercentage(char *value, int indx, const char *tomatch)
     if((dash && strncmp(value, tomatch, dash - tomatch) == 0) || (!dash && strcmp(value, tomatch) == 0))
     {
         ++dash;
-        isnormal = lookfor(dash, (char **)normals, NELEM(normals), true);
-        isbold = lookfor(dash, (char **)bolds, NELEM(bolds), true);
-        isitalic = lookfor(dash, (char **)italics, NELEM(italics), false);
+        isnormal = lookfor(dash, (char **)normals, std::size(normals), true);
+        isbold = lookfor(dash, (char **)bolds, std::size(bolds), true);
+        isitalic = lookfor(dash, (char **)italics, std::size(italics), false);
         switch(indx)
         {
             case 0:
@@ -1131,7 +1131,7 @@ substitute_font_if_needed(char **fontp, LONGINT orig_size,
         char *font;
 
         font = *fontp;
-        for(i = 0; i < (int)NELEM(substitutions); ++i)
+        for(i = 0; i < (int)std::size(substitutions); ++i)
         {
             int len;
 

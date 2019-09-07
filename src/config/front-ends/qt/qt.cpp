@@ -116,7 +116,7 @@ public:
             mkvkey = 0x89;// NOTAKEY
         else
             mkvkey = p->second;
-        if(mkvkey == 0x89 && ev->nativeScanCode() > 1 && ev->nativeScanCode() < NELEM(x_keycode_to_mac_virt))
+        if(mkvkey == 0x89 && ev->nativeScanCode() > 1 && ev->nativeScanCode() < std::size(x_keycode_to_mac_virt))
         {
             mkvkey = x_keycode_to_mac_virt[ev->nativeScanCode()];
             if constexpr(log_key_events)

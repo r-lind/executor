@@ -33,7 +33,7 @@ void dump_recent_traps(int num_traps_back)
     int i, num_interesting_traps;
 
     /* Record all the traps that are recent enough. */
-    for(i = 0, num_interesting_traps = 0; i < (int)NELEM(traps); i++)
+    for(i = 0, num_interesting_traps = 0; i < (int)std::size(traps); i++)
     {
         int32_t when;
 

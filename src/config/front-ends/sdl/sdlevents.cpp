@@ -399,10 +399,10 @@ init_sdlk_to_mkv(void)
     {
         unsigned int i;
 
-        for(i = 0; i < NELEM(sdlk_to_mkv); ++i)
+        for(i = 0; i < std::size(sdlk_to_mkv); ++i)
             sdlk_to_mkv[i] = NOTAKEY;
 
-        for(i = 0; i < NELEM(map); ++i)
+        for(i = 0; i < std::size(map); ++i)
         {
             SDLKey sdlk;
             unsigned char mkv;

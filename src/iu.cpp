@@ -338,7 +338,7 @@ static INTEGER defaultorder(unsigned char *cp, INTEGER len,
     if(c & 0x80)
     {
         index = (c & 0x7F);
-        if(index < (int)NELEM(highsortvalues))
+        if(index < (int)std::size(highsortvalues))
             *rp = highsortvalues[index];
         else
         {

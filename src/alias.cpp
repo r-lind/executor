@@ -63,9 +63,9 @@ find_sub_dir(OSType folderType)
     int i;
     const char *retval;
 
-    for(i = 0; i < (int)NELEM(matches) && matches[i].type != folderType; ++i)
+    for(i = 0; i < (int)std::size(matches) && matches[i].type != folderType; ++i)
         ;
-    if(i < (int)NELEM(matches))
+    if(i < (int)std::size(matches))
         retval = matches[i].name;
     else
         retval = 0;

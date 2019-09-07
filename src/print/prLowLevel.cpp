@@ -767,7 +767,7 @@ get_all_defaults(void)
     };
     int i;
 
-    for(i = 0; i < (int)NELEM(default_table); ++i)
+    for(i = 0; i < (int)std::size(default_table); ++i)
         if(*default_table[i].variablep == "")
             *default_table[i].variablep = get_default_key(default_table[i].key,
                                                           default_table[i].default_key);

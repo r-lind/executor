@@ -117,7 +117,7 @@ family_query(const char *family, RB_WORD *full_statusp, RB_WORD *resultp,
     PRO_STATUS retval;
 
     retval = SENTPRO_SUCCESS;
-    for(i = 0; (retval == SENTPRO_SUCCESS && i < (int)NELEM(family_command_prefixes)); ++i)
+    for(i = 0; (retval == SENTPRO_SUCCESS && i < (int)std::size(family_command_prefixes)); ++i)
     {
 #if 0 /* THIS BREAKS THINGS -- I HAVE NO IDEA WHY -- ctm */
       if (current_family[i] != family[i])

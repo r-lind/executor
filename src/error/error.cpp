@@ -112,7 +112,7 @@ bool error_parse_option_string(const char *options)
             /* Look for any matching option.  Unique prefixes are OK,
 	   * so "unimp" matches "unimplemented", etc.
 	   */
-            for(i = 0; i < (int)NELEM(error_options); i++)
+            for(i = 0; i < (int)std::size(error_options); i++)
                 if(!strncmp(error_options[i].name, option_name, opt_len))
                 {
                     if(match >= 0)

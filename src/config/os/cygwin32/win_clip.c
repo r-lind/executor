@@ -81,7 +81,7 @@ GetScrapX(LONGINT type, char **h)
                 decltype(format) newval;
                 UINT formats[2] = { format, CF_DIB };
 
-                newval = GetPriorityClipboardFormat(formats, NELEM(formats));
+                newval = GetPriorityClipboardFormat(formats, std::size(formats));
                 if(newval != 0 && newval != (UINT)-1)
                     format = newval;
             }

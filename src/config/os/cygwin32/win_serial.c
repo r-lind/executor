@@ -33,7 +33,7 @@ enum
         int retval;                          \
                                              \
         retval = PARAMETER_ERROR;            \
-        for(i = 0; i < (int)NELEM(map); ++i) \
+        for(i = 0; i < (int)std::size(map); ++i) \
             if(map[i].key == thekey)         \
             {                                \
                 *valp = map[i].val;          \
@@ -278,7 +278,7 @@ port_to_handle(uint8_t port)
     {
         int i;
 
-        for(i = 0; i < (int)NELEM(com_hands); ++i)
+        for(i = 0; i < (int)std::size(com_hands); ++i)
             com_hands[i] = INVALID_HANDLE_VALUE;
         been_here = true;
     }

@@ -1,10 +1,6 @@
 #if !defined(_MACROS_H_)
 #define _MACROS_H_
 
-#if !defined(NELEM)
-#define NELEM(s) (sizeof(s) / sizeof(s)[0])
-#endif
-
 #if !defined(PACKED)
 #ifdef _MSC_VER
 #define PACKED /* FIXME: check where this is used, we might need somethig */

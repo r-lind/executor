@@ -85,6 +85,6 @@ void uninstall_exception_handler(void)
 
     SetUnhandledExceptionFilter(old_filter);
     /* Set a handler for any fatal signal not already handled */
-    for(i = 0; i < (int)NELEM(fatal_signals); ++i)
+    for(i = 0; i < (int)std::size(fatal_signals); ++i)
         signal(fatal_signals[i], SIG_DFL);
 }

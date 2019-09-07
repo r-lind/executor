@@ -139,11 +139,11 @@ coalesce_writes(uint32_t fd, uint8_t **bufpp, uint32_t *lengthp, uint32_t *offse
     int forwards_index;
 
     /* find beginning of run */
-    fill_run(backwards_dps, NELEM(backwards_dps), &backwards_index,
+    fill_run(backwards_dps, std::size(backwards_dps), &backwards_index,
              -DCACHE_BLOCK_SIZE, *offsetp, fd);
 
     /* find ending of run */
-    fill_run(forwards_dps, NELEM(forwards_dps), &forwards_index,
+    fill_run(forwards_dps, std::size(forwards_dps), &forwards_index,
              DCACHE_BLOCK_SIZE, *offsetp, fd);
 
     if(backwards_index > 0 || forwards_index > 0)

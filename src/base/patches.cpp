@@ -28,11 +28,11 @@ add_to_bad_trap_addresses(bool tool_p, unsigned short index)
     if(tool_p)
         aline_trap += 0x800;
 
-    for(i = 0; i < n_bad_traps && i < NELEM(bad_traps) && bad_traps[i] != aline_trap; ++i)
+    for(i = 0; i < n_bad_traps && i < std::size(bad_traps) && bad_traps[i] != aline_trap; ++i)
         ;
     if(i >= n_bad_traps)
     {
-        bad_traps[n_bad_traps % NELEM(bad_traps)] = aline_trap;
+        bad_traps[n_bad_traps % std::size(bad_traps)] = aline_trap;
         ++n_bad_traps;
     }
 }
@@ -50,7 +50,7 @@ RAW_68K_IMPLEMENTATION(bad_trap_unimplemented)
         bool need_comma_p;
 
         need_comma_p = false;
-        for(i = 0; i < (int)NELEM(bad_traps) && i < n_bad_traps; ++i)
+        for(i = 0; i < (int)std::size(bad_traps) && i < n_bad_traps; ++i)
         {
             if(need_comma_p)
                 strcat(buf, ",");

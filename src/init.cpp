@@ -105,7 +105,7 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
             break;
     }
 
-    if(trap_num < (int)NELEM(trap_description)
+    if(trap_num < (int)std::size(trap_description)
        && trap_description[trap_num] != nullptr)
         gui_fatal("Fatal error:  unhandled trap %d at pc %s (%s)",
                   trap_num, pc_str, trap_description[trap_num]);

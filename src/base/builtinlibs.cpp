@@ -54,7 +54,7 @@ uint32_t builtinlibs::handleSC(PowerCore& cpu)
 
 void builtinlibs::addPPCEntrypoint(const char *library, const char *function, std::function<uint32_t (PowerCore&)> code)
 {
-    assert(nCallbacks < NELEM(callbacks));
+    assert(nCallbacks < std::size(callbacks));
     PPCCallback& callback = callbacks[nCallbacks++];
     callback.sc = 0x44000002;
     callback.codePtr = &callback.sc;
@@ -66,7 +66,7 @@ void builtinlibs::addPPCEntrypoint(const char *library, const char *function, st
 
 Ptr builtinlibs::makeUndefinedSymbolStub(const char *name)
 {
-    assert(nCallbacks < NELEM(callbacks));
+    assert(nCallbacks < std::size(callbacks));
     PPCCallback& callback = callbacks[nCallbacks++];
     callback.sc = 0x44000002;
     callback.codePtr = &callback.sc;

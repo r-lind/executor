@@ -149,7 +149,7 @@ append_end_marker_if_necessary(MCTableHandle h)
         if(MemError() == noErr)
         {
             entries = *h;
-            entries[nelem] = default_menu_ctab[NELEM(default_menu_ctab) - 1];
+            entries[nelem] = default_menu_ctab[std::size(default_menu_ctab) - 1];
         }
     }
 }

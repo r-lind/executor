@@ -354,7 +354,7 @@ replace_selector_in_table(OSType selector, LONGINT new_value,
 }
 
 #define REPLACE_SELECTOR_IN_TABLE(selector, new_value, table) \
-    replace_selector_in_table(selector, new_value, table, NELEM(table))
+    replace_selector_in_table(selector, new_value, table, std::size(table))
 
 void
 Executor::replace_physgestalt_selector(OSType selector, uint32_t new_value)
@@ -452,9 +452,9 @@ offset_addresses(gestaltentry_t *gp, int ngp, OSType *selp, int nsels)
 }
 
 #define OFFSET_ADDRESSES(table)                  \
-    offset_addresses(table, NELEM(table),        \
+    offset_addresses(table, std::size(table),        \
                      table##_selectors_to_patch, \
-                     NELEM(table##_selectors_to_patch))
+                     std::size(table##_selectors_to_patch))
 
 /*
  *  This is for gestalt entries that are hard-wired via configuration
@@ -542,7 +542,7 @@ OSErr Executor::C_Gestalt(OSType selector, GUEST<LONGINT> *responsep)
         OFFSET_ADDRESSES(phystable);
         been_here = true;
     }
-    return gestalt_helper(selector, responsep, true, gtable, NELEM(gtable));
+    return gestalt_helper(selector, responsep, true, gtable, std::size(gtable));
 }
 
 OSErr Executor::C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
@@ -565,7 +565,7 @@ OSErr Executor::C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
     }
 
     retval = gestalt_helper(selector, responsep, false, phystable,
-                            NELEM(phystable));
+                            std::size(phystable));
     if(retval == gestaltUndefSelectorErr)
         retval = physicalUndefSelectorErr;
     return retval;
@@ -574,7 +574,7 @@ OSErr Executor::C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
 OSErr Executor::C_GestaltTablesOnly(OSType selector,
                                        GUEST<LONGINT> *responsep)
 {
-    return gestalt_helper(selector, responsep, false, gtable, NELEM(gtable));
+    return gestalt_helper(selector, responsep, false, gtable, std::size(gtable));
 }
 
 static BOOLEAN
@@ -619,7 +619,7 @@ OSErr Executor::C_NewGestalt(OSType selector, SelectorFunctionUPP selFunc)
     OSErr retval;
 
     if(find_selector_on_list(selector)
-       || find_selector_in_table(selector, gtable, NELEM(gtable)))
+       || find_selector_in_table(selector, gtable, std::size(gtable)))
         retval = gestaltDupSelectorErr;
     else
         retval = new_link(selector, selFunc);
@@ -648,7 +648,7 @@ OSErr Executor::C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
     {
         gestaltentry_t *gep;
 
-        gep = find_selector_in_table(selector, gtable, NELEM(gtable));
+        gep = find_selector_in_table(selector, gtable, std::size(gtable));
         if(!gep)
             retval = gestaltUndefSelectorErr;
         else

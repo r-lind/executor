@@ -174,7 +174,7 @@ void Executor::futzwithdosdisks(void)
 	{ "/dev/fd1", (DrvQExtra *) 0, false, IGNORED },
 #endif
     };
-#define N_DRIVES NELEM(drives)
+#define N_DRIVES std::size(drives)
 #define OPEN_ROUTINE linuxfloppy_open
 #define CLOSE_ROUTINE linuxfloppy_close
 #define EXTRA_CLOSE_PARAM

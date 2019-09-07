@@ -103,7 +103,7 @@ set_depth(DialogPtr dp, int16_t item_to_set)
 
     modstate(dp, current_depth_item, CLEARSTATE);
 
-    for(i = 0; i < (int)NELEM(depths_list); i++)
+    for(i = 0; i < (int)std::size(depths_list); i++)
     {
         depth_t *depth = &depths_list[i];
 
@@ -245,7 +245,7 @@ void setupprefvalues(DialogPtr dp)
         int bpp, i;
 
         bpp = PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)));
-        for(i = 0; i < (int)NELEM(depths_list); i++)
+        for(i = 0; i < (int)std::size(depths_list); i++)
         {
             depth_t *depth = &depths_list[i];
 
@@ -406,16 +406,16 @@ static void enable_disable_pref_items(DialogPtr dp)
         };
     int i;
 
-    for(i = 0; i < (int)NELEM(to_enable); ++i)
+    for(i = 0; i < (int)std::size(to_enable); ++i)
         mod_item_enableness(dp, to_enable[i], enable);
-    for(i = 0; i < (int)NELEM(to_disable); ++i)
+    for(i = 0; i < (int)std::size(to_disable); ++i)
         mod_item_enableness(dp, to_disable[i], disable);
 
     if(SOUND_WORKS_P())
         mod_item_enableness(dp, PREFSOUNDONITEM, enable);
     set_sound_on_string(dp);
 
-    for(i = 0; i < (int)NELEM(depths_list); i++)
+    for(i = 0; i < (int)std::size(depths_list); i++)
     {
         depth_t *depth = &depths_list[i];
 

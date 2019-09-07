@@ -26,8 +26,8 @@ static HDC global_hdc;
 static RECT global_src;
 static RECT global_dest;
 
-#if !defined(NELEM)
-#define NELEM(x) ((sizeof(x)) / sizeof((x)[0]))
+#if !defined(std::size)
+#define std::size(x) ((sizeof(x)) / sizeof((x)[0]))
 #endif
 
 #define GSDLLAPI CALLBACK _export
@@ -271,7 +271,7 @@ WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
                 printf("argv[%d] = '%s'\n", i, argv[i]);
         }
 
-        if(gsdll_init(gsdll_callback, NULL, NELEM(argv) - 1, argv) != 0)
+        if(gsdll_init(gsdll_callback, NULL, std::size(argv) - 1, argv) != 0)
         {
             fprintf(stderr, "gsdll_init failed\n");
         }

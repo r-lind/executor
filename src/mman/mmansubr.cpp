@@ -138,7 +138,7 @@ addr_info(char *addr)
     zones[1] = LM(SysZone);
     zones[2] = LM(TheZone);
 
-    for(i = 0, addr_zone = nullptr; i < (int)NELEM(zones); i++)
+    for(i = 0, addr_zone = nullptr; i < (int)std::size(zones); i++)
     {
         if(addr_in_zone_p(zones[i], addr))
         {

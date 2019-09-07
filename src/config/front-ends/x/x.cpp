@@ -167,7 +167,7 @@ void X11VideoDriver::registerOptions(void)
                                 { "synchronous", "run in synchronous mode", opt_no_arg }, { "geometry", "specify the executor window geometry", opt_sep }, { "privatecmap", "have executor use a private x colormap", opt_no_arg }, { "truecolor", "have executor use a TrueColor visual", opt_no_arg },
                             });
 
-    //x_opts, NELEM (x_opts));
+    //x_opts, std::size (x_opts));
 }
 
 static XrmDatabase xdb;
@@ -781,9 +781,9 @@ typedef struct key_table_data
 
 key_table_t key_tables[] = {
     /* latin one table */
-    { 0, 0, NELEM(latin_one_table_data), latin_one_table_data },
+    { 0, 0, std::size(latin_one_table_data), latin_one_table_data },
     /* misc table */
-    { 0xFF, 8, NELEM(misc_table_data), misc_table_data },
+    { 0xFF, 8, std::size(misc_table_data), misc_table_data },
     { 0, 0, 0, nullptr },
 };
 
@@ -1037,7 +1037,7 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                     uint8_t keycode;
 
                     keycode = evt.xkey.keycode;
-                    if(keycode < NELEM(x_keycode_to_mac_virt))
+                    if(keycode < std::size(x_keycode_to_mac_virt))
                     {
                         keysym = x_keycode_to_mac_virt[keycode];
                         modifier = which_modifier_virt(keysym);
@@ -1167,7 +1167,7 @@ bool X11VideoDriver::parseCommandLine(int& argc, char *argv[])
     if(xdefs)
         xdb = XrmGetStringDatabase(xdefs);
 
-    XrmParseCommand(&xdb, opts, NELEM(opts), "Executor", &argc, argv);
+    XrmParseCommand(&xdb, opts, std::size(opts), "Executor", &argc, argv);
 
     return true;
 }
@@ -1875,7 +1875,7 @@ void init_x_cmap(void)
                  x_cmap, n_colors);
 
     /* Note the shifted versions of those colors. */
-    for(j = NELEM(shifted_x_cmap) - 1; j >= 0; j--)
+    for(j = std::size(shifted_x_cmap) - 1; j >= 0; j--)
     {
         shifted_x_cmap[j].red = x_cmap[j].red >> 1;
         shifted_x_cmap[j].green = x_cmap[j].green >> 1;

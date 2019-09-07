@@ -101,7 +101,7 @@ disk_number_to_disk_info(int number)
     dosdisk_info_t *retval;
 
     number &= ~DOSFDBIT;
-    retval = (number < (int)NELEM(disks) && disks[number].open_p)
+    retval = (number < (int)std::size(disks) && disks[number].open_p)
         ? &disks[number]
         : NULL;
 
@@ -262,7 +262,7 @@ dosdisk_open(int disk, LONGINT *bsizep, drive_flags_t *flagsp)
         *bsizep = d->sector_size;
         retval = -1;
     }
-    else if(disk >= (int)NELEM(disks))
+    else if(disk >= (int)std::size(disks))
     {
         *bsizep = 0;
         retval = -1;
@@ -422,7 +422,7 @@ win_95_lock(int disk)
     volume = disk + 1; /* woo hoo */
 
     retval = false;
-    for(i = 0; !retval && i < (int)NELEM(cat_list); ++i)
+    for(i = 0; !retval && i < (int)std::size(cat_list); ++i)
     {
         memset(&regs, 0, sizeof regs);
         regs.ebx = (0 << 8) | volume; /* level 0 lock */
@@ -454,7 +454,7 @@ win_95_unlock(int disk)
 
     volume = disk + 1;
     retval = false;
-    for(i = 0; !retval && i < (int)NELEM(cat_list); ++i)
+    for(i = 0; !retval && i < (int)std::size(cat_list); ++i)
     {
         memset(&regs, 0, sizeof regs);
         regs.ebx = volume;

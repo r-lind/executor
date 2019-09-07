@@ -140,7 +140,7 @@ void init_sdlk_to_mkv(void)
     {
         unsigned int i;
 
-        for(i = 0; i < NELEM(map); ++i)
+        for(i = 0; i < std::size(map); ++i)
         {
             SDL_Keycode sdlk;
             unsigned char mkv;

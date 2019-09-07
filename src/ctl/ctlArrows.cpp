@@ -168,7 +168,7 @@ validate_colors_for_control(ControlHandle ctl)
 
             c_ctab_entry = &c_ctab_table[i];
             index = c_ctab_entry->value;
-            if(index >= 0 && index < (int)NELEM(ctl_ctab_colors))
+            if(index >= 0 && index < (int)std::size(ctl_ctab_colors))
                 ctl_ctab_colors[index] = c_ctab_entry->rgb;
         }
     }

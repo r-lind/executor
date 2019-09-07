@@ -43,8 +43,8 @@ typedef struct win_print_str
     win_print_file_t file;
 } win_print_t;
 
-#if !defined(NELEM)
-#define NELEM(x) (sizeof(x) / sizeof(x)[0])
+#if !defined(std::size)
+#define std::size(x) (sizeof(x) / sizeof(x)[0])
 #endif
 
 enum

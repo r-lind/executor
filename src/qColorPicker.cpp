@@ -335,7 +335,7 @@ text_box_init(void)
     /* compute the text box offset caused by the titles */
     offset = -1;
     label_width = -1;
-    for(i = 0; i < (int)NELEM(titles); i++)
+    for(i = 0; i < (int)std::size(titles); i++)
     {
         StringPtr title, label;
 
@@ -1264,7 +1264,7 @@ color_wheel_notice_lightness_change(void)
 
     color_wheel_noticed_lightness = lightness;
 
-    for(i = 0; i < (int)NELEM(color_desc); i++)
+    for(i = 0; i < (int)std::size(color_desc); i++)
     {
         /* one half */
         hsl_color.lightness = lightness;
