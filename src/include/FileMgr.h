@@ -117,6 +117,8 @@ enum
     fsWrPerm = 2,
     fsRdWrPerm = 3,
     fsRdWrShPerm = 4,
+    fsRdDenyPerm = 0x10,
+    fsWrDenyPerm = 0x20
 };
 
 enum
@@ -883,6 +885,12 @@ NOTRAP_FUNCTION2(HOpen);
 extern OSErr HOpenDF(INTEGER vref, LONGINT dirid, ConstStringPtr name,
                      SignedByte perm, GUEST<INTEGER> *refp);
 NOTRAP_FUNCTION2(HOpenDF);
+
+extern OSErr HRename(INTEGER vref, LONGINT dirid, ConstStringPtr src, ConstStringPtr dst);
+//NOTRAP_FUNCTION2(HRename);
+
+extern OSErr HDelete(INTEGER vref, LONGINT dirid, ConstStringPtr name);
+//NOTRAP_FUNCTION2(HDelete);
 
 extern OSErr GetWDInfo(INTEGER wd, GUEST<INTEGER> *vrefp, GUEST<LONGINT> *dirp,
                        GUEST<LONGINT> *procp);
