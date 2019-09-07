@@ -167,21 +167,8 @@ static dispatch_block_t initSpeechBlock= ^{
 
 Executor::NumVersion MacBridge::SpeechManagerVersion (void)
 {
-#if 0
-  //The NumVersion struct on OS X is Endian-safe, so we can do this.
-#pragma pack(push, 2)
-  union ourNumVers {
-	::NumVersion MacVers;
-	Executor::NumVersion ExecutorVers;
-  } ourNumVersn;
-#pragma pack(pop)
-  
-  ourNumVersn.MacVers = ::SpeechManagerVersion();
-  return ourNumVersn.ExecutorVers;
-#else
   ::NumVersion theVers = ::SpeechManagerVersion();
   return theVers.majorRev << 24 | theVers.minorAndBugRev << 16 | theVers.stage << 8 | theVers.nonRelRev;
-#endif
 }
 
 int16_t MacBridge::SpeechBusy (void)

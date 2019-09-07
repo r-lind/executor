@@ -53,7 +53,6 @@ get_size_resource()
 
 
 
-#pragma pack(push, 2)
 typedef struct process_info
 {
     struct process_info *next;
@@ -66,7 +65,6 @@ typedef struct process_info
 
     ProcessSerialNumber serial_number;
 } process_info_t;
-#pragma pack(pop)
 
 static process_info_t *process_info_list;
 static process_info_t *current_process_info;

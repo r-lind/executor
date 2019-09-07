@@ -33,7 +33,6 @@ typedef struct hashlink_str
     char *dirname;
 } hashlink_t;
 
-#pragma pack(push, 2)
 
 typedef struct
 {
@@ -79,11 +78,9 @@ extern GUEST<LONGINT> DefDirID;
 #define fcwriteperm (1 << 0)
 
 /*
- * This struct is confusing.
- * Some of it is big-endian guest data,
- * some of it is native host data.
  * And it is an almost-duplicate of filecontrolblock in hfs.h.
- * This version describes the version of the struct used by the "ufs" code.
+ * This version describes the version of the struct used by the "ufs" code,
+ * of which there is little left. A common version should be added to FileMgr.h instead.
  */
 typedef struct
 {
@@ -99,10 +96,10 @@ typedef struct
     GUEST<Ptr> fcbBfAdr;
     GUEST<INTEGER> fcbFlPos;
     GUEST<LONGINT> fcbClmpSize;
-    LONGINT fcfd; /* instead of: LONGINT fcbBTCBPtr	PACKED; */
+    GUEST<LONGINT> fcbBTCBPtr;
     GUEST<LONGINT> zero[3]; /* these three fields are fcbExtRec */
     GUEST<LONGINT> fcbFType;
-    LONGINT hiddenfd; /* instead of LONGINT fcbCatPos */
+    GUEST<ULONGINT> fcbCatPos;
     GUEST<LONGINT> fcparid; /* LONGINT fcbDirID */
     GUEST<Byte[32]> fcname; /* Str31 fcbCName */
 } fcbrec;
@@ -264,7 +261,6 @@ typedef struct
 
 extern StringPtr ROMlib_exefname;
 
-#pragma pack(pop)
 
 extern OSErr ROMlib_maperrno(void);
 
