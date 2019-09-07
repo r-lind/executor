@@ -233,7 +233,7 @@ static gestaltentry_t gtable[] = {
     {
         gestaltStandardFileAttr, gestaltStandardFile58,
     },
-    { gestaltApplEventsAttr, 1 }, /* got away with 0, but that may
+    { gestaltAppleEventsAttr, 1 }, /* got away with 0, but that may
 				        give us trouble elsewhere */
 
 #if defined(THESE_REALLY_ARENT_NEEDED)

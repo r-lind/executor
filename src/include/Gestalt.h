@@ -21,7 +21,7 @@ enum
     gestaltPhysicalRAMSize = FOURCC('r', 'a', 'm', ' '),
     gestaltAddressingModeAttr = FOURCC('a', 'd', 'd', 'r'),
     gestaltAliasMgrAttr = FOURCC('a', 'l', 'i', 's'),
-    gestaltApplEventsAttr = FOURCC('e', 'v', 'n', 't'),
+    gestaltAppleEventsAttr = FOURCC('e', 'v', 'n', 't'),
     gestaltAppleTalkVersion = FOURCC('a', 't', 'l', 'k'),
     gestaltAUXVersion = FOURCC('a', '/', 'u', 'x'),
     gestaltConnMgrAttr = FOURCC('c', 'o', 'n', 'n'),
@@ -39,6 +39,7 @@ enum
     gestaltFXfrMgrAttr = FOURCC('f', 'x', 'f', 'r'),
     gestaltHardwareAttr = FOURCC('h', 'd', 'w', 'r'),
     gestaltHelpMgrAttr = FOURCC('h', 'e', 'l', 'p'),
+    gestaltIconUtilitiesAttr = FOURCC('i', 'c', 'o', 'n'),
     gestaltKeyboardType = FOURCC('k', 'b', 'd', ' '),
     gestaltLogicalPageSize = FOURCC('p', 'g', 's', 'z'),
     gestaltLogicalRAMSize = FOURCC('l', 'r', 'a', 'm'),
@@ -220,6 +221,7 @@ enum
 using SelectorFunctionUPP = UPP<OSErr(OSType, GUEST<LONGINT> *)>;
 
 DISPATCHER_TRAP(GestaltDispatch, 0xA1AD,  TrapBits);
+enum { _Gestalt = 0xA1AD };
 
 extern OSErr C_Gestalt(OSType selector, GUEST<LONGINT> *responsep);
 REGISTER_SUBTRAP(Gestalt, 0xA1AD, 0x000, GestaltDispatch, D0(D0,Out<LONGINT,A0>));

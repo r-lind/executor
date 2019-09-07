@@ -49,6 +49,16 @@ enum
     atBottomRight = (atBottom | atRight), /* 15 */
 };
 
+enum
+{
+    kAlignNode = 0,
+    kAlignVerticalCenter = 1,
+    kAlignTop = 2,
+    kAlignBottom = 3,
+    kAlignHorizontalCenter = 4,
+    kAlignAbsoluteCenter = (kAlignVerticalCenter | kAlignHorizontalCenter), /* 5 */
+};
+
 /* IconTranformType values */
 enum
 {
@@ -67,6 +77,11 @@ enum
     ttSelectedDisabled = (ttSelected | ttDisabled),
     ttSelectedOffline = (ttSelected | ttOffline),
     ttSelectedOpen = (ttSelected | ttOpen),
+};
+
+enum
+{
+    kTransformNone = 0
 };
 
 /* IconSelectorValue values */
