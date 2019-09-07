@@ -11,7 +11,7 @@
  */
 namespace Executor
 {
-typedef struct PEFContainerHeader
+struct PEFContainerHeader
 {
     GUEST_STRUCT;
     GUEST<OSType> tag1;
@@ -25,7 +25,7 @@ typedef struct PEFContainerHeader
     GUEST<uint16_t> sectionCount;
     GUEST<uint16_t> instSectionCount;
     GUEST<uint32_t> reservedA;
-} PEFContainerHeader_t;
+};
 
 #define PEF_CONTAINER_TAG1_X(p) ((p)->tag1)
 #define PEF_CONTAINER_TAG1(p) (PEF_CONTAINER_TAG1_X(p))
@@ -69,7 +69,7 @@ typedef struct PEFSectionHeader
     GUEST<uint8_t> shareKind;
     GUEST<uint8_t> alignment;
     GUEST<uint8_t> reservedA;
-} PEFSectionHeader_t;
+} PEFSectionHeader;
 
 #define PEFSH_DEFAULT_ADDRESS(p) ((p)->defaultAddress)
 
@@ -90,7 +90,7 @@ typedef struct PEFSectionHeader
 #define PEFSH_SHARE_KIND(p) ((p)->shareKind)
 #define PEFSH_ALIGNMENT(p) (1 << (p)->alignment)
 
-typedef struct PEFLoaderInfoHeader
+struct PEFLoaderInfoHeader
 {
     GUEST_STRUCT;
     GUEST<int32_t> mainSection;
@@ -107,7 +107,7 @@ typedef struct PEFLoaderInfoHeader
     GUEST<uint32_t> exportHashOffset;
     GUEST<uint32_t> exportHashTablePower;
     GUEST<uint32_t> exportedSymbolCount;
-} PEFLoaderInfoHeader_t;
+};
 
 #define PEFLIH_MAIN_SECTION(p) ((p)->mainSection)
 
@@ -162,7 +162,7 @@ typedef struct PEFImportedLibrary
     GUEST<uint8_t> options;
     GUEST<uint8_t> reservedA;
     GUEST<uint16_t> reservedB;
-} PEFImportedLibrary_t;
+} PEFImportedLibrary;
 
 #define PEFIL_NAME_OFFSET(p) ((p)->nameOffset)
 
@@ -171,14 +171,14 @@ typedef struct PEFImportedLibrary
 
 #define PEFIL_FIRST_SYMBOL(p) ((p)->firstImportedSymbol)
 
-typedef struct PEFLoaderRelocationHeader
+struct PEFLoaderRelocationHeader
 {
     GUEST_STRUCT;
     GUEST<uint16_t> sectionIndex;
     GUEST<uint16_t> reservedA;
     GUEST<uint32_t> relocCount;
     GUEST<uint32_t> firstRelocOffset;
-} PEFLoaderRelocationHeader_t;
+};
 
 #define PEFRLH_RELOC_COUNT(p) ((p)->relocCount)
 
@@ -244,27 +244,15 @@ enum
     kPEFGlueSymbol,
 };
 
-#if 0
-typedef struct pef_hash
-{
-  uint32_t n_symbols; /* exportedSymbolCount */
-  uint32_t n_hash_entries; /* 1 << exportHashTablePower */
-  hash_table_entry_t *hash_entries; /* exportHashOffset */
-  uint32_t *export_key_table; /* hash_entries + n_hash_entries */
-  PEFExportedSymbol *symbol_table; /* hash_entries + 2 * n_hash_entries */
-  const char *symbol_names; /* loaderStringsOffset */
-}
-pef_hash_t;
-#endif
 
-extern PEFLoaderInfoHeader_t *ROMlib_build_pef_hash(const map_entry_t table[],
+extern PEFLoaderInfoHeader *ROMlib_build_pef_hash(const map_entry_t table[],
                                                     int count);
 
-static_assert(sizeof(PEFContainerHeader_t) == 40);
-static_assert(sizeof(PEFSectionHeader_t) == 28);
-static_assert(sizeof(PEFLoaderInfoHeader_t) == 56);
-static_assert(sizeof(PEFImportedLibrary_t) == 24);
-static_assert(sizeof(PEFLoaderRelocationHeader_t) == 12);
+static_assert(sizeof(PEFContainerHeader) == 40);
+static_assert(sizeof(PEFSectionHeader) == 28);
+static_assert(sizeof(PEFLoaderInfoHeader) == 56);
+static_assert(sizeof(PEFImportedLibrary) == 24);
+static_assert(sizeof(PEFLoaderRelocationHeader) == 12);
 static_assert(sizeof(PEFExportedSymbol) == 10);
 }
 #endif

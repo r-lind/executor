@@ -636,7 +636,7 @@ symbol_lookup(uint32_t *indexp, GUEST<Ptr> *valp, uint8_t imports[][4],
 }
 
 static OSErr
-relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
+relocate(const PEFLoaderRelocationHeader reloc_headers[],
          int section, uint32_t reloc_count, uint8_t reloc_instrs[][2],
          uint8_t imports[][4], const char *symbol_names,
          CFragClosureID closure_id, ConnectionID connp)
@@ -871,7 +871,7 @@ relocate(const PEFLoaderRelocationHeader_t reloc_headers[],
 }
 
 static CFragClosureID
-begin_closure(uint32_t n_libs, PEFImportedLibrary_t *libs,
+begin_closure(uint32_t n_libs, PEFImportedLibrary *libs,
               const char *symbol_names, OSType arch)
 {
     CFragClosureID retval;
@@ -919,27 +919,27 @@ load_loader_section(const void *addr,
 {
     OSErr retval;
     char *loader_section_bytes;
-    PEFLoaderInfoHeader_t *lihp;
+    PEFLoaderInfoHeader *lihp;
     uint32_t n_libs;
     uint32_t n_imports;
     uint32_t n_reloc_headers;
-    PEFImportedLibrary_t *libs;
+    PEFImportedLibrary *libs;
     uint8_t(*imports)[4];
-    PEFLoaderRelocationHeader_t *reloc_headers;
+    PEFLoaderRelocationHeader *reloc_headers;
     uint8_t *relocation_area;
     char *symbol_names;
     int i;
     CFragClosureID closure_id;
 
     loader_section_bytes = (char *)addr + section_offset;
-    lihp = (PEFLoaderInfoHeader_t *)loader_section_bytes;
+    lihp = (PEFLoaderInfoHeader *)loader_section_bytes;
     connp->lihp = lihp;
     n_libs = PEFLIH_IMPORTED_LIBRARY_COUNT(lihp);
-    libs = (PEFImportedLibrary_t *)&lihp[1];
+    libs = (PEFImportedLibrary *)&lihp[1];
     n_imports = PEFLIH_IMPORTED_SYMBOL_COUNT(lihp);
     imports = (uint8_t(*)[4]) & libs[n_libs];
     n_reloc_headers = PEFLIH_RELOC_SECTION_COUNT(lihp);
-    reloc_headers = (PEFLoaderRelocationHeader_t *)imports[n_imports];
+    reloc_headers = (PEFLoaderRelocationHeader *)imports[n_imports];
 
     relocation_area = (uint8_t *)(loader_section_bytes + PEFLIH_RELOC_INSTR_OFFSET(lihp));
 
@@ -993,12 +993,12 @@ load_loader_section(const void *addr,
 
 static OSErr
 do_pef_section(ConnectionID connp, const void *addr,
-               const PEFSectionHeader_t *sections, int i,
+               const PEFSectionHeader *sections, int i,
                bool instantiate_p,
                syn68k_addr_t *mainAddrp, OSType arch)
 {
     OSErr retval;
-    const PEFSectionHeader_t *shp;
+    const PEFSectionHeader *shp;
     syn68k_addr_t default_address;
     uint32_t total_size;
     uint32_t packed_size;
@@ -1079,11 +1079,11 @@ do_pef_section(ConnectionID connp, const void *addr,
 }
 
 static OSErr
-do_pef_sections(ConnectionID connp, const PEFContainerHeader_t *headp,
+do_pef_sections(ConnectionID connp, const PEFContainerHeader *headp,
                 syn68k_addr_t *mainAddrp, OSType arch)
 {
     OSErr retval;
-    PEFSectionHeader_t *sections;
+    PEFSectionHeader *sections;
     int n_sects;
     int i;
 
@@ -1154,7 +1154,7 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
     OSErr retval;
 
     syn68k_addr_t main_addr;
-    PEFContainerHeader_t *headp;
+    PEFContainerHeader *headp;
     ConnectionID conn;
 
     warning_unimplemented("ignoring flags = 0x%x\n", flags);
@@ -1162,7 +1162,7 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
     main_addr = 0;
     *connp = 0;
 
-    headp = (PEFContainerHeader_t*)addr;
+    headp = (PEFContainerHeader*)addr;
 
     if(PEF_CONTAINER_TAG1_X(headp) != "Joy!"_4)
         warning_unexpected("0x%x", toHost(PEF_CONTAINER_TAG1(headp)));

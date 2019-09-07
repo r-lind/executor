@@ -14,6 +14,20 @@
 
 using namespace Executor;
 
+
+#if 0
+typedef struct pef_hash
+{
+  uint32_t n_symbols; /* exportedSymbolCount */
+  uint32_t n_hash_entries; /* 1 << exportHashTablePower */
+  hash_table_entry_t *hash_entries; /* exportHashOffset */
+  uint32_t *export_key_table; /* hash_entries + n_hash_entries */
+  PEFExportedSymbol *symbol_table; /* hash_entries + 2 * n_hash_entries */
+  const char *symbol_names; /* loaderStringsOffset */
+}
+pef_hash_t;
+#endif
+
 /*
  *
  * IM 8-43 provides C code that uses a loop to determine the exponent
@@ -144,10 +158,10 @@ update_export_hash_table(GUEST<uint32_t> *hashp, int hash_index, int first_index
     hashp[hash_index] = new_value;
 }
 
-PEFLoaderInfoHeader_t *
+PEFLoaderInfoHeader *
 Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
 {
-    PEFLoaderInfoHeader_t *retval;
+    PEFLoaderInfoHeader *retval;
     uint32_t hash_power;
     int n_hash_entries;
     uint32_t hash_offset, export_offset, symbol_table_offset, string_table_offset;
@@ -162,7 +176,7 @@ Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
     hash_power = PEFComputeHashTableExponent(count);
     n_hash_entries = 1 << hash_power;
 
-    hash_offset = sizeof(PEFLoaderInfoHeader_t);
+    hash_offset = sizeof(PEFLoaderInfoHeader);
     hash_length = sizeof(*hashp) * n_hash_entries;
 
     export_offset = hash_offset + hash_length;
@@ -289,7 +303,7 @@ lookup_by_name(const ConnectionID connp,
     int past_index;
     GUEST<uint32_t> hash_word_swapped;
     PEFExportedSymbol *retval;
-    PEFLoaderInfoHeader_t *lihp;
+    PEFLoaderInfoHeader *lihp;
     GUEST<uint32_t> *hash_entries;
     GUEST<uint32_t> *export_key_table;
     PEFExportedSymbol *symbol_table;
