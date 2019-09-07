@@ -118,45 +118,6 @@ typedef struct
 
 #define ROMlib_fcblocks (((fcbhidden *)LM(FCBSPtr))->fc)
 
-typedef struct
-{
-    GUEST_STRUCT;
-    GUEST<LONGINT> dirid;
-    GUEST<INTEGER> filesystemlen;
-    unsigned char hostnamelen;
-    char hostnameandroot[1]; /* potentially many more */
-} rkey_t;
-
-typedef struct
-{
-    GUEST_STRUCT;
-    GUEST<LONGINT> parid;
-    char path[1]; /* potentially many more */
-} rcontent_t;
-
-#define FILLOCK 1 /* dirflags & FILLOCK tell whether file is locked */
-
-#define VOLCHAR ':'
-
-typedef enum { DataFork,
-               ResourceFork } ForkType;
-typedef enum { File,
-               Directory } FOrDType;
-typedef enum { Get,
-               Set } GetOrSetType;
-typedef enum { CatMove,
-               FRename,
-               HRename } MoveOrRenameType;
-typedef enum { Lock,
-               Unlock } LockOrUnlockType;
-
-/* Note below:  No WDIndex because the paramBlock for PBGetWDInfo is weird */
-typedef enum { NoIndex,
-               VolIndex,
-               FDirIndex,
-               FCBIndex,
-               IGNORENAME } IndexType;
-
 #if defined(NDEBUG)
 #define BADRETURNHOOK(err)
 #else /* !defined(NDEBUG) */
