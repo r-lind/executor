@@ -1289,7 +1289,7 @@ OSErr dump_code_resources(const char *filename)
         Handle h;
         INTEGER old_rn, new_rn;
 
-        h = GetResource(TICK("CODE"), 0);
+        h = GetResource("CODE"_4, 0);
         retval = ResError();
         if(retval == noErr)
         {
@@ -1301,7 +1301,7 @@ OSErr dump_code_resources(const char *filename)
                 new_rn = OpenRFPerm(pfilename, 0, fsRdWrPerm);
                 retval = ResError();
                 if(retval == noErr)
-                    retval = copy_resources(new_rn, old_rn, TICK("CODE"));
+                    retval = copy_resources(new_rn, old_rn, "CODE"_4);
                 if(new_rn)
                 {
                     CloseResFile(new_rn);

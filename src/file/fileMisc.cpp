@@ -497,7 +497,7 @@ void Executor::InitSystemFolder(std::string systemFolder)
         WDPBRec wpb;
         wpb.ioNamePtr = 0;
         wpb.ioVRefNum = cpb.hFileInfo.ioVRefNum;
-        wpb.ioWDProcID = TICK("unix");
+        wpb.ioWDProcID = "unix"_4;
         wpb.ioWDDirID = cpb.hFileInfo.ioFlParID;
         if(PBOpenWD(&wpb, false) == noErr)
             LM(BootDrive) = wpb.ioVRefNum;

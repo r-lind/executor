@@ -1758,7 +1758,7 @@ void MoveHHi(Handle h)
    * will be real slow if we don't.
    */
 
-    if(ROMlib_creator != TICK("MSWD") && ROMlib_creator != TICK("ddOr"))
+    if(ROMlib_creator != "MSWD"_4 && ROMlib_creator != "ddOr"_4)
         ROMlib_destroy_blocks(0, ~0, true);
 
     /* #### there used to be a lot of code here; but it was unused and

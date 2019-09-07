@@ -65,12 +65,12 @@ Executor::HCreateResFile_helper(INTEGER vrefnum, LONGINT parid, ConstStringPtr n
 
 void Executor::C_CreateResFile(ConstStringPtr fn)
 {
-    HCreateResFile_helper(0, 0, fn, TICK("????"), TICK("????"), 0);
+    HCreateResFile_helper(0, 0, fn, "????"_4, "????"_4, 0);
 }
 
 void Executor::C_HCreateResFile(INTEGER vrefnum, LONGINT parid, ConstStringPtr name)
 {
-    HCreateResFile_helper(vrefnum, parid, name, TICK("????"), TICK("????"), 0);
+    HCreateResFile_helper(vrefnum, parid, name, "????"_4, "????"_4, 0);
 }
 
 
@@ -155,7 +155,7 @@ decompress_setup(INTEGER rn, int32_t *dlenp, int32_t *final_sizep, int32_t *offs
         GUEST<LONGINT> save_pos;
 
         GetFPos(rn, &save_pos);
-        *dcmp_handlep = GetResource(TICK("dcmp"), info.dcmpID);
+        *dcmp_handlep = GetResource("dcmp"_4, info.dcmpID);
         SetFPos(rn, fsFromStart, save_pos);
 
         if(!*dcmp_handlep)

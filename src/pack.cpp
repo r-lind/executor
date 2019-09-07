@@ -28,7 +28,7 @@ RAW_68K_IMPLEMENTATION(Pack1)
 {
     // For ResEdit, which uses PACK 1 to implement
     // its bitmap image editor.
-    Handle pack1 = GetResource(TICK("PACK"), 1);
+    Handle pack1 = GetResource("PACK"_4, 1);
     gui_assert(pack1);
     HLock(pack1);
     

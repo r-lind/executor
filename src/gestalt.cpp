@@ -147,7 +147,7 @@ static gestaltentry_t gtable[] = {
     },
     // FIXME: #warning questionable gestalt values for StuffitExpander
     { gestaltOSAttr, 0x3FF },
-    { FOURCC('t', 'h', 'd', 's'), 0 },
+    { "thds"_4, 0 },
 #else
     {
         gestaltNativeCPUtype, gestaltCPU68040,
@@ -237,8 +237,8 @@ static gestaltentry_t gtable[] = {
 				        give us trouble elsewhere */
 
 #if defined(THESE_REALLY_ARENT_NEEDED)
-    { FOURCC('i', 'c', 'm', 'p'), 17 }, /* QuickTime ... don't want this! */
-    { FOURCC('s', 'y', 's', 'a'), 0x4F30 },
+    { "icmp"_4, 17 }, /* QuickTime ... don't want this! */
+    { "sysa"_4, 0x4F30 },
     { gestaltOSAttr, 0x3FF },
     { gestaltPopupAttr, 1 }, /* perhaps we should admit to this */
     { gestaltFontMgrAttr, 7 },

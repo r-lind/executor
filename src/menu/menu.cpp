@@ -160,7 +160,7 @@ void Executor::C_InitMenus()
 
     LM(MenuHook) = LM(MBarHook) = 0;
     ClearMenuBar();
-    default_mcinfo = ROMlib_getrestid(TICK("mctb"), 0);
+    default_mcinfo = ROMlib_getrestid("mctb"_4, 0);
     if(!default_mcinfo)
     {
         /* try to load 'mctb' resource 0; otherwise use default
@@ -202,7 +202,7 @@ MenuHandle Executor::C_NewMenu(INTEGER mid, ConstStringPtr str)
     (*retval)->menuWidth = (*retval)->menuHeight = 0;
     /* menuHeight calculated elsewhere */
     SetResLoad(true);
-    temph = GetResource(TICK("MDEF"), textMenuProc);
+    temph = GetResource("MDEF"_4, textMenuProc);
     (*retval)->menuProc = temph;
     (*retval)->enableFlags = -1;
     str255assign((*retval)->menuData, str);
@@ -244,9 +244,9 @@ MenuHandle Executor::C_GetMenu(int16_t rid)
     Handle mct_res_h;
 
     SetResLoad(true);
-    retval = (MenuHandle)GetResource(TICK("MENU"), rid);
+    retval = (MenuHandle)GetResource("MENU"_4, rid);
 
-    mct_res_h = ROMlib_getrestid(TICK("mctb"), rid);
+    mct_res_h = ROMlib_getrestid("mctb"_4, rid);
     if(mct_res_h)
     {
         HLockGuard guard(mct_res_h);
@@ -279,7 +279,7 @@ MenuHandle Executor::C_GetMenu(int16_t rid)
             Handle temph;
 
             LM(MemErr) = noErr;
-            temph = GetResource(TICK("MDEF"),
+            temph = GetResource("MDEF"_4,
                                 *(GUEST<int16_t> *)&(*retval)->menuProc);
             if(SIZEOFMINFO != 15)
                 Munger((Handle)retval, (int32_t)6, (Ptr)0, (int32_t)0,
@@ -502,13 +502,13 @@ void Executor::C_AppendResMenu(MenuHandle mh, ResType restype)
                 if(str[0] && str[1] != '.' && str[1] != '%')
                     handleinsert(temph, str);
             }
-        } while(restype == TICK("FONT") && (restype = TICK("FOND")));
+        } while(restype == "FONT"_4 && (restype = "FOND"_4));
 
         /* Add an "About Executor..." menu to the Apple menu when they
        * ask for desk accessories.
        */
 
-        if(restype == TICK("DRVR") && about_box_menu_name_pstr[0])
+        if(restype == "DRVR"_4 && about_box_menu_name_pstr[0])
             app(about_box_menu_name_pstr, 0, 0, 0, 0, false, &endinf);
 
         n = GetHandleSize(temph);
@@ -764,7 +764,7 @@ Handle Executor::C_GetNewMBar(INTEGER mbarid)
     MenuHandle mh;
     Handle retval;
 
-    mb = (mbarhandle)GetResource(TICK("MBAR"), mbarid);
+    mb = (mbarhandle)GetResource("MBAR"_4, mbarid);
     if(!mb)
         retval = 0;
     else

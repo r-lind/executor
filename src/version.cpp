@@ -37,9 +37,9 @@ const char *ROMlib_executor_full_name = "Executor 2000 " EXECUTOR_VERSION;
         HUnlock(h); /* safe to do -- app not running */ \
         SetHandleSize(h, len);                          \
         memcpy(*h, str, len);                     \
-        if(_typ == TICK("STR "))                        \
+        if(_typ == "STR "_4)                        \
             *(char *)*h = len - 1;                \
-        else if(_typ == TICK("vers"))                   \
+        else if(_typ == "vers"_4)                   \
             ((char *)*h)[12] = len - 13;          \
     } while(0)
 
@@ -53,7 +53,7 @@ const char *ROMlib_executor_full_name = "Executor 2000 " EXECUTOR_VERSION;
         _minor = (minor);                                                                                        \
         _rev = (rev);                                                                                            \
                                                                                                                  \
-        UPDATE_RES(TICK("vers"), vers, "%c%c\x80%c%c%c\x5%d.%d.%d" fmt, _major, ((_minor << 4) | _rev), 0, 0, 0, \
+        UPDATE_RES("vers"_4, vers, "%c%c\x80%c%c%c\x5%d.%d.%d" fmt, _major, ((_minor << 4) | _rev), 0, 0, 0, \
                    _major, _minor, _rev, args);                                                                  \
     } while(0)
 
@@ -79,7 +79,7 @@ ROMlib_set_system_version(uint32_t version)
         rev = (version)&REV_MASK;
         gestalt_set_system_version(version);
 
-        UPDATE_RES(TICK("STR "), 0, "XMacintosh System Software, "
+        UPDATE_RES("STR "_4, 0, "XMacintosh System Software, "
                                     "version %d.%d",
                    major, minor);
 

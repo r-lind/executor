@@ -406,8 +406,8 @@ write_catalog(info_t *infop)
     filep->cdrResrv2 = 0;
     filep->filFlags = 0;
     filep->filTyp = 0;
-    filep->filUsrWds.fdType = TICK("FNDR");
-    filep->filUsrWds.fdCreator = TICK("ERIK");
+    filep->filUsrWds.fdType = "FNDR"_4;
+    filep->filUsrWds.fdCreator = "ERIK"_4;
     filep->filUsrWds.fdFlags = fInvisible;
     filep->filFlNum = 16;
     filep->filStBlk = 0;

@@ -882,7 +882,7 @@ PaletteHandle Executor::C_GetNewPalette(INTEGER id)
     PaletteHandle palette_res_h, retval;
     int palette_size;
 
-    palette_res_h = (PaletteHandle)ROMlib_getrestid(TICK("pltt"), id);
+    palette_res_h = (PaletteHandle)ROMlib_getrestid("pltt"_4, id);
     if(!palette_res_h)
         return nullptr;
 

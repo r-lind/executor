@@ -16,18 +16,18 @@ typedef int16_t AliasTypeInfo;
 
 enum
 {
-    kSystemFolderType = FOURCC('m', 'a', 'c', 's'),
-    kDesktopFolderType = FOURCC('d', 'e', 's', 'k'),
-    kTrashFolderType = FOURCC('t', 'r', 's', 'h'),
-    kWhereToEmptyTrashFolderType = FOURCC('e', 'm', 'p', 't'),
-    kPrintMonitorDocsFolderType = FOURCC('p', 'r', 'n', 't'),
-    kStartupFolderType = FOURCC('s', 't', 'r', 't'),
-    kAppleMenuFolderType = FOURCC('a', 'm', 'n', 'u'),
-    kControlPanelFolderType = FOURCC('c', 't', 'r', 'l'),
-    kExtensionFolderType = FOURCC('e', 'x', 't', 'n'),
-    kPreferencesFolderType = FOURCC('p', 'r', 'e', 'f'),
-    kTemporaryFolderType = FOURCC('t', 'e', 'm', 'p'),
-    kFontFolderType = FOURCC('f', 'o', 'n', 't'),
+    kSystemFolderType = "macs"_4,
+    kDesktopFolderType = "desk"_4,
+    kTrashFolderType = "trsh"_4,
+    kWhereToEmptyTrashFolderType = "empt"_4,
+    kPrintMonitorDocsFolderType = "prnt"_4,
+    kStartupFolderType = "strt"_4,
+    kAppleMenuFolderType = "amnu"_4,
+    kControlPanelFolderType = "ctrl"_4,
+    kExtensionFolderType = "extn"_4,
+    kPreferencesFolderType = "pref"_4,
+    kTemporaryFolderType = "temp"_4,
+    kFontFolderType = "font"_4,
 };
 
 DISPATCHER_TRAP(AliasDispatch, 0xA823, D0W);

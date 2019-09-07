@@ -341,10 +341,10 @@ ROMlib_new_window_common(WindowPeek w,
     WINDOW_STRUCT_REGION(w) = NewRgn();
     WINDOW_CONT_REGION(w) = NewRgn();
     WINDOW_UPDATE_REGION(w) = NewRgn();
-    WINDOW_DEF_PROC(w) = GetResource(TICK("WDEF"), proc_id >> 4);
+    WINDOW_DEF_PROC(w) = GetResource("WDEF"_4, proc_id >> 4);
     if(!WINDOW_DEF_PROC(w))
     {
-        WINDOW_DEF_PROC(w) = GetResource(TICK("WDEF"), 0);
+        WINDOW_DEF_PROC(w) = GetResource("WDEF"_4, 0);
         if(!WINDOW_DEF_PROC(w))
         {
             if(allocated_p)
@@ -357,7 +357,7 @@ ROMlib_new_window_common(WindowPeek w,
     t_aux_w = (AuxWinHandle)NewHandle(sizeof(AuxWinRec));
     (*t_aux_w)->awNext = LM(AuxWinHead);
     (*t_aux_w)->awOwner = (WindowPtr)w;
-    (*t_aux_w)->awCTable = (CTabHandle)GetResource(TICK("wctb"), 0);
+    (*t_aux_w)->awCTable = (CTabHandle)GetResource("wctb"_4, 0);
     (*t_aux_w)->dialogCItem = 0;
     (*t_aux_w)->awFlags = (proc_id & 0xF) << 24;
     (*t_aux_w)->awReserved = 0;
@@ -494,7 +494,7 @@ WindowPtr Executor::C_GetNewCWindow(INTEGER window_id, void* window_storage,
     Handle win_ctab_res;
     PaletteHandle palette;
 
-    win_res = (windrestypehand)ROMlib_getrestid(TICK("WIND"), window_id);
+    win_res = (windrestypehand)ROMlib_getrestid("WIND"_4, window_id);
     if(!win_res)
         return nullptr;
 
@@ -505,7 +505,7 @@ WindowPtr Executor::C_GetNewCWindow(INTEGER window_id, void* window_storage,
                           behind, (*win_res)->_wgoaway != 0,
                           *(GUEST<LONGINT> *)((char *)&(*win_res)->_wrect + 14));
 
-    win_ctab_res = ROMlib_getrestid(TICK("wctb"), window_id);
+    win_ctab_res = ROMlib_getrestid("wctb"_4, window_id);
     if(win_ctab_res != nullptr)
     {
         ThePortGuard guard(qdGlobals().thePort);
@@ -527,7 +527,7 @@ WindowPtr Executor::C_GetNewWindow(INTEGER wid, void* wst, WindowPtr behind)
     windrestypehand wh;
     WindowPtr tp;
 
-    wh = (windrestypehand)GetResource(TICK("WIND"), wid);
+    wh = (windrestypehand)GetResource("WIND"_4, wid);
     if(!wh)
         return (0);
     if(!*wh)

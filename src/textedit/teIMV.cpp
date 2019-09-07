@@ -711,7 +711,7 @@ void Executor::C_TEStylePaste(TEHandle te)
     StScrpHandle scrap;
 
     hText = NewHandle(1);
-    length = GetScrap(hText, TICK("TEXT"), &dummy);
+    length = GetScrap(hText, "TEXT"_4, &dummy);
     if(length < 0)
     {
         /* error, there is no scrap element */
@@ -723,7 +723,7 @@ void Executor::C_TEStylePaste(TEHandle te)
     }
 
     scrap = (StScrpHandle)NewHandle(sizeof(StScrpRec));
-    retval = GetScrap((Handle)scrap, TICK("styl"), &dummy);
+    retval = GetScrap((Handle)scrap, "styl"_4, &dummy);
     if(retval < 0)
     {
         DisposeHandle((Handle)scrap);

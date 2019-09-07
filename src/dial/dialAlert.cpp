@@ -52,7 +52,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterUPP fp) /* IMI-418 */
         LM(ANumber) = id;
         LM(ACount) = 0;
     }
-    ah = (alth)GetResource(TICK("ALRT"), id);
+    ah = (alth)GetResource("ALRT"_4, id);
     if(!ah)
     {
         BEEP(1);
@@ -68,12 +68,12 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterUPP fp) /* IMI-418 */
     if(!(n & 4))
         return -1;
 
-    ih = GetResource(TICK("DITL"), (*ah)->altiid);
+    ih = GetResource("DITL"_4, (*ah)->altiid);
     if(!ih)
         return -1;
     LoadResource(ih);
-    alert_ctab_res_h = ROMlib_getrestid(TICK("actb"), (*ah)->altiid);
-    item_ctab_res_h = ROMlib_getrestid(TICK("ictb"), (*ah)->altiid);
+    alert_ctab_res_h = ROMlib_getrestid("actb"_4, (*ah)->altiid);
+    item_ctab_res_h = ROMlib_getrestid("ictb"_4, (*ah)->altiid);
     GUEST<Handle> h = ih;
     HandToHand(&h);
 
@@ -211,7 +211,7 @@ static void lockditl(INTEGER id, BOOLEAN flag)
     INTEGER nitem, procid;
     itmp ip;
 
-    if((ih = lockres(TICK("DITL"), id, flag)))
+    if((ih = lockres("DITL"_4, id, flag)))
     {
         nitem = **(GUEST<GUEST<INTEGER> *> *)ih;
         ip = (itmp)((INTEGER *)*ih + 1);
@@ -219,15 +219,15 @@ static void lockditl(INTEGER id, BOOLEAN flag)
         {
             if((ip->itmtype & RESCTL) == RESCTL)
             {
-                h = lockres(TICK("CNTL"), *(GUEST<INTEGER> *)(&(ip->itmlen) + 1),
+                h = lockres("CNTL"_4, *(GUEST<INTEGER> *)(&(ip->itmlen) + 1),
                             flag);
                 procid = **(GUEST<GUEST<INTEGER> *> *)h + 8;
-                lockres(TICK("CDEF"), procid >> 4, flag);
+                lockres("CDEF"_4, procid >> 4, flag);
             }
             else if(ip->itmtype & iconItem)
-                lockres(TICK("ICON"), *(GUEST<INTEGER> *)(&(ip->itmlen) + 1), flag);
+                lockres("ICON"_4, *(GUEST<INTEGER> *)(&(ip->itmlen) + 1), flag);
             else if(ip->itmtype & picItem)
-                lockres(TICK("PICT"), *(GUEST<INTEGER> *)(&(ip->itmlen) + 1), flag);
+                lockres("PICT"_4, *(GUEST<INTEGER> *)(&(ip->itmlen) + 1), flag);
             BUMPIP(ip);
         }
     }
@@ -237,13 +237,13 @@ static void lockalert(INTEGER id, BOOLEAN flag)
 {
     alth ah;
 
-    if((ah = (alth)lockres(TICK("ALRT"), id, flag)))
+    if((ah = (alth)lockres("ALRT"_4, id, flag)))
     {
         lockditl((*ah)->altiid, flag);
-        lockres(TICK("WDEF"), dBoxProc >> 4, flag);
-        lockres(TICK("ICON"), stopIcon, flag);
-        lockres(TICK("ICON"), noteIcon, flag);
-        lockres(TICK("ICON"), cautionIcon, flag);
+        lockres("WDEF"_4, dBoxProc >> 4, flag);
+        lockres("ICON"_4, stopIcon, flag);
+        lockres("ICON"_4, noteIcon, flag);
+        lockres("ICON"_4, cautionIcon, flag);
     }
 }
 
@@ -261,10 +261,10 @@ static void lockdialog(INTEGER id, BOOLEAN flag)
 {
     dlogh dh;
 
-    if((dh = (dlogh)lockres(TICK("DLOG"), id, flag)))
+    if((dh = (dlogh)lockres("DLOG"_4, id, flag)))
     {
         lockditl((*dh)->dlgditl, flag);
-        lockres(TICK("WDEF"), (*dh)->dlgprocid >> 4, flag);
+        lockres("WDEF"_4, (*dh)->dlgprocid >> 4, flag);
     }
 }
 

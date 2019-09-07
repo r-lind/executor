@@ -27,24 +27,24 @@ extern void ROMlib_add_to_gestalt_list(OSType selector, OSErr retval,
 /* GhostScript DLL version number */
 enum
 {
-    gestaltGhostScriptVersion = FOURCC('g', 'o', 's', 't')
+    gestaltGhostScriptVersion = "gost"_4
 };
 
 /* Executor Version as string */
 enum
 {
-    gestaltExecutorVersionString = FOURCC('x', 'q', 't', 'r')
+    gestaltExecutorVersionString = "xqtr"_4
 };
 
 /* screen size */
 enum
 {
-    gestaltScreenSize = FOURCC('s', 'c', 'r', 'n')
+    gestaltScreenSize = "scrn"_4
 };
 
 enum
 {
-    gestaltPHYSICAL = FOURCC('M', 'U', 'L', '8')
+    gestaltPHYSICAL = "MUL8"_4
 };
 
 enum

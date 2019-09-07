@@ -130,7 +130,7 @@ StringHandle Executor::C_GetString(INTEGER i)
 {
     StringHandle retval;
 
-    retval = (StringHandle)ROMlib_getrestid(TICK("STR "), i);
+    retval = (StringHandle)ROMlib_getrestid("STR "_4, i);
     if(i == -16096 && !retval)
         retval = get_phoney_name_resource();
     return retval;
@@ -141,7 +141,7 @@ void Executor::C_GetIndString(StringPtr s, INTEGER sid, INTEGER index)
     Handle retval;
     char *p, *ep, *op;
 
-    retval = GetResource(TICK("STR#"), sid);
+    retval = GetResource("STR#"_4, sid);
     LoadResource(retval);
     if(ResError() != noErr || *(INTEGER *)*retval < index)
     {
@@ -418,7 +418,7 @@ void Executor::C_LongMul(LONGINT a, LONGINT b, Int64Bit *c)
 
 PatHandle Executor::C_GetPattern(INTEGER id)
 {
-    return ((PatHandle)ROMlib_getrestid(TICK("PAT "), id));
+    return ((PatHandle)ROMlib_getrestid("PAT "_4, id));
 }
 
 void Executor::GetIndPattern(Byte *op, INTEGER plistid, INTEGER index)
@@ -426,7 +426,7 @@ void Executor::GetIndPattern(Byte *op, INTEGER plistid, INTEGER index)
     Handle retval;
     char *p, *ep;
 
-    retval = GetResource(TICK("PAT#"), plistid);
+    retval = GetResource("PAT#"_4, plistid);
     LoadResource(retval);
     if(ResError() != noErr || *(INTEGER *)*retval < index)
     {
@@ -439,7 +439,7 @@ void Executor::GetIndPattern(Byte *op, INTEGER plistid, INTEGER index)
 
 CursHandle Executor::C_GetCursor(INTEGER id)
 {
-    return ((CursHandle)ROMlib_getrestid(TICK("CURS"), id));
+    return ((CursHandle)ROMlib_getrestid("CURS"_4, id));
 }
 
 /*
@@ -450,7 +450,7 @@ PicHandle Executor::C_GetPicture(INTEGER id)
 {
     PicHandle retval;
 
-    retval = (PicHandle)ROMlib_getrestid(TICK("PICT"), id);
+    retval = (PicHandle)ROMlib_getrestid("PICT"_4, id);
     return retval;
 }
 

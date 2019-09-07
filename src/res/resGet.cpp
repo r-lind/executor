@@ -278,7 +278,7 @@ pseudo_get_rom_resource(ResType typ, INTEGER id)
     Handle retval;
     int i;
     static pseudo_rom_entry_t pseudo_rom_table[] = {
-        { FOURCC('F', 'O', 'N', 'D'), 3 }
+        { "FOND"_4, 3 }
     };
 
     for(i = 0; (i < (int)NELEM(pseudo_rom_table) && (pseudo_rom_table[i].type != typ
@@ -330,7 +330,7 @@ Handle Executor::C_GetResource(ResType typ, INTEGER id)
  * I'm trying to find the author of the program and get him to fix it.
  *  	--Cliff Sat Sep  3 08:02:51 MDT 1994
  */
-    if(typ == TICK("rAnd") && id == 128)
+    if(typ == "rAnd"_4 && id == 128)
         return 0;
 #endif
 
@@ -349,9 +349,9 @@ Handle Executor::C_GetResource(ResType typ, INTEGER id)
     { /* fake out code resources */
 #define ICKYHACK
 #if defined(ICKYHACK)
-        case FOURCC('P', 'A', 'C', 'K'):
+        case "PACK"_4:
             if(id != 1)
-                return GetResource(TICK("ALRT"), -3995);
+                return GetResource("ALRT"_4, -3995);
 #endif /* ICKYHACK */
     }
 
@@ -369,7 +369,7 @@ Handle Executor::C_GetResource(ResType typ, INTEGER id)
             retval = 0;
     }
 #if defined(ULTIMA_III_HACK)
-    if(ROMlib_ultima_iii_hack && typ == TICK("PREF") && retval)
+    if(ROMlib_ultima_iii_hack && typ == "PREF"_4 && retval)
     {
         *((char *)*retval + 1) = 0; /* turn off Music prefs */
     }

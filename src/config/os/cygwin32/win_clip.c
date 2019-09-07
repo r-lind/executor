@@ -71,12 +71,12 @@ GetScrapX(LONGINT type, char **h)
     retval = -1;
     switch(type)
     {
-        case FOURCC('T', 'E', 'X', 'T'):
+        case "TEXT"_4:
             format = CF_TEXT;
             break;
         default:
             format = ROMlib_executor_format(type);
-            if(type == FOURCC('P', 'I', 'C', 'T'))
+            if(type == "PICT"_4)
             {
                 decltype(format) newval;
                 UINT formats[2] = { format, CF_DIB };
@@ -99,7 +99,7 @@ GetScrapX(LONGINT type, char **h)
             lp = GlobalLock(data);
             switch(type)
             {
-                case FOURCC('T', 'E', 'X', 'T'):
+                case "TEXT"_4:
                 {
                     int len;
 
@@ -139,7 +139,7 @@ calc_length_and_format(UINT *formatp, LONGINT type, LONGINT length,
 
     switch(type)
     {
-        case FOURCC('T', 'E', 'X', 'T'):
+        case "TEXT"_4:
             retval = length + count_char(p, length, '\r') + 1;
             *formatp = CF_TEXT;
             break;
@@ -156,7 +156,7 @@ fill_in_data(char *destp, LONGINT type, LONGINT length, const char *p)
 {
     switch(type)
     {
-        case FOURCC('T', 'E', 'X', 'T'):
+        case "TEXT"_4:
             while(--length >= 0)
             {
                 char c;
@@ -191,7 +191,7 @@ PutScrapX(LONGINT type, LONGINT length, char *p, int scrap_count)
 
         new_length = calc_length_and_format(&format, type, length, p);
         data = GlobalAlloc(GMEM_MOVEABLE | GMEM_DDESHARE, new_length);
-        if(type == TICK("PICT"))
+        if(type == "PICT"_4)
         {
             if(clip_data)
                 LocalFree(clip_data);
@@ -205,7 +205,7 @@ PutScrapX(LONGINT type, LONGINT length, char *p, int scrap_count)
             fill_in_data(destp, type, length, p);
             GlobalUnlock(data);
             SetClipboardData(format, data);
-            if(type == TICK("PICT"))
+            if(type == "PICT"_4)
             {
                 fill_in_data((char *)clip_data, type, length, p);
                 SetClipboardData(CF_DIB, NULL); /* we can create a DIB if
@@ -250,7 +250,7 @@ write_pict_as_pict_to_clipboard(void)
             lp = GlobalLock(hg);
             memcpy(lp, clip_data, len);
             GlobalUnlock(hg);
-            SetClipboardData(ROMlib_executor_format(FOURCC('P', 'I', 'C', 'T')), hg);
+            SetClipboardData(ROMlib_executor_format("PICT"_4), hg);
         }
     }
 }

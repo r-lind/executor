@@ -52,8 +52,8 @@ MacResourceFork::MacResourceFork(fs::path path, create_t)
         // but then Mac OS X swallows the attribute
         // and the MacItemFactory does not trigger
     ItemInfo info;
-    info.file.info.fdType = TICK("BINA");
-    info.file.info.fdCreator = TICK("EXEC");
+    info.file.info.fdType = "BINA"_4;
+    info.file.info.fdCreator = "EXEC"_4;
     fsetxattr(fd, XATTR_FINDERINFO_NAME, &info, 32, 0, 0);
 }
 

@@ -138,7 +138,7 @@ static INTEGER movealert(INTEGER id)
     INTEGER dh, dv;
     Rect *rp;
 
-    h = GetResource(TICK("ALRT"), id);
+    h = GetResource("ALRT"_4, id);
     if(!*h)
         LoadResource(h);
     rp = (Rect *)*h;
@@ -159,7 +159,7 @@ static void drawminiicon(INTEGER icon)
     BitMap bm;
     Rect r;
 
-    h = ROMlib_getrestid(TICK("SICN"), SICONS);
+    h = ROMlib_getrestid("SICN"_4, SICONS);
     if(!h)
         /*-->*/ return; /* badness */
     HLock(h);
@@ -328,7 +328,7 @@ WINDFL(void *dp)
     GUEST<LONGINT> retval;
 
     retval = ((WindowPeek)dp)->refCon;
-    if(retval == TICK("stdf"))
+    if(retval == "stdf"_4)
         return (fltype *)SYN68K_TO_US(emergency_save_ref_con);
     else
         return guest_cast<fltype *>(retval);
@@ -734,7 +734,7 @@ static void flfill(fltype *f)
                 {
                     if(pb.hFileInfo.ioFlAttrib & ATTRIB_ISADIR)
                         micon = MICONCFOLDER;
-                    else if(pb.hFileInfo.ioFlFndrInfo.fdType == TICK("APPL"))
+                    else if(pb.hFileInfo.ioFlFndrInfo.fdType == "APPL"_4)
                         micon = MICONAPP | f->flgraynondirs;
                     else
                         micon = MICONLETTER | f->flgraynondirs;
@@ -1035,7 +1035,7 @@ call_magicfp(fltype *fl, DialogPtr dp, EventRecord *evt, GUEST<INTEGER> *ith)
     LONGINT save_ref_con;
 
     save_ref_con = GetWRefCon(dp);
-    SetWRefCon(dp, TICK("stdf"));
+    SetWRefCon(dp, "stdf"_4);
     ROMlib_hook(stdfile_filtnumber);
 
     switch(fl->flavor)
@@ -1506,7 +1506,7 @@ makeworking(fltype *f)
 
             wdpb.ioVRefNum = -LM(SFSaveDisk);
             wdpb.ioWDDirID = LM(CurDirStore);
-            wdpb.ioWDProcID = TICK("STDF");
+            wdpb.ioWDProcID = "STDF"_4;
             wdpb.ioNamePtr = 0;
             err = PBOpenWD(&wdpb, false);
             if(err != noErr)
@@ -1627,7 +1627,7 @@ ROMlib_CALLDHOOK(fltype *fl, INTEGER ihit, DialogPtr dp, dialog_hook_u dhu)
 
     save_ref_con = GetWRefCon(dp);
     emergency_save_ref_con = save_ref_con;
-    SetWRefCon(dp, TICK("stdf"));
+    SetWRefCon(dp, "stdf"_4);
 
     switch(fl->flavor)
     {
@@ -1837,7 +1837,7 @@ create_new_folder_button(DialogPtr dp)
     ControlHandle retval;
     Handle dial_test;
 
-    dial_test = GetResource(TICK("DLOG"), -6044);
+    dial_test = GetResource("DLOG"_4, -6044);
     if(!dial_test)
         retval = nullptr;
     else

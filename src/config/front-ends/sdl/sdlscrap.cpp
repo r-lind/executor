@@ -250,7 +250,7 @@ convert_format(int type)
     switch(type)
     {
 
-        case FOURCC('T', 'E', 'X', 'T'):
+        case "TEXT"_4:
 #if defined(X11_SCRAP)
             /* * */
             return XA_STRING;
@@ -289,7 +289,7 @@ convert_data(int type, char *dst, char *src, int srclen)
     dstlen = 0;
     switch(type)
     {
-        case FOURCC('T', 'E', 'X', 'T'):
+        case "TEXT"_4:
             if(dst)
             {
                 while(--srclen >= 0)
@@ -368,7 +368,7 @@ convert_scrap(int type, char *dst, char *src, int srclen)
     dstlen = 0;
     switch(type)
     {
-        case FOURCC('T', 'E', 'X', 'T'):
+        case "TEXT"_4:
         {
             if(srclen == 0)
                 srclen = strlen(src);

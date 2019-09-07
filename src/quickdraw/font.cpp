@@ -37,7 +37,7 @@ void Executor::C_InitFonts() /* IMI-222 */
         saveZone = LM(TheZone);
         LM(TheZone) = LM(SysZone);
         SetResLoad(true);
-        LM(ROMFont0) = GetResource(TICK("FONT"), FONTRESID(systemFont, 12));
+        LM(ROMFont0) = GetResource("FONT"_4, FONTRESID(systemFont, 12));
         LM(WidthListHand) = NewHandle(MAXTABLES * sizeof(GUEST<Handle>));
         memset(*LM(WidthListHand), 0, MAXTABLES * sizeof(GUEST<Handle>));
         LM(TheZone) = saveZone;
@@ -97,11 +97,11 @@ void Executor::C_GetFontName(INTEGER fnum, StringPtr fnam) /* IMI-223 */
     else if(fnum == applFont)
         fnum = LM(ApFontID);
     SetResLoad(false);
-    h = GetResource(TICK("FONT"), FONTRESID(fnum, 0));
+    h = GetResource("FONT"_4, FONTRESID(fnum, 0));
     if(!h)
-        h = GetResource(TICK("NFNT"), FONTRESID(fnum, 0));
+        h = GetResource("NFNT"_4, FONTRESID(fnum, 0));
     if(!h)
-        h = GetResource(TICK("FOND"), fnum);
+        h = GetResource("FOND"_4, fnum);
     GetResInfo(h, &i, &rest, fnam);
     if(ResError())
         *fnam = 0;
@@ -125,15 +125,15 @@ void Executor::C_GetFNum(ConstStringPtr fnam, GUEST<INTEGER> *fnum) /* IMI-223 *
 
     SetResLoad(false);
 
-    h = GetNamedResource(TICK("FOND"), fnam);
+    h = GetNamedResource("FOND"_4, fnam);
     if(h)
         shift = false;
     else
     {
         shift = true;
-        h = GetNamedResource(TICK("FONT"), fnam);
+        h = GetNamedResource("FONT"_4, fnam);
         if(!h)
-            h = GetNamedResource(TICK("NFNT"), fnam);
+            h = GetNamedResource("NFNT"_4, fnam);
     }
 
     GetResInfo(h, fnum, &rest, nullptr);
@@ -487,10 +487,10 @@ static void findclosestfont(INTEGER family, INTEGER size, INTEGER *lesserp,
     lesser = 0;
     greater = 32767;
     SetResLoad(false);
-    nres = CountResources(TICK("FONT")); /* how about NFNT? */
+    nres = CountResources("FONT"_4); /* how about NFNT? */
     for(i = 1; i <= nres; i++)
     {
-        h = GetIndResource(TICK("FONT"), i);
+        h = GetIndResource("FONT"_4, i);
         GetResInfo(h, &id_s, &rest, (StringPtr)0);
         INTEGER id = id_s.get();
         if(((unsigned short)id >> 7) == family)
@@ -559,16 +559,16 @@ BOOLEAN Executor::C_RealFont(INTEGER fnum, INTEGER sz) /* IMI-223 */
     int retval;
 
     SetResLoad(false);
-    h = GetResource(TICK("FONT"), FONTRESID(fnum, sz));
+    h = GetResource("FONT"_4, FONTRESID(fnum, sz));
     if(!h)
-        h = GetResource(TICK("NFNT"), FONTRESID(fnum, sz));
+        h = GetResource("NFNT"_4, FONTRESID(fnum, sz));
     retval = !!h;
     SetResLoad(true);
     if(!retval)
     {
         FHandle fh;
 
-        fh = (FHandle)GetResource(TICK("FOND"), fnum);
+        fh = (FHandle)GetResource("FOND"_4, fnum);
         if(fh)
         {
             INTEGER powerof2, lesser, greater;
@@ -618,7 +618,7 @@ at_least_one_fond_entry(INTEGER family)
 {
     FHandle retval;
 
-    retval = (FHandle)GetResource(TICK("FOND"), family);
+    retval = (FHandle)GetResource("FOND"_4, family);
     if(retval)
     {
         INTEGER powerof2, lesser, greater;
@@ -634,7 +634,7 @@ at_least_one_fond_entry(INTEGER family)
  * TODO:  NFNT below
  */
 
-#define AVAILABLE(x) (WIDTHPTR->fSize = (x), WIDTHPTR->tabFont = GetResource(TICK("FONT"), FONTRESID(family, (x))))
+#define AVAILABLE(x) (WIDTHPTR->fSize = (x), WIDTHPTR->tabFont = GetResource("FONT"_4, FONTRESID(family, (x))))
 
 static void newwidthtable(FMInput *fmip)
 {
@@ -696,11 +696,11 @@ static void newwidthtable(FMInput *fmip)
     tried_app_font = false;
     n_tried_sys_font = 0;
     if((fh = at_least_one_fond_entry(wanted_family))
-       || GetResource(TICK("FONT"), FONTRESID(wanted_family, fmip->size))
-       || GetResource(TICK("FONT"), FONTRESID(wanted_family, 0)))
+       || GetResource("FONT"_4, FONTRESID(wanted_family, fmip->size))
+       || GetResource("FONT"_4, FONTRESID(wanted_family, 0)))
         family = wanted_family;
     else if((fh = at_least_one_fond_entry(LM(ApFontID)))
-            || GetResource(TICK("FONT"), FONTRESID(LM(ApFontID), 0)))
+            || GetResource("FONT"_4, FONTRESID(LM(ApFontID), 0)))
     {
         family = LM(ApFontID);
         tried_app_font = true;
@@ -744,10 +744,10 @@ static void newwidthtable(FMInput *fmip)
             if(!WIDTHPTR->fSize)
                 fprintf(stderr, "fh:  fSize = 0\n");
             fontresid = closestface();
-            if(!(WIDTHPTR->tabFont = GetResource(TICK("NFNT"), fontresid)))
-                WIDTHPTR->tabFont = GetResource(TICK("FONT"), fontresid);
+            if(!(WIDTHPTR->tabFont = GetResource("NFNT"_4, fontresid)))
+                WIDTHPTR->tabFont = GetResource("FONT"_4, fontresid);
             if(!WIDTHPTR->tabFont)
-                WIDTHPTR->tabFont = GetResource(TICK("FONT"),
+                WIDTHPTR->tabFont = GetResource("FONT"_4,
                                                    FONTRESID(family, WIDTHPTR->fSize));
             if(!WIDTHPTR->tabFont)
                 warning_unexpected(NULL_STRING);
@@ -762,7 +762,7 @@ static void newwidthtable(FMInput *fmip)
                 {
                     findclosestfont(family, fmip->size, &lesser, &greater);
                     WIDTHPTR->fSize = lesser ? lesser : greater;
-                    WIDTHPTR->tabFont = GetResource(TICK("FONT"),
+                    WIDTHPTR->tabFont = GetResource("FONT"_4,
                                                        FONTRESID(family, WIDTHPTR->fSize));
                 }
                 else
@@ -774,7 +774,7 @@ static void newwidthtable(FMInput *fmip)
                             WIDTHPTR->fSize = lesser;
                         else
                             WIDTHPTR->fSize = greater;
-                        WIDTHPTR->tabFont = GetResource(TICK("FONT"),
+                        WIDTHPTR->tabFont = GetResource("FONT"_4,
                                                            FONTRESID(family, WIDTHPTR->fSize));
                     }
                 }

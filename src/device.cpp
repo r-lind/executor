@@ -304,7 +304,7 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
 
     err = noErr;
 
-    if((ramdh = (ramdriverhand)GetNamedResource(TICK("DRVR"),
+    if((ramdh = (ramdriverhand)GetNamedResource("DRVR"_4,
                                                 pbp->ioParam.ioNamePtr)))
     {
         LoadResource((Handle)ramdh);

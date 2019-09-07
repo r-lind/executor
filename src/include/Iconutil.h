@@ -17,15 +17,15 @@ namespace Executor
 {
 enum
 {
-    large1BitMask = FOURCC('I', 'C', 'N', '#'),
-    large4BitData = FOURCC('i', 'c', 'l', '4'),
-    large8BitData = FOURCC('i', 'c', 'l', '8'),
-    small1BitMask = FOURCC('i', 'c', 's', '#'),
-    small4BitData = FOURCC('i', 'c', 's', '4'),
-    small8BitData = FOURCC('i', 'c', 's', '8'),
-    mini1BitMask = FOURCC('i', 'c', 'm', '#'),
-    mini4BitData = FOURCC('i', 'c', 'm', '4'),
-    mini8BitData = FOURCC('i', 'c', 'm', '8'),
+    large1BitMask = "ICN#"_4,
+    large4BitData = "icl4"_4,
+    large8BitData = "icl8"_4,
+    small1BitMask = "ics#"_4,
+    small4BitData = "ics4"_4,
+    small8BitData = "ics8"_4,
+    mini1BitMask = "icm#"_4,
+    mini4BitData = "icm4"_4,
+    mini8BitData = "icm8"_4,
 };
 
 /* IconAlignmentType values */

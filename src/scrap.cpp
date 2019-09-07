@@ -39,7 +39,7 @@ static OSErr cropen(GUEST<INTEGER> *fp)
     retval = FSOpen(LM(ScrapName), LM(BootDrive), fp);
     if(retval == fnfErr)
     {
-        retval = Create(LM(ScrapName), LM(BootDrive), TICK("MACS"), TICK("CLIP"));
+        retval = Create(LM(ScrapName), LM(BootDrive), "MACS"_4, "CLIP"_4);
         if(retval != noErr)
             return (retval);
         return (FSOpen(LM(ScrapName), LM(BootDrive), fp));

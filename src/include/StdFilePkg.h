@@ -119,7 +119,7 @@ enum
 
 enum
 {
-    sfMainDialogRefCon = TICK("stdf"),
+    sfMainDialogRefCon = "stdf"_4,
 };
 
 enum

@@ -91,7 +91,7 @@ static void eject_floppy_notify(void)
  * for another day.
  */
 
-    if(LM(WWExist) == EXIST_YES && GetResource(TICK("ALRT"), EJECTALERTID))
+    if(LM(WWExist) == EXIST_YES && GetResource("ALRT"_4, EJECTALERTID))
         Alert(EJECTALERTID, nullptr);
 }
 

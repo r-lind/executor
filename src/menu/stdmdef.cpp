@@ -69,7 +69,7 @@ int Executor::get_icon_info(mextp item_info, icon_info_t *info, int need_icon_p)
     {
         if(item_info->mkeyeq != SICN_FLAG)
         {
-            h = GetResource(TICK("cicn"), 256 + item_info->micon);
+            h = GetResource("cicn"_4, 256 + item_info->micon);
             if(h)
             {
                 CIconHandle icon;
@@ -84,7 +84,7 @@ int Executor::get_icon_info(mextp item_info, icon_info_t *info, int need_icon_p)
             }
             else
             {
-                h = GetResource(TICK("ICON"), 256 + item_info->micon);
+                h = GetResource("ICON"_4, 256 + item_info->micon);
                 if(h)
                 {
                     info->color_icon_p = false;
@@ -101,7 +101,7 @@ int Executor::get_icon_info(mextp item_info, icon_info_t *info, int need_icon_p)
         else if(!h)
         {
             if(item_info->mkeyeq == SICN_FLAG)
-                h = GetResource(TICK("SICN"), 256 + item_info->micon);
+                h = GetResource("SICN"_4, 256 + item_info->micon);
             if(h)
             {
                 info->color_icon_p = false;

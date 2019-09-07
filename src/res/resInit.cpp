@@ -103,7 +103,7 @@ INTEGER Executor::C_InitResources()
     LM(SysMapHndl) = LM(TopMapHndl);
     ROMlib_invalar();
     SetResLoad(true);
-    versh = GetResource(TICK("vers"), 1);
+    versh = GetResource("vers"_4, 1);
     versnum = extract_vers_num(versh);
     if(versnum < MINIMUM_SYSTEM_FILE_NEEDED)
         system_file_version_skew_p = true;

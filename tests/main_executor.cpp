@@ -67,7 +67,7 @@ public:
 
             wdpb.ioVRefNum = fsspec->vRefNum;
             wdpb.ioWDDirID = fsspec->parID;
-            wdpb.ioWDProcID = FOURCC('X', 'c', 't', 'r');
+            wdpb.ioWDProcID = "Xctr"_4;
             wdpb.ioNamePtr = fsspec->name;
             PBOpenWD(&wdpb, false);
             SetVol(nullptr, wdpb.ioVRefNum);

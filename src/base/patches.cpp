@@ -140,7 +140,7 @@ static bool shouldHideTrap(bool tool, int index)
             case 0x4F: /* RDrvrInstall */
                 return true;
             case 0x8B: /* Communications Toolbox */
-                return ROMlib_creator == TICK("KR09"); /* kermit */
+                return ROMlib_creator == "KR09"_4; /* kermit */
                 break;
             default:
                 return false;

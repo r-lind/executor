@@ -26,11 +26,4 @@
 #define str255assign(d, s) \
     (memcpy(d, s, uint8_t((s)[0]) + 1))
 
-#define FOURCC(a, b, c, d) ((((uint32_t)(uint8_t)(a)) << 24)   \
-                       | (((uint32_t)(uint8_t)(b)) << 16) \
-                       | (((uint32_t)(uint8_t)(c)) << 8)  \
-                       | (((uint32_t)(uint8_t)(d)) << 0))
-
-#define TICK(str) FOURCC(str[0], str[1], str[2], str[3])
-
 #endif /* !_MACROS_H_ */

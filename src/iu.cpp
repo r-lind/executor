@@ -207,7 +207,7 @@ Handle Executor::C_GetIntlResource(INTEGER id) /* IMI-505 */
 
     oldres = CurResFile();
     UseResFile(0);
-    retval = ROMlib_getrestid(TICK("INTL"), id);
+    retval = ROMlib_getrestid("INTL"_4, id);
     UseResFile(oldres);
 
     if(!retval && id == 4)
@@ -319,7 +319,7 @@ void Executor::C_SetIntlResource(INTEGER rn, INTEGER id, Handle newh) /* IMI-506
             ChangedResource(h);
         }
         else
-            AddResource(newh, TICK("INTL"), id, (StringPtr)0);
+            AddResource(newh, "INTL"_4, id, (StringPtr)0);
     }
     UseResFile(oldcurmap);
 }

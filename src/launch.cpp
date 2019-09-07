@@ -290,7 +290,7 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemo
         wdpb.ioWDDirID = fsp->parID;
     }
     /* Do not do this -- Loser does it SFSaveDisk_Update (vRefNum, fName); */
-    wdpb.ioWDProcID = TICK("Xctr");
+    wdpb.ioWDProcID = "Xctr"_4;
     wdpb.ioNamePtr = 0;
     PBOpenWD(&wdpb, false);
     ROMlib_exevrefnum = wdpb.ioVRefNum;
@@ -312,19 +312,19 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemo
 #define LEMMINGSHACK
 #if defined(LEMMINGSHACK)
     {
-        if(finfo.fdCreator == TICK("Psyg")
-           || finfo.fdCreator == TICK("Psod"))
+        if(finfo.fdCreator == "Psyg"_4
+           || finfo.fdCreator == "Psod"_4)
             ROMlib_flushoften = true;
     }
 #endif /* defined(LEMMINGSHACK) */
 
 #if defined(ULTIMA_III_HACK)
-    ROMlib_ultima_iii_hack = (finfo.fdCreator == TICK("Ult3"));
+    ROMlib_ultima_iii_hack = (finfo.fdCreator == "Ult3"_4);
 #endif
 
-    h = GetResource(FOURCC('v', 'e', 'r', 's'), 2);
+    h = GetResource("vers"_4, 2);
     if(!h)
-        h = GetResource(FOURCC('v', 'e', 'r', 's'), 1);
+        h = GetResource("vers"_4, 1);
 
     ROMlib_version_long = 0;
     if(h)
@@ -349,11 +349,11 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemo
         if(ROMlib_MacSize.first == INITIALPAIRVALUE)
             ROMlib_MacSize = ROMlib_ScreenSize;
     }
-    code0 = Get1Resource(FOURCC('C', 'O', 'D', 'E'), 0);
-    cfrg0 = Get1Resource(FOURCC('c', 'f', 'r', 'g'), 0);
+    code0 = Get1Resource("CODE"_4, 0);
+    cfrg0 = Get1Resource("cfrg"_4, 0);
 
     bool havePowerPCCode = cfrg0
-            && ROMlib_find_cfrg(cfrg0, FOURCC('p', 'w', 'p', 'c'),
+            && ROMlib_find_cfrg(cfrg0, "pwpc"_4,
                                 kApplicationCFrag, (StringPtr) "");
 
     if(havePowerPCCode && ppc_launch_p)
@@ -361,7 +361,7 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemo
     
     if(!havePowerPCCode && !code0)
     {
-        if(cfrg0 && ROMlib_find_cfrg(cfrg0, FOURCC('m', '6', '8', 'k'),
+        if(cfrg0 && ROMlib_find_cfrg(cfrg0, "m68k"_4,
                                      kApplicationCFrag, (StringPtr) ""))
             ROMlib_launch_failure = launch_cfm_requiring;
         else
@@ -370,9 +370,9 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemo
     }
 
     {
-        Handle size_resource_h = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), 0);
+        Handle size_resource_h = Get1Resource("SIZE"_4, 0);
         if(size_resource_h == nullptr)
-            size_resource_h = Get1Resource(FOURCC('S', 'I', 'Z', 'E'), -1);
+            size_resource_h = Get1Resource("SIZE"_4, -1);
         if(size_resource_h)
         {
             SIZEResource *size_resource;
@@ -464,7 +464,7 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemo
         FSSpec fs;
 
         FSMakeFSSpec(ROMlib_exevrefnum, 0, ROMlib_exefname, &fs);
-        cfm_launch(cfrg0, FOURCC('p', 'w', 'p', 'c'), &fs);
+        cfm_launch(cfrg0, "pwpc"_4, &fs);
     }
 }
 
@@ -817,7 +817,7 @@ our_special_map(resmaphand map)
     Handle h;
 
     LM(CurMap) = (*map)->resfn;
-    h = Get1Resource(TICK("nUSE"), 0);
+    h = Get1Resource("nUSE"_4, 0);
     retval = h ? true : false;
 
     return retval;

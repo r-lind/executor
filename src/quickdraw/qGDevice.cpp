@@ -290,7 +290,7 @@ GDHandle Executor::C_GetMainDevice()
      memory unless noDriver is set, but PacMan Deluxe will have
      trouble if that bit is set. */
 
-    if(ROMlib_creator == TICK("RLMZ"))
+    if(ROMlib_creator == "RLMZ"_4)
         GD_FLAGS(retval) |= 1 << noDriver;
     else
         GD_FLAGS(retval) &= ~(1 << noDriver);

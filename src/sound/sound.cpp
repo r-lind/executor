@@ -477,7 +477,7 @@ OSErr Executor::C_SndAddModifier(SndChannelPtr chanp, ProcPtr mod, INTEGER id,
                 }
                 else
                 {
-                    h = GetResource(TICK("snth"), id);
+                    h = GetResource("snth"_4, id);
                     if(*h != (Ptr)&snth5)
                     { /* ACK; phone handle stuff */
                         LoadResource(h);
@@ -964,7 +964,7 @@ OSErr Executor::C_SndControl(INTEGER id, SndCommand *cmdp)
             break;
 #if defined(OLD_BROKEN_NEXTSTEP_SOUND)
         case soundon:
-            h = GetResource(TICK("snth"), id);
+            h = GetResource("snth"_4, id);
             if(!h)
                 retval = resProblem;
             else

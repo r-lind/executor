@@ -300,51 +300,51 @@ enum
 
 enum
 {
-    typeFSS = FOURCC('f', 's', 's', ' '),
+    typeFSS = "fss "_4,
 
-    typeAEList = FOURCC('l', 'i', 's', 't'),
-    typeAERecord = FOURCC('r', 'e', 'c', 'o'),
-    typeAppleEvent = FOURCC('a', 'e', 'v', 't'),
-    typeProcessSerialNumber = FOURCC('p', 's', 'n', ' '),
-    typeNull = FOURCC('n', 'u', 'l', 'l'),
-    typeApplSignature = FOURCC('s', 'i', 'g', 'n'),
+    typeAEList = "list"_4,
+    typeAERecord = "reco"_4,
+    typeAppleEvent = "aevt"_4,
+    typeProcessSerialNumber = "psn "_4,
+    typeNull = "null"_4,
+    typeApplSignature = "sign"_4,
 
-    typeType = FOURCC('t', 'y', 'p', 'e'),
-    typeWildCard = FOURCC('*', '*', '*', '*'),
-    typeAlias = FOURCC('a', 'l', 'i', 's'),
+    typeType = "type"_4,
+    typeWildCard = "****"_4,
+    typeAlias = "alis"_4,
 
-    typeBoolean = TICK("bool"),
-    typeChar = TICK("TEXT"),
-    typeSInt16 = TICK("shor"),
-    typeSInt32 = TICK("long"),
-    typeUInt32 = TICK("magn"),
-    typeSInt64 = TICK("comp"),
-    typeIEEE32BitFloatingPoint = TICK("sing"),
-    typeIEEE64BitFloatingPoint = TICK("doub"),
-    type128BitFloatingPoint = TICK("ldbl"),
-    typeDecimalStruct = TICK("decm")
+    typeBoolean = "bool"_4,
+    typeChar = "TEXT"_4,
+    typeSInt16 = "shor"_4,
+    typeSInt32 = "long"_4,
+    typeUInt32 = "magn"_4,
+    typeSInt64 = "comp"_4,
+    typeIEEE32BitFloatingPoint = "sing"_4,
+    typeIEEE64BitFloatingPoint = "doub"_4,
+    type128BitFloatingPoint = "ldbl"_4,
+    typeDecimalStruct = "decm"_4
 };
 
 enum
 {
-    keyAddressAttr = FOURCC('a', 'd', 'd', 'r'),
-    keyEventClassAttr = FOURCC('e', 'v', 'c', 'l'),
-    keyEventIDAttr = FOURCC('e', 'v', 'i', 'd'),
-    keyProcessSerialNumber = FOURCC('p', 's', 'n', ' '),
+    keyAddressAttr = "addr"_4,
+    keyEventClassAttr = "evcl"_4,
+    keyEventIDAttr = "evid"_4,
+    keyProcessSerialNumber = "psn "_4,
 
-    keyDirectObject = FOURCC('-', '-', '-', '-'),
+    keyDirectObject = "----"_4,
 };
 
 enum
 {
-    kCoreEventClass = FOURCC('a', 'e', 'v', 't'),
-    kAEOpenApplication = FOURCC('o', 'a', 'p', 'p'),
-    kAEOpenDocuments = FOURCC('o', 'd', 'o', 'c'),
-    kAEPrintDocuments = FOURCC('p', 'd', 'o', 'c'),
-    kAEAnswer = FOURCC('a', 'n', 's', 'r'),
-    kAEQuitApplication = FOURCC('q', 'u', 'i', 't'),
+    kCoreEventClass = "aevt"_4,
+    kAEOpenApplication = "oapp"_4,
+    kAEOpenDocuments = "odoc"_4,
+    kAEPrintDocuments = "pdoc"_4,
+    kAEAnswer = "ansr"_4,
+    kAEQuitApplication = "quit"_4,
 
-    keySelectProc = FOURCC('s', 'e', 'l', 'h'),
+    keySelectProc = "selh"_4,
 };
 
 const LowMemGlobal<AE_info_ptr> AE_info { 0x2B6 }; // AppleEvents AEGizmo (true);

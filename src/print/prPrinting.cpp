@@ -518,7 +518,7 @@ TPPrPort Executor::C_PrOpenDoc(THPrint hPrint, TPPrPort port, Ptr pIOBuf)
             Ptr p;
             int len;
 
-            h = GetResource(TICK("PREC"), 103);
+            h = GetResource("PREC"_4, 103);
             if(h)
             {
                 p = *h;

@@ -19,7 +19,7 @@ OSErr Executor::TEFromScrap()
     GUEST<int32_t> l;
     int32_t m;
 
-    m = GetScrap(LM(TEScrpHandle), TICK("TEXT"), &l);
+    m = GetScrap(LM(TEScrpHandle), "TEXT"_4, &l);
     if(m < 0)
     {
         EmptyHandle(LM(TEScrpHandle));
@@ -36,7 +36,7 @@ OSErr Executor::TEToScrap()
 
     HLockGuard guard(LM(TEScrpHandle));
 
-    m = PutScrap(LM(TEScrpLength), TICK("TEXT"),
+    m = PutScrap(LM(TEScrpLength), "TEXT"_4,
                  *LM(TEScrpHandle));
     return m < 0 ? m : 0;
 }

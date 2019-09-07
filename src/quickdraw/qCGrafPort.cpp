@@ -412,7 +412,7 @@ PixPatHandle Executor::C_GetPixPat(INTEGER pixpat_id)
     int ctab_size;
     Handle xdata;
 
-    pixpat_res = (pixpat_res_handle)GetResource(TICK("ppat"), pixpat_id);
+    pixpat_res = (pixpat_res_handle)GetResource("ppat"_4, pixpat_id);
     if(pixpat_res == nullptr)
         return (PixPatHandle)nullptr;
     if(*pixpat_res == nullptr)

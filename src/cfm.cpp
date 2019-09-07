@@ -405,7 +405,7 @@ check_file(INTEGER vref, LONGINT dirid, Str255 file, bool shlb_test_p,
             FInfo finfo;
 
             err = FSpGetFInfo(&fs, &finfo);
-            if(err != noErr || finfo.fdType != TICK("shlb"))
+            if(err != noErr || finfo.fdType != "shlb"_4)
                 retval = fragLibNotFound;
         }
         if(retval == noErr)
@@ -419,7 +419,7 @@ check_file(INTEGER vref, LONGINT dirid, Str255 file, bool shlb_test_p,
             {
                 Handle cfrg0;
 
-                cfrg0 = Get1Resource(FOURCC('c', 'f', 'r', 'g'), 0);
+                cfrg0 = Get1Resource("cfrg"_4, 0);
                 if(!cfrg0)
                     retval = fragLibNotFound;
                 else
@@ -490,7 +490,7 @@ check_vanddir(INTEGER vref, LONGINT dirid, int descend_count, Str63 library,
                                            errName);
                 }
             }
-            else if(pb.hFileInfo.ioFlFndrInfo.fdType == TICK("shlb"))
+            else if(pb.hFileInfo.ioFlFndrInfo.fdType == "shlb"_4)
                 retval = check_file(vref, dirid, s, false, library, arch,
                                     loadflags, cidp, mainaddrp, errName);
         }
@@ -1164,14 +1164,14 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
 
     headp = (PEFContainerHeader_t*)addr;
 
-    if(PEF_CONTAINER_TAG1_X(headp) != FOURCC('J', 'o', 'y', '!'))
+    if(PEF_CONTAINER_TAG1_X(headp) != "Joy!"_4)
         warning_unexpected("0x%x", toHost(PEF_CONTAINER_TAG1(headp)));
 
-    if(PEF_CONTAINER_TAG2_X(headp) != FOURCC('p', 'e', 'f', 'f'))
+    if(PEF_CONTAINER_TAG2_X(headp) != "peff"_4)
         warning_unexpected("0x%x", toHost(PEF_CONTAINER_TAG2(headp)));
 
     if(PEF_CONTAINER_ARCHITECTURE(headp)
-       != FOURCC('p', 'w', 'p', 'c'))
+       != "pwpc"_4)
         warning_unexpected("0x%x",
                            toHost(PEF_CONTAINER_ARCHITECTURE(headp)));
 

@@ -109,7 +109,7 @@ ListHandle Executor::C_LNew(const Rect *rview, const Rect *bounds, Point csize,
     if(!retval)
         /*-->*/ return 0; /* couldn't allocate memory */
 
-    temph = GetResource(TICK("LDEF"), proc);
+    temph = GetResource("LDEF"_4, proc);
     if(!((*retval)->listDefProc = temph))
     {
         DisposeHandle((Handle)retval);

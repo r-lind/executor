@@ -607,7 +607,7 @@ void Executor::C_TECopy(TEHandle te)
         StyleRun *runs;
 
         ZeroScrap();
-        PutScrap(len, TICK("TEXT"), (Ptr)&Text[start]);
+        PutScrap(len, "TEXT"_4, (Ptr)&Text[start]);
 
         te_style = TE_GET_STYLE(te);
         te_style_flags = HGetState((Handle)te_style);
@@ -652,7 +652,7 @@ void Executor::C_TECopy(TEHandle te)
         {
             HLockGuard guard(scrap);
             PutScrap(SCRAP_SIZE_FOR_N_STYLES(n_scrap_styles),
-                     TICK("styl"), (Ptr)*scrap);
+                     "styl"_4, (Ptr)*scrap);
         }
         DisposeHandle((Handle)scrap);
 
@@ -662,7 +662,7 @@ void Executor::C_TECopy(TEHandle te)
 
     // FIXME: I seem to dimly remember that the TE scrap was separate from the global scrap.
     /* ### should this lock `LM(TEScrpHandle)'? */
-    vdriver->putScrap(TICK("TEXT"), LM(TEScrpLength),   
+    vdriver->putScrap("TEXT"_4, LM(TEScrpLength),   
                       (char *)*LM(TEScrpHandle), LM(ScrapCount));
 
     HSetState(hText, hText_flags);
@@ -678,7 +678,7 @@ void Executor::C_TEPaste(TEHandle teh)
 {
     Size s;
 
-    s = vdriver->getScrap(TICK("TEXT"), LM(TEScrpHandle));
+    s = vdriver->getScrap("TEXT"_4, LM(TEScrpHandle));
     if(s >= 0)
         LM(TEScrpLength) = s;
 

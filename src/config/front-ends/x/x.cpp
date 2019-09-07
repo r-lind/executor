@@ -2287,7 +2287,7 @@ void X11VideoDriver::beepAtUser(void)
 
 void X11VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_count)
 {
-    if(type == TICK("TEXT"))
+    if(type == "TEXT"_4)
     {
         if(selectiontext)
             free(selectiontext);
@@ -2318,7 +2318,7 @@ int X11VideoDriver::getScrap(OSType type, Handle h)
     int retval;
 
     retval = -1;
-    if(type == TICK("TEXT"))
+    if(type == "TEXT"_4)
     {
         Window selection_owner;
 

@@ -222,7 +222,7 @@ OSErr Executor::C_PlotSICNHandle(const Rect *rect, IconAlignmentType align,
 
 Handle Executor::C_GetIcon(short icon_id)
 {
-    return ROMlib_getrestid(TICK("ICON"), icon_id);
+    return ROMlib_getrestid("ICON"_4, icon_id);
 }
 
 CIconHandle Executor::C_GetCIcon(short icon_id)
@@ -235,7 +235,7 @@ CIconHandle Executor::C_GetCIcon(short icon_id)
     int bmap_data_size;
     int new_size;
 
-    cicon_res_handle = (CIconHandle)ROMlib_getrestid(TICK("cicn"), icon_id);
+    cicon_res_handle = (CIconHandle)ROMlib_getrestid("cicn"_4, icon_id);
     if(cicon_res_handle == nullptr)
         return nullptr;
 

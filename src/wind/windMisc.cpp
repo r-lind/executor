@@ -542,7 +542,7 @@ int32_t Executor::ROMlib_windcall(WindowPtr wind, int16_t mess, int32_t param)
         BOOLEAN save_hack;
 
         save_hack = ROMlib_evil_illustrator_7_hack;
-        ROMlib_evil_illustrator_7_hack = ROMlib_creator == TICK("ART5");
+        ROMlib_evil_illustrator_7_hack = ROMlib_creator == "ART5"_4;
 #endif
         ROMlib_hook(wind_wdefnumber);
         HLockGuard guard(defproc);

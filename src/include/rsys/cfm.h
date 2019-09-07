@@ -97,8 +97,8 @@ enum
 
 enum
 {
-    kPowerPCArch = FOURCC('p', 'w', 'p', 'c'),
-    kMotorola68KArch = FOURCC('m', '6', '8', 'k'),
+    kPowerPCArch = "pwpc"_4,
+    kMotorola68KArch = "m68k"_4,
 };
 
 enum {

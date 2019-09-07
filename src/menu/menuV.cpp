@@ -35,7 +35,7 @@ void Executor::C_InitProcMenu(INTEGER mbid)
      * GetResource to fail.  A small test program then confirmed that
      * the bits are not masked off.
      */
-    LM(MBDFHndl) = GetResource(TICK("MBDF"), mbid);
+    LM(MBDFHndl) = GetResource("MBDF"_4, mbid);
     (*MENULIST)->mufu = mbid;
     MBDFCALL(mbInit, 0, 0L);
 }

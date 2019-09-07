@@ -161,7 +161,7 @@ OSErr Executor::C_FSpExchangeFiles(FSSpecPtr src, FSSpecPtr dst)
     warning_unimplemented("poorly implemented");
     if(src->vRefNum != dst->vRefNum)
         retval = diffVolErr;
-    else if(ROMlib_creator != TICK("PAUP") || src->parID != dst->parID)
+    else if(ROMlib_creator != "PAUP"_4 || src->parID != dst->parID)
         retval = wrgVolTypeErr;
     else
     {

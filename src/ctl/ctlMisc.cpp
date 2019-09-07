@@ -80,7 +80,7 @@ void Executor::ctl_color_init(void)
     default_aux_ctl = (AuxCtlHandle)NewHandle(sizeof(AuxCtlRec));
 
 #if defined(KEEP_DEFAULT_CTL_CTAB_AROUND_FOR_OLD_SYSTEM_FILE_USERS)
-    default_ctl_ctab = (CTabHandle)ROMlib_getrestid(TICK("cctb"), 0);
+    default_ctl_ctab = (CTabHandle)ROMlib_getrestid("cctb"_4, 0);
 
     if(!default_ctl_ctab)
     {
@@ -97,7 +97,7 @@ void Executor::ctl_color_init(void)
 
     (*default_aux_ctl)->acNext = nullptr;
     (*default_aux_ctl)->acOwner = nullptr;
-    (*default_aux_ctl)->acCTable = (CCTabHandle)GetResource(TICK("cctb"), 0);
+    (*default_aux_ctl)->acCTable = (CCTabHandle)GetResource("cctb"_4, 0);
     (*default_aux_ctl)->acFlags = 0;
     (*default_aux_ctl)->acReserved = 0;
     (*default_aux_ctl)->acRefCon = 0;

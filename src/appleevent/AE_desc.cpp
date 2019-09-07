@@ -704,7 +704,7 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
 
         t = (GUEST<int32_t> *)((char *)event_data + sizeof *event_data + target_size);
 
-        t[0] = TICK("aevt");
+        t[0] = "aevt"_4;
         t[1] = 0x00010001;
     }
 

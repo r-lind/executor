@@ -275,7 +275,7 @@ OSErr Executor::C_AEGetEventHandler(AEEventClass event_class,
     OSErr err;
 
 #if 1
-    if(event_class == TICK("go b") && event_id == TICK("ears"))
+    if(event_class == "go b"_4 && event_id == "ears"_4)
         system_error("This application appears to be using AppleEvents in "
                      "a way that is not currently supported under Executor.  "
                      "You may try to continue, but in all likelihood Executor "
@@ -403,7 +403,7 @@ OSErr Executor::C_AERemoveCoercionHandler(
 
 /* special handler functions */
 
-#define k_special_sel1 (FOURCC('\000', '\000', '\000', '\000'))
+#define k_special_sel1 ("\000\000\000\000"_4)
 
 OSErr Executor::C_AEInstallSpecialHandler(
     AEKeyword function_class, AEEventHandlerUPP hdlr_fn,

@@ -65,7 +65,7 @@ Executor::ROMlib_kchr_ptr(void)
         TheZoneGuard guard(LM(SysZone));
         Handle kchr_hand;
 
-        kchr_hand = GetResource(TICK("KCHR"), kchr_id);
+        kchr_hand = GetResource("KCHR"_4, kchr_id);
         gui_assert(kchr_hand);
         LoadResource(kchr_hand);
         HLock(kchr_hand);
@@ -83,7 +83,7 @@ Executor::ROMlib_set_keyboard(const char *keyboardname)
     Str255 pkeyboardname;
 
     str255_from_c_string(pkeyboardname, keyboardname);
-    new_h = GetNamedResource(TICK("KCHR"), pkeyboardname);
+    new_h = GetNamedResource("KCHR"_4, pkeyboardname);
     if(new_h)
     {
         GUEST<INTEGER> tmpid;
@@ -574,14 +574,14 @@ Executor::display_keyboard_choices(void)
     vdriver->shutdown();
     printf("Available keyboard maps:\n");
     SetResLoad(false);
-    nres = CountResources(TICK("KCHR"));
+    nres = CountResources("KCHR"_4);
     names = (decltype(names))alloca(nres * sizeof(*names));
     nfound = 0;
     for(i = 1; i <= nres; ++i)
     {
         Handle h;
 
-        h = GetIndResource(TICK("KCHR"), i);
+        h = GetIndResource("KCHR"_4, i);
         if(h)
         {
             GetResInfo(h, 0, 0, (StringPtr)names[nfound]);

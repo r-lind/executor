@@ -10,6 +10,7 @@
 
 #include <base/mactype.h>
 #include <base/byteswap.h>
+#include <cassert>
 
 namespace Executor
 {
@@ -63,8 +64,7 @@ typedef double Extended;
 typedef LONGINT Size;
 
 typedef INTEGER OSErr;
-typedef LONGINT OSType;
-typedef LONGINT ResType;
+
 
 BEGIN_EXECUTOR_ONLY
 class OSErrorException : public std::runtime_error
@@ -74,6 +74,17 @@ public:
 
     OSErrorException(OSErr err) : std::runtime_error("oserror"), code(err) {}
 };
+END_EXECUTOR_ONLY
+
+typedef LONGINT OSType;
+typedef LONGINT ResType;
+
+BEGIN_EXECUTOR_ONLY
+constexpr OSType operator"" _4(const char*x, size_t n)
+{
+    assert(n == 4);
+    return (uint8_t(x[0]) << 24) | (uint8_t(x[1]) << 16) | (uint8_t(x[2]) << 8) | uint8_t(x[3]);
+}
 END_EXECUTOR_ONLY
 
 union QElem;

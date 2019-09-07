@@ -129,7 +129,7 @@ sdl_syswm_event(const SDL_Event *event)
         case WM_RENDERFORMAT:
             if(event->syswm.msg->wParam == CF_DIB)
                 write_pict_as_dib_to_clipboard();
-            else if(event->syswm.msg->wParam == ROMlib_executor_format(TICK("PICT")))
+            else if(event->syswm.msg->wParam == ROMlib_executor_format("PICT"_4))
                 write_pict_as_pict_to_clipboard();
             break;
         case WM_RENDERALLFORMATS:

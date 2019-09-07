@@ -125,7 +125,7 @@ static void ROMlib_togglealarm()
             }
             /* save the bits underneath */
             /* draw sicon -16385 up there */
-            if((alarmh = ROMlib_getrestid(TICK("SICN"), ALARMSICN)))
+            if((alarmh = ROMlib_getrestid("SICN"_4, ALARMSICN)))
                 src_alarm_bitmap.baseAddr = *alarmh;
             else
                 /* once again, we need to move the (Ptr) cast

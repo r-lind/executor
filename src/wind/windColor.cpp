@@ -88,7 +88,7 @@ void Executor::wind_color_init(void)
     (*default_aux_win)->awNext = 0;
     (*default_aux_win)->awOwner = 0;
     (*default_aux_win)->awCTable
-        = (CTabHandle)GetResource(TICK("wctb"), 0);
+        = (CTabHandle)GetResource("wctb"_4, 0);
     (*default_aux_win)->dialogCItem = 0;
     (*default_aux_win)->awFlags = 0;
     (*default_aux_win)->awReserved = 0;

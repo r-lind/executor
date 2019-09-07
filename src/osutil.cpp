@@ -648,8 +648,8 @@ static OSErr openparam(GUEST<INTEGER> *rnp)
     err = FSOpen((StringPtr)paramname, LM(BootDrive), rnp);
     if(err == fnfErr)
     {
-        if((err = Create((StringPtr)paramname, LM(BootDrive), TICK("unix"),
-                         TICK("pram")))
+        if((err = Create((StringPtr)paramname, LM(BootDrive), "unix"_4,
+                         "pram"_4))
            == noErr)
             err = FSOpen((StringPtr)paramname, LM(BootDrive), rnp);
     }

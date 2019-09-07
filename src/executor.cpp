@@ -90,7 +90,7 @@ void Executor::executor_main(void)
     {
         GetAppFiles(1, &thefile);
     
-        if(thefile.fType == FOURCC('A', 'P', 'P', 'L'))
+        if(thefile.fType == "APPL"_4)
         {
             ClrAppFiles(1);
             Munger(LM(AppParmHandle), 2L * sizeof(INTEGER), (Ptr)0,
@@ -102,7 +102,7 @@ void Executor::executor_main(void)
     else
         thefile.fType = 0;
 
-    if(thefile.fType != FOURCC('A', 'P', 'P', 'L'))
+    if(thefile.fType != "APPL"_4)
         ExitToShell();
 
     hpb.hFileInfo.ioNamePtr = &thefile.fName[0];
@@ -123,7 +123,7 @@ void Executor::executor_main(void)
     wdpb.ioWDDirID = hpb.hFileInfo.ioFlParID;
     SFSaveDisk_Update(hpb.hFileInfo.ioVRefNum, fName);
     LM(CurDirStore) = hpb.hFileInfo.ioFlParID;
-    wdpb.ioWDProcID = FOURCC('X', 'c', 't', 'r');
+    wdpb.ioWDProcID = "Xctr"_4;
     wdpb.ioNamePtr = 0;
     PBOpenWD(&wdpb, false);
     exevrefnum = wdpb.ioVRefNum;

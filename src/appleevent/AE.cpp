@@ -455,7 +455,7 @@ parse_evt(const AppleEvent *evtp, AEDesc *desc_out)
                     DisposeHandle(h);
                 else
                 {
-                    desc_out->descriptorType = TICK("appa");
+                    desc_out->descriptorType = "appa"_4;
                     desc_out->dataHandle = h;
                 }
             }
@@ -477,7 +477,7 @@ OSErr Executor::C_AECoerceDesc(AEDesc *desc, DescType result_type,
 
     desc_type = DESC_TYPE(desc);
 
-    if(desc_type == TICK("aevt") && result_type == TICK("appa"))
+    if(desc_type == "aevt"_4 && result_type == "appa"_4)
     {
         err = parse_evt(desc, desc_out);
         AE_RETURN_ERROR(err);

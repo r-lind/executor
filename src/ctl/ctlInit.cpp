@@ -29,7 +29,7 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, const Rect *r, ConstStringPt
     GUEST<Handle> temph;
 
     retval = (ControlHandle)NewHandle((Size)sizeof(ControlRecord));
-    temph = GetResource(TICK("CDEF"), procid >> 4);
+    temph = GetResource("CDEF"_4, procid >> 4);
     if(!((*retval)->contrlDefProc = temph))
     {
         DisposeHandle((Handle)retval);
@@ -48,7 +48,7 @@ ControlHandle Executor::C_NewControl(WindowPtr wst, const Rect *r, ConstStringPt
     HASSIGN_6(auxctlhead,
               acNext, tmp,
               acOwner, retval,
-              acCTable, (CCTabHandle)GetResource(TICK("cctb"), 0),
+              acCTable, (CCTabHandle)GetResource("cctb"_4, 0),
               acFlags, procid & 0x0F,
               acReserved, 0,
               acRefCon, 0);
@@ -95,12 +95,12 @@ ControlHandle Executor::C_GetNewControl(INTEGER cid, WindowPtr wst) /* IMI-321 *
     ControlHandle retval;
     Handle ctab_res_h;
 
-    wh = (GUEST<wp> *)GetResource(TICK("CNTL"), cid);
+    wh = (GUEST<wp> *)GetResource("CNTL"_4, cid);
     if(!wh)
         return 0;
     if(!(*wh))
         LoadResource((Handle)wh);
-    ctab_res_h = ROMlib_getrestid(TICK("cctb"), cid);
+    ctab_res_h = ROMlib_getrestid("cctb"_4, cid);
     retval = NewControl(wst, &((*wh)->_crect),
                         (StringPtr)((char *)&(*wh)->_crect + 22), /* _ctitle */
                         (*wh)->_cvisible != 0, (*wh)->_cvalue, (*wh)->_cmin,

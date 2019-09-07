@@ -92,7 +92,7 @@ static BOOLEAN argv_to_appfile(const char *uname, AppFile *ap)
     WDPBRec wpb;
     wpb.ioNamePtr = spec->name;
     wpb.ioVRefNum = spec->vRefNum;
-    wpb.ioWDProcID = TICK("unix");
+    wpb.ioWDProcID = "unix"_4;
     wpb.ioWDDirID = spec->parID;
     if(PBOpenWD(&wpb, false) == noErr)
         ap->vRefNum = wpb.ioVRefNum;
@@ -174,7 +174,7 @@ static BOOLEAN valid_browser(void)
     FInfo finfo;
 
     err = GetFInfo(LM(FinderName), LM(BootDrive), &finfo);
-    return !ROMlib_nobrowser && err == noErr && finfo.fdType == TICK("APPL");
+    return !ROMlib_nobrowser && err == noErr && finfo.fdType == "APPL"_4;
 }
 
 static void launch_browser(void)
@@ -204,7 +204,7 @@ void Executor::C_ExitToShell()
 #if 1
 
     Point pt;
-    static GUEST<SFTypeList> applonly = { FOURCC('A', 'P', 'P', 'L') };
+    static GUEST<SFTypeList> applonly = { "APPL"_4 };
     SFReply reply;
     struct
     {
@@ -324,7 +324,7 @@ void Executor::C_LoadSeg(INTEGER segno)
     GUEST<int16_t> *ptr, *saveptr;
 
     LM(ResLoad) = -1; /* CricketDraw III's behaviour suggested this */
-    newcode = GetResource(TICK("CODE"), segno);
+    newcode = GetResource("CODE"_4, segno);
     HLock(newcode);
     taboff = ((GUEST<INTEGER> *)*newcode)[0];
     if((uint16_t)taboff == 0xA89F) /* magic compressed resource signature */
@@ -384,7 +384,7 @@ void Executor::C_UnloadSeg(void* addr)
     if(*(GUEST<INTEGER> *)addr == JMPLINSTR)
     {
         segno = SEGNOOFP(addr);
-        h = GetResource(TICK("CODE"), segno);
+        h = GetResource("CODE"_4, segno);
         if(!*h)
             LoadResource(h);
         segstart = *h;

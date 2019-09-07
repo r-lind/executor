@@ -224,7 +224,7 @@ CCrsrHandle Executor::C_GetCCursor(INTEGER crsr_id)
 
     ccrsr_handle = (CCrsrHandle)NewHandle(sizeof(CCrsr));
 
-    res_handle = (ccrsr_res_handle)ROMlib_getrestid(TICK("crsr"), crsr_id);
+    res_handle = (ccrsr_res_handle)ROMlib_getrestid("crsr"_4, crsr_id);
     if(res_handle == nullptr)
         return nullptr;
 

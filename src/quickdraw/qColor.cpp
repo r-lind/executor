@@ -175,7 +175,7 @@ CTabHandle Executor::C_GetCTable(INTEGER ctab_res_id)
         /* fall through */
         default:
         {
-            clut = (clut_res_handle)ROMlib_getrestid(TICK("clut"), ctab_res_id);
+            clut = (clut_res_handle)ROMlib_getrestid("clut"_4, ctab_res_id);
 
             if(clut)
             {
