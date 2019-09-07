@@ -165,13 +165,13 @@ const LowMemGlobal<ProcPtr> JDTInstall { 0xD9C }; // OSUtil IMV (false);
 
 extern OSErr HandToHand(GUEST<Handle> *h);
 REGISTER_TRAP2(HandToHand, 0xA9E1, D0(InOut<Handle,A0>), SaveA1D1D2, CCFromD0);
-extern OSErr PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s);
+extern OSErr PtrToHand(const void* p, GUEST<Handle> *h, LONGINT s);
 REGISTER_TRAP2(PtrToHand, 0xA9E3, D0(A0, Out<Handle,A0>, D0), SaveA1D1D2, CCFromD0);
-extern OSErr PtrToXHand(Ptr p, Handle h, LONGINT s);
+extern OSErr PtrToXHand(const void* p, Handle h, LONGINT s);
 REGISTER_TRAP2(PtrToXHand, 0xA9E2, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD0);
 extern OSErr HandAndHand(Handle h1, Handle h2);
 REGISTER_TRAP2(HandAndHand, 0xA9E4, D0(A0,A1), MoveA1ToA0, SaveA1D1D2, CCFromD0);
-extern OSErr PtrAndHand(Ptr p, Handle h, LONGINT s1);
+extern OSErr PtrAndHand(const void* p, Handle h, LONGINT s1);
 REGISTER_TRAP2(PtrAndHand, 0xA9EF, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD0);
 
 extern LONGINT ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,

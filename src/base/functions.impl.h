@@ -27,7 +27,7 @@ template<int n> struct D
     operator UPP<T>() { return UPP<T>(ptr_from_longint<ProcPtr>(cpu_state.regs[n].ul.n)); }
 
     static void set(uint32_t x) { cpu_state.regs[n].ul.n = x; }
-    static void set(void *x) { cpu_state.regs[n].ul.n = ptr_to_longint(x); }
+    static void set(const void *x) { cpu_state.regs[n].ul.n = ptr_to_longint(x); }
     template<class T, class CC>
     static void set(UPP<T,CC> x) { cpu_state.regs[n].ul.n = ptr_to_longint((void*)x); }
 

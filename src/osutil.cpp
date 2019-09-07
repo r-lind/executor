@@ -54,12 +54,7 @@ OSErr Executor::HandToHand(GUEST<Handle> *hp)
     return noErr;
 }
 
-/*
- * NOTE: PtrToHand is not directly callable, hence the handle that
- *	 h points to isn't swapped.
- */
-
-OSErr Executor::PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s)
+OSErr Executor::PtrToHand(const void* p, GUEST<Handle> *h, LONGINT s)
 {
     Handle nh;
     OSErr err;
@@ -74,7 +69,7 @@ OSErr Executor::PtrToHand(Ptr p, GUEST<Handle> *h, LONGINT s)
     return (noErr);
 }
 
-OSErr Executor::PtrToXHand(Ptr p, Handle h, LONGINT s)
+OSErr Executor::PtrToXHand(const void* p, Handle h, LONGINT s)
 {
     OSErr err;
 
@@ -104,7 +99,7 @@ OSErr Executor::HandAndHand(Handle h1, Handle h2)
     return (noErr);
 }
 
-OSErr Executor::PtrAndHand(Ptr p, Handle h, LONGINT s1)
+OSErr Executor::PtrAndHand(const void* p, Handle h, LONGINT s1)
 {
     Size s2 = GetHandleSize(h);
     OSErr err;
