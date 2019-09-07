@@ -466,6 +466,8 @@ struct QDGlobals
     GUEST<GrafPtr> thePort;
 };
 
+typedef QDGlobals *QDGlobalsPtr;
+
 const LowMemGlobal<INTEGER> ScrVRes { 0x102 }; // QuickDraw IMI-473 (true);
 const LowMemGlobal<INTEGER> ScrHRes { 0x104 }; // QuickDraw IMI-473 (true);
 const LowMemGlobal<INTEGER> ScreenRow { 0x106 }; // QuickDraw ThinkC (true);
