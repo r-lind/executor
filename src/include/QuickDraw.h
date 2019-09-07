@@ -75,6 +75,7 @@ enum
 };
 
 typedef enum {
+    normal = 0,
     bold = 1,
     italic = 2,
     underline = 4,
