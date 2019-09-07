@@ -1210,7 +1210,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
             }
             else if(PtInRect(p, &fl->flcurdirrect))
             {
-                *ith = FAKECURDIR;
+                *ith = sfHookFolderPopUp;
                 retval = -1;
             }
             else
@@ -1228,19 +1228,19 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
             }
             break;
         case nullEvent:
-            *ith = 100;
+            *ith = sfHookNullEvent;
             retval = -1;
             break;
         case updateEvt:
             if(guest_cast<DialogPeek>(evt->message) == dp)
                 drawjobberattop(dp);
-            *ith = 100;
+            *ith = sfHookNullEvent;
             break;
     }
     retval2 = call_magicfp(fl, (DialogPtr)dp, evt, ith);
 
     if(*ith == getOpen && folder_selected_p(fl)) /* 1 is getOpen and putSave */
-        *ith = FAKEOPENDIR;
+        *ith = sfHookOpenFolder;
 
     return retval ? retval : retval2;
 }
@@ -2308,30 +2308,30 @@ void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_
             else if(ihit == ejectitem)
             {
                 doeject(dp);
-                ihit = FAKEREDRAW;
+                ihit = sfHookRebuildList;
             }
             else if(ihit == driveitem)
             {
                 bumpsavedisk(dp, true);
-                ihit = FAKEREDRAW;
+                ihit = sfHookRebuildList;
             }
             else if(ihit == diskname)
             {
                 if(moveuponedir(dp))
-                    ihit = FAKEREDRAW;
+                    ihit = sfHookRebuildList;
             }
-            else if(ihit == FAKECURDIR)
+            else if(ihit == sfHookFolderPopUp)
             {
                 if(trackdirs((DialogPeek)dp))
-                    ihit = FAKEREDRAW;
+                    ihit = sfHookRebuildList;
             }
-            else if(ihit == FAKEOPENDIR)
+            else if(ihit == sfHookOpenFolder)
             {
                 if(folder_selected_p(&f))
                 {
                     LM(CurDirStore) = *SF_FTYPE_XP(&f);
                     unixcd(&f);
-                    ihit = FAKEREDRAW;
+                    ihit = sfHookRebuildList;
                 }
             }
             else if(ihit == sfItemNewFolderUser)
@@ -2340,7 +2340,7 @@ void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_
                 {
                     LM(CurDirStore) = *SF_FTYPE_XP(&f);
                     unixcd(&f);
-                    ihit = FAKEREDRAW;
+                    ihit = sfHookRebuildList;
                 }
             }
             if(getorput == put)
@@ -2374,10 +2374,10 @@ void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_
                     adjustdrivebutton(dp);
                     LM(SFSaveDisk) = -pbr.volumeParam.ioVRefNum;
                     LM(CurDirStore) = 2;
-                    ihit = FAKEREDRAW;
+                    ihit = sfHookRebuildList;
                 }
             }
-            if(ihit == FAKEREDRAW)
+            if(ihit == sfHookRebuildList)
                 realcd((DialogPeek)dp, LM(CurDirStore));
         }
         if(f.flavor != original_sf && dh.odh)

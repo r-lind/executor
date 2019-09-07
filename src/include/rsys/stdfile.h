@@ -33,10 +33,6 @@ namespace Executor
 #define MICONAPP 4
 #define MICONDISK 5
 
-#define FAKEREDRAW 101
-#define FAKECURDIR 102
-#define FAKEOPENDIR 103
-
 extern void C_ROMlib_stdftrack(ControlHandle, INTEGER);
 PASCAL_FUNCTION(ROMlib_stdftrack);
 extern Boolean C_ROMlib_stdffilt(DialogPtr, EventRecord *, GUEST<INTEGER> *);

@@ -102,6 +102,28 @@ enum
 
 enum
 {
+    sfHookFirstCall = -1,
+    sfHookLastCall = -2,
+    sfHookNullEvent = 100,
+    sfHookRebuildList = 101,
+    sfHookFolderPopUp = 102,
+    sfHookOpenFolder = 103,
+    sfHookOpenAlias = 104,
+    sfHookGoToDesktop = 105,
+    sfHookGoToAliasTarget = 106,
+    sfHookGoToParent = 107,
+    sfHookGoToNextDrive = 108,
+    sfHookGoToPrevDrive = 109,
+    sfHookChangeSelection = 110,
+};
+
+enum
+{
+    sfMainDialogRefCon = TICK("stdf"),
+};
+
+enum
+{
     sfPutDialogID = -6043,
     sfGetDialogID = -6042
 };
