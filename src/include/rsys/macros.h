@@ -1,10 +1,6 @@
 #if !defined(_MACROS_H_)
 #define _MACROS_H_
 
-#if !defined(U)
-#define U(c) ((uint8_t)(c))
-#endif
-
 #if !defined(ALLOCABEGIN)
 #define ALLOCABEGIN /* nothing */
 #define ALLOCA(n) alloca(n)

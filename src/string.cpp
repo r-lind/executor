@@ -41,7 +41,7 @@ static void strNassign(Str63 new1, ConstStringPtr old, int n)
 {
     int old_length, new_length;
 
-    old_length = U(old[0]);
+    old_length = old[0];
     if(old_length <= n)
         new_length = old_length;
     else

@@ -632,7 +632,7 @@ static void flinsert(fltype *f, StringPtr p, INTEGER micon)
 
     finfo.floffs = GetHandleSize((Handle)f->flstrs);
     finfo.flicns = micon;
-    PtrAndHand((Ptr)p, (Handle)f->flstrs, (LONGINT)U(p[0]) + 1);
+    PtrAndHand((Ptr)p, (Handle)f->flstrs, (LONGINT)p[0] + 1);
     PtrAndHand((Ptr)&finfo, (Handle)f->flinfo,
                (LONGINT)sizeof(fltype::flinfostr));
     ++f->flnmfil;
@@ -1096,7 +1096,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
                 case '\r':
                     GetDialogItem((DialogPtr)dp, dp->aDefItem, &i, &tmpH, &r);
                     h = (ControlHandle)tmpH;
-                    if((*h)->contrlVis && U((*h)->contrlHilite) != 255)
+                    if((*h)->contrlVis && (*h)->contrlHilite != 255)
                     {
                         prefix[0] = 0;
                         oldticks = -1000;
@@ -1814,7 +1814,7 @@ static void unixcd(fltype *f)
 }
 
 #if 0
-	if (U(rep->fName[0]) > 63) /* remember to clip to 63 characters */
+	if (rep->fName[0] > 63) /* remember to clip to 63 characters */
 	    rep->fName[0] = 63;
 #endif
 

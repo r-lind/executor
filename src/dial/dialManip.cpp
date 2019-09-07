@@ -27,13 +27,13 @@ void Executor::C_ParamText(ConstStringPtr p0, ConstStringPtr p1, ConstStringPtr 
                            ConstStringPtr p3) /* IMI-421 */
 {
     if(p0)
-        PtrToXHand((Ptr)p0, LM(DAStrings)[0], (LONGINT)U(p0[0]) + 1);
+        PtrToXHand((Ptr)p0, LM(DAStrings)[0], (LONGINT)p0[0] + 1);
     if(p1)
-        PtrToXHand((Ptr)p1, LM(DAStrings)[1], (LONGINT)U(p1[0]) + 1);
+        PtrToXHand((Ptr)p1, LM(DAStrings)[1], (LONGINT)p1[0] + 1);
     if(p2)
-        PtrToXHand((Ptr)p2, LM(DAStrings)[2], (LONGINT)U(p2[0]) + 1);
+        PtrToXHand((Ptr)p2, LM(DAStrings)[2], (LONGINT)p2[0] + 1);
     if(p3)
-        PtrToXHand((Ptr)p3, LM(DAStrings)[3], (LONGINT)U(p3[0]) + 1);
+        PtrToXHand((Ptr)p3, LM(DAStrings)[3], (LONGINT)p3[0] + 1);
 }
 
 itmp Executor::ROMlib_dpnotoip(DialogPeek dp, INTEGER itemno,

@@ -80,13 +80,13 @@ StringHandle Executor::C_NewString(ConstStringPtr s)
 {
     GUEST<Handle> retval;
 
-    PtrToHand((Ptr)s, &retval, (LONGINT)U(s[0]) + 1);
+    PtrToHand((Ptr)s, &retval, (LONGINT)s[0] + 1);
     return ((StringHandle)retval);
 }
 
 void Executor::C_SetString(StringHandle h, ConstStringPtr s)
 {
-    PtrToXHand((Ptr)s, (Handle)h, (LONGINT)U(s[0]) + 1);
+    PtrToXHand((Ptr)s, (Handle)h, (LONGINT)s[0] + 1);
 }
 
 Handle Executor::ROMlib_getrestid(ResType rest, INTEGER id) /* INTERNAL */
@@ -139,7 +139,7 @@ StringHandle Executor::C_GetString(INTEGER i)
 void Executor::C_GetIndString(StringPtr s, INTEGER sid, INTEGER index)
 {
     Handle retval;
-    char *p, *ep, *op;
+    unsigned char *p, *ep, *op;
 
     retval = GetResource("STR#"_4, sid);
     LoadResource(retval);
@@ -148,10 +148,10 @@ void Executor::C_GetIndString(StringPtr s, INTEGER sid, INTEGER index)
         s[0] = 0;
         /*-->*/ return;
     }
-    p = (char *)*retval + 2;
+    p = (unsigned char *)*retval + 2;
     while(--index)
-        p += 1 + U(*p);
-    for(ep = p + 1 + U(*p), op = (char *)s; p != ep; *op++ = *p++)
+        p += 1 + *p;
+    for(ep = p + 1 + *p, op = s; p != ep; *op++ = *p++)
         ;
 }
 

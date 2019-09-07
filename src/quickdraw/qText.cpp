@@ -61,7 +61,7 @@ void Executor::C_DrawString(ConstStringPtr s)
 
     p.h = 1;
     p.v = 1;
-    CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), p, p);
+    CALLTEXT((INTEGER)s[0], (Ptr)(s + 1), p, p);
 }
 
 void Executor::C_DrawText(Ptr tb, INTEGER fb, INTEGER bc)
@@ -101,7 +101,7 @@ INTEGER Executor::C_StringWidth(ConstStringPtr s)
     FontInfo fi;
 
     np.h = np.v = dp.h = dp.v = 256;
-    retval = CALLTXMEAS((INTEGER)U(s[0]), (Ptr)s + 1, &np, &dp, &fi);
+    retval = CALLTXMEAS((INTEGER)s[0], (Ptr)s + 1, &np, &dp, &fi);
     return FixMul((LONGINT)retval << 16,
                   (Fixed)np.h << 8)
         / ((LONGINT)dp.h << 8);

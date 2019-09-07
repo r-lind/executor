@@ -43,7 +43,7 @@ BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
         if(ip && (ip->itmtype & ctrlItem))
         {
             c = (ControlHandle)ip->itmhand;
-            if((*c)->contrlVis && U((*c)->contrlHilite) != INACTIVE)
+            if((*c)->contrlVis && (*c)->contrlHilite != INACTIVE)
             {
                 if((when = ROMlib_when) != WriteNever)
                     ROMlib_WriteWhen(WriteInBltrgn);

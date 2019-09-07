@@ -276,7 +276,7 @@ BOOLEAN Executor::EqualString(ConstStringPtr s1, ConstStringPtr s2, BOOLEAN case
 
 int Executor::ROMlib_strcmp(const Byte *s1, const Byte *s2) /* INTERNAL */
 {
-    int n1 = U(s1[0]), n2 = U(s2[0]);
+    int n1 = s1[0], n2 = s2[0];
     unsigned char *p1 = (unsigned char *)s1 + 1,
                   *p2 = (unsigned char *)s2 + 1, c1, c2;
 
@@ -285,7 +285,7 @@ int Executor::ROMlib_strcmp(const Byte *s1, const Byte *s2) /* INTERNAL */
     c2 = 0;
 #endif /* LETGCCWAIL */
 
-    while(n1 && n2 && ((c1 = bothfold[U(*p1)]) == (c2 = bothfold[U(*p2)])))
+    while(n1 && n2 && ((c1 = bothfold[*p1]) == (c2 = bothfold[*p2])))
     {
         n1--;
         n2--;
@@ -310,7 +310,7 @@ void Executor::ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len)
         base = bothfold;
 
     for(p = s, ep = p + len; p != ep; p++)
-        *p = base[U(*p)];
+        *p = base[*p];
 }
 
 void Executor::UpperString(StringPtr s, BOOLEAN diac)

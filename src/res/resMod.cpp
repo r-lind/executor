@@ -33,7 +33,7 @@ void Executor::C_SetResInfo(Handle res, INTEGER id, ConstStringPtr name)
     resmaphand map;
     typref *tr;
     resref *rr;
-    char *sp;
+    unsigned char *sp;
     INTEGER sl;
     OSErr err;
 
@@ -48,8 +48,8 @@ void Executor::C_SetResInfo(Handle res, INTEGER id, ConstStringPtr name)
     rr->rid = id;
     if(name)
     {
-        sl = U(name[0]);
-        if(U(*(sp = (char *)*map + (*map)->namoff + rr->noff)) < sl || rr->noff == -1)
+        sl = name[0];
+        if(*(sp = (unsigned char *)*map + (*map)->namoff + rr->noff) < sl || rr->noff == -1)
         {
             SetHandleSize((Handle)map, (*map)->rh.maplen + sl + 1);
             err = MemError();
@@ -57,7 +57,7 @@ void Executor::C_SetResInfo(Handle res, INTEGER id, ConstStringPtr name)
                 return;
             rr->noff = (*map)->rh.maplen - (*map)->namoff;
             (*map)->rh.maplen = (*map)->rh.maplen + sl + 1;
-            sp = (char *)*map + (*map)->namoff + rr->noff;
+            sp = (unsigned char *)*map + (*map)->namoff + rr->noff;
             warning_unimplemented("we leak space here");
         }
         str255assign(sp, name);
@@ -140,7 +140,7 @@ static LONGINT addname(resmaphand map, ConstStringPtr name)
     {
         LONGINT namelen;
 
-        namelen = U(name[0]) + 1;
+        namelen = name[0] + 1;
 
         Munger((Handle)map, MAPLEN(map), (Ptr) "", (LONGINT)0, (Ptr)name,
                namelen);
@@ -249,7 +249,7 @@ void Executor::C_RemoveResource(Handle res)
     if(rr->noff != -1)
     {
         nmoff = rr->noff + NAMEOFF(map);
-        nlen = U(*((char *)*map + nmoff)) + 1;
+        nlen = *((unsigned char *)*map + nmoff) + 1;
         Munger((Handle)map, nmoff, (Ptr)0, nlen, (Ptr) "", (LONGINT)0);
         nmoff -= NAMEOFF(map);
         MAPLEN(map) -= nlen;

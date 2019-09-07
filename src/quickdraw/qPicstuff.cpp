@@ -295,7 +295,7 @@ static void longtext(Point pt, StringPtr s, GUEST<Point> *pp)
     PORT_PEN_LOC(qdGlobals().thePort).h = pt.h;
     PORT_PEN_LOC(qdGlobals().thePort).v = pt.v;
     setnumerdenom(&numer, &denom);
-    CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
+    CALLTEXT((INTEGER)s[0], (Ptr)(s + 1), numer, denom);
     PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 
@@ -308,7 +308,7 @@ static void dhtext(unsigned char dh, StringPtr s, GUEST<Point> *pp)
     save = PORT_PEN_LOC(qdGlobals().thePort);
     PORT_PEN_LOC(qdGlobals().thePort) = *pp;
     setnumerdenom(&numer, &denom);
-    CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
+    CALLTEXT((INTEGER)s[0], (Ptr)(s + 1), numer, denom);
     PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 
@@ -321,7 +321,7 @@ static void dvtext(unsigned char dv, StringPtr s, GUEST<Point> *pp)
     save = PORT_PEN_LOC(qdGlobals().thePort);
     PORT_PEN_LOC(qdGlobals().thePort) = *pp;
     setnumerdenom(&numer, &denom);
-    CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
+    CALLTEXT((INTEGER)s[0], (Ptr)(s + 1), numer, denom);
     PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 
@@ -335,7 +335,7 @@ static void dhdvtext(Byte dh, Byte dv, StringPtr s, GUEST<Point> *pp)
     save = PORT_PEN_LOC(qdGlobals().thePort);
     PORT_PEN_LOC(qdGlobals().thePort) = *pp;
     setnumerdenom(&numer, &denom);
-    CALLTEXT((INTEGER)U(s[0]), (Ptr)(s + 1), numer, denom);
+    CALLTEXT((INTEGER)s[0], (Ptr)(s + 1), numer, denom);
     PORT_PEN_LOC(qdGlobals().thePort) = save;
 }
 

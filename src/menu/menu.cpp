@@ -197,7 +197,7 @@ MenuHandle Executor::C_NewMenu(INTEGER mid, ConstStringPtr str)
 
     if(!str)
         str = (StringPtr) "";
-    retval = (MenuHandle)NewHandle((Size)SIZEOFMINFO + U(str[0]) + 1);
+    retval = (MenuHandle)NewHandle((Size)SIZEOFMINFO + str[0] + 1);
     (*retval)->menuID = mid;
     (*retval)->menuWidth = (*retval)->menuHeight = 0;
     /* menuHeight calculated elsewhere */
@@ -206,7 +206,7 @@ MenuHandle Executor::C_NewMenu(INTEGER mid, ConstStringPtr str)
     (*retval)->menuProc = temph;
     (*retval)->enableFlags = -1;
     str255assign((*retval)->menuData, str);
-    *((char *)*retval + SIZEOFMINFO + U(str[0])) = 0;
+    *((char *)*retval + SIZEOFMINFO + str[0]) = 0;
     return (retval);
 }
 
@@ -342,7 +342,7 @@ static void app(StringPtr str, char icon, char marker, char style,
         (*eip->menh)->enableFlags = (*eip->menh)->enableFlags & (~((LONGINT)1 << eip->menitem));
     else
         (*eip->menh)->enableFlags = (*eip->menh)->enableFlags | ((LONGINT)1 << eip->menitem);
-    newsize = eip->menoff + SIZEOFMEXT + 1 + U(str[0]);
+    newsize = eip->menoff + SIZEOFMEXT + 1 + str[0];
     SetHandleSize((Handle)eip->menh, newsize);
     /*
  * The following lines were put in because Virex 4.0 calls AppendResMenu with
@@ -359,7 +359,7 @@ static void app(StringPtr str, char icon, char marker, char style,
     }
     menuop = (char *)(*eip->menh) + eip->menoff;
     ip = (char *)str;
-    ep = ip + U(str[0]) + 1;
+    ep = ip + str[0] + 1;
     while(ip != ep)
         *menuop++ = *ip++;
     *menuop++ = icon;
@@ -385,7 +385,7 @@ void Executor::C_AppendMenu(MenuHandle mh, ConstStringPtr str)
         ip = (char *)str + 1;
         op = (char *)tempstr + 1;
         tempstr[0] = 0;
-        i = U(str[0]);
+        i = str[0];
         while(i > 0)
         {
             switch(i--, c = *ip++)
@@ -538,7 +538,7 @@ mextp Executor::ROMlib_mitemtop(MenuHandle mh, INTEGER item,
 
     if(!mh)
         /*-->*/ return 0;
-    retval = (mextp)((char *)*mh + SIZEOFMINFO + U((*mh)->menuData[0]));
+    retval = (mextp)((char *)*mh + SIZEOFMINFO + (*mh)->menuData[0]);
     if(*(char *)retval != 0)
     {
         stashstring = (StringPtr)retval;
@@ -547,7 +547,7 @@ mextp Executor::ROMlib_mitemtop(MenuHandle mh, INTEGER item,
         while(retval->mnextlen && item > 1)
         {
             stashstring = (StringPtr) & (retval->mnextlen);
-            retval = (mextp)((char *)retval + SIZEOFMEXT + U(retval->mnextlen));
+            retval = (mextp)((char *)retval + SIZEOFMEXT + retval->mnextlen);
             item--;
         }
         if(stashstringp)
@@ -609,7 +609,7 @@ static void xInsertResMenu(MenuHandle mh, ConstStringPtr str, ResType restype,
             if(mmm)
                 soff = (char *)&(mmm->mnextlen) - (char *)*mh;
             else
-                soff = SIZEOFMINFO + U((*mh)->menuData[0]);
+                soff = SIZEOFMINFO + (*mh)->menuData[0];
             hsize = GetHandleSize((Handle)mh) - soff;
             gui_assert(hsize >= 0);
             h = NewHandle(hsize);
@@ -1419,7 +1419,7 @@ LONGINT Executor::C_MenuKey(CharParameter thec)
             mitem = 1;
             while(*p != 0)
             {
-                mxp = (mextp)(p + U(*p) + 1);
+                mxp = (mextp)(p + *p + 1);
                 if(mxp->mkeyeq == c && ((e = (*mh)->enableFlags) & 1) && e & ((LONGINT)1 << mitem))
                 {
                     if(i == (int)nonhier)
@@ -1436,7 +1436,7 @@ LONGINT Executor::C_MenuKey(CharParameter thec)
                     /*-->*/ return retval;
                 }
                 mitem++;
-                p += U(*p) + SIZEOFMEXT;
+                p += *p + SIZEOFMEXT;
             }
         }
     }
@@ -1454,13 +1454,13 @@ void Executor::C_SetMenuItemText(MenuHandle mh, INTEGER item, ConstStringPtr str
     if(ROMlib_mitemtop(mh, item, &stashstring))
     {
         soff = (char *)stashstring - (char *)*mh;
-        oldsize = U(stashstring[0]);
-        newsize = U(str[0]);
+        oldsize = stashstring[0];
+        newsize = str[0];
         if(oldsize != newsize)
         {
             growth = newsize - oldsize;
             hsize = GetHandleSize((Handle)mh);
-            start = ((char *)stashstring + U(stashstring[0]) + 1) - (char *)*mh;
+            start = ((char *)stashstring + stashstring[0] + 1) - (char *)*mh;
             nbyte = hsize - start;
             hsize += growth;
             if(growth > 0)

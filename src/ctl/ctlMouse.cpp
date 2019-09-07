@@ -181,7 +181,7 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
             inpart = TestControl(c, whereunswapped);
             if(inpart && inpart != partstart)
                 inpart = 0;
-            if(inpart != U((*c)->contrlHilite))
+            if(inpart != (*c)->contrlHilite)
             {
                 (*c)->contrlHilite = inpart;
                 CTLCALL(c, drawCntl, partstart);
@@ -213,7 +213,7 @@ INTEGER Executor::C_TestControl(ControlHandle c, Point p) /* IMI-325 */
     int16_t retval;
 
     CtlCallGuard guard(c);
-    if((*c)->contrlVis && U((*c)->contrlHilite) != 255)
+    if((*c)->contrlVis && (*c)->contrlHilite != 255)
         retval = CTLCALL(c, testCntl, ((LONGINT)p.v << 16) | (unsigned short)p.h);
     else
         retval = 0;

@@ -740,7 +740,7 @@ LONGINT Executor::C_cdef16(INTEGER var, ControlHandle c, INTEGER mess,
         case testCntl:
             p.v = HiWord(param);
             p.h = LoWord(param);
-            if(U((*c)->contrlHilite) != 255
+            if((*c)->contrlHilite != 255
                && (*c)->contrlMin < (*c)->contrlMax
                && PtInRect(p, &((*c)->contrlRect)))
                 return where(c, p);

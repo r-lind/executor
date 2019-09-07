@@ -173,10 +173,8 @@ void Executor::TESetClickLoop(ProcPtr cp, TEHandle teh)
 
 INTEGER Executor::ROMlib_wordb(char *p) /* INTERNAL */
 {
-    return (U(*p) <= 0x20);
+    return (uint8_t(*p) <= 0x20);
 }
-
-#define MYWORDB(p) (U(p) <= 0x20)
 
 int16_t nextbreak(TEHandle teh, int16_t off, int16_t len,
                   int16_t max_width)
@@ -239,7 +237,7 @@ int16_t nextbreak(TEHandle teh, int16_t off, int16_t len,
             }
             else
             {
-                while(sp > minsp && !MYWORDB(*--sp))
+                while(sp > minsp && !ROMlib_wordb(--sp))
                     ;
                 if(sp == minsp)
                     retval = maxsp - Text; /* i.e. no wordbreaks */
