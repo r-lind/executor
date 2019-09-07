@@ -64,6 +64,17 @@ enum
 
 enum
 {
+    kWindowMsgDraw = 0,
+    kWindowMsgHitTest = 1,
+    kWindowMsgCalculateShape = 2,
+    kWindowMsgInitialize = 3,
+    kWindowMsgCleanUp = 4,
+    kWindowMsgDrawGrowOutline = 5,
+    kWindowMsgDrawGrowBox = 6,
+};
+
+enum
+{
     wNoHit = 0,
     wInContent = 1,
     wInDrag = 2,
@@ -161,6 +172,10 @@ struct AuxWinRec
     GUEST<CTabHandle> awReserved;
     GUEST<LONGINT> awRefCon;
 };
+
+using WindowDefUPP = UPP<LONGINT (INTEGER varcode, WindowPtr wp, INTEGER message,
+                           LONGINT param)>;
+
 
 const LowMemGlobal<WindowPeek> WindowList { 0x9D6 }; // WindowMgr IMI-274 (true);
 const LowMemGlobal<INTEGER> SaveUpdate { 0x9DA }; // WindowMgr IMI-297 (true);

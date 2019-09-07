@@ -52,9 +52,6 @@ typedef void (*draghookp)(void);
 
 #define var(w) (GetWVariant((w)))
 
-using windprocp = UPP<LONGINT(INTEGER var, WindowPtr wind, INTEGER mess,
-                                    LONGINT param)>;
-
 extern void CALLDRAGHOOK(void);
 extern void WINDCALLDESKHOOK(void);
 extern LONGINT ROMlib_windcall(WindowPtr wind, INTEGER mess, LONGINT param);

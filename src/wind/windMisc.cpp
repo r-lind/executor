@@ -512,7 +512,7 @@ int32_t Executor::ROMlib_windcall(WindowPtr wind, int16_t mess, int32_t param)
 {
     Handle defproc;
     int32_t retval;
-    windprocp wp;
+    WindowDefUPP wp;
     Rect saverect;
 
     defproc = WINDOW_DEF_PROC(wind);
@@ -530,7 +530,7 @@ int32_t Executor::ROMlib_windcall(WindowPtr wind, int16_t mess, int32_t param)
             break;
     }
 
-    wp = (windprocp)*defproc;
+    wp = (WindowDefUPP)*defproc;
 
     if(wp == &wdef0)
         retval = wdef0(var(wind), wind, mess, param);
