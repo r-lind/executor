@@ -114,16 +114,12 @@ void Executor::RAMSDClose(SPortSel port) /* IMII-250 */
     }
 }
 
-#define SERSET 8 /* IMII-250 */
-
 OSErr Executor::SerReset(INTEGER rn, INTEGER config) /* IMII-250 */
 {
     GUEST<INTEGER> config_s = config;
 
-    return Control(rn, SERSET, (Ptr)&config_s);
+    return Control(rn, kSERDConfiguration, (Ptr)&config_s);
 }
-
-#define SERSETBUF 9 /* IMII-251 */
 
 OSErr Executor::SerSetBuf(INTEGER rn, Ptr p, INTEGER len) /* IMII-251 */
 {
@@ -132,50 +128,40 @@ OSErr Executor::SerSetBuf(INTEGER rn, Ptr p, INTEGER len) /* IMII-251 */
     temp.p = p;
     temp.i = len;
 
-    return Control(rn, SERSETBUF, (Ptr)&temp);
+    return Control(rn, kSERDInputBuffer, (Ptr)&temp);
 }
-
-#define SERHSHAKE 10 /* IMII-251 */
 
 OSErr Executor::SerHShake(INTEGER rn, const SerShk *flags) /* IMII-251 */
 {
-    return Control(rn, SERHSHAKE, (Ptr)flags);
+    return Control(rn, kSERDSerHShake, (Ptr)flags);
 }
-
-#define SERSETBRK 12 /* IMII-252 */
 
 OSErr Executor::SerSetBrk(INTEGER rn) /* IMII-252 */
 {
-    return Control(rn, SERSETBRK, (Ptr)0);
+    return Control(rn, kSERDSetBreak, (Ptr)0);
 }
-
-#define SERCLRBRK 11 /* IMII-253 */
 
 OSErr Executor::SerClrBrk(INTEGER rn) /* IMII-253 */
 {
-    return Control(rn, SERCLRBRK, (Ptr)0);
+    return Control(rn, kSERDClearBreak, (Ptr)0);
 }
-
-#define SERGETBUF 2 /* IMII-253 */
 
 OSErr Executor::SerGetBuf(INTEGER rn, LONGINT *lp) /* IMII-253 */
 {
     INTEGER status[11];
     OSErr err;
 
-    if((err = Status(rn, SERGETBUF, (Ptr)status)) == noErr)
+    if((err = Status(rn, kSERDInputCount, (Ptr)status)) == noErr)
         *lp = *(LONGINT *)status;
     return err;
 }
-
-#define SERSTATUS 8 /* IMII-253 */
 
 OSErr Executor::SerStatus(INTEGER rn, SerStaRec *serstap) /* IMII-253 */
 {
     INTEGER status[11];
     OSErr err;
 
-    if((err = Status(rn, SERSTATUS, (Ptr)status)) == noErr)
+    if((err = Status(rn, kSERDStatus, (Ptr)status)) == noErr)
         BlockMoveData((Ptr)status, (Ptr)serstap, (Size)sizeof(*serstap));
     return err;
 }
@@ -780,25 +766,6 @@ static OSErr flow(LONGINT fd, LONGINT flag)
 #endif
 }
 
-#define SERBAUDRATE 13
-
-#define SERXHSHAKE 14 /* IMIV-226 */
-#define SERMISC 16 /* IMIV-226 */
-#define SERSETDTR 17 /* IMIV-226 */
-#define SERCLRDTR 18 /* IMIV-226 */
-
-#define SERCHAR 19
-
-#define SERXCHAR 20 /* IMIV-226 */
-
-#define SERUSETXOFF 21
-#define SERUCLRXOFF 22
-#define SERCXMITXON 23
-#define SERUXMITXON 24
-#define SERCXMITXOFF 25
-#define SERUXMITXOFF 26
-#define SERRESET 27
-
 #define SERKILLIO 1
 
 OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
@@ -822,69 +789,69 @@ OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
             case SERKILLIO:
                 err = noErr; /* All I/O done synchronously */
                 break;
-            case SERSET:
+            case kSERDConfiguration:
                 err = serset((*h)->fd, pbp->cntrlParam.csParam[0]);
                 break;
-            case SERSETBUF:
+            case kSERDInputBuffer:
                 err = noErr; /* ignored */
                 break;
-            case SERHSHAKE:
-            case SERXHSHAKE: /* NOTE:  DTR handshake isn't supported  */
+            case kSERDSerHShake:
+            case kSERDHandshake: /* NOTE:  DTR handshake isn't supported  */
                 err = serxhshake((*h)->fd, (SerShk *)pbp->cntrlParam.csParam);
                 break;
-            case SERSETBRK:
+            case kSERDSetBreak:
                 err = ctlbrk((*h)->fd, SER_START);
                 break;
-            case SERCLRBRK:
+            case kSERDClearBreak:
                 err = ctlbrk((*h)->fd, SER_STOP);
                 break;
-            case SERBAUDRATE:
+            case kSERDBaudRate:
                 err = setbaud((*h)->fd, pbp->cntrlParam.csParam[0]);
                 break;
-            case SERMISC:
+            case kSERDMiscOptions:
 #if defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
                 err = serial_bios_setdtr((*h)->fd);
 #else
                 err = controlErr; /* not supported */
 #endif
                 break;
-            case SERSETDTR:
+            case kSERDAssertDTR:
 #if defined(MSDOS) || defined(CYGWIN32) || defined(WIN32)
                 err = serial_bios_clrdtr((*h)->fd);
 #else
                 err = controlErr; /* not supported */
 #endif
                 break;
-            case SERCLRDTR:
+            case kSERDNegateDTR:
                 err = controlErr; /* not supported */
                 break;
-            case SERCHAR:
+            case kSERDSetPEChar:
                 err = controlErr; /* not supported */
                 break;
-            case SERXCHAR:
+            case kSERDSetPEAltChar:
                 err = controlErr; /* not supported */
                 break;
-            case SERUSETXOFF:
+            case kSERDSetXOffFlag:
                 err = flow((*h)->fd, SER_STOP);
                 break;
-            case SERUCLRXOFF:
+            case kSERDClearXOffFlag:
                 err = flow((*h)->fd, SER_START);
                 break;
-            case SERCXMITXON:
+            case kSERDSendXOn:
                 err = controlErr; /* not supported */
                 break;
-            case SERUXMITXON:
+            case kSERDSendXOnOut:
                 c = XONC;
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
                 break;
-            case SERCXMITXOFF:
+            case kSERDSendXOff:
                 err = controlErr; /* not supported */
                 break;
-            case SERUXMITXOFF:
+            case kSERDSendXOffOut:
                 c = XOFFC;
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
                 break;
-            case SERRESET:
+            case kSERDResetChannel:
                 err = controlErr; /* not supported */
                 break;
             default:
@@ -899,7 +866,7 @@ OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 }
 
 /*
- * NOTE:  SERSTATUS lies about everything except rdPend.
+ * NOTE:  kSERDStatus lies about everything except rdPend.
  */
 
 OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
@@ -918,7 +885,7 @@ OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL *
         h = (hiddenh)dcp->dCtlStorage;
         switch(pbp->cntrlParam.csCode)
         {
-            case SERGETBUF:
+            case kSERDInputCount:
 #if defined(LINUX) || defined(MACOSX)
                 if(ioctl((*h)->fd, FIONREAD, &n) < 0)
 #else
@@ -934,7 +901,7 @@ OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL *
                     err = noErr;
                 }
                 break;
-            case SERSTATUS:
+            case kSERDStatus:
 #if defined(LINUX) || defined(MACOSX)
                 if(ioctl((*h)->fd, FIONREAD, &n) < 0)
 #else

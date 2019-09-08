@@ -24,7 +24,10 @@ enum
     baud4800 = 22,
     baud7200 = 14,
     baud9600 = 10,
+    baud14400 = 6,
     baud19200 = 4,
+    baud28800 = 2,
+    baud38400 = 1,
     baud57600 = 0,
 };
 
@@ -77,6 +80,45 @@ enum
     sPortB = 1,
 };
 
+// Serial driver control codes
+enum
+{
+    kSERDConfiguration = 8,
+    kSERDInputBuffer = 9,
+    kSERDSerHShake = 10,
+    kSERDClearBreak = 11,
+    kSERDSetBreak = 12,
+    kSERDBaudRate = 13,
+    kSERDHandshake = 14,
+    kSERDClockMIDI = 15,
+    kSERDMiscOptions = 16,
+    kSERDAssertDTR = 17,
+    kSERDNegateDTR = 18,
+    kSERDSetPEChar = 19,
+    kSERDSetPEAltChar = 20,
+    kSERDSetXOffFlag = 21,
+    kSERDClearXOffFlag = 22,
+    kSERDSendXOn = 23,
+    kSERDSendXOnOut = 24,
+    kSERDSendXOff = 25,
+    kSERDSendXOffOut = 26,
+    kSERDResetChannel = 27,
+    kSERDHandshakeRS232 = 28,
+    kSERDStickParity = 29,
+    kSERDAssertRTS = 30,
+    kSERDNegateRTS = 31,
+    kSERD115KBaud = 115,
+    kSERD230KBaud = 230,
+};
+
+// Serial driver status codes
+enum
+{
+    kSERDInputCount = 2,
+    kSERDStatus = 8,
+    kSERDVersion = 9,
+    kSERDGetDCD = 256,
+};
 
 struct SerShk
 {
