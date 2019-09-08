@@ -48,8 +48,8 @@ enum
 struct SFReply
 {
     GUEST_STRUCT;
-    GUEST<BOOLEAN> good;
-    GUEST<BOOLEAN> copy;
+    GUEST<Boolean> good;
+    GUEST<Boolean> copy;
     GUEST<OSType> fType;
     GUEST<INTEGER> vRefNum;
     GUEST<INTEGER> version;
@@ -64,14 +64,14 @@ const LowMemGlobal<LONGINT> CurDirStore { 0x398 }; // StdFilePkg IMIV-72 (true);
 struct StandardFileReply
 {
     GUEST_STRUCT;
-    GUEST<BOOLEAN> sfGood;
-    GUEST<BOOLEAN> sfReplacing;
+    GUEST<Boolean> sfGood;
+    GUEST<Boolean> sfReplacing;
     GUEST<OSType> sfType;
     GUEST<FSSpec> sfFile;
     GUEST<ScriptCode> sfScript;
     GUEST<INTEGER> sfFlags;
-    GUEST<BOOLEAN> sfIsFolder;
-    GUEST<BOOLEAN> sfIsVolume;
+    GUEST<Boolean> sfIsFolder;
+    GUEST<Boolean> sfIsVolume;
     GUEST<LONGINT> sfReserved1;
     GUEST<INTEGER> sfReserved2;
 };

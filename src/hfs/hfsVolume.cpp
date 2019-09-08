@@ -332,7 +332,7 @@ HVCB *Executor::ROMlib_vcbbyvrn(short vrefnum)
 }
 
 HVCB *Executor::ROMlib_findvcb(short vrefnum, StringPtr name, LONGINT *diridp,
-                                      BOOLEAN usedefault)
+                                      Boolean usedefault)
 {
     HVCB *vcbp;
     INTEGER namelen;
@@ -439,7 +439,7 @@ Executor::hfsPBMountVol(ParmBlkPtr pb, LONGINT floppyfd, LONGINT offset, LONGINT
     HVCB *vcbp, *vcbp2;
     OSErr err;
     volumeinfoPtr vip;
-    BOOLEAN alreadythere;
+    Boolean alreadythere;
     ULONGINT nblocks;
     GUEST<THz> saveZone;
 
@@ -628,7 +628,7 @@ static unsigned short getnmfls(HVCB *vcbp, INTEGER workingdirnum)
 typedef enum { mfs,
                hfs } fstype;
 
-static OSErr commonGetVInfo(HVolumeParam *pb, BOOLEAN async, fstype fs)
+static OSErr commonGetVInfo(HVolumeParam *pb, Boolean async, fstype fs)
 {
     HVCB *vcbp;
     INTEGER workingdirnum;
@@ -704,19 +704,19 @@ static OSErr commonGetVInfo(HVolumeParam *pb, BOOLEAN async, fstype fs)
     PBRETURN(pb, noErr);
 }
 
-OSErr Executor::hfsPBGetVInfo(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBGetVInfo(ParmBlkPtr pb, Boolean async)
 {
     return commonGetVInfo((HVolumeParam *)pb, async, mfs);
 }
 
-OSErr Executor::hfsPBHGetVInfo(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHGetVInfo(HParmBlkPtr pb, Boolean async)
 {
     return commonGetVInfo((HVolumeParam *)pb, async, hfs);
 }
 
 #define ATRBMASK VSOFTLOCKBIT
 
-OSErr Executor::hfsPBSetVInfo(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBSetVInfo(HParmBlkPtr pb, Boolean async)
 {
     OSErr err;
     HVCB *vcbp;
@@ -765,7 +765,7 @@ static OSErr getvolcommon(VolumeParam *pb)
     return err;
 }
 
-OSErr Executor::hfsPBGetVol(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBGetVol(ParmBlkPtr pb, Boolean async)
 {
     OSErr err;
 
@@ -775,7 +775,7 @@ OSErr Executor::hfsPBGetVol(ParmBlkPtr pb, BOOLEAN async)
 
 GUEST<LONGINT> Executor::DefDirID = 2;
 
-OSErr Executor::hfsPBHGetVol(WDPBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHGetVol(WDPBPtr pb, Boolean async)
 {
     wdentry *wdp;
     OSErr err;
@@ -808,8 +808,8 @@ OSErr Executor::hfsPBHGetVol(WDPBPtr pb, BOOLEAN async)
  *
  */
 
-static OSErr setvolhelper(VolumeParam *pb, BOOLEAN aysnc, LONGINT dirid,
-                          BOOLEAN convertzeros)
+static OSErr setvolhelper(VolumeParam *pb, Boolean aysnc, LONGINT dirid,
+                          Boolean convertzeros)
 {
     HVCB *vcbp;
     GUEST<HVCB *> newDefVCBPtr;
@@ -891,17 +891,17 @@ static OSErr setvolhelper(VolumeParam *pb, BOOLEAN aysnc, LONGINT dirid,
     PBRETURN(pb, err);
 }
 
-OSErr Executor::hfsPBSetVol(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBSetVol(ParmBlkPtr pb, Boolean async)
 {
     return setvolhelper((VolumeParam *)pb, async, 0, true);
 }
 
-OSErr Executor::hfsPBHSetVol(WDPBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHSetVol(WDPBPtr pb, Boolean async)
 {
     return setvolhelper((VolumeParam *)pb, async, pb->ioWDDirID, false);
 }
 
-OSErr Executor::hfsPBFlushVol(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBFlushVol(ParmBlkPtr pb, Boolean async)
 {
     VCB *vcbp;
     OSErr err;

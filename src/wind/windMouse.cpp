@@ -59,9 +59,9 @@ DONE:
     return retval;
 }
 
-static BOOLEAN xTrackBox(WindowPtr wp, Point pt, INTEGER part) /* IMIV-50 */
+static Boolean xTrackBox(WindowPtr wp, Point pt, INTEGER part) /* IMIV-50 */
 {
-    BOOLEAN inpart = true, inp;
+    Boolean inpart = true, inp;
     EventRecord ev;
 
     ThePortGuard guard(wmgr_port);
@@ -89,20 +89,20 @@ static BOOLEAN xTrackBox(WindowPtr wp, Point pt, INTEGER part) /* IMIV-50 */
     return inpart;
 }
 
-BOOLEAN Executor::C_TrackBox(WindowPtr wp, Point pt, INTEGER part) /* IMIV-50 */
+Boolean Executor::C_TrackBox(WindowPtr wp, Point pt, INTEGER part) /* IMIV-50 */
 {
     if(part)
         part -= 2;
     return xTrackBox(wp, pt, part);
 }
 
-BOOLEAN Executor::C_TrackGoAway(WindowPtr w, Point p)
+Boolean Executor::C_TrackGoAway(WindowPtr w, Point p)
 {
     return xTrackBox(w, p, wInGoAway);
 }
 
 void Executor::C_ZoomWindow(WindowPtr wp, INTEGER part,
-                            BOOLEAN front) /* IMIV-50 */
+                            Boolean front) /* IMIV-50 */
 {
     RgnHandle behind;
 #if !defined(No_STEF_zoommods)

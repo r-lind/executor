@@ -108,7 +108,7 @@ static void drawinboxwithicon(StringPtr, Rect *, INTEGER);
 static void safeflflip(fltype *, INTEGER);
 static void flupdate(fltype *, INTEGER, INTEGER);
 static void flscroll(fltype *, INTEGER, INTEGER);
-static StringPtr getdiskname(BOOLEAN *, bool *);
+static StringPtr getdiskname(Boolean *, bool *);
 static void drawjobberattop(DialogPeek);
 static LONGINT getdirid(StringPtr);
 static void settype(fltype *, INTEGER);
@@ -122,13 +122,13 @@ static LONGINT stdfcmp(const void *, const void *);
 static void flfill(fltype *);
 static void realcd(DialogPeek, LONGINT);
 static LONGINT getparent(LONGINT);
-static BOOLEAN moveuponedir(DialogPtr);
+static Boolean moveuponedir(DialogPtr);
 static void flinit(fltype *, Rect *, ControlHandle);
 static void stdfflip(Rect *, INTEGER, INTEGER);
-static BOOLEAN trackdirs(DialogPeek);
-static BOOLEAN ejected(HParmBlkPtr);
-static void bumpsavedisk(DialogPtr, BOOLEAN);
-static void transformsfpdialog(DialogPtr, Point *, Rect *, BOOLEAN);
+static Boolean trackdirs(DialogPeek);
+static Boolean ejected(HParmBlkPtr);
+static void bumpsavedisk(DialogPtr, Boolean);
+static void transformsfpdialog(DialogPtr, Point *, Rect *, Boolean);
 static void doeject(DialogPtr);
 static GUEST<OSType> gettypeX(StringPtr, INTEGER, LONGINT);
 
@@ -390,9 +390,9 @@ void Executor::ROMlib_init_stdfile(void)
     holdstr = 0;
 }
 
-static StringPtr getdiskname(BOOLEAN *ejectablep, bool *writablep)
+static StringPtr getdiskname(Boolean *ejectablep, bool *writablep)
 {
-    static BOOLEAN ejectable;
+    static Boolean ejectable;
     static bool writable;
     static Str255 retval;
     ParamBlockRec pbr;
@@ -433,7 +433,7 @@ static void drawjobberattop(DialogPeek dp)
     Rect *rp;
     fltype *flp;
     GUEST<INTEGER> savebottom;
-    BOOLEAN ejectable;
+    Boolean ejectable;
     PenState ps;
 
     GetPenState(&ps);
@@ -782,7 +782,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
     StringPtr diskname;
     GUEST<Handle> tmpH;
     Handle ejhand;
-    BOOLEAN ejectable;
+    Boolean ejectable;
     PenState ps;
 
     GetPenState(&ps);
@@ -876,7 +876,7 @@ static LONGINT getparent(LONGINT dirid)
     return retval;
 }
 
-static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
+static Boolean findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
 {
 #if 1
     /*
@@ -892,7 +892,7 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
     return false;
 #else
     HVCB *vcbp;
-    BOOLEAN retval;
+    Boolean retval;
     struct stat sbuf;
     char *namecpy, *slashp;
     INTEGER namelen;
@@ -927,11 +927,11 @@ static BOOLEAN findparent(GUEST<INTEGER> *vrefp, GUEST<LONGINT> *diridp)
 #endif
 }
 
-static BOOLEAN moveuponedir(DialogPtr dp)
+static Boolean moveuponedir(DialogPtr dp)
 {
     LONGINT parent;
     GUEST<INTEGER> vrn;
-    BOOLEAN retval;
+    Boolean retval;
 
     parent = getparent(LM(CurDirStore));
     if(parent != LM(CurDirStore) && parent != 1)
@@ -948,7 +948,7 @@ static BOOLEAN moveuponedir(DialogPtr dp)
     return retval;
 }
 
-BOOLEAN keyarrow(fltype *fl, INTEGER incr) /* -1: up, 1: down */
+Boolean keyarrow(fltype *fl, INTEGER incr) /* -1: up, 1: down */
 {
     INTEGER nsel, oldval, newval;
     fltype::flinfostr *flp;
@@ -1028,10 +1028,10 @@ folder_selected_p(fltype *fl)
     return retval;
 }
 
-static BOOLEAN
+static Boolean
 call_magicfp(fltype *fl, DialogPtr dp, EventRecord *evt, GUEST<INTEGER> *ith)
 {
-    BOOLEAN retval;
+    Boolean retval;
     LONGINT save_ref_con;
 
     save_ref_con = GetWRefCon(dp);
@@ -1281,7 +1281,7 @@ static void stdfflip(Rect *rp, INTEGER n, INTEGER height)
     rp->top = savetop;
 }
 
-static BOOLEAN trackdirs(DialogPeek dp)
+static Boolean trackdirs(DialogPeek dp)
 {
     WRAPPER_PIXMAP_FOR_COPY(wrapper);
     PixMapHandle save_bits;
@@ -1300,9 +1300,9 @@ static BOOLEAN trackdirs(DialogPeek dp)
     EventRecord evt;
     LONGINT id;
     int sel, newsel, firstsel;
-    BOOLEAN done;
+    Boolean done;
     ALLOCABEGIN
-    BOOLEAN ejectable;
+    Boolean ejectable;
     bool seen_up_already;
     TEMP_ALLOC_DECL(temp_save_bits);
 
@@ -1526,7 +1526,7 @@ makeworking(fltype *f)
     }
 }
 
-static BOOLEAN ejected(HParmBlkPtr pb)
+static Boolean ejected(HParmBlkPtr pb)
 {
     return pb->volumeParam.ioVDrvInfo == 0;
 }
@@ -1549,13 +1549,13 @@ static bool single_tree_fs_p(HParmBlkPtr pb)
 }
 
 
-static void bumpsavedisk(DialogPtr dp, BOOLEAN always)
+static void bumpsavedisk(DialogPtr dp, Boolean always)
 {
     GUEST<INTEGER> current;
     HParamBlockRec pb;
     INTEGER vref;
     OSErr err;
-    BOOLEAN is_single_tree_fs, seenus;
+    Boolean is_single_tree_fs, seenus;
 
     pb.volumeParam.ioVRefNum = -LM(SFSaveDisk);
     pb.volumeParam.ioNamePtr = 0;
@@ -1648,7 +1648,7 @@ ROMlib_CALLDHOOK(fltype *fl, INTEGER ihit, DialogPtr dp, dialog_hook_u dhu)
 }
 
 static void transformsfpdialog(DialogPtr dp, Point *offset, Rect *scrollrect,
-                               BOOLEAN getting)
+                               Boolean getting)
 {
     INTEGER numitems, windheight, i, j, extrasizeneeded;
     GUEST<INTEGER> swapped_itype;
@@ -1707,7 +1707,7 @@ void adjustdrivebutton(DialogPtr dp)
     Rect r;
 #if !defined(MSDOS) && !defined(CYGWIN32)
     HVCB *vcbp;
-    BOOLEAN seenunix;
+    Boolean seenunix;
 
     count = 0;
     seenunix = false;
@@ -2048,7 +2048,7 @@ void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_
         fltype f;
         GrafPtr gp;
         INTEGER openorsave, promptitem, nmlistitem, diskname, ejectitem, driveitem;
-        BOOLEAN transform;
+        Boolean transform;
         EventRecord evt;
         ParamBlockRec pbr;
         CInfoPBRec hpb;

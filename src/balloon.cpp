@@ -7,19 +7,19 @@
 
 using namespace Executor;
 
-BOOLEAN Executor::C_HMGetBalloons()
+Boolean Executor::C_HMGetBalloons()
 {
     warning_unimplemented(NULL_STRING);
     return false;
 }
 
-OSErr Executor::C_HMSetBalloons(BOOLEAN flag)
+OSErr Executor::C_HMSetBalloons(Boolean flag)
 {
     warning_unimplemented(NULL_STRING);
     return hmHelpManagerNotInited;
 }
 
-BOOLEAN Executor::C_HMIsBalloon()
+Boolean Executor::C_HMIsBalloon()
 {
     warning_unimplemented(NULL_STRING);
     return false;

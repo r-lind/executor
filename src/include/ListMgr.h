@@ -36,7 +36,7 @@ struct ListRec
     GUEST<ControlHandle> vScroll;
     GUEST<ControlHandle> hScroll;
     GUEST<SignedByte> selFlags;
-    GUEST<BOOLEAN> lActive;
+    GUEST<Boolean> lActive;
     GUEST<SignedByte> lReserved;
     GUEST<SignedByte> listFlags;
     GUEST<LONGINT> clikTime;
@@ -93,12 +93,12 @@ DISPATCHER_TRAP(Pack0, 0xA9E7, StackW);
 extern void C_LGetCellDataLocation(GUEST<INTEGER> *offsetp,
                                 GUEST<INTEGER> *lenp, Cell cell, ListHandle list);
 PASCAL_SUBTRAP(LGetCellDataLocation, 0xA9E7, 0x0034, Pack0);
-extern BOOLEAN C_LNextCell(BOOLEAN hnext,
-                                       BOOLEAN vnext, GUEST<Cell> *cellp, ListHandle list);
+extern Boolean C_LNextCell(Boolean hnext,
+                                       Boolean vnext, GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LNextCell, 0xA9E7, 0x0048, Pack0);
 extern void C_LRect(Rect *cellrect, Cell cell, ListHandle list);
 PASCAL_SUBTRAP(LRect, 0xA9E7, 0x004C, Pack0);
-extern BOOLEAN
+extern Boolean
 C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LSearch, 0xA9E7, 0x0054, Pack0);
 extern void C_LSize(INTEGER width,
@@ -118,14 +118,14 @@ extern void C_LDelRow(INTEGER count,
 PASCAL_SUBTRAP(LDelRow, 0xA9E7, 0x0024, Pack0);
 extern ListHandle C_LNew(const Rect *rview,
                                      const Rect *bounds, Point csize, INTEGER proc, WindowPtr wind,
-                                     BOOLEAN draw, BOOLEAN grow, BOOLEAN scrollh, BOOLEAN scrollv);
+                                     Boolean draw, Boolean grow, Boolean scrollh, Boolean scrollv);
 PASCAL_SUBTRAP(LNew, 0xA9E7, 0x0044, Pack0);
 extern void C_LDispose(ListHandle list);
 PASCAL_SUBTRAP(LDispose, 0xA9E7, 0x0028, Pack0);
 extern void C_LDraw(Cell cell,
                                 ListHandle list);
 PASCAL_SUBTRAP(LDraw, 0xA9E7, 0x0030, Pack0);
-extern void C_LSetDrawingMode(BOOLEAN draw,
+extern void C_LSetDrawingMode(Boolean draw,
                                   ListHandle list);
 PASCAL_SUBTRAP(LSetDrawingMode, 0xA9E7, 0x002C, Pack0);
 extern void C_LScroll(INTEGER ncol,
@@ -136,18 +136,18 @@ PASCAL_SUBTRAP(LAutoScroll, 0xA9E7, 0x0010, Pack0);
 extern void C_LUpdate(RgnHandle rgn,
                                   ListHandle list);
 PASCAL_SUBTRAP(LUpdate, 0xA9E7, 0x0064, Pack0);
-extern void C_LActivate(BOOLEAN act,
+extern void C_LActivate(Boolean act,
                                     ListHandle list);
 PASCAL_SUBTRAP(LActivate, 0xA9E7, 0x0, Pack0);
 extern void C_ROMlib_mytrack(ControlHandle ch, INTEGER part);
 PASCAL_FUNCTION(ROMlib_mytrack);
 
-extern BOOLEAN C_LClick(Point pt,
+extern Boolean C_LClick(Point pt,
                                     INTEGER mods, ListHandle list);
 PASCAL_SUBTRAP(LClick, 0xA9E7, 0x0018, Pack0);
 extern LONGINT C_LLastClick(ListHandle list);
 PASCAL_SUBTRAP(LLastClick, 0xA9E7, 0x0040, Pack0);
-extern void C_LSetSelect(BOOLEAN setit,
+extern void C_LSetSelect(Boolean setit,
                                      Cell cell, ListHandle list);
 PASCAL_SUBTRAP(LSetSelect, 0xA9E7, 0x005C, Pack0);
 extern void C_LAddToCell(Ptr dp, INTEGER dl,
@@ -165,7 +165,7 @@ PASCAL_SUBTRAP(LSetCell, 0xA9E7, 0x0058, Pack0);
 extern void C_LCellSize(Point csize,
                                     ListHandle list);
 PASCAL_SUBTRAP(LCellSize, 0xA9E7, 0x0014, Pack0);
-extern BOOLEAN C_LGetSelect(BOOLEAN next,
+extern Boolean C_LGetSelect(Boolean next,
                                         GUEST<Cell> *cellp, ListHandle list);
 PASCAL_SUBTRAP(LGetSelect, 0xA9E7, 0x003C, Pack0);
 

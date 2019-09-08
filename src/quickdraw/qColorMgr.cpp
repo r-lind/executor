@@ -230,10 +230,10 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
     for(t = GD_SEARCH_PROC(LM(TheGDevice)), success_p = false;
         t && !success_p;)
     {
-        BOOLEAN(*search_fn)
+        Boolean(*search_fn)
         ();
 
-        search_fn = (BOOLEAN(*)())(*t)->srchProc;
+        search_fn = (Boolean(*)())(*t)->srchProc;
         /* fetch the next before calling the searchproc,
 	 since it can relocate the current `t' */
         t = (*t)->nxtSrch;
@@ -250,7 +250,7 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
             memcpy(cpu_state.regs, save_regs, 16 * sizeof cpu_state.regs[0]);
         }
 #if 0
-      /* return value from the search procedure is a BOOLEAN, ignore
+      /* return value from the search procedure is a Boolean, ignore
 	 all but the low byte */
       success_p &= 0xFF;
 #endif
@@ -278,7 +278,7 @@ void Executor::C_InvertColor(RGBColor *rgb)
     rgb->blue.raw(~rgb->blue.raw());
 }
 
-BOOLEAN Executor::C_RealColor(RGBColor *rgb)
+Boolean Executor::C_RealColor(RGBColor *rgb)
 {
     GDHandle gdev;
     ITabHandle inverse_table;
@@ -464,7 +464,7 @@ int Executor::average_color(GDHandle gd,
     }
 }
 
-BOOLEAN Executor::C_GetGray(GDHandle gdev, RGBColor *bk, RGBColor *fg)
+Boolean Executor::C_GetGray(GDHandle gdev, RGBColor *bk, RGBColor *fg)
 {
     return average_color(gdev, bk, fg, 0x8000, fg);
 }
@@ -837,7 +837,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
     ITAB_SEED(inverse_table) = CTAB_SEED(color_table);
 }
 
-void Executor::C_ProtectEntry(INTEGER index, BOOLEAN protect)
+void Executor::C_ProtectEntry(INTEGER index, Boolean protect)
 {
     GDHandle gdev;
     ColorSpec *entry;
@@ -864,7 +864,7 @@ void Executor::C_ProtectEntry(INTEGER index, BOOLEAN protect)
      current graphics device's colortable is unchanged */
 }
 
-void Executor::C_ReserveEntry(INTEGER index, BOOLEAN reserve)
+void Executor::C_ReserveEntry(INTEGER index, Boolean reserve)
 {
     GDHandle gdev;
     CTabHandle ctab;

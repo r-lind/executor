@@ -211,7 +211,7 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
 launch_failure_t Executor::ROMlib_launch_failure = launch_no_failure;
 INTEGER Executor::ROMlib_exevrefnum;
 
-static void launchchain(ConstStringPtr fName, INTEGER vRefNum, BOOLEAN resetmemory,
+static void launchchain(ConstStringPtr fName, INTEGER vRefNum, Boolean resetmemory,
                         LaunchParamBlockRec *lpbp)
 {
     OSErr err;
@@ -758,7 +758,7 @@ static void reset_traps(void)
 {
     static syn68k_addr_t savetooltraptable[0x400];
     static syn68k_addr_t saveostraptable[0x100];
-    static BOOLEAN beenhere = false;
+    static Boolean beenhere = false;
 
     ROMlib_reset_bad_trap_addresses();
     if(!beenhere)
@@ -878,7 +878,7 @@ Executor::NewLaunch(ConstStringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBl
     static Str255 fName;
     static INTEGER vRefNum;
     static LaunchParamBlockRec lpb;
-    BOOLEAN extended_p;
+    Boolean extended_p;
 
     retval = noErr;
     if(lpbp && lpbp->launchBlockID == extendedBlock)

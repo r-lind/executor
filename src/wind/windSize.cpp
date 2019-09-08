@@ -25,7 +25,7 @@ using namespace Executor;
  *	 as possible and probably have only one CalcVisBehind
  */
 
-void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, BOOLEAN front)
+void Executor::C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v, Boolean front)
 {
     GrafPtr gp;
     RgnHandle movepart, updatepart, behindpart;
@@ -275,7 +275,7 @@ LONGINT Executor::C_GrowWindow(WindowPtr w, Point startp, const Rect *rp)
 /* #### speedup? bag saveold, drawnew */
 
 void Executor::C_SizeWindow(WindowPtr w, INTEGER width, INTEGER height,
-                            BOOLEAN flag)
+                            Boolean flag)
 {
     if(width || height)
     {

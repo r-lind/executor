@@ -391,7 +391,7 @@ gestalt_set_cpu_type(uint32_t type)
 #endif
 
 static OSErr
-gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, BOOLEAN searchlist,
+gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, Boolean searchlist,
                gestaltentry_t table[], int length)
 {
     OSErr retval;
@@ -577,7 +577,7 @@ OSErr Executor::C_GestaltTablesOnly(OSType selector,
     return gestalt_helper(selector, responsep, false, gtable, std::size(gtable));
 }
 
-static BOOLEAN
+static Boolean
 syszone_p(ProcPtr p)
 {
     THz syszone;

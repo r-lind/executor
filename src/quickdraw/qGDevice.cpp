@@ -244,7 +244,7 @@ void Executor::C_InitGDevice(INTEGER gd_ref_num, LONGINT mode, GDHandle gdh)
 }
 
 void Executor::C_SetDeviceAttribute(GDHandle gdh, INTEGER attribute,
-                                    BOOLEAN value)
+                                    Boolean value)
 {
     if(value)
         GD_FLAGS(gdh) |= 1 << attribute;
@@ -372,9 +372,9 @@ void Executor::C_DeviceLoop(RgnHandle rgn,
     DisposeRgn(sect_rgn);
 }
 
-BOOLEAN Executor::C_TestDeviceAttribute(GDHandle gdh, INTEGER attribute)
+Boolean Executor::C_TestDeviceAttribute(GDHandle gdh, INTEGER attribute)
 {
-    BOOLEAN retval;
+    Boolean retval;
 
     retval = (GD_FLAGS(gdh) & (1 << attribute)) != 0;
     return retval;

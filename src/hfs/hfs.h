@@ -335,7 +335,7 @@ typedef struct
     anykey tofind; /* in */
     compfp fp; /* in */
     unsigned short refnum; /* in */
-    BOOLEAN success; /* out */
+    Boolean success; /* out */
     anykey *foundp; /* out */
     short leafindex; /* out */
     trailentry trail[MAXTRAILS]; /* out */
@@ -422,7 +422,7 @@ enum
 /* public entities in btree.c */
 
 extern cacheentry *ROMlib_addrtocachep(Ptr addr, HVCB *vcbp);
-extern BOOLEAN ROMlib_searchnode(btnode *btp, void *key, compfp fp, anykey **keypp,
+extern Boolean ROMlib_searchnode(btnode *btp, void *key, compfp fp, anykey **keypp,
                                  INTEGER *afterp);
 extern OSErr ROMlib_getcache(cacheentry **retpp, uint16_t refnum, ULONGINT logbno,
                              cacheflagtype flags);
@@ -444,7 +444,7 @@ extern OSErr ROMlib_btrename(btparam *btpb, StringPtr newnamep);
 extern OSErr ROMlib_btcreateemptyfile(btparam *btpb);
 extern OSErr ROMlib_btcreateemptydir(btparam *btpb, GUEST<LONGINT> *newidp);
 extern OSErr ROMlib_btpbindex(IOParam *pb, LONGINT dirid, HVCB **vcbpp,
-                              filerec **frpp, catkey **catkeypp, BOOLEAN onlyfiles);
+                              filerec **frpp, catkey **catkeypp, Boolean onlyfiles);
 extern OSErr ROMlib_cleancache(HVCB *vcbp);
 extern OSErr ROMlib_flushcachevcbp(HVCB *vcbp);
 
@@ -462,11 +462,11 @@ extern LONGINT ROMlib_logtophys(filecontrolblock *fcbp, LONGINT absoffset,
                                 LONGINT *nphyscontigp);
 extern OSErr ROMlib_makecatkey(catkey *keyp, LONGINT dirid, INTEGER namelen, Ptr namep);
 extern OSErr ROMlib_findvcbandfile(IOParam *pb, LONGINT dirid, btparam *btpb,
-                                   filekind *kindp, BOOLEAN ignorename);
+                                   filekind *kindp, Boolean ignorename);
 extern OSErr ROMlib_alreadyopen(HVCB *vcbp, LONGINT flnum, SignedByte *permp,
                                 GUEST<INTEGER> *refnump, busyconcern_t busy);
-extern OSErr ROMlib_allochelper(IOParam *pb, BOOLEAN async, alloctype alloc,
-                                BOOLEAN ROMlib_writefcbp);
+extern OSErr ROMlib_allochelper(IOParam *pb, Boolean async, alloctype alloc,
+                                Boolean ROMlib_writefcbp);
 
 /* public entries in helper.c */
 
@@ -491,7 +491,7 @@ extern OSErr ROMlib_readwrite(LONGINT fd, char *buffer, LONGINT count, LONGINT o
 /* public entries in volume.c */
 
 extern HVCB *ROMlib_findvcb(short vrefnum, StringPtr name, LONGINT *diridp,
-                            BOOLEAN usedefault);
+                            Boolean usedefault);
 extern OSErr ROMlib_mkwd(WDPBPtr pb, HVCB *vcbp, LONGINT dirid,
                          LONGINT procid);
 extern OSErr ROMlib_pbvolrename(IOParam *pb, StringPtr newnamep);
@@ -516,56 +516,56 @@ enum
     NEWLINEMODE = 1 << 7
 };
 
-extern OSErr hfsPBOpen(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHOpen(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBOpenRF(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHOpenRF(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBLockRange(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBUnlockRange(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBRead(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBWrite(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBGetFPos(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetFPos(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBGetEOF(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetEOF(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBAllocate(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBAllocContig(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBFlushFile(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBClose(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBCreate(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHCreate(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBDirCreate(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBDelete(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHDelete(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBGetCatInfo(CInfoPBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetCatInfo(CInfoPBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBCatMove(CMovePBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBOpenWD(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBCloseWD(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBGetWDInfo(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBGetFInfo(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHGetFInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetFInfo(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHSetFInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetFLock(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHSetFLock(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBRstFLock(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHRstFLock(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetFVers(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBRename(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHRename(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBGetFCBInfo(FCBPBPtr ufsPB, BOOLEAN a);
+extern OSErr hfsPBOpen(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHOpen(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBOpenRF(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHOpenRF(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBLockRange(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBUnlockRange(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBRead(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBWrite(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBGetFPos(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetFPos(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBGetEOF(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetEOF(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBAllocate(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBAllocContig(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBFlushFile(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBClose(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBCreate(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHCreate(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBDirCreate(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBDelete(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHDelete(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBGetCatInfo(CInfoPBPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetCatInfo(CInfoPBPtr ufsPB, Boolean a);
+extern OSErr hfsPBCatMove(CMovePBPtr ufsPB, Boolean a);
+extern OSErr hfsPBOpenWD(WDPBPtr ufsPB, Boolean a);
+extern OSErr hfsPBCloseWD(WDPBPtr ufsPB, Boolean a);
+extern OSErr hfsPBGetWDInfo(WDPBPtr ufsPB, Boolean a);
+extern OSErr hfsPBGetFInfo(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHGetFInfo(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetFInfo(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHSetFInfo(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetFLock(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHSetFLock(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBRstFLock(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHRstFLock(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetFVers(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBRename(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHRename(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBGetFCBInfo(FCBPBPtr ufsPB, Boolean a);
 extern OSErr hfsPBMountVol(ParmBlkPtr ufsPB, LONGINT floppyfd, LONGINT off,
                            LONGINT bsize, LONGINT maxbytes,
                            drive_flags_t flags, DrvQExtra *dqp);
-extern OSErr hfsPBGetVInfo(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHGetVInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetVInfo(HParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBGetVol(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHGetVol(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBSetVol(ParmBlkPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBHSetVol(WDPBPtr ufsPB, BOOLEAN a);
-extern OSErr hfsPBFlushVol(ParmBlkPtr ufsPB, BOOLEAN a);
+extern OSErr hfsPBGetVInfo(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHGetVInfo(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetVInfo(HParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBGetVol(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHGetVol(WDPBPtr ufsPB, Boolean a);
+extern OSErr hfsPBSetVol(ParmBlkPtr ufsPB, Boolean a);
+extern OSErr hfsPBHSetVol(WDPBPtr ufsPB, Boolean a);
+extern OSErr hfsPBFlushVol(ParmBlkPtr ufsPB, Boolean a);
 extern OSErr hfsPBUnmountVol(ParmBlkPtr ufsPB);
 extern OSErr hfsPBOffLine(ParmBlkPtr ufsPB);
 extern OSErr hfsPBEject(ParmBlkPtr ufsPB);

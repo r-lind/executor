@@ -272,7 +272,7 @@ void Executor::C_OffsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv)
 
 #define NHPAIR 1024
 
-BOOLEAN Executor::C_PtInRgn(Point p, RgnHandle rh)
+Boolean Executor::C_PtInRgn(Point p, RgnHandle rh)
 {
     if(!PtInRect(p, &RGN_BBOX(rh)))
         return false;
@@ -660,7 +660,7 @@ static void sectbinop(RgnHandle srcrgn1, RgnHandle srcrgn2, RgnHandle dstrgn)
     Rect *rp;
     INTEGER nspecial;
     RgnHandle exchrgn;
-    BOOLEAN wehavepairs;
+    Boolean wehavepairs;
     ALLOCABEGIN
 
     /*
@@ -1474,10 +1474,10 @@ void Executor::C_XorRgn(RgnHandle s1, RgnHandle s2, RgnHandle dest)
     ALLOCAEND
 }
 
-BOOLEAN Executor::C_RectInRgn(const Rect *rp, RgnHandle rh) /* IMIV-23 */
+Boolean Executor::C_RectInRgn(const Rect *rp, RgnHandle rh) /* IMIV-23 */
 {
     RgnHandle newrh;
-    BOOLEAN retval;
+    Boolean retval;
 
     newrh = NewRgn();
     RectRgn(newrh, rp);
@@ -1487,7 +1487,7 @@ BOOLEAN Executor::C_RectInRgn(const Rect *rp, RgnHandle rh) /* IMIV-23 */
     return retval;
 }
 
-BOOLEAN Executor::C_EqualRgn(RgnHandle r1, RgnHandle r2)
+Boolean Executor::C_EqualRgn(RgnHandle r1, RgnHandle r2)
 {
     /* Since the first field of the region is the size, this
    * will return false if the sizes differ, too.
@@ -1495,10 +1495,10 @@ BOOLEAN Executor::C_EqualRgn(RgnHandle r1, RgnHandle r2)
     return !memcmp(*r1, *r2, RGN_SIZE(r1));
 }
 
-BOOLEAN Executor::C_EmptyRgn(RgnHandle rh)
+Boolean Executor::C_EmptyRgn(RgnHandle rh)
 {
     // FIXME: #warning What does a mac do with a nullptr HANDLE here?
-    BOOLEAN retval;
+    Boolean retval;
 
     retval = rh ? EmptyRect(&RGN_BBOX(rh)) : true;
     return retval;

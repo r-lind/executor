@@ -73,10 +73,10 @@ struct DialogTemplate
     GUEST_STRUCT;
     GUEST<Rect> boundsRect;
     GUEST<INTEGER> procID;
-    GUEST<BOOLEAN> visible;
-    GUEST<BOOLEAN> filler1;
-    GUEST<BOOLEAN> goAwayFlag;
-    GUEST<BOOLEAN> filler2;
+    GUEST<Boolean> visible;
+    GUEST<Boolean> filler1;
+    GUEST<Boolean> goAwayFlag;
+    GUEST<Boolean> filler2;
     GUEST<LONGINT> refCon;
     GUEST<INTEGER> itemsID;
     GUEST<Str255> title;
@@ -164,8 +164,8 @@ PASCAL_TRAP(CouldDialog, 0xA979);
 extern void C_FreeDialog(INTEGER id);
 PASCAL_TRAP(FreeDialog, 0xA97A);
 extern DialogPtr C_NewDialog(void* dst,
-                            const Rect *r, ConstStringPtr tit, BOOLEAN vis, INTEGER procid,
-                            WindowPtr behind, BOOLEAN gaflag, LONGINT rc, Handle items);
+                            const Rect *r, ConstStringPtr tit, Boolean vis, INTEGER procid,
+                            WindowPtr behind, Boolean gaflag, LONGINT rc, Handle items);
 PASCAL_TRAP(NewDialog, 0xA97D);
 extern DialogPtr C_GetNewDialog(INTEGER id,
                                             void* dst, WindowPtr behind);
@@ -174,14 +174,14 @@ extern void C_CloseDialog(DialogPtr dp);
 PASCAL_TRAP(CloseDialog, 0xA982);
 extern void C_DisposeDialog(DialogPtr dp);
 PASCAL_TRAP(DisposeDialog, 0xA983);
-extern BOOLEAN C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
+extern Boolean C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                                       GUEST<INTEGER> *ith);
 PASCAL_FUNCTION(ROMlib_myfilt);
 
 extern void C_ModalDialog(ModalFilterUPP fp,
                                       GUEST<INTEGER> *item);
 PASCAL_TRAP(ModalDialog, 0xA991);
-extern BOOLEAN C_IsDialogEvent(
+extern Boolean C_IsDialogEvent(
     EventRecord *evt);
 PASCAL_TRAP(IsDialogEvent, 0xA97F);
 extern void C_DrawDialog(DialogPtr dp);
@@ -192,7 +192,7 @@ PASCAL_TRAP(FindDialogItem, 0xA984);
 extern void C_UpdateDialog(DialogPtr dp,
                                      RgnHandle rgn);
 PASCAL_TRAP(UpdateDialog, 0xA978);
-extern BOOLEAN C_DialogSelect(
+extern Boolean C_DialogSelect(
     EventRecord *evt, GUEST<DialogPtr> *dpp, GUEST<INTEGER> *item);
 PASCAL_TRAP(DialogSelect, 0xA980);
 extern void DialogCut(DialogPtr dp);
@@ -233,7 +233,7 @@ extern void C_ShowDialogItem(DialogPtr dp,
                                     INTEGER item);
 PASCAL_TRAP(ShowDialogItem, 0xA828);
 
-extern DialogPtr C_NewColorDialog(void*, const Rect *, ConstStringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT, Handle);
+extern DialogPtr C_NewColorDialog(void*, const Rect *, ConstStringPtr, Boolean, INTEGER, WindowPtr, Boolean, LONGINT, Handle);
 PASCAL_TRAP(NewColorDialog, 0xAA4B);
 
 extern OSErr C_GetStdFilterProc(GUEST<ProcPtr> *proc);

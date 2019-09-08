@@ -84,8 +84,8 @@ typedef struct SysEnvRec
     GUEST<INTEGER> machineType;
     GUEST<INTEGER> systemVersion;
     GUEST<INTEGER> processor;
-    GUEST<BOOLEAN> hasFPU;
-    GUEST<BOOLEAN> hasColorQD;
+    GUEST<Boolean> hasFPU;
+    GUEST<Boolean> hasColorQD;
     GUEST<INTEGER> keyBoardType;
     GUEST<INTEGER> atDrvrVersNum;
     GUEST<INTEGER> sysVRefNum;
@@ -175,13 +175,13 @@ extern OSErr PtrAndHand(const void* p, Handle h, LONGINT s1);
 REGISTER_TRAP2(PtrAndHand, 0xA9EF, D0(A0,A1,D0), MoveA1ToA0, SaveA1D1D2, CCFromD0);
 
 extern LONGINT ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
-                                BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0);
+                                Boolean casesig, Boolean diacsig, LONGINT d0);
 extern INTEGER RelString(ConstStringPtr s1, ConstStringPtr s2,
-                                 BOOLEAN casesig, BOOLEAN diacsig);
-extern BOOLEAN EqualString(ConstStringPtr s1, ConstStringPtr s2,
-                                   BOOLEAN casesig, BOOLEAN diacsig);
-extern void ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len);
-extern void UpperString(StringPtr s, BOOLEAN diac);
+                                 Boolean casesig, Boolean diacsig);
+extern Boolean EqualString(ConstStringPtr s1, ConstStringPtr s2,
+                                   Boolean casesig, Boolean diacsig);
+extern void ROMlib_UprString(StringPtr s, Boolean diac, INTEGER len);
+extern void UpperString(StringPtr s, Boolean diac);
 extern void GetDateTime(GUEST<ULONGINT> *mactimepointer);
 NOTRAP_FUNCTION2(GetDateTime);
 

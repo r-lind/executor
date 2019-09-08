@@ -29,10 +29,10 @@ void Executor::C_LGetCellDataLocation(GUEST<INTEGER> *offsetp, GUEST<INTEGER> *l
         *offsetp = *lenp = -1;
 }
 
-BOOLEAN Executor::C_LNextCell(BOOLEAN hnext, BOOLEAN vnext, GUEST<Cell> *cellp,
+Boolean Executor::C_LNextCell(Boolean hnext, Boolean vnext, GUEST<Cell> *cellp,
                               ListHandle list) /* IMIV-274 */
 {
-    BOOLEAN retval;
+    Boolean retval;
     Point scratch;
     INTEGER right, bottom;
 
@@ -117,7 +117,7 @@ static inline INTEGER Executor::ROMlib_CALLCMP(Ptr p1, Ptr p2, INTEGER l1, INTEG
 }
 
 
-BOOLEAN Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
+Boolean Executor::C_LSearch(Ptr dp, INTEGER dl, Ptr proc, GUEST<Cell> *cellp,
                             ListHandle list) /* IMIV-274 */
 {
     GUEST<INTEGER> offS, lenS;

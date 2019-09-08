@@ -122,9 +122,9 @@ extern OSErr PostEvent(INTEGER evcode, LONGINT evmsg);
 extern void FlushEvents(INTEGER evmask,
                              INTEGER stopmask);
 REGISTER_TRAP2(FlushEvents, 0xA032, void(D0LowWord,D0HighWord), ClearD0);
-extern BOOLEAN GetOSEvent(INTEGER evmask, EventRecord *eventp);
+extern Boolean GetOSEvent(INTEGER evmask, EventRecord *eventp);
 REGISTER_TRAP2(GetOSEvent, 0xA031, D0Minus1Boolean (D0,A0));
-extern BOOLEAN OSEventAvail(INTEGER evmask,
+extern Boolean OSEventAvail(INTEGER evmask,
                                     EventRecord *eventp);
 REGISTER_TRAP2(OSEventAvail, 0xA030, D0Minus1Boolean (D0,A0));
 extern void SetEventMask(INTEGER evmask);

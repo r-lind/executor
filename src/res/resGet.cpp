@@ -29,7 +29,7 @@ static INTEGER countmapresources(resmaphand, ResType);
 static Handle getindmapresource(resmaphand, ResType, INTEGER *);
 static Handle getnamedmapresource(resmaphand, ResType, ConstStringPtr);
 
-void Executor::C_SetResLoad(BOOLEAN load)
+void Executor::C_SetResLoad(Boolean load)
 {
     LM(ResLoad) = load;
 }
@@ -207,7 +207,7 @@ static GUEST<LONGINT> ROMlib_defs[NUM_ROMLIB_DEFS];
  * nn is the offset into ROMlib_defs (0, 4, 8, ...)
  */
 
-static BOOLEAN acceptable(unsigned long addr)
+static Boolean acceptable(unsigned long addr)
 {
     return !(islower(addr & 0xFF) || islower((addr >> 8) & 0xFF) || islower((addr >> 16) & 0xFF) || islower((addr >> 24) & 0xFF));
 }
@@ -497,7 +497,7 @@ void Executor::C_LoadResource(Handle res)
         LM(CurMap) = savemap;
         if(LM(ResErr) == noErr)
         {
-            BOOLEAN save_resload;
+            Boolean save_resload;
 
             save_resload = LM(ResLoad);
             SetResLoad(true);

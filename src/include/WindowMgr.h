@@ -120,10 +120,10 @@ struct WindowRecord
     GUEST_STRUCT;
     GUEST<GrafPort> port;
     GUEST<INTEGER> windowKind;
-    GUEST<BOOLEAN> visible;
-    GUEST<BOOLEAN> hilited;
-    GUEST<BOOLEAN> goAwayFlag;
-    GUEST<BOOLEAN> spareFlag;
+    GUEST<Boolean> visible;
+    GUEST<Boolean> hilited;
+    GUEST<Boolean> goAwayFlag;
+    GUEST<Boolean> spareFlag;
     GUEST<RgnHandle> strucRgn;
     GUEST<RgnHandle> contRgn;
     GUEST<RgnHandle> updateRgn;
@@ -214,7 +214,7 @@ PASCAL_TRAP(GetWTitle, 0xA919);
 extern WindowPtr C_FrontWindow(void);
 PASCAL_TRAP(FrontWindow, 0xA924);
 
-extern void C_HiliteWindow(WindowPtr w, BOOLEAN flag);
+extern void C_HiliteWindow(WindowPtr w, Boolean flag);
 PASCAL_TRAP(HiliteWindow, 0xA91C);
 
 extern void C_BringToFront(WindowPtr w);
@@ -223,7 +223,7 @@ PASCAL_TRAP(BringToFront, 0xA920);
 extern void C_SelectWindow(WindowPtr w);
 PASCAL_TRAP(SelectWindow, 0xA91F);
 
-extern void C_ShowHide(WindowPtr w, BOOLEAN flag);
+extern void C_ShowHide(WindowPtr w, Boolean flag);
 PASCAL_TRAP(ShowHide, 0xA908);
 
 extern void C_HideWindow(WindowPtr w);
@@ -245,15 +245,15 @@ extern void C_GetWMgrPort(GUEST<GrafPtr> *wp);
 PASCAL_TRAP(GetWMgrPort, 0xA910);
 
 extern WindowPtr C_NewWindow(void* wst, const Rect *r,
-                                         ConstStringPtr title, BOOLEAN vis, INTEGER procid, WindowPtr behind,
-                                         BOOLEAN gaflag, LONGINT rc);
+                                         ConstStringPtr title, Boolean vis, INTEGER procid, WindowPtr behind,
+                                         Boolean gaflag, LONGINT rc);
 PASCAL_TRAP(NewWindow, 0xA913);
 extern WindowPtr C_GetNewWindow(INTEGER wid, void* wst,
                                             WindowPtr behind);
 PASCAL_TRAP(GetNewWindow, 0xA9BD);
 extern void C_CloseWindow(WindowPtr w);
 
-extern WindowPtr C_NewCWindow(void *storage, const Rect *, ConstStringPtr, BOOLEAN, INTEGER, WindowPtr, BOOLEAN, LONGINT);
+extern WindowPtr C_NewCWindow(void *storage, const Rect *, ConstStringPtr, Boolean, INTEGER, WindowPtr, Boolean, LONGINT);
 PASCAL_TRAP(NewCWindow, 0xAA45);
 extern WindowPtr C_GetNewCWindow(INTEGER, void*, WindowPtr);
 PASCAL_TRAP(GetNewCWindow, 0xAA46);
@@ -287,7 +287,7 @@ PASCAL_TRAP(DragGrayRgn, 0xA905);
 extern void C_ClipAbove(WindowPeek w);
 PASCAL_TRAP(ClipAbove, 0xA90B);
 
-extern BOOLEAN C_CheckUpdate(EventRecord *ev);
+extern Boolean C_CheckUpdate(EventRecord *ev);
 PASCAL_TRAP(CheckUpdate, 0xA911);
 
 extern void C_SaveOld(WindowPeek w);
@@ -305,7 +305,7 @@ PASCAL_TRAP(CalcVis, 0xA909);
 extern void C_CalcVisBehind(WindowPeek w,
                                         RgnHandle clobbered);
 PASCAL_TRAP(CalcVisBehind, 0xA90A);
-extern void C_DrawNew(WindowPeek w, BOOLEAN flag);
+extern void C_DrawNew(WindowPeek w, Boolean flag);
 PASCAL_TRAP(DrawNew, 0xA90F);
 
 extern INTEGER C_GetWVariant(WindowPtr w);
@@ -314,17 +314,17 @@ PASCAL_TRAP(GetWVariant, 0xA80A);
 extern INTEGER C_FindWindow(Point p, GUEST<WindowPtr> *wpp);
 PASCAL_TRAP(FindWindow, 0xA92C);
 
-extern BOOLEAN C_TrackBox(WindowPtr wp,
+extern Boolean C_TrackBox(WindowPtr wp,
                                       Point pt, INTEGER part);
 PASCAL_TRAP(TrackBox, 0xA83B);
-extern BOOLEAN C_TrackGoAway(WindowPtr w, Point p);
+extern Boolean C_TrackGoAway(WindowPtr w, Point p);
 PASCAL_TRAP(TrackGoAway, 0xA91E);
 
 extern void C_ZoomWindow(WindowPtr wp,
-                                     INTEGER part, BOOLEAN front);
+                                     INTEGER part, Boolean front);
 PASCAL_TRAP(ZoomWindow, 0xA83A);
 extern void C_MoveWindow(WindowPtr wp, INTEGER h, INTEGER v,
-                                     BOOLEAN front);
+                                     Boolean front);
 PASCAL_TRAP(MoveWindow, 0xA91B);
 extern void C_DragWindow(WindowPtr wp, Point p, const Rect *rp);
 PASCAL_TRAP(DragWindow, 0xA925);
@@ -333,7 +333,7 @@ extern LONGINT C_GrowWindow(WindowPtr w, Point startp,
                                         const Rect *rp);
 PASCAL_TRAP(GrowWindow, 0xA92B);
 extern void C_SizeWindow(WindowPtr w, INTEGER width,
-                                     INTEGER height, BOOLEAN flag);
+                                     INTEGER height, Boolean flag);
 PASCAL_TRAP(SizeWindow, 0xA91D);
 extern void C_InvalRect(const Rect *r);
 PASCAL_TRAP(InvalRect, 0xA928);
@@ -358,7 +358,7 @@ PASCAL_TRAP(SetWinColor, 0xAA41);
 extern void C_SetDeskCPat(PixPatHandle);
 PASCAL_TRAP(SetDeskCPat, 0xAA47);
 
-extern BOOLEAN C_GetAuxWin(WindowPtr, GUEST<AuxWinHandle> *);
+extern Boolean C_GetAuxWin(WindowPtr, GUEST<AuxWinHandle> *);
 PASCAL_TRAP(GetAuxWin, 0xAA42);
 
 static_assert(sizeof(WindowRecord) == 156);

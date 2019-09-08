@@ -47,14 +47,14 @@ typedef LONGINT (*mbarhookp)(Rect *rp);
 #define CALLMBARHOOK(arg, fp) ROMlib_CALLMBARHOOK(arg, (mbarhookp)(fp))
 
 static void dirtymenusize(MenuHandle);
-static BOOLEAN findroot(INTEGER menuid, INTEGER *root_unswp);
+static Boolean findroot(INTEGER menuid, INTEGER *root_unswp);
 static inline void ROMlib_CALLMENUHOOK(menuhookp fp);
 static inline LONGINT ROMlib_CALLMBARHOOK(Rect *rp, mbarhookp fp);
 static INTEGER wheretowhich(LONGINT offset);
 static void shadowrect(Rect *rp);
 static void restoren(INTEGER ntodrop, RgnHandle restoredrgn, Rect *rp);
 static void initpairs(startendpairs pairs);
-static BOOLEAN mtoggle(INTEGER mid, highstate h);
+static Boolean mtoggle(INTEGER mid, highstate h);
 static MenuHandle menunumtomh(INTEGER mid, INTEGER *sixp);
 static MenuHandle itemishierarchical(MenuHandle, INTEGER, INTEGER *);
 
@@ -452,7 +452,7 @@ static void handleinsert(Handle h, StringPtr strp)
 {
     LONGINT n;
     StringPtr sp;
-    BOOLEAN done;
+    Boolean done;
 
     n = GetHandleSize(h);
     sp = (StringPtr)*h;
@@ -862,7 +862,7 @@ INTEGER Executor::ROMlib_mentosix(INTEGER menuid)
     return -1;
 }
 
-static BOOLEAN mtoggle(INTEGER mid, highstate h)
+static Boolean mtoggle(INTEGER mid, highstate h)
 {
     LONGINT l;
 
@@ -993,7 +993,7 @@ static MenuHandle itemishierarchical(MenuHandle mh, INTEGER item, INTEGER *sixp)
 #define HIERRECTBIT (1L << 16)
 
 int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
-                                    int32_t oldwhere, BOOLEAN ispopup,
+                                    int32_t oldwhere, Boolean ispopup,
                                     int16_t nmenusdisplayed)
 {
     mbdfentry *oldentry, *newentry;
@@ -1009,7 +1009,7 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
     LONGINT where, templ;
     GUEST<RgnHandle> saveclip;
     RgnHandle restoredrgn;
-    BOOLEAN changedmenus;
+    Boolean changedmenus;
     INTEGER oldwhichmenuhit, whichmenuhit;
     GrafPtr saveport;
     EventRecord ev;
@@ -1336,7 +1336,7 @@ void Executor::C_FlashMenuBar(INTEGER mid)
     MBDFCALL(mbHilite, 0, l);
 }
 
-static BOOLEAN findroot(INTEGER menuid, INTEGER *root_unswp)
+static Boolean findroot(INTEGER menuid, INTEGER *root_unswp)
 {
     INTEGER loopcount, i, maxi;
     enum
@@ -1503,7 +1503,7 @@ void Executor::C_EnableItem(MenuHandle mh, INTEGER item)
         (*mh)->enableFlags = (*mh)->enableFlags | (LONGINT)1 << item;
 }
 
-void Executor::C_CheckItem(MenuHandle mh, INTEGER item, BOOLEAN cflag)
+void Executor::C_CheckItem(MenuHandle mh, INTEGER item, Boolean cflag)
 {
     if(mh)
     {
@@ -1618,7 +1618,7 @@ void Executor::C_SetMenuFlash(INTEGER i)
     LM(MenuFlash) = i;
 }
 
-BOOLEAN Executor::ROMlib_shouldalarm()
+Boolean Executor::ROMlib_shouldalarm()
 {
     return MENULIST && (*(*MENULIST)->mulist[0].muhandle)->menuData[0] == 1;
 }

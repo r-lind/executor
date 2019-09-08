@@ -17,7 +17,7 @@ namespace Executor
 typedef int16_t INTEGER;
 typedef int32_t LONGINT;
 typedef uint32_t ULONGINT;
-typedef int8_t BOOLEAN;
+typedef int8_t Boolean;
 
 typedef int16_t CharParameter; /* very important not to use this as char */
 

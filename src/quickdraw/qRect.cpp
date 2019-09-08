@@ -41,7 +41,7 @@ void Executor::C_InsetRect(Rect *r, INTEGER dh, INTEGER dv)
 #endif /* INCOMPATIBLEBUTSANE */
 }
 
-BOOLEAN Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
+Boolean Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
 {
     if(s1->top < s2->bottom
        && s2->top < s1->bottom
@@ -61,7 +61,7 @@ BOOLEAN Executor::C_SectRect(const Rect *s1, const Rect *s2, Rect *dest)
     }
 }
 
-BOOLEAN Executor::C_EmptyRect(const Rect *r)
+Boolean Executor::C_EmptyRect(const Rect *r)
 {
     return (r->top >= r->bottom || r->left >= r->right);
 }
@@ -74,9 +74,9 @@ void Executor::C_UnionRect(const Rect *s1, const Rect *s2, Rect *dest)
     dest->right = std::max(s1->right, s2->right);
 }
 
-BOOLEAN Executor::C_PtInRect(Point p, const Rect *r)
+Boolean Executor::C_PtInRect(Point p, const Rect *r)
 {
-    BOOLEAN retval;
+    Boolean retval;
 
     retval = (p.h >= r->left
               && p.h < r->right
@@ -127,7 +127,7 @@ void Executor::C_PtToAngle(const Rect *rp, Point p, GUEST<INTEGER> *angle)
     *angle = a;
 }
 
-BOOLEAN Executor::C_EqualRect(const Rect *r1, const Rect *r2)
+Boolean Executor::C_EqualRect(const Rect *r1, const Rect *r2)
 {
     return *reinterpret_cast<const uint64_t*>(r1) == *reinterpret_cast<const uint64_t*>(r2);
 }

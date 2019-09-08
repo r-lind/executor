@@ -149,9 +149,9 @@ const LowMemGlobal<Ptr> JFetch { 0x8F4 }; // DeviceMgr IMII-194 (false);
 const LowMemGlobal<Ptr> JStash { 0x8F8 }; // DeviceMgr IMII-195 (false);
 const LowMemGlobal<Ptr> JIODone { 0x8FC }; // DeviceMgr IMII-195 (false);
 
-extern OSErr PBControl(ParmBlkPtr pbp, BOOLEAN a);
-extern OSErr PBStatus(ParmBlkPtr pbp, BOOLEAN a);
-extern OSErr PBKillIO(ParmBlkPtr pbp, BOOLEAN a);
+extern OSErr PBControl(ParmBlkPtr pbp, Boolean a);
+extern OSErr PBStatus(ParmBlkPtr pbp, Boolean a);
+extern OSErr PBKillIO(ParmBlkPtr pbp, Boolean a);
 
 FILE_TRAP(PBControl, ParmBlkPtr, 0xA004);
 FILE_TRAP(PBStatus, ParmBlkPtr, 0xA005);

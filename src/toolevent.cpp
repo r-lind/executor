@@ -61,11 +61,11 @@ LONGINT Executor::eventstate = 0;
 #define TRACE(n)
 #endif /* !defined(EVENTTRACE) */
 
-static BOOLEAN ROMlib_alarmonmbar = false;
+static Boolean ROMlib_alarmonmbar = false;
 
 #define ALARMSICN -16385
 
-BOOLEAN Executor::ROMlib_beepedonce = false;
+Boolean Executor::ROMlib_beepedonce = false;
 
 static void ROMlib_togglealarm()
 {
@@ -237,10 +237,10 @@ extern void ROMlib_updateworkspace(void);
 static bool isSuspended = false;
 static bool shouldBeSuspended = false;
 
-static BOOLEAN doevent(INTEGER em, EventRecord *evt,
-                       BOOLEAN remflag) /* no DA support */
+static Boolean doevent(INTEGER em, EventRecord *evt,
+                       Boolean remflag) /* no DA support */
 {
-    BOOLEAN retval;
+    Boolean retval;
     GUEST<ULONGINT> now_s;
     ULONGINT now;
     static int beenhere = 0;
@@ -460,9 +460,9 @@ done:
     return retval;
 }
 
-BOOLEAN Executor::C_GetNextEvent(INTEGER em, EventRecord *evt)
+Boolean Executor::C_GetNextEvent(INTEGER em, EventRecord *evt)
 {
-    BOOLEAN retval;
+    Boolean retval;
 
     TRACE(1);
     retval = doevent(em, evt, true);
@@ -481,10 +481,10 @@ BOOLEAN Executor::C_GetNextEvent(INTEGER em, EventRecord *evt)
  *	 we'd never get the mouse moved messages we need)
  */
 
-BOOLEAN Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
+Boolean Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
                                   LONGINT sleep, RgnHandle mousergn)
 {
-    BOOLEAN retval;
+    Boolean retval;
     Point p;
 
     do
@@ -516,7 +516,7 @@ BOOLEAN Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
     return retval;
 }
 
-BOOLEAN Executor::C_EventAvail(INTEGER em, EventRecord *evt)
+Boolean Executor::C_EventAvail(INTEGER em, EventRecord *evt)
 {
     return (doevent(em, evt, false));
 }
@@ -531,10 +531,10 @@ void Executor::C_GetMouse(GUEST<Point> *p)
 }
 
 // FIXME: #warning Button not coded per IM Macintosh Toolbox Essentials 2-108
-BOOLEAN Executor::C_Button()
+Boolean Executor::C_Button()
 {
     EventRecord evt;
-    BOOLEAN retval;
+    Boolean retval;
 
     GetOSEvent(0, &evt);
     retval = (evt.modifiers & btnState) ? false : true;
@@ -542,7 +542,7 @@ BOOLEAN Executor::C_Button()
 }
 
 // FIXME: #warning StillDown not coded per IM Macintosh Toolbox Essentials 2-109
-BOOLEAN Executor::C_StillDown() /* IMI-259 */
+Boolean Executor::C_StillDown() /* IMI-259 */
 {
     EventRecord evt;
 
@@ -556,7 +556,7 @@ BOOLEAN Executor::C_StillDown() /* IMI-259 */
  * might be retiring soon.
  */
 
-BOOLEAN Executor::C_WaitMouseUp()
+Boolean Executor::C_WaitMouseUp()
 {
     EventRecord evt;
     int retval;

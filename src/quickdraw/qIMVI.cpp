@@ -44,7 +44,7 @@ OSErr Executor::C_BitMapToRegion(RgnHandle rh, const BitMap *bmp)
     unsigned char *zeroline;
     unsigned char *line0p, *line1p, c, *p, *saveline0p, *saveline1p;
     INTEGER *outp, *endoutp, transition;
-    BOOLEAN havewritteny;
+    Boolean havewritteny;
     /* 0x00 or 0x100, depending on the state of the last xorred byte */
     unsigned int tableindex;
 

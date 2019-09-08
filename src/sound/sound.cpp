@@ -35,7 +35,7 @@ void Executor::StopSound()
 {
 }
 
-BOOLEAN Executor::SoundDone()
+Boolean Executor::SoundDone()
 {
     return true;
 }
@@ -303,7 +303,7 @@ int Executor::ROMlib_get_snd_cmds(Handle sndh, SndCommand **cmdsp)
     return retval;
 }
 
-OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, BOOLEAN async)
+OSErr Executor::C_SndPlay(SndChannelPtr chanp, Handle sndh, Boolean async)
 {
     OSErr retval;
     Ptr resp;
@@ -514,7 +514,7 @@ static void dumpcmd(SndCommand *cmdp)
 #endif
 
 
-BOOLEAN callasynth(SndChannelPtr chanp, SndCommand *cmdp, ModifierStubPtr mp)
+Boolean callasynth(SndChannelPtr chanp, SndCommand *cmdp, ModifierStubPtr mp)
 {
     /*
  * NOTE: when we support sound, we'll have to check for known P_routines
@@ -527,7 +527,7 @@ BOOLEAN callasynth(SndChannelPtr chanp, SndCommand *cmdp, ModifierStubPtr mp)
 static void recsndcmd(SndChannelPtr chanp, SndCommand *cmdp, ModifierStubPtr mp)
 {
     INTEGER i;
-    BOOLEAN doanother;
+    Boolean doanother;
 
     if(mp)
     {
@@ -778,7 +778,7 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
 }
 
 OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
-                               BOOLEAN nowait)
+                               Boolean nowait)
 {
     OSErr retval;
 
@@ -987,7 +987,7 @@ OSErr Executor::C_SndControl(INTEGER id, SndCommand *cmdp)
     return retval;
 }
 
-OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, BOOLEAN quitnow)
+OSErr Executor::C_SndDisposeChannel(SndChannelPtr chanp, Boolean quitnow)
 {
     OSErr retval;
     SndCommand cmd;

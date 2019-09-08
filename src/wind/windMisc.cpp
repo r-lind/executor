@@ -237,7 +237,7 @@ void Executor::C_ClipAbove(WindowPeek w)
                     PORT_CLIP_REGION(wmgr_port));
 }
 
-BOOLEAN Executor::C_CheckUpdate(EventRecord *ev)
+Boolean Executor::C_CheckUpdate(EventRecord *ev)
 {
     WindowPeek wp;
     Rect picr;
@@ -412,7 +412,7 @@ void Executor::C_CalcVisBehind(WindowPeek w, RgnHandle clobbered)
     DisposeRgn(testrgn);
 }
 
-void Executor::C_DrawNew(WindowPeek w, BOOLEAN flag)
+void Executor::C_DrawNew(WindowPeek w, Boolean flag)
 {
     RgnHandle r1, r2;
 
@@ -505,7 +505,7 @@ void Executor::WINDCALLDESKHOOK(void)
 }
 
 #if defined(EVIL_ILLUSTRATOR_7_HACK)
-BOOLEAN Executor::ROMlib_evil_illustrator_7_hack = false;
+Boolean Executor::ROMlib_evil_illustrator_7_hack = false;
 #endif
 
 int32_t Executor::ROMlib_windcall(WindowPtr wind, int16_t mess, int32_t param)
@@ -539,7 +539,7 @@ int32_t Executor::ROMlib_windcall(WindowPtr wind, int16_t mess, int32_t param)
     else
     {
 #if defined EVIL_ILLUSTRATOR_7_HACK
-        BOOLEAN save_hack;
+        Boolean save_hack;
 
         save_hack = ROMlib_evil_illustrator_7_hack;
         ROMlib_evil_illustrator_7_hack = ROMlib_creator == "ART5"_4;

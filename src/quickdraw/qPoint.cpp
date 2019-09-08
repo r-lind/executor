@@ -28,7 +28,7 @@ void Executor::C_SetPt(GUEST<Point> *pt, INTEGER h, INTEGER v)
     pt->v = v;
 }
 
-BOOLEAN Executor::C_EqualPt(Point p1, Point p2)
+Boolean Executor::C_EqualPt(Point p1, Point p2)
 {
     return (p1.h == p2.h && p1.v == p2.v);
 }

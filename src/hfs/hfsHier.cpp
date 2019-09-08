@@ -14,7 +14,7 @@ using namespace Executor;
 typedef enum { catGet,
                catSet } catop;
 
-static OSErr cathelper(CInfoPBPtr pb, BOOLEAN async, catop op)
+static OSErr cathelper(CInfoPBPtr pb, Boolean async, catop op)
 {
     filekind kind;
     filerec *frp;
@@ -26,7 +26,7 @@ static OSErr cathelper(CInfoPBPtr pb, BOOLEAN async, catop op)
     btparam btparamrec;
     HVCB *vcbp;
     catkey *catkeyp;
-    BOOLEAN ignorename;
+    Boolean ignorename;
 
     vcbp = 0;
     if(pb->hFileInfo.ioFDirIndex > 0 && op == catGet)
@@ -188,7 +188,7 @@ done:
     PBRETURN((IOParam *)pb, err);
 }
 
-OSErr Executor::hfsPBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBGetCatInfo(CInfoPBPtr pb, Boolean async)
 {
     OSErr err;
     err = cathelper(pb, async, catGet);
@@ -196,7 +196,7 @@ OSErr Executor::hfsPBGetCatInfo(CInfoPBPtr pb, BOOLEAN async)
     return err;
 }
 
-OSErr Executor::hfsPBSetCatInfo(CInfoPBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBSetCatInfo(CInfoPBPtr pb, Boolean async)
 {
     OSErr err;
     err = cathelper(pb, async, catSet);
@@ -245,7 +245,7 @@ static OSErr parentchild(HVCB *vcbp, catkey *parentcatp,
     return err;
 }
 
-OSErr Executor::hfsPBCatMove(CMovePBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBCatMove(CMovePBPtr pb, Boolean async)
 {
     OSErr err, err1;
     filekind srccurkind, dstcurkind;
@@ -254,7 +254,7 @@ OSErr Executor::hfsPBCatMove(CMovePBPtr pb, BOOLEAN async)
     directoryrec *dstdirdrp;
     directoryrec srcdrec;
     filerec srcfrec;
-    BOOLEAN ignorename;
+    Boolean ignorename;
 
     srccurkind = (filekind)(regular | directory);
     err = ROMlib_findvcbandfile((IOParam *)pb, pb->ioDirID, &srcbtparam,

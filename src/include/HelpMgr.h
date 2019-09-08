@@ -55,13 +55,13 @@ enum
 
 DISPATCHER_TRAP(Pack14, 0xA830, D0W);   // & 0xFF ? ###
 
-extern BOOLEAN C_HMGetBalloons(void);
+extern Boolean C_HMGetBalloons(void);
 PASCAL_SUBTRAP(HMGetBalloons, 0xA830, 0x0003, Pack14);
 
-extern OSErr C_HMSetBalloons(BOOLEAN flag);
+extern OSErr C_HMSetBalloons(Boolean flag);
 PASCAL_SUBTRAP(HMSetBalloons, 0xA830, 0x0104, Pack14);
 
-extern BOOLEAN C_HMIsBalloon(void);
+extern Boolean C_HMIsBalloon(void);
 PASCAL_SUBTRAP(HMIsBalloon, 0xA830, 0x0007, Pack14);
 
 extern OSErr C_HMShowBalloon(HMMessageRecord *msgp, Point tip,

@@ -46,7 +46,7 @@ typedef enum { Copy,
 static void transfer(INTEGER *, INTEGER *, INTEGER, INTEGER, INTEGER, INTEGER,
                      transferop);
 static void xSeedFill(unsigned char *, unsigned char *, INTEGER, INTEGER,
-                      INTEGER, INTEGER, BOOLEAN, INTEGER, INTEGER);
+                      INTEGER, INTEGER, Boolean, INTEGER, INTEGER);
 
 static void transfer(INTEGER *srcp, INTEGER *dstp, INTEGER srcr, INTEGER dstr,
                      INTEGER height, INTEGER widthw, transferop op)
@@ -123,12 +123,12 @@ static void transfer(INTEGER *srcp, INTEGER *dstp, INTEGER srcr, INTEGER dstr,
 
 static void xSeedFill(unsigned char *srcp, unsigned char *dstp, INTEGER srcr,
                       INTEGER dstr, INTEGER height, INTEGER width,
-                      BOOLEAN useseeds, INTEGER seedh, INTEGER seedv)
+                      Boolean useseeds, INTEGER seedh, INTEGER seedv)
 {
     unsigned char *cur, *savecur, expanded, saveexpanded, seed, *edstp;
     stackentry bogusentry, *topleftp, *toprightp, *bottomleftp, *bottomrightp,
         *stackp, stacke;
-    BOOLEAN atleft, atright;
+    Boolean atleft, atright;
     unsigned char tempuc;
     stackentry stack[4000], *sp;
     unsigned char *ecur;

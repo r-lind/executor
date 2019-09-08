@@ -176,7 +176,7 @@ extern void C_UpdateControls(WindowPtr wp,
                                       RgnHandle rh);
 PASCAL_TRAP(UpdateControls, 0xA953);
 extern ControlHandle C_NewControl(WindowPtr wst, const Rect *r,
-                                              ConstStringPtr title, BOOLEAN vis, INTEGER value, INTEGER min,
+                                              ConstStringPtr title, Boolean vis, INTEGER value, INTEGER min,
                                               INTEGER max, INTEGER procid, LONGINT rc);
 PASCAL_TRAP(NewControl, 0xA954);
 extern ControlHandle C_GetNewControl(
@@ -203,7 +203,7 @@ PASCAL_TRAP(GetControlAction, 0xA96A);
 extern INTEGER C_GetControlVariant(ControlHandle c);
 PASCAL_TRAP(GetControlVariant, 0xA809);
 
-extern BOOLEAN C_GetAuxiliaryControlRecord(ControlHandle c,
+extern Boolean C_GetAuxiliaryControlRecord(ControlHandle c,
                                        GUEST<AuxCtlHandle> *acHndl);
 PASCAL_TRAP(GetAuxiliaryControlRecord, 0xAA44);
 extern INTEGER C_FindControl(Point p,

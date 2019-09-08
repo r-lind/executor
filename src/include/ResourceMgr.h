@@ -74,7 +74,7 @@ const LowMemGlobal<Handle> SysMapHndl { 0xA54 }; // ResourceMgr IMI-114 (true);
 const LowMemGlobal<INTEGER> SysMap { 0xA58 }; // ResourceMgr IMI-114 (true);
 const LowMemGlobal<INTEGER> CurMap { 0xA5A }; // ResourceMgr IMI-117 (true);
 const LowMemGlobal<INTEGER> resreadonly { 0xA5C }; // ResourceMgr ToolEqu.a (false);
-const LowMemGlobal<BOOLEAN> ResLoad { 0xA5E }; // ResourceMgr IMI-118 (true);
+const LowMemGlobal<Boolean> ResLoad { 0xA5E }; // ResourceMgr IMI-118 (true);
 const LowMemGlobal<INTEGER> ResErr { 0xA60 }; // ResourceMgr IMI-118 (true);
 const LowMemGlobal<ProcPtr> ResErrProc { 0xAF2 }; // ResourceMgr IMI-116 (true);
 const LowMemGlobal<Byte[20]> SysResName { 0xAD8 }; // ResourceMgr IMI-114 (true);
@@ -87,7 +87,7 @@ BEGIN_EXECUTOR_ONLY
 RAW_68K_TRAP(ResourceStub, 0xA0FC); // defined in emustubs.cpp
 END_EXECUTOR_ONLY
 
-extern void C_SetResLoad(BOOLEAN load);
+extern void C_SetResLoad(Boolean load);
 PASCAL_TRAP(SetResLoad, 0xA99B);
 
 extern INTEGER C_CountResources(ResType typ);
@@ -194,7 +194,7 @@ PASCAL_TRAP(UpdateResFile, 0xA999);
 extern void C_WriteResource(Handle res);
 PASCAL_TRAP(WriteResource, 0xA9B0);
 
-extern void C_SetResPurge(BOOLEAN install);
+extern void C_SetResPurge(Boolean install);
 PASCAL_TRAP(SetResPurge, 0xA993);
 
 extern void C_CreateResFile(ConstStringPtr fn);

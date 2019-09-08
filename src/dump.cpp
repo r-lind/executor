@@ -1249,7 +1249,7 @@ static OSErr
 copy_resources(INTEGER new_rn, INTEGER old_rn, LONGINT type)
 {
     INTEGER num_res;
-    BOOLEAN save_res_load;
+    Boolean save_res_load;
     INTEGER i;
 
     save_res_load = LM(ResLoad);

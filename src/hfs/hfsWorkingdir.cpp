@@ -85,7 +85,7 @@ OSErr Executor::ROMlib_mkwd(WDPBPtr pb, HVCB *vcbp, LONGINT dirid,
     return retval;
 }
 
-OSErr Executor::hfsPBOpenWD(WDPBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBOpenWD(WDPBPtr pb, Boolean async)
 {
     LONGINT dirid;
     OSErr retval;
@@ -113,7 +113,7 @@ OSErr Executor::hfsPBOpenWD(WDPBPtr pb, BOOLEAN async)
     PBRETURN(pb, retval);
 }
 
-OSErr Executor::hfsPBCloseWD(WDPBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBCloseWD(WDPBPtr pb, Boolean async)
 {
     wdentry *wdp;
     OSErr retval;
@@ -130,12 +130,12 @@ OSErr Executor::hfsPBCloseWD(WDPBPtr pb, BOOLEAN async)
     PBRETURN(pb, retval);
 }
 
-OSErr Executor::hfsPBGetWDInfo(WDPBPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBGetWDInfo(WDPBPtr pb, Boolean async)
 {
     OSErr retval;
     wdentry *wdp, *ewdp;
     INTEGER i;
-    BOOLEAN foundelsewhere;
+    Boolean foundelsewhere;
     HVCB *vcbp;
 
     foundelsewhere = false;

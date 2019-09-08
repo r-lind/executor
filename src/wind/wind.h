@@ -39,7 +39,7 @@ PASCAL_FUNCTION(wdef16);
 
 extern WindowPeek ROMlib_firstvisible(WindowPtr w);
 
-extern BOOLEAN ROMlib_window_zoomed(WindowPeek wp);
+extern Boolean ROMlib_window_zoomed(WindowPeek wp);
 extern void wind_color_init(void);
 
 void ROMlib_rootless_update(RgnHandle extra = nullptr);

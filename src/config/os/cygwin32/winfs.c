@@ -10,10 +10,10 @@
    access to all the Windows data types and structures. */
 
 #define _STUBIFY_H_ /* prevent conflicts between stubify.h and windows.h */
-#define BOOLEAN MAC_BOOLEAN /* we want the Windows version of these two */
+#define Boolean MAC_BOOLEAN /* we want the Windows version of these two */
 #define CHAR MAC_CHAR
 #include <base/common.h>
-#undef BOOLEAN
+#undef Boolean
 #undef CHAR
 #undef Time
 

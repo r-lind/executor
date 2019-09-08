@@ -194,7 +194,7 @@ static unsigned char order[256] = {
 };
 
 LONGINT Executor::ROMlib_RelString(const unsigned char *s1, const unsigned char *s2,
-                                   BOOLEAN casesig, BOOLEAN diacsig, LONGINT d0)
+                                   Boolean casesig, Boolean diacsig, LONGINT d0)
 {
     INTEGER n1, n2;
     const unsigned char *s, *t;
@@ -260,16 +260,16 @@ LONGINT Executor::ROMlib_RelString(const unsigned char *s1, const unsigned char 
     return 0;
 }
 
-INTEGER Executor::RelString(ConstStringPtr s1, ConstStringPtr s2, BOOLEAN casesig,
-                               BOOLEAN diacsig)
+INTEGER Executor::RelString(ConstStringPtr s1, ConstStringPtr s2, Boolean casesig,
+                               Boolean diacsig)
 {
     return ROMlib_RelString((unsigned char *)s1 + 1, (unsigned char *)s2 + 1,
                             casesig, diacsig,
                             (LONGINT)(unsigned char)s1[0] << 16 | (unsigned char)s2[0]);
 }
 
-BOOLEAN Executor::EqualString(ConstStringPtr s1, ConstStringPtr s2, BOOLEAN casesig,
-                                 BOOLEAN diacsig)
+Boolean Executor::EqualString(ConstStringPtr s1, ConstStringPtr s2, Boolean casesig,
+                                 Boolean diacsig)
 {
     return RelString(s1, s2, casesig, diacsig) ? false : true;
 }
@@ -300,7 +300,7 @@ int Executor::ROMlib_strcmp(const Byte *s1, const Byte *s2) /* INTERNAL */
         return c1 < c2 ? -1 : 1;
 }
 
-void Executor::ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len)
+void Executor::ROMlib_UprString(StringPtr s, Boolean diac, INTEGER len)
 {
     unsigned char *p, *ep, *base;
 
@@ -313,7 +313,7 @@ void Executor::ROMlib_UprString(StringPtr s, BOOLEAN diac, INTEGER len)
         *p = base[*p];
 }
 
-void Executor::UpperString(StringPtr s, BOOLEAN diac)
+void Executor::UpperString(StringPtr s, Boolean diac)
 {
     ROMlib_UprString(s + 1, diac, (INTEGER)(unsigned char)s[0]);
 }
@@ -424,12 +424,12 @@ daysinyears(ULONGINT year)
     return (ULONGINT)365 * year + year / 4 - year / 100 + year / 400;
 }
 
-static BOOLEAN isleap(ULONGINT);
+static Boolean isleap(ULONGINT);
 static void setdefaults();
 static OSErr openparam(GUEST<INTEGER> *);
 static void deriveglobals();
 
-static BOOLEAN isleap(ULONGINT year)
+static Boolean isleap(ULONGINT year)
 {
     return !(year % 4) && (year % 100 || !(year % 400));
 }
@@ -500,7 +500,7 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
     long long secs_left;
     ULONGINT approx_year, days, secs_approx_year;
     INTEGER month, day, hour, minute;
-    static BOOLEAN cutoffs_inited_p = false;
+    static Boolean cutoffs_inited_p = false;
 
     if(!cutoffs_inited_p)
     {
@@ -696,7 +696,7 @@ OSErr Executor::InitUtil() /* IMII-380 */
     SysParmType sp;
     GUEST<LONGINT> count;
     OSErr err;
-    BOOLEAN badread;
+    Boolean badread;
 
 #if !defined(LETGCCWAIL)
     badread = false;
@@ -811,7 +811,7 @@ OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
 
 
 
-static BOOLEAN shouldbeawake;
+static Boolean shouldbeawake;
 
 void Executor::C_ROMlib_wakeup()
 {

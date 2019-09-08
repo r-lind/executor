@@ -45,13 +45,13 @@ PASCAL_TRAP(CloseDeskAcc, 0xA9B7);
 extern void C_SystemClick(EventRecord *evp, WindowPtr wp);
 PASCAL_TRAP(SystemClick, 0xA9B3);
 
-extern BOOLEAN C_SystemEdit(INTEGER editcmd);
+extern Boolean C_SystemEdit(INTEGER editcmd);
 PASCAL_TRAP(SystemEdit, 0xA9C2);
 
 extern void C_SystemTask(void);
 PASCAL_TRAP(SystemTask, 0xA9B4);
 
-extern BOOLEAN C_SystemEvent(EventRecord *evp);
+extern Boolean C_SystemEvent(EventRecord *evp);
 PASCAL_TRAP(SystemEvent, 0xA9B2);
 
 extern void C_SystemMenu(LONGINT menu);

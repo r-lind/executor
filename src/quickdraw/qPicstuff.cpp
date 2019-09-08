@@ -276,8 +276,8 @@ static void eatRegion(RgnHandle rh, Size hs);
 static void eatRect(Rect *rp);
 static void eatPixMap(PixMapPtr pixp, INTEGER rowb);
 static void eatBitMap(BitMap *bp, INTEGER rowb);
-static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep);
-static void eatbitdata(BitMap *bp, BOOLEAN packed);
+static Size eatpixdata(PixMapPtr pixmap, Boolean *freep);
+static void eatbitdata(BitMap *bp, Boolean packed);
 static void eatRGBColor(RGBColor *rgbp);
 static void eatColorTable(PixMapPtr pixmap);
 static void eatPattern(Pattern pat);
@@ -1126,7 +1126,7 @@ static void eatBitMap(BitMap *bp, INTEGER rowb)
     eatRect(&bp->bounds);
 }
 
-static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
+static Size eatpixdata(PixMapPtr pixmap, Boolean *freep)
 {
     int rowb;
     Size pic_data_size, final_data_size;
@@ -1291,7 +1291,7 @@ static Size eatpixdata(PixMapPtr pixmap, BOOLEAN *freep)
     return final_data_size;
 }
 
-static void eatbitdata(BitMap *bp, BOOLEAN packed)
+static void eatbitdata(BitMap *bp, Boolean packed)
 {
     INTEGER rowb;
     Size datasize;
@@ -1432,7 +1432,7 @@ static void eatPixPat(PixPatHandle pixpat)
     else
     {
         PixMapHandle patmap;
-        BOOLEAN free;
+        Boolean free;
 
         eatPattern(PIXPAT_1DATA(pixpat));
         patmap = (PixMapHandle)NewHandle(sizeof(PixMap));
@@ -1503,7 +1503,7 @@ void Executor::C_DrawPicture(PicHandle pic, const Rect *destrp)
     RGBColor rgb;
     BitMap bm;
     PixMap pm;
-    BOOLEAN packed;
+    Boolean packed;
     GrafPort saveport, *the_port;
     CGrafPtr the_cport;
 #if 0
@@ -1521,7 +1521,7 @@ void Executor::C_DrawPicture(PicHandle pic, const Rect *destrp)
     int16_t version_2, version_2ext;
     Fixed hRes, vRes;
     PixPatHandle junk_pen_pixpat, junk_bk_pixpat, junk_fill_pixpat;
-    BOOLEAN saveFractEnable, saveFScaleDisable;
+    Boolean saveFractEnable, saveFScaleDisable;
     Byte saveHiliteMode;
 
 #if 0

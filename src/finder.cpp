@@ -39,7 +39,7 @@ Executor::PBDTCloseDown(DTPBPtr dtp)
 }
 
 OSErr
-Executor::PBDTGetIcon(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTGetIcon(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -49,7 +49,7 @@ Executor::PBDTGetIcon(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTGetIconInfo(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTGetIconInfo(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -59,7 +59,7 @@ Executor::PBDTGetIconInfo(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTGetAPPL(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTGetAPPL(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -69,7 +69,7 @@ Executor::PBDTGetAPPL(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTGetComment(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTGetComment(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -79,7 +79,7 @@ Executor::PBDTGetComment(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTAddIcon(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTAddIcon(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -89,7 +89,7 @@ Executor::PBDTAddIcon(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTAddAPPL(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTAddAPPL(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -99,7 +99,7 @@ Executor::PBDTAddAPPL(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTSetComment(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTSetComment(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -109,7 +109,7 @@ Executor::PBDTSetComment(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTRemoveAPPL(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTRemoveAPPL(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -119,7 +119,7 @@ Executor::PBDTRemoveAPPL(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTRemoveComment(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTRemoveComment(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -129,7 +129,7 @@ Executor::PBDTRemoveComment(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTFlush(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTFlush(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -139,7 +139,7 @@ Executor::PBDTFlush(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTGetInfo(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTGetInfo(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -149,7 +149,7 @@ Executor::PBDTGetInfo(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTReset(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTReset(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 
@@ -159,7 +159,7 @@ Executor::PBDTReset(DTPBPtr dtp, BOOLEAN async)
 }
 
 OSErr
-Executor::PBDTDelete(DTPBPtr dtp, BOOLEAN async)
+Executor::PBDTDelete(DTPBPtr dtp, Boolean async)
 {
     OSErr retval;
 

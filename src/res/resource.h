@@ -98,7 +98,7 @@ extern void ROMlib_invalar(void);
 extern Handle ROMlib_getrestid(ResType restype, INTEGER id);
 extern INTEGER ROMlib_setreserr(INTEGER reserr);
 extern void ROMlib_wr(resmaphand map, resref *rr);
-extern LONGINT ROMlib_SizeResource(Handle res, BOOLEAN usehandle);
+extern LONGINT ROMlib_SizeResource(Handle res, Boolean usehandle);
 extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
 
 #define REF0 0 /* special refrence number signifying system file */

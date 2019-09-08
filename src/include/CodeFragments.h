@@ -105,7 +105,7 @@ struct MemFragment
     GUEST_STRUCT;
     GUEST<Ptr> address;
     GUEST<uint32_t> length;
-    GUEST<BOOLEAN> inPlace;
+    GUEST<Boolean> inPlace;
     GUEST<uint8_t> reservedA;
     GUEST<uint16_t> reservedB;
 };

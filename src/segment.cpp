@@ -65,7 +65,7 @@ typedef GUEST<finderinfoptr> *finderinfohand;
 
 using namespace Executor;
 
-static BOOLEAN argv_to_appfile(const char *uname, AppFile *ap)
+static Boolean argv_to_appfile(const char *uname, AppFile *ap)
 {
     auto spec = cmdlinePathToFSSpec(uname);
 
@@ -168,7 +168,7 @@ void Executor::C_GetAppParms(StringPtr namep, GUEST<INTEGER> *rnp,
     *aphandp = LM(AppParmHandle);
 }
 
-static BOOLEAN valid_browser(void)
+static Boolean valid_browser(void)
 {
     OSErr err;
     FInfo finfo;

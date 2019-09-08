@@ -436,7 +436,7 @@ void Executor::ROMlib_bogo_stdbits(BitMap *src_bogo_map, BitMap *dst_bogo_map,
 void Executor::StdBitsPicSaveFlag(const BitMap *src_bogo_map,
                                   const Rect *src_rect, const Rect *dst_rect,
                                   INTEGER mode, RgnHandle mask,
-                                  BOOLEAN savepic)
+                                  Boolean savepic)
 {
     Rect dummy_rect;
 

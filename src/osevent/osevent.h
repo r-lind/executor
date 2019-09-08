@@ -44,7 +44,7 @@ extern void post_keytrans_key_events(INTEGER evcode, LONGINT keywhat,
 extern void display_keyboard_choices(void);
 
 extern bool ROMlib_set_keyboard(const char *keyboardname);
-extern BOOLEAN ROMlib_bewaremovement;
+extern Boolean ROMlib_bewaremovement;
 extern void ROMlib_showhidecursor(void);
 extern void maybe_wait_for_keyup(void);
 

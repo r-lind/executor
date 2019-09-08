@@ -149,7 +149,7 @@ void Executor::C_TESelView(TEHandle teh) /* IMIV-57 */
     }
 }
 
-void Executor::C_TEAutoView(BOOLEAN autoflag, TEHandle teh) /* IMIV-57 */
+void Executor::C_TEAutoView(Boolean autoflag, TEHandle teh) /* IMIV-57 */
 {
     if(autoflag)
         (*TEHIDDENH(teh))->flags |= TEAUTOVIEWBIT;

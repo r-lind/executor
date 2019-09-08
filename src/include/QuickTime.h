@@ -37,7 +37,7 @@ PASCAL_SUBTRAP(MoviesTask, 0xAAAA, 0x0005, QuickTime);
 extern OSErr C_PrerollMovie(Movie movie, TimeValue time,
                                         Fixed rate);
 PASCAL_SUBTRAP(PrerollMovie, 0xAAAA, 0x0006, QuickTime);
-extern void C_SetMovieActive(Movie movie, BOOLEAN active);
+extern void C_SetMovieActive(Movie movie, Boolean active);
 PASCAL_SUBTRAP(SetMovieActive, 0xAAAA, 0x0009, QuickTime);
 extern void C_StartMovie(Movie movie);
 PASCAL_SUBTRAP(StartMovie, 0xAAAA, 0x000B, QuickTime);
@@ -56,13 +56,13 @@ extern INTEGER C_GetMovieVolume(Movie movie);
 PASCAL_SUBTRAP(GetMovieVolume, 0xAAAA, 0x002E, QuickTime);
 extern OSErr C_CloseMovieFile(INTEGER refnum);
 PASCAL_SUBTRAP(CloseMovieFile, 0xAAAA, 0x00D5, QuickTime);
-extern BOOLEAN C_IsMovieDone(Movie movie);
+extern Boolean C_IsMovieDone(Movie movie);
 PASCAL_SUBTRAP(IsMovieDone, 0xAAAA, 0x00DD, QuickTime);
 extern OSErr C_NewMovieFromFile(Movie *moviep, INTEGER refnum,
                                             INTEGER *residp,
                                             StringPtr resnamep,
                                             INTEGER flags,
-                                            BOOLEAN *datarefwaschangedp);
+                                            Boolean *datarefwaschangedp);
 PASCAL_SUBTRAP(NewMovieFromFile, 0xAAAA, 0x00F0, QuickTime);
 extern Fixed C_GetMoviePreferredRate(Movie movie);
 PASCAL_SUBTRAP(GetMoviePreferredRate, 0xAAAA, 0x00F3, QuickTime);

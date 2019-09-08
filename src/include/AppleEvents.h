@@ -571,19 +571,19 @@ PASCAL_SUBTRAP(AEResolve, 0xA816, 0x0536, Pack8);
 extern OSErr C_AERemoveObjectAccessor(DescType desiredClass,
                                                   DescType containerType,
                                                   ProcPtr theAccessor,
-                                                  BOOLEAN isSysHandler);
+                                                  Boolean isSysHandler);
 PASCAL_SUBTRAP(AERemoveObjectAccessor, 0xA816, 0x0738, Pack8);
 extern OSErr C_AEInstallObjectAccessor(DescType desiredClass,
                                                    DescType containerType,
                                                    ProcPtr theAccessor,
                                                    LONGINT refcon,
-                                                   BOOLEAN isSysHandler);
+                                                   Boolean isSysHandler);
 PASCAL_SUBTRAP(AEInstallObjectAccessor, 0xA816, 0x0937, Pack8);
 extern OSErr C_AEGetObjectAccessor(DescType desiredClass,
                                                DescType containerType,
                                                ProcPtr *theAccessor,
                                                LONGINT *accessorRefcon,
-                                               BOOLEAN isSysHandler);
+                                               Boolean isSysHandler);
 PASCAL_SUBTRAP(AEGetObjectAccessor, 0xA816, 0x0939, Pack8);
 extern OSErr C_AECallObjectAccessor(DescType desiredClass,
                                                 AEDesc *containerToken,

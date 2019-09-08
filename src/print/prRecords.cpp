@@ -80,7 +80,7 @@ void Executor::C_PrintDefault(THPrint hPrint)
     (*hPrint)->prJob.fFromUsr = 1;
 }
 
-BOOLEAN Executor::C_PrValidate(THPrint hPrint) /* IMII-158 */
+Boolean Executor::C_PrValidate(THPrint hPrint) /* IMII-158 */
 {
     /* TODO: figure out what are problem areas for us and adjust
 	     accordingly */
@@ -115,15 +115,15 @@ BOOLEAN Executor::C_PrValidate(THPrint hPrint) /* IMII-158 */
     return false;
 }
 
-BOOLEAN Executor::C_PrStlDialog(THPrint hPrint)
+Boolean Executor::C_PrStlDialog(THPrint hPrint)
 {
-    BOOLEAN retval;
+    Boolean retval;
 
     retval = C_PrDlgMain(hPrint, (ProcPtr)&PrStlInit);
     return retval;
 }
 
-BOOLEAN Executor::C_PrJobDialog(THPrint hPrint)
+Boolean Executor::C_PrJobDialog(THPrint hPrint)
 {
     ROMlib_acknowledge_job_dialog(hPrint);
     return C_PrDlgMain(hPrint, (ProcPtr)&PrJobInit);

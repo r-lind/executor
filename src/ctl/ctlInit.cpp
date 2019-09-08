@@ -19,7 +19,7 @@
 using namespace Executor;
 
 ControlHandle Executor::C_NewControl(WindowPtr wst, const Rect *r, ConstStringPtr title,
-                                     BOOLEAN vis, INTEGER value, INTEGER min,
+                                     Boolean vis, INTEGER value, INTEGER min,
                                      INTEGER max, INTEGER procid,
                                      LONGINT rc) /* IMI-319 */
 {

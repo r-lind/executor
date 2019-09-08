@@ -28,7 +28,7 @@
 
 using namespace Executor;
 
-BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
+Boolean Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                                   GUEST<INTEGER> *ith) /* IMI-415 */
 {
     DialogPeek dp = (DialogPeek)dlg;
@@ -63,13 +63,13 @@ BOOLEAN Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
 #define DIALOGEVTS \
     (mDownMask | mUpMask | keyDownMask | autoKeyMask | updateMask | activMask)
 
-using modalprocp = UPP<BOOLEAN(DialogPtr dial, EventRecord *evtp,
+using modalprocp = UPP<Boolean(DialogPtr dial, EventRecord *evtp,
                                GUEST<INTEGER> *iht)>;
 
 #define CALLMODALPROC(dp, evtp, ip, fp2) \
     ROMlib_CALLMODALPROC((dp), (evtp), (ip), (modalprocp)(fp2))
 
-static inline BOOLEAN
+static inline Boolean
 ROMlib_CALLMODALPROC(DialogPtr dp,
                      EventRecord *evtp, GUEST<INTEGER> *ip, modalprocp fp)
 {
@@ -257,7 +257,7 @@ void Executor::C_ModalDialog(ModalFilterUPP fp, GUEST<INTEGER> *item) /* IMI-415
 }
 #endif
 
-BOOLEAN Executor::C_IsDialogEvent(EventRecord *evt) /* IMI-416 */
+Boolean Executor::C_IsDialogEvent(EventRecord *evt) /* IMI-416 */
 {
     GUEST<WindowPtr> wp;
     DialogPeek dp;
@@ -520,7 +520,7 @@ void Executor::C_UpdateDialog(DialogPtr dp, RgnHandle rgn) /* IMIV-60 */
     SetPort(gp);
 }
 
-BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
+Boolean Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
                                  GUEST<INTEGER> *itemp) /* IMI-417 */
 {
     DialogPeek dp;
@@ -531,7 +531,7 @@ BOOLEAN Executor::C_DialogSelect(EventRecord *evt, GUEST<DialogPtr> *dpp,
     Point localp;
     GUEST<Point> glocalp;
     GrafPtr gp;
-    BOOLEAN itemenabled, retval;
+    Boolean itemenabled, retval;
     SignedByte flags;
 
     dp = (DialogPeek)FrontWindow();

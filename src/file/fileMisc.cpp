@@ -184,7 +184,7 @@ QHdrPtr Executor::C_GetDrvQHdr() /* IMIV-182 */
  *	  we're looking at hfs or ufs stuff.
  */
 
-OSErr Executor::PBGetFCBInfo(FCBPBPtr pb, BOOLEAN async)
+OSErr Executor::PBGetFCBInfo(FCBPBPtr pb, Boolean async)
 {
     filecontrolblock *fcbp, *efcbp;
     INTEGER i;

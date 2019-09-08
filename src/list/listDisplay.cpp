@@ -21,7 +21,7 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
     Rect r;
     GUEST<INTEGER> *ip;
     INTEGER off0, off1;
-    BOOLEAN setit;
+    Boolean setit;
     LISTDECL();
 
     if((ip = ROMlib_getoffp(cell, list)))
@@ -46,7 +46,7 @@ void Executor::C_LDraw(Cell cell, ListHandle list) /* IMIV-275 */
     }
 }
 
-void Executor::C_LSetDrawingMode(BOOLEAN draw, ListHandle list) /* IMIV-275 */
+void Executor::C_LSetDrawingMode(Boolean draw, ListHandle list) /* IMIV-275 */
 {
     if(draw)
     {
@@ -194,12 +194,12 @@ void Executor::C_LUpdate(RgnHandle rgn, ListHandle list) /* IMIV-275 */
     }
 }
 
-void Executor::C_LActivate(BOOLEAN act, ListHandle list) /* IMIV-276 */
+void Executor::C_LActivate(Boolean act, ListHandle list) /* IMIV-276 */
 {
     Cell c;
     Rect r;
     ControlHandle ch;
-    BOOLEAN sel;
+    Boolean sel;
     GUEST<INTEGER> *ip;
     INTEGER off0, off1;
     GUEST<RgnHandle> saveclip;
@@ -250,7 +250,7 @@ void Executor::C_LActivate(BOOLEAN act, ListHandle list) /* IMIV-276 */
     }
 }
 
-void Executor::ROMlib_listcall(INTEGER mess, BOOLEAN sel, Rect *rp, Cell cell, INTEGER off,
+void Executor::ROMlib_listcall(INTEGER mess, Boolean sel, Rect *rp, Cell cell, INTEGER off,
                                INTEGER len, ListHandle lhand)
 {
     Handle listdefhand;

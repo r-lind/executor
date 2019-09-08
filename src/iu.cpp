@@ -32,7 +32,7 @@ typedef INTEGER (*locptype)(Ptr ptr, INTEGER len, sorttype *sp);
 
 static void outl(LONGINT, char **);
 static void outs(StringPtr, INTEGER, char **);
-static void outn(INTEGER, BOOLEAN, char **);
+static void outn(INTEGER, Boolean, char **);
 static void month(INTEGER, Intl0Ptr, char, char **);
 static void day(INTEGER, Intl0Ptr, char, char **);
 static void year(INTEGER, Intl0Ptr, char, char **);
@@ -40,7 +40,7 @@ static INTEGER defaultorder(unsigned char *, INTEGER, sorttype *);
 static INTEGER germanylocalization(unsigned char *, INTEGER, sorttype *);
 static INTEGER britainlocalization(unsigned char *, INTEGER, sorttype *);
 static INTEGER defaultlocalization(unsigned char *, INTEGER, sorttype *);
-static INTEGER iuhelper(Ptr, Ptr, INTEGER, INTEGER, BOOLEAN);
+static INTEGER iuhelper(Ptr, Ptr, INTEGER, INTEGER, Boolean);
 
 static void outl(LONGINT l, char **opp)
 {
@@ -86,7 +86,7 @@ static void outs(StringPtr p, INTEGER n, char **opp)
  * is less than 10, a leading zero is output.
  */
 
-static void outn(INTEGER n, BOOLEAN leading0, char **opp)
+static void outn(INTEGER n, Boolean leading0, char **opp)
 {
     Str255 s;
 
@@ -240,7 +240,7 @@ void Executor::C_IUDateString(LONGINT date, DateForm form,
     IUDatePString(date, form, p, GetIntlResource(form == shortDate ? 0 : 1));
 }
 
-void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
+void Executor::C_IUTimePString(LONGINT date, Boolean secs, StringPtr p,
                                Handle h) /* IMI-505 */
 {
     Intl0Ptr int0p;
@@ -286,13 +286,13 @@ void Executor::C_IUTimePString(LONGINT date, BOOLEAN secs, StringPtr p,
     p[0] = op - (char *)p - 1;
 }
 
-void Executor::C_IUTimeString(LONGINT date, BOOLEAN secs,
+void Executor::C_IUTimeString(LONGINT date, Boolean secs,
                               StringPtr p) /* IMI-505 */
 {
     IUTimePString(date, secs, p, GetIntlResource(0));
 }
 
-BOOLEAN Executor::C_IsMetric() /* IMI-505 */
+Boolean Executor::C_IsMetric() /* IMI-505 */
 {
     Handle h;
 
@@ -513,7 +513,7 @@ static INTEGER defaultlocalization(unsigned char *cp, INTEGER len, sorttype *rp)
  */
 
 static INTEGER iuhelper(Ptr ptr1, Ptr ptr2, INTEGER len1, INTEGER len2,
-                        BOOLEAN ignoresec)
+                        Boolean ignoresec)
 {
     Intl0Hndl h;
     locptype locp;
@@ -623,7 +623,7 @@ void Executor::C_IULDateString(LongDateTime *datetimep, DateForm longflag,
     ROMlib_hook(iu_unimplementednumber);
 }
 
-void Executor::C_IULTimeString(LongDateTime *datetimep, BOOLEAN wantseconds,
+void Executor::C_IULTimeString(LongDateTime *datetimep, Boolean wantseconds,
                                Str255 result, Handle intlhand)
 {
     warning_unimplemented(NULL_STRING);

@@ -136,7 +136,7 @@ extern void C_HiliteMenu(INTEGER mid);
 PASCAL_TRAP(HiliteMenu, 0xA938);
 
 extern LONGINT ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
-                                 LONGINT oldwhere, BOOLEAN ispopup, INTEGER nmenusdisplayed);
+                                 LONGINT oldwhere, Boolean ispopup, INTEGER nmenusdisplayed);
 extern LONGINT C_MenuSelect(Point p);
 PASCAL_TRAP(MenuSelect, 0xA93D);
 
@@ -159,7 +159,7 @@ extern void C_EnableItem(MenuHandle mh, INTEGER item);
 PASCAL_TRAP(EnableItem, 0xA939);
 
 extern void C_CheckItem(MenuHandle mh, INTEGER item,
-                                    BOOLEAN cflag);
+                                    Boolean cflag);
 PASCAL_TRAP(CheckItem, 0xA945);
 extern void C_SetItemMark(MenuHandle mh, INTEGER item,
                                       CharParameter mark);

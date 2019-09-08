@@ -458,7 +458,7 @@ void Executor::dopreferences(void)
             SysBeep(5);
         else
         {
-            static BOOLEAN am_already_here = false;
+            static Boolean am_already_here = false;
 
             if(!am_already_here)
             {

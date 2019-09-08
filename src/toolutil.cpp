@@ -316,7 +316,7 @@ void Executor::C_UnpackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len)
     UNPACK_BITS_BODY(int8_t);
 }
 
-BOOLEAN Executor::C_BitTst(Ptr bp, LONGINT bn)
+Boolean Executor::C_BitTst(Ptr bp, LONGINT bn)
 {
     bp += bn / 8;
     return ((*bp & (1 << ((7 - bn) & 7))) != 0);

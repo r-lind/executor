@@ -195,7 +195,7 @@ OSErr Executor::C_FSpExchangeFiles(FSSpecPtr src, FSSpecPtr dst)
     return retval;
 }
 
-typedef OSErr (*open_procp)(HParmBlkPtr pb, BOOLEAN sync);
+typedef OSErr (*open_procp)(HParmBlkPtr pb, Boolean sync);
 
 static OSErr
 open_helper(FSSpecPtr spec, SignedByte perms, GUEST<int16_t> *refoutp,
@@ -303,7 +303,7 @@ OSErr Executor::C_FSpSetFInfo(FSSpecPtr spec, FInfo *fndr_info)
     return retval;
 }
 
-typedef OSErr (*lock_procp)(HParmBlkPtr pb, BOOLEAN async);
+typedef OSErr (*lock_procp)(HParmBlkPtr pb, Boolean async);
 
 static OSErr
 lock_helper(FSSpecPtr spec, lock_procp procp)
@@ -863,7 +863,7 @@ OSErr Executor::FSDelete(ConstStringPtr filen, INTEGER vrn) /* IMIV-113 */
 }
 
 
-OSErr Executor::PBHOpenDeny(HParmBlkPtr pb, BOOLEAN a) /* IMV-397 */
+OSErr Executor::PBHOpenDeny(HParmBlkPtr pb, Boolean a) /* IMV-397 */
 { /* HACK */
     HParamBlockRec block;
     OSErr retval;

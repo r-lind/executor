@@ -1122,7 +1122,7 @@ set_palette_common(WindowPtr dst_window, PaletteHandle src_palette,
 }
 
 void Executor::C_SetPalette(WindowPtr dst_window, PaletteHandle src_palette,
-                            BOOLEAN c_update)
+                            Boolean c_update)
 {
     set_palette_common(dst_window, src_palette,
                        c_update ? pmAllUpdates : pmNoUpdates);
@@ -1338,7 +1338,7 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
     PaletteHandle dst_window_palette_h;
     PalettePtr palette;
     ColorSpec *src_cspec;
-    BOOLEAN save_update;
+    Boolean save_update;
     int i;
 
     dst_window_palette_h = GetPalette(dst_window);

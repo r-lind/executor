@@ -240,13 +240,13 @@ PASCAL_SUBTRAP(SPBVersion, 0xA800, 0x00000014, SoundDispatch);
 
 extern OSErr C_SndStartFilePlay(SndChannelPtr chanp,
                                      INTEGER refnum, INTEGER resnum, LONGINT buffersize, Ptr bufferp,
-                                     AudioSelectionPtr theselectionp, ProcPtr completionp, BOOLEAN async);
+                                     AudioSelectionPtr theselectionp, ProcPtr completionp, Boolean async);
 PASCAL_SUBTRAP(SndStartFilePlay, 0xA800, 0x0D000008, SoundDispatch);
 
 extern OSErr C_SndPauseFilePlay(SndChannelPtr chanp);
 PASCAL_SUBTRAP(SndPauseFilePlay, 0xA800, 0x02040008, SoundDispatch);
 
-extern OSErr C_SndStopFilePlay(SndChannelPtr chanp, BOOLEAN async);
+extern OSErr C_SndStopFilePlay(SndChannelPtr chanp, Boolean async);
 PASCAL_SUBTRAP(SndStopFilePlay, 0xA800, 0x03080008, SoundDispatch);
 
 extern OSErr C_SndPlayDoubleBuffer(SndChannelPtr chanp,
@@ -284,11 +284,11 @@ PASCAL_SUBTRAP(SPBOpenDevice, 0xA800, 0x05180014, SoundDispatch);
 extern OSErr C_SPBCloseDevice(LONGINT inrefnum);
 PASCAL_SUBTRAP(SPBCloseDevice, 0xA800, 0x021C0014, SoundDispatch);
 
-extern OSErr C_SPBRecord(SPBPtr inparamp, BOOLEAN async);
+extern OSErr C_SPBRecord(SPBPtr inparamp, Boolean async);
 PASCAL_SUBTRAP(SPBRecord, 0xA800, 0x03200014, SoundDispatch);
 
 extern OSErr C_SPBRecordToFile(INTEGER refnum, SPBPtr inparamp,
-                                    BOOLEAN async);
+                                    Boolean async);
 PASCAL_SUBTRAP(SPBRecordToFile, 0xA800, 0x04240014, SoundDispatch);
 
 extern OSErr C_SPBPauseRecording(LONGINT refnum);
@@ -385,7 +385,7 @@ extern OSErr C_SndSetInfo(SndChannelPtr chan, OSType selector,
 PASCAL_SUBTRAP(SndSetInfo, 0xA800, 0x06400018, SoundDispatch);
 
 extern OSErr C_SndPlay(SndChannelPtr chanp, Handle sndh,
-                            BOOLEAN async);
+                            Boolean async);
 PASCAL_TRAP(SndPlay, 0xA805);
 extern OSErr C_SndNewChannel(GUEST<SndChannelPtr> *chanpp,
                                   INTEGER synth, LONGINT init, SndCallbackUPP userroutinep);
@@ -394,7 +394,7 @@ extern OSErr C_SndAddModifier(SndChannelPtr chanp,
                                    ProcPtr mod, INTEGER id, LONGINT init);
 PASCAL_TRAP(SndAddModifier, 0xA802);
 extern OSErr C_SndDoCommand(SndChannelPtr chanp,
-                                 SndCommand *cmdp, BOOLEAN nowait);
+                                 SndCommand *cmdp, Boolean nowait);
 PASCAL_TRAP(SndDoCommand, 0xA803);
 extern OSErr C_SndDoImmediate(SndChannelPtr chanp,
                                    SndCommand *cmdp);
@@ -403,7 +403,7 @@ extern OSErr C_SndControl(INTEGER id, SndCommand *cmdp);
 PASCAL_TRAP(SndControl, 0xA806);
 
 extern OSErr C_SndDisposeChannel(SndChannelPtr chanp,
-                                      BOOLEAN quitnow);
+                                      Boolean quitnow);
 PASCAL_TRAP(SndDisposeChannel, 0xA801);
 extern void C_FinaleUnknown1(void);
 extern OSErr C_FinaleUnknown2(ResType, LONGINT, Ptr, Ptr);

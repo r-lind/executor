@@ -15,7 +15,7 @@ using namespace Executor;
 typedef GUEST<ResType> *restypeptr;
 
 static GUEST<restypeptr> *ar = 0;
-static INTEGER inserttypes(resmaphand, INTEGER, BOOLEAN);
+static INTEGER inserttypes(resmaphand, INTEGER, Boolean);
 static INTEGER initar(INTEGER);
 
 #define ARRN_NOTINITTED (-1)
@@ -30,7 +30,7 @@ void Executor::ROMlib_invalar() /* INTERNAL */
     arrn = ARRN_NOTINITTED;
 }
 
-static INTEGER inserttypes(resmaphand map, INTEGER ninserted, BOOLEAN first)
+static INTEGER inserttypes(resmaphand map, INTEGER ninserted, Boolean first)
 {
     typref *tr;
     INTEGER i, j;
@@ -66,7 +66,7 @@ static INTEGER initar(INTEGER rn)
     Size mostbytesneeded;
     INTEGER ninserted;
     resmaphand map;
-    BOOLEAN first;
+    Boolean first;
 
     if(arrn != rn)
     {

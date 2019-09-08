@@ -194,7 +194,7 @@ void Executor::C_SetWinColor(WindowPtr w, CTabHandle new_w_ctab)
 
    they named it correctly, but noone got the documentation right */
 
-BOOLEAN Executor::C_GetAuxWin(WindowPtr w, GUEST<AuxWinHandle> *aux_win_out)
+Boolean Executor::C_GetAuxWin(WindowPtr w, GUEST<AuxWinHandle> *aux_win_out)
 {
     if(!w)
     {

@@ -30,7 +30,7 @@ using namespace Executor;
  *	  that get us to the routines.
  */
 
-OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
+OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, Boolean async,
                                 DriverRoutineType routine,
                                 INTEGER trapn) /* INTERNAL */
 {
@@ -165,7 +165,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
 
 /* PBOpen, PBClose, PBRead and PBWrite are part of the file manager */
 
-OSErr Executor::PBControl(ParmBlkPtr pbp, BOOLEAN a) /* IMII-186 */
+OSErr Executor::PBControl(ParmBlkPtr pbp, Boolean a) /* IMII-186 */
 {
     OSErr err;
 
@@ -174,7 +174,7 @@ OSErr Executor::PBControl(ParmBlkPtr pbp, BOOLEAN a) /* IMII-186 */
     return err;
 }
 
-OSErr Executor::PBStatus(ParmBlkPtr pbp, BOOLEAN a) /* IMII-186 */
+OSErr Executor::PBStatus(ParmBlkPtr pbp, Boolean a) /* IMII-186 */
 {
     OSErr err;
 
@@ -183,7 +183,7 @@ OSErr Executor::PBStatus(ParmBlkPtr pbp, BOOLEAN a) /* IMII-186 */
     return err;
 }
 
-OSErr Executor::PBKillIO(ParmBlkPtr pbp, BOOLEAN a) /* IMII-187 */
+OSErr Executor::PBKillIO(ParmBlkPtr pbp, Boolean a) /* IMII-187 */
 {
     OSErr err;
 
@@ -287,7 +287,7 @@ static void InitBuiltinDrivers()
     };
 }
 
-OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
+OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, Boolean a) /* INTERNAL */
 {
     if(knowndrivers.empty())
         InitBuiltinDrivers();
@@ -298,7 +298,7 @@ OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a) /* INTERNAL */
     DCtlHandle h;
     ramdriverhand ramdh;
     GUEST<ResType> typ;
-    BOOLEAN alreadyopen;
+    Boolean alreadyopen;
 
     TheZoneGuard guard(LM(SysZone));
 

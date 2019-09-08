@@ -12,7 +12,7 @@
 namespace Executor
 {
 #if defined(EVIL_ILLUSTRATOR_7_HACK)
-extern BOOLEAN ROMlib_evil_illustrator_7_hack;
+extern Boolean ROMlib_evil_illustrator_7_hack;
 #endif
 }
 #endif

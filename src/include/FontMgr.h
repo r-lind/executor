@@ -136,7 +136,7 @@ struct WidthTable
     GUEST<Point> inDenom;
     GUEST<INTEGER> aFID;
     GUEST<Handle> fHand;
-    GUEST<BOOLEAN> usedFam;
+    GUEST<Boolean> usedFam;
     GUEST<Byte> aFace;
     GUEST<INTEGER> vOutput;
     GUEST<INTEGER> hOutput;
@@ -152,7 +152,7 @@ struct FMInput
     GUEST<INTEGER> family;
     GUEST<INTEGER> size;
     GUEST<Style> face;
-    GUEST<BOOLEAN> needBits;
+    GUEST<Boolean> needBits;
     GUEST<INTEGER> device;
     GUEST<Point> numer;
     GUEST<Point> denom;
@@ -237,10 +237,10 @@ extern void ROMlib_GetFontName(LONGINT fnum, char *fnam);
 extern void C_GetFNum(ConstStringPtr fnam,
                                   GUEST<INTEGER> *fnum);
 PASCAL_TRAP(GetFNum, 0xA900);
-extern BOOLEAN C_RealFont(INTEGER fnum,
+extern Boolean C_RealFont(INTEGER fnum,
                                       INTEGER sz);
 PASCAL_TRAP(RealFont, 0xA902);
-extern void C_SetFontLock(BOOLEAN lflag);
+extern void C_SetFontLock(Boolean lflag);
 PASCAL_TRAP(SetFontLock, 0xA903);
 
 extern FMOutPtr C_FMSwapFont(FMInput *fmip);
@@ -249,9 +249,9 @@ extern void C_FontMetrics(FMetricRec *metrp);
 PASCAL_TRAP(FontMetrics, 0xA835);
 
 extern void C_SetFScaleDisable(
-    BOOLEAN disable);
+    Boolean disable);
 PASCAL_TRAP(SetFScaleDisable, 0xA834);
-extern void C_SetFractEnable(BOOLEAN enable);
+extern void C_SetFractEnable(Boolean enable);
 PASCAL_TRAP(SetFractEnable, 0xA814);
 
 extern void C_SetOutlinePreferred(Boolean _outline_perferred_p);

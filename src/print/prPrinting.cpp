@@ -297,7 +297,7 @@ void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
 static bool printport_open_p = false;
 
 static void
-ourinit(TPPrPort port, BOOLEAN preserve_font)
+ourinit(TPPrPort port, Boolean preserve_font)
 {
     GUEST<INTEGER> saved_font = port->gPort.txFont;
 

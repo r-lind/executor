@@ -93,7 +93,7 @@ typedef struct
 {
     const char *dname;
     DrvQExtra *dqp;
-    BOOLEAN loaded;
+    Boolean loaded;
     int fd;
 } dosdriveinfo_t;
 

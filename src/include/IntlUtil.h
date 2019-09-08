@@ -153,12 +153,12 @@ extern void C_IUDateString(LONGINT date,
                                        DateForm form, StringPtr p);
 PASCAL_SUBTRAP(IUDateString, 0xA9ED, 0x0, Pack6);
 extern void C_IUTimePString(LONGINT date,
-                                        BOOLEAN secs, StringPtr p, Handle h);
+                                        Boolean secs, StringPtr p, Handle h);
 PASCAL_SUBTRAP(IUTimePString, 0xA9ED, 0x0010, Pack6);
 extern void C_IUTimeString(LONGINT date,
-                                       BOOLEAN secs, StringPtr p);
+                                       Boolean secs, StringPtr p);
 PASCAL_SUBTRAP(IUTimeString, 0xA9ED, 0x0002, Pack6);
-extern BOOLEAN C_IsMetric(void);
+extern Boolean C_IsMetric(void);
 PASCAL_SUBTRAP(IsMetric, 0xA9ED, 0x0004, Pack6);
 
 extern void C_SetIntlResource(INTEGER rn,
@@ -184,7 +184,7 @@ extern void C_IULDateString(LongDateTime *datetimep,
 PASCAL_SUBTRAP(IULDateString, 0xA9ED, 0x0014, Pack6);
 
 extern void C_IULTimeString(LongDateTime *datetimep,
-                                        BOOLEAN wantseconds, Str255 result, Handle intlhand);
+                                        Boolean wantseconds, Str255 result, Handle intlhand);
 PASCAL_SUBTRAP(IULTimeString, 0xA9ED, 0x0016, Pack6);
 
 extern void C_ClearIntlResourceCache(void);

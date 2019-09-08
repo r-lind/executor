@@ -115,7 +115,7 @@ void Executor::set_refresh_rate(int new1)
  * this routine fills in the rectangle coordinates, copies the changed
  * data from screen to shadow, and returns true.
  */
-static BOOLEAN
+static Boolean
 find_changed_rect_and_update_shadow(const uint32_t *screen, uint32_t *shadow,
                                     long row_longs, long num_rows,
                                     int *top_long, int *left_long,

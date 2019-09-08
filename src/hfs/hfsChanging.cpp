@@ -18,7 +18,7 @@ typedef enum {
 } changeop;
 
 static OSErr PBFInfoHelper(changeop op, FileParam *pb, LONGINT dirid,
-                           BOOLEAN async)
+                           Boolean async)
 {
     OSErr err, err1;
     HVCB *vcbp;
@@ -98,48 +98,48 @@ static OSErr PBFInfoHelper(changeop op, FileParam *pb, LONGINT dirid,
     PBRETURN(pb, err);
 }
 
-OSErr Executor::hfsPBGetFInfo(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBGetFInfo(ParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(GetOp, (FileParam *)pb, 0L, async);
 }
 
-OSErr Executor::hfsPBHGetFInfo(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHGetFInfo(HParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(GetOp, (FileParam *)pb, pb->fileParam.ioDirID, async);
 }
 
-OSErr Executor::hfsPBSetFInfo(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBSetFInfo(ParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(SetOp, (FileParam *)pb, 0L, async);
 }
 
-OSErr Executor::hfsPBHSetFInfo(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHSetFInfo(HParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(SetOp, (FileParam *)pb, pb->fileParam.ioDirID, async);
 }
 
-OSErr Executor::hfsPBSetFLock(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBSetFLock(ParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(LockOp, (FileParam *)pb, 0L, async);
 }
 
-OSErr Executor::hfsPBHSetFLock(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHSetFLock(HParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(LockOp, (FileParam *)pb, pb->fileParam.ioDirID, async);
 }
 
-OSErr Executor::hfsPBRstFLock(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBRstFLock(ParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(UnlockOp, (FileParam *)pb, 0L, async);
 }
 
-OSErr Executor::hfsPBHRstFLock(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHRstFLock(HParmBlkPtr pb, Boolean async)
 {
     return PBFInfoHelper(UnlockOp, (FileParam *)pb,
                          pb->fileParam.ioDirID, async);
 }
 
-OSErr Executor::hfsPBSetFVers(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBSetFVers(ParmBlkPtr pb, Boolean async)
 {
     PBRETURN((IOParam *)pb, wrgVolTypErr);
 }
@@ -167,7 +167,7 @@ ROMlib_fcbrename(HVCB *vcbp, GUEST<LONGINT> swapped_parid, StringPtr oldnamep,
 }
 
 static OSErr
-renamehelper(IOParam *pb, BOOLEAN async, LONGINT dirid, filekind kind)
+renamehelper(IOParam *pb, Boolean async, LONGINT dirid, filekind kind)
 {
     OSErr err, err1;
     btparam btparamrec, btparamrec2;
@@ -226,12 +226,12 @@ renamehelper(IOParam *pb, BOOLEAN async, LONGINT dirid, filekind kind)
     PBRETURN(pb, err);
 }
 
-OSErr Executor::hfsPBRename(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBRename(ParmBlkPtr pb, Boolean async)
 {
     return renamehelper((IOParam *)pb, async, 0L, regular);
 }
 
-OSErr Executor::hfsPBHRename(HParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::hfsPBHRename(HParmBlkPtr pb, Boolean async)
 {
     return renamehelper((IOParam *)pb, async, pb->fileParam.ioDirID,
                         (filekind)(regular | directory));

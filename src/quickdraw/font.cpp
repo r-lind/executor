@@ -29,7 +29,7 @@ reset_myfmi(void)
 
 void Executor::C_InitFonts() /* IMI-222 */
 {
-    static BOOLEAN beenhere = false;
+    static Boolean beenhere = false;
     GUEST<THz> saveZone;
 
     if(!beenhere)
@@ -121,7 +121,7 @@ void Executor::C_GetFNum(ConstStringPtr fnam, GUEST<INTEGER> *fnum) /* IMI-223 *
 {
     Handle h;
     GUEST<ResType> rest;
-    BOOLEAN shift;
+    Boolean shift;
 
     SetResLoad(false);
 
@@ -144,7 +144,7 @@ void Executor::C_GetFNum(ConstStringPtr fnam, GUEST<INTEGER> *fnum) /* IMI-223 *
     SetResLoad(true);
 }
 
-void Executor::C_SetFontLock(BOOLEAN lflag) /* IMI-223 */
+void Executor::C_SetFontLock(Boolean lflag) /* IMI-223 */
 {
     INTEGER attrs;
 
@@ -196,7 +196,7 @@ static fchartstr ftstr = {
 };
 
 static void mungfmo(ctrip, FMOutput *);
-static BOOLEAN widthlistmatch(FMInput *);
+static Boolean widthlistmatch(FMInput *);
 static int countones(unsigned short);
 static GUEST<INTEGER> *findfondwidths();
 static void buildtable(INTEGER);
@@ -225,7 +225,7 @@ static void mungfmo(ctrip cp, FMOutput *fmop)
 
 #define MAXTABLES 12
 
-static BOOLEAN widthlistmatch(FMInput *fmip)
+static Boolean widthlistmatch(FMInput *fmip)
 {
 
     GUEST<WHandle> *whp, *ewhp;
@@ -553,7 +553,7 @@ static void findclosestfond(FHandle fh, INTEGER size, INTEGER *powerof2p,
     *greaterp = greater == 32767 ? 0 : greater;
 }
 
-BOOLEAN Executor::C_RealFont(INTEGER fnum, INTEGER sz) /* IMI-223 */
+Boolean Executor::C_RealFont(INTEGER fnum, INTEGER sz) /* IMI-223 */
 {
     Handle h;
     int retval;
@@ -807,7 +807,7 @@ FMOutPtr Executor::C_FMSwapFont(FMInput *fmip) /* IMI-223 */
     Style style;
     FontRec *fp;
     GUEST<INTEGER> savesize, savefamily;
-    BOOLEAN needtobuild;
+    Boolean needtobuild;
 
     savesize = fmip->size;
     if(fmip->size <= 0)
@@ -937,7 +937,7 @@ void Executor::C_FontMetrics(FMetricRec *metrp) /* IMIV-32 */
     metrp->wTabHandle = guest_cast<Handle>(LM(WidthTabHandle));
 }
 
-void Executor::C_SetFScaleDisable(BOOLEAN disable) /* IMIV-32 */
+void Executor::C_SetFScaleDisable(Boolean disable) /* IMIV-32 */
 {
     if(LM(FScaleDisable) != (Byte)disable)
     {
@@ -947,7 +947,7 @@ void Executor::C_SetFScaleDisable(BOOLEAN disable) /* IMIV-32 */
     }
 }
 
-void Executor::C_SetFractEnable(BOOLEAN enable) /* IMIV-32 */
+void Executor::C_SetFractEnable(Boolean enable) /* IMIV-32 */
 {
     LM(FractEnable) = enable;
 }

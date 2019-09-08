@@ -21,13 +21,13 @@ using namespace Executor;
 
 
 static void findcell(GUEST<Cell> *, ListHandle);
-static void setselectnilflag(BOOLEAN setit, Cell cell, ListHandle list,
-                             BOOLEAN hiliteempty);
+static void setselectnilflag(Boolean setit, Cell cell, ListHandle list,
+                             Boolean hiliteempty);
 static void scrollbyvalues(ListHandle);
 static void rect2value(Rect *in, Rect *butnotin, INTEGER value,
-                       ListHandle list, BOOLEAN hiliteempty);
+                       ListHandle list, Boolean hiliteempty);
 static void rectvalue(Rect *rp, INTEGER value, ListHandle list,
-                      BOOLEAN hiliteempty);
+                      Boolean hiliteempty);
 
 static void findcell(GUEST<Cell> *cp, ListHandle list)
 {
@@ -40,8 +40,8 @@ static void findcell(GUEST<Cell> *cp, ListHandle list)
         cp->v = 32767;
 }
 
-static void setselectnilflag(BOOLEAN setit, Cell cell, ListHandle list,
-                             BOOLEAN hiliteempty)
+static void setselectnilflag(Boolean setit, Cell cell, ListHandle list,
+                             Boolean hiliteempty)
 {
     GrafPtr saveport;
     GUEST<RgnHandle> saveclip;
@@ -88,7 +88,7 @@ static void setselectnilflag(BOOLEAN setit, Cell cell, ListHandle list,
 }
 
 static void rectvalue(Rect *rp, INTEGER value, ListHandle list,
-                      BOOLEAN hiliteempty)
+                      Boolean hiliteempty)
 {
     GUEST<INTEGER> *ip, *ep;
     GUEST<INTEGER> *sp;
@@ -113,7 +113,7 @@ static void rectvalue(Rect *rp, INTEGER value, ListHandle list,
 }
 
 static void rect2value(Rect *in, Rect *butnotin, INTEGER value,
-                       ListHandle list, BOOLEAN hiliteempty)
+                       ListHandle list, Boolean hiliteempty)
 {
     GUEST<INTEGER> *ip;
     Cell c;
@@ -174,9 +174,9 @@ void Executor::C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
     scrollbyvalues(guest_cast<ListHandle>((*ch)->contrlRfCon));
 }
 
-static inline BOOLEAN CALLCLICK(ListClickLoopUPP fp)
+static inline Boolean CALLCLICK(ListClickLoopUPP fp)
 {
-    BOOLEAN retval;
+    Boolean retval;
 
     ROMlib_hook(list_clicknumber);
     retval = fp();
@@ -184,7 +184,7 @@ static inline BOOLEAN CALLCLICK(ListClickLoopUPP fp)
 }
 
 
-BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
+Boolean Executor::C_LClick(Point pt, INTEGER mods,
                            ListHandle list) /* IMIV-273 */
 {
     ControlHandle ch, scrollh, scrollv;
@@ -193,9 +193,9 @@ BOOLEAN Executor::C_LClick(Point pt, INTEGER mods,
         short top, left, bottom, right;
     } r;
     GUEST<Rect> rswapped;
-    BOOLEAN doubleclick, ctlchanged;
-    BOOLEAN hiliteempty, onlyone, userects, disjoint, extend;
-    BOOLEAN initial;
+    Boolean doubleclick, ctlchanged;
+    Boolean hiliteempty, onlyone, userects, disjoint, extend;
+    Boolean initial;
     enum
     {
         Off,
@@ -458,7 +458,7 @@ LONGINT Executor::C_LLastClick(ListHandle list) /* IMIV-273 */
     return ((LONGINT)(*list)->lastClick.v << 16) | (unsigned short)(*list)->lastClick.h;
 }
 
-void Executor::C_LSetSelect(BOOLEAN setit, Cell cell,
+void Executor::C_LSetSelect(Boolean setit, Cell cell,
                             ListHandle list) /* IMIV-273 */
 {
     setselectnilflag(setit, cell, list, true);

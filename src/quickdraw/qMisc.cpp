@@ -16,10 +16,10 @@
 
 using namespace Executor;
 
-static BOOLEAN EquivRect(const Rect *, const Rect *);
+static Boolean EquivRect(const Rect *, const Rect *);
 static INTEGER fromhex(char c);
 
-static BOOLEAN EquivRect(const Rect *rp1, const Rect *rp2)
+static Boolean EquivRect(const Rect *rp1, const Rect *rp2)
 {
     return rp1->bottom - rp1->top == rp2->bottom - rp2->top && rp1->right - rp1->left == rp2->right - rp2->left;
 }
@@ -45,7 +45,7 @@ INTEGER Executor::C_Random()
     return retval == -32768 ? 0 : retval;
 }
 
-BOOLEAN Executor::C_GetPixel(INTEGER h, INTEGER v)
+Boolean Executor::C_GetPixel(INTEGER h, INTEGER v)
 {
     BitMap temp_bm;
     unsigned char temp_fbuf[4];
@@ -155,7 +155,7 @@ void Executor::C_MapRgn(RgnHandle rh, const Rect *srcr, const Rect *dstr)
     Fixed xcoff, ycoff;
     INTEGER buf1[1000], buf2[1000], *mergebuf, *freebuf, *ipe;
     LONGINT hold;
-    BOOLEAN done;
+    Boolean done;
 
     if(EquivRect(srcr, dstr))
         OffsetRgn(rh, dstr->left - srcr->left,

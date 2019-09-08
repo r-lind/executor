@@ -158,9 +158,9 @@ void Executor::ROMlib_OurClose(void)
 }
 
 #if 0
-static BOOLEAN isejectable(const charCx( *dname), LONGINT fd)
+static Boolean isejectable(const charCx( *dname), LONGINT fd)
 {
-    BOOLEAN retval;
+    Boolean retval;
 #if defined(MACOSX_) || defined(MACOSX_)
     struct scsi_req sr;
     char inqbuf[sizeof(struct inquiry_reply) + 3];
@@ -407,7 +407,7 @@ Executor::try_to_mount_disk(const char *dname, LONGINT floppyfd, GUEST<LONGINT> 
     char *tbuf, *buf;
     INTEGER drivenum;
     LONGINT offset;
-    BOOLEAN foundmap, first;
+    Boolean foundmap, first;
     oldblock1_t *oldmapp;
     partmapentry_t *partp;
     int i;
@@ -615,7 +615,7 @@ OSErr Executor::ROMlib_readwrite(LONGINT fd, char *buffer, LONGINT count,
 {
     char *newbuffer;
     LONGINT remainder, totransfer;
-    BOOLEAN needlseek;
+    Boolean needlseek;
     OSErr err;
     int (*readfp)(int fd, void *buf, int nbytes);
     int (*writefp)(int fd, const void *buf, int nbytes);

@@ -59,7 +59,7 @@ WindowPtr Executor::C_FrontWindow()
     return retval;
 }
 
-void Executor::C_HiliteWindow(WindowPtr w, BOOLEAN flag)
+void Executor::C_HiliteWindow(WindowPtr w, Boolean flag)
 {
     if(!w)
         return;
@@ -131,7 +131,7 @@ void Executor::C_SelectWindow(WindowPtr w)
     HiliteWindow(w, true);
 }
 
-void Executor::C_ShowHide(WindowPtr w, BOOLEAN flag)
+void Executor::C_ShowHide(WindowPtr w, Boolean flag)
 {
     if(flag && !WINDOW_VISIBLE(w))
     {

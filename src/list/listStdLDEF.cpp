@@ -9,7 +9,7 @@
 
 using namespace Executor;
 
-static void draw(BOOLEAN sel, Rect *rect, INTEGER doff, INTEGER dl,
+static void draw(Boolean sel, Rect *rect, INTEGER doff, INTEGER dl,
                  ListHandle list)
 {
     GrafPtr savePort;
@@ -26,7 +26,7 @@ static void draw(BOOLEAN sel, Rect *rect, INTEGER doff, INTEGER dl,
     SetPort(savePort);
 }
 
-void Executor::C_ldef0(INTEGER msg, BOOLEAN sel, Rect *rect, Cell cell,
+void Executor::C_ldef0(INTEGER msg, Boolean sel, Rect *rect, Cell cell,
                        INTEGER doff, INTEGER dl, ListHandle list) /* IMIV-276 */
 {
     GrafPtr savePort;

@@ -16,13 +16,13 @@ using namespace Executor;
  */
 
 
-BOOLEAN Executor::C_snth5(SndChannelPtr chanp, SndCommand *cmdp,
+Boolean Executor::C_snth5(SndChannelPtr chanp, SndCommand *cmdp,
                           ModifierStubPtr mp)
 {
 #if defined(MACOSX_)
     soundbuffer_t *bufp;
-    BOOLEAN done;
-    static BOOLEAN beenhere = 0;
+    Boolean done;
+    static Boolean beenhere = 0;
 
     if(!beenhere)
     {

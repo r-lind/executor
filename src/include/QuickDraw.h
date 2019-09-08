@@ -498,7 +498,7 @@ const LowMemGlobal<Ptr> ScrnBase { 0x824 }; // QuickDraw IMII-19 (true);
  */
 const LowMemGlobal<Rect> CrsrPin { 0x834 }; // QuickDraw ThinkC (false);
 const LowMemGlobal<Byte> QDColors { 0x8B0 }; // QuickDraw IMV (false);
-const LowMemGlobal<BOOLEAN> CrsrVis { 0x8CC }; // QuickDraw SysEqu.a (true);
+const LowMemGlobal<Boolean> CrsrVis { 0x8CC }; // QuickDraw SysEqu.a (true);
 const LowMemGlobal<Byte> CrsrBusy { 0x8CD }; // QuickDraw SysEqu.a (true);
 const LowMemGlobal<INTEGER> CrsrState { 0x8D0 }; // QuickDraw SysEqu.a (true);
 const LowMemGlobal<LONGINT> mousemask { 0x8D6 }; // QuickDraw .a (true-b);
@@ -586,7 +586,7 @@ extern void C_MakeRGBPat(PixPatHandle ph,
 PASCAL_TRAP(MakeRGBPat, 0xAA0D);
 extern INTEGER C_Random(void);
 PASCAL_TRAP(Random, 0xA861);
-extern BOOLEAN C_GetPixel(INTEGER h, INTEGER v);
+extern Boolean C_GetPixel(INTEGER h, INTEGER v);
 PASCAL_TRAP(GetPixel, 0xA865);
 extern void C_StuffHex(Ptr p, ConstStringPtr s);
 PASCAL_TRAP(StuffHex, 0xA866);
@@ -646,7 +646,7 @@ extern void C_SubPt(Point src, GUEST<Point> *dst);
 PASCAL_TRAP(SubPt, 0xA87F);
 extern void C_SetPt(GUEST<Point> *pt, INTEGER h, INTEGER v);
 PASCAL_TRAP(SetPt, 0xA880);
-extern BOOLEAN C_EqualPt(Point p1, Point p2);
+extern Boolean C_EqualPt(Point p1, Point p2);
 PASCAL_TRAP(EqualPt, 0xA881);
 extern void C_LocalToGlobal(GUEST<Point> *pt);
 PASCAL_TRAP(LocalToGlobal, 0xA870);
@@ -669,19 +669,19 @@ PASCAL_TRAP(OffsetRect, 0xA8A8);
 extern void C_InsetRect(Rect *r, INTEGER dh, INTEGER dv);
 PASCAL_TRAP(InsetRect, 0xA8A9);
 
-extern BOOLEAN C_EmptyRect(const Rect *r);
+extern Boolean C_EmptyRect(const Rect *r);
 PASCAL_TRAP(EmptyRect, 0xA8AE);
-extern BOOLEAN C_SectRect(const Rect *s1, const Rect *s2, Rect *dest);
+extern Boolean C_SectRect(const Rect *s1, const Rect *s2, Rect *dest);
 PASCAL_TRAP(SectRect, 0xA8AA);
 extern void C_UnionRect(const Rect *s1, const Rect *s2, Rect *dest);
 PASCAL_TRAP(UnionRect, 0xA8AB);
-extern BOOLEAN C_PtInRect(Point p, const Rect *r);
+extern Boolean C_PtInRect(Point p, const Rect *r);
 PASCAL_TRAP(PtInRect, 0xA8AD);
 extern void C_Pt2Rect(Point p1, Point p2, Rect *dest);
 PASCAL_TRAP(Pt2Rect, 0xA8AC);
 extern void C_PtToAngle(const Rect *rp, Point p, GUEST<INTEGER> *angle);
 PASCAL_TRAP(PtToAngle, 0xA8C3);
-extern BOOLEAN C_EqualRect(const Rect *r1, const Rect *r2);
+extern Boolean C_EqualRect(const Rect *r1, const Rect *r2);
 PASCAL_TRAP(EqualRect, 0xA8A6);
 extern RgnHandle C_NewRgn(void);
 PASCAL_TRAP(NewRgn, 0xA8D8);
@@ -703,7 +703,7 @@ PASCAL_TRAP(RectRgn, 0xA8DF);
 extern void C_OffsetRgn(RgnHandle rh, INTEGER dh,
                                     INTEGER dv);
 PASCAL_TRAP(OffsetRgn, 0xA8E0);
-extern BOOLEAN C_PtInRgn(Point p, RgnHandle rh);
+extern Boolean C_PtInRgn(Point p, RgnHandle rh);
 PASCAL_TRAP(PtInRgn, 0xA8E8);
 extern void C_InsetRgn(RgnHandle rh, INTEGER dh, INTEGER dv);
 PASCAL_TRAP(InsetRgn, 0xA8E1);
@@ -719,12 +719,12 @@ PASCAL_TRAP(DiffRgn, 0xA8E6);
 extern void C_XorRgn(RgnHandle s1, RgnHandle s2,
                                  RgnHandle dest);
 PASCAL_TRAP(XorRgn, 0xA8E7);
-extern BOOLEAN C_RectInRgn(const Rect *rp,
+extern Boolean C_RectInRgn(const Rect *rp,
                                        RgnHandle rh);
 PASCAL_TRAP(RectInRgn, 0xA8E9);
-extern BOOLEAN C_EqualRgn(RgnHandle r1, RgnHandle r2);
+extern Boolean C_EqualRgn(RgnHandle r1, RgnHandle r2);
 PASCAL_TRAP(EqualRgn, 0xA8E3);
-extern BOOLEAN C_EmptyRgn(RgnHandle rh);
+extern Boolean C_EmptyRgn(RgnHandle rh);
 PASCAL_TRAP(EmptyRgn, 0xA8E2);
 extern void C_FrameRect(const Rect *r);
 PASCAL_TRAP(FrameRect, 0xA8A1);
@@ -797,7 +797,7 @@ extern void C_StdBits(const BitMap *srcbmp,
 PASCAL_TRAP(StdBits, 0xA8EB);
 extern void StdBitsPicSaveFlag(const BitMap *srcbmp,
                                const Rect *srcrp, const Rect *dstrp,
-                               INTEGER mode, RgnHandle mask, BOOLEAN savepic);
+                               INTEGER mode, RgnHandle mask, Boolean savepic);
 
 extern void C_StdLine(Point p);
 PASCAL_TRAP(StdLine, 0xA890);

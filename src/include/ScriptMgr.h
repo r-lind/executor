@@ -277,13 +277,13 @@ extern void C_MeasureJust(Ptr textbufp, INTEGER length,
                                       INTEGER slop, Ptr charlocs);
 PASCAL_SUBTRAP(MeasureJust, 0xA8B5, 0x800C0020, ScriptUtil);
 extern INTEGER C_Pixel2Char(Ptr textbufp, INTEGER len,
-                                        INTEGER slop, INTEGER pixwidth, BOOLEAN *leftsidep);
+                                        INTEGER slop, INTEGER pixwidth, Boolean *leftsidep);
 PASCAL_SUBTRAP(Pixel2Char, 0xA8B5, 0x820E0014, ScriptUtil);
 extern INTEGER C_Char2Pixel(Ptr textbufp, INTEGER len,
                                         INTEGER slop, INTEGER offset, SignedByte dir);
 PASCAL_SUBTRAP(Char2Pixel, 0xA8B5, 0x820C0016, ScriptUtil);
 extern void C_FindWord(Ptr textbufp, INTEGER length,
-                                   INTEGER offset, BOOLEAN leftside, Ptr breaks, GUEST<INTEGER> *offsets);
+                                   INTEGER offset, Boolean leftside, Ptr breaks, GUEST<INTEGER> *offsets);
 PASCAL_SUBTRAP(FindWord, 0xA8B5, 0x8012001A, ScriptUtil);
 extern void C_HiliteText(Ptr textbufp, INTEGER firstoffset,
                                      INTEGER secondoffset, GUEST<INTEGER> *offsets);
@@ -378,7 +378,7 @@ extern INTEGER C_PixelToChar(
     LONGINT textLen,
     Fixed slop,
     Fixed pixelWidth,
-    BOOLEAN *leadingEdgep,
+    Boolean *leadingEdgep,
     GUEST<Fixed> *widthRemainingp,
     JustStyleCode styleRunPosition,
     Point numer,

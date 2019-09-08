@@ -26,9 +26,9 @@ namespace Executor
 
 #if 1
 
-BOOLEAN ROMlib_window_zoomed(WindowPeek wp)
+Boolean ROMlib_window_zoomed(WindowPeek wp)
 {
-    BOOLEAN retval;
+    Boolean retval;
     const Rect *portrp, *staterp, *boundsrp;
 
     portrp = &PORT_RECT(wp);

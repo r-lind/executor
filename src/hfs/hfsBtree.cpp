@@ -252,7 +252,7 @@ static void checkbtp(btnode *btp)
 }
 #endif /* CATFILEDEBUG */
 
-BOOLEAN Executor::ROMlib_searchnode(btnode *btp, void *key, compfp fp,
+Boolean Executor::ROMlib_searchnode(btnode *btp, void *key, compfp fp,
                                     anykey **keypp, INTEGER *afterp)
 {
     INTEGER low, high, mid;
@@ -371,7 +371,7 @@ LONGINT tagdate;
 LONGINT tagtfs0;
 LONGINT tagtfs1;
 
-static BOOLEAN ROMlib_index_cached = false;
+static Boolean ROMlib_index_cached = false;
 
 OSErr Executor::ROMlib_getcache(cacheentry **retpp, uint16_t refnum,
                                 ULONGINT logbno, cacheflagtype flags)
@@ -579,7 +579,7 @@ OSErr Executor::ROMlib_keyfind(btparam *btpb)
     cacheentry *cachep;
     OSErr err;
     LONGINT node;
-    BOOLEAN found;
+    Boolean found;
     unsigned char type;
     trailentry *tep;
 
@@ -685,7 +685,7 @@ OSErr Executor::ROMlib_btnext(anykey **nextpp, anykey *keyp, HVCB *vcbp)
  * index at the end of a node.
  */
 
-static OSErr MapBitSetOrClr(cacheentry *block0cachep, LONGINT bit, BOOLEAN set)
+static OSErr MapBitSetOrClr(cacheentry *block0cachep, LONGINT bit, Boolean set)
 {
     INTEGER refnum;
     btblock0 *block0p;
@@ -693,7 +693,7 @@ static OSErr MapBitSetOrClr(cacheentry *block0cachep, LONGINT bit, BOOLEAN set)
     btnode *btp;
     unsigned char *mapstart, *mapend;
     cacheentry *cachep;
-    BOOLEAN done;
+    Boolean done;
     INTEGER nrecs, nmapnodes;
     OSErr err;
 
@@ -757,7 +757,7 @@ static OSErr add_free_nodes(cacheentry *block0cachep, ULONGINT n_new_nodes)
     btnode *btp, *newbtp;
     unsigned char *mapstart, *mapend;
     cacheentry *newcachep;
-    BOOLEAN done;
+    Boolean done;
     INTEGER refnum;
     INTEGER nrecs;
     OSErr err;
@@ -845,7 +845,7 @@ static OSErr MapFindFirstBitAndSet(cacheentry *block0cachep,
     btnode *btp;
     unsigned char *mapstart, *mapend;
     cacheentry *cachep;
-    BOOLEAN done;
+    Boolean done;
     INTEGER nrecs;
     ULONGINT nmapnodes;
     OSErr err;
@@ -1168,7 +1168,7 @@ static OSErr pullout(cacheentry *selfcachep, INTEGER selfindex,
     INTEGER freesize, ntoadjust;
     whichnodetype whichmerge;
     OSErr err;
-    BOOLEAN done, modselfkey, modrightkey;
+    Boolean done, modselfkey, modrightkey;
     LONGINT left, right;
 
     modselfkey = false;
@@ -1441,7 +1441,7 @@ OSErr Executor::ROMlib_btdelete(btparam *btpb)
 {
     OSErr err;
     trailentry *tep;
-    BOOLEAN done;
+    Boolean done;
     cacheentry *selfcachep, *parentcachep;
     INTEGER selfindex, parentindex, todelete, tomung, refnum;
 
@@ -1967,7 +1967,7 @@ static OSErr slipin(cacheentry *cachep, INTEGER after, anykey *keyp,
     cacheentry *newcachep;
     btnode *btp, *newbtp;
     HVCB *vcbp;
-    BOOLEAN inbtp;
+    Boolean inbtp;
     OSErr err;
 
     btp = (btnode *)cachep->buf;
@@ -2208,7 +2208,7 @@ static OSErr btcreate(btparam *btpb, void *datap, INTEGER datasize)
     anykey *keytoinsertp;
     char *datatoinsertp;
     INTEGER sizetoinsert, keylen, tomung, refnum;
-    BOOLEAN done;
+    Boolean done;
     btnode *newbtp;
     anykey tempkey;
     btblock0 *block0p;
@@ -2553,13 +2553,13 @@ OSErr Executor::ROMlib_btcreateemptydir(btparam *btpb, GUEST<LONGINT> *newidp)
 
 OSErr Executor::ROMlib_btpbindex(IOParam *pb, LONGINT dirid, HVCB **vcbpp,
                                  filerec **frpp, catkey **catkeypp,
-                                 BOOLEAN filesonly)
+                                 Boolean filesonly)
 {
     IOParam newpb;
     btparam btparamrec;
     filekind kind;
     OSErr err;
-    BOOLEAN done;
+    Boolean done;
     LONGINT count, new_count;
     btnode *btp;
     LONGINT flink;

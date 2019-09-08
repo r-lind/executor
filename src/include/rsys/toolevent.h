@@ -11,7 +11,7 @@
 namespace Executor
 {
 extern void dofloppymount(void);
-extern BOOLEAN ROMlib_beepedonce;
+extern Boolean ROMlib_beepedonce;
 extern void ROMlib_send_quit(void);
 
 extern int ROMlib_right_button_modifier;   /* in parse.ypp */

@@ -79,7 +79,7 @@ OSErr Executor::C_SndStartFilePlay(SndChannelPtr chanp, INTEGER refnum,
                                    INTEGER resnum, LONGINT buffersize,
                                    Ptr bufferp,
                                    AudioSelectionPtr theselectionp,
-                                   ProcPtr completionp, BOOLEAN async)
+                                   ProcPtr completionp, Boolean async)
 {
     /* #warning SndStartFilePlay not implemented */
     warning_sound_log(NULL_STRING);
@@ -93,7 +93,7 @@ OSErr Executor::C_SndPauseFilePlay(SndChannelPtr chanp)
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
-OSErr Executor::C_SndStopFilePlay(SndChannelPtr chanp, BOOLEAN async)
+OSErr Executor::C_SndStopFilePlay(SndChannelPtr chanp, Boolean async)
 {
     /* #warning SndStopFilePlay not implemented */
     warning_sound_log(NULL_STRING);
@@ -106,7 +106,7 @@ static struct
     SndChannelPtr chanp;
     int current_buffer;
     TMTask task;
-    BOOLEAN busy;
+    Boolean busy;
 } call_back_info;
 
 /*
@@ -298,7 +298,7 @@ OSErr Executor::C_SPBCloseDevice(LONGINT inrefnum)
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
-OSErr Executor::C_SPBRecord(SPBPtr inparamp, BOOLEAN async)
+OSErr Executor::C_SPBRecord(SPBPtr inparamp, Boolean async)
 {
     /* #warning SPBRecord not implemented */
     warning_sound_log(NULL_STRING);
@@ -306,7 +306,7 @@ OSErr Executor::C_SPBRecord(SPBPtr inparamp, BOOLEAN async)
 }
 
 OSErr Executor::C_SPBRecordToFile(INTEGER refnum, SPBPtr inparamp,
-                                  BOOLEAN async)
+                                  Boolean async)
 {
     /* #warning SPBRecordToFile not implemented */
     warning_sound_log(NULL_STRING);

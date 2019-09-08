@@ -188,7 +188,7 @@ INTEGER Executor::C_CautionAlert(INTEGER id, ModalFilterUPP fp) /* IMI-420 */
     return Alert(id, fp);
 }
 
-static Handle lockres(ResType rt, INTEGER id, BOOLEAN flag)
+static Handle lockres(ResType rt, INTEGER id, Boolean flag)
 {
     Handle retval;
 
@@ -205,7 +205,7 @@ static Handle lockres(ResType rt, INTEGER id, BOOLEAN flag)
 
 #define RESCTL (ctrlItem | resCtrl)
 
-static void lockditl(INTEGER id, BOOLEAN flag)
+static void lockditl(INTEGER id, Boolean flag)
 {
     Handle ih, h;
     INTEGER nitem, procid;
@@ -233,7 +233,7 @@ static void lockditl(INTEGER id, BOOLEAN flag)
     }
 }
 
-static void lockalert(INTEGER id, BOOLEAN flag)
+static void lockalert(INTEGER id, Boolean flag)
 {
     alth ah;
 
@@ -257,7 +257,7 @@ void Executor::C_FreeAlert(INTEGER id) /* IMI-420 */
     lockalert(id, false);
 }
 
-static void lockdialog(INTEGER id, BOOLEAN flag)
+static void lockdialog(INTEGER id, Boolean flag)
 {
     dlogh dh;
 

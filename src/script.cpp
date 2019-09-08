@@ -257,7 +257,7 @@ INTEGER Executor::C_TransliterateText(Handle srch, Handle dsth, INTEGER target,
 }
 
 INTEGER Executor::C_Pixel2Char(Ptr textbufp, INTEGER len, INTEGER slop,
-                               INTEGER pixwidth, BOOLEAN *leftsidep)
+                               INTEGER pixwidth, Boolean *leftsidep)
 {
     Point num, den;
     INTEGER retval;
@@ -292,7 +292,7 @@ INTEGER Executor::C_Char2Pixel(Ptr textbufp, INTEGER len, INTEGER slop,
 }
 
 void Executor::C_FindWord(Ptr textbufp, INTEGER length, INTEGER offset,
-                          BOOLEAN leftside, Ptr breaks, GUEST<INTEGER> *offsets)
+                          Boolean leftside, Ptr breaks, GUEST<INTEGER> *offsets)
 {
     INTEGER start, stop;
     bool chasing_spaces_p;
@@ -785,7 +785,7 @@ ScriptRunStatus Executor::C_FindScriptRun(
 }
 
 INTEGER Executor::C_PixelToChar(Ptr textBuf, LONGINT textLen, Fixed slop,
-                                Fixed pixelWidth, BOOLEAN *leadingEdgep,
+                                Fixed pixelWidth, Boolean *leadingEdgep,
                                 GUEST<Fixed> *widthRemainingp,
                                 JustStyleCode styleRunPosition, Point numer,
                                 Point denom)

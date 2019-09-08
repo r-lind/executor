@@ -19,13 +19,13 @@
 namespace Executor
 {
 extern void
-C_ldef0(INTEGER, BOOLEAN, Rect *, Cell, INTEGER, INTEGER, ListHandle);
+C_ldef0(INTEGER, Boolean, Rect *, Cell, INTEGER, INTEGER, ListHandle);
 PASCAL_FUNCTION(ldef0);
 
-using listprocp = UPP<void (INTEGER mess, BOOLEAN sel, Rect *rectp,
+using listprocp = UPP<void (INTEGER mess, Boolean sel, Rect *rectp,
                                  Cell cell, INTEGER off, INTEGER len, ListHandle lhand)>;
 
-extern void ROMlib_listcall(INTEGER mess, BOOLEAN sel, Rect *rp, Cell cell,
+extern void ROMlib_listcall(INTEGER mess, Boolean sel, Rect *rp, Cell cell,
                             INTEGER off, INTEGER len, ListHandle lhand);
 
 #define LISTCALL(msg, sel, rect, cell, doff, dlen, list) \

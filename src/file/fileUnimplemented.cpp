@@ -4,7 +4,7 @@
 
 using namespace Executor;
 
-OSErr Executor::PBHGetLogInInfo(HParmBlkPtr pb, BOOLEAN a)
+OSErr Executor::PBHGetLogInInfo(HParmBlkPtr pb, Boolean a)
 {
     OSErr retval;
 
@@ -13,7 +13,7 @@ OSErr Executor::PBHGetLogInInfo(HParmBlkPtr pb, BOOLEAN a)
     return retval;
 }
 
-OSErr Executor::PBHGetDirAccess(HParmBlkPtr pb, BOOLEAN a)
+OSErr Executor::PBHGetDirAccess(HParmBlkPtr pb, Boolean a)
 {
     OSErr retval;
 
@@ -22,7 +22,7 @@ OSErr Executor::PBHGetDirAccess(HParmBlkPtr pb, BOOLEAN a)
     return retval;
 }
 
-OSErr Executor::PBHCopyFile(HParmBlkPtr pb, BOOLEAN a)
+OSErr Executor::PBHCopyFile(HParmBlkPtr pb, Boolean a)
 {
     OSErr retval;
 
@@ -31,7 +31,7 @@ OSErr Executor::PBHCopyFile(HParmBlkPtr pb, BOOLEAN a)
     return retval;
 }
 
-OSErr Executor::PBHMapName(HParmBlkPtr pb, BOOLEAN a)
+OSErr Executor::PBHMapName(HParmBlkPtr pb, Boolean a)
 {
     OSErr retval;
 
@@ -40,7 +40,7 @@ OSErr Executor::PBHMapName(HParmBlkPtr pb, BOOLEAN a)
     return retval;
 }
 
-OSErr Executor::PBHMapID(HParmBlkPtr pb, BOOLEAN a)
+OSErr Executor::PBHMapID(HParmBlkPtr pb, Boolean a)
 {
     OSErr retval;
 
@@ -49,7 +49,7 @@ OSErr Executor::PBHMapID(HParmBlkPtr pb, BOOLEAN a)
     return retval;
 }
 
-OSErr Executor::PBHSetDirAccess(HParmBlkPtr pb, BOOLEAN a)
+OSErr Executor::PBHSetDirAccess(HParmBlkPtr pb, Boolean a)
 {
     OSErr retval;
 
@@ -58,7 +58,7 @@ OSErr Executor::PBHSetDirAccess(HParmBlkPtr pb, BOOLEAN a)
     return retval;
 }
 
-OSErr Executor::PBHMoveRename(HParmBlkPtr pb, BOOLEAN a)
+OSErr Executor::PBHMoveRename(HParmBlkPtr pb, Boolean a)
 {
     OSErr retval;
 
@@ -67,7 +67,7 @@ OSErr Executor::PBHMoveRename(HParmBlkPtr pb, BOOLEAN a)
     return retval;
 }
 
-OSErr Executor::PBExchangeFiles(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::PBExchangeFiles(ParmBlkPtr pb, Boolean async)
 {
     OSErr retval;
 
@@ -76,7 +76,7 @@ OSErr Executor::PBExchangeFiles(ParmBlkPtr pb, BOOLEAN async)
     FAKEASYNC(pb, async, retval);
 }
 
-OSErr Executor::PBCatSearch(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::PBCatSearch(ParmBlkPtr pb, Boolean async)
 {
     OSErr retval;
 
@@ -85,7 +85,7 @@ OSErr Executor::PBCatSearch(ParmBlkPtr pb, BOOLEAN async)
     FAKEASYNC(pb, async, retval);
 }
 
-OSErr Executor::PBCreateFileIDRef(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::PBCreateFileIDRef(ParmBlkPtr pb, Boolean async)
 {
     OSErr retval;
 
@@ -94,7 +94,7 @@ OSErr Executor::PBCreateFileIDRef(ParmBlkPtr pb, BOOLEAN async)
     FAKEASYNC(pb, async, retval);
 }
 
-OSErr Executor::PBDeleteFileIDRef(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::PBDeleteFileIDRef(ParmBlkPtr pb, Boolean async)
 {
     OSErr retval;
 
@@ -103,7 +103,7 @@ OSErr Executor::PBDeleteFileIDRef(ParmBlkPtr pb, BOOLEAN async)
     FAKEASYNC(pb, async, retval);
 }
 
-OSErr Executor::PBResolveFileIDRef(ParmBlkPtr pb, BOOLEAN async)
+OSErr Executor::PBResolveFileIDRef(ParmBlkPtr pb, Boolean async)
 {
     OSErr retval;
 

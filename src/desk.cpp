@@ -120,10 +120,10 @@ void Executor::C_SystemClick(EventRecord *evp, WindowPtr wp)
     }
 }
 
-BOOLEAN Executor::C_SystemEdit(INTEGER editcmd)
+Boolean Executor::C_SystemEdit(INTEGER editcmd)
 {
     WindowPeek wp;
-    BOOLEAN retval;
+    Boolean retval;
 
     wp = (WindowPeek)FrontWindow();
     if(!wp)
@@ -152,9 +152,9 @@ void Executor::C_SystemTask()
     }
 }
 
-BOOLEAN Executor::C_SystemEvent(EventRecord *evp)
+Boolean Executor::C_SystemEvent(EventRecord *evp)
 {
-    BOOLEAN retval;
+    Boolean retval;
     WindowPeek wp;
     INTEGER rn;
     DCtlHandle dctlh;

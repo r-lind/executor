@@ -196,12 +196,12 @@ void Executor::C_LCellSize(Point csize, ListHandle list) /* IMIV-273 */
     }
 }
 
-BOOLEAN Executor::C_LGetSelect(BOOLEAN next, GUEST<Cell> *cellp,
+Boolean Executor::C_LGetSelect(Boolean next, GUEST<Cell> *cellp,
                                ListHandle list) /* IMIV-273 */
 {
     GUEST<INTEGER> *ip, *ep;
     INTEGER nint, ncols, rown, coln;
-    BOOLEAN retval;
+    Boolean retval;
     Cell temp, c;
     Point p;
 

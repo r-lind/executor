@@ -565,7 +565,7 @@ OSErr Executor::C_AEResolve(AEDesc *objectSpecifier, INTEGER callbackFlags,
 
 OSErr Executor::C_AERemoveObjectAccessor(
     DescType desiredClass, DescType containerType, ProcPtr theAccessor,
-    BOOLEAN isSysHandler)
+    Boolean isSysHandler)
 {
     warning_unimplemented(NULL_STRING);
     return noErr;
@@ -573,7 +573,7 @@ OSErr Executor::C_AERemoveObjectAccessor(
 
 OSErr Executor::C_AEInstallObjectAccessor(
     DescType desiredClass, DescType containerType, ProcPtr theAccessor,
-    LONGINT refcon, BOOLEAN isSysHandler)
+    LONGINT refcon, Boolean isSysHandler)
 {
     warning_unimplemented(NULL_STRING);
     return noErr;
@@ -583,7 +583,7 @@ OSErr Executor::C_AEGetObjectAccessor(DescType desiredClass,
                                       DescType containerType,
                                       ProcPtr *theAccessor,
                                       LONGINT *accessorRefcon,
-                                      BOOLEAN isSysHandler)
+                                      Boolean isSysHandler)
 {
     warning_unimplemented(NULL_STRING);
     return noErr;

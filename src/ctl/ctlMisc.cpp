@@ -150,7 +150,7 @@ INTEGER Executor::C_GetControlVariant(ControlHandle c) /* IMV-222 */
 /* according to IM-MTE; this has been renamed
    `GetAuxiliaryControlRecord ()', possibly because of the
    inconsistency below, i can only assume they have the same trap word */
-BOOLEAN Executor::C_GetAuxiliaryControlRecord(ControlHandle ctl,
+Boolean Executor::C_GetAuxiliaryControlRecord(ControlHandle ctl,
                               GUEST<AuxCtlHandle> *aux_ctl) /* IMV-222 */
 {
     /* according to testing on the Mac+

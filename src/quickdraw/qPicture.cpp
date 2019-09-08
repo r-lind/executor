@@ -126,7 +126,7 @@ static void updateclip(void)
     }
 }
 
-static BOOLEAN EqualPat(Pattern pat1, Pattern pat2)
+static Boolean EqualPat(Pattern pat1, Pattern pat2)
 {
     LONGINT *lp1, *lp2;
 

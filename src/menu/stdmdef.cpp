@@ -131,9 +131,9 @@ int Executor::get_icon_info(mextp item_info, icon_info_t *info, int need_icon_p)
 
 /* See IMV-236 */
 
-static BOOLEAN iskeyequiv(struct table::tableentry *tp)
+static Boolean iskeyequiv(struct table::tableentry *tp)
 {
-    BOOLEAN retval;
+    Boolean retval;
 
     if(tp->options->mkeyeq)
         retval = (tp->options->mkeyeq < 0x1b || tp->options->mkeyeq > 0x1f);
@@ -282,10 +282,10 @@ draw_arrow(Rect *menu_rect, MenuHandle mh, arrowtype arrdir)
     RGBBackColor(&ROMlib_white_rgb_color);
 }
 
-static void erasearrow(Rect *, tablePtr, BOOLEAN);
+static void erasearrow(Rect *, tablePtr, Boolean);
 static void popuprect(MenuHandle, Rect *, Point, GUEST<INTEGER> *, tablePtr);
 
-static void erasearrow(Rect *rp, tablePtr tablep, BOOLEAN upordown)
+static void erasearrow(Rect *rp, tablePtr tablep, Boolean upordown)
 {
     Rect r;
     INTEGER x, y;
@@ -525,7 +525,7 @@ fliprect(Rect *rp, int16_t i, tablePtr tablep, Rect *flipr)
 }
 
 static void
-doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, BOOLEAN upordown,
+doupdown(MenuHandle mh, Rect *rp, tablePtr tablep, Boolean upordown,
          GUEST<int16_t> *itemp)
 {
     INTEGER offset;

@@ -82,7 +82,7 @@ PASCAL_TRAP(PackBits, 0xA8CF);
 extern void C_UnpackBits(GUEST<Ptr> *sp, GUEST<Ptr> *dp, INTEGER len);
 PASCAL_TRAP(UnpackBits, 0xA8D0);
 
-extern BOOLEAN C_BitTst(Ptr bp, LONGINT bn);
+extern Boolean C_BitTst(Ptr bp, LONGINT bn);
 PASCAL_TRAP(BitTst, 0xA85D);
 
 extern void C_BitSet(Ptr bp, LONGINT bn);

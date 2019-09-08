@@ -100,7 +100,7 @@ OSErr Executor::C_PrerollMovie(Movie movie, TimeValue time, Fixed rate)
     return retval;
 }
 
-void Executor::C_SetMovieActive(Movie movie, BOOLEAN active)
+void Executor::C_SetMovieActive(Movie movie, Boolean active)
 {
     warning_unimplemented(NULL_STRING);
 }
@@ -169,9 +169,9 @@ OSErr Executor::C_CloseMovieFile(INTEGER refnum)
     return retval;
 }
 
-BOOLEAN Executor::C_IsMovieDone(Movie movie)
+Boolean Executor::C_IsMovieDone(Movie movie)
 {
-    BOOLEAN retval;
+    Boolean retval;
 
 #if !defined(CYGWIN32)
     warning_unimplemented(NULL_STRING);
@@ -184,7 +184,7 @@ BOOLEAN Executor::C_IsMovieDone(Movie movie)
 
 OSErr Executor::C_NewMovieFromFile(Movie *moviep, INTEGER refnum,
                                    INTEGER *residp, StringPtr resnamep,
-                                   INTEGER flags, BOOLEAN *datarefwaschangedp)
+                                   INTEGER flags, Boolean *datarefwaschangedp)
 {
     OSErr retval;
 

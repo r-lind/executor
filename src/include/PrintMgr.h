@@ -68,8 +68,8 @@ struct TPrPort
     GUEST<GrafPort> gPort;
     GUEST<QDProcs> saveprocs;
     GUEST<LONGINT[4]> spare;
-    GUEST<BOOLEAN> fOurPtr;
-    GUEST<BOOLEAN> fOurBits;
+    GUEST<Boolean> fOurPtr;
+    GUEST<Boolean> fOurBits;
 };
 typedef TPrPort *TPPrPort;
 
@@ -124,7 +124,7 @@ struct TPrJob
     GUEST<INTEGER> iLstPage;
     GUEST<INTEGER> iCopies;
     GUEST<SignedByte> bJDocLoop;
-    GUEST<BOOLEAN> fFromUsr;
+    GUEST<Boolean> fFromUsr;
     GUEST<ProcPtr> pIdleProc;
     GUEST<StringPtr> pFileName;
     GUEST<INTEGER> iFileVol;
@@ -159,8 +159,8 @@ struct TPrStatus
     GUEST<INTEGER> iCurCopy;
     GUEST<INTEGER> iTotBands;
     GUEST<INTEGER> iCurBand;
-    GUEST<BOOLEAN> fPgDirty;
-    GUEST<BOOLEAN> fImaging;
+    GUEST<Boolean> fPgDirty;
+    GUEST<Boolean> fImaging;
     GUEST<THPrint> hPrint;
     GUEST<TPPrPort> pPRPort;
     GUEST<PicHandle> hPic;
@@ -175,8 +175,8 @@ typedef struct TPrDlg
     GUEST<ModalFilterUPP> pFltrProc;
     GUEST<UserItemUPP> pItemProc;
     GUEST<THPrint> hPrintUsr;
-    GUEST<BOOLEAN> fDoIt;
-    GUEST<BOOLEAN> fDone;
+    GUEST<Boolean> fDoIt;
+    GUEST<Boolean> fDone;
     GUEST<LONGINT> lUser1;
     GUEST<LONGINT> lUser2;
     GUEST<LONGINT> lUser3;
@@ -210,10 +210,10 @@ extern INTEGER C_PrDrvrVers(void);
 PASCAL_SUBTRAP(PrDrvrVers, 0xA8FD, 0x9A000000, PrGlue);
 extern void C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno);
 PASCAL_FUNCTION(ROMlib_myjobproc);
-extern BOOLEAN C_ROMlib_stlfilterproc(DialogPtr dp,
+extern Boolean C_ROMlib_stlfilterproc(DialogPtr dp,
                                              EventRecord *evt, GUEST<INTEGER> *ith);
 PASCAL_FUNCTION(ROMlib_stlfilterproc);
-extern BOOLEAN C_ROMlib_numsonlyfilterproc(DialogPtr dp,
+extern Boolean C_ROMlib_numsonlyfilterproc(DialogPtr dp,
                                                   EventRecord *evt,
                                                   GUEST<INTEGER> *ith);
 PASCAL_FUNCTION(ROMlib_numsonlyfilterproc);
@@ -225,7 +225,7 @@ extern TPPrDlg C_PrJobInit(THPrint hPrint);
 PASCAL_SUBTRAP(PrJobInit, 0xA8FD, 0x44040410, PrGlue);
 extern TPPrDlg C_PrStlInit(THPrint hPrint);
 PASCAL_SUBTRAP(PrStlInit, 0xA8FD, 0x3C04040C, PrGlue);
-extern BOOLEAN C_PrDlgMain(THPrint hPrint, ProcPtr initfptr);
+extern Boolean C_PrDlgMain(THPrint hPrint, ProcPtr initfptr);
 PASCAL_SUBTRAP(PrDlgMain, 0xA8FD, 0x4A040894, PrGlue);
 extern void C_PrGeneral(Ptr pData);
 PASCAL_SUBTRAP(PrGeneral, 0xA8FD, 0x70070480, PrGlue);
@@ -306,11 +306,11 @@ extern void C_PrPicFile(THPrint hPrint, TPPrPort pPrPort,
 PASCAL_SUBTRAP(PrPicFile, 0xA8FD, 0x60051480, PrGlue);
 extern void C_PrintDefault(THPrint hPrint);
 PASCAL_SUBTRAP(PrintDefault, 0xA8FD, 0x20040480, PrGlue);
-extern BOOLEAN C_PrValidate(THPrint hPrint);
+extern Boolean C_PrValidate(THPrint hPrint);
 PASCAL_SUBTRAP(PrValidate, 0xA8FD, 0x52040498, PrGlue);
-extern BOOLEAN C_PrStlDialog(THPrint hPrint);
+extern Boolean C_PrStlDialog(THPrint hPrint);
 PASCAL_SUBTRAP(PrStlDialog, 0xA8FD, 0x2A040484, PrGlue);
-extern BOOLEAN C_PrJobDialog(THPrint hPrint);
+extern Boolean C_PrJobDialog(THPrint hPrint);
 PASCAL_SUBTRAP(PrJobDialog, 0xA8FD, 0x32040488, PrGlue);
 extern void C_PrJobMerge(THPrint hPrintSrc, THPrint hPrintDst);
 PASCAL_SUBTRAP(PrJobMerge, 0xA8FD, 0x5804089C, PrGlue);

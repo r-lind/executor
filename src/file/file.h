@@ -264,8 +264,8 @@ extern StringPtr ROMlib_exefname;
 
 extern OSErr ROMlib_maperrno(void);
 
-extern OSErr ROMlib_driveropen(ParmBlkPtr pbp, BOOLEAN a);
-extern OSErr ROMlib_dispatch(ParmBlkPtr p, BOOLEAN async,
+extern OSErr ROMlib_driveropen(ParmBlkPtr pbp, Boolean a);
+extern OSErr ROMlib_dispatch(ParmBlkPtr p, Boolean async,
                              DriverRoutineType routine, INTEGER trap);
 
 extern DrvQExtra *ROMlib_addtodq(ULONGINT drvsize, const char *devicename,

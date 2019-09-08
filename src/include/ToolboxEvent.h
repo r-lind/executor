@@ -30,24 +30,24 @@ extern void ROMlib_alarmoffmbar(void);
 extern LONGINT C_KeyTranslate(Ptr mapp, unsigned short code,
                                       LONGINT *state);
 PASCAL_TRAP(KeyTranslate, 0xA9C3);
-extern BOOLEAN C_GetNextEvent(INTEGER em,
+extern Boolean C_GetNextEvent(INTEGER em,
                                           EventRecord *evt);
 PASCAL_TRAP(GetNextEvent, 0xA970);
-extern BOOLEAN C_WaitNextEvent(INTEGER mask,
+extern Boolean C_WaitNextEvent(INTEGER mask,
                                            EventRecord *evp, LONGINT sleep, RgnHandle mousergn);
 PASCAL_TRAP(WaitNextEvent, 0xA860);
-extern BOOLEAN C_EventAvail(INTEGER em, EventRecord *evt);
+extern Boolean C_EventAvail(INTEGER em, EventRecord *evt);
 PASCAL_TRAP(EventAvail, 0xA971);
 
 extern void C_GetMouse(GUEST<Point> *p);
 PASCAL_TRAP(GetMouse, 0xA972);
-extern BOOLEAN C_Button(void);
+extern Boolean C_Button(void);
 PASCAL_TRAP(Button, 0xA974);
 
-extern BOOLEAN C_StillDown(void);
+extern Boolean C_StillDown(void);
 PASCAL_TRAP(StillDown, 0xA973);
 
-extern BOOLEAN C_WaitMouseUp(void);
+extern Boolean C_WaitMouseUp(void);
 PASCAL_TRAP(WaitMouseUp, 0xA977);
 
 extern void C_GetKeys(unsigned char *keys);

@@ -269,7 +269,7 @@ extern void ROMlib_teautoloop(TEHandle teh);
 extern void C_TESelView(TEHandle teh);
 PASCAL_TRAP(TESelView, 0xA811);
 
-extern void C_TEAutoView(BOOLEAN autoflag,
+extern void C_TEAutoView(Boolean autoflag,
                          TEHandle teh);
 PASCAL_TRAP(TEAutoView, 0xA813);
 extern TEHandle C_TEStyleNew(const Rect *dst, const Rect *view);
@@ -303,16 +303,16 @@ extern void C_TEStylePaste(TEHandle teh);
 PASCAL_SUBTRAP(TEStylePaste, 0xA83D, 0x0000, TEDispatch);
 
 extern void C_TESetStyle(INTEGER mode, TextStyle *newStyle,
-                         BOOLEAN redraw, TEHandle teh);
+                         Boolean redraw, TEHandle teh);
 PASCAL_SUBTRAP(TESetStyle, 0xA83D, 0x0001, TEDispatch);
 extern void C_TEReplaceStyle(INTEGER mode,
-                             TextStyle *oldStyle, TextStyle *newStyle, BOOLEAN redraw, TEHandle teh);
+                             TextStyle *oldStyle, TextStyle *newStyle, Boolean redraw, TEHandle teh);
 PASCAL_SUBTRAP(TEReplaceStyle, 0xA83D, 0x0002, TEDispatch);
-extern BOOLEAN C_TEContinuousStyle(GUEST<INTEGER> *modep,
+extern Boolean C_TEContinuousStyle(GUEST<INTEGER> *modep,
                                    TextStyle *thestyle, TEHandle teh);
 PASCAL_SUBTRAP(TEContinuousStyle, 0xA83D, 0x000A, TEDispatch);
 extern void C_TEUseStyleScrap(LONGINT start, LONGINT stop,
-                              StScrpHandle newstyles, BOOLEAN redraw, TEHandle teh);
+                              StScrpHandle newstyles, Boolean redraw, TEHandle teh);
 PASCAL_SUBTRAP(TEUseStyleScrap, 0xA83D, 0x000B, TEDispatch);
 extern void C_TECustomHook(INTEGER sel, GUEST<ProcPtr> *addr,
                            TEHandle teh);
@@ -332,7 +332,7 @@ PASCAL_TRAP(TEDispose, 0xA9CD);
 extern void C_TEIdle(TEHandle teh);
 PASCAL_TRAP(TEIdle, 0xA9DA);
 
-extern void C_TEClick(Point p, BOOLEAN ext, TEHandle teh);
+extern void C_TEClick(Point p, Boolean ext, TEHandle teh);
 PASCAL_TRAP(TEClick, 0xA9D4);
 
 extern void C_TESetSelect(LONGINT start, LONGINT stop,

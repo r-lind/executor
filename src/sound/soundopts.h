@@ -56,7 +56,7 @@ typedef LONGINT TimeL;
 struct ModifierStub;
 typedef ModifierStub *ModifierStubPtr;
 
-using snthfp = UPP<BOOLEAN(SndChannelPtr, SndCommand *, ModifierStubPtr)>;
+using snthfp = UPP<Boolean(SndChannelPtr, SndCommand *, ModifierStubPtr)>;
 struct ModifierStub
 {
     GUEST<struct _ModifierStub *> nextStub;
@@ -103,7 +103,7 @@ extern bool sound_disabled_p;
 
 extern int ROMlib_get_snd_cmds(Handle sndh, SndCommand **cmdsp);
 
-BOOLEAN C_snth5(SndChannelPtr, SndCommand *, ModifierStubPtr);
+Boolean C_snth5(SndChannelPtr, SndCommand *, ModifierStubPtr);
 PASCAL_FUNCTION(snth5);
 }
 

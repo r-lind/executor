@@ -762,7 +762,7 @@ te_do_redraw(TEHandle te)
     TERESTORE();
 }
 
-void Executor::C_TESetStyle(int16_t mode, TextStyle *new_attrs, BOOLEAN redraw,
+void Executor::C_TESetStyle(int16_t mode, TextStyle *new_attrs, Boolean redraw,
                             TEHandle te)
 {
     int16_t start, end;
@@ -824,7 +824,7 @@ void Executor::C_TESetStyle(int16_t mode, TextStyle *new_attrs, BOOLEAN redraw,
 }
 
 void Executor::C_TEReplaceStyle(int16_t mode, TextStyle *attrs_to_replace,
-                                TextStyle *replacement_attrs, BOOLEAN redraw,
+                                TextStyle *replacement_attrs, Boolean redraw,
                                 TEHandle te)
 {
     TEStyleHandle te_style;
@@ -907,7 +907,7 @@ void Executor::C_TEReplaceStyle(int16_t mode, TextStyle *attrs_to_replace,
     TE_SLAM(te);
 }
 
-BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
+Boolean Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
                                       TEHandle teh)
 {
     int16_t sel_start, sel_end;
@@ -1068,7 +1068,7 @@ BOOLEAN Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
 }
 
 void Executor::C_TEUseStyleScrap(int32_t start, int32_t stop,
-                              StScrpHandle newstyles, BOOLEAN redraw,
+                              StScrpHandle newstyles, Boolean redraw,
                               TEHandle teh)
 {
     ROMlib_hook(te_notsupported);

@@ -842,16 +842,16 @@ double_click_p(TEHandle te, int16_t cl)
     return false;
 }
 
-typedef BOOLEAN (*cliklooptype)(void);
+typedef Boolean (*cliklooptype)(void);
 
 namespace Executor
 {
-static inline BOOLEAN CALLCLIKOK(TEHandle);
+static inline Boolean CALLCLIKOK(TEHandle);
 }
 
-static inline BOOLEAN Executor::CALLCLIKOK(TEHandle teh)
+static inline Boolean Executor::CALLCLIKOK(TEHandle teh)
 {
-    BOOLEAN retval;
+    Boolean retval;
     cliklooptype cp;
 
     if((cp = (cliklooptype)(*teh)->clikLoop))
@@ -933,7 +933,7 @@ done:
     return retval;
 }
 
-void Executor::C_TEClick(Point pt, BOOLEAN extend, TEHandle te)
+void Executor::C_TEClick(Point pt, Boolean extend, TEHandle te)
 {
     EventRecord evt;
     SignedByte te_flags;

@@ -98,7 +98,7 @@ INTEGER Executor::C_GetResAttrs(Handle res)
     return (rr->ratr);
 }
 
-LONGINT Executor::ROMlib_SizeResource(Handle res, BOOLEAN usehandle)
+LONGINT Executor::ROMlib_SizeResource(Handle res, Boolean usehandle)
 {
     resmaphand map;
     typref *tr;

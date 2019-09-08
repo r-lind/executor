@@ -510,7 +510,7 @@ void Executor::C_UpdateResFile(INTEGER rn)
     INTEGER i, j;
     typref *tr;
     resref *rr;
-    BOOLEAN needtowalk;
+    Boolean needtowalk;
     fcbrec *fp;
     OSErr err;
     IOParam iopb;
@@ -566,7 +566,7 @@ void Executor::C_WriteResource(Handle res)
     ROMlib_wr(map, rr);
 }
 
-void Executor::C_SetResPurge(BOOLEAN install)
+void Executor::C_SetResPurge(Boolean install)
 {
     /* NOP */
     ROMlib_setreserr(noErr);

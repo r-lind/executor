@@ -15,8 +15,8 @@
 #undef DrawText
 #undef FindWindow
 #undef ReplaceText
-/* Do not use the windows BOOLEAN or CHAR types */
-#define BOOLEAN MAC_BOOLEAN
+/* Do not use the windows Boolean or CHAR types */
+#define Boolean MAC_BOOLEAN
 #define CHAR MAC_CHAR
 #define Polygon MAC_Polygon
 

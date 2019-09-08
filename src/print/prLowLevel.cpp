@@ -553,10 +553,10 @@ static inline void Executor::ROMlib_CALLPRITEMPROC(TPPrDlg prrecptr, INTEGER ite
     }
 }
 
-BOOLEAN Executor::C_ROMlib_stlfilterproc(
+Boolean Executor::C_ROMlib_stlfilterproc(
     DialogPtr dlg, EventRecord *evt, GUEST<INTEGER> *ith)
 {
-    BOOLEAN retval;
+    Boolean retval;
     char *keyp;
 
     retval = false;
@@ -647,7 +647,7 @@ BOOLEAN Executor::C_ROMlib_stlfilterproc(
     return retval;
 }
 
-BOOLEAN Executor::C_ROMlib_numsonlyfilterproc(
+Boolean Executor::C_ROMlib_numsonlyfilterproc(
     DialogPtr dlg, EventRecord *evt, GUEST<INTEGER> *ith)
 {
     char c;
@@ -1120,12 +1120,12 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
 
 #define SUNPATH_HACK (ROMlib_options & ROMLIB_PRINTING_HACK_BIT)
 
-BOOLEAN Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
+Boolean Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
 {
     GUEST<INTEGER> item_swapped;
     INTEGER item;
     TPPrDlg prrecptr;
-    BOOLEAN retval;
+    Boolean retval;
 
     printer_init();
     retval = false;

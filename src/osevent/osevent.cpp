@@ -181,8 +181,8 @@ void Executor::ROMlib_eventinit() /* INTERNAL */
 static void dropevent(EvQEl *);
 static OSErr _PPostEvent(INTEGER evcode, LONGINT evmsg,
                             GUEST<EvQElPtr> *qelpp);
-static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
-                             BOOLEAN dropit);
+static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
+                             Boolean dropit);
 
 static void dropevent(EvQEl *qp)
 {
@@ -373,13 +373,13 @@ void Executor::FlushEvents(INTEGER evmask, INTEGER stopmask) /* II-69 */
     /* NOTE:  According to IMII-69 we should be leaving stuff in d0 */
 }
 
-BOOLEAN Executor::ROMlib_bewaremovement;
+Boolean Executor::ROMlib_bewaremovement;
 
-static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
-                             BOOLEAN dropit)
+static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
+                             Boolean dropit)
 {
     EvQEl *qp;
-    BOOLEAN retval;
+    Boolean retval;
     static Point oldpoint = { -1, -1 };
     LONGINT ticks;
 
@@ -514,12 +514,12 @@ static BOOLEAN OSEventCommon(INTEGER evmask, EventRecord *eventp,
     return retval;
 }
 
-BOOLEAN Executor::GetOSEvent(INTEGER evmask, EventRecord *eventp)
+Boolean Executor::GetOSEvent(INTEGER evmask, EventRecord *eventp)
 {
     return OSEventCommon(evmask, eventp, true);
 }
 
-BOOLEAN Executor::OSEventAvail(INTEGER evmask, EventRecord *eventp)
+Boolean Executor::OSEventAvail(INTEGER evmask, EventRecord *eventp)
 {
     return OSEventCommon(evmask, eventp, false);
 }
