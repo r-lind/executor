@@ -19,7 +19,7 @@
 #include <ResourceMgr.h>
 
 #include <rsys/cfm.h>
-#include <rsys/pef.h>
+#include <PEFBinaryFormat.h>
 #include <file/file.h>
 #include <rsys/launch.h>
 #include <hfs/hfs.h>
@@ -29,62 +29,7 @@
 
 using namespace Executor;
 
-#if 0
-
-OSErr Executor::C_CloseConnection(ConnectionID *cidp)
-{
-    warning_trace_info("cidp = %p, cid = 0x%p", cidp, *cidp);
-    return noErr;
-}
-
-OSErr Executor::C_GetSharedLibrary(Str63 library, OSType arch,
-                                   LoadFlags loadflags, GUEST<ConnectionID> *cidp,
-                                   GUEST<Ptr> *mainaddrp, Str255 errName)
-{
-    return paramErr;
-}
-
-OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
-                                 LoadFlags flags, GUEST<ConnectionID> *connp,
-                                 GUEST<Ptr> *mainAddrp, Str255 errname)
-{
-    return paramErr;
-}
-
-OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
-                                  LONGINT length, Str63 fragname,
-                                  LoadFlags flags, GUEST<ConnectionID> *connp,
-                                  GUEST<Ptr> *mainAddrp, Str255 errname)
-{
-    return paramErr;
-}
-
-ConnectionID
-ROMlib_new_connection(uint32_t n_sects)
-{
-    return nullptr;
-}
-
-#else
-enum {
-    process_share = 1,
-    global_share = 4,
-    protected_share = 5,
-};
 typedef int share_kind_t;
-
-enum
-{
-    code_section_type = 0,
-    unpacked_data_section_type,
-    pattern_data_section_type,
-    constant_section_type,
-    loader_section_type,
-    debug_section_type,
-    executable_data_section_type,
-    exception_section_type,
-    traceback_section_type,
-};
 
 static OSErr
 try_to_get_memory(void **addrp, syn68k_addr_t default_syn_address,
@@ -1034,19 +979,19 @@ do_pef_section(ConnectionID connp, const void *addr,
 
     switch(PEFSH_SECTION_KIND(shp))
     {
-        case code_section_type:
+        case kPEFCodeSection:
             connp->sects[i].perms = readable_section | executable_section;
             goto unpacked_common;
 
-        case unpacked_data_section_type:
+        case kPEFUnpackedDataSection:
             connp->sects[i].perms = readable_section | writable_section;
             goto unpacked_common;
 
-        case constant_section_type:
+        case kPEFConstantSection:
             connp->sects[i].perms = readable_section;
             goto unpacked_common;
 
-        case executable_data_section_type:
+        case kPEFExecutableDataSection:
             connp->sects[i].perms = (readable_section | writable_section | executable_section);
             goto unpacked_common;
 
@@ -1056,14 +1001,14 @@ do_pef_section(ConnectionID connp, const void *addr,
                                            section_offset, share_kind, alignment,
                                            &connp->sects[i]);
             break;
-        case pattern_data_section_type:
+        case kPEFPatternDataSection:
             connp->sects[i].perms = readable_section | writable_section;
             retval = load_pattern_section(addr, default_address, total_size,
                                           packed_size, unpacked_size,
                                           section_offset, share_kind, alignment,
                                           &connp->sects[i]);
             break;
-        case loader_section_type:
+        case kPEFLoaderSection:
             retval = load_loader_section(addr, default_address, total_size,
                                          packed_size, unpacked_size,
                                          section_offset, share_kind, alignment,
@@ -1164,10 +1109,10 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
 
     headp = (PEFContainerHeader*)addr;
 
-    if(PEF_CONTAINER_TAG1_X(headp) != "Joy!"_4)
+    if(PEF_CONTAINER_TAG1(headp) != "Joy!"_4)
         warning_unexpected("0x%x", toHost(PEF_CONTAINER_TAG1(headp)));
 
-    if(PEF_CONTAINER_TAG2_X(headp) != "peff"_4)
+    if(PEF_CONTAINER_TAG2(headp) != "peff"_4)
         warning_unexpected("0x%x", toHost(PEF_CONTAINER_TAG2(headp)));
 
     if(PEF_CONTAINER_ARCHITECTURE(headp)
@@ -1181,7 +1126,7 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
 
     // #warning ignoring (old_dev, old_imp, current) version
 
-   conn = ROMlib_new_connection(PEF_CONTAINER_SECTION_COUNT(headp));
+    conn = ROMlib_new_connection(PEF_CONTAINER_SECTION_COUNT(headp));
     if(!conn)
         retval = fragNoMem;
     else
@@ -1224,4 +1169,36 @@ OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
     return retval;
 }
 
-#endif
+
+static bool
+cfrg_match(const cfir_t *cfirp, GUEST<OSType> arch_x, uint8_t type_x, Str255 name)
+{
+    bool retval;
+
+    retval = (CFIR_ISA(cfirp) == arch_x && CFIR_TYPE(cfirp) == type_x && (!name[0] || EqualString(name, (StringPtr)CFIR_NAME(cfirp),
+                                                                                                      false, true)));
+    return retval;
+}
+
+cfir_t *
+Executor::ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type, Str255 name)
+{
+    cfrg_resource_t *cfrgp;
+    int n_descripts;
+    cfir_t *cfirp;
+    GUEST<OSType> desired_arch_x;
+    uint8_t type_x;
+    cfir_t *retval;
+
+    cfrgp = (cfrg_resource_t *)*cfrg;
+    cfirp = (cfir_t *)((char *)cfrgp + sizeof *cfrgp);
+    desired_arch_x = arch;
+    type_x = type;
+    for(n_descripts = CFRG_N_DESCRIPTS(cfrgp);
+        n_descripts > 0 && !cfrg_match(cfirp, desired_arch_x, type_x, name);
+        --n_descripts, cfirp = (cfir_t *)((char *)cfirp + CFIR_LENGTH(cfirp)))
+        ;
+    retval = n_descripts > 0 ? cfirp : 0;
+
+    return retval;
+}

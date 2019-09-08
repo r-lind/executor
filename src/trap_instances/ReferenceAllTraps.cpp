@@ -1,7 +1,6 @@
 namespace Executor {
     namespace ReferenceTraps {
         void rsys_adb();
-        void rsys_cfm();
         void rsys_gestalt();
         void rsys_osutil();
         void rsys_serial();
@@ -12,6 +11,7 @@ namespace Executor {
         void AliasMgr();
         void AppleEvents();
         void BinaryDecimal();
+        void CodeFragments();
         void ControlMgr();
         void CQuickDraw();
         void DeskMgr();
@@ -68,7 +68,6 @@ namespace Executor {
     void ReferenceAllTraps()
     {
         ReferenceTraps::rsys_adb();
-        ReferenceTraps::rsys_cfm();
         ReferenceTraps::rsys_gestalt();
         ReferenceTraps::rsys_osutil();
         ReferenceTraps::rsys_serial();
@@ -79,6 +78,7 @@ namespace Executor {
         ReferenceTraps::AliasMgr();
         ReferenceTraps::AppleEvents();
         ReferenceTraps::BinaryDecimal();
+        ReferenceTraps::CodeFragments();
         ReferenceTraps::ControlMgr();
         ReferenceTraps::CQuickDraw();
         ReferenceTraps::DeskMgr();

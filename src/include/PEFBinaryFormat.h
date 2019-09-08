@@ -1,16 +1,50 @@
 #if !defined(_pef_h_)
 #define _pef_h_
 
-#include <rsys/cfm.h>
+#include <CodeFragments.h>
 
 /*
  * Copyright 1999-2000 by Abacus Research and Development, Inc.
  * All rights reserved.
  *
-
  */
 namespace Executor
 {
+enum
+{
+    kPEFTag1 = "Joy!"_4,
+    kPEFTag2 = "peff"_4,
+    kPEFVersion = 1
+};
+
+enum
+{
+    kPEFProcessShare = 1,
+    kPEFGlobalShare = 4,
+    kPEFProtectedShare = 5,
+};
+
+enum
+{
+    kPEFCodeSection = 0,
+    kPEFUnpackedDataSection,
+    kPEFPatternDataSection,
+    kPEFConstantSection,
+    kPEFLoaderSection,
+    kPEFDebugSection,
+    kPEFExecutableDataSection,
+    kPEFExceptionSection,
+    kPEFTracebackSection,
+};
+
+enum
+{
+    kPEFCodeSymbol,
+    kPEFDataSymbol,
+    kPEFTVectorSymbol,
+    kPEFTOCSymbol,
+    kPEFGlueSymbol,
+};
 struct PEFContainerHeader
 {
     GUEST_STRUCT;
@@ -27,34 +61,21 @@ struct PEFContainerHeader
     GUEST<uint32_t> reservedA;
 };
 
-#define PEF_CONTAINER_TAG1_X(p) ((p)->tag1)
-#define PEF_CONTAINER_TAG1(p) (PEF_CONTAINER_TAG1_X(p))
-
-#define PEF_CONTAINER_TAG2_X(p) ((p)->tag2)
-#define PEF_CONTAINER_TAG2(p) (PEF_CONTAINER_TAG2_X(p))
-
+#define PEF_CONTAINER_TAG1(p) ((p)->tag1)
+#define PEF_CONTAINER_TAG2(p) ((p)->tag2)
 #define PEF_CONTAINER_ARCHITECTURE(p) ((p)->architecture)
-
-
 #define PEF_CONTAINER_FORMAT_VERSION(p) ((p)->formatVersion)
-
-
 #define PEF_CONTAINER_SECTION_COUNT(p) ((p)->sectionCount)
-
-
 #define PEF_CONTAINER_INSTSECTION_COUNT(p) ((p)->instSectionCount)
-
-
 #define PEF_CONTAINER_DATE(p) ((p)->dateTimeStamp)
-
 #define PEF_CONTAINER_OLD_DEV_VERS(p) ((p)->oldDefVersion)
-
-
 #define PEF_CONTAINER_OLD_IMP_VERS(p) ((p)->oldImpVersion)
-
-
 #define PEF_CONTAINER_CURRENT_VERS(p) ((p)->currentVersion)
 
+enum
+{
+    kPEFFirstSectionHeaderOffset = sizeof(PEFContainerHeader)
+};
 
 typedef struct PEFSectionHeader
 {
@@ -72,20 +93,10 @@ typedef struct PEFSectionHeader
 } PEFSectionHeader;
 
 #define PEFSH_DEFAULT_ADDRESS(p) ((p)->defaultAddress)
-
-
 #define PEFSH_TOTAL_SIZE(p) ((p)->totalSize)
-
-
 #define PEFSH_UNPACKED_SIZE(p) ((p)->unpackedSize)
-
-
 #define PEFSH_PACKED_SIZE(p) ((p)->packedSize)
-
-
 #define PEFSH_CONTAINER_OFFSET(p) ((p)->containerOffset)
-
-
 #define PEFSH_SECTION_KIND(p) ((p)->sectionKind)
 #define PEFSH_SHARE_KIND(p) ((p)->shareKind)
 #define PEFSH_ALIGNMENT(p) (1 << (p)->alignment)
@@ -110,44 +121,18 @@ struct PEFLoaderInfoHeader
 };
 
 #define PEFLIH_MAIN_SECTION(p) ((p)->mainSection)
-
-
 #define PEFLIH_MAIN_OFFSET(p) ((p)->mainOffset)
-
-
 #define PEFLIH_INIT_SECTION(p) ((p)->initSection)
-
-
 #define PEFLIH_INIT_OFFSET(p) ((p)->initOffset)
-
-
 #define PEFLIH_TERM_SECTION(p) ((p)->termSection)
-
-
 #define PEFLIH_TERM_OFFSET(p) ((p)->termOffset)
-
-
 #define PEFLIH_IMPORTED_LIBRARY_COUNT(p) ((p)->importedLibraryCount)
-
-
 #define PEFLIH_IMPORTED_SYMBOL_COUNT(p) ((p)->totalImportedSymbolCount)
-
-
 #define PEFLIH_RELOC_SECTION_COUNT(p) ((p)->relocSectionCount)
-
-
 #define PEFLIH_RELOC_INSTR_OFFSET(p) ((p)->relocInstrOffset)
-
-
 #define PEFLIH_STRINGS_OFFSET(p) ((p)->loaderStringsOffset)
-
-
 #define PEFLIH_HASH_OFFSET(p) ((p)->exportHashOffset)
-
-
 #define PEFLIH_HASH_TABLE_POWER(p) ((p)->exportHashTablePower)
-
-
 #define PEFLIH_SYMBOL_COUNT(p) ((p)->exportedSymbolCount)
 
 
@@ -165,10 +150,7 @@ typedef struct PEFImportedLibrary
 } PEFImportedLibrary;
 
 #define PEFIL_NAME_OFFSET(p) ((p)->nameOffset)
-
-
 #define PEFIL_SYMBOL_COUNT(p) ((p)->importedSymbolCount)
-
 #define PEFIL_FIRST_SYMBOL(p) ((p)->firstImportedSymbol)
 
 struct PEFLoaderRelocationHeader
@@ -181,13 +163,8 @@ struct PEFLoaderRelocationHeader
 };
 
 #define PEFRLH_RELOC_COUNT(p) ((p)->relocCount)
-
-
 #define PEFRLH_FIRST_RELOC_OFFSET(p) ((p)->firstRelocOffset)
-
-
 #define PEFRLH_SECTION_INDEX(p) ((p)->sectionIndex)
-
 
 enum
 {
@@ -200,8 +177,6 @@ enum
     kPEFHashLengthShift = 16,
     kPEFHashValueMask = 0xFFFF,
 };
-
-typedef uint32_t hash_table_entry_t;
 
 enum
 {
@@ -220,14 +195,20 @@ struct PEFExportedSymbol
 };
 
 #define PEFEXS_CLASS_AND_NAME(p) ((p)->classAndName)
-
-
 #define PEFEXS_NAME(p) (PEFEXS_CLASS_AND_NAME(p) & 0xffffff)
-
 #define PEFEXS_SYMBOL_VALUE(p) ((p)->symbolValue)
-
-
 #define PEFEXS_SECTION_INDEX(p) ((p)->sectionIndex)
+
+struct PEFImportedSymbol
+{
+    GUEST_STRUCT;
+    GUEST<uint32_t> classAndName;
+};
+
+typedef uint32_t PEFExportedSymbolKey;
+typedef uint32_t PEFExportedSymbolHashSlot;
+
+
 
 
 enum
@@ -235,18 +216,6 @@ enum
     NAME_MASK = 0xFFFFFF,
 };
 
-enum
-{
-    kPEFCodeSymbol,
-    kPEFDataSymbol,
-    kPEFTVectSymbol,
-    kPEFTOCSymbol,
-    kPEFGlueSymbol,
-};
-
-
-extern PEFLoaderInfoHeader *ROMlib_build_pef_hash(const map_entry_t table[],
-                                                    int count);
 
 static_assert(sizeof(PEFContainerHeader) == 40);
 static_assert(sizeof(PEFSectionHeader) == 28);

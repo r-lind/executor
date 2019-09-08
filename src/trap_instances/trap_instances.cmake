@@ -1,6 +1,5 @@
 set(trap_instance_sources
 		trap_instances/rsys_adb.cpp
-		trap_instances/rsys_cfm.cpp
 		trap_instances/rsys_gestalt.cpp
 		trap_instances/rsys_osutil.cpp
 		trap_instances/rsys_serial.cpp
@@ -11,6 +10,7 @@ set(trap_instance_sources
 		trap_instances/AliasMgr.cpp
 		trap_instances/AppleEvents.cpp
 		trap_instances/BinaryDecimal.cpp
+		trap_instances/CodeFragments.cpp
 		trap_instances/ControlMgr.cpp
 		trap_instances/CQuickDraw.cpp
 		trap_instances/DeskMgr.cpp

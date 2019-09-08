@@ -128,38 +128,6 @@ LONGINT Executor::ROMlib_creator;
 
 uint32_t Executor::ROMlib_version_long;
 
-static bool
-cfrg_match(const cfir_t *cfirp, GUEST<OSType> arch_x, uint8_t type_x, Str255 name)
-{
-    bool retval;
-
-    retval = (CFIR_ISA(cfirp) == arch_x && CFIR_TYPE(cfirp) == type_x && (!name[0] || EqualString(name, (StringPtr)CFIR_NAME(cfirp),
-                                                                                                      false, true)));
-    return retval;
-}
-
-cfir_t *
-Executor::ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type, Str255 name)
-{
-    cfrg_resource_t *cfrgp;
-    int n_descripts;
-    cfir_t *cfirp;
-    GUEST<OSType> desired_arch_x;
-    uint8_t type_x;
-    cfir_t *retval;
-
-    cfrgp = (cfrg_resource_t *)*cfrg;
-    cfirp = (cfir_t *)((char *)cfrgp + sizeof *cfrgp);
-    desired_arch_x = arch;
-    type_x = type;
-    for(n_descripts = CFRG_N_DESCRIPTS(cfrgp);
-        n_descripts > 0 && !cfrg_match(cfirp, desired_arch_x, type_x, name);
-        --n_descripts, cfirp = (cfir_t *)((char *)cfirp + CFIR_LENGTH(cfirp)))
-        ;
-    retval = n_descripts > 0 ? cfirp : 0;
-
-    return retval;
-}
 
 static void
 cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)

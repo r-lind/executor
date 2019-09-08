@@ -3,11 +3,12 @@
  */
 
 #include <base/common.h>
+#include <rsys/cfm.h>
 
 #include <MemoryMgr.h>
 
-#include <rsys/pef.h>
-#include <rsys/cfm.h>
+#include <PEFBinaryFormat.h>
+#include <CodeFragments.h>
 
 #include <math.h>
 #include <iostream>
@@ -20,7 +21,7 @@ typedef struct pef_hash
 {
   uint32_t n_symbols; /* exportedSymbolCount */
   uint32_t n_hash_entries; /* 1 << exportHashTablePower */
-  hash_table_entry_t *hash_entries; /* exportHashOffset */
+  PEFExportedSymbolHashSlot *hash_entries; /* exportHashOffset */
   uint32_t *export_key_table; /* hash_entries + n_hash_entries */
   PEFExportedSymbol *symbol_table; /* hash_entries + 2 * n_hash_entries */
   const char *symbol_names; /* loaderStringsOffset */
@@ -228,7 +229,7 @@ Executor::ROMlib_build_pef_hash(const map_entry_t table[], int count)
                                                      strlen(table[i].symbol_name));
             sorted[i].hash_index = PEFHashTableIndex(sorted[i].hash_word,
                                                      hash_power);
-            sorted[i].class_and_name_x = (kPEFTVectSymbol << 24) | name_offset;
+            sorted[i].class_and_name_x = (kPEFTVectorSymbol << 24) | name_offset;
             sorted[i].value = guest_cast<void *>(table[i].value);
             length = strlen(table[i].symbol_name);
             memcpy(string_tablep + name_offset, table[i].symbol_name, length);

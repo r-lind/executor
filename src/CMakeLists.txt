@@ -475,7 +475,7 @@ set(include_sources
                   include/rsys/appearance.h
                   include/rsys/arch.h
                   include/rsys/arrowkeys.h
-                  include/rsys/cfm.h
+                  include/CodeFragments.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/desk.h
                   include/rsys/device.h
@@ -496,7 +496,7 @@ set(include_sources
                   include/rsys/os.h
                   include/rsys/osutil.h
                   include/rsys/paths.h
-                  include/rsys/pef.h
+                  include/PEFBinaryFormat.h
                   include/rsys/prefpanel.h
                   include/rsys/process.h
                   include/rsys/redrawscreen.h

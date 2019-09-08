@@ -1,6 +1,6 @@
 #include <base/builtinlibs.h>
 #include <rsys/cfm.h>
-#include <rsys/pef.h>
+#include <PEFBinaryFormat.h>
 #include <unordered_map>
 #include <vector>
 #include <string>
