@@ -200,7 +200,7 @@ OSErr Executor::PBKillIO(ParmBlkPtr pbp, Boolean a) /* IMII-187 */
 
 /* FSRead, FSWrite are part of the file manager */
 
-OSErr Executor::Control(INTEGER rn, INTEGER code, Ptr param) /* IMII-179 */
+OSErr Executor::Control(INTEGER rn, INTEGER code, const void *param) /* IMII-179 */
 {
     ParamBlockRec pb;
     OSErr err;

@@ -162,7 +162,7 @@ NOTRAP_FUNCTION2(OpenDriver);
 extern OSErr CloseDriver(INTEGER rn);
 NOTRAP_FUNCTION2(CloseDriver);
 extern OSErr Control(INTEGER rn, INTEGER code,
-                     Ptr param);
+                     const void* param);
 NOTRAP_FUNCTION2(Control);
 extern OSErr Status(INTEGER rn, INTEGER code, Ptr param);
 NOTRAP_FUNCTION2(Status);
