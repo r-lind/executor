@@ -45,6 +45,14 @@ enum
     kPEFTOCSymbol,
     kPEFGlueSymbol,
 };
+
+// flags for PEFImportedLibrary::options
+enum
+{
+    kPEFWeakImportLibMask = 0x40,
+    kPEFInitLibBeforeMask = 0x80,
+};
+
 struct PEFContainerHeader
 {
     GUEST_STRUCT;
@@ -82,9 +90,9 @@ typedef struct PEFSectionHeader
     GUEST_STRUCT;
     GUEST<int32_t> nameOffset;
     GUEST<uint32_t> defaultAddress;
-    GUEST<uint32_t> totalSize;
-    GUEST<uint32_t> unpackedSize;
-    GUEST<uint32_t> packedSize;
+    GUEST<uint32_t> totalLength;
+    GUEST<uint32_t> unpackedLength;
+    GUEST<uint32_t> containerLength;
     GUEST<uint32_t> containerOffset;
     GUEST<uint8_t> sectionKind;
     GUEST<uint8_t> shareKind;
@@ -93,9 +101,9 @@ typedef struct PEFSectionHeader
 } PEFSectionHeader;
 
 #define PEFSH_DEFAULT_ADDRESS(p) ((p)->defaultAddress)
-#define PEFSH_TOTAL_SIZE(p) ((p)->totalSize)
-#define PEFSH_UNPACKED_SIZE(p) ((p)->unpackedSize)
-#define PEFSH_PACKED_SIZE(p) ((p)->packedSize)
+#define PEFSH_TOTAL_SIZE(p) ((p)->totalLength)
+#define PEFSH_UNPACKED_SIZE(p) ((p)->unpackedLength)
+#define PEFSH_PACKED_SIZE(p) ((p)->containerLength)
 #define PEFSH_CONTAINER_OFFSET(p) ((p)->containerOffset)
 #define PEFSH_SECTION_KIND(p) ((p)->sectionKind)
 #define PEFSH_SHARE_KIND(p) ((p)->shareKind)
