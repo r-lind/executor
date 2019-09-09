@@ -415,11 +415,6 @@ extern OSErr C_AEResumeTheCurrentEvent(AppleEvent *evt, AppleEvent *reply,
                                                    int32_t refcon);
 PASCAL_SUBTRAP(AEResumeTheCurrentEvent, 0xA816, 0x0818, Pack8);
 
-/*
-extern OSErr C_AEProcessEvent(EventRecord *evt);
-PASCAL_FUNCTION(AEProcessEvent);
-*/
-
 extern OSErr C_AEGetInteractionAllowed(AEInteractionAllowed *return_level);
 PASCAL_SUBTRAP(AEGetInteractionAllowed, 0xA816, 0x021D, Pack8);
 
@@ -555,9 +550,6 @@ PASCAL_SUBTRAP(AEPutPtr, 0xA816, 0x0A08, Pack8);
 extern OSErr C_AEInteractWithUser(int32_t timeout, NMRecPtr nm_req,
                                               IdleUPP idle_proc);
 PASCAL_SUBTRAP(AEInteractWithUser, 0xA816, 0x061C, Pack8);
-
-extern void AE_init(void);
-extern void AE_reinit(void);
 
 extern OSErr C_AEManagerInfo(GUEST<LONGINT> *resultp);
 PASCAL_SUBTRAP(AEManagerInfo, 0xA816, 0x0441, Pack8);

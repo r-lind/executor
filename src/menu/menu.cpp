@@ -36,6 +36,7 @@
 #include <rsys/version.h>
 #include <base/functions.impl.h>
 #include <prefs/prefs.h>
+#include <rsys/toolevent.h>
 
 using namespace Executor;
 

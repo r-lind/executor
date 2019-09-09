@@ -7,6 +7,7 @@
 /* HLock checked by ctm on Mon May 13 17:54:22 MDT 1991 */
 
 #include <base/common.h>
+#include <dial/dial.h>
 #include <EventMgr.h>
 #include <DialogMgr.h>
 #include <ControlMgr.h>

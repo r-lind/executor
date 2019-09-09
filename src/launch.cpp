@@ -70,11 +70,12 @@
 #include <rsys/gestalt.h>
 #include <osevent/osevent.h>
 #include <time/time.h>
-
+#include <appleevent/apple_events.h>
 #include <rsys/cfm.h>
 #include <rsys/launch.h>
 #include <rsys/version.h>
 #include <rsys/appearance.h>
+#include <time/vbl.h>
 
 #include <base/logging.h>
 

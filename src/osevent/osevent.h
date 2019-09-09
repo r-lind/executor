@@ -2,10 +2,14 @@
 #define _RSYS_OSEVENT_H_
 
 #include <EventMgr.h>
+#include <OSEvent.h>
 
 namespace Executor
 {
 extern INTEGER ROMlib_mods;
+
+extern OSErr ROMlib_PPostEvent(INTEGER evcode, LONGINT evmsg,
+                                  GUEST<EvQElPtr> *qelp, LONGINT when, Point where, INTEGER butmods);
 
 extern Ptr ROMlib_kchr_ptr(void);
 

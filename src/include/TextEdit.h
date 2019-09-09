@@ -265,7 +265,7 @@ PASCAL_TRAP(TEInsert, 0xA9DE);
 extern void C_TEPinScroll(INTEGER dh,
                           INTEGER dv, TEHandle teh);
 PASCAL_TRAP(TEPinScroll, 0xA812);
-extern void ROMlib_teautoloop(TEHandle teh);
+
 extern void C_TESelView(TEHandle teh);
 PASCAL_TRAP(TESelView, 0xA811);
 

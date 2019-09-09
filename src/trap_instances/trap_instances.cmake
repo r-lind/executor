@@ -6,6 +6,7 @@ set(trap_instance_sources
 		trap_instances/rsys_stdfile.cpp
 		trap_instances/base_emustubs.cpp
 		trap_instances/ctl_ctl.cpp
+		trap_instances/dial_dial.cpp
 		trap_instances/ADB.cpp
 		trap_instances/AliasMgr.cpp
 		trap_instances/AppleEvents.cpp

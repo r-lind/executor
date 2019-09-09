@@ -131,12 +131,9 @@ PASCAL_TRAP(GetMenuBar, 0xA93B);
 extern void C_SetMenuBar(Handle ml);
 PASCAL_TRAP(SetMenuBar, 0xA93C);
 
-extern INTEGER ROMlib_mentosix(INTEGER menuid);
 extern void C_HiliteMenu(INTEGER mid);
 PASCAL_TRAP(HiliteMenu, 0xA938);
 
-extern LONGINT ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
-                                 LONGINT oldwhere, Boolean ispopup, INTEGER nmenusdisplayed);
 extern LONGINT C_MenuSelect(Point p);
 PASCAL_TRAP(MenuSelect, 0xA93D);
 

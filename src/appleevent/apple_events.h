@@ -2,7 +2,9 @@
 #define __rsys_apple_events_h__
 namespace Executor
 {
-/* #### internal */
+
+extern void AE_init(void);
+extern void AE_reinit(void);
 
 struct inline_desc_t
 {

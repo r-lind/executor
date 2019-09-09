@@ -11,6 +11,7 @@
 #include <OSUtil.h>
 #include <MemoryMgr.h>
 
+#include <dial/dial.h>
 #include <dial/itm.h>
 #include <mman/mman.h>
 

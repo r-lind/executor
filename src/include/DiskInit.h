@@ -25,8 +25,6 @@ PASCAL_SUBTRAP(DIUnload, 0xA9E9, 0x0004, Pack2);
 extern INTEGER C_DIBadMount(Point pt, LONGINT evtmess);
 PASCAL_SUBTRAP(DIBadMount, 0xA9E9, 0x0000, Pack2);
 
-extern INTEGER C_dibadmount(Point *ptp, LONGINT evtmess);
-
 extern OSErr C_DIFormat(INTEGER dn);
 PASCAL_SUBTRAP(DIFormat, 0xA9E9, 0x0006, Pack2);
 

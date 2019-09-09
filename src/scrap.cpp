@@ -99,7 +99,7 @@ LONGINT Executor::C_LoadScrap()
     return (LM(ScrapState) > 0 ? noErr : noScrapErr);
 }
 
-LONGINT Executor::ROMlib_ZeroScrap()
+LONGINT Executor::C_ZeroScrap()
 {
     OSErr retval;
     INTEGER f;
@@ -130,11 +130,6 @@ LONGINT Executor::ROMlib_ZeroScrap()
     LM(ScrapSize) = 0;
     LM(ScrapCount) = LM(ScrapCount) + 1;
     return noErr;
-}
-
-LONGINT Executor::C_ZeroScrap()
-{
-    return ROMlib_ZeroScrap();
 }
 
 LONGINT Executor::C_PutScrap(LONGINT len, ResType rest, Ptr p)

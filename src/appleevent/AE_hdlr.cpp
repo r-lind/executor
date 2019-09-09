@@ -10,6 +10,7 @@
 
 #include <error/system_error.h>
 #include <mman/mman.h>
+#include "apple_events.h"
 
 using namespace Executor;
 

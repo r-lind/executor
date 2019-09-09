@@ -130,9 +130,6 @@ enum
 
 DISPATCHER_TRAP(Pack3, 0xA9EA, StackW);
 
-extern void C_ROMlib_filebox(DialogPeek dp, INTEGER which);
-PASCAL_FUNCTION(ROMlib_filebox);
-
 extern void C_SFPPutFile(Point p, ConstStringPtr prompt,
                                      ConstStringPtr name, DlgHookUPP dh, SFReply *rep, INTEGER dig, ModalFilterUPP fp);
 PASCAL_SUBTRAP(SFPPutFile, 0xA9EA, 0x0003, Pack3);

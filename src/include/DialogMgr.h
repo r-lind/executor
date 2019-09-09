@@ -174,9 +174,6 @@ extern void C_CloseDialog(DialogPtr dp);
 PASCAL_TRAP(CloseDialog, 0xA982);
 extern void C_DisposeDialog(DialogPtr dp);
 PASCAL_TRAP(DisposeDialog, 0xA983);
-extern Boolean C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
-                                      GUEST<INTEGER> *ith);
-PASCAL_FUNCTION(ROMlib_myfilt);
 
 extern void C_ModalDialog(ModalFilterUPP fp,
                                       GUEST<INTEGER> *item);
@@ -199,8 +196,6 @@ extern void DialogCut(DialogPtr dp);
 extern void DialogCopy(DialogPtr dp);
 extern void DialogPaste(DialogPtr dp);
 extern void DialogDelete(DialogPtr dp);
-extern void C_ROMlib_mysound(INTEGER i);
-PASCAL_FUNCTION(ROMlib_mysound);
 extern void C_ErrorSound(SoundUPP sp);
 PASCAL_TRAP(ErrorSound, 0xA98C);
 extern void C_InitDialogs(ProcPtr rp);

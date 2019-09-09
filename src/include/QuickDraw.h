@@ -795,9 +795,6 @@ extern void C_StdBits(const BitMap *srcbmp,
                                   const Rect *srcrp, const Rect *dstrp,
                                   INTEGER mode, RgnHandle mask);
 PASCAL_TRAP(StdBits, 0xA8EB);
-extern void StdBitsPicSaveFlag(const BitMap *srcbmp,
-                               const Rect *srcrp, const Rect *dstrp,
-                               INTEGER mode, RgnHandle mask, Boolean savepic);
 
 extern void C_StdLine(Point p);
 PASCAL_TRAP(StdLine, 0xA890);

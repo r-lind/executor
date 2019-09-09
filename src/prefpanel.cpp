@@ -7,6 +7,7 @@
 #include <quickdraw/cquick.h>
 #include <commandline/parseopt.h>
 #include <vdriver/vdriver.h>
+#include <time/vbl.h>
 
 #include <DialogMgr.h>
 #include <SysErr.h>

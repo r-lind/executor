@@ -26,7 +26,6 @@ const LowMemGlobal<INTEGER> JournalRef { 0x8E8 }; // ToolboxEvent IMI-261 (false
 
 LOWMEM_ACCESSOR(DoubleTime);
 
-extern void ROMlib_alarmoffmbar(void);
 extern LONGINT C_KeyTranslate(Ptr mapp, unsigned short code,
                                       LONGINT *state);
 PASCAL_TRAP(KeyTranslate, 0xA9C3);

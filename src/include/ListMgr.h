@@ -139,8 +139,6 @@ PASCAL_SUBTRAP(LUpdate, 0xA9E7, 0x0064, Pack0);
 extern void C_LActivate(Boolean act,
                                     ListHandle list);
 PASCAL_SUBTRAP(LActivate, 0xA9E7, 0x0, Pack0);
-extern void C_ROMlib_mytrack(ControlHandle ch, INTEGER part);
-PASCAL_FUNCTION(ROMlib_mytrack);
 
 extern Boolean C_LClick(Point pt,
                                     INTEGER mods, ListHandle list);

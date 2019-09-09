@@ -44,7 +44,6 @@ PASCAL_FUNCTION(mbdf0);
 #define SIZEOFMEXT 5
 #define SIZEOFMINFO (sizeof(MenuInfo) - sizeof(Str255) + 1)
 
-extern void ROMlib_alarmoffmbar(void);
 extern mextp ROMlib_mitemtop(MenuHandle mh, INTEGER item, StringPtr *ssp);
 extern INTEGER ROMlib_mentosix(INTEGER mid);
 extern LONGINT ROMlib_menuhelper(MenuHandle mh, Rect *saver, LONGINT where,

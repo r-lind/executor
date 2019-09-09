@@ -42,5 +42,8 @@ extern void ROMlib_listcall(INTEGER mess, Boolean sel, Rect *rp, Cell cell,
 extern void ROMlib_vminmax(INTEGER *minp, INTEGER *maxp, ListPtr lp);
 extern void ROMlib_hminmax(INTEGER *minp, INTEGER *maxp, ListPtr lp);
 extern GUEST<INTEGER> *ROMlib_getoffp(Cell cell, ListHandle list);
+
+extern void C_ROMlib_mytrack(ControlHandle ch, INTEGER part);
+PASCAL_FUNCTION(ROMlib_mytrack);
 }
 #endif /* !defined(__RSYS_LIST__) */

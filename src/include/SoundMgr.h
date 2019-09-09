@@ -405,10 +405,15 @@ PASCAL_TRAP(SndControl, 0xA806);
 extern OSErr C_SndDisposeChannel(SndChannelPtr chanp,
                                       Boolean quitnow);
 PASCAL_TRAP(SndDisposeChannel, 0xA801);
-extern void C_FinaleUnknown1(void);
+
+extern void C_FinaleUnknown1();
+PASCAL_SUBTRAP(FinaleUnknown1, 0xA800, 0x00000000, SoundDispatch);
 extern OSErr C_FinaleUnknown2(ResType, LONGINT, Ptr, Ptr);
-extern LONGINT C_DirectorUnknown3(void);
+PASCAL_SUBTRAP(FinaleUnknown2, 0xA800, 0x00040004, SoundDispatch);
+extern LONGINT C_DirectorUnknown3();
+PASCAL_SUBTRAP(DirectorUnknown3, 0xA800, 0x00000004, SoundDispatch);
 extern INTEGER C_DirectorUnknown4(ResType, INTEGER, Ptr, Ptr);
+PASCAL_SUBTRAP(DirectorUnknown4, 0xA800, 0x001C0004, SoundDispatch);
 
 static_assert(sizeof(SndCommand) == 8);
 static_assert(sizeof(SndChannel) == 1060);

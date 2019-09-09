@@ -5,6 +5,7 @@
 #include <base/common.h>
 
 #include <DialogMgr.h>
+#include <dial/dial.h>
 
 using namespace Executor;
 

@@ -47,10 +47,9 @@ enum
 
 OSErr C_unixmount(CInfoPBRec *cbp);
 PASCAL_FUNCTION(unixmount);
-}
 
-namespace Executor
-{
+extern void C_ROMlib_filebox(DialogPeek dp, INTEGER which);
+PASCAL_FUNCTION(ROMlib_filebox);
 
 typedef enum { get,
                put } getorput_t;

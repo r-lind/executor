@@ -44,7 +44,7 @@ extern LONGINT C_UnloadScrap(void);
 PASCAL_TRAP(UnloadScrap, 0xA9FA);
 extern LONGINT C_LoadScrap(void);
 PASCAL_TRAP(LoadScrap, 0xA9FB);
-extern LONGINT ROMlib_ZeroScrap(void);
+
 extern LONGINT C_ZeroScrap(void);
 PASCAL_TRAP(ZeroScrap, 0xA9FC);
 extern LONGINT C_PutScrap(LONGINT len, ResType rest, Ptr p);

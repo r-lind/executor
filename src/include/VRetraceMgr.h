@@ -36,8 +36,6 @@ typedef VBLTask *VBLTaskPtr;
 const LowMemGlobal<QHdr> VBLQueue { 0x160 }; // VRetraceMgr IMII-352 (true);
 const LowMemGlobal<ProcPtr> JVBLTask { 0xD28 }; // VRetraceMgr IMV (false);
 
-extern void ROMlib_clockonoff(LONGINT onoroff);
-
 extern OSErr VInstall(VBLTaskPtr vtaskp);
 REGISTER_TRAP2(VInstall, 0xA033, D0(A0));
 extern OSErr VRemove(VBLTaskPtr vtaskp);

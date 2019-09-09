@@ -99,7 +99,6 @@ typedef struct item_color_info
 
 extern itmp ROMlib_dpnotoip(DialogPeek dp, INTEGER itemno, SignedByte *flags);
 extern void ROMlib_dpntoteh(DialogPeek dp, INTEGER no);
-extern void C_ROMlib_mysound(INTEGER n);
 
 extern void ROMlib_drawiptext(DialogPtr dp, itmp ip, int item_no);
 extern void dialog_create_item(DialogPeek dp, itmp dst, itmp src,

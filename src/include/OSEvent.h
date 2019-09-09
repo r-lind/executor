@@ -116,8 +116,6 @@ END_EXECUTOR_ONLY
 
 extern OSErr PPostEvent(INTEGER evcode,
                                 LONGINT evmsg, GUEST<EvQElPtr> *qelp);
-extern OSErr ROMlib_PPostEvent(INTEGER evcode, LONGINT evmsg,
-                                  GUEST<EvQElPtr> *qelp, LONGINT when, Point where, INTEGER butmods);
 extern OSErr PostEvent(INTEGER evcode, LONGINT evmsg);
 extern void FlushEvents(INTEGER evmask,
                              INTEGER stopmask);

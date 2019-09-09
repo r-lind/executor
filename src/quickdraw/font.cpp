@@ -108,15 +108,6 @@ void Executor::C_GetFontName(INTEGER fnum, StringPtr fnam) /* IMI-223 */
     SetResLoad(true);
 }
 
-/*
- * callable w/o pascal conventions
- */
-
-void Executor::ROMlib_GetFontName(LONGINT fnum, char *fnam)
-{
-    GetFontName(fnum, (StringPtr)fnam);
-}
-
 void Executor::C_GetFNum(ConstStringPtr fnam, GUEST<INTEGER> *fnum) /* IMI-223 */
 {
     Handle h;

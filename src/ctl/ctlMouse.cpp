@@ -66,16 +66,6 @@ INTEGER Executor::C_FindControl(Point p, WindowPtr w,
 }
 
 
-static inline void CALLACTION(ControlHandle ch, INTEGER inpart, ControlActionUPP a)
-{
-    ROMlib_hook(ctl_cdefnumber);
-    if(a == &ROMlib_mytrack)
-        ROMlib_mytrack(ch, inpart);
-    else if(a == &ROMlib_stdftrack)
-        ROMlib_stdftrack(ch, inpart);
-    else
-        a(ch, inpart);
-}
 
 INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
                                  ControlActionUPP a) /* IMI-323 */
@@ -171,7 +161,7 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
         /* not an indicator */
         (*c)->contrlHilite = partstart;
         CTLCALL(c, drawCntl, partstart);
-        /* CALLACTION can remove mouse up events which is why the
+        /* the action callback can remove mouse up events which is why the
 	      following line is not a GetOSEvent call. */
         while(!OSEventAvail(mUpMask, &ev) && StillDown())
         {
@@ -187,7 +177,7 @@ INTEGER Executor::C_TrackControl(ControlHandle c, Point p,
                 CTLCALL(c, drawCntl, partstart);
             }
             if(a && inpart)
-                CALLACTION(c, inpart, a);
+                a(c, inpart);
         }
         GetOSEvent(mUpMask, &ev);
         GlobalToLocal(&ev.where);

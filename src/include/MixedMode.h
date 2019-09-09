@@ -160,7 +160,9 @@ PASCAL_SUBTRAP(RestoreMixedModeState, 0xAA59, 0x0004, MixedModeDispatch);
 extern LONGINT C_CallUniversalProc(UniversalProcPtr theProcPtr, ProcInfoType procInfo);
 NOTRAP_FUNCTION(CallUniversalProc);
 
+BEGIN_EXECUTOR_ONLY
 extern uint32_t ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType procInfo, ISAType fromISA);
+END_EXECUTOR_ONLY
 
 static_assert(sizeof(RoutineRecord) == 20);
 static_assert(sizeof(RoutineDescriptor) == 32);

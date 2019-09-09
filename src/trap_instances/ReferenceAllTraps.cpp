@@ -7,6 +7,7 @@ namespace Executor {
         void rsys_stdfile();
         void base_emustubs();
         void ctl_ctl();
+        void dial_dial();
         void ADB();
         void AliasMgr();
         void AppleEvents();
@@ -74,6 +75,7 @@ namespace Executor {
         ReferenceTraps::rsys_stdfile();
         ReferenceTraps::base_emustubs();
         ReferenceTraps::ctl_ctl();
+        ReferenceTraps::dial_dial();
         ReferenceTraps::ADB();
         ReferenceTraps::AliasMgr();
         ReferenceTraps::AppleEvents();

@@ -48,7 +48,7 @@
 #include <base/emustubs.h>
 #include <sane/float.h>
 #include <rsys/paths.h>
-
+#include <appleevent/apple_events.h>
 #include <rsys/os.h>
 #include <rsys/arch.h>
 #include <rsys/gestalt.h>
