@@ -506,9 +506,10 @@ const LowMemGlobal<LONGINT> mouseoffset { 0x8DA }; // QuickDraw SysEqu.a (true-b
 const LowMemGlobal<ProcPtr> JCrsrTask { 0x8EE }; //   (true);
 const LowMemGlobal<Byte> HiliteMode { 0x938 }; // QuickDraw IMV (true-b);
 
-
+BEGIN_EXECUTOR_ONLY
 extern void C_unknown574();
 PASCAL_FUNCTION(unknown574);
+END_EXECUTOR_ONLY
 
 extern void C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
                             const Rect *src_rect, const Rect *dst_rect,
@@ -578,7 +579,8 @@ extern void C_CopyMask(BitMap *srcbp,
                         BitMap *mskbp, BitMap *dstbp, const Rect *srcrp,
                         const Rect * mskrp, const Rect *dstrp);
 PASCAL_TRAP(CopyMask, 0xA817);
-extern INTEGER *GetMaskTable(void);
+extern INTEGER *C_GetMaskTable(void);
+PASCAL_TRAP(GetMaskTable, 0xA836);
 extern void C_CharExtra(Fixed Extra);
 PASCAL_TRAP(CharExtra, 0xAA23);
 extern void C_MakeRGBPat(PixPatHandle ph,

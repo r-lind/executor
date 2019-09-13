@@ -230,8 +230,5 @@ extern OSErr C_ReplaceGestalt(OSType selector, SelectorFunctionUPP selFunc,
                                     GUEST<SelectorFunctionUPP> *oldSelFuncp);
 REGISTER_SUBTRAP(ReplaceGestalt, 0xA5AD, 0x400, GestaltDispatch, D0(D0,A0,Out<SelectorFunctionUPP,A0>));
 
-extern OSErr C_GestaltTablesOnly(OSType selector,
-                                         GUEST<LONGINT> *responsep);
-NOTRAP_FUNCTION(GestaltTablesOnly);
 }
 #endif

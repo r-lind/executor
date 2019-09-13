@@ -23,6 +23,10 @@ extern void ROMlib_clear_gestalt_list(void);
 extern void ROMlib_add_to_gestalt_list(OSType selector, OSErr retval,
                                        uint32_t new_value);
 
+extern OSErr C_GestaltTablesOnly(OSType selector,
+                                         GUEST<LONGINT> *responsep);
+PASCAL_FUNCTION(GestaltTablesOnly);
+
 /* GhostScript DLL version number */
 enum
 {
