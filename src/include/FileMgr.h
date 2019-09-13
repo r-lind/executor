@@ -227,6 +227,9 @@ typedef enum {
     GUEST<StringPtr> ioNamePtr;  \
     GUEST<INTEGER> ioVRefNum
 
+// ioMisc should be a Ptr, but that's not a good idea for Executor because it is often misused to store integers.
+typedef LONGINT IOMiscType;
+
 typedef struct
 {
     GUEST_STRUCT;
@@ -234,7 +237,7 @@ typedef struct
     GUEST<INTEGER> ioRefNum;
     GUEST<SignedByte> ioVersNum;
     GUEST<SignedByte> ioPermssn;
-    GUEST<LONGINT> ioMisc; /* should be largest of Ptr, LONGINT */
+    GUEST<IOMiscType> ioMisc; /* should be largest of Ptr, LONGINT */
     GUEST<Ptr> ioBuffer;
     GUEST<LONGINT> ioReqCount;
     GUEST<LONGINT> ioActCount;
@@ -308,7 +311,7 @@ typedef struct
     GUEST<INTEGER> ioRefNum;
     GUEST<SignedByte> ioVersNum;
     GUEST<SignedByte> ioPermssn;
-    GUEST<LONGINT> ioMisc; /* should be largest of Ptr, LONGINT */
+    GUEST<IOMiscType> ioMisc; /* should be largest of Ptr, LONGINT */
     GUEST<Ptr> ioBuffer;
     GUEST<LONGINT> ioReqCount;
     GUEST<LONGINT> ioActCount;

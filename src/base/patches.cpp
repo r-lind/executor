@@ -96,7 +96,7 @@ RAW_68K_IMPLEMENTATION(Unimplemented)
 }
 
 
-static int getTrapIndex(INTEGER trapnum, bool newTraps, bool &tool)
+static int getTrapIndex(uint16_t trapnum, bool newTraps, bool &tool)
 {
     if(!newTraps)
     {
@@ -148,7 +148,7 @@ static bool shouldHideTrap(bool tool, int index)
     }
 }
 
-ProcPtr Executor::_GetTrapAddress_flags(INTEGER n, bool newTraps, bool tool)
+ProcPtr Executor::_GetTrapAddress_flags(uint16_t n, bool newTraps, bool tool)
 {
     int index = getTrapIndex(n, newTraps, tool);
     
@@ -162,29 +162,29 @@ ProcPtr Executor::_GetTrapAddress_flags(INTEGER n, bool newTraps, bool tool)
     return ptr_from_longint<ProcPtr>(addr);
 }
 
-void Executor::_SetTrapAddress_flags(ProcPtr addr, INTEGER n, bool newTraps, bool tool)
+void Executor::_SetTrapAddress_flags(ProcPtr addr, uint16_t n, bool newTraps, bool tool)
 {
     int index = getTrapIndex(n, newTraps, tool);
     
     (tool ? tooltraptable : ostraptable)[index] = ptr_to_longint(addr);
 }
 
-void Executor::C_SetToolboxTrapAddress(ProcPtr addr, INTEGER n)
+void Executor::C_SetToolboxTrapAddress(ProcPtr addr, uint16_t n)
 {
     _SetTrapAddress_flags(addr, n, true, true);
 }
 
-ProcPtr Executor::C_GetToolboxTrapAddress(INTEGER n)
+ProcPtr Executor::C_GetToolboxTrapAddress(uint16_t n)
 {
     return _GetTrapAddress_flags(n, true, true);
 }
 
-ProcPtr Executor::C_NGetTrapAddress(INTEGER n, TrapType ttype) /* IMII-384 */
+ProcPtr Executor::C_NGetTrapAddress(uint16_t n, TrapType ttype) /* IMII-384 */
 {
     return _GetTrapAddress_flags(n, true, ttype != kOSTrapType);
 }
 
-void Executor::C_NSetTrapAddress(ProcPtr addr, INTEGER n, TrapType ttype)
+void Executor::C_NSetTrapAddress(ProcPtr addr, uint16_t n, TrapType ttype)
 {
     _SetTrapAddress_flags(addr, n, true, ttype != kOSTrapType);
 }

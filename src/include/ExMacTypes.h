@@ -43,6 +43,9 @@ typedef Byte Str255[256];
 typedef Byte *StringPtr;
 typedef const unsigned char *ConstStringPtr;
 typedef ConstStringPtr ConstStr255Param;
+typedef ConstStringPtr ConstStr63Param;
+typedef ConstStringPtr ConstStr31Param;
+typedef ConstStringPtr ConstStr16Param;
 
 typedef GUEST<StringPtr> *StringHandle;
 
