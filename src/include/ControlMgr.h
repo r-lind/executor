@@ -105,7 +105,7 @@ enum
 
 using ControlActionUPP = UPP<void(ControlHandle, int16_t)>;
 
-struct __cr
+struct ControlRecord
 {
     GUEST_STRUCT;
     GUEST<ControlHandle> nextControl;

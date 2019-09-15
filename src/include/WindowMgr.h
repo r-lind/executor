@@ -110,7 +110,7 @@ typedef GrafPtr WindowPtr;
 
 typedef CGrafPtr CWindowPtr;
 
-typedef struct __cr ControlRecord;
+struct ControlRecord;
 typedef ControlRecord *ControlPtr;
 
 typedef GUEST<ControlPtr> *ControlHandle;
