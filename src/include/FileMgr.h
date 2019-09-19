@@ -569,7 +569,7 @@ const LowMemGlobal<INTEGER> DefVRefNum { 0x384 }; // FileMgr MPW (true);
 /*
  * Note: MacLinkPC+ loads 0x358 into a register (i.e. the address of the
  * pointer to the first element on the VCB queue) and then uses
- * 72 off of it (0x3A0) and 78 off of it (0x3A6). As LONGINT as
+ * 72 off of it (0x3A0) and 78 off of it (0x3A6). As long as
  * there are zeros there, that doesn't hurt us, but normally,
  * we'd have negative ones in there. Hence we describe them
  * here and set them to zero in executor.
