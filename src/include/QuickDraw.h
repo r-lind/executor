@@ -637,8 +637,6 @@ PASCAL_TRAP(ClosePicture, 0xA8F4);
 extern void C_PicComment(INTEGER kind, INTEGER size,
                                      Handle hand);
 PASCAL_TRAP(PicComment, 0xA8F2);
-extern void C_ReadComment(INTEGER kind, INTEGER size,
-                                      Handle hand);
 
 extern void C_KillPicture(PicHandle pic);
 PASCAL_TRAP(KillPicture, 0xA8F5);

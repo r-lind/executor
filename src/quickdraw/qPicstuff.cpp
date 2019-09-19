@@ -387,7 +387,7 @@ static void pnlochfrac(INTEGER f)
 
 static void myreadcment(INTEGER kind)
 {
-    C_ReadComment(kind, 0, (Handle)0);
+    C_PicComment(kind, 0, (Handle)0);
 }
 
 static RGBColor saveHiliteRGB;
@@ -768,7 +768,7 @@ static void W_InvertRgn(RgnHandle rh)
 
 static void W_ReadComment(INTEGER kind, INTEGER size, Handle hand)
 {
-    C_ReadComment(kind, size, hand);
+    C_PicComment(kind, size, hand);
 }
 
 static void

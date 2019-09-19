@@ -431,11 +431,6 @@ void Executor::C_PicComment(INTEGER kind, INTEGER size, Handle hand)
     CALLCOMMENT(kind, size, hand);
 }
 
-void Executor::C_ReadComment(INTEGER kind, INTEGER size, Handle hand)
-{
-    CALLCOMMENT(kind, size, hand);
-}
-
 /* look in qPicStuff.c for DrawPicture */
 
 void Executor::C_KillPicture(PicHandle pic)
