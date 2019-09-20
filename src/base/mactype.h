@@ -188,6 +188,8 @@ struct GuestTypeTraits<Point>
     using GuestType = uint32_t;
     static constexpr bool fitsInRegister = true;
 
+    static_assert(sizeof(Point) == 4);
+
     static GuestType host_to_guest(HostType x) { return reinterpret_bits_cast<uint32_t>(SwapPoint(x)); }
     static HostType guest_to_host(GuestType x) { return SwapPoint(reinterpret_bits_cast<Point>(x)); }
     

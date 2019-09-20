@@ -108,15 +108,6 @@ enum
     paramErr = (-50),
 };
 
-#if 0
-// custom case in mactype.h
-/* from Quickdraw.h */
-struct Point { GUEST_STRUCT;
-    GUEST< INTEGER> v;
-    GUEST< INTEGER> h;
-};
-#endif
-
 struct Rect
 {
     GUEST_STRUCT;
@@ -124,7 +115,6 @@ struct Rect
     GUEST<INTEGER> left;
     GUEST<INTEGER> bottom;
     GUEST<INTEGER> right;
-
 };
 
 typedef Rect *RectPtr;
@@ -145,7 +135,6 @@ typedef INTEGER ScriptCode;
 typedef INTEGER LangCode;
 
 static_assert(sizeof(QHdr) == 10);
-static_assert(sizeof(Point) == 4);
 static_assert(sizeof(Rect) == 8);
 }
 #endif /* _MACTYPES_H_ */
