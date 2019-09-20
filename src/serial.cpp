@@ -146,13 +146,13 @@ OSErr Executor::SerClrBrk(INTEGER rn) /* IMII-253 */
     return Control(rn, kSERDClearBreak, (Ptr)0);
 }
 
-OSErr Executor::SerGetBuf(INTEGER rn, LONGINT *lp) /* IMII-253 */
+OSErr Executor::SerGetBuf(INTEGER rn, GUEST<LONGINT> *lp) /* IMII-253 */
 {
     INTEGER status[11];
     OSErr err;
 
     if((err = Status(rn, kSERDInputCount, (Ptr)status)) == noErr)
-        *lp = *(LONGINT *)status;
+        *lp = *(GUEST<LONGINT> *)status;
     return err;
 }
 

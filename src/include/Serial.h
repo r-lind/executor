@@ -175,7 +175,7 @@ extern OSErr SerSetBrk(INTEGER rn);
 NOTRAP_FUNCTION2(SerSetBrk);
 extern OSErr SerClrBrk(INTEGER rn);
 NOTRAP_FUNCTION2(SerClrBrk);
-extern OSErr SerGetBuf(INTEGER rn, LONGINT *lp);
+extern OSErr SerGetBuf(INTEGER rn, GUEST<LONGINT> *lp);
 NOTRAP_FUNCTION2(SerGetBuf);
 extern OSErr SerStatus(INTEGER rn, SerStaRec *serstap);
 NOTRAP_FUNCTION2(SerStatus);
