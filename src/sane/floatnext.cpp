@@ -54,7 +54,7 @@ mp_increment_big_endian(uint8_t *bytes, int num_bytes)
 void Executor::C_ROMlib_FnextX(uint8_t *x, uint8_t *y, unsigned short sel)
 {
     CCRElement saved_ccc, saved_ccn, saved_ccv, saved_ccnz, saved_ccx;
-    INTEGER x_class, y_class, x_class_swapped, y_class_swapped;
+    INTEGER x_class, y_class;
     x80_t x80_x;
     int byte_size;
     int x_sign, y_sign;
@@ -68,10 +68,8 @@ void Executor::C_ROMlib_FnextX(uint8_t *x, uint8_t *y, unsigned short sel)
     saved_ccx = cpu_state.ccx;
 
     /* Determine the classes of both X and Y. */
-    ROMlib_Fclassx(x, &x_class_swapped, sel);
-    x_class = CW_RAW(x_class_swapped);
-    ROMlib_Fclassx(y, &y_class_swapped, sel);
-    y_class = CW_RAW(y_class_swapped);
+    ROMlib_Fclassx(x, out(x_class), sel);
+    ROMlib_Fclassx(y, out(y_class), sel);
 
     normalize_x80_p = false; /* default, avoid gcc warnings. */
 

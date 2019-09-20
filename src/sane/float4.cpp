@@ -1097,7 +1097,7 @@ void Executor::C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel)
                            toHost(sp->exp), (IEEE_T_PRINT_CAST)in);
 }
 
-void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)
+void Executor::C_ROMlib_Fclassx(void *sp, GUEST<INTEGER> *dp, unsigned short sel)
 {
     static const unsigned char eight_zeros[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     unsigned short first_word = CW_RAW(*(unsigned short *)sp);
@@ -1105,7 +1105,7 @@ void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)
     warning_floating_point(NULL_STRING);
 
     /* Default to normal number. */
-    *dp = CWC_RAW(NormalNum);
+    *dp = NormalNum;
 
     warning_floating_point(NULL_STRING);
 
@@ -1121,18 +1121,18 @@ void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)
             {
                 if((((unsigned char *)sp)[2] & 0x7F) == 0
                    && !memcmp(((unsigned char *)sp) + 3, eight_zeros, 7))
-                    *dp = CWC_RAW(Infinite);
+                    *dp = Infinite;
                 else if(((unsigned short *)sp)[1] & CWC_RAW(X_QNAN_MASK))
-                    *dp = CWC_RAW(QNaN);
+                    *dp = QNaN;
                 else
-                    *dp = CWC_RAW(SNaN);
+                    *dp = SNaN;
             }
             else if((((unsigned short *)sp)[1] & CWC_RAW(X_NORMNUM_MASK)) == 0)
             {
                 if(!memcmp(((char *)sp) + 2, eight_zeros, 8))
-                    *dp = CWC_RAW(ZeroNum);
+                    *dp = ZeroNum;
                 else
-                    *dp = CWC_RAW(DenormalNum);
+                    *dp = DenormalNum;
             }
             break;
         case FD_OPERAND:
@@ -1146,19 +1146,19 @@ void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)
             {
                 if((first_word & 0xF) == 0
                    && !memcmp(((char *)sp) + 2, eight_zeros, 6))
-                    *dp = CWC_RAW(Infinite);
+                    *dp = Infinite;
                 else if(first_word & D_QNAN_MASK)
-                    *dp = CWC_RAW(QNaN);
+                    *dp = QNaN;
                 else
-                    *dp = CWC_RAW(SNaN);
+                    *dp = SNaN;
             }
             else if((first_word & D_NORMNUM_MASK) == 0)
             {
                 if((first_word & 0xF) == 0
                    && !memcmp(((char *)sp) + 2, eight_zeros, 6))
-                    *dp = CWC_RAW(ZeroNum);
+                    *dp = ZeroNum;
                 else
-                    *dp = CWC_RAW(DenormalNum);
+                    *dp = DenormalNum;
             }
             break;
         case FS_OPERAND:
@@ -1171,18 +1171,18 @@ void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)
             if((v & S_INF_OR_NAN) == S_INF_OR_NAN)
             {
                 if((v & S_FRAC_MASK) == 0)
-                    *dp = CWC_RAW(Infinite);
+                    *dp = Infinite;
                 else if(v & S_QNAN_MASK)
-                    *dp = CWC_RAW(QNaN);
+                    *dp = QNaN;
                 else
-                    *dp = CWC_RAW(SNaN);
+                    *dp = SNaN;
             }
             else if((v & S_NORMNUM_MASK) == 0)
             {
                 if((v & S_FRAC_MASK) == 0)
-                    *dp = CWC_RAW(ZeroNum);
+                    *dp = ZeroNum;
                 else
-                    *dp = CWC_RAW(DenormalNum);
+                    *dp = DenormalNum;
             }
         }
         break;
@@ -1191,9 +1191,9 @@ void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)
             static const unsigned char comp_nan[] = { 0x80, 0, 0, 0, 0, 0, 0, 0 };
 
             if(!memcmp(sp, eight_zeros, sizeof(comp_t)))
-                *dp = CWC_RAW(ZeroNum);
+                *dp = ZeroNum;
             else if(!memcmp(sp, comp_nan, sizeof comp_nan))
-                *dp = CWC_RAW(SNaN); /* FIXME - should this be signaling?  Bill sez so */
+                *dp = SNaN; /* FIXME - should this be signaling?  Bill sez so */
 
             /* FIXME - should we let the SNaN get negated, below? */
         }
@@ -1207,5 +1207,5 @@ void Executor::C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel)
    * sign bit, we only need to check the first byte of the type.
    */
     if(*(signed char *)sp < 0)
-        *dp = CW_RAW(0 - CW_RAW(*dp));
+        *dp = 0 - *dp;
 }

@@ -168,7 +168,7 @@ extern void C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp, unsigned short 
 PASCAL_SUBTRAP(ROMlib_Fx2dec, 0xA9EB, 0x0B, Pack4);
 extern void C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fdec2x, 0xA9EB, 0x09, Pack4);
-extern void C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel);
+extern void C_ROMlib_Fclassx(void *sp, GUEST<INTEGER> *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fclassx, 0xA9EB, 0x1C, Pack4);
 extern void C_ROMlib_FlnX(extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_FlnX, 0xA9EC, 0x00, Pack5);
