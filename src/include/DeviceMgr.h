@@ -125,16 +125,6 @@ enum
     writErr = (-20),
 };
 
-typedef struct
-{
-    DriverUPP open;
-    DriverUPP prime;
-    DriverUPP ctl;
-    DriverUPP status;
-    DriverUPP close;
-    StringPtr name;
-    INTEGER refnum;
-} driverinfo;
 
 const LowMemGlobal<DCtlHandlePtr> UTableBase { 0x11C }; // DeviceMgr IMII-192 (false);
 const LowMemGlobal<ProcPtr[8]> Lvl1DT { 0x192 }; // DeviceMgr IMII-197 (false);

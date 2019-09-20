@@ -257,6 +257,17 @@ DCtlHandle Executor::GetDCtlEntry(INTEGER rn)
  * beginning with * a period.
  */
 
+
+struct driverinfo
+{
+    DriverUPP open;
+    DriverUPP prime;
+    DriverUPP ctl;
+    DriverUPP status;
+    DriverUPP close;
+    StringPtr name;
+    INTEGER refnum;
+};
 static std::vector<driverinfo> knowndrivers;
 
 
