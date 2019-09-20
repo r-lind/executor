@@ -167,7 +167,7 @@ extern OSErr C_FindSymbol(ConnectionID connID, Str255 symName, GUEST<Ptr> *symAd
 PASCAL_SUBTRAP(FindSymbol, 0xAA5A, 0x0005, CodeFragmentDispatch);
 
 
-extern OSErr C_CloseConnection(ConnectionID *cidp);
+extern OSErr C_CloseConnection(GUEST<ConnectionID> *cidp);
 PASCAL_SUBTRAP(CloseConnection, 0xAA5A, 0x0004, CodeFragmentDispatch);
 
 extern OSErr C_GetSharedLibrary(Str63 library, OSType arch,

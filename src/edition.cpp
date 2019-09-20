@@ -17,7 +17,7 @@ OSErr Executor::C_InitEditionPackVersion(INTEGER unused)
 OSErr Executor::C_NewSection(EditionContainerSpecPtr container,
                              FSSpecPtr section_doc, SectionType kind,
                              int32_t section_id, UpdateMode initial_mode,
-                             SectionHandle *section_out)
+                             GUEST<SectionHandle> *section_out)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
@@ -71,21 +71,21 @@ OSErr Executor::C_SetEditionFormatMark(EditionRefNum edition,
 }
 
 OSErr Executor::C_GetEditionFormatMark(EditionRefNum edition,
-                                       FormatType format, int32_t *currentMark)
+                                       FormatType format, GUEST<int32_t> *currentMark)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
 }
 
 OSErr Executor::C_OpenEdition(SectionHandle subscriber_section,
-                              EditionRefNum *ref_num)
+                              GUEST<EditionRefNum> *ref_num)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
 }
 
 OSErr Executor::C_EditionHasFormat(EditionRefNum edition, FormatType format,
-                                   Size *format_size)
+                                   GUEST<Size> *format_size)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
@@ -101,7 +101,7 @@ OSErr Executor::C_ReadEdition(EditionRefNum edition, FormatType format,
 OSErr Executor::C_OpenNewEdition(SectionHandle publisher_section,
                                  OSType creator,
                                  FSSpecPtr publisher_section_doc,
-                                 EditionRefNum *ref_num)
+                                 GUEST<EditionRefNum> *ref_num)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;
@@ -195,7 +195,7 @@ OSErr Executor::C_GetStandardFormats(EditionContainerSpecPtr container,
     return paramErr;
 }
 
-OSErr Executor::C_GetEditionOpenerProc(EditionOpenerUPP *opener)
+OSErr Executor::C_GetEditionOpenerProc(GUEST<EditionOpenerUPP> *opener)
 {
     warning_unimplemented(NULL_STRING);
     return paramErr;

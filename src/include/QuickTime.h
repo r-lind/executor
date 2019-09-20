@@ -58,8 +58,8 @@ extern OSErr C_CloseMovieFile(INTEGER refnum);
 PASCAL_SUBTRAP(CloseMovieFile, 0xAAAA, 0x00D5, QuickTime);
 extern Boolean C_IsMovieDone(Movie movie);
 PASCAL_SUBTRAP(IsMovieDone, 0xAAAA, 0x00DD, QuickTime);
-extern OSErr C_NewMovieFromFile(Movie *moviep, INTEGER refnum,
-                                            INTEGER *residp,
+extern OSErr C_NewMovieFromFile(GUEST<Movie> *moviep, INTEGER refnum,
+                                            GUEST<INTEGER> *residp,
                                             StringPtr resnamep,
                                             INTEGER flags,
                                             Boolean *datarefwaschangedp);
@@ -77,7 +77,7 @@ PASCAL_SUBTRAP(NewMovieController, 0xAAAA, 0x018A, QuickTime);
 extern void C_DisposeMovieController(ComponentInstance cntrller);
 PASCAL_SUBTRAP(DisposeMovieController, 0xAAAA, 0x018B, QuickTime);
 extern OSErr C_OpenMovieFile(const FSSpec *filespecp,
-                                         INTEGER *refnump, uint8_t perm);
+                                         GUEST<INTEGER> *refnump, uint8_t perm);
 PASCAL_SUBTRAP(OpenMovieFile, 0xAAAA, 0x0192, QuickTime);
 
 static_assert(sizeof(MovieRecord) == 4);

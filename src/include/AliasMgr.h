@@ -67,7 +67,7 @@ extern OSErr C_ResolveAliasFile(FSSpecPtr theSpec,
 PASCAL_SUBTRAP(ResolveAliasFile, 0xA823, 0x000C, AliasDispatch);
 
 extern OSErr C_MatchAlias(FSSpecPtr fromFile, int32_t rulesMask,
-                                      AliasHandle alias, int16_t *aliasCount,
+                                      AliasHandle alias, GUEST<int16_t> *aliasCount,
                                       FSSpecArrayPtr aliasList,
                                       Boolean *needsUpdate,
                                       AliasFilterUPP aliasFilter,

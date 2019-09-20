@@ -758,7 +758,7 @@ Boolean Executor::C_RectInIconMethod(const Rect *test_rect, const Rect *rect,
     return false;
 }
 
-OSErr Executor::C_MakeIconCache(Handle *cache, IconGetterUPP make_icon,
+OSErr Executor::C_MakeIconCache(GUEST<Handle> *cache, IconGetterUPP make_icon,
                                 void *data)
 {
     warning_unimplemented(NULL_STRING);
@@ -772,7 +772,7 @@ OSErr Executor::C_LoadIconCache(const Rect *rect, IconAlignmentType align,
     ICON_RETURN_ERROR(paramErr);
 }
 
-OSErr Executor::C_GetIconCacheData(Handle cache, void **data)
+OSErr Executor::C_GetIconCacheData(Handle cache, GUEST<void *>*data)
 {
     warning_unimplemented(NULL_STRING);
     ICON_RETURN_ERROR(paramErr);
@@ -784,7 +784,7 @@ OSErr Executor::C_SetIconCacheData(Handle cache, void *data)
     ICON_RETURN_ERROR(paramErr);
 }
 
-OSErr Executor::C_GetIconCacheProc(Handle cache, IconGetterUPP *proc)
+OSErr Executor::C_GetIconCacheProc(Handle cache, GUEST<IconGetterUPP> *proc)
 {
     warning_unimplemented(NULL_STRING);
     ICON_RETURN_ERROR(paramErr);

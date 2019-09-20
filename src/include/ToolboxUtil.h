@@ -155,10 +155,17 @@ PASCAL_TRAP(Fix2Frac, 0xA841);
 extern Fixed C_Frac2Fix(Fract x);
 PASCAL_TRAP(Frac2Fix, 0xA842);
 
+BEGIN_EXECUTOR_ONLY
+// TODO:
+// Executor will need to provide both 80-bit extended versions as trap
+// and 64-bit double versions for PPC.
+// Multiversal Interfaces might also need to declare a 96-bit extended version for 68881.
 extern Extended Fix2X(Fixed x);
 extern Fixed X2Fix(Extended *xp);
 extern Extended Frac2X(Fract x);
 extern Fract X2Frac(Extended *xp);
+END_EXECUTOR_ONLY
+
 extern Fixed C_R_X2Fix(extended80 *x);
 PASCAL_TRAP(R_X2Fix, 0xA844);
 extern Fract C_R_X2Frac(extended80 *x);

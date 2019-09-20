@@ -184,7 +184,7 @@ extern OSErr C_NewSection(EditionContainerSpecPtr container,
                                       FSSpecPtr section_doc,
                                       SectionType kind, int32_t section_id,
                                       UpdateMode initial_mode,
-                                      SectionHandle *section_out);
+                                      GUEST<SectionHandle> *section_out);
 PASCAL_SUBTRAP(NewSection, 0xA82D, 0x0A02, Pack11);
 extern OSErr C_RegisterSection(FSSpecPtr section_doc,
                                            SectionHandle section,
@@ -214,12 +214,12 @@ extern OSErr C_GetEditionFormatMark(EditionRefNum edition,
 PASCAL_SUBTRAP(GetEditionFormatMark, 0xA82D, 0x061E, Pack11);
 
 extern OSErr C_OpenEdition(SectionHandle subscriber_section,
-                                       EditionRefNum *ref_num);
+                            GUEST<EditionRefNum> *ref_num);
 PASCAL_SUBTRAP(OpenEdition, 0xA82D, 0x0412, Pack11);
 
 extern OSErr C_EditionHasFormat(EditionRefNum edition,
                                             FormatType format,
-                                            Size *format_size);
+                                            GUEST<Size> *format_size);
 PASCAL_SUBTRAP(EditionHasFormat, 0xA82D, 0x0618, Pack11);
 extern OSErr C_ReadEdition(EditionRefNum edition,
                                        FormatType format,
@@ -227,9 +227,9 @@ extern OSErr C_ReadEdition(EditionRefNum edition,
 PASCAL_SUBTRAP(ReadEdition, 0xA82D, 0x081A, Pack11);
 
 extern OSErr C_OpenNewEdition(SectionHandle publisher_section,
-                                          OSType creator,
-                                          FSSpecPtr publisher_section_doc,
-                                          EditionRefNum *ref_num);
+                            OSType creator,
+                            FSSpecPtr publisher_section_doc,
+                            GUEST<EditionRefNum> *ref_num);
 PASCAL_SUBTRAP(OpenNewEdition, 0xA82D, 0x0814, Pack11);
 
 extern OSErr C_WriteEdition(EditionRefNum edition, FormatType format,
@@ -283,7 +283,7 @@ extern OSErr C_GetStandardFormats(EditionContainerSpecPtr container,
                                               Handle publisher_alias,
                                               Handle formats);
 PASCAL_SUBTRAP(GetStandardFormats, 0xA82D, 0x0A28, Pack11);
-extern OSErr C_GetEditionOpenerProc(EditionOpenerUPP *opener);
+extern OSErr C_GetEditionOpenerProc(GUEST<EditionOpenerUPP> *opener);
 PASCAL_SUBTRAP(GetEditionOpenerProc, 0xA82D, 0x022A, Pack11);
 extern OSErr C_SetEditionOpenerProc(EditionOpenerUPP opener);
 PASCAL_SUBTRAP(SetEditionOpenerProc, 0xA82D, 0x022C, Pack11);

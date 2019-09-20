@@ -520,7 +520,7 @@ OSErr Executor::C_GetSharedLibrary(Str63 library, OSType arch,
     return retval;
 }
 
-OSErr Executor::C_CloseConnection(ConnectionID *cidp)
+OSErr Executor::C_CloseConnection(GUEST<ConnectionID> *cidp)
 {
     warning_trace_info("cidp = %p, cid = 0x%p", cidp, *cidp);
     return noErr;

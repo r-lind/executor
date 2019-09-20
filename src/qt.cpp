@@ -182,8 +182,8 @@ Boolean Executor::C_IsMovieDone(Movie movie)
     return retval;
 }
 
-OSErr Executor::C_NewMovieFromFile(Movie *moviep, INTEGER refnum,
-                                   INTEGER *residp, StringPtr resnamep,
+OSErr Executor::C_NewMovieFromFile(GUEST<Movie> *moviep, INTEGER refnum,
+                                   GUEST<INTEGER> *residp, StringPtr resnamep,
                                    INTEGER flags, Boolean *datarefwaschangedp)
 {
     OSErr retval;
@@ -239,7 +239,7 @@ void Executor::C_DisposeMovieController(ComponentInstance controller)
     warning_unimplemented(NULL_STRING);
 }
 
-OSErr Executor::C_OpenMovieFile(const FSSpec *filespecp, INTEGER *refnump,
+OSErr Executor::C_OpenMovieFile(const FSSpec *filespecp, GUEST<INTEGER> *refnump,
                                 uint8_t perm)
 {
     OSErr retval;

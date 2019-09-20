@@ -254,7 +254,7 @@ extern Boolean C_RectInIconMethod(const Rect *test_rect,
                                               IconGetterUPP method,
                                               void *data);
 PASCAL_SUBTRAP(RectInIconMethod, 0xABC9, 0x0912, IconDispatch);
-extern OSErr C_MakeIconCache(Handle *cache,
+extern OSErr C_MakeIconCache(GUEST<Handle> *cache,
                                          IconGetterUPP make_icon,
                                          void *data);
 PASCAL_SUBTRAP(MakeIconCache, 0xABC9, 0x0604, IconDispatch);
@@ -263,12 +263,11 @@ extern OSErr C_LoadIconCache(const Rect *rect,
                                          IconTransformType transform,
                                          Handle cache);
 PASCAL_SUBTRAP(LoadIconCache, 0xABC9, 0x0606, IconDispatch);
-extern OSErr C_GetIconCacheData(Handle cache, void **data);
+extern OSErr C_GetIconCacheData(Handle cache, GUEST<void *>*data);
 PASCAL_SUBTRAP(GetIconCacheData, 0xABC9, 0x0419, IconDispatch);
 extern OSErr C_SetIconCacheData(Handle cache, void *data);
 PASCAL_SUBTRAP(SetIconCacheData, 0xABC9, 0x041A, IconDispatch);
-extern OSErr C_GetIconCacheProc(Handle cache,
-                                            IconGetterUPP *proc);
+extern OSErr C_GetIconCacheProc(Handle cache, GUEST<IconGetterUPP> *proc);
 PASCAL_SUBTRAP(GetIconCacheProc, 0xABC9, 0x041B, IconDispatch);
 extern OSErr C_SetIconCacheProc(Handle cache,
                                             IconGetterUPP proc);
