@@ -1710,7 +1710,7 @@ void _PurgeMem_flags(Size sizeneeded, bool sys_p)
     MM_SLAM("exit");
 }
 
-void _BlockMove_flags(Ptr src, Ptr dst, Size cnt, bool flush_p)
+void _BlockMove_flags(const void *src, void *dst, Size cnt, bool flush_p)
 {
     MM_SLAM("entry");
     if(cnt > 0)
@@ -1719,10 +1719,10 @@ void _BlockMove_flags(Ptr src, Ptr dst, Size cnt, bool flush_p)
 	 dereference 0 */
 
         if(!dst)
-            dst = (Ptr)SYN68K_TO_US(0);
+            dst = SYN68K_TO_US(0);
 
         if(!src)
-            src = (Ptr)SYN68K_TO_US(0);
+            src = SYN68K_TO_US(0);
 
         memmove(dst, src, cnt);
         if(flush_p)

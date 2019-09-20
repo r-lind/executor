@@ -220,7 +220,7 @@ extern THz PtrZone(Ptr p);
 REGISTER_TRAP2(PtrZone, 0xA148, A0 (A0), ReturnMemErr<D0>);
 
 
-extern void _BlockMove_flags(Ptr src, Ptr dst, Size cnt, bool flush_p);
+extern void _BlockMove_flags(const void *src, void *dst, Size cnt, bool flush_p);
 REGISTER_FLAG_TRAP(_BlockMove_flags, BlockMove, BlockMoveData,
     0xA02E, void(const void* src, void* dst, Size cnt), void (A0,A1,D0,TrapBit<0x200>), ReturnMemErr<D0>);
 
