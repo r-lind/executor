@@ -191,7 +191,7 @@ RAW_68K_IMPLEMENTATION(Frac2X)
                                                              \
     uw = EM_D1 << 8;                                         \
     uw |= cpu_state.regs[2].uw.n;                            \
-    EM_D0 = (KeyTranslate(nullptr, uw, (LONGINT *)0) >> 16) & 0xFF; \
+    EM_D0 = (KeyTranslate(nullptr, uw, (GUEST<LONGINT> *)0) >> 16) & 0xFF; \
     RTS();
 
 RAW_68K_IMPLEMENTATION(Key1Trans);

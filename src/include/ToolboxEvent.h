@@ -27,7 +27,7 @@ const LowMemGlobal<INTEGER> JournalRef { 0x8E8 }; // ToolboxEvent IMI-261 (false
 LOWMEM_ACCESSOR(DoubleTime);
 
 extern LONGINT C_KeyTranslate(Ptr mapp, unsigned short code,
-                                      LONGINT *state);
+                                      GUEST<LONGINT> *state);
 PASCAL_TRAP(KeyTranslate, 0xA9C3);
 extern Boolean C_GetNextEvent(INTEGER em,
                                           EventRecord *evt);

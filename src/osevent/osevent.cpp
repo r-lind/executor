@@ -147,7 +147,7 @@ Executor::ROMlib_xlate(INTEGER virt, INTEGER modifiers, bool down_p)
         retval = down_value[virt & VIRT_MASK];
     else
     {
-        static LONGINT state;
+        static GUEST<LONGINT> state;
 
         retval = KeyTranslate(ROMlib_kchr_ptr(),
                           modifiers | (virt & VIRT_MASK), &state);

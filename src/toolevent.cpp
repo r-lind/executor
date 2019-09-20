@@ -151,7 +151,7 @@ void Executor::ROMlib_alarmoffmbar()
         ROMlib_togglealarm();
 }
 
-LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, LONGINT *state)
+LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, GUEST<LONGINT> *state)
 {
     LONGINT ascii;
     int table_num;
