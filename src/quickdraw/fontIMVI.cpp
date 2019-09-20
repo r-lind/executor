@@ -26,8 +26,8 @@ Boolean Executor::C_IsOutline(Point numer, Point denom)
 }
 
 OSErr Executor::C_OutlineMetrics(int16_t byte_count, Ptr text, Point numer,
-                                 Point denom, int16_t *y_max, int16_t *y_min,
-                                 Fixed *aw_array, Fixed *lsb_array,
+                                 Point denom, GUEST<int16_t> *y_max, GUEST<int16_t> *y_min,
+                                 GUEST<Fixed> *aw_array, GUEST<Fixed> *lsb_array,
                                  Rect *bounds_array)
 {
     warning_unimplemented(NULL_STRING);
