@@ -106,7 +106,7 @@ OSErr Executor::C_GetIndVoice(int16_t index, VoiceSpec *voice)
 #endif
 }
 
-OSErr Executor::C_NewSpeechChannel(VoiceSpec *voice, SpeechChannel *chan)
+OSErr Executor::C_NewSpeechChannel(VoiceSpec *voice, GUEST<SpeechChannel> *chan)
 {
 #ifdef MACOSX
     return MacBridge::NewSpeechChannel(voice, chan);

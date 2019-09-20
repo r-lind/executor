@@ -24,7 +24,7 @@ Executor::OSErr StopSpeech(Executor::SpeechChannel chan);
 Executor::OSErr ContinueSpeech(Executor::SpeechChannel chan);
 
 Executor::OSErr GetIndVoice(int16_t index, Executor::VoiceSpec *voice);
-Executor::OSErr NewSpeechChannel(Executor::VoiceSpec *voice, Executor::SpeechChannel *chan);
+Executor::OSErr NewSpeechChannel(Executor::VoiceSpec *voice, Executor::GUEST<Executor::SpeechChannel> *chan);
 Executor::OSErr StopSpeechAt(Executor::SpeechChannel chan, int32_t whereToStop);
 Executor::OSErr PauseSpeechAt(Executor::SpeechChannel chan, int32_t whereToPause);
 Executor::OSErr SetSpeechRate(Executor::SpeechChannel chan, Executor::Fixed rate);

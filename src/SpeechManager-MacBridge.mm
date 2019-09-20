@@ -277,7 +277,7 @@ Executor::OSErr MacBridge::GetIndVoice (int16_t index, Executor::VoiceSpec *voic
   return Executor::noErr;
 }
 
-Executor::OSErr MacBridge::NewSpeechChannel (Executor::VoiceSpec *voice, Executor::SpeechChannel *chan)
+Executor::OSErr MacBridge::NewSpeechChannel (Executor::VoiceSpec *voice, Executor::GUEST<Executor::SpeechChannel> *chan)
 {
   static Executor::LONGINT speechChanData = 0;
   @autoreleasepool {

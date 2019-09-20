@@ -113,7 +113,7 @@ PASCAL_SUBTRAP(ContinueSpeech, 0xA800, 0x0238000C, SoundDispatch);
 
 OSErr C_GetIndVoice(int16_t index, VoiceSpec *voice);
 PASCAL_SUBTRAP(GetIndVoice, 0xA800, 0x030C000C, SoundDispatch);
-OSErr C_NewSpeechChannel(VoiceSpec *voice, SpeechChannel *chan);
+OSErr C_NewSpeechChannel(VoiceSpec *voice, GUEST<SpeechChannel> *chan);
 PASCAL_SUBTRAP(NewSpeechChannel, 0xA800, 0x0418000C, SoundDispatch);
 OSErr C_StopSpeechAt(SpeechChannel chan, int32_t whereToStop);
 PASCAL_SUBTRAP(StopSpeechAt, 0xA800, 0x0430000C, SoundDispatch);
