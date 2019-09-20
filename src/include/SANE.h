@@ -194,17 +194,13 @@ PASCAL_SUBTRAP(ROMlib_Fexp1X, 0xA9EC, 0x0C, Pack5);
 extern void C_ROMlib_Fexp21X(extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_Fexp21X, 0xA9EC, 0x0E, Pack5);
 
-extern void C_ROMlib_Fxpwri(INTEGER *sp,
-                                        extended80 *dp);
+extern void C_ROMlib_Fxpwri(GUEST<INTEGER> *sp, extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_Fxpwri, 0xA9EC, 0x10, Pack5);
-extern void C_ROMlib_Fxpwry(extended80 *sp,
-                                        extended80 *dp);
+extern void C_ROMlib_Fxpwry(extended80 *sp, extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_Fxpwry, 0xA9EC, 0x12, Pack5);
-extern void C_ROMlib_Fcompound(extended80 *sp2,
-                                           extended80 *sp, extended80 *dp);
+extern void C_ROMlib_Fcompound(extended80 *sp2, extended80 *sp, extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_Fcompound, 0xA9EC, 0x14, Pack5);
-extern void C_ROMlib_Fannuity(extended80 *sp2,
-                                          extended80 *sp, extended80 *dp);
+extern void C_ROMlib_Fannuity(extended80 *sp2, extended80 *sp, extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_Fannuity, 0xA9EC, 0x16, Pack5);
 extern void C_ROMlib_FsinX(extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_FsinX, 0xA9EC, 0x18, Pack5);

@@ -85,12 +85,12 @@ void Executor::C_ROMlib_Fexp21X(x80_t *dp)
     warning_floating_point("exp21(%f) == %f", (double)in, (double)out);
 }
 
-void Executor::C_ROMlib_Fxpwri(INTEGER *sp, x80_t *dp)
+void Executor::C_ROMlib_Fxpwri(GUEST<INTEGER> *sp, x80_t *dp)
 {
     DECLAREIN2OUT();
 
     /* FIXME - may lose precision! */
-    ieee_to_x80(out = pow(in1 = x80_to_ieee(dp), in2 = CW_RAW(*(short *)sp)), dp);
+    ieee_to_x80(out = pow(in1 = x80_to_ieee(dp), in2 = *sp), dp);
     warning_floating_point("xpwri(%f, %f) == %f",
                            (double)in1, (double)in2, (double)out);
 }
