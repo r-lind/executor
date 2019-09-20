@@ -211,7 +211,7 @@ extern INTEGER C_IUTextOrder(Ptr ptra, Ptr ptrb, INTEGER lena,
 PASCAL_SUBTRAP(IUTextOrder, 0xA9ED, 0x0022, Pack6);
 
 extern void C_GetIntlResourceTable(ScriptCode script, INTEGER tablecode,
-                                        Handle *itlhandlep, LONGINT *offsetp, LONGINT *lengthp);
+                                        GUEST<Handle> *itlhandlep, GUEST<LONGINT> *offsetp, GUEST<LONGINT> *lengthp);
 PASCAL_SUBTRAP(GetIntlResourceTable, 0xA9ED, 0x0024, Pack6);
 
 static_assert(sizeof(Intl0Rec) == 32);

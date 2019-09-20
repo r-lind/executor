@@ -674,8 +674,8 @@ INTEGER Executor::C_IUTextOrder(Ptr ptra, Ptr ptrb, INTEGER lena, INTEGER lenb,
 }
 
 void Executor::C_GetIntlResourceTable(ScriptCode script, INTEGER tablecode,
-                               Handle *itlhandlep, LONGINT *offsetp,
-                               LONGINT *lengthp)
+                               GUEST<Handle> *itlhandlep, GUEST<LONGINT> *offsetp,
+                               GUEST<LONGINT> *lengthp)
 {
     warning_unimplemented(NULL_STRING);
     ROMlib_hook(iu_unimplementednumber);
