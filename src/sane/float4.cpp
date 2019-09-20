@@ -180,7 +180,7 @@ ROMlib_compare_fcw_fsw(uint32_t fcwfsw, const char *func, int line)
  */
 static uint8_t halts_enabled;
 
-void Executor::C_ROMlib_Fsetenv(INTEGER *dp, INTEGER sel)
+void Executor::C_ROMlib_Fsetenv(GUEST<INTEGER> *dp, INTEGER sel)
 {
     unsigned short env;
 
@@ -190,7 +190,7 @@ void Executor::C_ROMlib_Fsetenv(INTEGER *dp, INTEGER sel)
    * handling.
    */
 
-    env = CW_RAW(*dp);
+    env = *dp;
     halts_enabled = env & 0x1F;
     env &= ~0x1F;
 
@@ -308,10 +308,10 @@ void Executor::C_ROMlib_Fsetenv(INTEGER *dp, INTEGER sel)
     //gui_abort();
 #endif
 
-    warning_floating_point("setenv(0x%04X)", (unsigned)(uint16_t)CW_RAW(*dp));
+    warning_floating_point("setenv(0x%04X)", (unsigned)(uint16_t)*dp);
 }
 
-void Executor::C_ROMlib_Fgetenv(INTEGER *dp, INTEGER sel)
+void Executor::C_ROMlib_Fgetenv(GUEST<INTEGER> *dp, INTEGER sel)
 {
     unsigned short env;
 
@@ -394,13 +394,13 @@ void Executor::C_ROMlib_Fgetenv(INTEGER *dp, INTEGER sel)
     env = (env & ~0x1F) | halts_enabled;
 
     /* Return the computed environment word. */
-    *(unsigned short *)dp = CW_RAW(env);
+    *dp = (INTEGER)env;
     warning_floating_point("Returning 0x%04X", (unsigned)env);
 }
 
-void Executor::C_ROMlib_Fprocentry(INTEGER *dp, INTEGER sel)
+void Executor::C_ROMlib_Fprocentry(GUEST<INTEGER> *dp, INTEGER sel)
 {
-    static INTEGER default_environment = 0; /* Always == 0. */
+    static GUEST<INTEGER> default_environment = 0; /* Always == 0. */
 
     warning_floating_point(NULL_STRING);
     /* Save the old environment. */
@@ -410,10 +410,10 @@ void Executor::C_ROMlib_Fprocentry(INTEGER *dp, INTEGER sel)
     C_ROMlib_Fsetenv(&default_environment, 0);
 }
 
-void Executor::C_ROMlib_Fprocexit(INTEGER *dp, INTEGER sel)
+void Executor::C_ROMlib_Fprocexit(GUEST<INTEGER> *dp, INTEGER sel)
 {
-    INTEGER swapped_old_env;
-    INTEGER swapped_new_env;
+    INTEGER old_env;
+    INTEGER new_env;
 
     /* FIXME - the behavior of this function is not likely to be correct for
    * the cases where exceptions are lurking, waiting to be signaled.
@@ -423,31 +423,30 @@ void Executor::C_ROMlib_Fprocexit(INTEGER *dp, INTEGER sel)
 #define EXCEPTION_BITS_MASK 0x1F00
 
     /* Get the old environment. */
-    C_ROMlib_Fgetenv(&swapped_old_env, 0);
+    C_ROMlib_Fgetenv(out(old_env), 0);
 
     /* Compute the new environment (which is swapped). */
-    swapped_new_env = ((*dp & ~CWC_RAW(EXCEPTION_BITS_MASK))
-                       | (swapped_old_env & CWC_RAW(EXCEPTION_BITS_MASK)));
+    new_env = ((*dp & ~EXCEPTION_BITS_MASK)
+            | (old_env & EXCEPTION_BITS_MASK));
 
     /* Set up the new environment. */
-    C_ROMlib_Fsetenv(&swapped_new_env, 0);
+    C_ROMlib_Fsetenv(inout(new_env), 0);
 }
 
-void Executor::C_ROMlib_Ftestxcp(INTEGER *dp, INTEGER sel)
+void Executor::C_ROMlib_Ftestxcp(GUEST<INTEGER> *dp, INTEGER sel)
 {
     INTEGER env;
 
     warning_floating_point(NULL_STRING);
     /* Fetch the current environment. */
-    C_ROMlib_Fgetenv(&env, 0);
-    env = CW_RAW(env);
-
+    C_ROMlib_Fgetenv(out(env), 0);
+    
     /* Clear dp's high byte. */
-    *dp &= CWC_RAW(0x00FF);
+    *dp &= 0x00FF;
 
     /* See if any of the specified exception bits are set. */
-    if((env >> 8) & ((unsigned char *)dp)[1])
-        *dp |= CWC_RAW(0x100); /* Return 1 in the high byte. */
+    if((env >> 8) & (uint8_t)(*dp))
+        *dp |= 0x100; /* Return 1 in the high byte. */
 }
 
 void Executor::C_ROMlib_FsqrtX(x80_t *dp, unsigned short sel)
@@ -460,13 +459,13 @@ void Executor::C_ROMlib_FsqrtX(x80_t *dp, unsigned short sel)
                            (IEEE_T_PRINT_CAST)in, (IEEE_T_PRINT_CAST)out);
 }
 
-void Executor::C_ROMlib_FscalbX(INTEGER *sp, x80_t *dp, unsigned short sel)
+void Executor::C_ROMlib_FscalbX(GUEST<INTEGER> *sp, x80_t *dp, unsigned short sel)
 {
     int scale;
     DECLAREINOUT();
 
     /* FIXME - may lose precision! */
-    scale = *(GUEST<int16_t> *)sp;
+    scale = *sp;
     ieee_to_x80(out = scalbn(in = x80_to_ieee(dp), scale), dp);
 
     warning_floating_point("scalb(" IEEE_T_FORMAT ", %d) == " IEEE_T_FORMAT "",
@@ -601,12 +600,12 @@ void Executor::C_ROMlib_Fmulx(void *sp, x80_t *dp, unsigned short sel)
 
 static LONGINT halt_vec;
 
-void Executor::C_ROMlib_Fsethv(LONGINT *hvp, unsigned short sel)
+void Executor::C_ROMlib_Fsethv(GUEST<LONGINT> *hvp, unsigned short sel)
 {
     halt_vec = *hvp;
 }
 
-void Executor::C_ROMlib_Fgethv(LONGINT *hvp, unsigned short sel)
+void Executor::C_ROMlib_Fgethv(GUEST<LONGINT> *hvp, unsigned short sel)
 {
     *hvp = halt_vec;
 }

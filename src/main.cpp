@@ -802,7 +802,7 @@ int main(int argc, char **argv)
 
     {
         INTEGER env = 0;
-        ROMlib_Fsetenv(&env, 0);
+        ROMlib_Fsetenv(inout(env), 0);
     }
 
     syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors

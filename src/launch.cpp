@@ -751,7 +751,7 @@ static void reset_low_globals(void)
     /* Set up default floating point environment. */
     {
         INTEGER env = 0;
-        ROMlib_Fsetenv(&env, 0);
+        ROMlib_Fsetenv(inout(env), 0);
     }
 }
 

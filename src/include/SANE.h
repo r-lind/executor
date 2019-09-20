@@ -120,91 +120,55 @@ DISPATCHER_TRAP(Pack4, 0xA9EB, StackWLookahead<0xFF>);
 DISPATCHER_TRAP(Pack5, 0xA9EC, StackWMasked<0xFF>);
 DISPATCHER_TRAP(Pack7, 0xA9EE, StackW);
 
-extern void C_ROMlib_Fsetenv(INTEGER *dp,
-                                         INTEGER sel);
+extern void C_ROMlib_Fsetenv(GUEST<INTEGER> *dp, INTEGER sel);
 PASCAL_SUBTRAP(ROMlib_Fsetenv, 0xA9EB, 0x01, Pack4);
-extern void C_ROMlib_Fgetenv(INTEGER *dp,
-                                         INTEGER sel);
+extern void C_ROMlib_Fgetenv(GUEST<INTEGER> *dp, INTEGER sel);
 PASCAL_SUBTRAP(ROMlib_Fgetenv, 0xA9EB, 0x03, Pack4);
-extern void C_ROMlib_Fprocentry(INTEGER *dp,
-                                            INTEGER sel);
+extern void C_ROMlib_Fprocentry(GUEST<INTEGER> *dp, INTEGER sel);
 PASCAL_SUBTRAP(ROMlib_Fprocentry, 0xA9EB, 0x17, Pack4);
-extern void C_ROMlib_Fprocexit(INTEGER *dp,
-                                           INTEGER sel);
+extern void C_ROMlib_Fprocexit(GUEST<INTEGER> *dp, INTEGER sel);
 PASCAL_SUBTRAP(ROMlib_Fprocexit, 0xA9EB, 0x19, Pack4);
-extern void C_ROMlib_Ftestxcp(INTEGER *dp,
-                                          INTEGER sel);
+extern void C_ROMlib_Ftestxcp(GUEST<INTEGER> *dp, INTEGER sel);
 PASCAL_SUBTRAP(ROMlib_Ftestxcp, 0xA9EB, 0x1B, Pack4);
-extern void C_ROMlib_FsqrtX(extended80 *dp,
-                                        unsigned short sel);
+extern void C_ROMlib_FsqrtX(extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FsqrtX, 0xA9EB, 0x12, Pack4);
-extern void C_ROMlib_FscalbX(INTEGER *sp,
-                                         extended80 *dp, unsigned short sel);
+extern void C_ROMlib_FscalbX(GUEST<INTEGER> *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FscalbX, 0xA9EB, 0x18, Pack4);
-extern void C_ROMlib_FlogbX(extended80 *dp,
-                                        unsigned short sel);
+extern void C_ROMlib_FlogbX(extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FlogbX, 0xA9EB, 0x1A, Pack4);
-extern void C_ROMlib_FabsX(extended80 *dp,
-                                       unsigned short sel);
+extern void C_ROMlib_FabsX(extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FabsX, 0xA9EB, 0x0F, Pack4);
-extern void C_ROMlib_FnegX(extended80 *dp,
-                                       unsigned short sel);
+extern void C_ROMlib_FnegX(extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FnegX, 0xA9EB, 0x0D, Pack4);
-extern void C_ROMlib_FrintX(extended80 *dp,
-                                        unsigned short sel);
+extern void C_ROMlib_FrintX(extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FrintX, 0xA9EB, 0x14, Pack4);
-extern void C_ROMlib_FtintX(extended80 *dp,
-                                        unsigned short sel);
+extern void C_ROMlib_FtintX(extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FtintX, 0xA9EB, 0x16, Pack4);
-extern void C_ROMlib_Fcpysgnx(x80_t *sp,
-                                          x80_t *dp, unsigned short sel);
+extern void C_ROMlib_Fcpysgnx(x80_t *sp, x80_t *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fcpysgnx, 0xA9EB, 0x11, Pack4);
-extern void C_ROMlib_Faddx(void *sp, extended80 *
-                                                     dp,
-                                       unsigned short sel);
+extern void C_ROMlib_Faddx(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Faddx, 0xA9EB, 0x00, Pack4);
-extern void C_ROMlib_Fsubx(void *sp, extended80 *
-                                                     dp,
-                                       unsigned short sel);
+extern void C_ROMlib_Fsubx(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fsubx, 0xA9EB, 0x02, Pack4);
-extern void C_ROMlib_Fmulx(void *sp, extended80 *
-                                                     dp,
-                                       unsigned short sel);
+extern void C_ROMlib_Fmulx(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fmulx, 0xA9EB, 0x04, Pack4);
-extern void C_ROMlib_Fdivx(void *sp, extended80 *
-                                                     dp,
-                                       unsigned short sel);
+extern void C_ROMlib_Fdivx(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fdivx, 0xA9EB, 0x06, Pack4);
-extern void C_ROMlib_Fremx(void *sp,
-                                       extended80 *dp, unsigned short sel);
+extern void C_ROMlib_Fremx(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fremx, 0xA9EB, 0x0C, Pack4);
-extern void C_ROMlib_Fcmpx(void *sp, extended80 *
-                                                                 dp,
-                                                   unsigned short sel);
+extern void C_ROMlib_Fcmpx(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fcmpx, 0xA9EB, 0x08, Pack4);
-extern void C_ROMlib_FcpXx(void *sp, extended80 *
-                                                                 dp,
-                                                   unsigned short sel);
+extern void C_ROMlib_FcpXx(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FcpXx, 0xA9EB, 0x0A, Pack4);
-extern void C_ROMlib_FX2x(extended80 *sp, void *
-                                                          dp,
-                                      unsigned short sel);
+extern void C_ROMlib_FX2x(extended80 *sp, void *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_FX2x, 0xA9EB, 0x10, Pack4);
-extern void C_ROMlib_Fx2X(void *sp, extended80 *
-                                                    dp,
-                                      unsigned short sel);
+extern void C_ROMlib_Fx2X(void *sp, extended80 *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fx2X, 0xA9EB, 0x0E, Pack4);
-extern void C_ROMlib_Fx2dec(DecForm *sp2, void *
-                                                          sp,
-                                        Decimal *dp, unsigned short sel);
+extern void C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fx2dec, 0xA9EB, 0x0B, Pack4);
-extern void C_ROMlib_Fdec2x(Decimal *sp, void *
-                                                         dp,
-                                        unsigned short sel);
+extern void C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fdec2x, 0xA9EB, 0x09, Pack4);
-extern void C_ROMlib_Fclassx(void *sp, INTEGER *
-                                                       dp,
-                                         unsigned short sel);
+extern void C_ROMlib_Fclassx(void *sp, INTEGER *dp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fclassx, 0xA9EB, 0x1C, Pack4);
 extern void C_ROMlib_FlnX(extended80 *dp);
 PASCAL_SUBTRAP(ROMlib_FlnX, 0xA9EC, 0x00, Pack5);
@@ -260,18 +224,13 @@ PASCAL_SUBTRAP(ROMlib_FrandX, 0xA9EC, 0x20, Pack5);
 extern void C_ROMlib_Fdec2str(DecForm *sp2,
                                           Decimal *sp, Decstr dp);
 PASCAL_SUBTRAP(ROMlib_Fdec2str, 0xA9EE, 0x03, Pack7);
-extern void C_ROMlib_Fxstr2dec(Decstr sp2,
-                                           INTEGER *sp, Decimal *dp2, Byte *dp,
-                                           INTEGER lastchar);
-extern void C_ROMlib_Fcstr2dec(Decstr sp2,
-                                           INTEGER *sp, Decimal *dp2, Byte *dp);
+extern void C_ROMlib_Fcstr2dec(Decstr sp2, GUEST<INTEGER> *sp, Decimal *dp2, Byte *dp);
 PASCAL_SUBTRAP(ROMlib_Fcstr2dec, 0xA9EE, 0x04, Pack7);
-extern void C_ROMlib_Fpstr2dec(Decstr sp2,
-                                           INTEGER *sp, Decimal *dp2, Byte *dp);
+extern void C_ROMlib_Fpstr2dec(Decstr sp2, GUEST<INTEGER> *sp, Decimal *dp2, Byte *dp);
 PASCAL_SUBTRAP(ROMlib_Fpstr2dec, 0xA9EE, 0x02, Pack7);
-extern void C_ROMlib_Fsethv(LONGINT *hvp, unsigned short sel);
+extern void C_ROMlib_Fsethv(GUEST<LONGINT> *hvp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fsethv, 0xA9EB, 0x05, Pack4);
-extern void C_ROMlib_Fgethv(LONGINT *hvp, unsigned short sel);
+extern void C_ROMlib_Fgethv(GUEST<LONGINT> *hvp, unsigned short sel);
 PASCAL_SUBTRAP(ROMlib_Fgethv, 0xA9EB, 0x07, Pack4);
 
 extern void C_ROMlib_FnextX(uint8_t *x, uint8_t *y,

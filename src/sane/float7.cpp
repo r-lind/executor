@@ -158,13 +158,13 @@ void Executor::C_ROMlib_Fdec2str(DecForm *volatile sp2, Decimal *volatile sp,
     };
 }
 
-void Executor::C_ROMlib_Fxstr2dec(Decstr volatile sp2, INTEGER *volatile sp,
+static void C_ROMlib_Fxstr2dec(Decstr volatile sp2, GUEST<INTEGER> *volatile sp,
                                   Decimal *volatile dp2, Byte *volatile dp,
                                   INTEGER lastchar)
 {
     int index, expsgn, implicitexp;
 
-    index = CW_RAW(*sp);
+    index = *sp;
     warning_floating_point("xstr2dec(\"%.*s\")",
                            lastchar - index + 1, (const char *)sp2 + index);
     while(((sp2[index] == ' ') || (sp2[index] == '\t')) && (index <= lastchar))
@@ -206,7 +206,7 @@ void Executor::C_ROMlib_Fxstr2dec(Decstr volatile sp2, INTEGER *volatile sp,
         dp2->sig[1] = 'N';
         /*-->*/ goto abortlookahead; /* should I use a break or return instead? */
     }
-    *sp = CW_RAW(index); /* The base is legit.  Check exponent. */
+    *sp = index; /* The base is legit.  Check exponent. */
     dp2->exp = 0;
     if(LOWER(sp2[index]) == 'e')
     {
@@ -238,7 +238,7 @@ void Executor::C_ROMlib_Fxstr2dec(Decstr volatile sp2, INTEGER *volatile sp,
         if(expsgn)
             dp2->exp = -1 * dp2->exp;
     }
-    *sp = CW_RAW(index);
+    *sp = index;
 abortlookahead:
     dp2->exp = dp2->exp + implicitexp - dp2->sig[0];
     *dp = !sp2[index] || (index > lastchar);
@@ -250,188 +250,15 @@ abortlookahead:
                            dp2->sig[0], dp2->sig + 1, toHost(dp2->exp));
 }
 
-void Executor::C_ROMlib_Fcstr2dec(Decstr volatile sp2, INTEGER *volatile sp,
+void Executor::C_ROMlib_Fcstr2dec(Decstr volatile sp2, GUEST<INTEGER> *volatile sp,
                                   Decimal *volatile dp2, Byte *volatile dp)
-/*
- * NOTE: sp2 is really supposed to be a Decstr, but it is going to
- * be used as a C *char or a Pascal string depending upon the
- * function.
- */
-
 {
-    warning_floating_point(NULL_STRING);
-#if 1
     C_ROMlib_Fxstr2dec(sp2, sp, dp2, dp, 32767);
-#else /* 0 */
-    int index, implicitexp, expsgn;
-
-#error No one has put byte swapping code in me yet!
-
-    index = *sp;
-    while((sp2[index] == ' ') || (sp2[index] == '\t'))
-        index++;
-    if(sp2[index] == '-')
-    {
-        dp2->sgn = 1;
-        index++;
-    }
-    else if(sp2[index] == '+')
-    {
-        dp2->sgn = 0;
-        index++;
-    }
-    else
-        dp2->sgn = 0;
-
-    dp2->sig[0] = 0;
-    while(isdigit(sp2[index]))
-    {
-        dp2->sig[0]++;
-        dp2->sig[dp2->sig[0]] = sp2[index];
-        index++;
-    }
-    implicitexp = dp2->sig[0];
-    if(sp2[index] == '.')
-    {
-        index++;
-        while(isdigit(sp2[index]))
-        {
-            dp2->sig[0]++;
-            dp2->sig[dp2->sig[0]] = sp2[index];
-            index++;
-        }
-    }
-    if(!dp2->sig[0])
-    {
-        dp2->sig[0] = 0;
-        dp2->sig[1] = 'N';
-        /*-->*/ goto abortlookahead; /* should I use a break or return instead? */
-    }
-    *sp = index; /* The base is legit.  Check exponent. */
-    dp2->exp = 0;
-    if(LOWER(sp2[index]) == 'e')
-    {
-        index++;
-        if(sp2[index] == '-')
-        {
-            expsgn = 1;
-            index++;
-        }
-        else if(sp2[index] == '+')
-        {
-            expsgn = 0;
-            index++;
-        }
-        else
-            expsgn = 0;
-        if(!isdigit(sp2[index]))
-        {
-            /*-->*/ goto abortlookahead; /* should I use a break or return instead? */
-        }
-        while(isdigit(sp2[index]))
-        {
-            dp2->exp *= 10;
-            dp2->exp += sp2[index] - '0';
-            index++;
-        }
-    }
-    *sp = index;
-abortlookahead:
-    dp2->exp += implicitexp - dp2->sig[0];
-    *dp = !sp2[index];
-#endif /* 0 */
 }
 
-void Executor::C_ROMlib_Fpstr2dec(Decstr volatile sp2, INTEGER *volatile sp,
+void Executor::C_ROMlib_Fpstr2dec(Decstr volatile sp2, GUEST<INTEGER> *volatile sp,
                                   Decimal *volatile dp2, Byte *volatile dp)
-/*
- * NOTE: sp2 is really supposed to be a Decstr, but it is going to
- * be used as a C *char or a Pascal string depending upon the
- * function.
- */
-
 {
-    warning_floating_point(NULL_STRING);
-#if 1
     C_ROMlib_Fxstr2dec(sp2, sp, dp2, dp, sp2[0]);
-#else /* 0 */
-    int index, implicitexp, expsgn, lastchar;
-
-#error No one has put byte swapping code in me yet!
-
-    index = *sp;
-    lastchar = index + sp2[0];
-    while(((sp2[index] == ' ') || (sp2[index] == '\t')) && (index <= lastchar))
-        index++;
-    if(sp2[index] == '-')
-    {
-        dp2->sgn = 1;
-        index++;
-    }
-    else if(sp2[index] == '+')
-    {
-        dp2->sgn = 0;
-        index++;
-    }
-    else
-        dp2->sgn = 0;
-
-    dp2->sig[0] = 0;
-    while(isdigit(sp2[index]) && (index <= lastchar))
-    {
-        dp2->sig[0]++;
-        dp2->sig[dp2->sig[0]] = sp2[index];
-        index++;
-    }
-    implicitexp = dp2->sig[0] - 1;
-    if(sp2[index] == '.')
-    {
-        index++;
-        while(isdigit(sp2[index]) && (index <= lastchar))
-        {
-            dp2->sig[0]++;
-            dp2->sig[dp2->sig[0]] = sp2[index];
-            index++;
-        }
-    }
-    if(!dp2->sig[0])
-    {
-        dp2->sig[0] = 0;
-        dp2->sig[1] = 'N';
-        /*-->*/ goto abortlookahead; /* should I use a break or return instead? */
-    }
-    *sp = index; /* The base is legit.  Check exponent. */
-    dp2->exp = 0;
-    if(LOWER(sp2[index]) == 'e')
-    {
-        index++;
-        if(sp2[index] == '-')
-        {
-            expsgn = 1;
-            index++;
-        }
-        else if(sp2[index] == '+')
-        {
-            expsgn = 0;
-            index++;
-        }
-        else
-            expsgn = 0;
-        if(!isdigit(sp2[index]))
-        {
-            /*-->*/ goto abortlookahead; /* should I use a break or return instead? */
-        }
-        while(isdigit(sp2[index]) && (index <= lastchar))
-        {
-            dp2->exp *= 10;
-            dp2->exp += sp2[index] - '0';
-            index++;
-        }
-    }
-    *sp = index;
-abortlookahead:
-    dp2->exp += implicitexp;
-    *dp = (index > lastchar);
-#endif /* 0 */
 }
 
