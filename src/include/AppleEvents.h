@@ -573,8 +573,8 @@ extern OSErr C_AEInstallObjectAccessor(DescType desiredClass,
 PASCAL_SUBTRAP(AEInstallObjectAccessor, 0xA816, 0x0937, Pack8);
 extern OSErr C_AEGetObjectAccessor(DescType desiredClass,
                                                DescType containerType,
-                                               ProcPtr *theAccessor,
-                                               LONGINT *accessorRefcon,
+                                               GUEST<ProcPtr> *theAccessor,
+                                               GUEST<LONGINT> *accessorRefcon,
                                                Boolean isSysHandler);
 PASCAL_SUBTRAP(AEGetObjectAccessor, 0xA816, 0x0939, Pack8);
 extern OSErr C_AECallObjectAccessor(DescType desiredClass,

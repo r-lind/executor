@@ -581,8 +581,8 @@ OSErr Executor::C_AEInstallObjectAccessor(
 
 OSErr Executor::C_AEGetObjectAccessor(DescType desiredClass,
                                       DescType containerType,
-                                      ProcPtr *theAccessor,
-                                      LONGINT *accessorRefcon,
+                                      GUEST<ProcPtr> *theAccessor,
+                                      GUEST<LONGINT> *accessorRefcon,
                                       Boolean isSysHandler)
 {
     warning_unimplemented(NULL_STRING);
