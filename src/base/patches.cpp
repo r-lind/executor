@@ -2,6 +2,7 @@
 #include "emustubs.h"
 
 #include <SegmentLdr.h>
+#include <error/error.h>
 #include <error/system_error.h>
 #include <base/debugger.h>
 #include <sound/soundopts.h>
