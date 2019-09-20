@@ -8,6 +8,7 @@
 #include <ListMgr.h>
 #include <MemoryMgr.h>
 #include <IntlUtil.h>
+#include <ControlMgr.h>
 #include <list/list.h>
 #include <rsys/hook.h>
 #include <base/functions.impl.h>

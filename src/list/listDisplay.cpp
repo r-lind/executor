@@ -6,6 +6,7 @@
 
 #include <base/common.h>
 #include <ListMgr.h>
+#include <ControlMgr.h>
 
 #include <quickdraw/cquick.h>
 #include <list/list.h>

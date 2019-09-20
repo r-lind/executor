@@ -7,6 +7,7 @@
 #include <base/common.h>
 #include <ListMgr.h>
 #include <MemoryMgr.h>
+#include <ControlMgr.h>
 #include <list/list.h>
 #include <algorithm>
 

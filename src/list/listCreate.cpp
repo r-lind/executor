@@ -8,6 +8,7 @@
 #include <MemoryMgr.h>
 #include <ResourceMgr.h>
 #include <ListMgr.h>
+#include <ControlMgr.h>
 #include <list/list.h>
 
 using namespace Executor;
