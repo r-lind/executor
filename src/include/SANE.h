@@ -120,8 +120,6 @@ DISPATCHER_TRAP(Pack4, 0xA9EB, StackWLookahead<0xFF>);
 DISPATCHER_TRAP(Pack5, 0xA9EC, StackWMasked<0xFF>);
 DISPATCHER_TRAP(Pack7, 0xA9EE, StackW);
 
-extern void C_ROMlib_Fcomp2X(comp sp, extended80 *
-                                                 dp);
 extern void C_ROMlib_Fsetenv(INTEGER *dp,
                                          INTEGER sel);
 PASCAL_SUBTRAP(ROMlib_Fsetenv, 0xA9EB, 0x01, Pack4);
