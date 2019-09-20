@@ -1,6 +1,7 @@
 #pragma once
 
 #include <CodeFragments.h>
+#include <PEFBinaryFormat.h>
 
 namespace Executor
 {
