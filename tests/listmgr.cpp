@@ -4,6 +4,7 @@
 #ifdef EXECUTOR
 #include <ListMgr.h>
 #include <WindowMgr.h>
+#include <ControlMgr.h>
 #else
 #include <Lists.h>
 #include <Windows.h>
