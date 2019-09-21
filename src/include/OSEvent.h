@@ -163,7 +163,7 @@ EXTERN_DISPATCHER_TRAP(OSDispatch, 0xA88F, StackW);
 
 extern OSErr C_AcceptHighLevelEvent(TargetID *sender_id_return, GUEST<int32_t> *refcon_return, Ptr msg_buf, GUEST<int32_t> *msg_length_return);
 PASCAL_SUBTRAP(AcceptHighLevelEvent, 0xA88F, 0x0033, OSDispatch);
-extern Boolean C_GetSpecificHighLevelEvent(GetSpecificFilterUPP fn, Ptr data, OSErr *err_return);
+extern Boolean C_GetSpecificHighLevelEvent(GetSpecificFilterUPP fn, Ptr data, GUEST<OSErr> *err_return);
 PASCAL_SUBTRAP(GetSpecificHighLevelEvent, 0xA88F, 0x0045, OSDispatch);
 extern OSErr C_PostHighLevelEvent(EventRecord *evt, Ptr receiver_id, int32_t refcon, Ptr msg_buf, int32_t msg_length, int32_t post_options);
 PASCAL_SUBTRAP(PostHighLevelEvent, 0xA88F, 0x0034, OSDispatch);
