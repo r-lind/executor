@@ -368,7 +368,7 @@ static void SetupOneMemoryMapping(size_t index, uintptr_t base, size_t size)
     ROMlib_offsets[index] -= index << (ADDRESS_BITS - OFFSET_TABLE_BITS);
     ROMlib_sizes[index] = size;
 }
-static void SetupMultiMemoryMapping(size_t index, size_t n, uintptr_t base, size_t size)
+[[maybe_unused]] static void SetupMultiMemoryMapping(size_t index, size_t n, uintptr_t base, size_t size)
 {
     const size_t blockSize = 1 << (ADDRESS_BITS - OFFSET_TABLE_BITS);
     for(size_t i = 0; i < n; i++)

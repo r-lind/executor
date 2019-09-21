@@ -13,10 +13,10 @@
 #define RGNP_SMALL_P(rgnp) \
     (RGNP_SIZE(rgnp) == RGN_SMALL_SIZE)
 
-#define RGNP_SET_SIZE_AND_SPECIAL(rgnp, size, special_p)     \
-    ((void)((rgnp)->rgnSize = ((size & RGN_SIZE_MASK) \
-                               | ((special_p)                \
-                                      ? RGN_SPECIAL_FLAG   \
+#define RGNP_SET_SIZE_AND_SPECIAL(rgnp, size, special_p) \
+    ((void)((rgnp)->rgnSize = (((size)&RGN_SIZE_MASK)    \
+                               | ((special_p)            \
+                                      ? RGN_SPECIAL_FLAG \
                                       : 0))))
 
 #define RGNP_SET_SMALL(rgnp) \

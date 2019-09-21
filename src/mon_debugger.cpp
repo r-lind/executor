@@ -17,7 +17,6 @@ using namespace Executor;
 
 namespace
 {
-bool mon_inited = false;
 bool mon_singlestep = false;
 bool nmi = false;
 }
@@ -38,8 +37,6 @@ MonDebugger::MonDebugger()
     mon_init();
     mon_read_byte = [](mon_addr_t addr) { return (uint32_t) *(uint8_t*)SYN68K_TO_US(addr); };
     mon_write_byte = [](mon_addr_t addr, uint32_t b) { *(uint8_t*)SYN68K_TO_US(addr) = (uint8_t) b; };
-
-    PowerCore& cpu = getPowerCore();
 
     mon_add_command("es", [] { 
         ExitToShell(); 
