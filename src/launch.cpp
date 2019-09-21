@@ -38,6 +38,7 @@
 #include <AliasMgr.h>
 #include <OSEvent.h>
 #include <ADB.h>
+#include <LowMem.h>
 
 #include <base/trapglue.h>
 #include <file/file.h>

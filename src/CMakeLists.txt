@@ -456,6 +456,7 @@ set(include_sources
                   include/Iconutil.h
                   include/IntlUtil.h
                   include/ListMgr.h
+                  include/LowMem.h
                   include/ExMacTypes.h
                   include/MemoryMgr.h
                   include/MenuMgr.h

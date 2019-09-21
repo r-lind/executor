@@ -13,6 +13,7 @@
 #include <SysErr.h>
 #include <TextEdit.h>
 #include <OSEvent.h>
+#include <LowMem.h>
 
 #include <mman/mman_private.h>
 #include <base/cpu.h>

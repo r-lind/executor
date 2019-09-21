@@ -30,6 +30,7 @@
 #include <SoundDvr.h>
 #include <StartMgr.h>
 #include <SegmentLdr.h>
+#include <LowMem.h>
 
 #include <quickdraw/cquick.h> /* SET_HILITE_BIT */
 #include <base/emustubs.h>  /* Key1Trans, Key2Trans */

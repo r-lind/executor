@@ -52,6 +52,8 @@ typedef GUEST<StringPtr> *StringHandle;
 struct RoutineDescriptor;
 typedef RoutineDescriptor *UniversalProcPtr;
 
+using VoidUPP = UPP<void()>;
+
 typedef LONGINT Fixed, Fract;
 
 /* SmallFract represnts values between 0 and 65535 */

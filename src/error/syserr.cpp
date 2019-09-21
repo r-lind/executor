@@ -15,6 +15,7 @@
 #include <SysErr.h>
 #include <MemoryMgr.h>
 #include <BinaryDecimal.h>
+#include <LowMem.h>
 
 #include <quickdraw/cquick.h>
 #include <quickdraw/quick.h>
