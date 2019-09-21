@@ -6,6 +6,8 @@
 #include <MemoryMgr.h>
 
 #include <quickdraw/rgbutil.h>
+#include <error/error.h>
+
 namespace Executor
 {
 #define SET_HILITE_BIT() \
