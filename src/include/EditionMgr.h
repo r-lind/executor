@@ -210,7 +210,7 @@ PASCAL_SUBTRAP(SetEditionFormatMark, 0xA82D, 0x0620, Pack11);
 
 extern OSErr C_GetEditionFormatMark(EditionRefNum edition,
                                                 FormatType format,
-                                                int32_t *currentMark);
+                                                GUEST<int32_t> *currentMark);
 PASCAL_SUBTRAP(GetEditionFormatMark, 0xA82D, 0x061E, Pack11);
 
 extern OSErr C_OpenEdition(SectionHandle subscriber_section,
