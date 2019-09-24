@@ -151,7 +151,7 @@ void Executor::C_SetFontLock(Boolean lflag) /* IMI-223 */
     }
 }
 
-typedef char ctrip[3];
+typedef signed char ctrip[3];
 typedef struct
 {
     INTEGER dpiv, dpih;
