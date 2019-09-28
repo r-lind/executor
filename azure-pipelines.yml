@@ -92,7 +92,12 @@ jobs:
       testResultsFormat: 'CTest'
       testResultsFiles: build/Testing/**/*.xml
       buildPlatform: 'x86_64-linux'
-
+  - script: |
+      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && cpack'
+  - task: PublishBuildArtifacts@1
+      inputs:
+        pathtoPublish: build/Executor2000-0.1.0-Linux.tar.bz2
+        artifactName: Executor2000-Linux.tar.bz2
 
 - job: Linux32
   pool:
