@@ -593,4 +593,6 @@ target_link_libraries(executor-headless romlib front-end-headless)
 set_target_properties(executor-headless PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-install(TARGETS executor executor-headless RUNTIME DESTINATION bin)
+install(TARGETS executor executor-headless
+    RUNTIME DESTINATION bin
+    BUNDLE DESTINATION .)
