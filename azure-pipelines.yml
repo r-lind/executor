@@ -126,7 +126,7 @@ jobs:
       testResultsFiles: build/Testing/**/*.xml
       buildPlatform: 'i386-linux'
   - script: |
-      docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && cpack'
+      docker run --rm -v `pwd`:/files executor-buildtools32 sh -c 'cd build && cpack'
   - task: PublishBuildArtifacts@1
     inputs:
       pathtoPublish: build/Executor2000-0.1.0-Linux.tar.bz2
