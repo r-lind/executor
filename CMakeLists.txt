@@ -1,10 +1,9 @@
-cmake_minimum_required(VERSION 3.10)
-cmake_policy(VERSION 3.10...3.14)
+cmake_minimum_required(VERSION 3.10...3.15)
 
 # Use packaged CMake modules for use with find_package(...), if and as needed
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
-project(Executor)
+project(Executor2000 VERSION 0.1.0)
 
 set(CMAKE_CXX_STANDARD 17)
 
@@ -33,6 +32,8 @@ if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
 endif()
 
 enable_testing()
+
+set(Boost_USE_STATIC_LIBS YES)
 
 add_library(lmdb
     lmdb/libraries/liblmdb/lmdb.h lmdb/libraries/liblmdb/mdb.c
@@ -63,3 +64,11 @@ add_subdirectory(PowerCore)
 add_subdirectory(cxmon)
 add_subdirectory(src)
 add_subdirectory(tests)
+
+set(CPACK_GENERATOR "TBZ2")
+set(CPACK_PACKAGE_CONTACT "Wolfgang Thaller <wolfgang.thaller@gmx.net>")
+set(CPACK_STRIP_FILES TRUE)
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS YES)
+set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+include(CPack)

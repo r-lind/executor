@@ -72,7 +72,11 @@ else()
         ${TEST_SOURCES}
         ${NATIVE_TEST_SOURCES}
         main_executor.cpp)
-    add_subdirectory(googletest)
+
+    
+    set(GOOGLETEST_VERSION 1.9.0)
+    add_subdirectory(googletest/googletest)
+    
     target_link_libraries(tests gtest romlib)
     target_compile_definitions(tests PRIVATE -DEXECUTOR)
     if(CMAKE_COMPILER_IS_GNUCXX)
