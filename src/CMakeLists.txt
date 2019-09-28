@@ -45,6 +45,7 @@ add_subdirectory(config/front-ends/x)
 add_subdirectory(config/front-ends/sdl)
 add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
+add_subdirectory(config/front-ends/headless)
 add_subdirectory(config/arch/generic_le)
 add_subdirectory(config/os/win32)
 add_subdirectory(config/os/macosx)
@@ -586,3 +587,8 @@ if(APPLE)
             MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
         )
 endif()
+
+add_executable(executor-headless main.cpp)
+target_link_libraries(executor-headless romlib front-end-headless)
+set_target_properties(executor-headless PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
