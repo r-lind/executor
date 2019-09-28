@@ -75,10 +75,10 @@ jobs:
   - script: |
       cd build
       cpack
- - task: PublishBuildArtifacts@1
-   inputs:
-     pathtoPublish: build/Executor2000-0.1.0-Darwin.tar.bz2
-     artifactName: Executor2000-Darwin.tar.bz2
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: build/Executor2000-0.1.0-Darwin.tar.bz2
+      artifactName: Executor2000-Darwin.tar.bz2
 
 - job: Linux
   pool:
