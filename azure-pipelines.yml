@@ -57,16 +57,17 @@ jobs:
     submodules: true
   - script: |
       brew install boost qt ninja
-    displayName: 'brew prerequisites'
+    displayName: 'Brew prerequisites'
   - script: |
       mkdir build
       cd build
       cmake .. -G Ninja -DCMAKE_PREFIX_PATH=/usr/local/opt/qt/lib/cmake
       cmake --build .
-    displayName: build
+    displayName: Build
   - script: |
       cd build
       ctest . -LE xfail --no-compress-output -T test || true
+    displayName: 'Run tests'
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'CTest'
@@ -88,12 +89,13 @@ jobs:
     submodules: true
   - script: |
       docker build -f docker/Dockerfile.x86_64 . -t executor-buildtools64
-    displayName: 'install prerequisites'
+    displayName: 'Install prerequisites'
   - script: |
       docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'mkdir -p build && cd build && cmake .. -G Ninja && cmake --build .'
-    displayName: 'build'
+    displayName: 'Build'
   - script: |
       docker run --rm -v `pwd`:/files executor-buildtools64 sh -c 'cd build && ctest . -LE xfail --no-compress-output -T test || true'
+    displayName: 'Run tests'
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'CTest'
@@ -114,12 +116,13 @@ jobs:
     submodules: true
   - script: |
       docker build -f docker/Dockerfile.i386 . -t executor-buildtools32
-    displayName: 'install prerequisites'
+    displayName: 'Install prerequisites'
   - script: |
       docker run --rm -v `pwd`:/files executor-buildtools32 sh -c 'mkdir -p build && cd build && cmake .. -G Ninja && cmake --build .'
-    displayName: 'build'
+    displayName: 'Build'
   - script: |
       docker run --rm -v `pwd`:/files executor-buildtools32 sh -c 'cd build && ctest . -LE xfail --no-compress-output -T test || true'
+    displayName: 'Run tests'
   - task: PublishTestResults@2
     inputs:
       testResultsFormat: 'CTest'
