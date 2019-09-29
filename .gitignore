@@ -9,3 +9,4 @@ core
 test_detail.xml
 CMakeSettings.json
 .vs
+.finf
