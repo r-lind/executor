@@ -48,9 +48,6 @@ TEST(guestvalues, assignToInt16)
 
 TEST(guestvalues, rawHostOrder)
 {
-    int x = 1;
-    char& littleEndian = *reinterpret_cast<char*>(&x);
-
     GUEST<uint32_t> a = 0x12345678;
     GUEST<uint16_t> b = 0x1234;
     GUEST<Point> p = {0x1234, 0x5678};

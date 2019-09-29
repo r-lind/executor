@@ -611,7 +611,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
     const int *offset;
     NativeColorSpec color_for_index[256];
 
-    auto ENQUEUE = [&queue, &head, &tail, &index_in_queue_p, &itab_elt_count](unsigned _q_elt_) {
+    auto ENQUEUE = [&queue, &head, &index_in_queue_p, &itab_elt_count](unsigned _q_elt_) {
         if(!index_in_queue_p[_q_elt_])
         {
             queue[head] = _q_elt_;
@@ -620,7 +620,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
         }
     };
 
-    auto DEQUEUE = [&queue, &head, &tail, &index_in_queue_p, &itab_elt_count]() {
+    auto DEQUEUE = [&queue, &tail, &index_in_queue_p, &itab_elt_count]() {
         const unsigned _q_elt_ = queue[tail];
         tail = (tail + 1) & (itab_elt_count - 1);
         index_in_queue_p[_q_elt_] = false;

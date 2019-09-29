@@ -174,7 +174,7 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
         );
     else
         dispatcher.addSelector(selector, this,
-            [this](syn68k_addr_t addr)
+            [](syn68k_addr_t addr)
             {
                 return callfrom68K::Invoker<Ret (Args...), CallConv>
                     ::invokeFrom68K(addr, fptr); 

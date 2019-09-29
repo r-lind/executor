@@ -314,8 +314,6 @@ std::optional<CNIDMapper::Mapping> LMDBCNIDMapper::lookupCNID(CNID cnid)
                 
             if(fs::exists(mapping->path))
             {
-                boost::system::error_code ec;
-
                 try
                 {
                     return Mapping {

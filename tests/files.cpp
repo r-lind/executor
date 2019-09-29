@@ -53,7 +53,6 @@ TEST(Files, GetWDInfo)
     memset(&wdpb, 42, sizeof(wdpb));
     wdpb.ioCompletion = nullptr;
     wdpb.ioVRefNum = 0;
-    Str255 buf;
     wdpb.ioNamePtr = nullptr;
     wdpb.ioWDIndex = 0;
 
@@ -142,7 +141,6 @@ protected:
             memset(&wdpb, 42, sizeof(wdpb));
             wdpb.ioCompletion = nullptr;
             wdpb.ioVRefNum = vRefNum;
-            Str255 buf;
             wdpb.ioNamePtr = nullptr;
             wdpb.ioWDIndex = 0;
 
@@ -243,7 +241,6 @@ protected:
         open();
 
         char buf1[] = "Hello, world.";
-        char buf2[100];
 
         ParamBlockRec pb;
         memset(&pb, 42, sizeof(pb));
@@ -491,7 +488,6 @@ TEST_F(FileTest, CaseInsensitive)
     memset(&ipb, 42, sizeof(ipb));
     ipb.hFileInfo.ioCompletion = nullptr;
     ipb.hFileInfo.ioVRefNum = vRefNum;
-    Str255 buf;
     ipb.hFileInfo.ioNamePtr = name;
     ipb.hFileInfo.ioFDirIndex = 0;
     ipb.hFileInfo.ioDirID = dirID;
@@ -768,7 +764,7 @@ TEST_F(FileTest, Rename)
 
     ASSERT_EQ(noErr, hpb.ioParam.ioResult);
 
-    long tempDirID = hpb.fileParam.ioDirID;
+    //long tempDirID = hpb.fileParam.ioDirID;
 
     CInfoPBRec ipb;
     memset(&ipb, 42, sizeof(ipb));
@@ -980,7 +976,6 @@ TEST(Files, CatMove)
     memset(&wdpb, 42, sizeof(wdpb));
     wdpb.ioCompletion = nullptr;
     wdpb.ioVRefNum = 0;
-    Str255 buf;
     wdpb.ioNamePtr = nullptr;
     wdpb.ioWDIndex = 0;
 
@@ -1097,7 +1092,7 @@ TEST_F(FileTest, GetFInfo)
     PBDirCreateSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
-    long newDirID = pb.fileParam.ioDirID;
+    //long newDirID = pb.fileParam.ioDirID;
     
     memset(&pb, 42, sizeof(pb));
     pb.ioParam.ioCompletion = nullptr;
@@ -1170,7 +1165,7 @@ TEST_F(FileTest, GetFInfoIndexed)
     PBDirCreateSync(&pb);
 
     EXPECT_EQ(noErr, pb.ioParam.ioResult);
-    long newDirID = pb.fileParam.ioDirID;
+    //long newDirID = pb.fileParam.ioDirID;
     
 
     std::set<std::string> filesCat;

@@ -95,8 +95,6 @@ std::optional<CNIDMapper::Mapping> SimpleCNIDMapper::lookupCNID(CNID cnid)
 
     if(fs::exists(it->second.path))
     {
-        boost::system::error_code ec;
-
         try
         {
             return Mapping {

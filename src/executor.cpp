@@ -59,7 +59,7 @@ void Executor::executor_main(void)
 {
     QDGlobals quickbytes;
     LONGINT tmpA5;
-    GUEST<INTEGER> mess, count_s;
+    GUEST<INTEGER> mess;
     INTEGER count;
     INTEGER exevrefnum, toskip;
     AppFile thefile;
@@ -84,8 +84,7 @@ void Executor::executor_main(void)
     LM(FinderName)[0] = std::min(strlen(BROWSER_NAME), sizeof(LM(FinderName)) - 1);
     memcpy(LM(FinderName) + 1, BROWSER_NAME, LM(FinderName)[0]);
 
-    CountAppFiles(&mess, &count_s);
-    count = count_s;
+    CountAppFiles(&mess, out(count));
     if(count > 0)
     {
         GetAppFiles(1, &thefile);
@@ -98,12 +97,17 @@ void Executor::executor_main(void)
 
             fName = thefile.fName;
         }
+        else
+        {
+            ExitToShell();
+            return;
+        }
     }
     else
-        thefile.fType = 0;
-
-    if(thefile.fType != "APPL"_4)
+    {
         ExitToShell();
+        return;
+    }
 
     hpb.hFileInfo.ioNamePtr = &thefile.fName[0];
     hpb.hFileInfo.ioVRefNum = thefile.vRefNum;
