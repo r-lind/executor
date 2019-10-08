@@ -12,9 +12,13 @@ find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 find_package(Threads REQUIRED)
 
-include_directories(include/)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/api/)
+include_directories(include)
 include_directories(.)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
+
+execute_process(COMMAND ruby make-multiverse.rb -G Executor -o "${CMAKE_CURRENT_BINARY_DIR}/api"
+                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal)
 
 set(FRONT_END qt CACHE STRING "which front-end to use (qt, sdl2, sdl, x)")
 set(HOST_ARCH generic_le)
@@ -432,52 +436,12 @@ set(misc_sources
   )
 
 set(include_sources 
-                  include/ADB.h
-                  include/AliasMgr.h
-                  include/AppleEvents.h
-                  include/AppleTalk.h
-                  include/BinaryDecimal.h
-                  include/CommTool.h
-                  include/Components.h
-                  include/ControlMgr.h
-                  include/CQuickDraw.h
-                  include/DeskMgr.h
-                  include/DeviceMgr.h
-                  include/DialogMgr.h
-                  include/Disk.h
-                  include/DiskInit.h
-                  include/Displays.h
-                  include/EditionMgr.h
-                  include/EventMgr.h
-                  include/FileMgr.h
-                  include/Finder.h
-                  include/FontMgr.h
-                  include/Gestalt.h
-                  include/HelpMgr.h
-                  include/Iconutil.h
-                  include/IntlUtil.h
-                  include/ListMgr.h
-                  include/LowMem.h
-                  include/ExMacTypes.h
-                  include/MemoryMgr.h
-                  include/MenuMgr.h
-                  include/NotifyMgr.h
-                  include/OSEvent.h
-                  include/OSUtil.h
-                  include/Package.h
-                  include/PPC.h
-                  include/PrintMgr.h
-                  include/ProcessMgr.h
-                  include/QuickDraw.h
-                  include/QuickTime.h
-                  include/ResourceMgr.h
                   include/rsys/aboutbox.h
                   include/rsys/adb.h
                   include/rsys/alias.h
                   include/rsys/appearance.h
                   include/rsys/arch.h
                   include/rsys/arrowkeys.h
-                  include/CodeFragments.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/desk.h
                   include/rsys/device.h
@@ -498,7 +462,6 @@ set(include_sources
                   include/rsys/os.h
                   include/rsys/osutil.h
                   include/rsys/paths.h
-                  include/PEFBinaryFormat.h
                   include/rsys/prefpanel.h
                   include/rsys/process.h
                   include/rsys/redrawscreen.h
@@ -514,26 +477,6 @@ set(include_sources
                   include/rsys/toolutil.h
                   include/rsys/uniquefile.h
                   include/rsys/version.h
-                  include/SANE.h
-                  include/ScrapMgr.h
-                  include/ScriptMgr.h
-                  include/SegmentLdr.h
-                  include/Serial.h
-                  include/ShutDown.h
-                  include/SoundDvr.h
-                  include/SoundMgr.h
-                  include/SpeechManager.h
-                  include/StartMgr.h
-                  include/StdFilePkg.h
-                  include/SysErr.h
-                  include/TextEdit.h
-                  include/TimeMgr.h
-                  include/ToolboxEvent.h
-                  include/ToolboxUtil.h
-                  include/VDriver.h
-                  include/VRetraceMgr.h
-                  include/WindowMgr.h
-                  include/MixedMode.h
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
 
@@ -561,7 +504,7 @@ add_library(romlib ${sources}
         ${GENERATED_FILES}
     )
 
-target_include_directories(romlib PUBLIC . include/ ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(romlib PUBLIC . include/ ${CMAKE_CURRENT_BINARY_DIR}/api/ ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(romlib arch-${HOST_ARCH})
 target_link_libraries(romlib lmdb)
