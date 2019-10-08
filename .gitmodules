@@ -19,3 +19,6 @@
 [submodule "cmrc"]
 	path = cmrc
 	url = https://github.com/vector-of-bool/cmrc.git
+[submodule "multiversal"]
+	path = multiversal
+	url = https://github.com/autc04/multiversal.git
