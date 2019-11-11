@@ -557,7 +557,7 @@ aggr_delete_key_desc(Handle aggr_handle,
 
 static void
 ae_desc_to_ptr(descriptor_t *desc,
-               Ptr data, uint32_t max_size, GUEST<int32_t> *size_out)
+               void *data, uint32_t max_size, GUEST<int32_t> *size_out)
 {
     uint32_t copy_size, desc_size;
     Handle desc_data;
@@ -724,7 +724,7 @@ OSErr Executor::C_AECreateAppleEvent(AEEventClass event_class,
 
 /* generic descriptor functions */
 
-OSErr Executor::C_AECreateDesc(DescType type, void* data, Size data_size,
+OSErr Executor::C_AECreateDesc(DescType type, const void* data, Size data_size,
                                AEDesc *desc_out)
 {
     Handle h;
@@ -828,7 +828,7 @@ OSErr Executor::C_AEGetNthDesc(AEDescList *list, int32_t index,
 OSErr Executor::C_AEGetNthPtr(AEDescList *list, int32_t index,
                               DescType desired_type,
                               GUEST<AEKeyword> *keyword_out,
-                              GUEST<DescType> *type_out, Ptr data,
+                              GUEST<DescType> *type_out, void *data,
                               int32_t max_size, GUEST<Size> *size_out)
 {
     descriptor_t *desc = (descriptor_t *)alloca(sizeof *desc);
@@ -863,7 +863,7 @@ OSErr Executor::C_AEPutDesc(AEDescList *list, int32_t index, AEDesc *desc)
 }
 
 OSErr Executor::C_AEPutPtr(AEDescList *list, int32_t index, DescType type,
-                           Ptr data, Size data_size)
+                           const void *data, Size data_size)
 {
     descriptor_t *desc;
     OSErr err, retval;
@@ -965,7 +965,7 @@ OSErr Executor::C_AEGetParamPtr(AERecord *record, AEKeyword keyword,
 }
 
 OSErr Executor::C_AEPutParamPtr(AERecord *record, AEKeyword keyword,
-                              DescType type, Ptr data, Size data_size)
+                              DescType type, const void *data, Size data_size)
 {
     descriptor_t *desc;
     OSErr err, retval;
@@ -1018,7 +1018,7 @@ OSErr Executor::C_AESizeOfParam(AERecord *record, AEKeyword keyword,
 /* descriptor functions for apple events */
 
 OSErr Executor::C_AEPutAttributePtr(AppleEvent *evt, AEKeyword keyword,
-                                    DescType type, Ptr data, Size data_size)
+                                    DescType type, const void *data, Size data_size)
 {
     descriptor_t *desc;
     OSErr err, retval;
@@ -1069,7 +1069,7 @@ OSErr Executor::C_AEGetAttributeDesc(AppleEvent *evt, AEKeyword keyword,
 
 OSErr Executor::C_AEGetAttributePtr(AppleEvent *evt, AEKeyword keyword,
                                     DescType desired_type,
-                                    GUEST<DescType> *type_out, Ptr data,
+                                    GUEST<DescType> *type_out, void *data,
                                     Size max_size, GUEST<Size> *size_out)
 {
     descriptor_t *desc;

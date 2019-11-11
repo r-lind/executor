@@ -356,7 +356,7 @@ extern OSErr C_AEGetCoercionHandler(DescType from_type, DescType to_type,
 PASCAL_SUBTRAP(AEGetCoercionHandler, 0xA816, 0x0B24, Pack8);
 
 extern OSErr C_AECreateDesc(DescType type,
-                                        void* data, Size data_size,
+                                        const void* data, Size data_size,
                                         AEDesc *desc_out);
 PASCAL_SUBTRAP(AECreateDesc, 0xA816, 0x0825, Pack8);
 extern OSErr C_AEDisposeDesc(AEDesc *desc);
@@ -376,7 +376,7 @@ extern OSErr C_AEGetParamDesc(AERecord *record, AEKeyword keyword,
 PASCAL_SUBTRAP(AEGetParamDesc, 0xA816, 0x0812, Pack8);
 
 extern OSErr C_AEPutParamPtr(AERecord *record, AEKeyword keyword,
-                                       DescType type, Ptr data, Size data_size);
+                                       DescType type, const void *data, Size data_size);
 PASCAL_SUBTRAP(AEPutParamPtr, 0xA816, 0x0A0F, Pack8);
 extern OSErr C_AEPutParamDesc(AERecord *record, AEKeyword keyword,
                                         AEDesc *desc);
@@ -474,7 +474,7 @@ extern OSErr C_AEPutDesc(AEDescList *list, int32_t index,
 PASCAL_SUBTRAP(AEPutDesc, 0xA816, 0x0609, Pack8);
 
 extern OSErr C_AEPutAttributePtr(AppleEvent *evt, AEKeyword keyword,
-                                             DescType type, Ptr data, Size size);
+                                             DescType type, const void *data, Size size);
 PASCAL_SUBTRAP(AEPutAttributePtr, 0xA816, 0x0A16, Pack8);
 
 extern OSErr C_AEPutAttributeDesc(AppleEvent *evt, AEKeyword keyword,
@@ -484,12 +484,12 @@ PASCAL_SUBTRAP(AEPutAttributeDesc, 0xA816, 0x0627, Pack8);
 extern OSErr C_AEGetNthPtr(AEDescList *list, int32_t index,
                                        DescType desired_type, GUEST<AEKeyword> *keyword_out,
                                        GUEST<DescType> *type_out,
-                                       Ptr data, int32_t max_size, GUEST<int32_t> *size_out);
+                                       void *data, int32_t max_size, GUEST<int32_t> *size_out);
 PASCAL_SUBTRAP(AEGetNthPtr, 0xA816, 0x100A, Pack8);
 
 extern OSErr C_AEGetAttributePtr(AppleEvent *evt, AEKeyword keyword,
                                              DescType desired_type, GUEST<DescType> *type_out,
-                                             Ptr data, Size max_size, GUEST<Size> *size_out);
+                                             void *data, Size max_size, GUEST<Size> *size_out);
 PASCAL_SUBTRAP(AEGetAttributePtr, 0xA816, 0x0E15, Pack8);
 
 extern OSErr C_AEGetArray(AEDescList *list,
@@ -544,7 +544,7 @@ extern OSErr C_AESizeOfNthItem(AEDescList *list, int32_t index,
 PASCAL_SUBTRAP(AESizeOfNthItem, 0xA816, 0x082A, Pack8);
 
 extern OSErr C_AEPutPtr(AEDescList *list, int32_t index, DescType type,
-                                    Ptr data, Size data_size);
+                                    const void *data, Size data_size);
 PASCAL_SUBTRAP(AEPutPtr, 0xA816, 0x0A08, Pack8);
 
 extern OSErr C_AEInteractWithUser(int32_t timeout, NMRecPtr nm_req,
