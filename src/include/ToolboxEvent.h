@@ -52,7 +52,7 @@ PASCAL_TRAP(WaitMouseUp, 0xA977);
 extern void C_GetKeys(unsigned char *keys);
 PASCAL_TRAP(GetKeys, 0xA976);
 
-extern LONGINT C_TickCount(void);
+extern ULONGINT C_TickCount(void);
 PASCAL_TRAP(TickCount, 0xA975);
 
 extern LONGINT GetDblTime(void);

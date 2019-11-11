@@ -572,7 +572,7 @@ void Executor::C_GetKeys(unsigned char *keys)
     BlockMoveData((Ptr)LM(KeyMap), (Ptr)keys, (Size)sizeof_KeyMap);
 }
 
-LONGINT Executor::C_TickCount()
+ULONGINT Executor::C_TickCount()
 {
     unsigned long ticks;
     unsigned long new_time;
