@@ -380,7 +380,7 @@ OSErr Executor::C_GetIndSymbol(ConnectionID id, LONGINT index, Str255 name,
     return retval;
 }
 
-OSErr Executor::C_FindSymbol(ConnectionID connID, Str255 symName,
+OSErr Executor::C_FindSymbol(ConnectionID connID, ConstStr255Param symName,
                              GUEST<Ptr> *symAddr, SymClass *symClass)
 {
     OSErr retval;

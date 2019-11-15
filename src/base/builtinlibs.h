@@ -13,7 +13,7 @@ namespace Executor
 
         void addPPCEntrypoint(const char *library, const char *function, std::function<uint32_t (PowerCore&)> code);
 
-        ConnectionID getBuiltinLib(Str255 libname);
+        ConnectionID getBuiltinLib(ConstStr255Param libname);
 
         Ptr makeUndefinedSymbolStub(const char *name);
     }

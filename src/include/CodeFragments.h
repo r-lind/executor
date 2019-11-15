@@ -155,14 +155,14 @@ typedef struct CFragClosure *CFragClosureID;
 DISPATCHER_TRAP(CodeFragmentDispatch, 0xAA5A, StackW);
 
 extern OSErr C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset, LONGINT length,
-                               Str63 fragname, LoadFlags flags,
+                               ConstStr63Param fragname, LoadFlags flags,
                                GUEST<ConnectionID> *connp, GUEST<Ptr> *mainAddrp,
                                Str255 errname);
 PASCAL_SUBTRAP(GetDiskFragment, 0xAA5A, 0x0002, CodeFragmentDispatch);
 
 typedef uint8_t SymClass;
 
-extern OSErr C_FindSymbol(ConnectionID connID, Str255 symName, GUEST<Ptr> *symAddr,
+extern OSErr C_FindSymbol(ConnectionID connID, ConstStr255Param symName, GUEST<Ptr> *symAddr,
                           SymClass *symClass);
 PASCAL_SUBTRAP(FindSymbol, 0xAA5A, 0x0005, CodeFragmentDispatch);
 
@@ -170,13 +170,13 @@ PASCAL_SUBTRAP(FindSymbol, 0xAA5A, 0x0005, CodeFragmentDispatch);
 extern OSErr C_CloseConnection(GUEST<ConnectionID> *cidp);
 PASCAL_SUBTRAP(CloseConnection, 0xAA5A, 0x0004, CodeFragmentDispatch);
 
-extern OSErr C_GetSharedLibrary(Str63 library, OSType arch,
+extern OSErr C_GetSharedLibrary(ConstStr63Param library, OSType arch,
                                 LoadFlags loadflags,
                                 GUEST<ConnectionID> *cidp, GUEST<Ptr> *mainaddrp,
                                 Str255 errName);
 PASCAL_SUBTRAP(GetSharedLibrary, 0xAA5A, 0x0001, CodeFragmentDispatch);
 
-extern OSErr C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
+extern OSErr C_GetMemFragment(void *addr, uint32_t length, ConstStr63Param fragname,
                               LoadFlags flags, GUEST<ConnectionID> *connp,
                               GUEST<Ptr> *mainAddrp, Str255 errname);
 PASCAL_SUBTRAP(GetMemFragment, 0xAA5A, 0x0003, CodeFragmentDispatch);

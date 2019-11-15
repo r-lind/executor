@@ -75,7 +75,7 @@ Ptr builtinlibs::makeUndefinedSymbolStub(const char *name)
     return (Ptr) &callback;
 }
 
-ConnectionID builtinlibs::getBuiltinLib(Str255 libname)
+ConnectionID builtinlibs::getBuiltinLib(ConstStr255Param libname)
 {
     std::string name(libname + 1, libname + 1 + libname[0]);
     auto it = builtins.find(name);

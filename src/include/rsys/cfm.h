@@ -76,7 +76,7 @@ extern char *ROMlib_p2cstr(StringPtr str);
 
 
 extern cfir_t *ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type,
-                                Str255 name);
+                                ConstStr255Param name);
 
 
 extern ConnectionID ROMlib_new_connection(uint32_t n_sects);

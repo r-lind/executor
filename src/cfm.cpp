@@ -317,7 +317,7 @@ repeatedly_relocate(uint32_t count, uint8_t **relocAddressp, uint32_t val)
 }
 
 static OSErr
-check_existing_connections(Str63 library, OSType arch, LoadFlags loadflags,
+check_existing_connections(ConstStr63Param library, OSType arch, LoadFlags loadflags,
                            GUEST<ConnectionID> *cidp, GUEST<Ptr> *mainaddrp, Str255 errName)
 {
     /* TODO */
@@ -333,7 +333,7 @@ get_root_and_app(INTEGER *root_vrefp, LONGINT *root_diridp,
 
 static OSErr
 check_file(INTEGER vref, LONGINT dirid, Str255 file, bool shlb_test_p,
-           Str63 library, OSType arch, LoadFlags loadflags,
+           ConstStr63Param library, OSType arch, LoadFlags loadflags,
            GUEST<ConnectionID> *cidp, GUEST<Ptr> *mainaddrp, Str255 errName)
 {
     OSErr retval;
@@ -391,7 +391,7 @@ check_file(INTEGER vref, LONGINT dirid, Str255 file, bool shlb_test_p,
 }
 
 static OSErr
-check_vanddir(INTEGER vref, LONGINT dirid, int descend_count, Str63 library,
+check_vanddir(INTEGER vref, LONGINT dirid, int descend_count, ConstStr63Param library,
               OSType arch, LoadFlags loadflags, GUEST<ConnectionID> *cidp,
               GUEST<Ptr> *mainaddrp, Str255 errName)
 {
@@ -456,7 +456,7 @@ check_vanddir(INTEGER vref, LONGINT dirid, int descend_count, Str63 library,
  *
  */
 
-OSErr Executor::C_GetSharedLibrary(Str63 library, OSType arch,
+OSErr Executor::C_GetSharedLibrary(ConstStr63Param library, OSType arch,
                                    LoadFlags loadflags, GUEST<ConnectionID> *cidp,
                                    GUEST<Ptr> *mainaddrp, Str255 errName)
 {
@@ -1092,7 +1092,7 @@ Executor::ROMlib_new_connection(uint32_t n_sects)
     return retval;
 }
 
-OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
+OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, ConstStr63Param fragname,
                                  LoadFlags flags, GUEST<ConnectionID> *connp,
                                  GUEST<Ptr> *mainAddrp, Str255 errname)
 {
@@ -1143,7 +1143,7 @@ OSErr Executor::C_GetMemFragment(void *addr, uint32_t length, Str63 fragname,
 
 
 OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
-                                  LONGINT length, Str63 fragname,
+                                  LONGINT length, ConstStr63Param fragname,
                                   LoadFlags flags, GUEST<ConnectionID> *connp,
                                   GUEST<Ptr> *mainAddrp, Str255 errname)
 {
@@ -1171,7 +1171,7 @@ OSErr Executor::C_GetDiskFragment(FSSpecPtr fsp, LONGINT offset,
 
 
 static bool
-cfrg_match(const cfir_t *cfirp, GUEST<OSType> arch_x, uint8_t type_x, Str255 name)
+cfrg_match(const cfir_t *cfirp, GUEST<OSType> arch_x, uint8_t type_x, ConstStr255Param name)
 {
     bool retval;
 
@@ -1181,7 +1181,7 @@ cfrg_match(const cfir_t *cfirp, GUEST<OSType> arch_x, uint8_t type_x, Str255 nam
 }
 
 cfir_t *
-Executor::ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type, Str255 name)
+Executor::ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type, ConstStr255Param name)
 {
     cfrg_resource_t *cfrgp;
     int n_descripts;
