@@ -17,7 +17,7 @@ include_directories(include)
 include_directories(.)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-execute_process(COMMAND ruby make-multiverse.rb -G Executor -o "${CMAKE_CURRENT_BINARY_DIR}/api"
+execute_process(COMMAND ruby make-multiverse.rb -G Executor -o "${CMAKE_CURRENT_BINARY_DIR}/"
                 WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal)
 
 set(FRONT_END qt CACHE STRING "which front-end to use (qt, sdl2, sdl, x)")
