@@ -1639,16 +1639,9 @@ void Executor::ROMlib_menucall(INTEGER mess, MenuHandle themenu, Rect *menrect, 
 
         mp = (menuprocp)*defproc;
 
-        if(mp == &mdef0)
-        {
-            mdef0(mess, themenu, menrect, hit, which);
-        }
-        else
-        {
-            ROMlib_hook(menu_mdefnumber);
-            HLockGuard guard(defproc);
-            mp(mess, themenu, menrect, hit, which);
-        }
+        ROMlib_hook(menu_mdefnumber);
+        HLockGuard guard(defproc);
+        mp(mess, themenu, menrect, hit, which);
     }
 }
 
@@ -1666,15 +1659,10 @@ Executor::ROMlib_mbdfcall(INTEGER msg, INTEGER param1, LONGINT param2)
 
     mp = (mbdfprocp)*defproc;
 
-    if(mp == &mbdf0)
-        retval = mbdf0(((*MENULIST)->mufu & 7), msg, param1, param2);
-    else
-    {
-        ROMlib_hook(menu_mbdfnumber);
-        HLockGuard guard(defproc);
+    ROMlib_hook(menu_mbdfnumber);
+    HLockGuard guard(defproc);
 
-        retval = mp((*MENULIST)->mufu & 7, msg, param1, param2);
-    }
+    retval = mp((*MENULIST)->mufu & 7, msg, param1, param2);
 
     return retval;
 }

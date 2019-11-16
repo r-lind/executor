@@ -164,7 +164,7 @@ void Executor::C_ModalDialog(ModalFilterUPP fp, GUEST<INTEGER> *item) /* IMI-415
                && mousedown_where != inMenuBar
                && !(mousedown_where == inContent
                     && temp_wp == (WindowPtr)dp))
-                BEEP(1);
+                Beep(1);
             else if(CALLMODALPROC((DialogPtr)dp, &evt, item, fp2))
             {
                 /* #### not sure what this means */
@@ -246,7 +246,7 @@ void Executor::C_ModalDialog(ModalFilterUPP fp, GUEST<INTEGER> *item) /* IMI-415
                     && mousedown_where != inMenuBar
                     && !(mousedown_where == inContent
                          && temp_wp == (WindowPtr)dp))
-                BEEP(1);
+                Beep(1);
             else
             {
                 if(IsDialogEvent(&evt)
@@ -656,17 +656,11 @@ void Executor::DialogDelete(DialogPtr dp) /* IMI-418 */
         TEDelete(((DialogPeek)dp)->textH);
 }
 
-void Executor::BEEPER(INTEGER n)
+void Executor::Beep(INTEGER n)
 {
     if(LM(DABeeper))
     {
-        if(LM(DABeeper) == &ROMlib_mysound)
-            C_ROMlib_mysound((n));
-        else
-        {
-            ROMlib_hook(dial_soundprocnumber);
-            LM(DABeeper)
-            (n);
-        }
+        ROMlib_hook(dial_soundprocnumber);
+        LM(DABeeper)(n);
     }
 }

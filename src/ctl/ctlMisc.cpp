@@ -194,18 +194,9 @@ int32_t Executor::ROMlib_ctlcall(ControlHandle c, int16_t i, int32_t l)
 
     cp = (ctlfuncp)*defproc;
 
-    if(cp == &cdef0)
-        retval = cdef0(VAR(c), c, i, l);
-    else if(cp == &cdef16)
-        retval = cdef16(VAR(c), c, i, l);
-    else if(cp == &cdef1008)
-        retval = cdef1008(VAR(c), c, i, l);
-    else
-    {
-        ROMlib_hook(ctl_cdefnumber);
-        HLockGuard guard(defproc);
-        retval = cp(VAR(c), c, i, l);
-    }
-
+    ROMlib_hook(ctl_cdefnumber);
+    HLockGuard guard(defproc);
+    retval = cp(VAR(c), c, i, l);
+    
     return retval;
 }

@@ -478,13 +478,10 @@ OSErr Executor::C_SndAddModifier(SndChannelPtr chanp, ProcPtr mod, INTEGER id,
                 else
                 {
                     h = GetResource("snth"_4, id);
-                    if(*h != (Ptr)&snth5)
-                    { /* ACK; phone handle stuff */
-                        LoadResource(h);
-                        modp->flags = MOD_SYNTH_FLAG;
-                        modp->hState = HGetState(h);
-                        HLock(h);
-                    }
+                    LoadResource(h);
+                    modp->flags = MOD_SYNTH_FLAG;
+                    modp->hState = HGetState(h);
+                    HLock(h);
                     modp->code = (ProcPtr)*h;
                 }
                 modp->userInfo = 0;
@@ -970,15 +967,9 @@ OSErr Executor::C_SndControl(INTEGER id, SndCommand *cmdp)
             else
             {
                 LoadResource(h);
-                if(*h != (Ptr)&snth5)
-                    state = HGetState(h);
-#if !defined(LETGCCWAIL)
-                else
-                    state = 0;
-#endif
+                state = HGetState(h);
                 callasynth((SndChannelPtr)0, cmdp, (ModifierStubPtr)0);
-                if(*h != (Ptr)&snth5)
-                    HSetState(h, state);
+                HSetState(h, state);
                 retval = noErr;
             }
             break;

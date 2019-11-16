@@ -130,8 +130,7 @@ inline void BUMPIP(itmp& ip)
 }
 
 
-extern void BEEPER(INTEGER n);
-#define BEEP(n) BEEPER(n)
+extern void Beep(INTEGER n);
 
 static_assert(sizeof(itmstr) == 14);
 static_assert(sizeof(altstr) == 12);

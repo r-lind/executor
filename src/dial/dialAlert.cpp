@@ -55,7 +55,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterUPP fp) /* IMI-418 */
     ah = (alth)GetResource("ALRT"_4, id);
     if(!ah)
     {
-        BEEP(1);
+        Beep(1);
         return -1;
     }
 
@@ -64,7 +64,7 @@ INTEGER Executor::C_Alert(INTEGER id, ModalFilterUPP fp) /* IMI-418 */
     LM(ACount) = LM(ACount) + 1;
     if(LM(ACount) > 3)
         LM(ACount) = 3;
-    BEEP(n & 3);
+    Beep(n & 3);
     if(!(n & 4))
         return -1;
 
