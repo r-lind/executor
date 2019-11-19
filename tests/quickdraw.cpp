@@ -424,3 +424,12 @@ TEST(QuickDraw, PinRect)
     EXPECT_EQ(29, p.v);
     EXPECT_EQ(39, p.h);
 }
+
+TEST(QuickDraw, InvalidCloseRgn)
+{
+    OffscreenPort port;
+
+    RgnHandle rgn = NewRgn();
+    CloseRgn(rgn);      // CloseRgn without OpenRgn is invalid, but doesn't crash on real Macs.
+    DisposeRgn(rgn);
+}

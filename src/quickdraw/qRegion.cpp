@@ -200,6 +200,9 @@ void Executor::C_CloseRgn(RgnHandle rh)
 {
     RgnHandle rgn_save = (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort);
 
+    if (!rgn_save)
+        return;
+
     if(RGN_SIZE(rgn_save) == RGN_SMALL_SIZE + sizeof(INTEGER)
        || rgn_is_rect_p(rgn_save))
         RGN_SET_SMALL(rgn_save);
