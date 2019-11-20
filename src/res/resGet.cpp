@@ -188,13 +188,10 @@ OSErr Executor::ROMlib_typidtop(ResType typ, INTEGER id, resmaphand *pth,
     return resNotFound;
 }
 
-#define MAELSTROM_HACK
 
 #define NUM_ROMLIB_DEFS 10
 
-#if !defined(MAELSTROM_HACK)
 static GUEST<LONGINT> ROMlib_defs[NUM_ROMLIB_DEFS];
-#endif
 
 /*
  * Don't change the order of the routines below.
@@ -207,14 +204,8 @@ static GUEST<LONGINT> ROMlib_defs[NUM_ROMLIB_DEFS];
  * nn is the offset into ROMlib_defs (0, 4, 8, ...)
  */
 
-static Boolean acceptable(unsigned long addr)
-{
-    return !(islower(addr & 0xFF) || islower((addr >> 8) & 0xFF) || islower((addr >> 16) & 0xFF) || islower((addr >> 24) & 0xFF));
-}
-
 static void ROMlib_init_xdefs(void)
 {
-#if !defined(MAELSTROM_HACK)
     ROMlib_defs[0] = guest_cast<LONGINT>(&cdef0);
     ROMlib_defs[1] = guest_cast<LONGINT>(&cdef16);
     ROMlib_defs[2] = guest_cast<LONGINT>(&wdef0);
@@ -226,44 +217,8 @@ static void ROMlib_init_xdefs(void)
     ROMlib_defs[8] = guest_cast<LONGINT>(&unixmount);
     ROMlib_defs[9] = guest_cast<LONGINT>(&cdef1008);
 
-    *(LONGINT *)SYN68K_TO_US(0x58) = (LONGINT)ROMlib_defs;
-#else
-    GUEST<THz> save_zone;
-    Handle oldhandle, newhandle;
-    long timeout;
-    GUEST<LONGINT> *ROMlib_defs;
-
-    save_zone = LM(TheZone);
-
-    LM(TheZone) = LM(SysZone);
-    newhandle = 0;
-    timeout = 64000;
-    do
-    {
-        oldhandle = newhandle;
-        newhandle = NewHandle(NUM_ROMLIB_DEFS * sizeof(ROMlib_defs[0]));
-        if(oldhandle)
-            DisposeHandle(oldhandle);
-    } while(!acceptable((*newhandle).raw()) && --timeout);
-#if !defined(NDEBUG)
-    if(!timeout)
-        warning_unexpected("Maelstrom hack didn't work");
-#endif
-    HLock(newhandle);
-    ROMlib_defs = (GUEST<LONGINT> *)*newhandle;
-    ROMlib_defs[0] = guest_cast<LONGINT>(&cdef0);
-    ROMlib_defs[1] = guest_cast<LONGINT>(&cdef16);
-    ROMlib_defs[2] = guest_cast<LONGINT>(&wdef0);
-    ROMlib_defs[3] = guest_cast<LONGINT>(&wdef16);
-    ROMlib_defs[4] = guest_cast<LONGINT>(&mdef0);
-    ROMlib_defs[5] = guest_cast<LONGINT>(&ldef0);
-    ROMlib_defs[6] = guest_cast<LONGINT>(&mbdf0);
-    ROMlib_defs[7] = guest_cast<LONGINT>(&snth5);
-    ROMlib_defs[8] = guest_cast<LONGINT>(&unixmount);
-    ROMlib_defs[9] = guest_cast<LONGINT>(&cdef1008);
-    *(LONGINT *)SYN68K_TO_US(0x58) = (LONGINT)(*newhandle).raw(); // ### use standard low mem access method
-    LM(TheZone) = save_zone;
-#endif
+    const LowMemGlobal<Ptr> magic_vector { 0x58 }; 
+    LM(magic_vector) = (Ptr) &ROMlib_defs;
 }
 
 typedef struct

@@ -33,4 +33,5 @@ multi-screen support
 [ ] clean up M68K interrupt business: wy do we want several "realistic" interrupt vectors?
         (also, SDL & X11 ftontends might have trouble with PowerPC apps)
 
-[ ] Figure out and get rid of the MAELSTROM_HACK (doctored address of the 0x58 MAGIC_ARDI_VECTOR)
+[X] Figure out and get rid of the MAELSTROM_HACK (doctored address of the 0x58 MAGIC_ARDI_VECTOR)
+    (ok, not really figured out, but didn't find a reason to keep it)
