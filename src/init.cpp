@@ -37,6 +37,13 @@
 #include <prefs/prefs.h> /* system_version */
 #include <textedit/tesave.h> /* ROMlib_dotext */
 
+#include <ctl/ctl.h>
+#include <list/list.h>
+#include <menu/menu.h>
+#include <wind/wind.h>
+#include <sound/soundopts.h>
+#include <rsys/stdfile.h> /* for unixmount */
+
 using namespace Executor;
 
 static syn68k_addr_t
@@ -162,10 +169,45 @@ setup_trap_vectors(void)
         }
 }
 
-
 void Executor::InitLowMem()
 {
     setup_trap_vectors();
+
+
+    /*
+     * Executor Custom Entrypoints
+     * There is a pointer to a table of entrypoints hidden
+     * behind an unused interrupt vector at address 0x58.
+     * 
+     * Don't change the order of the routines below.
+     * We have made stubs of the form:
+     *
+     *	0x20780058	movel	0x58:w,		a0
+     *	0x206800nn	movel	a0@(nn),	a0
+     *	0x4ED0		jmp			a0@
+     * 
+     * nn is the offset into ROMlib_defs (0, 4, 8, ...)
+     * 
+     * Addionally, the Browser binary uses the unixmount entrypoint,
+     * which is now a no-op, but has to remain here until Browser
+     * has been successfully recompiled or replaced.
+     */
+
+    static GUEST<LONGINT> ROMlib_defs[] = {
+        guest_cast<LONGINT>(&cdef0),
+        guest_cast<LONGINT>(&cdef16),
+        guest_cast<LONGINT>(&wdef0),
+        guest_cast<LONGINT>(&wdef16),
+        guest_cast<LONGINT>(&mdef0),
+        guest_cast<LONGINT>(&ldef0),
+        guest_cast<LONGINT>(&mbdf0),
+        guest_cast<LONGINT>(&snth5),
+        guest_cast<LONGINT>(&unixmount),
+        guest_cast<LONGINT>(&cdef1008)
+    };
+
+    const LowMemGlobal<Ptr> magic_vector { 0x58 }; 
+    LM(magic_vector) = (Ptr) &ROMlib_defs;
 
 
     {   // Mystery Hack: Replace the trap entry for ResourceStub by a piece

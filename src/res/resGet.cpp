@@ -11,15 +11,7 @@
 #include <MemoryMgr.h>
 #include <OSUtil.h>
 #include <mman/mman.h>
-
-#include <ctl/ctl.h>
-#include <list/list.h>
-#include <menu/menu.h>
-#include <wind/wind.h>
-#include <sound/soundopts.h>
-#include <file/file.h>
 #include <rsys/aboutbox.h>
-#include <rsys/stdfile.h> /* for unixmount */
 
 #include <ctype.h>
 
@@ -188,39 +180,6 @@ OSErr Executor::ROMlib_typidtop(ResType typ, INTEGER id, resmaphand *pth,
     return resNotFound;
 }
 
-
-#define NUM_ROMLIB_DEFS 10
-
-static GUEST<LONGINT> ROMlib_defs[NUM_ROMLIB_DEFS];
-
-/*
- * Don't change the order of the routines below.
- * We have made stubs of the form:
- *
- *	0x20780058	movel	0x58:w,		a0
- *	0x206800nn	movel	a0@(nn),	a0
- *	0x4ED0		jmp			a0@
- * 
- * nn is the offset into ROMlib_defs (0, 4, 8, ...)
- */
-
-static void ROMlib_init_xdefs(void)
-{
-    ROMlib_defs[0] = guest_cast<LONGINT>(&cdef0);
-    ROMlib_defs[1] = guest_cast<LONGINT>(&cdef16);
-    ROMlib_defs[2] = guest_cast<LONGINT>(&wdef0);
-    ROMlib_defs[3] = guest_cast<LONGINT>(&wdef16);
-    ROMlib_defs[4] = guest_cast<LONGINT>(&mdef0);
-    ROMlib_defs[5] = guest_cast<LONGINT>(&ldef0);
-    ROMlib_defs[6] = guest_cast<LONGINT>(&mbdf0);
-    ROMlib_defs[7] = guest_cast<LONGINT>(&snth5);
-    ROMlib_defs[8] = guest_cast<LONGINT>(&unixmount);
-    ROMlib_defs[9] = guest_cast<LONGINT>(&cdef1008);
-
-    const LowMemGlobal<Ptr> magic_vector { 0x58 }; 
-    LM(magic_vector) = (Ptr) &ROMlib_defs;
-}
-
 typedef struct
 {
     ResType type;
@@ -262,14 +221,7 @@ Handle Executor::C_GetResource(ResType typ, INTEGER id)
 {
     resmaphand map;
     resref *rr;
-    static int beenhere = 0;
     Handle retval;
-
-    if(!beenhere)
-    {
-        beenhere = 1;
-        ROMlib_init_xdefs();
-    }
 
     EM_D0 = 0; // apparently, somebody is relying on D0 being reset to 0 on exit from GetResource...
                // (this used to be in emustubs.cpp)
