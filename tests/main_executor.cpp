@@ -6,6 +6,7 @@
 #include <WindowMgr.h>
 #include <MenuMgr.h>
 #include <FontMgr.h>
+#include <rsys/executor.h>
 
 using namespace Executor;
 
@@ -54,11 +55,30 @@ public:
 
     virtual void SetUp() override
     {
-        tempDir = fs::current_path() / fs::unique_path("temptest-%%%%-%%%%-%%%%-%%%%");
 
         Executor::InitMemory(thingOnStack);
-        Executor::ROMlib_fileinit();
 
+        vdriver = new MockVDriver();
+        initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
+        traps::init(false);
+        Executor::InitLowMem();
+
+        PowerCore& cpu = getPowerCore();
+#if SIZEOF_CHAR_P == 4 && !defined(TWENTYFOUR_BIT_ADDRESSING)
+        cpu.memoryBases[0] = (void*)ROMlib_offset;
+        cpu.memoryBases[1] = nullptr;
+        cpu.memoryBases[2] = nullptr;
+        cpu.memoryBases[3] = nullptr;
+#else
+        cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
+        cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
+        cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
+        cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
+#endif
+        EM_A5 = EM_A7 = ptr_to_longint(LM(MemTop)-4);
+
+        tempDir = fs::current_path() / fs::unique_path("temptest-%%%%-%%%%-%%%%-%%%%");
+        Executor::ROMlib_fileinit();
         fs::create_directory(tempDir);
 
         if(auto fsspec = nativePathToFSSpec(tempDir))
@@ -73,34 +93,10 @@ public:
             SetVol(nullptr, wdpb.ioVRefNum);
         }
 
-        vdriver = new MockVDriver();
-        initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
-        traps::init(false);
-
-        PowerCore& cpu = getPowerCore();
-#if SIZEOF_CHAR_P == 4 && !defined(TWENTYFOUR_BIT_ADDRESSING)
-        cpu.memoryBases[0] = (void*)ROMlib_offset;
-        cpu.memoryBases[1] = nullptr;
-        cpu.memoryBases[2] = nullptr;
-        cpu.memoryBases[3] = nullptr;
-#else
-        cpu.memoryBases[0] = (void*)ROMlib_offsets[0];
-        cpu.memoryBases[1] = (void*)ROMlib_offsets[1];
-        cpu.memoryBases[2] = (void*)ROMlib_offsets[2];
-        cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
-#endif
-
-        LM(ResErrProc) = 0;
         InitResources();
         ROMlib_InitGDevices();
-        LM(TheZone) = LM(ApplZone);
 
         ROMlib_color_init();
-        LM(WindowList) = nullptr;
-        LM(MenuList) = nullptr;
-        LM(MBDFHndl) = nullptr;
-        LM(MBSaveLoc) = nullptr;
-        EM_A5 = EM_A7 = ptr_to_longint(LM(MemTop)-4);
         InitGraf(&qd.thePort);
         InitFonts();
         InitWindows();
