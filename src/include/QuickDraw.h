@@ -506,11 +506,6 @@ const LowMemGlobal<LONGINT> mouseoffset { 0x8DA }; // QuickDraw SysEqu.a (true-b
 const LowMemGlobal<ProcPtr> JCrsrTask { 0x8EE }; //   (true);
 const LowMemGlobal<Byte> HiliteMode { 0x938 }; // QuickDraw IMV (true-b);
 
-BEGIN_EXECUTOR_ONLY
-extern void C_unknown574();
-PASCAL_FUNCTION(unknown574);
-END_EXECUTOR_ONLY
-
 extern void C_CopyBits(BitMap *src_bitmap, BitMap *dst_bitmap,
                             const Rect *src_rect, const Rect *dst_rect,
                             INTEGER mode, RgnHandle mask);

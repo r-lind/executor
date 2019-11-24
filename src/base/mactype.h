@@ -587,6 +587,23 @@ T toHost(guestvalues::GuestWrapper<T> x)
     return x;
 }
 
+template<typename T>
+uint32_t toRawHostOrder(GUEST<T> x)
+{
+    if constexpr(sizeof(x) == 1)
+        return x;
+    else
+        return x.raw_host_order();
+}
+template<typename T>
+void setRawHostOrder(GUEST<T>& x, uint32_t y)
+{
+    if constexpr(sizeof(x) == 1)
+        x = y;
+    else
+        x.raw_host_order(y);
+}
+
 
 template<typename TO, typename FROM, 
     typename = typename guestvalues::GuestTypeTraits<FROM>::HostType,

@@ -26,11 +26,6 @@ using namespace Executor;
 
 #define RTS() return POPADDR()
 
-// QuickDraw.h
-void Executor::C_unknown574()
-{
-}
-
 // StartMgr.h
 RAW_68K_IMPLEMENTATION(GetDefaultStartup)
 {
@@ -67,15 +62,6 @@ RAW_68K_IMPLEMENTATION(GetOSDefault)
 
 RAW_68K_IMPLEMENTATION(SetOSDefault)
 {
-    RTS();
-}
-
-// OSUtil.h
-RAW_68K_IMPLEMENTATION(SwapMMUMode)
-{
-    EM_D0 &= 0xFFFFFF00;
-    EM_D0 |= 0x00000001;
-    LM(MMU32Bit) = 0x01; /* TRUE32b */
     RTS();
 }
 

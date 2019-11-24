@@ -396,30 +396,29 @@ extern INTEGER C_CharToPixel(
     Point denom);
 PASCAL_SUBTRAP(CharToPixel, 0xA8B5, 0x821C0030, ScriptUtil);
 
-BEGIN_EXECUTOR_ONLY
 extern void C_LowercaseText(
     Ptr textp,
     INTEGER len,
     ScriptCode script);
-PASCAL_FUNCTION(LowercaseText); //, 0xA8B5, ScriptUtil);
+NOTRAP_FUNCTION(LowercaseText);
 
 extern void C_UppercaseText(
     Ptr textp,
     INTEGER len,
     ScriptCode script);
-PASCAL_FUNCTION(UppercaseText); //, 0xA8B5, ScriptUtil);
+NOTRAP_FUNCTION(UppercaseText);
 
 extern void C_StripDiacritics(
     Ptr textp,
     INTEGER len,
     ScriptCode script);
-PASCAL_FUNCTION(StripDiacritics); //, 0xA8B5, ScriptUtil);
+NOTRAP_FUNCTION(StripDiacritics);
 
 extern void C_UppercaseStripDiacritics(
     Ptr textp,
     INTEGER len,
     ScriptCode script);
-PASCAL_FUNCTION(UppercaseStripDiacritics); //, 0xA8B5, ScriptUtil);
+NOTRAP_FUNCTION(UppercaseStripDiacritics);
 
     // the above four functions are actually one entry point on 68K:
 extern void C_TextUtilFunctions(
@@ -428,7 +427,7 @@ extern void C_TextUtilFunctions(
     INTEGER len,
     ScriptCode script);
 PASCAL_SUBTRAP(TextUtilFunctions, 0xA8B5, 0x800AFFB6, ScriptUtil);
-END_EXECUTOR_ONLY
+
 
 extern INTEGER C_CharacterByteType(Ptr textBuf, INTEGER textOffset,
                                    ScriptCode script);

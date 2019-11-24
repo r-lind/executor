@@ -250,10 +250,12 @@ REGISTER_TRAP2(SysEnvirons, 0xA090, D0(D0,A0));
 extern void Restart(void);
 extern void SetUpA5(void);
 extern void RestoreA5(void);
-#undef GetMMUMode
-#undef SwapMMUMode
+
 extern Byte GetMMUMode();
+NOTRAP_FUNCTION2(GetMMUMode);
+
 extern void SwapMMUMode(Byte *bp);
+REGISTER_TRAP2(SwapMMUMode, 0xA05D, void(InOut<Byte,D0>));
 
 extern uint32_t StripAddress(uint32_t l);
 REGISTER_TRAP2(StripAddress, 0xA055, D0(D0));

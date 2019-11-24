@@ -702,7 +702,7 @@ static void reset_low_globals(void)
     LM(JSetCrsr) = (ProcPtr)&SetCursor;
     LM(JCrsrObscure) = (ProcPtr)&ObscureCursor;
 
-    LM(JUnknown574) = (ProcPtr)&unknown574;
+    LM(JUnknown574) = (ProcPtr)&stub_SwapMMUMode;
 
     LM(Key1Trans) = (Ptr)&stub_Key1Trans;
     LM(Key2Trans) = (Ptr)&stub_Key2Trans;
