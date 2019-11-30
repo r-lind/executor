@@ -20,6 +20,7 @@
 #include <quickdraw/text.h>
 #include <base/cpu.h>
 #include <textedit/textedit.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
@@ -795,6 +796,10 @@ DONE:
    
    for calling conventions, see IM Text, 2-63 */
 
+namespace Executor
+{
+    PASCAL_FUNCTION_PTR(ROMlib_dotext); // FIXME: this is wrong and only mostly works because all calls to this are short-circuited.
+}
 int16_t Executor::C_ROMlib_dotext(TEPtr tep, int16_t start, int16_t end,
                                   int16_t what) /* INTERNAL */
 {
@@ -806,7 +811,7 @@ int16_t Executor::C_ROMlib_dotext(TEPtr tep, int16_t start, int16_t end,
         return te_find(tep, start, end);
     return 0;
 }
-
+/*
 INTEGER ROMlib_dotext(void)
 {
     INTEGER retval;
@@ -824,7 +829,7 @@ INTEGER ROMlib_dotext(void)
     EM_D0 = retval;
     return retval;
 }
-
+*/
 /* return true if click at location `cl' was a double click; otherwise
    save away this click information (location, time) */
 static bool

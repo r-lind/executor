@@ -16,8 +16,13 @@
 #include <prefs/prefs.h>
 #include <sound/soundopts.h>
 #include <base/functions.impl.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
+
+static OSErr
+start_playing(SndChannelPtr chanp, SndDoubleBufferHeaderPtr paramp,
+              int which_buf);
 
 void Executor::C_SndGetSysBeepState(GUEST<INTEGER> *statep)
 {
@@ -124,6 +129,27 @@ void Executor::clear_pending_sounds(void)
     allchans = nullptr;
 }
 
+
+static void C_sound_timer_handler()
+{
+    SndDoubleBufferPtr dbp;
+    SndDoubleBackUPP pp;
+    int current_buffer;
+
+    if(call_back_info.headp)
+    {
+        current_buffer = call_back_info.current_buffer;
+        pp = call_back_info.headp->dbhDoubleBack;
+        dbp = call_back_info.headp->dbhBufferPtr[current_buffer];
+        call_back_info.busy = false;
+        start_playing(call_back_info.chanp, call_back_info.headp,
+                      current_buffer ^ 1);
+        dbp->dbFlags &= ~dbBufferReady;
+        pp(call_back_info.chanp, dbp);
+    }
+}
+PASCAL_FUNCTION_PTR(sound_timer_handler);
+
 /*
  * NOTE: we're not really playing anything here, although we could.
  */
@@ -172,24 +198,6 @@ start_playing(SndChannelPtr chanp, SndDoubleBufferHeaderPtr paramp,
     return noErr;
 }
 
-void Executor::C_sound_timer_handler()
-{
-    SndDoubleBufferPtr dbp;
-    SndDoubleBackUPP pp;
-    int current_buffer;
-
-    if(call_back_info.headp)
-    {
-        current_buffer = call_back_info.current_buffer;
-        pp = call_back_info.headp->dbhDoubleBack;
-        dbp = call_back_info.headp->dbhBufferPtr[current_buffer];
-        call_back_info.busy = false;
-        start_playing(call_back_info.chanp, call_back_info.headp,
-                      current_buffer ^ 1);
-        dbp->dbFlags &= ~dbBufferReady;
-        pp(call_back_info.chanp, dbp);
-    }
-}
 
 OSErr Executor::C_SndPlayDoubleBuffer(SndChannelPtr chanp,
                                       SndDoubleBufferHeaderPtr paramp)

@@ -21,9 +21,7 @@ struct icon_item_template_t
 
 extern Boolean C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                                       GUEST<INTEGER> *ith);
-PASCAL_FUNCTION(ROMlib_myfilt);
-extern void C_ROMlib_mysound(INTEGER i);
-PASCAL_FUNCTION(ROMlib_mysound);
+EXTERN_PASCAL_FUNCTION_PTR(ROMlib_myfilt);
 
 static_assert(sizeof(icon_item_template_t) == 18);
 }

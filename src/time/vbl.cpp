@@ -20,6 +20,7 @@
 #include <sound/soundopts.h>
 #include <prefs/prefs.h>
 #include <base/cpu.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
@@ -53,7 +54,7 @@ static TMTask vbltm;
 
 #define VBUSY (1 << 6)
 
-void Executor::C_ROMlib_vcatch()
+static void C_ROMlib_vcatch()
 {
     VBLTaskPtr vp, next;
     ULONGINT old_ticks, new_ticks, ticks_elapsed;
@@ -133,6 +134,7 @@ void Executor::C_ROMlib_vcatch()
     cpu_state.ccv = saved_ccv;
     cpu_state.ccx = saved_ccx;
 }
+PASCAL_FUNCTION_PTR(ROMlib_vcatch);
 
 static void
 startclock(void)

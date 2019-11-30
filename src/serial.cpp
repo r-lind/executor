@@ -31,6 +31,7 @@
 #include <rsys/serial.h>
 #include <rsys/device.h>
 #include <base/cpu.h>
+#include <base/traps.impl.h>
 
 #if defined(CYGWIN32) || defined(WIN32)
 #include "win_serial.h"
@@ -77,6 +78,18 @@ using namespace Executor;
 
 #define SER_START (1)
 #define SER_STOP (0)
+
+
+static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp);
+REGISTER_FUNCTION_PTR(ROMlib_serialopen, D0(A0,A1));
+static OSErr C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp);
+REGISTER_FUNCTION_PTR(ROMlib_serialprime, D0(A0,A1));
+static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp);
+REGISTER_FUNCTION_PTR(ROMlib_serialctl, D0(A0,A1));
+static OSErr C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp);
+REGISTER_FUNCTION_PTR(ROMlib_serialstatus, D0(A0,A1));
+static OSErr C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp);
+REGISTER_FUNCTION_PTR(ROMlib_serialclose, D0(A0,A1));
 
 OSErr Executor::RAMSDOpen(SPortSel port) /* IMII-249 */
 {
@@ -278,7 +291,7 @@ void callcomp(ParmBlkPtr pbp, ProcPtr comp, OSErr err)
 
 #define SERIALDEBUG
 
-OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     DCtlPtr otherp; /* auto due to old compiler bug */
@@ -339,7 +352,7 @@ OSErr Executor::C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     DOCOMPLETION(pbp, err);
 }
 
-OSErr Executor::C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+static OSErr C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;
@@ -769,7 +782,7 @@ static OSErr flow(LONGINT fd, LONGINT flag)
 
 #define SERKILLIO 1
 
-OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;
@@ -870,7 +883,7 @@ OSErr Executor::C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
  * NOTE:  kSERDStatus lies about everything except rdPend.
  */
 
-OSErr Executor::C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+static OSErr C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;
@@ -946,7 +959,7 @@ static void restorecloseanddispose(hiddenh h)
     DisposeHandle((Handle)h);
 }
 
-OSErr Executor::C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
+static OSErr C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;

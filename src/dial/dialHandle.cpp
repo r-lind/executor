@@ -26,9 +26,14 @@
 #include <rsys/hook.h>
 #include <osevent/osevent.h>
 #include <base/functions.impl.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
+namespace Executor
+{
+    PASCAL_FUNCTION_PTR(ROMlib_myfilt);
+}
 Boolean Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
                                   GUEST<INTEGER> *ith) /* IMI-415 */
 {

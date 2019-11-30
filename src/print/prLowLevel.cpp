@@ -29,6 +29,8 @@
 #include <base/functions.impl.h>
 #include <prefs/prefs.h>
 #include <rsys/paths.h>
+#include <base/traps.impl.h>
+
 #include <algorithm>
 
 #ifdef MACOSX_
@@ -43,6 +45,26 @@ using namespace Executor;
 
 /* optional resolution other than 72dpix72dpi for printing */
 INTEGER Executor::ROMlib_optional_res_x, Executor::ROMlib_optional_res_y;
+
+static void C_ROMlib_circle_ok(DialogPtr dp, INTEGER which);
+PASCAL_FUNCTION_PTR(ROMlib_circle_ok);
+static void C_ROMlib_orientation(DialogPtr dp, INTEGER which);
+PASCAL_FUNCTION_PTR(ROMlib_orientation);
+static void C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno);
+PASCAL_FUNCTION_PTR(ROMlib_myjobproc);
+static Boolean C_ROMlib_stlfilterproc(DialogPtr dp,
+                                      EventRecord *evt, GUEST<INTEGER> *ith);
+PASCAL_FUNCTION_PTR(ROMlib_stlfilterproc);
+static Boolean C_ROMlib_numsonlyfilterproc(DialogPtr dp,
+                                           EventRecord *evt,
+                                           GUEST<INTEGER> *ith);
+PASCAL_FUNCTION_PTR(ROMlib_numsonlyfilterproc);
+
+static void C_ROMlib_mystlproc(DialogPtr dp, INTEGER itemno);
+PASCAL_FUNCTION_PTR(ROMlib_mystlproc);
+
+
+
 
 void Executor::C_PrDrvrOpen() /* TODO */
 {
@@ -122,7 +144,7 @@ GetDILong(DialogPtr dp, INTEGER item, LONGINT _default)
 win_printp_t ROMlib_wp;
 #endif
 
-void Executor::C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
+static void C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
 {
     switch(itemno)
     {
@@ -487,7 +509,7 @@ update_port(DialogPtr dp)
     SetPort(gp);
 }
 
-void Executor::C_ROMlib_mystlproc(DialogPtr dp, INTEGER itemno)
+static void C_ROMlib_mystlproc(DialogPtr dp, INTEGER itemno)
 {
     switch(itemno)
     {
@@ -553,7 +575,7 @@ static inline void Executor::ROMlib_CALLPRITEMPROC(TPPrDlg prrecptr, INTEGER ite
     }
 }
 
-Boolean Executor::C_ROMlib_stlfilterproc(
+static Boolean C_ROMlib_stlfilterproc(
     DialogPtr dlg, EventRecord *evt, GUEST<INTEGER> *ith)
 {
     Boolean retval;
@@ -647,7 +669,7 @@ Boolean Executor::C_ROMlib_stlfilterproc(
     return retval;
 }
 
-Boolean Executor::C_ROMlib_numsonlyfilterproc(
+static Boolean C_ROMlib_numsonlyfilterproc(
     DialogPtr dlg, EventRecord *evt, GUEST<INTEGER> *ith)
 {
     char c;
@@ -835,7 +857,7 @@ TPPrDlg Executor::C_PrJobInit(THPrint hPrint)
     return retval;
 }
 
-void Executor::C_ROMlib_circle_ok(DialogPtr dp, INTEGER which)
+static void C_ROMlib_circle_ok(DialogPtr dp, INTEGER which)
 {
     Rect r;
     GUEST<INTEGER> unused;
@@ -850,7 +872,7 @@ void Executor::C_ROMlib_circle_ok(DialogPtr dp, INTEGER which)
         FrameRect(&r);
 }
 
-void Executor::C_ROMlib_orientation(DialogPtr dp, INTEGER which)
+static void C_ROMlib_orientation(DialogPtr dp, INTEGER which)
 {
     Rect r;
     GUEST<INTEGER> unused;

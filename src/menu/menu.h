@@ -37,9 +37,7 @@ typedef struct mext
 } * mextp;
 
 extern void C_mdef0(INTEGER, MenuHandle, Rect *, Point, GUEST<INTEGER> *);
-PASCAL_FUNCTION(mdef0);
 extern int32_t C_mbdf0(int16_t, int16_t, int16_t, int32_t);
-PASCAL_FUNCTION(mbdf0);
 
 #define SIZEOFMEXT 5
 #define SIZEOFMINFO (sizeof(MenuInfo) - sizeof(Str255) + 1)

@@ -26,9 +26,6 @@ extern void date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp,
     // case insitive, diac insensitive
 extern int ROMlib_strcmp(const Byte *s1, const Byte *s2);
 
-extern void C_ROMlib_wakeup(void);
-PASCAL_FUNCTION(ROMlib_wakeup);
-
 #define PARAMRAMMACNAME "\010ParamRAM"
 
 extern Executor::LONGINT ROMlib_GMTcorrect; /* Correction for GMT to localtime */

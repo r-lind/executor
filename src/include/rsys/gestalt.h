@@ -25,7 +25,6 @@ extern void ROMlib_add_to_gestalt_list(OSType selector, OSErr retval,
 
 extern OSErr C_GestaltTablesOnly(OSType selector,
                                          GUEST<LONGINT> *responsep);
-PASCAL_FUNCTION(GestaltTablesOnly);
 
 /* GhostScript DLL version number */
 enum
@@ -54,9 +53,6 @@ enum
 {
     physicalUndefSelectorErr = -15551
 };
-
-extern OSErr C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep);
-PASCAL_FUNCTION(PhysicalGestalt);
 
 extern void gestalt_set_system_version(uint32_t version);
 extern void gestalt_set_memory_size(uint32_t size);

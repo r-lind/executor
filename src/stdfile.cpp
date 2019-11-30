@@ -47,6 +47,7 @@
 #include <error/system_error.h>
 
 #include <base/functions.impl.h>
+#include <base/traps.impl.h>
 #include <prefs/prefs.h>
 
 using namespace Executor;
@@ -339,7 +340,7 @@ WINDFL(void *dp)
     ((fltype *)(long)((WindowPeek)dp)->refCon)
 #endif
 
-void Executor::C_ROMlib_stdftrack(ControlHandle sh, INTEGER part)
+static void C_ROMlib_stdftrack(ControlHandle sh, INTEGER part)
 {
     const uint32_t min_between_scroll_msecs = 100;
     static uint32_t last_scroll_msecs;
@@ -372,6 +373,7 @@ void Executor::C_ROMlib_stdftrack(ControlHandle sh, INTEGER part)
     }
     flscroll(CTLFL(sh), from, GetControlValue(sh));
 }
+PASCAL_FUNCTION_PTR(ROMlib_stdftrack);
 
 static GUEST<INTEGER> cachedvrn = 32767;
 static INTEGER savesel = -1;
@@ -773,7 +775,7 @@ static void flfill(fltype *f)
  * dotted line (whopee!)
  */
 
-void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
+static void C_ROMlib_filebox(DialogPeek dp, INTEGER which)
 {
     GUEST<Handle> h;
     Rect r, r2;
@@ -826,6 +828,7 @@ void Executor::C_ROMlib_filebox(DialogPeek dp, INTEGER which)
     }
     SetPenState(&ps);
 }
+PASCAL_FUNCTION_PTR(ROMlib_filebox);
 
 static void realcd(DialogPeek dp, LONGINT dir)
 {
@@ -1063,7 +1066,7 @@ call_magicfp(fltype *fl, DialogPtr dp, EventRecord *evt, GUEST<INTEGER> *ith)
 
 #define keydownbit 0x1000
 
-Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
+static Boolean C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
                                     GUEST<INTEGER> *ith) /* handle disk insert */
 {
     DialogPeek dp = (DialogPeek)dlg;
@@ -1244,6 +1247,7 @@ Boolean Executor::C_ROMlib_stdffilt(DialogPtr dlg, EventRecord *evt,
 
     return retval ? retval : retval2;
 }
+PASCAL_FUNCTION_PTR(ROMlib_stdffilt);
 
 static void flinit(fltype *f, Rect *r, ControlHandle sh)
 {

@@ -220,10 +220,6 @@ extern bool ROMlib_pick_likely_print_name(StringPtr name);
 
 extern void ROMlib_trytomatch(char *retval, LONGINT index);
 
-extern void C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno);
-
-extern void C_ROMlib_mystlproc(DialogPtr dp, INTEGER itemno);
-
 extern void ROMlib_set_default_resolution(THPrint hPrint,
                                           INTEGER vres, INTEGER hres);
 
@@ -232,11 +228,6 @@ extern void do_textcenter(TCenterRecHdl h);
 extern void do_textend(void);
 
 extern void print_reinit(void);
-
-extern void C_ROMlib_circle_ok(DialogPtr dp, INTEGER which);
-PASCAL_FUNCTION(ROMlib_circle_ok);
-extern void C_ROMlib_orientation(DialogPtr dp, INTEGER which);
-PASCAL_FUNCTION(ROMlib_orientation);
 
 extern void printer_init(void);
 extern void update_printing_globals(void);
@@ -255,81 +246,6 @@ extern void ROMlib_grestore(void);
 
 extern void ROMlib_acknowledge_job_dialog(THPrint thprint);
 
-extern void C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno);
-PASCAL_FUNCTION(ROMlib_myjobproc);
-extern Boolean C_ROMlib_stlfilterproc(DialogPtr dp,
-                                             EventRecord *evt, GUEST<INTEGER> *ith);
-PASCAL_FUNCTION(ROMlib_stlfilterproc);
-extern Boolean C_ROMlib_numsonlyfilterproc(DialogPtr dp,
-                                                  EventRecord *evt,
-                                                  GUEST<INTEGER> *ith);
-PASCAL_FUNCTION(ROMlib_numsonlyfilterproc);
-
-extern void C_ROMlib_mystlproc(DialogPtr dp, INTEGER itemno);
-PASCAL_FUNCTION(ROMlib_mystlproc);
-
-extern void C_donotPrArc(GrafVerb verb, const Rect *r,
-                                     INTEGER starta, INTEGER arca);
-PASCAL_FUNCTION(donotPrArc);
-extern void C_PrArc(GrafVerb verb, const Rect *r, INTEGER starta,
-                                INTEGER arca);
-PASCAL_FUNCTION(PrArc);
-extern void C_donotPrBits(const BitMap *srcbmp, const Rect *srcrp,
-                                      const Rect *dstrp, INTEGER mode,
-                                      RgnHandle mask);
-PASCAL_FUNCTION(donotPrBits);
-extern void C_PrBits(const BitMap *srcbmp, const Rect *srcrp,
-                                 const Rect *dstrp, INTEGER mode, RgnHandle mask);
-PASCAL_FUNCTION(PrBits);
-extern void C_donotPrLine(Point p);
-PASCAL_FUNCTION(donotPrLine);
-extern void C_PrLine(Point p);
-PASCAL_FUNCTION(PrLine);
-extern void C_donotPrOval(GrafVerb v, const Rect *rp);
-PASCAL_FUNCTION(donotPrOval);
-extern void C_PrOval(GrafVerb v, const Rect *rp);
-PASCAL_FUNCTION(PrOval);
-extern void C_textasPS(INTEGER n, Ptr textbufp,
-                                   Point num, Point den);
-PASCAL_FUNCTION(textasPS);
-extern void C_donotPrGetPic(Ptr dp, INTEGER bc);
-PASCAL_FUNCTION(donotPrGetPic);
-extern void C_PrGetPic(Ptr dp, INTEGER bc);
-PASCAL_FUNCTION(PrGetPic);
-extern void C_donotPrPutPic(Ptr sp, INTEGER bc);
-PASCAL_FUNCTION(donotPrPutPic);
-extern void C_PrPutPic(Ptr sp, INTEGER bc);
-PASCAL_FUNCTION(PrPutPic);
-extern void C_donotPrPoly(GrafVerb verb, PolyHandle ph);
-PASCAL_FUNCTION(donotPrPoly);
-extern void C_PrPoly(GrafVerb verb, PolyHandle ph);
-PASCAL_FUNCTION(PrPoly);
-extern void C_donotPrRRect(GrafVerb verb, const Rect *r,
-                                       INTEGER width, INTEGER height);
-PASCAL_FUNCTION(donotPrRRect);
-extern void C_PrRRect(GrafVerb verb, const Rect *r, INTEGER width,
-                                  INTEGER height);
-PASCAL_FUNCTION(PrRRect);
-
-extern void C_donotPrRect(GrafVerb v, const Rect *rp);
-PASCAL_FUNCTION(donotPrRect);
-extern void C_PrRect(GrafVerb v, const Rect *rp);
-PASCAL_FUNCTION(PrRect);
-extern void C_donotPrRgn(GrafVerb verb, RgnHandle rgn);
-PASCAL_FUNCTION(donotPrRgn);
-extern void C_PrRgn(GrafVerb verb, RgnHandle rgn);
-PASCAL_FUNCTION(PrRgn);
-extern INTEGER C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
-                                      GUEST<Point> *denp, FontInfo *finfop);
-PASCAL_FUNCTION(PrTxMeas);
-extern void C_donotPrText(INTEGER n, Ptr textbufp, Point num,
-                                      Point den);
-PASCAL_FUNCTION(donotPrText);
-extern void C_PrText(INTEGER n, Ptr textbufp, Point num,
-                                 Point den);
-PASCAL_FUNCTION(PrText);
-extern void C_PrComment(INTEGER kind, INTEGER size, Handle hand);
-PASCAL_FUNCTION(PrComment);
 
 
 static_assert(sizeof(TGnlData) == 8);

@@ -17,6 +17,7 @@
 #include <quickdraw/cquick.h>
 #include <vdriver/vdriver.h>
 #include <file/file.h>
+#include <base/traps.impl.h>
 
 #include <prefs/prefs.h>
 
@@ -58,23 +59,87 @@ static bool page_is_open = false;
 LONGINT Executor::pagewanted = 0;
 static int lastpagewanted = 0;
 
-void Executor::C_donotPrArc(GrafVerb verb, const Rect *r, INTEGER starta,
+
+static void C_donotPrArc(GrafVerb verb, const Rect *r,
+                                     INTEGER starta, INTEGER arca);
+PASCAL_FUNCTION_PTR(donotPrArc);
+static void C_PrArc(GrafVerb verb, const Rect *r, INTEGER starta,
+                                INTEGER arca);
+PASCAL_FUNCTION_PTR(PrArc);
+static void C_donotPrBits(const BitMap *srcbmp, const Rect *srcrp,
+                                      const Rect *dstrp, INTEGER mode,
+                                      RgnHandle mask);
+PASCAL_FUNCTION_PTR(donotPrBits);
+static void C_PrBits(const BitMap *srcbmp, const Rect *srcrp,
+                                 const Rect *dstrp, INTEGER mode, RgnHandle mask);
+PASCAL_FUNCTION_PTR(PrBits);
+static void C_donotPrLine(Point p);
+PASCAL_FUNCTION_PTR(donotPrLine);
+static void C_PrLine(Point p);
+PASCAL_FUNCTION_PTR(PrLine);
+static void C_donotPrOval(GrafVerb v, const Rect *rp);
+PASCAL_FUNCTION_PTR(donotPrOval);
+static void C_PrOval(GrafVerb v, const Rect *rp);
+PASCAL_FUNCTION_PTR(PrOval);
+static void C_textasPS(INTEGER n, Ptr textbufp,
+                                   Point num, Point den);
+PASCAL_FUNCTION_PTR(textasPS);
+static void C_donotPrGetPic(Ptr dp, INTEGER bc);
+PASCAL_FUNCTION_PTR(donotPrGetPic);
+static void C_PrGetPic(Ptr dp, INTEGER bc);
+PASCAL_FUNCTION_PTR(PrGetPic);
+static void C_donotPrPutPic(Ptr sp, INTEGER bc);
+PASCAL_FUNCTION_PTR(donotPrPutPic);
+static void C_PrPutPic(Ptr sp, INTEGER bc);
+PASCAL_FUNCTION_PTR(PrPutPic);
+static void C_donotPrPoly(GrafVerb verb, PolyHandle ph);
+PASCAL_FUNCTION_PTR(donotPrPoly);
+static void C_PrPoly(GrafVerb verb, PolyHandle ph);
+PASCAL_FUNCTION_PTR(PrPoly);
+static void C_donotPrRRect(GrafVerb verb, const Rect *r,
+                                       INTEGER width, INTEGER height);
+PASCAL_FUNCTION_PTR(donotPrRRect);
+static void C_PrRRect(GrafVerb verb, const Rect *r, INTEGER width,
+                                  INTEGER height);
+PASCAL_FUNCTION_PTR(PrRRect);
+
+static void C_donotPrRect(GrafVerb v, const Rect *rp);
+PASCAL_FUNCTION_PTR(donotPrRect);
+static void C_PrRect(GrafVerb v, const Rect *rp);
+PASCAL_FUNCTION_PTR(PrRect);
+static void C_donotPrRgn(GrafVerb verb, RgnHandle rgn);
+PASCAL_FUNCTION_PTR(donotPrRgn);
+static void C_PrRgn(GrafVerb verb, RgnHandle rgn);
+PASCAL_FUNCTION_PTR(PrRgn);
+static INTEGER C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
+                                      GUEST<Point> *denp, FontInfo *finfop);
+PASCAL_FUNCTION_PTR(PrTxMeas);
+static void C_donotPrText(INTEGER n, Ptr textbufp, Point num,
+                                      Point den);
+PASCAL_FUNCTION_PTR(donotPrText);
+static void C_PrText(INTEGER n, Ptr textbufp, Point num,
+                                 Point den);
+PASCAL_FUNCTION_PTR(PrText);
+static void C_PrComment(INTEGER kind, INTEGER size, Handle hand);
+PASCAL_FUNCTION_PTR(PrComment);
+
+static void C_donotPrArc(GrafVerb verb, const Rect *r, INTEGER starta,
                             INTEGER arca)
 {
 }
 
-void Executor::C_PrArc(GrafVerb verb, const Rect *r, INTEGER starta, INTEGER arca)
+static void C_PrArc(GrafVerb verb, const Rect *r, INTEGER starta, INTEGER arca)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrArc(verb, r, starta, arca, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dstrp,
+static void C_donotPrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dstrp,
                              INTEGER mode, RgnHandle mask)
 {
 }
 
-void Executor::C_PrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dstrp, INTEGER mode,
+static void C_PrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dstrp, INTEGER mode,
                         RgnHandle mask)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
@@ -82,11 +147,11 @@ void Executor::C_PrBits(const BitMap *srcbmp, const Rect *srcrp, const Rect *dst
                    mode, mask, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrLine(Point p)
+static void C_donotPrLine(Point p)
 {
 }
 
-void Executor::C_PrLine(Point p)
+static void C_PrLine(Point p)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
     {
@@ -98,17 +163,17 @@ void Executor::C_PrLine(Point p)
     }
 }
 
-void Executor::C_donotPrOval(GrafVerb v, const Rect *rp)
+static void C_donotPrOval(GrafVerb v, const Rect *rp)
 {
 }
 
-void Executor::C_PrOval(GrafVerb v, const Rect *rp)
+static void C_PrOval(GrafVerb v, const Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrOval(v, rp, qdGlobals().thePort);
 }
 
-void Executor::C_textasPS(INTEGER n, Ptr textbufp, Point num, Point den)
+static void C_textasPS(INTEGER n, Ptr textbufp, Point num, Point den)
 {
 #if 1
     if(pageno >= pagewanted && pageno <= lastpagewanted)
@@ -123,82 +188,82 @@ void Executor::C_textasPS(INTEGER n, Ptr textbufp, Point num, Point den)
 #endif
 }
 
-void Executor::C_donotPrGetPic(Ptr dp, INTEGER bc)
+static void C_donotPrGetPic(Ptr dp, INTEGER bc)
 {
     gui_abort();
 }
 
-void Executor::C_PrGetPic(Ptr dp, INTEGER bc)
+static void C_PrGetPic(Ptr dp, INTEGER bc)
 {
     gui_abort();
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrGetPic(dp, bc, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrPutPic(Ptr sp, INTEGER bc)
+static void C_donotPrPutPic(Ptr sp, INTEGER bc)
 {
 }
 
-void Executor::C_PrPutPic(Ptr sp, INTEGER bc)
+static void C_PrPutPic(Ptr sp, INTEGER bc)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrPutPic(sp, bc, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrPoly(GrafVerb verb, PolyHandle ph)
+static void C_donotPrPoly(GrafVerb verb, PolyHandle ph)
 {
 }
 
-void Executor::C_PrPoly(GrafVerb verb, PolyHandle ph)
+static void C_PrPoly(GrafVerb verb, PolyHandle ph)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrPoly(verb, ph, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrRRect(GrafVerb verb, const Rect *r, INTEGER width,
+static void C_donotPrRRect(GrafVerb verb, const Rect *r, INTEGER width,
                               INTEGER height)
 {
 }
 
-void Executor::C_PrRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER height)
+static void C_PrRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER height)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrRRect(verb, r, width, height, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrRect(GrafVerb v, const Rect *rp)
+static void C_donotPrRect(GrafVerb v, const Rect *rp)
 {
 }
 
-void Executor::C_PrRect(GrafVerb v, const Rect *rp)
+static void C_PrRect(GrafVerb v, const Rect *rp)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrRect(v, rp, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrRgn(GrafVerb verb, RgnHandle rgn)
+static void C_donotPrRgn(GrafVerb verb, RgnHandle rgn)
 {
 }
 
-void Executor::C_PrRgn(GrafVerb verb, RgnHandle rgn)
+static void C_PrRgn(GrafVerb verb, RgnHandle rgn)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
         NeXTPrRgn(verb, rgn, qdGlobals().thePort);
 }
 
-INTEGER Executor::C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
-                             GUEST<Point> *denp, FontInfo *finfop)
+static INTEGER C_PrTxMeas(INTEGER n, Ptr p, GUEST<Point> *nump,
+                          GUEST<Point> *denp, FontInfo *finfop)
 {
     StdTxMeas(n, p, nump, denp, finfop);
     return NeXTPrTxMeas(n, p, nump, denp,
                         finfop, qdGlobals().thePort);
 }
 
-void Executor::C_donotPrText(INTEGER n, Ptr textbufp, Point num, Point den)
+static void C_donotPrText(INTEGER n, Ptr textbufp, Point num, Point den)
 {
 }
 
-void Executor::C_PrText(INTEGER n, Ptr textbufp, Point num, Point den)
+static void C_PrText(INTEGER n, Ptr textbufp, Point num, Point den)
 {
     if(pageno >= pagewanted && pageno <= lastpagewanted)
     {
@@ -210,7 +275,7 @@ static QDProcs prprocs;
 static QDProcs sendpsprocs;
 static bool need_restore;
 
-void Executor::C_PrComment(INTEGER kind, INTEGER size, Handle hand)
+static void C_PrComment(INTEGER kind, INTEGER size, Handle hand)
 {
     SignedByte state;
     GUEST<INTEGER> *ip;

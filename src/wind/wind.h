@@ -33,9 +33,7 @@ struct windrestype
 };
 
 extern LONGINT C_wdef0(INTEGER, WindowPtr, INTEGER, LONGINT);
-PASCAL_FUNCTION(wdef0);
 extern LONGINT C_wdef16(INTEGER, WindowPtr, INTEGER, LONGINT);
-PASCAL_FUNCTION(wdef16);
 
 extern WindowPeek ROMlib_firstvisible(WindowPtr w);
 
