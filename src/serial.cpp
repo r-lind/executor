@@ -29,6 +29,7 @@
 #include <file/file.h>
 #include <hfs/hfs.h>
 #include <rsys/serial.h>
+#include <rsys/device.h>
 #include <base/cpu.h>
 
 #if defined(CYGWIN32) || defined(WIN32)
