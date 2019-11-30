@@ -964,3 +964,26 @@ OSErr Executor::C_ROMlib_serialclose(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 #endif
     DOCOMPLETION(pbp, err);
 }
+
+void Executor::InitSerialDriver()
+{
+    RegisterDriver({
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\04.AIn", -6,
+        });
+
+     RegisterDriver({
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\05.AOut", -7,
+        });
+
+    RegisterDriver({
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\04.BIn", -8,
+        });
+
+    RegisterDriver({
+            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
+            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\05.BOut", -9,
+        });
+}

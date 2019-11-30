@@ -252,52 +252,22 @@ DCtlHandle Executor::GetDCtlEntry(INTEGER rn)
                                                 : LM(UTableBase)[devicen];
 }
 
+static std::vector<driverinfo> knowndrivers;
+
+void Executor::RegisterDriver(const driverinfo& di)
+{
+    knowndrivers.push_back(di);
+}
+
+static void InitBuiltinDrivers()
+{
+    InitSerialDriver();
+}
+
 /*
  * ROMlib_driveropen will be called by PBOpen if it encounters a name
  * beginning with * a period.
  */
-
-
-struct driverinfo
-{
-    DriverUPP open;
-    DriverUPP prime;
-    DriverUPP ctl;
-    DriverUPP status;
-    DriverUPP close;
-    StringPtr name;
-    INTEGER refnum;
-};
-static std::vector<driverinfo> knowndrivers;
-
-
-static void InitBuiltinDrivers()
-{
-    knowndrivers = {
-#if defined(LINUX) || defined(MACOSX_) || defined(MSDOS) || defined(CYGWIN32)
-        {
-            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
-            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\04.AIn", -6,
-        },
-
-        {
-            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
-            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\05.AOut", -7,
-        },
-
-        {
-            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
-            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\04.BIn", -8,
-        },
-
-        {
-            &ROMlib_serialopen, &ROMlib_serialprime, &ROMlib_serialctl,
-            &ROMlib_serialstatus, &ROMlib_serialclose, (StringPtr) "\05.BOut", -9,
-        },
-#endif
-    };
-}
-
 OSErr Executor::ROMlib_driveropen(ParmBlkPtr pbp, Boolean a) /* INTERNAL */
 {
     if(knowndrivers.empty())
