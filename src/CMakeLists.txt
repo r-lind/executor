@@ -480,7 +480,7 @@ set(include_sources
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
 
-include(trap_instances/trap_instances.cmake)
+include(${CMAKE_CURRENT_BINARY_DIR}/trap_instances/trap_instances.cmake)
 
 if(WIN32)
     set(host_platform_sources ../windows/dirent.c ../windows/gettimeofday.cpp)
