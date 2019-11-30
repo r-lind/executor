@@ -1,6 +1,7 @@
 /* Copyright 1994, 1995, 1996 by Abacus Research and
  * Development, Inc.  All rights reserved.
  */
+#define INSTANTIATE_TRAPS_base_emustubs
 
 #include <base/common.h>
 #include <ResourceMgr.h>
