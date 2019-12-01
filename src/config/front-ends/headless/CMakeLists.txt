@@ -5,4 +5,4 @@ add_library(front-end-headless
 )
 target_include_directories(front-end-headless
 PUBLIC .)
-target_link_libraries(front-end-headless syn68k)
+target_link_libraries(front-end-headless syn68k romlib)

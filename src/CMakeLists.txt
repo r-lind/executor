@@ -40,8 +40,7 @@ foreach(interfaceModule ${api_yaml_files})
 endforeach()
 
 add_custom_command(
-    OUTPUT ${api_headers}
-    BYPRODUCTS ${trap_instance_sources}
+    OUTPUT ${api_headers} ${trap_instance_sources}
     DEPENDS
         ${api_yaml_files}
         ${multiversal_ruby_sources}

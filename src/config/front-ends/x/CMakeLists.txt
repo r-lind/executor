@@ -13,7 +13,7 @@ if(X11_LIBRARY AND Xext_LIBRARY)
             sigio_multiplex.h
             sigio_multiplex.cpp
 		)
-	target_link_libraries(front-end-x syn68k ${X11_LIBRARY} ${Xext_LIBRARY})
+	target_link_libraries(front-end-x syn68k ${X11_LIBRARY} ${Xext_LIBRARY} romlib)
 	target_include_directories(front-end-x PUBLIC . ${X11_INCLUDE_PATH})
 
 
