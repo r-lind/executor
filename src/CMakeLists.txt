@@ -53,7 +53,6 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal
 )
 
-set(FRONT_END qt CACHE STRING "which front-end to use (qt, sdl2, sdl, x)")
 set(HOST_ARCH generic_le)
 
 if(WIN32)
@@ -64,6 +63,7 @@ elseif(UNIX AND NOT APPLE)
 set(HOST_OS "linux")
 endif()
 
+set(FRONT_ENDS headless qt x sdl sdl2)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     # -Wno-enum-compare: Mac OSErr codes are currently spread between different
@@ -549,24 +549,24 @@ target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
 target_link_libraries(romlib resources)
 
-add_executable(executor main.cpp)
-target_link_libraries(executor romlib front-end-${FRONT_END})
+foreach(FRONT_END ${FRONT_ENDS})
+    add_executable(executor-${FRONT_END} main.cpp)
+    target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
+    set_target_properties(executor-${FRONT_END} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-set_target_properties(executor PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+    if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
+        set_target_properties(executor PROPERTIES
+                MACOSX_BUNDLE TRUE
+                MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
+            )
+    endif()
+    
+    install(TARGETS executor-${FRONT_END}
+        RUNTIME DESTINATION bin
+        BUNDLE DESTINATION .)
+endforeach()
 
-if(APPLE)
-    set_target_properties(executor PROPERTIES
-            MACOSX_BUNDLE TRUE
-            MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
-        )
+if(TARGET executor-qt)
+    set_target_properties(executor-qt PROPERTIES OUTPUT_NAME executor)
 endif()
-
-add_executable(executor-headless main.cpp)
-target_link_libraries(executor-headless romlib front-end-headless)
-set_target_properties(executor-headless PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-install(TARGETS executor executor-headless
-    RUNTIME DESTINATION bin
-    BUNDLE DESTINATION .)
