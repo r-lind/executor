@@ -17,8 +17,37 @@ include_directories(include)
 include_directories(.)
 include_directories(${CMAKE_CURRENT_BINARY_DIR})
 
-execute_process(COMMAND ruby make-multiverse.rb -G Executor -o "${CMAKE_CURRENT_BINARY_DIR}/"
-                WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal)
+file(GLOB api_yaml_files
+    CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal/defs/*.yaml)
+
+file(GLOB multiversal_ruby_sources
+    ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal/*.rb)
+
+
+set(trap_instance_sources ${CMAKE_CURRENT_BINARY_DIR}/trap_instances/ReferenceAllTraps.cpp)
+set(api_headers)
+foreach(interfaceModule ${api_yaml_files})
+    get_filename_component(base ${interfaceModule} NAME_WLE)
+
+        # Special case: MacTypes.h is still around on modern macs.
+        # Let's rename our version to avoid conflicts.
+    if(${base} STREQUAL MacTypes)
+        set(base ExMacTypes)
+    endif()
+    list(APPEND trap_instance_sources ${CMAKE_CURRENT_BINARY_DIR}/trap_instances/${base}.cpp)
+    list(APPEND api_headers ${CMAKE_CURRENT_BINARY_DIR}/api/${base}.h)
+endforeach()
+
+add_custom_command(
+    OUTPUT ${api_headers}
+    BYPRODUCTS ${trap_instance_sources}
+    DEPENDS
+        ${api_yaml_files}
+        ${multiversal_ruby_sources}
+    COMMAND ruby make-multiverse.rb -G Executor -o "${CMAKE_CURRENT_BINARY_DIR}/"
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal
+)
 
 set(FRONT_END qt CACHE STRING "which front-end to use (qt, sdl2, sdl, x)")
 set(HOST_ARCH generic_le)
@@ -480,8 +509,6 @@ set(include_sources
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
 
-include(${CMAKE_CURRENT_BINARY_DIR}/trap_instances/trap_instances.cmake)
-
 if(WIN32)
     set(host_platform_sources ../windows/dirent.c ../windows/gettimeofday.cpp)
 else()
@@ -497,7 +524,7 @@ set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${sound_sources} ${num_sources} ${misc_sources}
     ${file_sources} ${hfs_sources} ${time_sources} ${osevent_sources}
     ${error_sources} ${commandline_sources} ${prefs_sources}
-    ${trap_instance_sources} ${host_platform_sources}
+    ${api_headers} ${trap_instance_sources} ${host_platform_sources}
     ${include_sources})
 
 add_library(romlib ${sources}
