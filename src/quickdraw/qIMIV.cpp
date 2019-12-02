@@ -243,107 +243,22 @@ static void xSeedFill(unsigned char *srcp, unsigned char *dstp, INTEGER srcr,
     }
 }
 
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-static bool
-create_scratch_bitmap_if_necessary(uint8_t **_fbuf,
-                                   /* dummy */ int row_words,
-                                   int height, int word_width,
-                                   write_back_data_t *write_back_data)
-{
-    PixMapHandle gd_pmap;
-
-    uint8_t *screen_fbuf, *fbuf;
-    int screen_row_bytes;
-    int screen_height;
-
-    gd_pmap = GD_PMAP(LM(MainDevice));
-    screen_fbuf = PIXMAP_BASEADDR(gd_pmap);
-    screen_row_bytes = PIXMAP_ROWBYTES(gd_pmap);
-    screen_height = RECT_HEIGHT(&PIXMAP_BOUNDS(gd_pmap));
-
-    fbuf = *_fbuf;
-
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P()
-       && (screen_fbuf <= fbuf
-           && fbuf < screen_fbuf + (screen_row_bytes * screen_height)))
-    {
-        PixMap *src_pm, *dst_pm;
-        Rect *src_rect, *dst_rect;
-        int offset;
-
-        src_pm = &write_back_data->dst_pm;
-        src_rect = &write_back_data->dst_rect;
-        dst_pm = &write_back_data->src_pm;
-        dst_rect = &write_back_data->src_rect;
-
-        offset = fbuf - screen_fbuf;
-
-        src_rect->top = offset / screen_row_bytes;
-        src_rect->bottom = offset / screen_row_bytes + height;
-        src_rect->left = (offset % screen_row_bytes) * 8;
-        src_rect->right = (offset % screen_row_bytes) * 8
-                             + word_width * 16;
-
-        *src_pm = **gd_pmap;
-
-        pixmap_copy(src_pm, src_rect, dst_pm, dst_rect);
-        *_fbuf = BITMAP_BASEADDR(dst_pm);
-
-        return true;
-    }
-
-    return false;
-}
-
-static void
-SeedFill_handle_direct_screen_access(uint8_t *srcp, uint8_t *dstp,
-                                     int src_row_words, int dst_row_words,
-                                     int height, int word_width,
-                                     bool use_seed_pt_p,
-                                     int seedh, int seedv)
-{
-    write_back_data_t write_back_data;
-    bool write_back_p = false;
-
-    create_scratch_bitmap_if_necessary(&srcp, src_row_words,
-                                       height, word_width,
-                                       nullptr);
-    write_back_p = create_scratch_bitmap_if_necessary(&dstp, dst_row_words,
-                                                      height, word_width,
-                                                      &write_back_data);
-
-    xSeedFill(srcp, dstp, src_row_words, dst_row_words,
-              height, word_width, use_seed_pt_p, seedh, seedv);
-
-    if(write_back_p)
-    {
-        CopyBits((BitMap *)&write_back_data.src_pm,
-                 (BitMap *)&write_back_data.dst_pm,
-                 &write_back_data.src_rect, &write_back_data.dst_rect,
-                 srcCopy, nullptr);
-
-        pixmap_free_copy(&write_back_data.src_pm);
-    }
-}
-#else
-#define SeedFill_handle_direct_screen_access xSeedFill
-#endif
 
 void Executor::C_SeedFill(Ptr srcp, Ptr dstp, INTEGER srcr, INTEGER dstr,
                           INTEGER height, INTEGER width, INTEGER seedh,
                           INTEGER seedv) /* IMIV-24 */
 {
-    SeedFill_handle_direct_screen_access((uint8_t *)srcp, (uint8_t *)dstp,
-                                         srcr, dstr,
-                                         height, width, true, seedh, seedv);
+    xSeedFill((uint8_t *)srcp, (uint8_t *)dstp,
+              srcr, dstr,
+              height, width, true, seedh, seedv);
 }
 
 void Executor::C_CalcMask(Ptr srcp, Ptr dstp, INTEGER srcr, INTEGER dstr,
                           INTEGER height, INTEGER width) /* IMIV-24 */
 {
-    SeedFill_handle_direct_screen_access((uint8_t *)srcp, (uint8_t *)dstp,
-                                         srcr, dstr,
-                                         height, width, false, 0, 0);
+    xSeedFill((uint8_t *)srcp, (uint8_t *)dstp,
+              srcr, dstr,
+              height, width, false, 0, 0);
 }
 
 static void

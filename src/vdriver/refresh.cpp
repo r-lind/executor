@@ -72,20 +72,10 @@ static bool shadow_screen_invalid_p;
 
 void Executor::set_refresh_rate(int new1)
 {
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    int old_vis = vdriver->setCursorVisible(false);
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
     static int last_refresh_set = 0;
 
     if(new1 < 0)
         new1 = 0;
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(!last_refresh_set && new1)
-        vdriver_set_up_internal_screen();
-    else if(last_refresh_set && !new1)
-        dirty_rect_update_screen();
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 
     if(!last_refresh_set && new1)
         shadow_screen_invalid_p = true;
@@ -104,10 +94,6 @@ void Executor::set_refresh_rate(int new1)
     }
 
     ROMlib_refresh = last_refresh_set = new1;
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    vdriver->setCursorVisible(old_vis);
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 }
 
 /* This code identifies a rectangle that encompasses any differences

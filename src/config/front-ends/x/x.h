@@ -18,7 +18,6 @@ public:
     void setUseScancodes(bool val) override;
     void registerOptions() override;
     void flushDisplay() override;
-    Executor::vdriver_accel_result_t accelFillRect(int top, int left, int bottom, int right, uint32_t color) override;
     void beepAtUser() override;
     void putScrap(Executor::OSType type, Executor::LONGINT length, char *p, int scrap_count) override;
     void weOwnScrap(void) override;

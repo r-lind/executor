@@ -139,8 +139,7 @@ dump_indirect_pm(PixMap *pm)
 
     bpp = pm->pixelSize;
 
-    if((bpp != 8 && bpp != 4)
-       || VDRIVER_BYPASS_INTERNAL_FBUF_P())
+    if(bpp != 8 && bpp != 4)
     {
         tiff_pm = (PixMap *)alloca(sizeof *tiff_pm);
 

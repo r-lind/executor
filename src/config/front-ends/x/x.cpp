@@ -2211,58 +2211,6 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     return true;
 }
 
-vdriver_accel_result_t
-X11VideoDriver::accelFillRect(int top, int left, int bottom,
-                              int right, uint32_t color)
-{
-    XGCValues gc_values;
-    uint32_t x_color;
-
-    /* Don't use accel fills in refresh mode, and don't bother if that
-   * rect is going to be transferred to the screen anyway (this happens
-   * often when windows get drawn).
-   */
-    if(ROMlib_refresh || dirty_rect_subsumed_p(top, left, bottom, right))
-        return VDRIVER_ACCEL_NO_UPDATE;
-
-    if(cmap_mapping)
-        x_color = cmap_mapping[color];
-    else if(x_fbuf_bpp > 8)
-    {
-        if(bpp() > 8)
-        {
-            rgb_spec_t *mac_rgb_spec = (bpp() == 32
-                                            ? &mac_32bpp_rgb_spec
-                                            : &mac_16bpp_rgb_spec);
-            RGBColor rgb_color;
-
-            (*mac_rgb_spec->pixel_to_rgbcolor)(mac_rgb_spec,
-                                               color,
-                                               &rgb_color);
-
-            x_color = (*x_rgb_spec.rgbcolor_to_pixel)(&x_rgb_spec,
-                                                      &rgb_color,
-                                                      true);
-        }
-        else
-        {
-            x_color = (*x_rgb_spec.rgbcolor_to_pixel)(&x_rgb_spec,
-                                                      &cmap[color].rgb,
-                                                      true);
-        }
-    }
-    else
-        x_color = color;
-
-    dirty_rect_update_screen();
-    gc_values.foreground = x_color;
-    XChangeGC(x_dpy, accel_gc, GCForeground, &gc_values);
-    XFillRectangle(x_dpy, x_window, accel_gc, left, top,
-                   right - left, bottom - top);
-
-    return VDRIVER_ACCEL_HOST_SCREEN_UPDATE_ONLY;
-}
-
 void X11VideoDriver::pumpEvents()
 {
     if(x_event_pending_p())

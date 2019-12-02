@@ -29,16 +29,7 @@ typedef struct
 {
     int top, left, bottom, right;
 } vdriver_rect_t;
-
-typedef enum {
-    VDRIVER_ACCEL_NO_UPDATE,
-    VDRIVER_ACCEL_FULL_UPDATE,
-    VDRIVER_ACCEL_HOST_SCREEN_UPDATE_ONLY
-} vdriver_accel_result_t;
 }
-
-/* We don't provide any accelerated display functions under SDL (yet) */
-#define VDRIVER_BYPASS_INTERNAL_FBUF_P() false
 
 namespace Executor
 {
@@ -67,19 +58,6 @@ public:
     virtual void flushDisplay();
     virtual void registerOptions();
 
-    virtual vdriver_accel_result_t accelFillRect(int top, int left,
-                                                      int bottom, int right,
-                                                      uint32_t color);
-
-        // NOTE: this is never called, and there is no non-trivial implementation
-    virtual vdriver_accel_result_t accelScrollRect(int top, int left,
-                                                            int bottom, int right,
-                                                            int dx, int dy);
-    
-        // NOTE: there is no non-trivial implementation
-    virtual void accelWait();
-
-
     virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
     virtual LONGINT getScrap(OSType type, Handle h);
     virtual void weOwnScrap();
@@ -97,10 +75,6 @@ public:
                                 uint16_t cursor_mask[16],
                                 int hotspot_x, int hotspot_y);
     virtual bool setCursorVisible(bool show_p);
-
-    // called only if VDRIVER_SUPPORTS_REAL_SCREEN_BLITS only:
-    virtual bool hideCursorIfIntersects(int top, int left,
-                                        int bottom, int right);
 
 
     virtual void pumpEvents();
@@ -138,27 +112,6 @@ public:
 };
 
 extern VideoDriver *vdriver;
-
-// TODO: none of the existing front ends define this, but there is a lot of conditionally-defined code
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-
-#if !defined(vdriver_flip_real_screen_pixels_p)
-extern bool vdriver_flip_real_screen_pixels_p;
-#endif
-
-#if !defined(vdriver_real_screen_row_bytes)
-extern int vdriver_real_screen_row_bytes;
-#endif
-
-#if !defined(vdriver_real_screen_baseaddr)
-extern uint8_t *vdriver_real_screen_baseaddr;
-#endif
-
-#if !defined(vdriver_set_up_internal_screen)
-extern void vdriver_set_up_internal_screen();
-#endif
-
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 
 // #define VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT number-of-bytes
 

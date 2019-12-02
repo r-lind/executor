@@ -36,7 +36,7 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
                                                 const Rect *src_rect, const Rect *dst_rect,
                                                 uint32_t fg_color, uint32_t bk_color)
 {
-    bool screen_dst_p, update_dirty_p;
+    bool screen_dst_p;
     Rect bbox;
     TEMP_ALLOC_DECL(temp_alloc_space);
 
@@ -192,15 +192,15 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
 
     screen_dst_p = active_screen_addr_p(dst_pm);
 
-    update_dirty_p = srcblt_rgn(rh, mode, ROMlib_log2[bpp],
-                                (blt_bitmap_t *)src_pm,
-                                (blt_bitmap_t *)dst_pm,
-                                (GUEST<Point> *)src_rect, (GUEST<Point> *)dst_rect,
-                                fg_color, bk_color);
+    srcblt_rgn(rh, mode, ROMlib_log2[bpp],
+               (blt_bitmap_t *)src_pm,
+               (blt_bitmap_t *)dst_pm,
+               (GUEST<Point> *)src_rect, (GUEST<Point> *)dst_rect,
+               fg_color, bk_color);
 
     /* if drawing to the screen, update the dirty rect (or copy the
      image straight to screen) */
-    if(screen_dst_p && update_dirty_p)
+    if(screen_dst_p)
     {
         const Rect *r = &RGN_BBOX(rh);
         int dst_top = dst_pm->bounds.top;
@@ -301,7 +301,6 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     bool screen_dst_p;
     PixMap dst_pixmap;
     GrafPtr the_port;
-    bool update_dirty_p;
 
     main_gd = LM(MainDevice);
     main_gd_pmap = GD_PMAP(main_gd);
@@ -334,11 +333,11 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
     dst_left = dst_pixmap.bounds.left;
 
     /* Actually do the blt. */
-    update_dirty_p = xdblt_pattern(rh, mode, -dst_left, -dst_top, src,
-                                   &dst_pixmap, fg_pixel, bk_pixel);
+    xdblt_pattern(rh, mode, -dst_left, -dst_top, src,
+                  &dst_pixmap, fg_pixel, bk_pixel);
 
     /* Update the real screen as appropriate. */
-    if(screen_dst_p && update_dirty_p)
+    if(screen_dst_p)
     {
         const Rect *r = &RGN_BBOX(rh);
         dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
@@ -357,7 +356,6 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
 {
     bool screen_dst_p;
     int dst_top, dst_left;
-    bool update_dirty_p;
 
     {
         HLockGuard guard1(srch), guard2(dsth);
@@ -382,9 +380,9 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
             canonical_from_bogo_color(PORT_BK_COLOR(the_port), dst_rgb_spec,
                                       &bk_color, nullptr);
 
-            update_dirty_p = xdblt_pattern(rh, mode, -dst_left, -dst_top,
-                                           src->pat1Data, dst, fg_color,
-                                           bk_color);
+            xdblt_pattern(rh, mode, -dst_left, -dst_top,
+                          src->pat1Data, dst, fg_color,
+                          bk_color);
         }
         else
         {
@@ -440,13 +438,13 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
 
             HLockGuard guard(xh);
             xdata_t *x = *xh;
-            update_dirty_p = (*x->blt_func)(rh, mode, -dst_left,
-                                            -dst_top, x, dst);
+            (*x->blt_func)(rh, mode, -dst_left,
+                           -dst_top, x, dst);
         }
     }
 
     /* Update the real screen as appropriate. */
-    if(screen_dst_p && update_dirty_p)
+    if(screen_dst_p)
     {
         const Rect *r = &RGN_BBOX(rh);
         dirty_rect_accrue(r->top - dst_top, r->left - dst_left,

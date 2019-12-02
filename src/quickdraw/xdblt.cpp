@@ -110,53 +110,18 @@ static const uint32_t flip_mask_for_mode[8] = { 0, 0, 0, ~(uint32_t)0, ~(uint32_
 #define MODE_CANON_MASK 0xFFFFFF00
 #define MODE_CANON_P(m) (((m)&MODE_CANON_MASK) == MODE_CANON_BITS)
 
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-static inline bool
-hide_cursor_if_necessary(RgnHandle rh, const PixMap *dst, bool *old_vis)
-{
-    int top, left;
-    RgnPtr rp;
-
-    top = dst->bounds.top;
-    left = dst->bounds.left;
-    rp = *rh;
-
-    *old_vis = vdriver->hideCursorIfIntersects(rp->rgnBBox.top - top,
-                                              rp->rgnBBox.left - left,
-                                              rp->rgnBBox.bottom - top,
-                                              rp->rgnBBox.right - left);
-
-    return true;
-}
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
-
 static inline int
 setup_dst_bitmap(int log2_bpp, PixMap *dst_pixmap)
 {
-    char *dst;
-    int byte_slop;
-    int row_bytes;
-
-/* Long-align the bitmap, and set it up so that
-   * baseaddr + y * row_bytes evaluates to the correct row.
-   */
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P()
-       && active_screen_addr_p(dst_pixmap))
-    {
-        row_bytes = vdriver_real_screen_row_bytes;
-        dst = (char *)vdriver_real_screen_baseaddr;
-    }
-    else
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
-    {
-        row_bytes = BITMAP_ROWBYTES(dst_pixmap);
-        dst = (char *)dst_pixmap->baseAddr;
-    }
+    /* Long-align the bitmap, and set it up so that
+     * baseaddr + y * row_bytes evaluates to the correct row.
+     */
+    int row_bytes = BITMAP_ROWBYTES(dst_pixmap);
+    char *dst = (char *)dst_pixmap->baseAddr;
 
     dst -= row_bytes * dst_pixmap->bounds.top;
     xdblt_dst_row_bytes = row_bytes;
-    byte_slop = (uintptr_t)dst & 3;
+    int byte_slop = (uintptr_t)dst & 3;
     xdblt_dst_baseaddr = (uint32_t *)(dst - byte_slop);
 
     xdblt_x_offset = ((byte_slop << 3)
@@ -173,37 +138,18 @@ INTEGER phony_special_region[7] = { 0, 0, 0, RGN_STOP, 0, RGN_STOP, RGN_STOP_X }
  * pattern value by any multiple of the bits per pixel.  Some examples
  * are 0 or ~0 at any bpp, 0xA1A1A1A1 at 8bpp, 0x55555555 at 2bpp, etc.
  */
-bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
+void Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
                                           int pat_x_rotate_count, int pat_y_rotate_count,
                                           xdata_t *x, PixMap *dst)
 {
-    RgnPtr r;
     int log2_bpp;
     bool active_screen_p;
-    vdriver_accel_result_t accel_result;
     bool mode_canon_p;
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    bool cursor_maybe_changed_p, cursor_vis_p;
-#endif
 
     mode_canon_p = MODE_CANON_P(mode);
     mode &= 7;
 
     active_screen_p = active_screen_addr_p(dst);
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    /* If we can blit directly to the real screen, change the mode
-   * appropriately.
-   */
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P()
-       && active_screen_p)
-    {
-        cursor_maybe_changed_p = hide_cursor_if_necessary(rh, dst,
-                                                          &cursor_vis_p);
-    }
-    else
-        cursor_maybe_changed_p = false;
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 
     if(!mode_canon_p)
     {
@@ -211,52 +157,18 @@ bool Executor::xdblt_xdata_norgb_norotate(RgnHandle rh, int mode,
         mode &= 3;
     }
 
-    if(active_screen_p
-       && mode == (patCopy & 3) /* patCopy or notPatCopy */
-       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE))
-    {
-        int top, left;
+    xdblt_log2_pattern_row_bytes = 2;
+    xdblt_pattern_row_0 = 0;
+    xdblt_pattern_baseaddr = &xdblt_pattern_value;
+    xdblt_pattern_end = &xdblt_pattern_value + 1;
+    xdblt_stub_table = x->stub_table_for_mode[mode];
+    xdblt_log2_bpp = log2_bpp = x->log2_bpp;
 
-        top = dst->bounds.top;
-        left = dst->bounds.left;
+    setup_dst_bitmap(log2_bpp, dst);
+    SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
 
-        accel_result = vdriver->accelFillRect(r->rgnBBox.top - top, r->rgnBBox.left - left,
-                                              r->rgnBBox.bottom - top, r->rgnBBox.right - left,
-                                              xdblt_pattern_value & ROMlib_pixel_size_mask[x->log2_bpp]);
-
-        if(accel_result != VDRIVER_ACCEL_NO_UPDATE)
-            note_executor_changed_screen(r->rgnBBox.top - top,
-                                         r->rgnBBox.bottom - top);
-    }
-    else
-        accel_result = VDRIVER_ACCEL_NO_UPDATE;
-
-    if(accel_result != VDRIVER_ACCEL_FULL_UPDATE)
-    {
-        xdblt_log2_pattern_row_bytes = 2;
-        xdblt_pattern_row_0 = 0;
-        xdblt_pattern_baseaddr = &xdblt_pattern_value;
-        xdblt_pattern_end = &xdblt_pattern_value + 1;
-        xdblt_stub_table = x->stub_table_for_mode[mode];
-        xdblt_log2_bpp = log2_bpp = x->log2_bpp;
-
-        setup_dst_bitmap(log2_bpp, dst);
-        SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
-
-        /* Make sure we have access to the raw screen bits. */
-        vdriver->accelWait();
-
-        /* Actually do the blit. */
-        xdblt_canon_pattern();
-    }
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(cursor_maybe_changed_p)
-        vdriver->setCursorVisible(cursor_vis_p);
-#endif
-
-    return (!VDRIVER_BYPASS_INTERNAL_FBUF_P()
-            && accel_result == VDRIVER_ACCEL_NO_UPDATE);
+    /* Actually do the blit. */
+    xdblt_canon_pattern();
 }
 
 /* Contrary to my expectation, a small test program shows that RGB
@@ -287,33 +199,16 @@ static const int
 
 #endif /* RGB_NEEDS_MODE_MAPPING */
 
-bool Executor::xdblt_xdata_short_narrow(RgnHandle rh, int mode,
+void Executor::xdblt_xdata_short_narrow(RgnHandle rh, int mode,
                                         int pat_x_rotate_count, int pat_y_rotate_count,
                                         xdata_t *x, PixMap *dst)
 {
     uint32_t v, flip;
     int rcount, log2_bpp;
     bool mode_canon_p;
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    bool cursor_maybe_changed_p, cursor_vis_p;
-#endif
 
     mode_canon_p = MODE_CANON_P(mode);
     mode &= 7;
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    /* If we can blit directly to the real screen, change the mode
-   * appropriately.
-   */
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P()
-       && active_screen_addr_p(dst))
-    {
-        cursor_maybe_changed_p = hide_cursor_if_necessary(rh, dst,
-                                                          &cursor_vis_p);
-    }
-    else
-        cursor_maybe_changed_p = false;
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 
 #if defined(RGB_NEEDS_MODE_MAPPING)
     if(x->rgb_spec && !mode_canon_p)
@@ -325,7 +220,7 @@ bool Executor::xdblt_xdata_short_narrow(RgnHandle rh, int mode,
     else
         xdblt_stub_table = x->stub_table_for_mode[mode];
     if(xdblt_stub_table == xdblt_nop_table)
-        return false;
+        return;
 
     xdblt_log2_bpp = log2_bpp = x->log2_bpp;
 
@@ -350,18 +245,8 @@ bool Executor::xdblt_xdata_short_narrow(RgnHandle rh, int mode,
     xdblt_pattern_baseaddr = &xdblt_pattern_value;
     xdblt_pattern_end = &xdblt_pattern_value + 1;
 
-    /* Make sure we have access to the raw screen bits. */
-    vdriver->accelWait();
-
     /* Actually do the blit. */
     xdblt_canon_pattern();
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(cursor_maybe_changed_p)
-        vdriver->setCursorVisible(cursor_vis_p);
-#endif
-
-    return !VDRIVER_BYPASS_INTERNAL_FBUF_P();
 }
 
 /* This function XORs FLIP_MASK with all of the longs in the xdata,
@@ -454,33 +339,16 @@ rotate_and_flip_xdata(xdata_t *x, int xrot, uint32_t flip_mask)
     }
 }
 
-bool Executor::xdblt_xdata_complex(RgnHandle rh, int mode,
+void Executor::xdblt_xdata_complex(RgnHandle rh, int mode,
                                    int pat_x_rotate_count, int pat_y_rotate_count,
                                    xdata_t *x, PixMap *dst)
 {
     const char *base;
     uint32_t flip_mask;
     bool mode_canon_p;
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    bool cursor_maybe_changed_p, cursor_vis_p;
-#endif
 
     mode_canon_p = MODE_CANON_P(mode);
     mode &= 7;
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    /* If we can blit directly to the real screen, change the mode
-   * appropriately.
-   */
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P()
-       && active_screen_addr_p(dst))
-    {
-        cursor_maybe_changed_p = hide_cursor_if_necessary(rh, dst,
-                                                          &cursor_vis_p);
-    }
-    else
-        cursor_maybe_changed_p = false;
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
 
 #if defined(RGB_NEEDS_MODE_MAPPING)
     if(x->rgb_spec && !mode_canon_p)
@@ -514,28 +382,16 @@ bool Executor::xdblt_xdata_complex(RgnHandle rh, int mode,
     xdblt_pattern_height_minus_1 = x->height_minus_1;
     SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
 
-    /* Make sure we have access to the raw screen bits. */
-    vdriver->accelWait();
-
     xdblt_canon_pattern();
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(cursor_maybe_changed_p)
-        vdriver->setCursorVisible(cursor_vis_p);
-#endif
-
-    return !VDRIVER_BYPASS_INTERNAL_FBUF_P();
 }
 
-static bool
+static void
 do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
                         uint32_t fg_color, uint32_t bk_color, int log2_bpp,
                         const rgb_spec_t *rgb_spec, int pat_x_rotate_count)
 {
     int extra_rot, raw_mode;
     uint32_t tv, op_color;
-    RgnPtr r;
-    vdriver_accel_result_t accel_result;
 
     extra_rot = setup_dst_bitmap(log2_bpp, dst);
 
@@ -563,7 +419,7 @@ do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
         case(patOr & 3):
         case(patBic & 3):
             if(v == 0 || (rgb_spec && (v & rgb_spec->pixel_bits_mask) == 0))
-                return false;
+                return;
             op_color = ((mode & 3) == (patOr & 3)) ? fg_color : bk_color;
 
             if(v == (uint32_t)~0 || (rgb_spec && v == rgb_spec->white_pixel))
@@ -633,48 +489,18 @@ do_short_narrow_pattern(RgnHandle rh, int mode, uint32_t v, PixMap *dst,
     if(log2_bpp < 5)
         RORL(1 << log2_bpp, tv);
 
-    if(v == tv
-       && raw_mode == XDBLT_COPY
-       && (r = *rh, r->rgnSize == RGN_SMALL_SIZE)
-       && active_screen_addr_p(dst))
-    {
-        int top, left;
+    xdblt_log2_bpp = log2_bpp;
+    xdblt_log2_pattern_row_bytes = 2;
+    xdblt_pattern_row_0 = 0;
+    xdblt_pattern_height_minus_1 = 0;
+    xdblt_pattern_baseaddr = &xdblt_pattern_value;
+    xdblt_pattern_end = &xdblt_pattern_value + 1;
 
-        top = dst->bounds.top;
-        left = dst->bounds.left;
+    /* Set up the region appropriately. */
+    SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
 
-        accel_result = vdriver->accelFillRect(r->rgnBBox.top - top, r->rgnBBox.left - left,
-                                              r->rgnBBox.bottom - top, r->rgnBBox.right - left,
-                                              xdblt_pattern_value & ROMlib_pixel_size_mask[log2_bpp]);
-
-        if(accel_result != VDRIVER_ACCEL_NO_UPDATE)
-            note_executor_changed_screen(r->rgnBBox.top - top,
-                                         r->rgnBBox.bottom - top);
-    }
-    else
-        accel_result = VDRIVER_ACCEL_NO_UPDATE;
-
-    if(accel_result != VDRIVER_ACCEL_FULL_UPDATE)
-    {
-        xdblt_log2_bpp = log2_bpp;
-        xdblt_log2_pattern_row_bytes = 2;
-        xdblt_pattern_row_0 = 0;
-        xdblt_pattern_height_minus_1 = 0;
-        xdblt_pattern_baseaddr = &xdblt_pattern_value;
-        xdblt_pattern_end = &xdblt_pattern_value + 1;
-
-        /* Set up the region appropriately. */
-        SETUP_SPECIAL_RGN(rh, xdblt_rgn_start);
-
-        /* Make sure we have access to the raw screen bits. */
-        vdriver->accelWait();
-
-        /* Actually do the blit. */
-        xdblt_canon_pattern();
-    }
-
-    return (!VDRIVER_BYPASS_INTERNAL_FBUF_P()
-            && accel_result == VDRIVER_ACCEL_NO_UPDATE);
+    /* Actually do the blit. */
+    xdblt_canon_pattern();
 }
 
 static inline uint32_t
@@ -721,7 +547,7 @@ canonicalize_pat_value_for_mode(uint32_t v, int mode, uint32_t fg_color,
     return v;
 }
 
-bool Executor::xdblt_pattern(RgnHandle rh, int mode,
+void Executor::xdblt_pattern(RgnHandle rh, int mode,
                              int pat_x_rotate_count, int pat_y_rotate_count,
                              const Pattern& pattern, PixMap *dst,
                              uint32_t fg_color, uint32_t bk_color)
@@ -729,10 +555,6 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
     uint32_t v, mask, tile, *p, *end;
     const rgb_spec_t *rgb_spec = nullptr;
     int log2_bpp;
-    bool update_dirty_p;
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    bool cursor_maybe_changed_p, cursor_vis_p;
-#endif
 
     rgb_spec = pixmap_rgb_spec(dst);
 
@@ -745,20 +567,6 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
 
     mode &= 7;
 
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    /* If we can blit directly to the real screen, change the mode
-   * appropriately.
-   */
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P()
-       && active_screen_addr_p(dst))
-    {
-        cursor_maybe_changed_p = hide_cursor_if_necessary(rh, dst,
-                                                          &cursor_vis_p);
-    }
-    else
-        cursor_maybe_changed_p = false;
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
-
 #if defined(RGB_NEEDS_MODE_MAPPING)
     if(rgb_spec)
         mode = ind_mode_to_rgb_mode[mode];
@@ -770,9 +578,9 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
     v = *(const uint32_t *)pattern.pat;
     if((v + 1U) <= 1U && v == ((const uint32_t *)pattern.pat)[1])
     {
-        update_dirty_p = do_short_narrow_pattern(rh, mode, v, dst, fg_color,
-                                                 bk_color, log2_bpp,
-                                                 rgb_spec, pat_x_rotate_count);
+        do_short_narrow_pattern(rh, mode, v, dst, fg_color,
+                                bk_color, log2_bpp,
+                                rgb_spec, pat_x_rotate_count);
     }
     else
     {
@@ -816,28 +624,21 @@ bool Executor::xdblt_pattern(RgnHandle rh, int mode,
                     raw_mode = mode & 3;
                 }
 
-                update_dirty_p = (*x->blt_func)(rh, raw_mode | MODE_CANON_BITS,
-                                                pat_x_rotate_count,
-                                                pat_y_rotate_count, x, dst);
+                (*x->blt_func)(rh, raw_mode | MODE_CANON_BITS,
+                               pat_x_rotate_count,
+                               pat_y_rotate_count, x, dst);
             }
             else
             {
-                update_dirty_p = do_short_narrow_pattern(rh, mode,
-                                                         x->pat_value,
-                                                         dst, fg_color,
-                                                         bk_color, log2_bpp,
-                                                         rgb_spec,
-                                                         pat_x_rotate_count);
+                do_short_narrow_pattern(rh, mode,
+                                        x->pat_value,
+                                        dst, fg_color,
+                                        bk_color, log2_bpp,
+                                        rgb_spec,
+                                        pat_x_rotate_count);
             }
         }
 
         xdata_free(xh);
     }
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(cursor_maybe_changed_p)
-        vdriver->setCursorVisible(cursor_vis_p);
-#endif
-
-    return update_dirty_p;
 }

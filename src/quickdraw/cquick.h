@@ -531,12 +531,6 @@ extern struct qd_color_elt
     LONGINT value;
 } ROMlib_QDColors[];
 
-typedef struct write_back_data
-{
-    PixMap src_pm, dst_pm;
-    Rect src_rect, dst_rect;
-} write_back_data_t;
-
 struct pixpat_res
 {
     PixPat pixpat;
@@ -546,8 +540,6 @@ struct pixpat_res
 void pixmap_free_copy(PixMap *pm);
 void pixmap_copy(const PixMap *src_pm, const Rect *src_rect,
                  PixMap *return_pm, Rect *return_rect);
-bool pixmap_copy_if_screen(const PixMap *src_pm, const Rect *src_rect,
-                           write_back_data_t *write_back_data);
 
 extern int ROMlib_Cursor_color_p;
 extern Cursor ROMlib_Cursor;
