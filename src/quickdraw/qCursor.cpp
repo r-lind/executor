@@ -22,51 +22,7 @@
 #include <quickdraw/quick.h>
 #include <vdriver/vdriver.h>
 
-#if !defined(CURSOR_DEBUG)
-
 using namespace Executor;
-
-#define HOST_SET_CURSOR(d, m, x, y) vdriver->setCursor(d, m, x, y)
-
-#else
-
-#include <vdriver/dirtyrect.h>
-#include <vdriver/vdriver.h>
-
-using namespace Executor;
-
-static void
-cursor_debug(const uint8_t *datap, const uint8_t *maskp, int hot_x, int hot_y)
-{
-    int y;
-    uint8_t *pixel;
-    int offset;
-
-    pixel = vdriver->framebuffer();
-    offset = vdriver->rowBytes() - 16;
-    for(y = 0; y < 16; ++y)
-    {
-        uint16_t u, bit;
-
-        u = *datap++;
-        u = (u << 8) | *datap++;
-        for(bit = 1 << 15; bit; bit >>= 1)
-            *pixel++ = u & bit ? 0 : 255;
-        pixel += offset;
-    }
-    dirty_rect_accrue(0, 0, 16, 16);
-    dirty_rect_update_screen();
-    vdriver->flushDisplay();
-}
-
-#define HOST_SET_CURSOR(d, m, x, y)  \
-    do                               \
-    {                                \
-        cursor_debug(d, m, x, y);    \
-        vdriver->setCursor(d, m, x, y); \
-    } while(false)
-
-#endif
 
 static CCrsrHandle current_ccrsr;
 static Cursor current_crsr;
@@ -118,8 +74,8 @@ void Executor::C_SetCursor(Cursor *cp)
 
     if(vdriver->cursorDepth() == 1)
     {
-        HOST_SET_CURSOR((char *)cp->data, (unsigned short *)cp->mask,
-                        cp->hotSpot.h, cp->hotSpot.v);
+        vdriver->setCursor((char *)cp->data, (unsigned short *)cp->mask,
+                           cp->hotSpot.h, cp->hotSpot.v);
     }
     else
     {
@@ -152,8 +108,8 @@ void Executor::C_SetCursor(Cursor *cp)
         convert_pixmap(&data_pixmap, &target_pixmap,
                        &ROMlib_cursor_rect, nullptr);
 
-        HOST_SET_CURSOR(data_baseaddr, (unsigned short *)cp->mask,
-                        cp->hotSpot.h, cp->hotSpot.v);
+        vdriver->setCursor(data_baseaddr, (unsigned short *)cp->mask,
+                           cp->hotSpot.h, cp->hotSpot.v);
     }
 
     current_crsr = *cp;
@@ -384,15 +340,15 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
 
             /* Actually set the current cursor. */
             HLockGuard guard(ccrsr_xdata);
-            HOST_SET_CURSOR((char *)*ccrsr_xdata,
-                            (unsigned short *)CCRSR_MASK(ccrsr),
-                            hot_spot->h, hot_spot->v);
+            vdriver->setCursor((char *)*ccrsr_xdata,
+                               (unsigned short *)CCRSR_MASK(ccrsr),
+                               hot_spot->h, hot_spot->v);
         }
         else
         {
-            HOST_SET_CURSOR((char *)CCRSR_1DATA(ccrsr),
-                            (unsigned short *)CCRSR_MASK(ccrsr),
-                            hot_spot->h, hot_spot->v);
+            vdriver->setCursor((char *)CCRSR_1DATA(ccrsr),
+                               (unsigned short *)CCRSR_MASK(ccrsr),
+                               hot_spot->h, hot_spot->v);
         }
     }
 
