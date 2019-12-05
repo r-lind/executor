@@ -46,26 +46,8 @@ checksum_strip(int which_strip)
 
         for(r = row_size; r > 0; r--)
         {
-#if defined(i386)
-            uint32_t t1, t2;
-
-            /* Hand-scheduled for the Pentium.  gcc does a terrible job. */
-            asm("movl (%3),%1\n\t"
-                "movl 4(%3),%2\n\t"
-                "addl %1,%0\n\t"
-                "movl 8(%3),%1\n\t"
-                "addl %2,%0\n\t"
-                "movl 12(%3),%2\n\t"
-                "addl %1,%0\n\t"
-                "addl $16,%3\n\t"
-                "addl %2,%0"
-                : "=r"(sum), "=r"(t1), "=r"(t2), "=r"(base)
-                : "0"(sum), "3"(base)
-                : "cc");
-#else
             sum += base[0] + base[1] + base[2] + base[3];
             base += 4;
-#endif
         }
 
         base += next_row_delta;
