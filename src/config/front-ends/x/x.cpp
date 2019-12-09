@@ -56,18 +56,12 @@
 
 #include "x_keycodes.h"
 
-static bool use_scan_codes = false;
+static int use_scan_codes = false;
 
 namespace Executor {
         // FIXME: not including rsys/paths.h because that pulls in boost/filesystem, which CMake doesn't know about yet
         // (the dependencies are the wrong way aroudn anyway)
     extern std::string ROMlib_appname;
-}
-
-void
-X11VideoDriver::setUseScancodes(bool val)
-{
-    use_scan_codes = val;
 }
 
 using namespace Executor;
@@ -154,20 +148,24 @@ static XrmOptionDescRec opts[] = {
     { "-geometry", ".geometry", XrmoptionSepArg, 0 },
     { "-privatecmap", ".privateColormap", XrmoptionNoArg, "on" },
     { "-truecolor", ".trueColor", XrmoptionNoArg, "on" },
+    { "-scancodes", ".scancodes", XrmoptionNoArg, "on" },
 
 /* options that are transfered from the x resource database to the
      `common' executor options database */
-#define FIRST_COMMON_OPT 4
+#define FIRST_COMMON_OPT 5
     { "-debug", ".debug", XrmoptionSepArg, 0 },
 };
 
 void X11VideoDriver::registerOptions(void)
 {
     opt_register("vdriver", {
-                                { "synchronous", "run in synchronous mode", opt_no_arg }, { "geometry", "specify the executor window geometry", opt_sep }, { "privatecmap", "have executor use a private x colormap", opt_no_arg }, { "truecolor", "have executor use a TrueColor visual", opt_no_arg },
-                            });
-
-    //x_opts, std::size (x_opts));
+            {"synchronous", "run in synchronous mode", opt_no_arg},
+            {"geometry", "specify the executor window geometry", opt_sep},
+            {"privatecmap", "have executor use a private x colormap", opt_no_arg},
+            {"truecolor", "have executor use a TrueColor visual", opt_no_arg},
+            {"scancodes", "different form of key mapping (may be useful in "
+                "conjunction with -keyboard)", opt_no_arg},
+        });
 }
 
 static XrmDatabase xdb;
@@ -1186,9 +1184,11 @@ bool X11VideoDriver::init()
     int num_blue_bits, low_blue_bit;
     char *geom;
 
+    
     get_bool_resource("privateColormap", &private_cmap_p);
 
     get_bool_resource("trueColor", &truecolor_p);
+    get_bool_resource("scancodes", &use_scan_codes);
 
     if(!get_string_resource("geometry", &geom))
         geom = 0;

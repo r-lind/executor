@@ -2,6 +2,8 @@
 #if !defined(_VDRIVER_H_)
 #define _VDRIVER_H_
 
+#include <unordered_map>
+#include <string>
 
 #include <ExMacTypes.h>
 
@@ -40,7 +42,11 @@ public:
     virtual ~VideoDriver();
 
     virtual bool parseCommandLine(int& argc, char *argv[]);
+    virtual bool setOptions(std::unordered_map<std::string, std::string> options);
+    virtual void registerOptions();
+
     virtual bool init();
+    
     virtual void shutdown();
     virtual void updateScreen(int top, int left, int bottom, int right,
                                  bool cursor_p);
@@ -56,7 +62,6 @@ public:
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) = 0;
     virtual void flushDisplay();
-    virtual void registerOptions();
 
     virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
     virtual LONGINT getScrap(OSType type, Handle h);
@@ -64,12 +69,6 @@ public:
 
     virtual void setTitle(const std::string& name);
     virtual std::string getTitle();
-
-        // X & SDL1/windows only.
-        // TODO: should probably use registerOptions and add a custom option.
-    virtual void setUseScancodes(bool val);
-
-    
 
     virtual void setCursor(char *cursor_data,
                                 uint16_t cursor_mask[16],

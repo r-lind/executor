@@ -5,6 +5,7 @@
 #include <base/common.h>
 #include <quickdraw/srcblt.h>
 #include <vdriver/refresh.h>
+#include <commandline/option.h>
 
 #if defined(CYGWIN32)
 #include "win_screen.h"
@@ -32,6 +33,38 @@ static int video_flags = (SDL_SWSURFACE | SDL_HWPALETTE);
 
 bool ROMlib_fullscreen_p = false;
 bool ROMlib_hwsurface_p = false;
+bool use_scan_codes = false;
+
+void SDLVideoDriver::registerOptions()
+{
+    opt_register("vdriver", {
+            { "fullscreen", "try to run in full-screen mode", opt_no_arg, "" },
+            { "hwsurface", "UNSUPPORTED", opt_no_arg, "" },
+            {
+                "sdlaudio", "specify the audio driver to attempt to use first, e.g. "
+                            "\"executor -sdlaudio esd\" will tell Executor to use esound, "
+                            "the Enlightened Sound Daemon instead of /dev/dsp.",
+                opt_sep, "",
+            },
+            {"scancodes", "different form of key mapping (may be useful in "
+                "conjunction with -keyboard)", opt_no_arg},
+        });
+
+}
+
+bool SDLVideoDriver::setOptions(std::unordered_map<std::string, std::string> options)
+{
+    if(opt_val(options, "fullscreen"))
+        ROMlib_fullscreen_p = true;
+
+    if(opt_val(options, "hwsurface"))
+        ROMlib_hwsurface_p = true;
+
+    if(opt_val(options, "scancodes"))
+        use_scan_codes = true;
+
+    return true;
+}
 
 bool SDLVideoDriver::init()
 {
@@ -60,14 +93,14 @@ bool SDLVideoDriver::init()
 #endif
 
     /* Try for fullscreen on platforms that support it */
-    if(getenv("SDL_FULLSCREEN") != nullptr || ROMlib_fullscreen_p)
+    if(getenv("SDL_FULLSCREEN") || ROMlib_fullscreen_p)
         video_flags |= SDL_FULLSCREEN;
 
     /* Allow unsafe fullscreen video memory access */
-    if(getenv("SDL_HWSURFACE") != nullptr || ROMlib_hwsurface_p)
+    if(getenv("SDL_HWSURFACE") || ROMlib_hwsurface_p)
         video_flags |= SDL_HWSURFACE;
 
-    return (true);
+    return true;
 }
 
 bool SDLVideoDriver::isAcceptableMode(int width, int height, int bpp,

@@ -15,7 +15,6 @@ public:
     void pumpEvents() override;
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
     bool setCursorVisible(bool show_p) override;
-    void setUseScancodes(bool val) override;
     void registerOptions() override;
     void flushDisplay() override;
     void beepAtUser() override;

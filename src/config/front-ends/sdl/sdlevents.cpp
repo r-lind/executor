@@ -25,13 +25,7 @@
 
 using namespace Executor;
 
-static bool use_scan_codes = false;
-
-void
-SDLVideoDriver::setUseScancodes(bool val)
-{
-    use_scan_codes = val;
-}
+extern bool use_scan_codes;
 
 #if SDL_MAJOR_VERSION == 0 && SDL_MINOR_VERSION < 9
 

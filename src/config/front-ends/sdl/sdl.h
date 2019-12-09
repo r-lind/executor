@@ -5,7 +5,9 @@
 class SDLVideoDriver : public Executor::VideoDriver
 {
 public:
+    void registerOptions() override;
     bool init() override;
+    bool setOptions(std::unordered_map<std::string, std::string> options) override;
     void shutdown() override;
     bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p, bool exact_match_p) override;
     bool setMode(int width, int height, int bpp, bool grayscale_p) override;
@@ -16,7 +18,6 @@ public:
     bool setCursorVisible(bool show_p) override;
     void setTitle(const std::string& title) override;
     std::string getTitle() override;
-    void setUseScancodes(bool val) override;
     Executor::LONGINT getScrap(Executor::LONGINT type, Executor::Handle h) override;
     void putScrap(Executor::LONGINT type, Executor::LONGINT length, char *p, int scrap_count) override;
 };
