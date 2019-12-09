@@ -64,7 +64,6 @@
 #include <MemoryMgr.h>
 #include <ToolboxUtil.h>
 #include <hfs/hfs.h>
-#include <hfs/dcache.h>
 
 #include <hfs/hfs_plus.h>
 
@@ -358,8 +357,6 @@ OSErr Executor::ROMlib_putcache(cacheentry *cachep)
         warning_unexpected("cache free");
     cachep->flags &= ~CACHEDIRTY;
 
-    if(err == noErr)
-        err = dcache_flush(((VCBExtra *)vcbp)->u.hfs.fd) ? (OSErr)noErr : (OSErr)ioErr;
     fs_err_hook(err);
     return err;
 }
@@ -563,8 +560,6 @@ OSErr Executor::ROMlib_flushcachevcbp(HVCB *vcbp)
         }
         fs_err_hook(err);
     }
-    if(err == noErr)
-        err = dcache_flush(((VCBExtra *)vcbp)->u.hfs.fd) ? noErr : ioErr;
 
     return err;
 }

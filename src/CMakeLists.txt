@@ -191,9 +191,7 @@ set(hfs_sources
     hfs/hfs.h
     hfs/hfs_plus.h
     hfs/partition.h
-    hfs/dcache.h
     hfs/drive_flags.h
-    hfs/dcache.cpp
     hfs/futzwithdosdisks.h
     hfs/hfsBtree.cpp hfs/hfsChanging.cpp hfs/hfsCreate.cpp hfs/hfsFile.cpp
     hfs/hfsHelper.cpp hfs/hfsHier.cpp hfs/hfsMisc.cpp hfs/hfsVolume.cpp

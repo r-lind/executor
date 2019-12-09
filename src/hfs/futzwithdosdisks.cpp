@@ -3,7 +3,6 @@
 #include <file/file.h>
 #include <hfs/hfs.h>
 #include <prefs/prefs.h>
-#include <hfs/dcache.h>
 #include <OSEvent.h>
 
 #if defined(LINUX)
@@ -182,11 +181,6 @@ void Executor::futzwithdosdisks(void)
 #define EXTRA_PARAM , (DRIVE_NAME_OF(i))
 #define ROMLIB_MACDRIVES (~0)
 #endif
-
-    /* Since we're scanning for new disks, let's be paranoid and
-     * flush all cached disk information.
-     */
-    dcache_invalidate_all(true);
 
     if(!nodrivesearch_p)
     {

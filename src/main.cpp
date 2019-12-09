@@ -42,7 +42,6 @@
 #include <mman/memsize.h>
 #include <vdriver/autorefresh.h>
 #include <sound/sounddriver.h>
-#include <hfs/dcache.h>
 #include <error/system_error.h>
 #include <commandline/option.h>
 #include <base/emustubs.h>
@@ -133,8 +132,6 @@ static const option_vec common_opts = {
        "Example: \"executor -debug unimp,trace\""),
 
       opt_sep, "" },
-    { "nodiskcache", "disable internal disk cache.",
-      opt_no_arg, "" },
     { "nosound", "disable any sound hardware",
       opt_no_arg, "" },
 
@@ -501,13 +498,6 @@ static void parseCommandLine(int& argc, char **argv)
         skip = 0;
         opt_int_val(opt_db, "nosound", &skip, &bad_arg_p);
         sound_disabled_p = (skip != 0);
-    }
-
-    {
-        int nocache;
-        nocache = 0;
-        opt_int_val(opt_db, "nodiskcache", &nocache, &bad_arg_p);
-        dcache_set_enabled(!nocache);
     }
 
     use_native_code_p = !opt_val(opt_db, "notnative", nullptr);

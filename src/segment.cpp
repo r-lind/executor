@@ -27,7 +27,6 @@
 #include <osevent/osevent.h>
 #include <quickdraw/cquick.h>
 #include <rsys/desk.h>
-#include <hfs/dcache.h>
 #include <rsys/launch.h>
 #include <rsys/paths.h>
 #include <rsys/macstrings.h>
@@ -297,8 +296,6 @@ void Executor::C_ExitToShell()
 
     CloseResFile(0);
     ROMlib_OurClose();
-
-    dcache_invalidate_all(true);
 
     if(ROMlib_errorstring)
     {
