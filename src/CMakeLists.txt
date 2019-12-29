@@ -28,7 +28,7 @@ file(GLOB multiversal_ruby_sources
 set(trap_instance_sources ${CMAKE_CURRENT_BINARY_DIR}/trap_instances/ReferenceAllTraps.cpp)
 set(api_headers)
 foreach(interfaceModule ${api_yaml_files})
-    get_filename_component(base ${interfaceModule} NAME_WLE)
+    get_filename_component(base ${interfaceModule} NAME_WE)
 
         # Special case: MacTypes.h is still around on modern macs.
         # Let's rename our version to avoid conflicts.
