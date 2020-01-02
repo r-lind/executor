@@ -239,7 +239,7 @@ extern uint32_t Executor::ModeSwitch(UniversalProcPtr theProcPtr, ProcInfoType p
     uint32_t stackPointer = fromISA == kM68kISA ? EM_A7: cpu.r[1];
 
     uint32_t paramValues[maxParameters];
-    uint32_t retval;
+    uint32_t retval = 0;
 
     if(fromISA == kM68kISA)
     {

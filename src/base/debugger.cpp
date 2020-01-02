@@ -50,7 +50,7 @@ uint32_t Debugger::interact1(DebuggerEntry entry)
 
 uint32_t Debugger::nmi68K(uint32_t /*interruptCallbackAddr*/)
 {
-    uint16_t frameType = (*ptr_from_longint<GUEST<uint16_t>*>(EM_A7 + 6)) >> 12;
+    uint16_t frameType [[maybe_unused]] = (*ptr_from_longint<GUEST<uint16_t>*>(EM_A7 + 6)) >> 12;
     assert(frameType == 0);
 
     uint16_t sr = *ptr_from_longint<GUEST<uint16_t>*>(EM_A7);

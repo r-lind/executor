@@ -94,7 +94,7 @@ INTEGER Executor::C_InitResources()
     if(LM(SysMap) == -1)
     {
         fprintf(stderr, "Could not open System file: OpenRFPerm (\"%.*s\", 0x%x, fsCurPerm) failed\n",
-                SYSMACNAME[0], SYSMACNAME + 1, (uint16_t)LM(BootDrive));
+                SYSMACNAME[0], &SYSMACNAME[1], (uint16_t)LM(BootDrive));
 
         exit(1);
     }
