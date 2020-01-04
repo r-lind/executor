@@ -15,8 +15,12 @@
 #include <rsys/version.h>
 #include <vdriver/vdriver.h>
 #include <base/functions.impl.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
+
+static OSErr C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep);
+PASCAL_FUNCTION_PTR(PhysicalGestalt);
 
 typedef struct
 {
@@ -545,7 +549,7 @@ OSErr Executor::C_Gestalt(OSType selector, GUEST<LONGINT> *responsep)
     return gestalt_helper(selector, responsep, true, gtable, std::size(gtable));
 }
 
-OSErr Executor::C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
+static OSErr C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
 {
     OSErr retval;
 
@@ -576,6 +580,7 @@ OSErr Executor::C_GestaltTablesOnly(OSType selector,
 {
     return gestalt_helper(selector, responsep, false, gtable, std::size(gtable));
 }
+PASCAL_FUNCTION_PTR(GestaltTablesOnly);
 
 static Boolean
 syszone_p(ProcPtr p)

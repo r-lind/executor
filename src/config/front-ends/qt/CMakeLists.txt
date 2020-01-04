@@ -18,7 +18,7 @@ if(TARGET Qt5::Gui)
     target_include_directories(front-end-qt
             PUBLIC .)
 
-    target_link_libraries(front-end-qt syn68k)
+    target_link_libraries(front-end-qt syn68k romlib)
 
     if(WIN32 AND MSYS AND BUILD_STATIC)
         find_package(PkgConfig REQUIRED)

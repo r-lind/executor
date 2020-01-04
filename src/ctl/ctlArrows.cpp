@@ -15,6 +15,7 @@
 
 #include <quickdraw/image.h>
 #include <wind/wind.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
@@ -487,6 +488,7 @@ void draw_thumb(ControlHandle ctl)
     }
 }
 
+PASCAL_FUNCTION_PTR(new_draw_scroll);
 void Executor::C_new_draw_scroll(INTEGER depth, INTEGER flags, GDHandle target,
                                  LONGINT l)
 {
@@ -569,6 +571,7 @@ where(ControlHandle ctl, Point p)
     }
 }
 
+PASCAL_FUNCTION_PTR(new_pos_ctl);
 void Executor::C_new_pos_ctl(INTEGER depth, INTEGER flags, GDHandle target,
                              LONGINT l)
 {

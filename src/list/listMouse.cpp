@@ -16,6 +16,7 @@
 #include <list/list.h>
 #include <rsys/hook.h>
 #include <base/functions.impl.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
@@ -141,7 +142,7 @@ static void scrollbyvalues(ListHandle list)
     C_LCellSize(p, list);
 }
 
-void Executor::C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
+static void C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
 {
     INTEGER quant, page;
     ListPtr lp;
@@ -173,6 +174,7 @@ void Executor::C_ROMlib_mytrack(ControlHandle ch, INTEGER part)
     SetControlValue(ch, GetControlValue(ch) + quant);
     scrollbyvalues(guest_cast<ListHandle>((*ch)->contrlRfCon));
 }
+PASCAL_FUNCTION_PTR(ROMlib_mytrack);
 
 static inline Boolean CALLCLICK(ListClickLoopUPP fp)
 {

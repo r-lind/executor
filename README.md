@@ -85,9 +85,20 @@ posession of it.  Other contributors include:
 Building and Running
 --------------------
 
-Needs a modern C++ compiler, CMake, and Qt 5, plus 'perl' and 'bison' commands.
-SDL2, SDL1.2 or X11 libraries are required to build some of the alternate front-ends.
+Requirements:
+* a modern C++17 compiler
+* CMake 3.10 or later
+* Qt 5.12 or later
+* perl
+* ruby 2.0 or later
+* bison
 
+Optional (for additional front-ends):
+* SDL 2
+* SDL 1.2
+* X11 libraries
+
+Building:
 ```
 git submodule init
 git submodule update
@@ -105,8 +116,8 @@ When `./build/src/executor` is first invoked, it will automatically install its
 fake Mac system file and the `Browser` finder replacement to `~/.executor/`, so
 no further setup should be needed.
 
-If you're using Wayland, you will need to force Qt to use its X11 backend, as their
-Wayland backend hopelessly fails for executor:
+If you're using Wayland, you may need to force Qt to use its X11 backend, as their
+Wayland backend causes problems for executor:
 
 ```
 export QT_QPA_PLATFORM=xcb
@@ -116,61 +127,86 @@ Executor 2000 should be able to use native Mac files on macOS, AppleDouble
 file pairs (`foo` and `%foo`) as used by older executor verions, as well as
 files written by Basilisk or SheepShaver (`foo`, `.rsrc/foo` and `.finf/foo`).
 
+It should be possible to build Executor 2000 for Microsoft Windows;
+see [here](docs/building-on-windows.md) for some only slightly outdated instructions.
 
-### Microsoft Windows
 
-Executor 2000 can be built for Microsoft Windows, albeit only as a 32-bit
-Windows Desktop (i.e. Win32) application.  The build procedure is nearly the
-same, however, some additional dependencies need to be installed, and then,
-some extra options need to be passed into CMake.
+Overview
+--------
 
-The following procedure has been used to prepare a Windows 10 machine to build
-Executor 2000 as a Windows app.  Some of Microsoft's
-[free, time-use-limited Windows VM images](https://developer.microsoft.com/en-us/windows/downloads/virtual-machines)
-have, in the past, been sufficient to build Executor 2000.  If you try this,
-please note that these VMs did have some, but not all of the above dependencies
-already installed.
+### Git Submodules
 
-Command line steps be performed once Visual Studio 2017 is installed, by
-running the Start Menu searchable program, ```Developer Command Prompt for VS 2017```
+Executor 2000 includes several git submodules, some to include third-party
+libraries, and some which are maintained together with Executor.
 
-1. install [Git](https://git-scm.com/download)
-2. install [CMake](https://cmake.org/download/)
-3. install [LLVM](http://releases.llvm.org/download.html). (8.0.0, pre-built
-   binaries have been used, for example.)
-4. install [Visual Studio 2017](https://visualstudio.microsoft.com/), plus it's
-   [Desktop Development with C++](https://docs.microsoft.com/en-us/cpp/build/vscpp-step-0-installation?view=vs-2017)
-   option 
-5. install the VS-2017 add-on,
-   [LLVM Compiler Toolchain](https://marketplace.visualstudio.com/items?itemName=LLVMExtensions.llvm-toolchain)
-6. install perl and bison, via MinGW-get's packages for
-   ```msys-bison-bin``` and ```msys-perl-bin``` - [MinGW Getting Started](http://www.mingw.org/wiki/getting_started)
-7. add perl and bison to path.  If MinGW is installed to C:\MinGW, the
-   directory to add to PATH should be, ```C:\MinGW\msys\1.0\bin```.
-8. install [vcpkg](https://github.com/Microsoft/vcpkg).  Installation to
-   ```C:\vcpkg``` is recommended (but not strictly required, perhaps).
-9. use vcpkg to build and install Qt5, SDL2, and Boost.  This may take
-   multiple hours to perform (due primarily to Qt).
-   1. ```cd C:\vcpkg```
-   2. ```vcpkg install sdl2 boost-filesystem boost-system qt5-base```
+#### Third party libraries:
+- LMDB/lmdb (database library used for filesystem implementation)
+- google/googletest
+- vector-of-bool/cmrc (the CMake resource compiler, for embedding binaries)
 
-With the above steps performed, building was done using the normal procedure,
-as listed above), but with the cmake-configuration step (aka. ```cmake ..```)
-being issued as such:
+#### Third party library forked with minor fixes and changes:
+- autc04/cxmon (low-level debugger from the macemu project)
+- autc04/lmdbxx (C++ wrapper for lmdb)
 
-```cmake -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake -T"llvm" ..```
+#### Components maintained along with Executor 2000:
+- autc04/syn68k (68K emulator core)
+- autc04/PowerCore (PowerPC emulator core)
+- autc04/multiversal (classic MacOS API definitions plus generator scripts)
 
-The important and new parts here are:
+### Directories 
 
-  - ```-DCMAKE_TOOLCHAIN_FILE=...```: lets the build system know about the
-    vcpkg-installed dependencies.
-  - ```-T"llvm"```: lets the build system know to use Clang to compile
-    C/C++ code (rather than Microsoft's Visual C++ engine, for example).
+- `src/` - main source directory
+- `docker/` - used for CI on azure-pipelines
+- `res/` - files that are embedded into the executor binary
+    (`System`, `Browser`, etc.)
+- `tests/` - automated tests for regression testing and for figuring out how
+    MacOS really works
+- `packages/go/` - source code for the Browser application. Seems to not 
+    exactly match the compiled  Browser binary, and I haven't been able to
+    compile it yet.
+- `packages/skel/` - System Folder and Freeware apps that used to be shipped
+    with Executor.
+- `docs/` - some extra documentation
+- `docs/outdated/` - Outdated docs that might help understanding the past of
+    Executor.
+- `util/` - a collection of scripts and helper programs, all obsolete
 
-By default, the build step (of ```cmake --build .```) will generate a Debug
-build.  To make a Release build, run the build step as such:
+### The "Multiversal Interfaces"
 
-```cmake --build . --config Release```
+On classic MacOS, compilers would ship with an Apple-supplied package called
+the "Universal Interfaces" that contained C header files for all APIs provided
+by MacOS.
 
-The resulting ```executor.exe``` will be in the ```Release``` sub-folder
-(or ```Debug```, for Debug builds).
+The `multiversal` repository, included as a git submodule, contains the
+"Multiversal Interfaces", an open source reimplementation that is shared
+between Executor 2000 and the Retro68 cross-compiler suite.
+
+The directory `multiversal/defs` contains YAML files that describe (a subset
+of) the MacOS API; the ruby scripts in `multiversal`, invoked from
+`src/CMakeLists.txt`, generate actual C++ header files for Executor from those
+descriptions. You can find the C++ headers in `build/src/api` once you've built
+Executor 2000, but you should of course only edit the YAML files they are
+generated from. 
+
+There is a JSON schema describing the format of those YAML files in
+`multiversal/multiversal.schema.json`. If you happen to be using Visual Studio
+Code as your text editor, you can install the YAML extension from Red Hat and
+add the following to your workspace settings (`.vscode/settings.json`), and
+you'll get some autocompletion and automatic error squiggles as you type:
+
+```json
+    "yaml.schemas": {
+        "multiversal/multiversal.schema.json": "multiversal/defs/*.yaml"
+    }
+```
+
+### Inside `src/`
+
+The code in `src/` is loosely organized into subdirectories. Each subdirectory
+can contain both headers and source files. Some of these headers might be
+intended for use from other files in the subdirectory only, while others might
+be public. This should be systematically cleaned up at some point. Source files
+that didn't fit into any subdirectory have been left at the top level. The
+header files corresponding to those `.cpp` files can for historical reasons be
+found in `include/rsys/`. I never found out what `rsys` stands for.
+

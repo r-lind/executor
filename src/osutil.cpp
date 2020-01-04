@@ -26,6 +26,7 @@
 #include <base/cpu.h>
 #include <vdriver/vdriver.h>   /* for beepAtUser */
 #include <PowerCore.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
@@ -813,10 +814,11 @@ OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
 
 static Boolean shouldbeawake;
 
-void Executor::C_ROMlib_wakeup()
+static void C_ROMlib_wakeup()
 {
     shouldbeawake = true;
 }
+PASCAL_FUNCTION_PTR(ROMlib_wakeup);
 
 /* argument n is in 1/60ths of a second */
 

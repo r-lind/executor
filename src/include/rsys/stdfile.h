@@ -33,10 +33,6 @@ namespace Executor
 #define MICONAPP 4
 #define MICONDISK 5
 
-extern void C_ROMlib_stdftrack(ControlHandle, INTEGER);
-PASCAL_FUNCTION(ROMlib_stdftrack);
-extern Boolean C_ROMlib_stdffilt(DialogPtr, EventRecord *, GUEST<INTEGER> *);
-PASCAL_FUNCTION(ROMlib_stdffilt);
 extern void ROMlib_init_stdfile(void);
 
 enum
@@ -46,10 +42,7 @@ enum
 };
 
 OSErr C_unixmount(CInfoPBRec *cbp);
-PASCAL_FUNCTION(unixmount);
 
-extern void C_ROMlib_filebox(DialogPeek dp, INTEGER which);
-PASCAL_FUNCTION(ROMlib_filebox);
 
 typedef enum { get,
                put } getorput_t;

@@ -68,10 +68,10 @@ template<typename T, typename Loc> struct Out
 
     operator GUEST<T>*() { return &temp; }
 
-    ~Out() { Loc::set(temp.raw_host_order()); }
+    ~Out() { Loc::set(toRawHostOrder<T>(temp)); }
 
     static void set(GUEST<T>* p) {}
-    static void afterCall(GUEST<T>* p) { p->raw_host_order(Loc()); }
+    static void afterCall(GUEST<T>* p) { setRawHostOrder<T>(*p,Loc()); }
 };
 
 template<typename T, typename InLoc, typename OutLoc> struct InOut
@@ -80,13 +80,12 @@ template<typename T, typename InLoc, typename OutLoc> struct InOut
 
     operator GUEST<T>*() { return &temp; }
 
-    InOut() { temp.raw_host_order(InLoc()); }
-    ~InOut() { OutLoc::set(temp.raw_host_order()); }
+    InOut() { setRawHostOrder<T>(temp,InLoc()); }
+    ~InOut() { OutLoc::set(toRawHostOrder<T>(temp)); }
 
-    static void set(GUEST<T>* p) { InLoc::set(p->raw_host_order()); }
-    static void afterCall(GUEST<T>* p) { p->raw_host_order(OutLoc()); }
+    static void set(GUEST<T>* p) { InLoc::set(toRawHostOrder<T>(*p)); }
+    static void afterCall(GUEST<T>* p) { setRawHostOrder<T>(*p,OutLoc()); }
 };
-
 
 template<int mask> struct TrapBit
 {

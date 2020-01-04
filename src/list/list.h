@@ -20,7 +20,6 @@ namespace Executor
 {
 extern void
 C_ldef0(INTEGER, Boolean, Rect *, Cell, INTEGER, INTEGER, ListHandle);
-PASCAL_FUNCTION(ldef0);
 
 using listprocp = UPP<void (INTEGER mess, Boolean sel, Rect *rectp,
                                  Cell cell, INTEGER off, INTEGER len, ListHandle lhand)>;
@@ -43,7 +42,5 @@ extern void ROMlib_vminmax(INTEGER *minp, INTEGER *maxp, ListPtr lp);
 extern void ROMlib_hminmax(INTEGER *minp, INTEGER *maxp, ListPtr lp);
 extern GUEST<INTEGER> *ROMlib_getoffp(Cell cell, ListHandle list);
 
-extern void C_ROMlib_mytrack(ControlHandle ch, INTEGER part);
-PASCAL_FUNCTION(ROMlib_mytrack);
 }
 #endif /* !defined(__RSYS_LIST__) */

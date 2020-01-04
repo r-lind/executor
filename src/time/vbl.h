@@ -9,9 +9,6 @@
 
 namespace Executor
 {
-extern void C_ROMlib_vcatch(void);
-PASCAL_FUNCTION(ROMlib_vcatch);
-
 extern void ROMlib_clockonoff(LONGINT onoroff);
 }
 

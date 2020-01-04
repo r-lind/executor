@@ -43,6 +43,7 @@
 #include <wind/wind.h>
 #include <sound/soundopts.h>
 #include <rsys/stdfile.h> /* for unixmount */
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
@@ -168,6 +169,17 @@ setup_trap_vectors(void)
             *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(i * 4) = c;
         }
 }
+
+PASCAL_FUNCTION_PTR(cdef0);
+PASCAL_FUNCTION_PTR(cdef16);
+PASCAL_FUNCTION_PTR(cdef1008);
+PASCAL_FUNCTION_PTR(ldef0);
+PASCAL_FUNCTION_PTR(mdef0);
+PASCAL_FUNCTION_PTR(mbdf0);
+PASCAL_FUNCTION_PTR(snth5);
+PASCAL_FUNCTION_PTR(wdef0);
+PASCAL_FUNCTION_PTR(wdef16);
+PASCAL_FUNCTION_PTR(unixmount);
 
 void Executor::InitLowMem()
 {

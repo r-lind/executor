@@ -13,6 +13,7 @@
 #include <OSEvent.h>
 #include <time/syncint.h>
 #include <quickdraw/cquick.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
@@ -21,7 +22,7 @@ static TMTask refresh_tm_task;
 static bool refresh_tm_task_installed_p = false;
 static void flush_shadow_screen();
 
-void Executor::C_handle_refresh()
+static void C_handle_refresh()
 {
     static bool busy_p = false;
 
@@ -55,6 +56,7 @@ void Executor::C_handle_refresh()
         busy_p = old_busy_p;
     }
 }
+PASCAL_FUNCTION_PTR(handle_refresh);
 
 void Executor::dequeue_refresh_task(void)
 {

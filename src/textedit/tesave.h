@@ -94,7 +94,7 @@ extern void ROMlib_teremovestyleinfo(TEStyleHandle sth, INTEGER start,
                                      INTEGER stop);
 extern INTEGER C_ROMlib_dotext(TEPtr tep, INTEGER first, INTEGER last,
                                INTEGER what);
-PASCAL_FUNCTION(ROMlib_dotext);
+EXTERN_PASCAL_FUNCTION_PTR(ROMlib_dotext);
 
 extern int16_t te_char_to_run_index(TEStyleHandle te_style, int16_t sel);
 extern int16_t te_char_to_lineno(TEPtr te, int16_t sel);

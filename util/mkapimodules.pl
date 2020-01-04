@@ -7,7 +7,7 @@ print CMAKE "set(trap_instance_sources\n";
 
 @allmodules = ();
 
-while($header = <include/rsys/*.h */*.h>) {
+while($header = <include/rsys/*.h ../build/src/api/*.h */*.h>) {
     $hadtrap = 0;
     $i = 0;
     $lastincludeline = 1;
@@ -29,6 +29,9 @@ while($header = <include/rsys/*.h */*.h>) {
         } elsif($header =~ /^include\/(.*)\.h$/) {
             $modname = $1;
             $headername = "$1.h";
+        } elsif($header =~ /^\.\.\/build\/src\/api\/(.*)\.h$/) {
+            $modname = $1;
+            $headername = "$1.h";            
         } elsif($header =~ /^(.*)\/(.*)\.h$/) {
             $modname = "$1_$2";
             $headername = "$1/$2.h";

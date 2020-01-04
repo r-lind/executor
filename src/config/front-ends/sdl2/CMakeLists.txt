@@ -12,7 +12,7 @@ if(SDL2_FOUND)
         string(STRIP "${SDL2_LIBRARY}" SDL2_LIBRARY)
     endif()
 
-    target_link_libraries(front-end-sdl2 syn68k ${SDL2_LIBRARY})
+    target_link_libraries(front-end-sdl2 syn68k ${SDL2_LIBRARY} romlib)
     target_include_directories(front-end-sdl2
         PUBLIC .
         PRIVATE ${SDL2_INCLUDE_DIR} ${SDL2_INCLUDE_DIR}/SDL2)

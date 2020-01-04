@@ -56,7 +56,7 @@ jobs:
   - checkout: self
     submodules: true
   - script: |
-      brew install boost qt ninja
+      brew install boost qt ninja ruby
     displayName: 'Brew prerequisites'
   - script: |
       mkdir build

@@ -124,7 +124,7 @@ static void catchalarmCommon()
                     ROMlib_hook(time_number);
 
                     tm_addr = qp->tmAddr;
-                    if(tm_addr == (ProcPtr)&ROMlib_wakeup)
+                    /*if(tm_addr == (ProcPtr)&ROMlib_wakeup)
                         ROMlib_wakeup();
                     else if(tm_addr == (ProcPtr)&ROMlib_vcatch)
                         ROMlib_vcatch();
@@ -132,7 +132,7 @@ static void catchalarmCommon()
                         handle_refresh();
                     else if(tm_addr == (ProcPtr)&sound_timer_handler)
                         sound_timer_handler();
-                    else if(tm_addr)
+                    else */if(tm_addr)
                     {
                         /* No need to save and restore regs here; we
 		       * save and restore all of them outside this

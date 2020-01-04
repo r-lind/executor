@@ -14,14 +14,16 @@
 #include <dial/dial.h>
 #include <dial/itm.h>
 #include <mman/mman.h>
+#include <base/traps.impl.h>
 
 using namespace Executor;
 
-void Executor::C_ROMlib_mysound(INTEGER i)
+static void C_ROMlib_mysound(INTEGER i)
 {
     while(i--)
         SysBeep(5);
 }
+PASCAL_FUNCTION_PTR(ROMlib_mysound);
 
 void Executor::C_ErrorSound(SoundUPP sp) /* IMI-411 */
 {

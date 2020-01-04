@@ -68,7 +68,6 @@ extern void ROMlib_reset_bad_trap_addresses(void);
 RAW_68K_TRAP(Unimplemented, 0xA89F);
 RAW_68K_FUNCTION(bad_trap_unimplemented);
 
-RAW_68K_TRAP(SwapMMUMode, 0xA05D);
 RAW_68K_TRAP(Chain, 0xA9F3);
 RAW_68K_TRAP(InitZone68K, 0xA019);
 RAW_68K_TRAP(PostEvent, 0xA02F);

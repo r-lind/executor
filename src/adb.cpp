@@ -9,6 +9,7 @@
 #include <rsys/adb.h>
 #include <osevent/osevent.h>
 #include <base/cpu.h>
+#include <base/traps.impl.h>
 
 #include <stdarg.h>
 /*
@@ -67,10 +68,10 @@ enum
 static GUEST<ProcPtr> adb_service_procp = nullptr; /* stored as though in lowglobal */
 static Ptr adb_data_ptr = (Ptr)0x90ABCDEF;
 
-void
-Executor::C_adb_service_stub(void)
+static void C_adb_service_stub(void)
 {
 }
+PASCAL_FUNCTION_PTR(adb_service_stub);
 
 void
 Executor::reset_adb_vector(void)
