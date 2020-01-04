@@ -8,6 +8,11 @@ if(NOT BISON_COMMAND)
     message(FATAL_ERROR "Cannot find command: 'bison' (needed for building!)")
 endif()
 
+find_package(Ruby 2.1)
+if(NOT RUBY_EXECUTABLE)
+    message(FATAL_ERROR "Cannot find command: 'ruby' (needed for building!)")
+endif()
+
 find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 find_package(Threads REQUIRED)
@@ -44,7 +49,7 @@ add_custom_command(
     DEPENDS
         ${api_yaml_files}
         ${multiversal_ruby_sources}
-    COMMAND ruby make-multiverse.rb -G Executor -o "${CMAKE_CURRENT_BINARY_DIR}/"
+    COMMAND ${RUBY_EXECUTABLE} make-multiverse.rb -G Executor -o "${CMAKE_CURRENT_BINARY_DIR}/"
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal
 )
 
