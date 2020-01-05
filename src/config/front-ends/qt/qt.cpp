@@ -12,6 +12,7 @@
 
 #include <optional>
 
+
 #include <vdriver/vdriver.h>
 #include <quickdraw/cquick.h> /* for ThePortGuard */
 #include <rsys/adb.h>
@@ -20,8 +21,6 @@
 #include <rsys/keyboard.h>
 #include <OSEvent.h>
 #include <ToolboxEvent.h>
-#include <ScrapMgr.h>
-#include <vdriver/refresh.h>
 
 #include "available_geometry.h"
 
