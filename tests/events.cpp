@@ -89,3 +89,45 @@ TEST(Events, PostKeyMod)
     EXPECT_LE(e.when, ticks);
     EXPECT_GT(e.when + 5, ticks);
 }
+
+TEST(Events, Button)
+{
+    EXPECT_FALSE(Button());
+    auto saveButton = *(uint8_t*)0x172;
+    EXPECT_NE(0, saveButton);
+
+    *(uint8_t*)0x172 = 0;
+    EXPECT_TRUE(Button());
+
+    *(uint8_t*)0x172 = saveButton;
+    EXPECT_FALSE(Button());
+}
+
+
+TEST(Events, ButtonMod)
+{
+    FlushEvents(everyEvent, 0);
+
+    EXPECT_FALSE(Button());
+    auto saveButton = *(uint8_t*)0x172;
+    EXPECT_NE(0, saveButton);
+
+    *(uint8_t*)0x172 = 0;
+    EXPECT_TRUE(Button());
+
+    PostEvent(keyDown, 0 | 'a');
+
+    EventRecord e;
+    bool gotEvent = GetOSEvent(everyEvent, &e);
+    long ticks = TickCount();
+
+    EXPECT_TRUE(gotEvent);
+    EXPECT_EQ(keyDown, e.what);
+    EXPECT_LE(e.when, ticks);
+    EXPECT_GT(e.when + 5, ticks);
+    EXPECT_EQ(0 | 'a', e.message);
+    EXPECT_EQ(0, e.modifiers & 0xFF80);
+
+    *(uint8_t*)0x172 = saveButton;
+    EXPECT_FALSE(Button());
+}
