@@ -11,7 +11,6 @@
 #include <base/cpu.h>
 #include <base/traps.impl.h>
 
-#include <stdarg.h>
 /*
  * NOTE: most of the code in adb.c was originally written solely to support
  * apeiron (and potentially other games).  Apeiron patches the mouse ADB
@@ -187,7 +186,7 @@ enum
 //       because va_start requires it.
 
 void
-Executor::adb_apeiron_hack(int /*bool*/ deltas_p, ...)
+Executor::adb_apeiron_hack()
 {
     static bool been_here = false;
     static long old_x;
@@ -224,20 +223,8 @@ Executor::adb_apeiron_hack(int /*bool*/ deltas_p, ...)
     {
         int dx, dy;
 
-        if(deltas_p)
-        {
-            va_list ap;
-
-            va_start(ap, deltas_p);
-            dx = va_arg(ap, int);
-            dy = va_arg(ap, int);
-            va_end(ap);
-        }
-        else
-        {
-            dx = x - old_x;
-            dy = y - old_y;
-        }
+        dx = x - old_x;
+        dy = y - old_y;
 
         do
         {

@@ -18,7 +18,7 @@ void VideoDriverCallbacks::mouseButtonEvent(bool down, int h, int v)
     ROMlib_PPostEvent(down ? mouseDown : mouseUp,
                         0, nullptr, TickCount(), Point{v,h},
                         modifiers);
-    adb_apeiron_hack(false);
+    adb_apeiron_hack();
 }
 
 void VideoDriverCallbacks::mouseMoved(int h, int v)
@@ -26,7 +26,7 @@ void VideoDriverCallbacks::mouseMoved(int h, int v)
     LM(MouseLocation).h = h;
     LM(MouseLocation).v = v;
 
-    adb_apeiron_hack(false);
+    adb_apeiron_hack();
 }
 
 void VideoDriverCallbacks::keyboardEvent(bool down, unsigned char mkvkey)
