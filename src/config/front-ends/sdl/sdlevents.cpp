@@ -417,45 +417,13 @@ init_sdlk_to_mkv(void)
 #include "syswm_map.h"
 
 /* The current state of the keyboard modifiers */
-static uint16_t keymod = btnState;
 static uint16_t right_button_keymod = 0;
 static GUEST<Point> mouseloc; /* To save mouse location at interrupt */
-
-static int modifier_p(unsigned char virt, uint16_t *modstore)
-{
-    /* Note: shift and control can be cleared if right* and left* are pressed */
-    switch(virt)
-    {
-        case MKV_LEFTSHIFT:
-        case MKV_RIGHTSHIFT:
-            *modstore = shiftKey;
-            break;
-        case MKV_CAPS:
-            *modstore = alphaLock;
-            break;
-        case MKV_LEFTCNTL:
-        case MKV_RIGHTCNTL:
-            *modstore = ControlKey;
-            break;
-        case MKV_CLOVER:
-            *modstore = cmdKey;
-            break;
-        case MKV_LEFTOPTION:
-        case MKV_RIGHTOPTION:
-            *modstore = optionKey;
-            break;
-        default:
-            *modstore = 0;
-            return 0;
-    }
-    return 1;
-}
 
 syn68k_addr_t
 handle_sdl_mouse(syn68k_addr_t interrupt_addr, void *unused)
 {
-    LM(MouseLocation) = mouseloc;
-    adb_apeiron_hack(false);
+    vdriver->callbacks_->mouseMoved(mouseloc.h, mouseloc.v);
     return (MAGIC_RTE_ADDRESS);
 }
 
@@ -473,15 +441,15 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
                 if(event.active.state & SDL_APPINPUTFOCUS)
                 {
                     if(!event.active.gain)
-                        sendsuspendevent();
+                        vdriver->callbacks_->suspendEvent();
                     else
                     {
                         if(!we_lost_clipboard())
-                            sendresumeevent(false);
+                            vdriver->callbacks_->resumeEvent(false);
                         else
                         {
                             ZeroScrap();
-                            sendresumeevent(true);
+                            vdriver->callbacks_->resumeEvent(true);
                         }
                     }
                 }
@@ -491,10 +459,6 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
             case SDL_MOUSEBUTTONDOWN:
             case SDL_MOUSEBUTTONUP:
             {
-                bool down_p;
-                int32_t when;
-                Point where;
-
                 if(event.button.button == 3)
                 {
                     if(ROMlib_right_button_modifier != (optionKey | keyDownMask | keyUpMask))
@@ -524,18 +488,7 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
                     }
                 }
 
-                down_p = (event.button.state == SDL_PRESSED);
-                if(down_p)
-                    keymod &= ~btnState;
-                else
-                    keymod |= btnState;
-                when = TickCount();
-                where.h = event.button.x;
-                where.v = event.button.y;
-                ROMlib_PPostEvent(down_p ? mouseDown : mouseUp,
-                                  0, (GUEST<EvQElPtr> *)0, when, where,
-                                  keymod | right_button_keymod);
-                adb_apeiron_hack(false);
+                vdriver->callbacks_->mouseButtonEvent(event.button.state == SDL_PRESSED, event.button.x, event.button.y);
             }
             break;
 
@@ -543,35 +496,16 @@ handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
             case SDL_KEYUP:
             key_down_or_key_up:
             {
-                bool down_p;
                 unsigned char mkvkey;
-                uint16_t mod;
-                LONGINT keywhat;
-                int32_t when;
-                Point where;
 
                 init_sdlk_to_mkv();
-                down_p = (event.key.state == SDL_PRESSED);
 
                 if(use_scan_codes)
                     mkvkey = ibm_virt_to_mac_virt[event.key.keysym.scancode];
                 else
                     mkvkey = sdlk_to_mkv[event.key.keysym.sym];
-                mkvkey = ROMlib_right_to_left_key_map(mkvkey);
-                if(modifier_p(mkvkey, &mod))
-                {
-                    if(down_p)
-                        keymod |= mod;
-                    else
-                        keymod &= ~mod;
-                }
-                when = TickCount();
-                where.h = LM(MouseLocation).h;
-                where.v = LM(MouseLocation).v;
-                keywhat = ROMlib_xlate(mkvkey, keymod, down_p);
-                post_keytrans_key_events(down_p ? keyDown : keyUp,
-                                         keywhat, when, where,
-                                         keymod | right_button_keymod, mkvkey);
+                
+                vdriver->callbacks_->keyboardEvent(event.key.state == SDL_PRESSED, mkvkey);
             }
             break;
 

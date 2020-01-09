@@ -36,9 +36,29 @@ typedef struct
 namespace Executor
 {
 
+/*
+ * VideoDriverCallbacks
+ * 
+ * This will probably become an abstract class that should be the only calls that
+ * video drivers make into the rest of Executor.
+ */
+class VideoDriverCallbacks
+{
+public:
+    virtual void mouseButtonEvent(bool down, int h, int v);
+    virtual void mouseMoved(int h, int v);
+    virtual void keyboardEvent(bool down, unsigned char mkvkey);
+    virtual void suspendEvent();
+    virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */);
+
+private:
+    uint16_t modifiers = 0;
+};
+
 class VideoDriver
 {
 public:
+    VideoDriver(VideoDriverCallbacks *cb) : callbacks_(cb) {}
     virtual ~VideoDriver();
 
     virtual bool parseCommandLine(int& argc, char *argv[]);
@@ -95,6 +115,8 @@ public:
     bool isRootless() { return isRootless_; }
 
 public:
+    VideoDriverCallbacks *callbacks_ = nullptr;
+
     uint8_t* framebuffer_ = nullptr;
     int width_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
     int height_ = VDRIVER_DEFAULT_SCREEN_HEIGHT;

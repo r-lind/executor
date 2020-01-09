@@ -28,6 +28,8 @@ StringPtr PSTR(const char* s)
 
 class MockVDriver : public VideoDriver
 {
+    using VideoDriver::VideoDriver;
+
     virtual void setColors(int first_color, int num_colors,
                                const struct ColorSpec *color_array) override
     {
@@ -50,6 +52,7 @@ class ExecutorTestEnvironment : public testing::Environment
 {
     char *thingOnStack;
     fs::path tempDir;
+    VideoDriverCallbacks videoDriverCallbacks;
 public:
     ExecutorTestEnvironment(char* thingOnStack) : thingOnStack(thingOnStack) {}
 
@@ -58,7 +61,7 @@ public:
 
         Executor::InitMemory(thingOnStack);
 
-        vdriver = new MockVDriver();
+        vdriver = new MockVDriver(&videoDriverCallbacks);
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
         traps::init(false);
         Executor::InitLowMem();

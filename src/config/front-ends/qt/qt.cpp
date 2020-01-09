@@ -58,8 +58,10 @@ ExecutorWindow *window;
 
 class ExecutorWindow : public QRasterWindow
 {
+    VideoDriverCallbacks *callbacks_;
 public:
-    ExecutorWindow()
+    ExecutorWindow(VideoDriverCallbacks *callbacks)
+        : callbacks_(callbacks)
     {
         setFlag(Qt::FramelessWindowHint, true);
         setFlag(Qt::NoDropShadowWindowHint, true);
@@ -77,22 +79,7 @@ public:
 
     void mousePressRelease(QMouseEvent *ev)
     {
-        bool down_p;
-        int32_t when;
-        Point where;
-
-        down_p = ev->buttons() & Qt::LeftButton;
-        if(down_p)
-            keymod &= ~btnState;
-        else
-            keymod |= btnState;
-        when = TickCount();
-        where.h = ev->x();
-        where.v = ev->y();
-        ROMlib_PPostEvent(down_p ? mouseDown : mouseUp,
-                            0, (GUEST<EvQElPtr> *)0, when, where,
-                            keymod);
-        adb_apeiron_hack(false);
+        callbacks_->mouseButtonEvent(!!(ev->buttons() & Qt::LeftButton), ev->x(), ev->y());
     }
     void mousePressEvent(QMouseEvent *ev)
     {
@@ -106,9 +93,6 @@ public:
     void keyEvent(QKeyEvent *ev, bool down_p)
     {
         unsigned char mkvkey;
-        LONGINT keywhat;
-        int32_t when;
-        Point where;
 
         auto p = qtToMacKeycodeMap.find(Qt::Key(ev->key()));
         if(p == qtToMacKeycodeMap.end())
@@ -126,42 +110,7 @@ public:
             mkvkey = ev->nativeVirtualKey();
 #endif
         mkvkey = ROMlib_right_to_left_key_map(mkvkey);
-        keymod &= ~(shiftKey | ControlKey | cmdKey | optionKey);
-        Qt::KeyboardModifiers qtmods = ev->modifiers();
-        if(qtmods & Qt::ShiftModifier)
-            keymod |= shiftKey;
-#if true || defined(MACOSX)
-        if(qtmods & Qt::ControlModifier)
-            keymod |= cmdKey;
-        if(qtmods & Qt::AltModifier)
-            keymod |= optionKey;
-        if(qtmods & Qt::MetaModifier)
-            keymod |= ControlKey;
-#else
-        if(qtmods & Qt::ControlModifier)
-            keymod |= ControlKey;
-        if(qtmods & Qt::AltModifier)
-            keymod |= cmdKey;
-        if(qtmods & Qt::MetaModifier)
-            keymod |= optionKey;
-#endif
-        if(mkvkey == MKV_CAPS)
-        {
-            if(down_p)
-                keymod |= alphaLock;
-            else
-                keymod &= ~alphaLock;
-        }
-        when = TickCount();
-        where.h = LM(MouseLocation).h;
-        where.v = LM(MouseLocation).v;
-        keywhat = ROMlib_xlate(mkvkey, keymod, down_p);
-        if constexpr(log_key_events)
-            std::cout << "keywhat: " << std::hex << keywhat << std::dec << std::endl;
-        post_keytrans_key_events(down_p ? keyDown : keyUp,
-                             keywhat, when, where,
-                             keymod, mkvkey);
-
+        callbacks_->keyboardEvent(down_p, mkvkey);
     }
     
     void keyPressEvent(QKeyEvent *ev)
@@ -184,10 +133,9 @@ public:
         switch(ev->type())
         {
             case QEvent::FocusIn:
-                sendresumeevent(true);
-                break;
+                callbacks_->resumeEvent(true);
             case QEvent::FocusOut:
-                sendsuspendevent();
+                callbacks_->suspendEvent();
                 break;
 
             default:
@@ -298,7 +246,7 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         qimage->setColorTable({qRgb(0,0,0),qRgb(255,255,255)});
 
     if(!window)
-        window = new ExecutorWindow();
+        window = new ExecutorWindow(callbacks_);
     window->setGeometry(geom);
 #ifdef MACOSX
     window->show();
@@ -413,10 +361,7 @@ void QtVideoDriver::pumpEvents()
     macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
 #endif
     cursorPos = window->mapFromGlobal(cursorPos);
-    LM(MouseLocation).h = cursorPos.x();
-    LM(MouseLocation).v = cursorPos.y();
-
-    adb_apeiron_hack(false);
+    callbacks_->mouseMoved(cursorPos.x(), cursorPos.y());
 
     static bool beenHere = false;
     if(!beenHere && rootlessRegion)

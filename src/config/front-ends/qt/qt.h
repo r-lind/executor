@@ -7,6 +7,8 @@ class QRect;
 class QtVideoDriver : public Executor::VideoDriver
 {
 public:
+    using VideoDriver::VideoDriver;
+    
     void setRootlessRegion(Executor::RgnHandle rgn) override;
     bool parseCommandLine(int& argc, char *argv[]) override;
     bool setMode(int width, int height, int bpp, bool grayscale_p) override;

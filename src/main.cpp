@@ -689,7 +689,8 @@ int main(int argc, char **argv)
     setstartdir(argv[0]);
     set_appname(argv[0]);
 
-    vdriver = new DefaultVDriver();
+    VideoDriverCallbacks videoDriverCallbacks;
+    vdriver = new DefaultVDriver(&videoDriverCallbacks);
     if(!vdriver->parseCommandLine(argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");

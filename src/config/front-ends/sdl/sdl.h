@@ -5,6 +5,8 @@
 class SDLVideoDriver : public Executor::VideoDriver
 {
 public:
+    using VideoDriver::VideoDriver;
+    
     void registerOptions() override;
     bool init() override;
     bool setOptions(std::unordered_map<std::string, std::string> options) override;

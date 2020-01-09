@@ -5,6 +5,8 @@
 class X11VideoDriver : public Executor::VideoDriver
 {
 public:
+    using VideoDriver::VideoDriver;
+    
     bool parseCommandLine(int& argc, char *argv[]) override;
     bool init() override;
     void shutdown() override;

@@ -5,6 +5,8 @@
 class SDL2VideoDriver : public Executor::VideoDriver
 {
 public:
+    using VideoDriver::VideoDriver;
+    
     bool init() override;
     bool setMode(int width, int height, int bpp, bool grayscale_p) override;
     void setColors(int first_color, int num_colors, const Executor::ColorSpec *colors) override;

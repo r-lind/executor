@@ -173,8 +173,6 @@ static XrmDatabase xdb;
 Display *x_dpy;
 static int x_screen;
 
-static void querypointerX(int *xp, int *yp, int *modp);
-
 int get_string_resource(char *resource, char **retval)
 {
     char *res_type, res_name[256], res_class[256];
@@ -788,22 +786,20 @@ key_table_t key_tables[] = {
 /* convert x keysym to mac virtual `keywhat'; return true the
    conversion was successful */
 
-static int
-x_keysym_to_mac_keywhat(unsigned int keysym, int16_t button_state,
-                        LONGINT *retval_out, bool down_p,
-                        unsigned char *virt_out)
+static bool
+x_keysym_to_mac_virt(unsigned int keysym, unsigned char *virt_out)
 {
     key_table_t *table;
     uint8_t keysym_high_byte, keysym_low_byte;
-    int16_t keywhat;
+    int16_t mkvkey;
     int i;
 
     if(use_scan_codes)
     {
         if(keysym == 0xff)
-            keywhat = NOTKEY;
+            mkvkey = NOTKEY;
         else
-            keywhat = keysym;
+            mkvkey = keysym;
     }
     else
     {
@@ -825,143 +821,15 @@ x_keysym_to_mac_keywhat(unsigned int keysym, int16_t button_state,
            || keysym_low_byte > (table->min + table->size))
             return false;
 
-        keywhat = table->data[keysym_low_byte - table->min];
+        mkvkey = table->data[keysym_low_byte - table->min];
     }
 
-    if(keywhat == NOTKEY)
+    if(mkvkey == NOTKEY)
         return false;
 
-    keywhat = ROMlib_right_to_left_key_map(keywhat);
+    mkvkey = ROMlib_right_to_left_key_map(mkvkey);
 
-    *virt_out = keywhat;
-    *retval_out = ROMlib_xlate(keywhat, button_state, down_p);
-    return true;
-}
-
-static bool
-keydown(uint8_t key)
-{
-    bool retval;
-    int i;
-    uint8_t bit;
-
-    retval = false;
-
-    if(ROMlib_get_index_and_bit(key, &i, &bit) && (LM(KeyMap)[i] & bit))
-        retval = true;
-
-    return retval;
-}
-
-static uint16_t
-x_to_mac_state(unsigned int x_state)
-{
-    uint16_t retval;
-
-    retval = ((x_state & ShiftMask ? shiftKey : 0)
-              | (x_state & LockMask ? alphaLock : 0)
-              | (x_state & ControlMask ? ControlKey : 0)
-              | (x_state & Button1Mask ? 0 : btnState));
-
-#if 0
-  if (use_scan_codes)
-    {
-#endif
-    if(keydown(MKV_CLOVER))
-        retval |= cmdKey;
-    if(keydown(MKV_LEFTOPTION) || keydown(MKV_RIGHTOPTION))
-        retval |= optionKey;
-#if 0
-    }
-  else
-    {
-      retval |= 
-	  (x_state & Mod1Mask     ? cmdKey     : 0)
-	| (x_state & Mod3Mask     ? optionKey  : 0)
-	| (x_state & Mod5Mask     ? optionKey  : 0);
-    }
-#endif
-
-    return retval;
-}
-
-#define X_TO_MAC_STATE(x_state) x_to_mac_state(x_state)
-
-static uint16_t which_modifier_virt(unsigned char virt)
-{
-    uint16_t retval;
-
-    retval = 0;
-    switch(virt)
-    {
-        case MKV_LEFTSHIFT:
-        case MKV_RIGHTSHIFT:
-            retval = shiftKey;
-            break;
-
-        case MKV_LEFTCNTL:
-        case MKV_RIGHTCNTL:
-            retval = ControlKey;
-            break;
-
-        case MKV_CAPS:
-            retval = alphaLock;
-            break;
-
-        case MKV_CLOVER:
-            retval = cmdKey;
-            break;
-
-        case MKV_LEFTOPTION:
-        case MKV_RIGHTOPTION:
-            retval = optionKey;
-            break;
-
-        default:
-            break;
-    }
-
-    return retval;
-}
-
-static bool
-x_modifier_p(unsigned int keysym, uint16_t *return_mac_modifier)
-{
-    int16_t modifier;
-
-    *return_mac_modifier = 0;
-    switch(keysym)
-    {
-        case XK_Shift_L:
-        case XK_Shift_R:
-            modifier = shiftKey;
-            break;
-
-        case XK_Control_L:
-        case XK_Control_R:
-            modifier = ControlKey;
-            break;
-
-        case XK_Caps_Lock:
-            modifier = alphaLock;
-            break;
-
-        /* ### XK_Shift_Lock */
-
-        case XK_Meta_L:
-        case XK_Meta_R:
-            modifier = cmdKey;
-            break;
-        case XK_Alt_L:
-        case XK_Alt_R:
-        case XK_Mode_switch:
-            modifier = optionKey;
-            break;
-        default:
-            return false;
-    }
-
-    *return_mac_modifier = modifier;
+    *virt_out = mkvkey;
     return true;
 }
 
@@ -982,10 +850,7 @@ static syn68k_addr_t
 post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
 {
     XEvent evt;
-    Point where;
-    int32_t when;
 
-    when = TickCount();
     while(XCheckTypedEvent(x_dpy, SelectionRequest, &evt)
           || XCheckMaskEvent(x_dpy, ~0L, &evt))
     {
@@ -1019,27 +884,16 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
             case KeyPress:
             case KeyRelease:
             {
-                LONGINT keywhat;
-                uint16_t button_state;
-                uint16_t modifier;
                 unsigned keysym;
                 unsigned char virt;
 
-                where.h = evt.xkey.x;
-                where.v = evt.xkey.y;
-                button_state = X_TO_MAC_STATE(evt.xkey.state);
-
-                modifier = 0;
                 if(use_scan_codes)
                 {
                     uint8_t keycode;
 
                     keycode = evt.xkey.keycode;
                     if(keycode < std::size(x_keycode_to_mac_virt))
-                    {
                         keysym = x_keycode_to_mac_virt[keycode];
-                        modifier = which_modifier_virt(keysym);
-                    }
                     else
                         keysym = NOTKEY;
                 }
@@ -1059,46 +913,18 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
 
                     if(keysym == 0xFF7E && evt.xkey.keycode == 0x4e)
                         keysym = 0xFF7D;
-
-                    x_modifier_p(keysym, &modifier);
                 }
 
-                if(modifier)
+                if(x_keysym_to_mac_virt(keysym, &virt))
                 {
-                    if(evt.type == KeyPress)
-                        button_state |= modifier;
-                    else
-                        button_state &= ~modifier;
-                }
-
-                if(x_keysym_to_mac_keywhat(keysym, button_state, &keywhat,
-                                           evt.type == KeyPress, &virt))
-                {
-                    INTEGER evcode;
-
-                    evcode = evt.type == KeyRelease ? keyUp : keyDown;
-                    post_keytrans_key_events(evcode, keywhat, when, where,
-                                             button_state, virt);
+                    vdriver->callbacks_->keyboardEvent(evt.type == KeyPress, virt);
                 }
                 break;
             }
             case ButtonPress:
             case ButtonRelease:
             {
-                int16_t button_state;
-
-                where.h = evt.xbutton.x;
-                where.v = evt.xbutton.y;
-                button_state = X_TO_MAC_STATE(evt.xbutton.state);
-                if(evt.type == ButtonPress)
-                    button_state &= ~btnState;
-                else
-                    button_state |= btnState;
-                ROMlib_PPostEvent((evt.type == ButtonRelease) ? mouseUp : mouseDown,
-                                  0, (GUEST<EvQElPtr> *)0,
-                                  when, where,
-                                  button_state);
-                adb_apeiron_hack(false);
+                vdriver->callbacks_->mouseButtonEvent(evt.type == ButtonPress, evt.xbutton.x, evt.xbutton.y);
                 break;
             }
             case Expose:
@@ -1118,18 +944,16 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                     cvt = selection_owner != None && selection_owner != x_window;
                     if(cvt)
                         ZeroScrap();
-                    sendresumeevent(cvt);
+                    vdriver->callbacks_->resumeEvent(cvt);
                 }
                 break;
             case LeaveNotify:
                 if(frob_autorepeat_p)
                     XAutoRepeatOn(x_dpy);
-                sendsuspendevent();
+                vdriver->callbacks_->suspendEvent();
                 break;
             case MotionNotify:
-                LM(MouseLocation).h = evt.xmotion.x;
-                LM(MouseLocation).v = evt.xmotion.y;
-                adb_apeiron_hack(false);
+                vdriver->callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
                 break;
         }
     }
@@ -2217,12 +2041,16 @@ void X11VideoDriver::pumpEvents()
         post_pending_x_events(/* dummy */ -1, /* dummy */ nullptr);
 
     LONGINT x, y;
-    LONGINT newmods;
+    Window dummy_window;
+    Window child_window;
+    int dummy_int;
+    unsigned int mods;
 
-    querypointerX(&x, &y, &newmods);
-    LM(MouseLocation).h = x;
-    LM(MouseLocation).v = y;
+    XQueryPointer(x_dpy, x_window, &dummy_window,
+                  &child_window, &dummy_int, &dummy_int,
+                  &x, &y, &mods);
 
+    vdriver->callbacks_->mouseMoved(x,y);
 }
 
 /* stuff from x.c */
@@ -2334,22 +2162,4 @@ std::string X11VideoDriver::getTitle(void)
     XFree(cstr);
 
     return retval;
-}
-
-int lookupkeysymX(char *evt)
-{
-    return XLookupKeysym((XKeyEvent *)evt, 0);
-}
-
-void querypointerX(int *xp, int *yp, int *modp)
-{
-    Window dummy_window;
-    Window child_window;
-    int dummy_int;
-    unsigned int mods;
-
-    XQueryPointer(x_dpy, x_window, &dummy_window,
-                  &child_window, &dummy_int, &dummy_int,
-                  xp, yp, &mods);
-    *modp = X_TO_MAC_STATE(mods);
 }

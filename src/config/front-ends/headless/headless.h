@@ -2,6 +2,8 @@
 
 class HeadlessVideoDriver : public Executor::VideoDriver
 {
+    using VideoDriver::VideoDriver;
+
     virtual void setColors(int first_color, int num_colors,
                                const struct Executor::ColorSpec *color_array) override;
     virtual bool setMode(int width, int height, int bpp,
