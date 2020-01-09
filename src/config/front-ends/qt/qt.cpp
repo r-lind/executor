@@ -133,6 +133,7 @@ public:
         {
             case QEvent::FocusIn:
                 callbacks_->resumeEvent(true);
+                break;
             case QEvent::FocusOut:
                 callbacks_->suspendEvent();
                 break;
