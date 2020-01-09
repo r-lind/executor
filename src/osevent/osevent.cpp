@@ -41,8 +41,6 @@ using namespace Executor;
 static int nevent = 0;
 static EvQEl evs[NEVENT], *freeelem = evs + NEVENT - 1;
 
-#define ROMlib_curs LM(MouseLocation)
-
 INTEGER Executor::ROMlib_mods = btnState;
 static LONGINT autoticks;
 static LONGINT lastdown = -1;
@@ -270,7 +268,7 @@ OSErr Executor::PPostEvent(INTEGER evcode, LONGINT evmsg,
     qp->evtQWhat = evcode;
     qp->evtQMessage = evmsg;
     qp->evtQWhen = TickCount();
-    qp->evtQWhere = ROMlib_curs;
+    qp->evtQWhere = LM(MouseLocation2);
     qp->evtQModifiers = ROMlib_mods;
     Enqueue((QElemPtr)qp, &LM(EventQueue));
     if(qelp)
@@ -283,8 +281,7 @@ OSErr Executor::ROMlib_PPostEvent(INTEGER evcode, LONGINT evmsg,
                                      GUEST<EvQElPtr> *qelp, LONGINT when,
                                      Point where, INTEGER butmods)
 {
-    LM(MouseLocation2).h = ROMlib_curs.h = where.h;
-    LM(MouseLocation2).v = ROMlib_curs.v = where.v;
+    LM(MouseLocation2) = LM(MTemp) = LM(MouseLocation) = where;
     ROMlib_mods = butmods;
 
     if(evcode == keyUp)
@@ -309,6 +306,14 @@ OSErr Executor::ROMlib_PPostEvent(INTEGER evcode, LONGINT evmsg,
         }
         lastdown = evmsg;
         autoticks = TickCount() + LM(KeyThresh);
+    }
+    else if(evcode == mouseDown)
+    {
+        LM(MBState) = 0;
+    }
+    else if(evcode == mouseUp)
+    {
+        LM(MBState) = 0xFF;
     }
 
     return PPostEvent(evcode, evmsg, qelp);
@@ -438,7 +443,7 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
     {
         eventp->when = TickCount();
 
-        LM(MouseLocation2) = eventp->where = ROMlib_curs;
+        eventp->where = LM(MouseLocation2);
 
         eventp->modifiers = ROMlib_mods;
         if((evmask & autoKeyMask) && lastdown != -1 && ticks > autoticks)

@@ -191,27 +191,11 @@ Executor::adb_apeiron_hack()
     static bool been_here = false;
     static long old_x;
     static long old_y;
-    long x, y;
-    bool button_is_down;
+    bool button_is_down = LM(MBState) == 0;
     char message[3];
 
-    x = LM(MouseLocation).h;
-    y = LM(MouseLocation).v;
-    button_is_down = !(ROMlib_mods & btnState);
-
-    /* begin code for PegLeg */
-
-    if(button_is_down)
-        LM(MBState) = 0;
-    else
-        LM(MBState) = 0xFF;
-
-    LM(MTemp).h = LM(MouseLocation).h;
-    LM(MTemp).v = LM(MouseLocation).v;
-
-    /* end code for PegLeg */
-
-    LM(MouseLocation2) = LM(MouseLocation);
+    long x = LM(MouseLocation).h;
+    long y = LM(MouseLocation).v;
 
     if(!been_here)
     {

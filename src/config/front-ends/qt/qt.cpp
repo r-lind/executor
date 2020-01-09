@@ -53,7 +53,6 @@ namespace
 class ExecutorWindow;
 QGuiApplication *qapp;
 QImage *qimage;
-uint16_t keymod = btnState;
 ExecutorWindow *window;
 
 class ExecutorWindow : public QRasterWindow

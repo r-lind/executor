@@ -16,15 +16,14 @@ void VideoDriverCallbacks::mouseButtonEvent(bool down, int h, int v)
         modifiers |= btnState;
 
     ROMlib_PPostEvent(down ? mouseDown : mouseUp,
-                        0, nullptr, TickCount(), Point{v,h},
+                        0, nullptr, TickCount(), Point{int16_t(v),int16_t(h)},
                         modifiers);
     adb_apeiron_hack();
 }
 
 void VideoDriverCallbacks::mouseMoved(int h, int v)
 {
-    LM(MouseLocation).h = h;
-    LM(MouseLocation).v = v;
+    LM(MouseLocation2) = LM(MTemp) = LM(MouseLocation) = Point{(int16_t)v, (int16_t)h};
 
     adb_apeiron_hack();
 }
