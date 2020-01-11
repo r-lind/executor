@@ -555,7 +555,7 @@ foreach(FRONT_END ${FRONT_ENDS})
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
     if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
-        set_target_properties(executor PROPERTIES
+        set_target_properties(executor-${FRONT_END} PROPERTIES
                 MACOSX_BUNDLE TRUE
                 MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
             )
