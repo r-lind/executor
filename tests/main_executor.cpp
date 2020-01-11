@@ -7,6 +7,7 @@
 #include <MenuMgr.h>
 #include <FontMgr.h>
 #include <rsys/executor.h>
+#include <osevent/osevent.h>
 
 using namespace Executor;
 
@@ -98,6 +99,7 @@ public:
 
         InitResources();
         ROMlib_InitGDevices();
+        ROMlib_eventinit();
 
         ROMlib_color_init();
         InitGraf(&qd.thePort);

@@ -50,9 +50,8 @@ public:
     virtual void keyboardEvent(bool down, unsigned char mkvkey);
     virtual void suspendEvent();
     virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */);
-
 private:
-    uint16_t modifiers = 0;
+    GUEST<uint32_t> keytransState = 0;
 };
 
 class VideoDriver
