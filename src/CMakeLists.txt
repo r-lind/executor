@@ -549,21 +549,23 @@ target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
 target_link_libraries(romlib resources)
 
 foreach(FRONT_END ${FRONT_ENDS})
-    add_executable(executor-${FRONT_END} main.cpp)
-    target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
-    set_target_properties(executor-${FRONT_END} PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-    if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
+    if(TARGET front-end-${FRONT_END})
+        add_executable(executor-${FRONT_END} main.cpp)
+        target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
         set_target_properties(executor-${FRONT_END} PROPERTIES
-                MACOSX_BUNDLE TRUE
-                MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
-            )
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+        if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
+            set_target_properties(executor-${FRONT_END} PROPERTIES
+                    MACOSX_BUNDLE TRUE
+                    MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
+                )
+        endif()
+        
+        install(TARGETS executor-${FRONT_END}
+            RUNTIME DESTINATION bin
+            BUNDLE DESTINATION .)
     endif()
-    
-    install(TARGETS executor-${FRONT_END}
-        RUNTIME DESTINATION bin
-        BUNDLE DESTINATION .)
 endforeach()
 
 if(TARGET executor-qt)
