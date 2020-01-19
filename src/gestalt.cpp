@@ -13,14 +13,10 @@
 #include <mman/mman.h>
 #include <rsys/gestalt.h>
 #include <rsys/version.h>
-#include <vdriver/vdriver.h>
 #include <base/functions.impl.h>
 #include <base/traps.impl.h>
 
 using namespace Executor;
-
-static OSErr C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep);
-PASCAL_FUNCTION_PTR(PhysicalGestalt);
 
 typedef struct
 {
@@ -230,8 +226,6 @@ static gestaltentry_t gtable[] = {
     { gestaltEditionMgrAttr, 1 }, /* must be 1 */
     { gestaltAliasMgrAttr, 1 }, /* must be 1 */
 
-    { gestaltPHYSICAL, 0 }, /* will be filled in w/ callback address */
-
 #define SYSTEM_7_EXTRAS 2
 
     {
@@ -254,33 +248,6 @@ static OSType gtable_selectors_to_patch[] = {
     gestaltExtToolboxTable,
     gestaltToolboxTable,
     gestaltOSTable,
-};
-
-/*
-gestaltSystemVersion   		'sysv' Executor version numeric encoding
-gestaltPhysicalRAMSize		'ram '
-*/
-
-#define TO_BE_FILLED_IN (0)
-
-static gestaltentry_t phystable[] = {
-    { gestaltSystemVersion, EXECUTOR_VERSION_NUMERIC },
-#if SIZEOF_CHAR_P == 4
-    { gestaltExecutorVersionString, (long)EXECUTOR_VERSION },
-#else
-// FIXME: #warning gestaltExecutorVersionString not currently available
-#endif
-#if defined(LINUX) || defined(CYGWIN32)
-    { gestaltPhysicalRAMSize, TO_BE_FILLED_IN },
-#endif
-    { gestaltScreenSize, TO_BE_FILLED_IN },
-#if defined(CYGWIN32)
-    { gestaltGhostScriptVersion, TO_BE_FILLED_IN },
-#endif
-};
-
-static OSType phystable_selectors_to_patch[] = {
-    gestaltExecutorVersionString,
 };
 
 typedef struct gestalt_link_str
@@ -361,12 +328,6 @@ replace_selector_in_table(OSType selector, LONGINT new_value,
     replace_selector_in_table(selector, new_value, table, std::size(table))
 
 void
-Executor::replace_physgestalt_selector(OSType selector, uint32_t new_value)
-{
-    REPLACE_SELECTOR_IN_TABLE(selector, new_value, phystable);
-}
-
-void
 Executor::gestalt_set_memory_size(uint32_t size)
 {
     REPLACE_SELECTOR_IN_TABLE(gestaltLogicalRAMSize, size, gtable);
@@ -379,20 +340,6 @@ Executor::gestalt_set_system_version(uint32_t version)
     REPLACE_SELECTOR_IN_TABLE(gestaltSystemVersion, version, gtable);
 }
 
-void
-gestalt_set_physical_gestalt_callback(void)
-{
-    REPLACE_SELECTOR_IN_TABLE(gestaltPHYSICAL,
-                              (long)US_TO_SYN68K((ProcPtr)&PhysicalGestalt), gtable);
-}
-
-#if defined(powerpc) || defined(__ppc__)
-void
-gestalt_set_cpu_type(uint32_t type)
-{
-    REPLACE_SELECTOR_IN_TABLE(gestaltPHYSICAL, type, gtable);
-}
-#endif
 
 static OSErr
 gestalt_helper(OSType selector, GUEST<LONGINT> *responsep, Boolean searchlist,
@@ -513,17 +460,6 @@ OSErr Executor::C_Gestalt(OSType selector, GUEST<LONGINT> *responsep)
                        (selector >> 16) & 0xFF,
                        (selector >> 8) & 0xFF,
                        (selector)&0xFF);
-#if defined(CYGWIN32)
-    if((uint32_t)selector == 0xb7d20e84)
-    {
-        OSErr retval;
-
-        warning_trace_info("about to dongle_query");
-        retval = dongle_query(responsep);
-        warning_trace_info("dongle_queried");
-        return retval;
-    }
-#endif
 
     {
         gestalt_list_entry_t *p, *ep;
@@ -541,38 +477,10 @@ OSErr Executor::C_Gestalt(OSType selector, GUEST<LONGINT> *responsep)
 
     if(!been_here)
     {
-        gestalt_set_physical_gestalt_callback();
         OFFSET_ADDRESSES(gtable);
-        OFFSET_ADDRESSES(phystable);
         been_here = true;
     }
     return gestalt_helper(selector, responsep, true, gtable, std::size(gtable));
-}
-
-static OSErr C_PhysicalGestalt(OSType selector, GUEST<LONGINT> *responsep)
-{
-    OSErr retval;
-
-    switch(selector)
-    {
-        case gestaltScreenSize:
-            replace_physgestalt_selector(gestaltScreenSize,
-                                         ((vdriver->height() << 16) | (uint16_t)vdriver->width()));
-            break;
-#if defined(CYGWIN32)
-        case gestaltGhostScriptVersion:
-            set_gs_gestalt_info();
-            break;
-#endif
-        default:
-            break;
-    }
-
-    retval = gestalt_helper(selector, responsep, false, phystable,
-                            std::size(phystable));
-    if(retval == gestaltUndefSelectorErr)
-        retval = physicalUndefSelectorErr;
-    return retval;
 }
 
 OSErr Executor::C_GestaltTablesOnly(OSType selector,
