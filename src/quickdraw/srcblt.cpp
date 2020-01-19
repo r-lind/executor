@@ -6,7 +6,6 @@
 #include <quickdraw/srcblt.h>
 #include <quickdraw/quick.h>
 #include <quickdraw/xdblt.h>
-#include <vdriver/vdriver.h>
 #include <prefs/prefs.h>
 
 // FIXME: #warning This seems unsafe...

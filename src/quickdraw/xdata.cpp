@@ -11,8 +11,6 @@
 #include <mman/tempalloc.h>
 #include <mman/mman.h>
 
-#include <vdriver/vdriver.h>
-
 using namespace Executor;
 
 bool Executor::update_xdata_if_needed(xdata_handle_t xh, PixPat *pixpat,

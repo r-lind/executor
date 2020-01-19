@@ -22,7 +22,6 @@
 #include <rsys/segment.h>
 #include <commandline/flags.h>
 #include <rsys/version.h>
-#include <vdriver/vdriver.h>
 #include <osevent/osevent.h>
 #include <prefs/options.h>
 #include <error/syserr.h>

@@ -14,7 +14,6 @@
 #include <rsys/safe_alloca.h>
 #include <mman/tempalloc.h>
 #include <vdriver/dirtyrect.h>
-#include <vdriver/vdriver.h>
 
 #undef ALLOCABEGIN
 #define ALLOCABEGIN SAFE_DECL();
