@@ -5,7 +5,6 @@
 #include <base/common.h>
 #include <Gestalt.h>
 #include <commandline/parseopt.h>
-#include <vdriver/vdriver.h>
 #include <commandline/flags.h>
 #include <prefs/prefs.h>
 #include <rsys/version.h>
@@ -135,10 +134,9 @@ bool Executor::parse_size_opt(string opt, string arg1)
                 opt.c_str());
         success_p = false;
     }
-    else if(w < VDRIVER_MIN_SCREEN_WIDTH || h < VDRIVER_MIN_SCREEN_HEIGHT)
+    else if(w < 512 || h < 342)
     {
-        fprintf(stderr, "Screen size must be at least %dx%d.\n",
-                VDRIVER_MIN_SCREEN_WIDTH, VDRIVER_MIN_SCREEN_HEIGHT);
+        fprintf(stderr, "Screen size must be at least 512x342\n");
         success_p = false;
     }
     else

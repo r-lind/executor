@@ -6,7 +6,6 @@
 
 #include <rsys/aboutbox.h>
 #include <mman/mman.h>
-#include <vdriver/vdriver.h>
 #include <rsys/string.h>
 #include <quickdraw/cquick.h>
 #include <quickdraw/quick.h>
@@ -312,11 +311,12 @@ create_about_box()
     Rect about_box_bounds;
     int b;
 
+    
     SetRect(&about_box_bounds,
-            (vdriver->width() - ABOUT_BOX_WIDTH) / 2U,
-            (vdriver->height() - ABOUT_BOX_HEIGHT) / 3U + 15,
-            (vdriver->width() + ABOUT_BOX_WIDTH) / 2U,
-            (vdriver->height() + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
+            (qdGlobals().screenBits.bounds.right - ABOUT_BOX_WIDTH) / 2U,
+            (qdGlobals().screenBits.bounds.bottom - ABOUT_BOX_HEIGHT) / 3U + 15,
+            (qdGlobals().screenBits.bounds.right + ABOUT_BOX_WIDTH) / 2U,
+            (qdGlobals().screenBits.bounds.bottom + 2 * ABOUT_BOX_HEIGHT) / 3U + 15);
 
     /* Create the window. */
     about_box = NewCWindow(nullptr, &about_box_bounds,
