@@ -454,6 +454,14 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     if(LM(WWExist) == EXIST_YES)
     {
+        // FIXME: this is not what the Mac does.
+        // on MacOS, a lowmem global at 0xD66 contains a Handle to a system heap block
+        // that contains a list of all GrafPorts in the system.
+        // It starts with a two-byte count and then contains the specified number of pointers.
+        // It is updated by Open[C]Port and Close[C]Port.
+        // When reconfiguring displays, the DisplayManager updates bitmaps/pixmaps/colors for
+        // all ports, and portRects/regions for all screen-sized ports.
+
         for(tw = LM(WindowList); tw; tw = WINDOW_NEXT_WINDOW(tw))
         {
             GrafPtr gp;

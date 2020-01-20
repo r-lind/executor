@@ -3,7 +3,6 @@
 
 #include <QuickDraw.h>
 #include <quickdraw/cquick.h>
-#include <vdriver/vdriver.h>
 
 extern "C" {
 

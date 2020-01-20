@@ -366,14 +366,6 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
                     retval = false;
                     doquitreallyquits();
                     break;
-                case 0x1a:
-                    retval = false;
-                    /* Reset the video mode.  Seems to be needed under DOS
-		 * sometimes when hotkeying around.
-		 */
-                    vdriver->setMode(0, 0, 0, vdriver->isGrayscale());
-                    redraw_screen();
-                    break;
                 // case 0x1c: // command shift 8
             }
             if(!retval)
