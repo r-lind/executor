@@ -20,7 +20,6 @@
 #include <osevent/osevent.h>
 #include <quickdraw/text.h>
 #include <prefs/prefs.h>
-#include <vdriver/vdriver.h>
 #include <textedit/textedit.h>
 
 using namespace Executor;
@@ -596,6 +595,8 @@ void Executor::C_TECopy(TEHandle te)
     Text = (char *)*hText;
 
     PtrToXHand((Ptr)&Text[start], LM(TEScrpHandle), len);
+    LM(TEScrpLength) = len;
+
     if(TE_STYLIZED_P(te))
     {
         TEStyleHandle te_style;
@@ -658,12 +659,6 @@ void Executor::C_TECopy(TEHandle te)
 
         HSetState((Handle)te_style, te_style_flags);
     }
-    LM(TEScrpLength) = len;
-
-    // FIXME: I seem to dimly remember that the TE scrap was separate from the global scrap.
-    /* ### should this lock `LM(TEScrpHandle)'? */
-    vdriver->putScrap("TEXT"_4, LM(TEScrpLength),   
-                      (char *)*LM(TEScrpHandle), LM(ScrapCount));
 
     HSetState(hText, hText_flags);
 }
@@ -676,12 +671,6 @@ void Executor::C_TECut(TEHandle teh)
 
 void Executor::C_TEPaste(TEHandle teh)
 {
-    Size s;
-
-    s = vdriver->getScrap("TEXT"_4, LM(TEScrpHandle));
-    if(s >= 0)
-        LM(TEScrpLength) = s;
-
     HLockGuard guard(LM(TEScrpHandle));
     ROMlib_tedoitall(teh, *LM(TEScrpHandle), LM(TEScrpLength),
                      false, nullptr);
