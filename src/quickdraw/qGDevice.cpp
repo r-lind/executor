@@ -51,20 +51,17 @@ mode_from_bpp(int bpp)
 
 void Executor::gd_allocate_main_device(void)
 {
-    GDHandle graphics_device;
-
     if(vdriver->framebuffer() == nullptr)
         gui_fatal("vdriver not initialized, unable to allocate `LM(MainDevice)'");
 
     TheZoneGuard guard(LM(SysZone));
 
     PixMapHandle gd_pixmap;
-    Rect *gd_rect;
 
     SET_HILITE_BIT();
     LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = nullptr;
 
-    graphics_device = NewGDevice(/* no driver */ 0,
+    GDHandle graphics_device = NewGDevice(/* no driver */ 0,
                                  mode_from_bpp(vdriver->bpp()));
 
     /* we are the main device, since there are currently no others */
@@ -168,9 +165,8 @@ void Executor::gd_set_bpp()
     bool fixed_p = vdriver->isFixedCLUT();
     int bpp = vdriver->bpp();
 
-    PixMapHandle gd_pixmap;
-    bool main_device_p = (gd == );
-
+    PixMapHandle gd_pixmap = GD_PMAP(gd);
+    
     /* set the color bit, all other flag bits should be the same */
     if(color_p)
         GD_FLAGS(gd) |= 1 << gdDevType;
@@ -181,7 +177,6 @@ void Executor::gd_set_bpp()
                          ? directType
                          : (fixed_p ? fixedType : clutType));
 
-    gd_pixmap = GD_PMAP(gd);
     pixmap_set_pixel_fields(*gd_pixmap, bpp);
 
     if(bpp <= 8)
@@ -227,7 +222,7 @@ void Executor::gd_set_bpp()
 
     PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
 
-    Rect *gd_rect = &GD_RECT(graphics_device);
+    Rect *gd_rect = &GD_RECT(gd);
     gd_rect->top = gd_rect->left = 0;
     gd_rect->bottom = vdriver->height();
     gd_rect->right = vdriver->width();
