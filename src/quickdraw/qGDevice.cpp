@@ -83,18 +83,9 @@ void Executor::gd_allocate_main_device(void)
 						 be setting this bit.
 					    | (1 << noDriver) */;
 
-    gd_set_bpp(graphics_device, !vdriver->isGrayscale(), vdriver->isFixedCLUT(),
-               vdriver->bpp());
+    gd_set_bpp();
 
     gd_pixmap = GD_PMAP(graphics_device);
-    PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
-    PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
-
-    gd_rect = &GD_RECT(graphics_device);
-    gd_rect->top = gd_rect->left = 0;
-    gd_rect->bottom = vdriver->height();
-    gd_rect->right = vdriver->width();
-    PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
 
     /* add ourselves to the device list */
     GD_NEXT_GD(graphics_device) = LM(DeviceList);
@@ -170,10 +161,15 @@ GDHandle Executor::C_NewGDevice(INTEGER ref_num, LONGINT mode)
     return this2;
 }
 
-void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
+void Executor::gd_set_bpp()
 {
+    GDHandle gd = LM(MainDevice);
+    bool color_p = !vdriver->isGrayscale();
+    bool fixed_p = vdriver->isFixedCLUT();
+    int bpp = vdriver->bpp();
+
     PixMapHandle gd_pixmap;
-    bool main_device_p = (gd == LM(MainDevice));
+    bool main_device_p = (gd == );
 
     /* set the color bit, all other flag bits should be the same */
     if(color_p)
@@ -196,21 +192,16 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
 
         if(fixed_p)
         {
-            if(!main_device_p)
-                gui_fatal("unable to set bpp of gd not the screen");
-            else
-            {
-                CTabHandle gd_color_table;
+            CTabHandle gd_color_table;
 
-                gd_color_table = PIXMAP_TABLE(gd_pixmap);
-                SetHandleSize((Handle)gd_color_table,
-                              CTAB_STORAGE_FOR_SIZE((1 << bpp) - 1));
-                CTAB_SIZE(gd_color_table) = (1 << bpp) - 1;
-                vdriver->getColors(0, 1 << bpp,
-                                   CTAB_TABLE(gd_color_table));
+            gd_color_table = PIXMAP_TABLE(gd_pixmap);
+            SetHandleSize((Handle)gd_color_table,
+                            CTAB_STORAGE_FOR_SIZE((1 << bpp) - 1));
+            CTAB_SIZE(gd_color_table) = (1 << bpp) - 1;
+            vdriver->getColors(0, 1 << bpp,
+                                CTAB_TABLE(gd_color_table));
 
-                CTAB_SEED(gd_color_table) = GetCTSeed();
-            }
+            CTAB_SEED(gd_color_table) = GetCTSeed();
         }
         else
         {
@@ -224,21 +215,27 @@ void Executor::gd_set_bpp(GDHandle gd, bool color_p, bool fixed_p, int bpp)
                           color_p ? bpp : (bpp + 32));
             ROMlib_copy_ctab(temp_color_table, gd_color_table);
             DisposeCTable(temp_color_table);
+
+            vdriver->setColors(0, 1 << bpp, CTAB_TABLE(gd_color_table));
         }
 
         CTAB_FLAGS(gd_color_table) = CTAB_GDEVICE_BIT;
         MakeITable(gd_color_table, GD_ITABLE(gd), GD_RES_PREF(gd));
-
-        if(main_device_p && !fixed_p && bpp <= 8)
-            vdriver->setColors(0, 1 << bpp, CTAB_TABLE(gd_color_table));
     }
+
+    PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
+
+    PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
+
+    Rect *gd_rect = &GD_RECT(graphics_device);
+    gd_rect->top = gd_rect->left = 0;
+    gd_rect->bottom = vdriver->height();
+    gd_rect->right = vdriver->width();
+    PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
 }
 
 /* it seems that `gd_ref_num' describes which device to initialize,
-   and `mode' tells it what mode to start it in
-
-   i'm not sure how this2 relates to NeXT/vga video hardware, for now,
-   we do nothing */
+   and `mode' tells it what mode to start it in */
 void Executor::C_InitGDevice(INTEGER gd_ref_num, LONGINT mode, GDHandle gdh)
 {
 }
@@ -437,10 +434,7 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
 
-    gd_set_bpp(gdh, !vdriver->isGrayscale(), vdriver->isFixedCLUT(), bpp);
-
-    PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
-    qdGlobals().screenBits.rowBytes = vdriver->rowBytes();
+    gd_set_bpp();
 
     cursor_reset_current_cursor();
 
