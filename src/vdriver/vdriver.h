@@ -27,10 +27,16 @@ namespace Executor
 #define VDRIVER_DEFAULT_SCREEN_WIDTH 640
 #define VDRIVER_DEFAULT_SCREEN_HEIGHT 480
 
-typedef struct
+struct vdriver_rect_t
 {
     int top, left, bottom, right;
-} vdriver_rect_t;
+};
+
+struct vdriver_color_t
+{
+    uint16_t red, green, blue;
+};
+
 }
 
 namespace Executor
@@ -74,10 +80,7 @@ public:
     virtual bool isAcceptableMode(int width, int height, int bpp,
                                       bool grayscale_p,
                                       bool exact_match_p);
-    virtual void setColors(int first_color, int num_colors,
-                               const struct ColorSpec *color_array) = 0;
-    virtual void getColors(int first_color, int num_colors,
-                                struct ColorSpec *color_array);
+    virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) = 0;
     virtual void flushDisplay();
@@ -110,7 +113,6 @@ public:
     int maxBpp() { return maxBpp_; }
     rgb_spec_t *rgbSpec() { return rgbSpec_; }
     bool isGrayscale() { return isGrayscale_; }
-    bool isFixedCLUT() { return isFixedCLUT_; }
     bool isRootless() { return isRootless_; }
 
 public:
@@ -126,7 +128,6 @@ public:
     int maxBpp_ = 8;
     int cursorDepth_ = 1;
     bool isRootless_ = false;
-    bool isFixedCLUT_ = false;
 
     rgb_spec_t *rgbSpec_ = nullptr;
 };

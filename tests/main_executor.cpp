@@ -31,8 +31,7 @@ class MockVDriver : public VideoDriver
 {
     using VideoDriver::VideoDriver;
 
-    virtual void setColors(int first_color, int num_colors,
-                               const struct ColorSpec *color_array) override
+    virtual void setColors(int num_colors, const vdriver_color_t *colors) override
     {
 
     }

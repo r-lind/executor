@@ -1,10 +1,4 @@
 #include "sdl2.h"
-#include <rsys/adb.h>
-#include <osevent/osevent.h>
-#include <rsys/scrap.h>
-#include <rsys/keyboard.h>
-#include <OSEvent.h>
-#include <ToolboxEvent.h>
 #include <SegmentLdr.h>
 
 #include "keycode_map.h"
@@ -109,18 +103,18 @@ bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     return true;
 }
 
-void SDL2VideoDriver::setColors(int first_color, int num_colors, const ColorSpec *colors)
+void SDL2VideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
 {
     SDL_Color *sdlColors = (SDL_Color *)alloca(sizeof(SDL_Color) * num_colors);
     for(int i = 0; i < num_colors; i++)
     {
         sdlColors[i].a = 255;
-        sdlColors[i].r = colors[i].rgb.red >> 8;
-        sdlColors[i].g = colors[i].rgb.green >> 8;
-        sdlColors[i].b = colors[i].rgb.blue >> 8;
+        sdlColors[i].r = colors[i].red >> 8;
+        sdlColors[i].g = colors[i].green >> 8;
+        sdlColors[i].b = colors[i].blue >> 8;
     }
 
-    SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, first_color, num_colors);
+    SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, 0, num_colors);
 }
 
 void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
@@ -187,7 +181,6 @@ void SDL2VideoDriver::pumpEvents()
                     else
                         mkvkey = p->second;
                 }
-                mkvkey = ROMlib_right_to_left_key_map(mkvkey);
                 callbacks_->keyboardEvent(down_p, mkvkey);
             }
             break;

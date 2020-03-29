@@ -87,11 +87,6 @@ void Executor::gd_allocate_main_device(void)
     /* add ourselves to the device list */
     GD_NEXT_GD(graphics_device) = LM(DeviceList);
     LM(DeviceList) = graphics_device;
-
-    /* Assure that we're using the correct colors. */
-    if(vdriver->bpp() <= 8)
-        vdriver->setColors(0, 1 << vdriver->bpp(),
-                           CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(graphics_device))));
 }
 
 GDHandle Executor::C_NewGDevice(INTEGER ref_num, LONGINT mode)
@@ -158,11 +153,34 @@ GDHandle Executor::C_NewGDevice(INTEGER ref_num, LONGINT mode)
     return this2;
 }
 
+void Executor::gd_update_colors()
+{
+    GDHandle gd = LM(TheGDevice);
+
+    if(GD_TYPE(gd) != clutType)
+        /* no updates to do here */
+        return;
+
+    auto gd_ctab = PIXMAP_TABLE(GD_PMAP(gd));
+
+    vdriver_color_t colors[256];
+    int n = CTAB_SIZE(gd_ctab) + 1;
+    assert(n <= 256);
+
+    auto ctab = CTAB_TABLE(gd_ctab);
+
+    for(int i = 0; i <= n; i++)
+    {
+        colors[i] = { ctab[i].rgb.red, ctab[i].rgb.green, ctab[i].rgb.blue };
+    }
+
+    vdriver->setColors(n, colors);
+}
+
 void Executor::gd_set_bpp()
 {
     GDHandle gd = LM(MainDevice);
     bool color_p = !vdriver->isGrayscale();
-    bool fixed_p = vdriver->isFixedCLUT();
     int bpp = vdriver->bpp();
 
     PixMapHandle gd_pixmap = GD_PMAP(gd);
@@ -173,9 +191,7 @@ void Executor::gd_set_bpp()
     else
         GD_FLAGS(gd) &= ~(1 << gdDevType);
 
-    GD_TYPE(gd) = (bpp > 8
-                         ? directType
-                         : (fixed_p ? fixedType : clutType));
+    GD_TYPE(gd) = (bpp > 8 ? directType : clutType);
 
     pixmap_set_pixel_fields(*gd_pixmap, bpp);
 
@@ -185,37 +201,21 @@ void Executor::gd_set_bpp()
 
         gd_color_table = PIXMAP_TABLE(gd_pixmap);
 
-        if(fixed_p)
-        {
-            CTabHandle gd_color_table;
+        CTabHandle temp_color_table;
 
-            gd_color_table = PIXMAP_TABLE(gd_pixmap);
-            SetHandleSize((Handle)gd_color_table,
-                            CTAB_STORAGE_FOR_SIZE((1 << bpp) - 1));
-            CTAB_SIZE(gd_color_table) = (1 << bpp) - 1;
-            vdriver->getColors(0, 1 << bpp,
-                                CTAB_TABLE(gd_color_table));
-
-            CTAB_SEED(gd_color_table) = GetCTSeed();
-        }
-        else
-        {
-            CTabHandle temp_color_table;
-
-            temp_color_table = GetCTable(color_p
-                                             ? bpp
-                                             : (bpp + 32));
-            if(temp_color_table == nullptr)
-                gui_fatal("unable to get color table `%d'",
-                          color_p ? bpp : (bpp + 32));
-            ROMlib_copy_ctab(temp_color_table, gd_color_table);
-            DisposeCTable(temp_color_table);
-
-            vdriver->setColors(0, 1 << bpp, CTAB_TABLE(gd_color_table));
-        }
+        temp_color_table = GetCTable(color_p
+                                            ? bpp
+                                            : (bpp + 32));
+        if(temp_color_table == nullptr)
+            gui_fatal("unable to get color table `%d'",
+                        color_p ? bpp : (bpp + 32));
+        ROMlib_copy_ctab(temp_color_table, gd_color_table);
+        DisposeCTable(temp_color_table);
 
         CTAB_FLAGS(gd_color_table) = CTAB_GDEVICE_BIT;
         MakeITable(gd_color_table, GD_ITABLE(gd), GD_RES_PREF(gd));
+
+        gd_update_colors();
     }
 
     PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());

@@ -64,15 +64,6 @@ void VideoDriver::registerOptions()
 {
 }
 
-void VideoDriver::getColors(int first_color, int num_colors,
-                                struct ColorSpec *color_array)
-{
-    if(!isFixedCLUT())
-        gui_fatal("`!vdriver_fixed_clut_p' and `VideoDriver::getColors ()' called");
-    else
-        gui_fatal("`VideoDriver::getColors ()' unimplemented");
-}
-
 void VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_cnt)
 {
 }

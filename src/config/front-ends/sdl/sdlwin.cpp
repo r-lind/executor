@@ -193,7 +193,7 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     return (true);
 }
 
-void SDLVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *colors)
+void SDLVideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
 {
     int i;
     SDL_Color *sdl_cmap;
@@ -201,9 +201,9 @@ void SDLVideoDriver::setColors(int first_color, int num_colors, const ColorSpec 
     sdl_cmap = (SDL_Color *)alloca(num_colors * sizeof(SDL_Color));
     for(i = 0; i < num_colors; ++i)
     {
-        sdl_cmap[i].r = (colors[i].rgb.red >> 8);
-        sdl_cmap[i].g = (colors[i].rgb.green >> 8);
-        sdl_cmap[i].b = (colors[i].rgb.blue >> 8);
+        sdl_cmap[i].r = (colors[i].red >> 8);
+        sdl_cmap[i].g = (colors[i].green >> 8);
+        sdl_cmap[i].b = (colors[i].blue >> 8);
     }
     SDL_SetColors(screen, sdl_cmap, first_color, num_colors);
 }

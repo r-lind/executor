@@ -1527,16 +1527,16 @@ static uint32_t _cmap_mapping[256];
 static uint32_t *cmap_mapping;
 
 static void
-compute_new_mapping(int index, const ColorSpec *c)
+compute_new_mapping(int index, const vdriver_color_t *c)
 {
     int i;
     int min = -1;
     unsigned min_dist = MAX_CDIST;
     int shifted_c_red, shifted_c_blue, shifted_c_green;
 
-    shifted_c_red = c->rgb.red >> 1;
-    shifted_c_green = c->rgb.green >> 1;
-    shifted_c_blue = c->rgb.blue >> 1;
+    shifted_c_red = c->red >> 1;
+    shifted_c_green = c->green >> 1;
+    shifted_c_blue = c->blue >> 1;
 
     for(i = (1 << x_fbuf_bpp) - 1; i >= 0; i--)
     {
@@ -1774,11 +1774,9 @@ void init_x_cmap(void)
     x_cmap_initialized_p = true;
 }
 
-static ColorSpec cmap[256];
 static uint8_t depth_table_space[DEPTHCONV_MAX_TABLE_SIZE];
 
-void X11VideoDriver::setColors(int first_color, int num_colors,
-                               const ColorSpec *colors)
+void X11VideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
 {
     int i;
 
@@ -1798,11 +1796,13 @@ void X11VideoDriver::setColors(int first_color, int num_colors,
         }
         else
         {
-            memcpy(&cmap[first_color], colors, num_colors * sizeof *colors);
-
+            ColorSpec table[256];
+            for(int i = 0; i < num_colors; i++)
+                table[i] = { i, { colors[i].red, colors[i].green, colors[i].blue }};
+            
             conversion_func
                 = depthconv_make_ind_to_rgb_table(depth_table_space, bpp(),
-                                                  nullptr, colors, &x_rgb_spec);
+                                                  nullptr, table, &x_rgb_spec);
             updateScreen(0, 0, height(), width(), false);
         }
     }
@@ -1821,11 +1821,11 @@ void X11VideoDriver::setColors(int first_color, int num_colors,
 
             for(i = 0; i < num_colors; i++)
             {
-                x_colors[i].pixel = first_color + i;
+                x_colors[i].pixel = i;
 
-                x_colors[i].red = colors[i].rgb.red;
-                x_colors[i].green = colors[i].rgb.green;
-                x_colors[i].blue = colors[i].rgb.blue;
+                x_colors[i].red = colors[i].red;
+                x_colors[i].green = colors[i].green;
+                x_colors[i].blue = colors[i].blue;
 
                 x_colors[i].flags = DoRed | DoGreen | DoBlue;
             }
@@ -1838,7 +1838,7 @@ void X11VideoDriver::setColors(int first_color, int num_colors,
                 init_x_cmap();
 
             for(i = 0; i < num_colors; i++)
-                compute_new_mapping(first_color + i, &colors[i]);
+                compute_new_mapping(i, &colors[i]);
 
             cmap_mapping = _cmap_mapping;
 

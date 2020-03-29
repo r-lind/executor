@@ -15,12 +15,6 @@
 
 #include <vdriver/vdriver.h>
 #include <quickdraw/cquick.h> /* for ThePortGuard */
-#include <rsys/adb.h>
-#include <osevent/osevent.h>
-#include <rsys/scrap.h>
-#include <rsys/keyboard.h>
-#include <OSEvent.h>
-#include <ToolboxEvent.h>
 
 #include "available_geometry.h"
 
@@ -108,7 +102,6 @@ public:
         if(ev->nativeVirtualKey())
             mkvkey = ev->nativeVirtualKey();
 #endif
-        mkvkey = ROMlib_right_to_left_key_map(mkvkey);
         callbacks_->keyboardEvent(down_p, mkvkey);
     }
     
@@ -255,7 +248,7 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 #endif
     return true;
 }
-void QtVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *colors)
+void QtVideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
 {
     if(bpp_ > 8)
         return;
@@ -264,9 +257,9 @@ void QtVideoDriver::setColors(int first_color, int num_colors, const ColorSpec *
     for(int i = 0; i < num_colors; i++)
     {
         qcolors[i] = qRgb(
-            colors[i].rgb.red >> 8,
-            colors[i].rgb.green >> 8,
-            colors[i].rgb.blue >> 8
+            colors[i].red >> 8,
+            colors[i].green >> 8,
+            colors[i].blue >> 8
         );
     }
     qimage->setColorTable(qcolors);
