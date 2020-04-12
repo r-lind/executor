@@ -73,7 +73,7 @@ static int x_fd = -1;
 
 #define EXECUTOR_WINDOW_EVENT_MASK (KeyPressMask | KeyReleaseMask         \
                                     | ButtonPressMask | ButtonReleaseMask \
-                                    | EnterWindowMask | LeaveWindowMask   \
+                                    | FocusChangeMask   \
                                     | ExposureMask | PointerMotionMask    \
                                     | ColormapChangeMask)
 
@@ -933,7 +933,7 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                                           evt.xexpose.y + evt.xexpose.height,
                                           evt.xexpose.x + evt.xexpose.width, false);
                 break;
-            case EnterNotify:
+            case FocusIn:
                 if(frob_autorepeat_p)
                     XAutoRepeatOff(x_dpy);
                 {
@@ -947,7 +947,7 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                     vdriver->callbacks_->resumeEvent(cvt);
                 }
                 break;
-            case LeaveNotify:
+            case FocusOut:
                 if(frob_autorepeat_p)
                     XAutoRepeatOn(x_dpy);
                 vdriver->callbacks_->suspendEvent();
