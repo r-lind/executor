@@ -197,6 +197,9 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         delete[] framebuffer_;
     
     QRect geom = screenGeometries[0];
+    for(const QRect& r : screenGeometries)
+        if(r.width() * r.height() > geom.width() * geom.height())
+            geom = r;
 
     width_ = geom.width();
     height_ = geom.height();
