@@ -20,8 +20,6 @@
 #include <signal.h>
 #include <fcntl.h>
 
-#include "sigio_multiplex.h"
-
 #include <X11/X.h>
 #include <X11/Xlib.h>
 /* declares a data type `Region' */
@@ -1178,7 +1176,14 @@ bool X11VideoDriver::init()
     {
         x_fd = XConnectionNumber(x_dpy);
 
-        sigio_multiplex_install_handler(x_fd, x_event_handler);
+        struct sigaction sa;
+
+        sa.sa_handler = x_event_handler;
+        sigemptyset(&sa.sa_mask);
+        sigaddset(&sa.sa_mask, SIGIO);
+        sa.sa_flags = 0;
+
+        sigaction(SIGIO, &sa, nullptr);
 
         fcntl(x_fd, F_GETOWN, &orig_sigio_owner);
         fcntl(x_fd, F_SETOWN, getpid());
