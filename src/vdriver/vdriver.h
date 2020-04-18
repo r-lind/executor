@@ -90,7 +90,6 @@ public:
     virtual void weOwnScrap();
 
     virtual void setTitle(const std::string& name);
-    virtual std::string getTitle();
 
     virtual void setCursor(char *cursor_data,
                                 uint16_t cursor_mask[16],

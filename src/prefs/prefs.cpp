@@ -157,12 +157,6 @@ int Executor::saveprefvalues(const char *savefilename)
             clean(ROMlib_WindowName);
             fprintf(fp, "WindowName = \"%s\";\n", ROMlib_WindowName.c_str());
         }
-        else
-        {
-            std::string window_name = vdriver->getTitle();
-            clean(window_name);
-            fprintf(fp, "// WindowName = \"%s\";\n", window_name.c_str());
-        }
         fprintf(fp, "BitsPerPixel = %d;\n",
                 toHost(PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)))));
 

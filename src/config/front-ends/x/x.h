@@ -24,7 +24,6 @@ public:
     void weOwnScrap(void) override;
     int getScrap(Executor::OSType type, Executor::Handle h) override;
     void setTitle(const std::string& newtitle) override;
-    std::string getTitle(void) override;
 
 private:
     void alloc_x_window(int width, int height, int bpp, bool grayscale_p);

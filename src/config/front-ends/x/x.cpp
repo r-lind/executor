@@ -2151,15 +2151,3 @@ void X11VideoDriver::setTitle(const std::string& newtitle)
     XSetStandardProperties(x_dpy, x_window, newtitle_c, newtitle_c, None,
                            nullptr, 0, &xsh);
 }
-
-std::string X11VideoDriver::getTitle(void)
-{
-    char *cstr;
-
-    XFetchName(x_dpy, x_window, &cstr);
-
-    std::string retval = cstr;
-    XFree(cstr);
-
-    return retval;
-}

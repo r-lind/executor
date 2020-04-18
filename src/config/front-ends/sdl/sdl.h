@@ -19,7 +19,6 @@ public:
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
     bool setCursorVisible(bool show_p) override;
     void setTitle(const std::string& title) override;
-    std::string getTitle() override;
     Executor::LONGINT getScrap(Executor::LONGINT type, Executor::Handle h) override;
     void putScrap(Executor::LONGINT type, Executor::LONGINT length, char *p, int scrap_count) override;
 };
