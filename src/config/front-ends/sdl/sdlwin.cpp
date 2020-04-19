@@ -205,7 +205,7 @@ void SDLVideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
         sdl_cmap[i].g = (colors[i].green >> 8);
         sdl_cmap[i].b = (colors[i].blue >> 8);
     }
-    SDL_SetColors(screen, sdl_cmap, first_color, num_colors);
+    SDL_SetColors(screen, sdl_cmap, 0, num_colors);
 }
 
 void SDLVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
