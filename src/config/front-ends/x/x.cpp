@@ -1189,10 +1189,6 @@ bool X11VideoDriver::init()
         fcntl(x_fd, F_SETOWN, getpid());
         orig_sigio_flag = fcntl(x_fd, F_GETFL, 0) & ~FASYNC;
         fcntl(x_fd, F_SETFL, orig_sigio_flag | FASYNC);
-
-        /* call the event loop to bootstrap things, and set up the signal
-       handler */
-        x_event_handler(SIGIO);
     }
 
     return true;
