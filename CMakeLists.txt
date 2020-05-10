@@ -1,5 +1,9 @@
 cmake_minimum_required(VERSION 3.10...3.15)
 
+if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
+    message(FATAL_ERROR "In-source build not allowed (for your own good)")
+endif()
+
 # Use packaged CMake modules for use with find_package(...), if and as needed
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
