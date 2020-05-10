@@ -40,6 +40,8 @@
 
 using namespace Executor;
 
+static bool enableADBSupport = false;
+
 void
 Executor::ADBReInit(void)
 {
@@ -57,7 +59,7 @@ INTEGER
 Executor::CountADBs(void)
 {
     warning_unimplemented(NULL_STRING);
-    return 1;
+    return enableADBSupport ? 1 : 0;
 }
 
 enum
@@ -85,7 +87,7 @@ Executor::GetIndADB(ADBDataBlock *adbp, INTEGER index)
     OSErr retval;
 
     warning_unimplemented(NULL_STRING);
-    if(index != 1)
+    if(!enableADBSupport || index != 1)
         retval = -1;
     else
     {
@@ -106,7 +108,7 @@ Executor::GetADBInfo(ADBDataBlock *adbp, INTEGER address)
     OSErr retval;
 
     warning_unimplemented(NULL_STRING);
-    if(address != SPOOFED_MOUSE_ADDR)
+    if(!enableADBSupport || address != SPOOFED_MOUSE_ADDR)
         retval = -1;
     else
         retval = GetIndADB(adbp, 1);
@@ -119,7 +121,7 @@ Executor::SetADBInfo(ADBSetInfoBlock *adbp, INTEGER address)
     OSErr retval;
 
     warning_unimplemented(NULL_STRING);
-    if(address != SPOOFED_MOUSE_ADDR)
+    if(!enableADBSupport || address != SPOOFED_MOUSE_ADDR)
         retval = -1;
     else
     {
