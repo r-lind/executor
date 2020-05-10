@@ -120,23 +120,14 @@ static void catchalarmCommon()
                 qp->tmCount = tm_count;
                 if(tm_count <= 0)
                 {
-                    ProcPtr tm_addr;
-                    ROMlib_hook(time_number);
 
-                    tm_addr = qp->tmAddr;
-                    /*if(tm_addr == (ProcPtr)&ROMlib_wakeup)
-                        ROMlib_wakeup();
-                    else if(tm_addr == (ProcPtr)&ROMlib_vcatch)
-                        ROMlib_vcatch();
-                    else if(tm_addr == (ProcPtr)&handle_refresh)
-                        handle_refresh();
-                    else if(tm_addr == (ProcPtr)&sound_timer_handler)
-                        sound_timer_handler();
-                    else */if(tm_addr)
+                    if(ProcPtr tm_addr = qp->tmAddr)
                     {
+                        ROMlib_hook(time_number);
+
                         /* No need to save and restore regs here; we
-		       * save and restore all of them outside this
-		       * loop. */
+                         * save and restore all of them outside this
+                         * loop. */
                         EM_A0 = US_TO_SYN68K(tm_addr);
                         EM_A1 = US_TO_SYN68K(qp);
 
