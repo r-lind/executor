@@ -206,9 +206,9 @@ Boolean Executor::C_LClick(Point pt, INTEGER mods,
     } cellvalue; /* order is important here */
     Byte flags;
     EventRecord evt;
-    Rect anchor, oldselrect, newselrect, newcellr, pinrect;
+    Rect anchor, oldselrect{}, newselrect, newcellr, pinrect;
     Cell c, oldcellunswapped, newcellunswapped;
-    GUEST<Cell> newcell, oldcell, cswapped;
+    GUEST<Cell> newcell, oldcell{}, cswapped;
     LONGINT l;
     INTEGER dh, dv;
     Point p;

@@ -41,9 +41,6 @@ using namespace Executor;
 static int nevent = 0;
 static EvQEl evs[NEVENT], *freeelem = evs + NEVENT - 1;
 
-#define ROMlib_curs LM(MouseLocation)
-
-INTEGER Executor::ROMlib_mods = btnState;
 static LONGINT autoticks;
 static LONGINT lastdown = -1;
 
@@ -129,35 +126,6 @@ Executor::ROMlib_right_to_left_key_map(uint16_t what)
     return retval;
 }
 
-/*
- * NOTE: we figure out the value for a down keystroke, then we just remember
- * what we figured out and return that value on the up.  This probably isn't
- * how the Mac does it, but it's probably close enough.  Largely this
- * routine is just a wrapper for KeyTranslate now.  See IMV for an explanation
- * of what's going on here.
- */
-
-LONGINT
-Executor::ROMlib_xlate(INTEGER virt, INTEGER modifiers, bool down_p)
-{
-    static uint16_t down_value[VIRT_MASK + 1];
-    LONGINT retval;
-
-    if(!down_p)
-        retval = down_value[virt & VIRT_MASK];
-    else
-    {
-        static GUEST<LONGINT> state;
-
-        retval = KeyTranslate(ROMlib_kchr_ptr(),
-                          modifiers | (virt & VIRT_MASK), &state);
-        down_value[virt & VIRT_MASK] = (retval >> 16
-                                            ? retval >> 16
-                                            : retval & 0xFFFF);
-    }
-    return retval;
-}
-
 void Executor::ROMlib_eventinit() /* INTERNAL */
 {
     static int beenhere = 0;
@@ -179,8 +147,7 @@ void Executor::ROMlib_eventinit() /* INTERNAL */
 }
 
 static void dropevent(EvQEl *);
-static OSErr _PPostEvent(INTEGER evcode, LONGINT evmsg,
-                            GUEST<EvQElPtr> *qelpp);
+
 static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
                              Boolean dropit);
 
@@ -207,8 +174,8 @@ Executor::geteventelem(void)
     return retval;
 }
 
-bool
-Executor::ROMlib_get_index_and_bit(LONGINT loc, int *indexp, uint8_t *bitp)
+static bool
+keymap_index_and_bit(LONGINT loc, int *indexp, uint8_t *bitp)
 {
     bool retval;
 
@@ -223,139 +190,90 @@ Executor::ROMlib_get_index_and_bit(LONGINT loc, int *indexp, uint8_t *bitp)
     return retval;
 }
 
-static void ROMlib_zapmap(LONGINT loc, LONGINT val)
+void Executor::ROMlib_SetKey(uint8_t mkvkey, bool down)
 {
     int i;
     uint8_t bit;
 
-    if(ROMlib_get_index_and_bit(loc, &i, &bit))
+    if(keymap_index_and_bit(mkvkey, &i, &bit))
     {
-        if(val)
+        if(down)
             LM(KeyMap)[i] |= bit;
         else
             LM(KeyMap)[i] &= ~(bit);
     }
 }
 
-static bool
-key_down(uint8_t loc)
+bool
+Executor::ROMlib_GetKey(uint8_t mkvkey)
 {
     bool retval;
     int i;
     uint8_t bit;
 
-    if(!ROMlib_get_index_and_bit(loc, &i, &bit))
+    if(!keymap_index_and_bit(mkvkey, &i, &bit))
         retval = false;
     else
         retval = !!(LM(KeyMap)[i] & bit);
     return retval;
 }
 
+short Executor::ROMlib_GetModifiers()
+{
+    short modifiers = 0;
+
+    if(LM(MBState))
+        modifiers |= btnState;
+    if(ROMlib_GetKey(MKV_CLOVER))
+        modifiers |= cmdKey;
+    if(ROMlib_GetKey(MKV_LEFTSHIFT) || ROMlib_GetKey(MKV_RIGHTSHIFT))
+        modifiers |= shiftKey;
+    if(ROMlib_GetKey(MKV_LEFTOPTION) || ROMlib_GetKey(MKV_RIGHTOPTION))
+        modifiers |= optionKey;
+    if(ROMlib_GetKey(MKV_LEFTCNTL) || ROMlib_GetKey(MKV_RIGHTCNTL))
+        modifiers |= ControlKey;
+
+    return modifiers;
+}
+
 OSErr Executor::PPostEvent(INTEGER evcode, LONGINT evmsg,
                               GUEST<EvQElPtr> *qelp) /* IMIV-85 */
 {
-    EvQEl *qp;
-    LONGINT tmpticks;
+    short modifiers = ROMlib_GetModifiers();
 
-    /*
-     * Here is where the portable autokey stuff should go
-     * If it is a keyUp event, clear autoticks, if it is
-     * a keyDown then set the appropriate bugger ...
-     *
-     * Now that the portable code is here, SCO stuff is out of date
-     */
-
-    /*
-     * NOTE:  The code below isn't strictly correct, since IMI-260 says
-     * you can have at most 2 non modifier keys down at one time.
-     */
-
-    tmpticks = TickCount();
-    if(evcode == keyUp)
+    if(evcode == keyDown)
     {
-        ROMlib_zapmap((evmsg >> 8) & 0xFF, 0);
-        if(!(evmsg & 0xff))
-        {
-            if(qelp)
-                *qelp = 0;
-            return noErr;
-        }
-        lastdown = -1;
-    }
-    else if(evcode == keyDown)
-    {
-        ROMlib_zapmap((evmsg >> 8) & 0xFF, 1);
-        if(!(evmsg & 0xff))
-        {
-            if(qelp)
-                *qelp = 0;
-            return noErr;
-        }
-        lastdown = evmsg;
-        autoticks = tmpticks + LM(KeyThresh);
-
         if((evmsg & 0xff) == '2' && /* cmd-shift-2 */
-           key_down(MKV_CLOVER) && (key_down(MKV_LEFTSHIFT) || key_down(MKV_RIGHTSHIFT)))
-
+            (modifiers & (cmdKey | shiftKey)) == (cmdKey | shiftKey))
+        {
             dofloppymount();
+        }
     }
 
     if(!((1 << evcode) & LM(SysEvtMask)))
         /*-->*/ return evtNotEnb;
-    qp = geteventelem();
+    
+    EvQEl *qp = geteventelem();
     qp->evtQWhat = evcode;
     qp->evtQMessage = evmsg;
-    qp->evtQWhen = tmpticks;
-    qp->evtQWhere = ROMlib_curs;
-    qp->evtQModifiers = ROMlib_mods;
+    qp->evtQWhen = TickCount();
+    qp->evtQWhere = LM(MouseLocation2);
+    qp->evtQModifiers = modifiers;
     Enqueue((QElemPtr)qp, &LM(EventQueue));
     if(qelp)
         *qelp = qp;
     return noErr;
 }
 
-static OSErr _PPostEvent(INTEGER evcode, LONGINT evmsg,
-                            GUEST<EvQElPtr> *qelpp)
+void Executor::ROMlib_SetAutokey(uint32_t message)
 {
-    OSErr ret;
-    syn68k_addr_t proc;
-    GUEST<EvQElPtr> retquelp;
-
-    proc = ostraptable[0x2F];
-
-#if 0 /* FIXME */
-    if (proc == osstuff[0x2F].orig)
-#endif
-    ret = PPostEvent(evcode, evmsg, &retquelp);
-#if 0
-    else {
-	EM_A0 = evcode;
-	EM_D0 = evmsg;
-	execute68K((syn68k_addr_t) proc);
-	retquelp = EM_A0;
-	ret = EM_D0;
-    }
-#endif
-
-    if(qelpp)
-        *qelpp = retquelp;
-    return ret;
-}
-
-OSErr Executor::ROMlib_PPostEvent(INTEGER evcode, LONGINT evmsg,
-                                     GUEST<EvQElPtr> *qelp, LONGINT when,
-                                     Point where, INTEGER butmods)
-{
-    LM(MouseLocation2).h = ROMlib_curs.h = where.h;
-    LM(MouseLocation2).v = ROMlib_curs.v = where.v;
-    ROMlib_mods = butmods;
-
-    return _PPostEvent(evcode, evmsg, qelp);
+    lastdown = message;
+    autoticks = TickCount() + LM(KeyThresh);
 }
 
 OSErr Executor::PostEvent(INTEGER evcode, LONGINT evmsg)
 {
-    return _PPostEvent(evcode, evmsg, (GUEST<EvQElPtr> *)0);
+    return PPostEvent(evcode, evmsg, (GUEST<EvQElPtr> *)0);
 }
 
 void Executor::FlushEvents(INTEGER evmask, INTEGER stopmask) /* II-69 */
@@ -477,9 +395,9 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
     {
         eventp->when = TickCount();
 
-        LM(MouseLocation2) = eventp->where = ROMlib_curs;
+        eventp->where = LM(MouseLocation2);
 
-        eventp->modifiers = ROMlib_mods;
+        eventp->modifiers = ROMlib_GetModifiers();
         if((evmask & autoKeyMask) && lastdown != -1 && ticks > autoticks)
         {
             autoticks = ticks + LM(KeyRepThresh);
@@ -532,28 +450,6 @@ void Executor::SetEventMask(INTEGER evmask)
 QHdrPtr Executor::GetEvQHdr()
 {
     return &LM(EventQueue);
-}
-
-void
-Executor::post_keytrans_key_events(INTEGER evcode, LONGINT keywhat, int32_t when,
-                                   Point where, uint16_t button_state, unsigned char virt)
-{
-    INTEGER first_key, second_key;
-
-    first_key = keywhat >> 16;
-    second_key = keywhat;
-
-    if(first_key)
-    {
-        ROMlib_PPostEvent(evcode, (virt << 8) | first_key, 0, when, where,
-                          button_state);
-        if(second_key)
-            ROMlib_PPostEvent(keyUp, (virt << 8) | first_key, 0, when, where,
-                              button_state);
-    }
-    if(second_key || !first_key)
-        ROMlib_PPostEvent(evcode, (virt << 8) | second_key, 0, when, where,
-                          button_state);
 }
 
 static int

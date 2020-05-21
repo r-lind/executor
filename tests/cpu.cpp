@@ -3,7 +3,15 @@
 #include <base/mactype.h>
 #include <PowerCore.h>
 
+#define ABSOLUTE_ADDR 0
+
+#if ABSOLUTE_ADDR
 #define BASE 0x1000
+#else
+#include <MemoryMgr.h>
+
+uint32_t BASE;
+#endif
 #define WORDS (ptr_from_longint<GUEST<uint16_t>*>(BASE))
 #define LONGS (ptr_from_longint<GUEST<uint32_t>*>(BASE))
 
@@ -43,6 +51,21 @@ public:
         getPowerCore().flushCache();
         executePPC(BASE);
     }
+
+#if !ABSOLUTE_ADDR
+    Ptr basePtr;
+
+    CPU()
+    {
+        basePtr = NewPtrClear(4096);
+        BASE = ptr_to_longint(basePtr);
+        EM_A7 = getPowerCore().r[1] = ptr_to_longint(LM(MemTop)) - 4;
+    }
+    ~CPU()
+    {
+        DisposePtr(basePtr);
+    }
+#endif
 };
 
 class CPUSingleStep : public CPU
@@ -74,7 +97,6 @@ public:
     }
 };
 
-
 TEST_F(CPU, execute68K)
 {
     EM_D0 = 0;
@@ -101,6 +123,7 @@ TEST_F(CPU, executePPC)
 
     EXPECT_EQ(42, getPowerCore().r[3]);
 }
+
 
 TEST_F(CPU, breakpoint68K)
 {

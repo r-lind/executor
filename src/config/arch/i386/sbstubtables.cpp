@@ -4,7 +4,6 @@
 
 #include <base/common.h>
 #include <quickdraw/srcblt.h>
-#include <vdriver/vdriver.h>
 #include "src-blitters.h"
 
 #if !defined(USE_PORTABLE_SRCBLT)

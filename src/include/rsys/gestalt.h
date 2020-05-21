@@ -3,8 +3,7 @@
  * All rights reserved.
  *
  */
-#if !defined(_RSYS_GESTALT_H_)
-#define _RSYS_GESTALT_H_
+#pragma once
 
 #include <ExMacTypes.h>
 
@@ -26,37 +25,7 @@ extern void ROMlib_add_to_gestalt_list(OSType selector, OSErr retval,
 extern OSErr C_GestaltTablesOnly(OSType selector,
                                          GUEST<LONGINT> *responsep);
 
-/* GhostScript DLL version number */
-enum
-{
-    gestaltGhostScriptVersion = "gost"_4
-};
-
-/* Executor Version as string */
-enum
-{
-    gestaltExecutorVersionString = "xqtr"_4
-};
-
-/* screen size */
-enum
-{
-    gestaltScreenSize = "scrn"_4
-};
-
-enum
-{
-    gestaltPHYSICAL = "MUL8"_4
-};
-
-enum
-{
-    physicalUndefSelectorErr = -15551
-};
-
 extern void gestalt_set_system_version(uint32_t version);
 extern void gestalt_set_memory_size(uint32_t size);
-extern void gestalt_set_cpu_type(uint32_t type);
 
 }
-#endif /* !_RSYS_GESTALT_H_ */

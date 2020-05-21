@@ -984,8 +984,7 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
             if(num_colors > 0)
             {
                 dirty_rect_update_screen();
-                vdriver->setColors(first_color, num_colors,
-                                   &ctab_table[first_color]);
+                gd_update_colors();
             }
         }
     }

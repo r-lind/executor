@@ -32,13 +32,12 @@ QVector<QRect> getAvailableScreenGeometries()
 
 #else
 
-/* Figure out available screen geometries by opening
-   invisible maximized windows on each screen.
-   
-   QScreen::availableGeometry() is documented not to work
+/* QScreen::availableGeometry() is documented not to work
    on multi-screen X11 systems.
 
-   This version should still work even where it isn't needed.
+   If platformName() != "xcb", we can use availableGeometry();
+   on X11, we instead figure out available screen geometries by opening
+   invisible maximized windows on each screen.
  */
 
 template <class F>
@@ -60,6 +59,15 @@ QWindow* makeSizeTestWindow(F f) { return new SizeTestWindow<F>(f); }
 
 QVector<QRect> getAvailableScreenGeometries()
 {
+    if(qApp->platformName() != QLatin1String("xcb"))
+    {
+        QVector<QRect> geometries;
+        for(QScreen *screen : QGuiApplication::screens())
+            geometries.push_back(screen->availableGeometry());
+
+        return geometries;
+    }
+
     QVector<QWindow*> windows;
     int windowCount = 0;
     QEventLoop loop;

@@ -3,7 +3,6 @@
 
 #include <QuickDraw.h>
 #include <quickdraw/cquick.h>
-#include <vdriver/vdriver.h>
 
 extern "C" {
 
@@ -11,7 +10,7 @@ extern "C" {
 #define USE_PORTABLE_SRCBLT
 #endif
 
-extern bool srcblt_rgn(Executor::RgnHandle rh, int mode, int log2_bpp,
+extern void srcblt_rgn(Executor::RgnHandle rh, int mode, int log2_bpp,
                        const Executor::blt_bitmap_t *src, const Executor::blt_bitmap_t *dst,
                        Executor::GUEST<Executor::Point> *src_origin, Executor::GUEST<Executor::Point> *dst_origin,
                        uint32_t fg_color, uint32_t bk_color) asm("_srcblt_rgn");

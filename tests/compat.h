@@ -17,6 +17,8 @@ StringPtr PSTR(const char* s);
 typedef signed char SInt8;
 typedef int32_t SInt32;
 
+
+
 #else
 #include <MacTypes.h>
 #include <Memory.h>
@@ -37,6 +39,12 @@ inline bool hasDeepGWorlds()
 }
 
 #define PSTR(s) StringPtr("\p" s)
+
+template<typename TT>
+TT ptr_from_longint(int32_t l)
+{
+    return (TT) l;
+}
 #endif
 
 #define PTR(x) (&inout(x))

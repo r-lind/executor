@@ -42,7 +42,6 @@
 #include <mman/memsize.h>
 #include <vdriver/autorefresh.h>
 #include <sound/sounddriver.h>
-#include <hfs/dcache.h>
 #include <error/system_error.h>
 #include <commandline/option.h>
 #include <base/emustubs.h>
@@ -133,8 +132,6 @@ static const option_vec common_opts = {
        "Example: \"executor -debug unimp,trace\""),
 
       opt_sep, "" },
-    { "nodiskcache", "disable internal disk cache.",
-      opt_no_arg, "" },
     { "nosound", "disable any sound hardware",
       opt_no_arg, "" },
 
@@ -242,35 +239,11 @@ capable of color.",
       "this additional resolution.",
       opt_sep, "" },
 
-#if defined(SDL)
-    { "fullscreen", "try to run in full-screen mode", opt_no_arg, "" },
-    { "hwsurface", "UNSUPPORTED", opt_no_arg, "" },
-#if defined(CYGWIN)
-    {
-        "sdlaudio", "specify the audio driver to attempt to use first, e.g. "
-                    "\"executor -sdlaudio waveout\" will tell Executor to use the old "
-                    "windows sound drivers and not use DirectSound.",
-        opt_sep, "",
-    },
-#else
-    {
-        "sdlaudio", "specify the audio driver to attempt to use first, e.g. "
-                    "\"executor -sdlaudio esd\" will tell Executor to use esound, "
-                    "the Enlightened Sound Daemon instead of /dev/dsp.",
-        opt_sep, "",
-    },
-#endif
-#endif
-
 #if defined(CYGWIN32) && defined(SDL)
     { "clipleak", "UNSUPPORTED (ignored)", opt_no_arg, "" },
 #endif
 
-    { "scancodes", "different form of key mapping (may be useful in "
-                   "conjunction with -keyboard)",
-      opt_no_arg, "" }, // FIXME: only applies to some vdrivers (X11, SDL1 on CYGWIN)
-
-    { "ppc", "try to execute the PPC native code if possible (UNSUPPORTED)", opt_no_arg, "" },
+    { "ppc", "prefer PPC code to 68K code when both are available", opt_no_arg, "" },
 
     { "appearance", "(mac or windows) specify the appearance of windows and "
                     "menus.  For example \"executor -appearance windows\" will make each "
@@ -448,11 +421,9 @@ construct_command_line_string(int argc, char **argv)
 
 static void parseCommandLine(int& argc, char **argv)
 {
-    opt_database_t common_db;
+    opt_database_t opt_db;
     string arg;
 
-    opt_init();
-    common_db = opt_alloc_db();
     opt_register("common", common_opts);
 
     opt_register_pre_note("welcome to the executor help message.");
@@ -462,10 +433,9 @@ static void parseCommandLine(int& argc, char **argv)
     vdriver->registerOptions();
 
     if(!bad_arg_p)
-        bad_arg_p = opt_parse(common_db, common_opts,
-                              &argc, argv);
+        bad_arg_p = opt_parse(opt_db, &argc, argv);
 
-    if(opt_val(common_db, "version", nullptr))
+    if(opt_val(opt_db, "version", nullptr))
     {
         fprintf(stdout, "%s\n", EXECUTOR_VERSION);
         exit(0);
@@ -475,16 +445,18 @@ static void parseCommandLine(int& argc, char **argv)
    * If they ask for help, it's not an error -- it should go to stdout
    */
 
-    if(opt_val(common_db, "help", nullptr))
+    if(opt_val(opt_db, "help", nullptr))
     {
         fprintf(stdout, "%s", opt_help_message());
         exit(0);
     }
 
+    vdriver->setOptions(opt_db);
+
     /* Verify that the user input a legal bits per pixel.  "0" is a legal
    * value here; that means "use the vdriver's default."
    */
-    opt_int_val(common_db, "bpp", &flag_bpp, &bad_arg_p);
+    opt_int_val(opt_db, "bpp", &flag_bpp, &bad_arg_p);
     if(flag_bpp != 0 && flag_bpp != 1
        && flag_bpp != 2 && flag_bpp != 4 && flag_bpp != 8
        && flag_bpp != 16 && flag_bpp != 32)
@@ -493,38 +465,27 @@ static void parseCommandLine(int& argc, char **argv)
         bad_arg_p = true;
     }
 
-#if defined(SDL)
-    if(opt_val(common_db, "fullscreen", nullptr))
-        ROMlib_fullscreen_p = true;
-
-    if(opt_val(common_db, "hwsurface", nullptr))
-        ROMlib_hwsurface_p = true;
-#endif
-
-    if(opt_val(common_db, "scancodes", nullptr))
-        vdriver->setUseScancodes(true);
-
 #if defined(Sound_SDL_Sound)
 
-    if(opt_val(common_db, "sdlaudio", &arg))
+    if(opt_val(opt_db, "sdlaudio", &arg))
         ROMlib_set_sdl_audio_driver_name(arg);
 
 #endif
 
-    if(opt_val(common_db, "ppc", nullptr))
+    if(opt_val(opt_db, "ppc", nullptr))
         ROMlib_set_ppc(true);
 
-    if(opt_val(common_db, "hfsplusro", nullptr))
+    if(opt_val(opt_db, "hfsplusro", nullptr))
         ROMlib_hfs_plus_support = true;
 
-    if(opt_val(common_db, "size", &arg))
+    if(opt_val(opt_db, "size", &arg))
         bad_arg_p |= !parse_size_opt("size", arg);
 
-    if(opt_val(common_db, "prres", &arg))
+    if(opt_val(opt_db, "prres", &arg))
         bad_arg_p |= !parse_prres_opt(&ROMlib_optional_res_x,
                                       &ROMlib_optional_res_y, arg);
 
-    if(opt_val(common_db, "debug", &arg))
+    if(opt_val(opt_db, "debug", &arg))
         bad_arg_p |= !error_parse_option_string(arg);
 
 #if defined(MACOSX)
@@ -535,32 +496,25 @@ static void parseCommandLine(int& argc, char **argv)
     {
         int skip;
         skip = 0;
-        opt_int_val(common_db, "nosound", &skip, &bad_arg_p);
+        opt_int_val(opt_db, "nosound", &skip, &bad_arg_p);
         sound_disabled_p = (skip != 0);
     }
 
-    {
-        int nocache;
-        nocache = 0;
-        opt_int_val(common_db, "nodiskcache", &nocache, &bad_arg_p);
-        dcache_set_enabled(!nocache);
-    }
+    use_native_code_p = !opt_val(opt_db, "notnative", nullptr);
 
-    use_native_code_p = !opt_val(common_db, "notnative", nullptr);
-
-    substitute_fonts_p = !opt_val(common_db, "cities", nullptr);
+    substitute_fonts_p = !opt_val(opt_db, "cities", nullptr);
 
 #if defined(CYGWIN32)
-    if(opt_val(common_db, "die", nullptr))
+    if(opt_val(opt_db, "die", nullptr))
         uninstall_exception_handler();
-    if(opt_val(common_db, "noautoevents", nullptr))
+    if(opt_val(opt_db, "noautoevents", nullptr))
         set_timer_driven_events(false);
 #endif
 
     /* Parse the "-memory" option. */
     {
         int total_memory;
-        if(opt_int_val(common_db, "memory", &total_memory, &bad_arg_p))
+        if(opt_int_val(opt_db, "memory", &total_memory, &bad_arg_p))
         {
             check_arg("memory", &total_memory,
                       (MIN_APPLZONE_SIZE + DEFAULT_SYSZONE_SIZE
@@ -582,57 +536,57 @@ static void parseCommandLine(int& argc, char **argv)
     /* I bumped the minimal ROMlib_applzone to 512, since Loser needs
    more than 256.  I guess it's a little unfair to people who bypass
    Loser, but it will prevent confusion.  */
-    opt_int_val(common_db, "applzone", &ROMlib_applzone_size, &bad_arg_p);
+    opt_int_val(opt_db, "applzone", &ROMlib_applzone_size, &bad_arg_p);
     if(ROMlib_applzone_size < 65536)
         note_memory_syntax("applzone", ROMlib_applzone_size);
     else
         check_arg("applzone", &ROMlib_applzone_size, MIN_APPLZONE_SIZE,
                   MAX_APPLZONE_SIZE);
 
-    opt_int_val(common_db, "syszone", &ROMlib_syszone_size, &bad_arg_p);
+    opt_int_val(opt_db, "syszone", &ROMlib_syszone_size, &bad_arg_p);
     if(ROMlib_syszone_size < 65536)
         note_memory_syntax("syszone", ROMlib_syszone_size);
     else
         check_arg("syszone", &ROMlib_syszone_size, MIN_SYSZONE_SIZE,
                   MAX_SYSZONE_SIZE);
 
-    opt_int_val(common_db, "stack", &ROMlib_stack_size, &bad_arg_p);
+    opt_int_val(opt_db, "stack", &ROMlib_stack_size, &bad_arg_p);
     if(ROMlib_stack_size < 32768)
         note_memory_syntax("stack", ROMlib_stack_size);
     else
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
 
-    if(opt_val(common_db, "keyboards", nullptr))
+    if(opt_val(opt_db, "keyboards", nullptr))
         graphics_p = false;
 
 
-    opt_bool_val(common_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
-    opt_bool_val(common_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
-    opt_bool_val(common_db, "print", &ROMlib_print, &bad_arg_p);
-    opt_bool_val(common_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);
+    opt_bool_val(opt_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
+    opt_bool_val(opt_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
+    opt_bool_val(opt_db, "print", &ROMlib_print, &bad_arg_p);
+    opt_bool_val(opt_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);
 #if 0
-  opt_int_val (common_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
+  opt_int_val (opt_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
 #endif
     {
         int no_auto = false;
-        opt_int_val(common_db, "noautorefresh", &no_auto, &bad_arg_p);
+        opt_int_val(opt_db, "noautorefresh", &no_auto, &bad_arg_p);
         do_autorefresh_p = !no_auto;
     }
 
-    opt_int_val(common_db, "refresh", &ROMlib_refresh, &bad_arg_p);
+    opt_int_val(opt_db, "refresh", &ROMlib_refresh, &bad_arg_p);
     check_arg("refresh", &ROMlib_refresh, 0, 60);
 
-    opt_bool_val(common_db, "grayscale", &flag_grayscale, &bad_arg_p);
+    opt_bool_val(opt_db, "grayscale", &flag_grayscale, &bad_arg_p);
 
 #if defined(LINUX)
-    opt_bool_val(common_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
+    opt_bool_val(opt_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
 #endif
 
     {
         string str;
 
-        if(opt_val(common_db, "prvers", &str))
+        if(opt_val(opt_db, "prvers", &str))
         {
             uint32_t vers;
 
@@ -646,7 +600,7 @@ static void parseCommandLine(int& argc, char **argv)
     {
         string appearance_str;
 
-        if(opt_val(common_db, "appearance", &appearance_str))
+        if(opt_val(opt_db, "appearance", &appearance_str))
             bad_arg_p |= !ROMlib_parse_appearance(appearance_str.c_str());
     }
 
@@ -655,15 +609,15 @@ static void parseCommandLine(int& argc, char **argv)
     {
         string system_str;
 
-        if(opt_val(common_db, "system", &system_str))
+        if(opt_val(opt_db, "system", &system_str))
             bad_arg_p |= !parse_system_version(system_str);
     }
 
-    opt_bool_val(common_db, "break", &breakOnProcessStart, &bad_arg_p);
-    opt_bool_val(common_db, "logtraps", &logtraps, &bad_arg_p);
+    opt_bool_val(opt_db, "break", &breakOnProcessStart, &bad_arg_p);
+    opt_bool_val(opt_db, "logtraps", &logtraps, &bad_arg_p);
 
-    opt_val(common_db, "keyboard", &keyboard);
-    opt_bool_val(common_db, "keyboards", &list_keyboards_p, &bad_arg_p);
+    opt_val(opt_db, "keyboard", &keyboard);
+    opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
 
     /* If we failed to parse our arguments properly, exit now.
    * I don't think we should call ExitToShell yet because the
@@ -735,7 +689,8 @@ int main(int argc, char **argv)
     setstartdir(argv[0]);
     set_appname(argv[0]);
 
-    vdriver = new DefaultVDriver();
+    VideoDriverCallbacks videoDriverCallbacks;
+    vdriver = new DefaultVDriver(&videoDriverCallbacks);
     if(!vdriver->parseCommandLine(argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");

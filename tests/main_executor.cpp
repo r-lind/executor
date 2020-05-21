@@ -7,6 +7,7 @@
 #include <MenuMgr.h>
 #include <FontMgr.h>
 #include <rsys/executor.h>
+#include <osevent/osevent.h>
 
 using namespace Executor;
 
@@ -28,8 +29,9 @@ StringPtr PSTR(const char* s)
 
 class MockVDriver : public VideoDriver
 {
-    virtual void setColors(int first_color, int num_colors,
-                               const struct ColorSpec *color_array) override
+    using VideoDriver::VideoDriver;
+
+    virtual void setColors(int num_colors, const vdriver_color_t *colors) override
     {
 
     }
@@ -50,6 +52,7 @@ class ExecutorTestEnvironment : public testing::Environment
 {
     char *thingOnStack;
     fs::path tempDir;
+    VideoDriverCallbacks videoDriverCallbacks;
 public:
     ExecutorTestEnvironment(char* thingOnStack) : thingOnStack(thingOnStack) {}
 
@@ -58,7 +61,7 @@ public:
 
         Executor::InitMemory(thingOnStack);
 
-        vdriver = new MockVDriver();
+        vdriver = new MockVDriver(&videoDriverCallbacks);
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
         traps::init(false);
         Executor::InitLowMem();
@@ -95,6 +98,7 @@ public:
 
         InitResources();
         ROMlib_InitGDevices();
+        ROMlib_eventinit();
 
         ROMlib_color_init();
         InitGraf(&qd.thePort);

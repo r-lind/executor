@@ -6,7 +6,6 @@
 #include <quickdraw/srcblt.h>
 #include <quickdraw/quick.h>
 #include <quickdraw/xdblt.h>
-#include <vdriver/vdriver.h>
 #include <prefs/prefs.h>
 
 // FIXME: #warning This seems unsafe...
@@ -37,7 +36,7 @@ bool srcblt_reverse_scanlines_p asm("_srcblt_reverse_scanlines_p");
 /* We use this macro to avoid page faults when aligning pointers. */
 #define MIN_PAGE_SIZE 512
 
-bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
+void srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
                 const blt_bitmap_t *src, const blt_bitmap_t *dst,
                 GUEST<Point> *src_origin, GUEST<Point> *dst_origin,
                 uint32_t fg_color, uint32_t bk_color)
@@ -46,9 +45,6 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
     unsigned long dst_align32_offset, src_align32_offset;
     long src_x_offset, src_y_offset, left_shift;
     char *dst_baseaddr, *src_baseaddr;
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    bool cursor_maybe_changed_p, old_vis_p;
-#endif
 
     /* Record log2 bpp. */
     srcblt_log2_bpp = log2_bpp;
@@ -65,54 +61,6 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
 
     mode &= 7;
 
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    cursor_maybe_changed_p = old_vis_p = false;
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P())
-    {
-        int top, left;
-        RgnPtr rp = *rh;
-
-        if(active_screen_addr_p(src))
-        {
-            srcblt_src_row_bytes = vdriver_real_screen_row_bytes;
-            src_baseaddr = (char *)vdriver_real_screen_baseaddr;
-            if(vdriver_flip_real_screen_pixels_p)
-                mode ^= (srcCopy ^ notSrcCopy);
-
-            /* I'm a lazy bastard and don't want to figure out the
-	   * coordinate system sludge.  Copying from the screen is
-	   * uncommon anyway.
-	   */
-            old_vis_p = vdriver->setCursorVisible(false);
-            cursor_maybe_changed_p = true;
-        }
-        else
-        {
-            srcblt_src_row_bytes = src->rowBytes & ROWBYTES_VALUE_BITS;
-            src_baseaddr = (char *)src->baseAddr;
-        }
-        if(active_screen_addr_p(dst))
-        {
-            srcblt_dst_row_bytes = vdriver_real_screen_row_bytes;
-            dst_baseaddr = (char *)vdriver_real_screen_baseaddr;
-            top = dst->bounds.top;
-            left = dst->bounds.left;
-
-            /* Hide the cursor if necessary. */
-            old_vis_p |= (vdriver->hideCursorIfIntersects(rp->rgnBBox.top - top,
-                                                         rp->rgnBBox.left - left,
-                                                         rp->rgnBBox.bottom - top,
-                                                         rp->rgnBBox.right - left));
-            cursor_maybe_changed_p = true;
-        }
-        else
-        {
-            srcblt_dst_row_bytes = dst->rowBytes & ROWBYTES_VALUE_BITS;
-            dst_baseaddr = (char *)dst->baseAddr;
-        }
-    }
-    else
-#endif /* VDRIVER_SUPPORTS_REAL_SCREEN_BLITS */
     {
         /* Default to values for non-screen blit. */
         srcblt_src_row_bytes = src->rowBytes & ROWBYTES_VALUE_BITS;
@@ -243,16 +191,6 @@ bool srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
 
     SETUP_SPECIAL_RGN(rh, srcblt_rgn_start);
 
-    /* Make sure we have access to the raw screen bits. */
-    vdriver->accelWait();
-
     /* Actually do the blit. */
     srcblt_bitmap();
-
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(cursor_maybe_changed_p)
-        vdriver->setCursorVisible(old_vis_p);
-#endif
-
-    return !VDRIVER_BYPASS_INTERNAL_FBUF_P();
 }

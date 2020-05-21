@@ -991,9 +991,9 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
 #endif
 
         /* Copy the generated string out to their Decimal record. */
-        dp->sig[0] = strlen(c_string);
-    strncpy((char *)dp->sig + 1,
-            c_string, strlen(c_string)); /* Don't copy '\0' */
+    dp->sig[0] = strlen(c_string);
+    memcpy((char *)dp->sig + 1,
+            c_string, dp->sig[0]); /* Don't copy '\0' */
 
     warning_floating_point("Fx2dec(" IEEE_T_FORMAT ", digits=%d) == %s%s * 10**%d",
                            (IEEE_T_PRINT_CAST)in, digits, dp->sgn ? "-" : "",

@@ -31,7 +31,6 @@
 #include <rsys/segment.h>
 #include <rsys/executor.h>
 #include <hfs/hfs.h>
-#include <vdriver/vdriver.h>
 #include <base/trapname.h>
 
 #include <prefs/options.h>

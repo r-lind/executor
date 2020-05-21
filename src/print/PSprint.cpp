@@ -410,8 +410,6 @@ static fontentry_t fonttable[] = {
 
 GrafPort Executor::printport;
 
-#define patCopy 8
-
 /*
  * NOTE: for now we use alloca for a temporary buffer, even though
  *	 sending big char arrays no longer works... We should just

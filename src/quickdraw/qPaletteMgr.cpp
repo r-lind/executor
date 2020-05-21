@@ -587,7 +587,7 @@ pm_do_updates_gd_changed(void)
     LM(PaintWhite) = -1;
 
     dirty_rect_update_screen();
-    vdriver->setColors(0, CTAB_SIZE(gd_ctab) + 1, CTAB_TABLE(gd_ctab));
+    gd_update_colors();
 }
 
 #define gd_index_mask gd_ctab_size
@@ -1324,8 +1324,7 @@ void Executor::C_AnimateEntry(WindowPtr dst_window, INTEGER dst_entry,
             if(update_host_colors_p)
             {
                 dirty_rect_update_screen();
-                vdriver->setColors(0, CTAB_SIZE(gd_ctab) + 1,
-                                   CTAB_TABLE(gd_ctab));
+                gd_update_colors();
             }
         }
     }
@@ -1361,12 +1360,8 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
     update_host_colors_p = save_update;
 
     /* To be safe, update the colors visible on the screen. */
-    {
-        CTabHandle ctab;
-        dirty_rect_update_screen();
-        ctab = PIXMAP_TABLE(GD_PMAP(LM(TheGDevice)));
-        vdriver->setColors(0, CTAB_SIZE(ctab) + 1, CTAB_TABLE(ctab));
-    }
+    dirty_rect_update_screen();
+    gd_update_colors();
 }
 
 void Executor::C_GetEntryColor(PaletteHandle src_palette, INTEGER entry_index,

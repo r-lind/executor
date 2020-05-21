@@ -21,8 +21,6 @@
 #include <Gestalt.h>
 #include <SegmentLdr.h>
 
-#include <rsys/gestalt.h>
-
 #include <rsys/lockunlock.h>
 
 #include <stdio.h>
@@ -64,43 +62,8 @@ void uninstall_exception_handler(void)
     }
 }
 
-static unsigned long
-physical_memory(void)
-{
-    FILE *fp;
-    unsigned long mem;
-
-    mem = 0;
-    fp = fopen("/proc/meminfo", "r");
-    if(fp)
-    {
-        char buf[256];
-
-        while(fgets(buf, sizeof buf - 1, fp))
-            if(!strncmp(buf, "Mem:", 4) && sscanf(buf + 4, "%lu", &mem))
-                break;
-
-        fclose(fp);
-    }
-
-    replace_physgestalt_selector(gestaltPhysicalRAMSize, mem);
-    return mem;
-}
-
-static void
-guess_good_memory_settings(void)
-{
-    unsigned long new_appl_size;
-
-    new_appl_size = physical_memory() / 4;
-
-    if(new_appl_size > ROMlib_applzone_size)
-        ROMlib_applzone_size = std::min<unsigned long>(MAX_APPLZONE_SIZE, new_appl_size);
-}
-
 bool Executor::os_init(void)
 {
-    guess_good_memory_settings();
 #if defined(SDL)
     install_exception_handler();
 #endif

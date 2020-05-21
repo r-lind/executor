@@ -152,10 +152,6 @@ QDErr Executor::C_NewGWorld(GUEST<GWorldPtr> *graphics_world_out,
         }
     }
 
-#if defined(BASIC_QD_ONLY)
-    gui_assert(depth == 1 && gw_gd == nullptr);
-#endif /* BASIC_QD_ONLY */
-
     /* tests show that if we allocate the gdevice, then the gdevice's
      baseAddr is the graphics world's locked handle.
 

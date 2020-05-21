@@ -8,15 +8,12 @@
 #include <MenuMgr.h>
 #include <rsys/redrawscreen.h>
 #include <quickdraw/cquick.h>
-#include <vdriver/vdriver.h>
 
 using namespace Executor;
 
 void Executor::redraw_screen(void)
 {
     TheGDeviceGuard guard(LM(MainDevice));
-    vdriver->setColors(0, 1 << vdriver->bpp(),
-                       CTAB_TABLE(PIXMAP_TABLE(GD_PMAP(LM(MainDevice)))));
 
     if(LM(WWExist) == EXIST_YES)
     {

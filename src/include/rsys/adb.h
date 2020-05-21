@@ -14,7 +14,7 @@
 
 namespace Executor
 {
-extern void adb_apeiron_hack(int /*bool*/ deltas_p, ...);
+extern void adb_apeiron_hack();
 extern void reset_adb_vector(void);
 }
 #endif

@@ -1,5 +1,4 @@
-#if !defined(_COMMON_H_)
-#define _COMMON_H_
+#pragma once
 
 #if defined(_WIN32) && !defined(WIN32)
 #define WIN32 /* evil hackage needed to make SDL happy */
@@ -18,5 +17,3 @@
 #include <rsys/slash.h>
 #include <error/error.h>
 #include <base/lowglobals.h>
-
-#endif /* !_COMMON_H_ */

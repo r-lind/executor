@@ -32,7 +32,6 @@
 #include <res/resource.h>
 #include <rsys/aboutbox.h>
 #include <error/system_error.h>
-#include <vdriver/vdriver.h>
 #include <rsys/version.h>
 #include <base/functions.impl.h>
 #include <prefs/prefs.h>

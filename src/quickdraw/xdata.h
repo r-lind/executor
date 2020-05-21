@@ -31,7 +31,7 @@ typedef struct _xdata_t
     uint32_t magic_cookie;
 
     /* This function will do the actual blit. */
-    bool (*blt_func)(RgnHandle rh, int mode,
+    void (*blt_func)(RgnHandle rh, int mode,
                      int pat_x_rotate_count, int pat_y_rotate_count,
                      struct _xdata_t *x, PixMap *dst_bitmap);
 

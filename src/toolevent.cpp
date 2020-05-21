@@ -151,51 +151,51 @@ void Executor::ROMlib_alarmoffmbar()
         ROMlib_togglealarm();
 }
 
-LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, GUEST<LONGINT> *state)
+uint32_t Executor::C_KeyTranslate(Ptr mapp, unsigned short code, GUEST<uint32_t> *state)
 {
-    LONGINT ascii;
-    int table_num;
-    unsigned char virt;
-    kchr_ptr_t p;
-    int table_num_index;
-
-    p = (kchr_ptr_t)mapp;
-    virt = code & VIRT_MASK;
-
-    table_num_index = (code >> MODIFIER_SHIFT) & MODIFIER_MASK;
-    table_num = (KCHR_MODIFIER_TABLE(p))[table_num_index];
-    ascii = (unsigned char)(KCHR_TABLE(p)[table_num][virt]);
-
-    if(*state == 0)
+    enum
     {
-        if(ascii)
-            *state = 0;
-        else
-        {
-            int n_dead;
-            dead_key_rec_t *deadp;
+        MODIFIER_SHIFT = 8,
+        VIRT_MASK = 0x7F,
+        MODIFIER_MASK = (ControlKey << 1) - 1
+    };
 
-            n_dead = KCHR_N_DEAD_KEY_RECS(p);
-            deadp = KCHR_DEAD_KEY_RECS(p);
+    kchr_ptr_t p = (kchr_ptr_t)mapp;
+    unsigned char virt = code & VIRT_MASK;
+
+    int table_num_index = (code >> MODIFIER_SHIFT) & MODIFIER_MASK;
+    int table_num = (KCHR_MODIFIER_TABLE(p))[table_num_index];
+    uint32_t ascii = (unsigned char)(KCHR_TABLE(p)[table_num][virt]);
+
+    if(code & 0x80)
+        state = nullptr;
+
+    if(!state || *state == 0)
+    {
+        if(!ascii)
+        {
+            int n_dead = KCHR_N_DEAD_KEY_RECS(p);
+            dead_key_rec_t *deadp = KCHR_DEAD_KEY_RECS(p);
             while(--n_dead >= 0
                   && (DEAD_KEY_TABLE_NUMBER(deadp) != table_num
                       || DEAD_KEY_VIRT_KEY(deadp) != virt))
                 deadp = (dead_key_rec_t *)(&DEAD_KEY_NO_MATCH(deadp) + 1);
             if(n_dead >= 0)
-                *state = (char *)deadp - (char *)&KCHR_N_TABLES(p);
-            else
-                *state = 0;
+            {
+                if(!state) // key up
+                    ascii = DEAD_KEY_NO_MATCH(deadp);
+                else
+                    *state = (char *)deadp - (char *)&KCHR_N_TABLES(p);
+            }
         }
     }
     else
     {
-        dead_key_rec_t *deadp;
-        completer_t *completep;
         int n_recs, i;
 
-        deadp = (dead_key_rec_t *)((char *)&KCHR_N_TABLES(p) + *state);
+        dead_key_rec_t *deadp = (dead_key_rec_t *)((char *)&KCHR_N_TABLES(p) + *state);
         *state = 0;
-        completep = &DEAD_KEY_COMPLETER(deadp);
+        completer_t *completep = &DEAD_KEY_COMPLETER(deadp);
         n_recs = COMPLETER_N_RECS(completep);
         for(i = 0;
             (i < n_recs
@@ -207,7 +207,7 @@ LONGINT Executor::C_KeyTranslate(Ptr mapp, unsigned short code, GUEST<LONGINT> *
             ascii = (unsigned char)
                 (COMPLETER_COMPLETER_RECS(completep)[i]).replacement;
         else
-            ascii = (ascii << 16) | (unsigned short)DEAD_KEY_NO_MATCH(deadp);
+            ascii |= DEAD_KEY_NO_MATCH(deadp) << 16;
     }
     return ascii;
 }
@@ -365,14 +365,6 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
                 case 0x16: /* command shift 6: Don't restart Executor */
                     retval = false;
                     doquitreallyquits();
-                    break;
-                case 0x1a:
-                    retval = false;
-                    /* Reset the video mode.  Seems to be needed under DOS
-		 * sometimes when hotkeying around.
-		 */
-                    vdriver->setMode(0, 0, 0, vdriver->isGrayscale());
-                    redraw_screen();
                     break;
                 // case 0x1c: // command shift 8
             }
@@ -612,8 +604,6 @@ static bool debug_supress_suspend_resume = false;
 void
 Executor::sendsuspendevent(void)
 {
-    Point p;
-
     shouldBeSuspended = true;
     if(
         (size_info.size_flags & SZacceptSuspendResumeEvents)
@@ -627,18 +617,14 @@ Executor::sendsuspendevent(void)
         && (!(ROMlib_options & ROMLIB_NOSUSPEND_BIT) /* ||
 	  !(size_info.size_flags & SZcanBackground) */))
     {
-        p.h = LM(MouseLocation).h;
-        p.v = LM(MouseLocation).v;
-        ROMlib_PPostEvent(osEvt, SUSPENDRESUMEBITS | SUSPEND | CONVERTCLIPBOARD,
-                          (GUEST<EvQElPtr> *)0, TickCount(), p, ROMlib_mods);
+        PostEvent(osEvt, SUSPENDRESUMEBITS | SUSPEND | CONVERTCLIPBOARD);
     }
 }
 
 void
 Executor::sendresumeevent(bool cvtclip)
 {
-    LONGINT what;
-    Point p;
+    LONGINT msg;
 
     shouldBeSuspended = false;
     if(
@@ -646,33 +632,20 @@ Executor::sendresumeevent(bool cvtclip)
         && !debug_supress_suspend_resume
         )
     {
-        what = SUSPENDRESUMEBITS | RESUME;
+        msg = SUSPENDRESUMEBITS | RESUME;
         if(cvtclip)
-            what |= CONVERTCLIPBOARD;
-        p.h = LM(MouseLocation).h;
-        p.v = LM(MouseLocation).v;
-        ROMlib_PPostEvent(osEvt, what, (GUEST<EvQElPtr> *)0, TickCount(),
-                          p, ROMlib_mods);
+            msg |= CONVERTCLIPBOARD;
+        PostEvent(osEvt, msg);
     }
-}
-
-static void
-post_helper(INTEGER code, uint8_t raw, uint8_t mapped, INTEGER mods)
-{
-    Point p;
-
-    p.h = LM(MouseLocation).h;
-    p.v = LM(MouseLocation).v;
-
-    ROMlib_PPostEvent(code, (raw << 8) | mapped, (GUEST<EvQElPtr> *)0,
-                      TickCount(), p, btnState | mods);
 }
 
 void
 Executor::ROMlib_send_quit(void)
 {
-    post_helper(keyDown, MKV_CLOVER, 0, 0);
-    post_helper(keyDown, MKV_q, 'q', cmdKey);
-    post_helper(keyUp, MKV_q, 'q', cmdKey);
-    post_helper(keyUp, MKV_CLOVER, 0, cmdKey);
+    constexpr long q = (MKV_q << 8) | 'q';
+    bool saveCmd = ROMlib_GetKey(MKV_CLOVER);
+    ROMlib_SetKey(MKV_CLOVER, true);
+    PostEvent(keyDown, q);
+    PostEvent(keyUp, q);
+    ROMlib_SetKey(MKV_CLOVER, saveCmd);
 }

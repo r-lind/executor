@@ -114,26 +114,6 @@ void Executor::pixmap_copy(const PixMap *src_pm, const Rect *src_rect,
     }
 }
 
-bool Executor::pixmap_copy_if_screen(const PixMap *src_pm, const Rect *src_rect,
-                                     write_back_data_t *write_back_data)
-{
-#if defined(VDRIVER_SUPPORTS_REAL_SCREEN_BLITS)
-    if(VDRIVER_BYPASS_INTERNAL_FBUF_P()
-       && active_screen_addr_p(src_pm))
-    {
-        write_back_data->dst_pm = *src_pm;
-        write_back_data->dst_rect = *src_rect;
-
-        pixmap_copy(src_pm, src_rect,
-                    &write_back_data->src_pm, &write_back_data->src_rect);
-
-        return true;
-    }
-#endif
-
-    return false;
-}
-
 uint32_t
 pixel_from_rgb(RGBColor *color,
                const rgb_spec_t *rgb_spec)
@@ -374,9 +354,6 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
     uint8_t *src_base, *dst_base;
     int16_t src_row_bytes, dst_row_bytes;
 
-    write_back_data_t write_back;
-    bool copy_p;
-
     TEMP_ALLOC_DECL(temp_scratch_pm_bits);
 
     /* Grab some useful information about the PixMaps. */
@@ -553,13 +530,6 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
     cached_src_bpp = src_bpp;
     cached_dst_bpp = dst_bpp;
 
-    copy_p = pixmap_copy_if_screen(src, rect, &write_back);
-    if(copy_p)
-    {
-        src = &write_back.src_pm;
-        rect = &write_back.src_rect;
-    }
-
     PIXMAP_ASSERT_NOT_SCREEN(dst);
 
     /* using BITMAP_... on a PixMap * is slimy */
@@ -577,7 +547,5 @@ void Executor::convert_pixmap(const PixMap *src, PixMap *dst,
 
     dst->bounds = *rect;
 
-    if(copy_p)
-        pixmap_free_copy(&write_back.src_pm);
     TEMP_ALLOC_FREE(temp_scratch_pm_bits);
 }

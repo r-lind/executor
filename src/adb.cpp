@@ -11,7 +11,6 @@
 #include <base/cpu.h>
 #include <base/traps.impl.h>
 
-#include <stdarg.h>
 /*
  * NOTE: most of the code in adb.c was originally written solely to support
  * apeiron (and potentially other games).  Apeiron patches the mouse ADB
@@ -189,32 +188,16 @@ enum
 //       because va_start requires it.
 
 void
-Executor::adb_apeiron_hack(int /*bool*/ deltas_p, ...)
+Executor::adb_apeiron_hack()
 {
     static bool been_here = false;
     static long old_x;
     static long old_y;
-    long x, y;
-    bool button_is_down;
+    bool button_is_down = LM(MBState) == 0;
     char message[3];
 
-    x = LM(MouseLocation).h;
-    y = LM(MouseLocation).v;
-    button_is_down = !(ROMlib_mods & btnState);
-
-    /* begin code for PegLeg */
-
-    if(button_is_down)
-        LM(MBState) = 0;
-    else
-        LM(MBState) = 0xFF;
-
-    LM(MTemp).h = LM(MouseLocation).h;
-    LM(MTemp).v = LM(MouseLocation).v;
-
-    /* end code for PegLeg */
-
-    LM(MouseLocation2) = LM(MouseLocation);
+    long x = LM(MouseLocation).h;
+    long y = LM(MouseLocation).v;
 
     if(!been_here)
     {
@@ -226,20 +209,8 @@ Executor::adb_apeiron_hack(int /*bool*/ deltas_p, ...)
     {
         int dx, dy;
 
-        if(deltas_p)
-        {
-            va_list ap;
-
-            va_start(ap, deltas_p);
-            dx = va_arg(ap, int);
-            dy = va_arg(ap, int);
-            va_end(ap);
-        }
-        else
-        {
-            dx = x - old_x;
-            dy = y - old_y;
-        }
+        dx = x - old_x;
+        dy = y - old_y;
 
         do
         {

@@ -105,9 +105,6 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
     int bits_per_pixel;
     const rgb_spec_t *rgb_spec;
 
-    bool copy1_p, copy2_p;
-    write_back_data_t write_back1, write_back2;
-
     bits_per_pixel = src1->pixelSize;
     rgb_spec = pixmap_rgb_spec(src1);
 
@@ -115,19 +112,6 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
    * boolean transfer modes.
    */
     gui_assert(bits_per_pixel > 1);
-
-    copy1_p = pixmap_copy_if_screen(src1, r1, &write_back1);
-    if(copy1_p)
-    {
-        src1 = &write_back1.src_pm;
-        r1 = &write_back1.src_rect;
-    }
-    copy2_p = pixmap_copy_if_screen(src2, r2, &write_back2);
-    if(copy2_p)
-    {
-        src2 = &write_back2.src_pm;
-        r2 = &write_back2.src_rect;
-    }
 
     PIXMAP_ASSERT_NOT_SCREEN(dst);
 
@@ -341,11 +325,6 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
     /* Set up the dst bitmap's bounds so that rectangle r2 identifies
      the newly created bits.  */
     dst->bounds = *r2;
-
-    if(copy1_p)
-        pixmap_free_copy(&write_back1.src_pm);
-    if(copy2_p)
-        pixmap_free_copy(&write_back2.src_pm);
 }
 
 /* This function combines rectangles from two source bitmaps via one of
@@ -374,9 +353,6 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
     const rgb_spec_t *rgb_spec;
     int bits_per_pixel;
 
-    bool copy1_p, copy2_p;
-    write_back_data_t write_back1, write_back2;
-
     bits_per_pixel = src1->pixelSize;
     rgb_spec = pixmap_rgb_spec(src1);
 
@@ -384,19 +360,6 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
    * boolean transfer modes.
    */
     gui_assert(bits_per_pixel > 1);
-
-    copy1_p = pixmap_copy_if_screen(src1, r1, &write_back1);
-    if(copy1_p)
-    {
-        src1 = &write_back1.src_pm;
-        r1 = &write_back1.src_rect;
-    }
-    copy2_p = pixmap_copy_if_screen(src2, r2, &write_back2);
-    if(copy2_p)
-    {
-        src2 = &write_back2.src_pm;
-        r2 = &write_back2.src_rect;
-    }
 
     PIXMAP_ASSERT_NOT_SCREEN(dst);
 
@@ -690,9 +653,4 @@ void Executor::convert_pixmap_with_IMV_mode(const PixMap *src1, const PixMap *sr
    * the newly created bits.
    */
     dst->bounds = *r2;
-
-    if(copy1_p)
-        pixmap_free_copy(&write_back1.src_pm);
-    if(copy2_p)
-        pixmap_free_copy(&write_back2.src_pm);
 }

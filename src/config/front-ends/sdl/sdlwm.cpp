@@ -14,15 +14,6 @@ void SDLVideoDriver::setTitle(const std::string& title)
     SDL_WM_SetCaption(title.c_str(), "executor");
 }
 
-std::string
-SDLVideoDriver::getTitle(void)
-{
-    char *retval;
-
-    SDL_WM_GetCaption(&retval, (char **)0);
-    return retval;
-}
-
 /* This is really inefficient.  We should hash the cursors */
 void SDLVideoDriver::setCursor(char *cursor_data,
                                unsigned short cursor_mask[16],

@@ -53,7 +53,6 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal
 )
 
-set(FRONT_END qt CACHE STRING "which front-end to use (qt, sdl2, sdl, x)")
 set(HOST_ARCH generic_le)
 
 if(WIN32)
@@ -64,6 +63,7 @@ elseif(UNIX AND NOT APPLE)
 set(HOST_OS "linux")
 endif()
 
+set(FRONT_ENDS headless qt x sdl sdl2)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     # -Wno-enum-compare: Mac OSErr codes are currently spread between different
@@ -191,9 +191,7 @@ set(hfs_sources
     hfs/hfs.h
     hfs/hfs_plus.h
     hfs/partition.h
-    hfs/dcache.h
     hfs/drive_flags.h
-    hfs/dcache.cpp
     hfs/futzwithdosdisks.h
     hfs/hfsBtree.cpp hfs/hfsChanging.cpp hfs/hfsCreate.cpp hfs/hfsFile.cpp
     hfs/hfsHelper.cpp hfs/hfsHier.cpp hfs/hfsMisc.cpp hfs/hfsVolume.cpp
@@ -387,6 +385,7 @@ set(vdriver_sources
         vdriver/autorefresh.h
         vdriver/refresh.h
         vdriver/vdriver.h
+        vdriver/vdriver_callbacks.cpp
     )
 
 set(mman_sources
@@ -455,7 +454,7 @@ set(misc_sources
   version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
   process.cpp alias.cpp string.cpp  edition.cpp  balloon.cpp
    adb.cpp color_wheel_bits.cpp finder.cpp  
-  icon.cpp redrawscreen.cpp qt.cpp
+  icon.cpp redrawscreen.cpp quicktime.cpp
   commtool.cpp cfm.cpp pef_hash.cpp
   mixed_mode.cpp appearance.cpp lockrange.cpp
   unix_like.cpp
@@ -549,24 +548,26 @@ target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
 target_link_libraries(romlib resources)
 
-add_executable(executor main.cpp)
-target_link_libraries(executor romlib front-end-${FRONT_END})
+foreach(FRONT_END ${FRONT_ENDS})
+    if(TARGET front-end-${FRONT_END})
+        add_executable(executor-${FRONT_END} main.cpp)
+        target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
+        set_target_properties(executor-${FRONT_END} PROPERTIES
+            RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-set_target_properties(executor PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+        if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
+            set_target_properties(executor-${FRONT_END} PROPERTIES
+                    MACOSX_BUNDLE TRUE
+                    MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
+                )
+        endif()
+        
+        install(TARGETS executor-${FRONT_END}
+            RUNTIME DESTINATION bin
+            BUNDLE DESTINATION .)
+    endif()
+endforeach()
 
-if(APPLE)
-    set_target_properties(executor PROPERTIES
-            MACOSX_BUNDLE TRUE
-            MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
-        )
+if(TARGET executor-qt)
+    set_target_properties(executor-qt PROPERTIES OUTPUT_NAME executor)
 endif()
-
-add_executable(executor-headless main.cpp)
-target_link_libraries(executor-headless romlib front-end-headless)
-set_target_properties(executor-headless PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
-
-install(TARGETS executor executor-headless
-    RUNTIME DESTINATION bin
-    BUNDLE DESTINATION .)

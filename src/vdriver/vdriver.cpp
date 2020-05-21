@@ -19,6 +19,11 @@ bool VideoDriver::init()
     return true;
 }
 
+bool VideoDriver::setOptions(std::unordered_map<std::string, std::string> options)
+{
+    return true;
+}
+
 void VideoDriver::shutdown()
 {
 }
@@ -59,29 +64,6 @@ void VideoDriver::registerOptions()
 {
 }
 
-void VideoDriver::getColors(int first_color, int num_colors,
-                                struct ColorSpec *color_array)
-{
-    if(!isFixedCLUT())
-        gui_fatal("`!vdriver_fixed_clut_p' and `VideoDriver::getColors ()' called");
-    else
-        gui_fatal("`VideoDriver::getColors ()' unimplemented");
-}
-
-vdriver_accel_result_t VideoDriver::accelFillRect(int top, int left, int bottom, int right, uint32_t color)
-{
-    return VDRIVER_ACCEL_NO_UPDATE;
-}
-
-vdriver_accel_result_t VideoDriver::accelScrollRect(int top, int left, int bottom, int right, int dx, int dy)
-{
-    return VDRIVER_ACCEL_NO_UPDATE;
-}
-
-void VideoDriver::accelWait()
-{
-}
-
 void VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_cnt)
 {
 }
@@ -99,15 +81,6 @@ void VideoDriver::setTitle(const std::string& name)
 {
 }
 
-std::string VideoDriver::getTitle()
-{
-    return "";
-}
-
-void VideoDriver::setUseScancodes(bool val)
-{
-}
-
 void VideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y)
 {
 }
@@ -115,11 +88,6 @@ void VideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hot
 bool VideoDriver::setCursorVisible(bool show_p)
 {
     return true;
-}
-
-bool VideoDriver::hideCursorIfIntersects(int top, int left, int bottom, int right)
-{
-    return setCursorVisible(false);
 }
 
 void VideoDriver::beepAtUser()
