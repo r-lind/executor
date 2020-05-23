@@ -56,15 +56,10 @@ add_custom_command(
 if(WIN32)
     set(HOST_OS "win32")
     set(host_os_sources
-        config/os/win32/dirent.c
-        config/os/win32/gettimeofday.cpp
         config/os/win32/win32.h
-        config/os/win32/win32.cpp
         config/os/win32/win_serial.cpp
         config/os/win32/win_serial.h
         config/os/win32/win_launch.cpp
-        config/os/win32/winfs.h
-        config/os/win32/winfs.cpp
         config/os/win32/win_stat.h
         config/os/win32/win_stat.cpp)
 elseif(APPLE AND UNIX)

@@ -10,9 +10,6 @@
 #include <file/file.h>
 #include <hfs/hfs_plus.h>
 
-#if defined(_WIN32)
-#include "winfs.h"
-#endif
 
 using namespace Executor;
 
@@ -220,8 +217,10 @@ static OSErr readvolumeinfo(HVCB *vcbp) /* call once during mounting */
 
 void Executor::vcbsync(HVCB *vcbp)
 {
+#ifndef _WIN32
     if(!ROMlib_nosync)
         fsync(((VCBExtra *)vcbp)->u.hfs.fd);
+#endif
 }
 
 static OSErr writevolumeinfo(HVCB *vcbp, Ptr p)

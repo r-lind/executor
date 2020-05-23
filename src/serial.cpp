@@ -943,14 +943,18 @@ static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 break;
             case kSERDSendXOnOut:
                 c = XONC;
+#if defined(__linux__) || defined(MACOSX)                
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
+#endif                
                 break;
             case kSERDSendXOff:
                 err = controlErr; /* not supported */
                 break;
             case kSERDSendXOffOut:
                 c = XOFFC;
+#if defined(__linux__) || defined(MACOSX)
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
+#endif
                 break;
             case kSERDResetChannel:
                 err = controlErr; /* not supported */

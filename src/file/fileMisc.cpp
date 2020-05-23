@@ -22,16 +22,6 @@
 #include <rsys/paths.h>
 #include <rsys/macstrings.h>
 
-#if !defined(_WIN32)
-#include <pwd.h>
-#else
-#include "winfs.h"
-//#include "dosdisk.h"
-#endif
-
-#ifndef S_ISDIR
-#define S_ISDIR(m) ((m) & S_IFDIR)
-#endif
 
 #include <ctype.h>
 #include <algorithm>

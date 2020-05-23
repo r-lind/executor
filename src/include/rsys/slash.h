@@ -1,6 +1,10 @@
 #if !defined(_SLASH_H_)
 #define _SLASH_H_
 
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+
 #if defined(_WIN32)
 
 extern int Uaccess(const char *path, int mode);
@@ -12,9 +16,6 @@ extern int Ustat(const char *path, struct stat *buf);
 
 #else
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/stat.h>
 
 #define Uaccess access
 #define Ufopen fopen

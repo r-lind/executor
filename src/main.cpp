@@ -72,15 +72,6 @@
 #include <sys/wait.h>
 #endif
 
-#if defined(CYGWIN32)
-#include "winfs.h"
-#include "dosdisk.h"
-#include "win_except.h"
-#include "win_queue.h"
-#include "win_clip.h"
-#include "win_print.h"
-#endif
-
 #include <vector>
 
 using namespace Executor;

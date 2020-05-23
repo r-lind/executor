@@ -12,11 +12,11 @@
 
 #include <base/common.h>
 #include <rsys/slash.h>
+#include <unistd.h>
 
 using namespace Executor;
 
 #if defined(_WIN32)
-#include "winfs.h"
 #include "win_stat.h"
 
 #define DOUBLE_SLASH_REMOVE(str)                                      \
@@ -59,25 +59,6 @@ int Ustat(const char *path, struct stat *buf)
 
     path = DOUBLE_SLASH_REMOVE(path);
     retval = stat(path, buf);
-    if(strlen(path) == 2 && path[1] == ':')
-    {
-#if defined(_WIN32)
-        buf->st_ino = 0;
-        buf->st_rdev = 1;
-#else
-        buf->st_ino = 1;
-#endif
-    }
-#if defined(_WIN32)
-    else
-    {
-        uint32_t ino;
-
-        ino = ino_from_name(path);
-        buf->st_ino = ino >> 16; /* See definition of ST_INO */
-        buf->st_rdev = ino;
-    }
-#endif
     return retval;
 }
 

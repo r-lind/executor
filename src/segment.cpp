@@ -35,27 +35,9 @@
 #include <ctype.h>
 #include <algorithm>
 
-#if defined(CYGWIN32)
-
-#include "winfs.h"
-
-/*
- * NOTE:  I've looked at MINGW32 0.1.3 and the io.h #defines
- *        X_OK, which we use below.  I think Sam uses 0.1.3, even though
- *	  ARDI is currently at 0.1.2.
- */
-
-#if !defined(OLD_MINGWIN32)
-#include <io.h> /* needed for X_OK */
-#else
-#define X_OK 4 /* this is really just to get segment.c to compile */
-#endif
-
-#endif
 
 namespace Executor
 {
-char *ROMlib_errorstring;
 bool ROMlib_exit = false;
 
 typedef finderinfo *finderinfoptr;
@@ -297,13 +279,6 @@ void Executor::C_ExitToShell()
 
     CloseResFile(0);
     ROMlib_OurClose();
-
-    if(ROMlib_errorstring)
-    {
-        write(2, ROMlib_errorstring, strlen(ROMlib_errorstring));
-        gui_abort();
-    }
-
 
     exit(0);
     ALLOCAEND /* yeah, right, if exit fails... */
