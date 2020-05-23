@@ -12,26 +12,26 @@
 
 using namespace Executor;
 
-int srcblt_log2_bpp asm("_srcblt_log2_bpp");
+int srcblt_log2_bpp;
 
-const INTEGER *srcblt_rgn_start asm("_srcblt_rgn_start");
+const INTEGER *srcblt_rgn_start;
 
-const void **srcblt_stub_table asm("_srcblt_stub_table");
+const void **srcblt_stub_table;
 
-int32_t srcblt_x_offset asm("_srcblt_x_offset");
+int32_t srcblt_x_offset;
 
-int32_t srcblt_src_row_bytes asm("_srcblt_src_row_bytes");
-int32_t srcblt_dst_row_bytes asm("_srcblt_dst_row_bytes");
+int32_t srcblt_src_row_bytes;
+int32_t srcblt_dst_row_bytes;
 
-uint32_t srcblt_fg_color asm("_srcblt_fg_color");
-uint32_t srcblt_bk_color asm("_srcblt_bk_color");
+uint32_t srcblt_fg_color;
+uint32_t srcblt_bk_color;
 
-char *srcblt_src_baseaddr asm("_srcblt_src_baseaddr");
-char *srcblt_dst_baseaddr asm("_srcblt_dst_baseaddr");
+char *srcblt_src_baseaddr;
+char *srcblt_dst_baseaddr;
 
-int srcblt_shift_offset asm("_srcblt_shift_offset");
+int srcblt_shift_offset;
 
-bool srcblt_reverse_scanlines_p asm("_srcblt_reverse_scanlines_p");
+bool srcblt_reverse_scanlines_p;
 
 /* We use this macro to avoid page faults when aligning pointers. */
 #define MIN_PAGE_SIZE 512
@@ -164,29 +164,10 @@ void srcblt_rgn(RgnHandle rh, int mode, int log2_bpp,
     }
     else
     {
-#if defined(USE_PORTABLE_SRCBLT) || !defined(i386)
         if(srcblt_fg_color == (uint32_t)~0 && srcblt_bk_color == 0)
             srcblt_stub_table = srcblt_shift_stubs[mode];
         else
             srcblt_stub_table = srcblt_shift_fgbk_stubs[mode];
-#else /* i386 */
-        if(arch_type == ARCH_TYPE_I386)
-        {
-            /* i386 */
-            if(srcblt_fg_color == (uint32_t)~0 && srcblt_bk_color == 0)
-                srcblt_stub_table = srcblt_shift_i386_stubs FIRST_DIM[mode];
-            else
-                srcblt_stub_table = srcblt_shift_fgbk_i386_stubs FIRST_DIM[mode];
-        }
-        else
-        {
-            /* i486 or better */
-            if(srcblt_fg_color == (uint32_t)~0 && srcblt_bk_color == 0)
-                srcblt_stub_table = srcblt_shift_i486_stubs FIRST_DIM[mode];
-            else
-                srcblt_stub_table = srcblt_shift_fgbk_i486_stubs FIRST_DIM[mode];
-        }
-#endif /* i386 */
     }
 
     SETUP_SPECIAL_RGN(rh, srcblt_rgn_start);
