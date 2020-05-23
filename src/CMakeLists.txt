@@ -89,7 +89,7 @@ else()
 endif()
 source_group(HostOS FILES ${host_os_sources})
 
-set(FRONT_ENDS qt x sdl sdl2)
+set(FRONT_ENDS qt x sdl sdl2 wayland)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     # -Wno-enum-compare: Mac OSErr codes are currently spread between different
@@ -108,6 +108,7 @@ add_subdirectory(config/front-ends/x)
 add_subdirectory(config/front-ends/sdl)
 add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
+add_subdirectory(config/front-ends/wayland)
 add_subdirectory(config/front-ends/headless)
 
 function(linkheader from to variant)
