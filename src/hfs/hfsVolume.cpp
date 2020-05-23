@@ -10,7 +10,7 @@
 #include <file/file.h>
 #include <hfs/hfs_plus.h>
 
-#if defined(WIN32)
+#if defined(_WIN32)
 #include "winfs.h"
 #endif
 
@@ -283,14 +283,6 @@ static HVCB *vcbbyname(StringPtr name)
         ;
     return vcbp;
 }
-
-#if defined(CYGWIN32) || defined(MSDOS)
-#define VCB_CMPN_FUNC strncasecmp
-#define VCB_CMP_FUNC strcasecmp
-#else
-#define VCB_CMPN_FUNC strncmp
-#define VCB_CMP_FUNC strcmp
-#endif
 
 HVCB *Executor::ROMlib_vcbbydrive(short vrefnum)
 {

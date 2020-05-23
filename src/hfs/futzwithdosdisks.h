@@ -18,7 +18,7 @@
 namespace Executor
 {
     extern void futzwithdosdisks(void);
-#if defined(LINUX)
+#if defined(__linux__)
     extern int linuxfloppy_open(int disk, LONGINT *bsizep,
                                 drive_flags_t *flagsp, const char *dname);
     extern int linuxfloppy_close(int disk);

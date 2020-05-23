@@ -20,7 +20,7 @@
 #if defined(MSDOS) || defined(CYGWIN32)
 #include "dosdisk.h"
 #include "aspi.h"
-#elif defined(WIN32)
+#elif defined(_WIN32)
 // ### TODO: new win32 OS code does not yet
 // include the direct disk access stuff
 #else
@@ -44,7 +44,7 @@ void Executor::ROMlib_hfsinit(void)
  *	 which is an ARDI written NEXTSTEP atrocity.
  */
 
-#if !defined(LINUX) && !defined(MACOSX)
+#if !defined(__linux__) && !defined(MACOSX)
 #define EJECTABLE(buf) false
 #else
 /* #warning this is not the proper way to tell if something is ejectable */
@@ -64,18 +64,6 @@ void Executor::ROMlib_hfsinit(void)
     } while(0)
 
 #define NRETRIES 5
-
-long
-Executor::ROMlib_priv_open(const char *filename, long mode)
-{
-    long retval;
-
-    retval = Uopen(filename, mode, 0);
-    if(retval < 0)
-        retval = ROMlib_maperrno();
-
-    return retval;
-}
 
 #if !defined(MSDOS) && !defined(CYGWIN32)
 [[maybe_unused]]
@@ -125,7 +113,7 @@ OSErr Executor::ROMlib_ejectfloppy(LONGINT floppyfd)
 #endif
         if(floppyfd != -1)
             close(floppyfd);
-#if defined(LINUX) || defined(MACOSX_)
+#if defined(__linux__) || defined(MACOSX_)
         eject_floppy_notify();
 #endif
 #if defined(MSDOS) || defined(CYGWIN32)

@@ -11,12 +11,11 @@
  */
 
 #include <base/common.h>
-#include <rsys/lockunlock.h>
 #include <rsys/slash.h>
 
 using namespace Executor;
 
-#if defined(WIN32)
+#if defined(_WIN32)
 #include "winfs.h"
 #include "win_stat.h"
 
@@ -68,14 +67,14 @@ int Ustat(const char *path, struct stat *buf)
     retval = stat(path, buf);
     if(strlen(path) == 2 && path[1] == ':')
     {
-#if defined(WIN32)
+#if defined(_WIN32)
         buf->st_ino = 0;
         buf->st_rdev = 1;
 #else
         buf->st_ino = 1;
 #endif
     }
-#if defined(WIN32)
+#if defined(_WIN32)
     else
     {
         uint32_t ino;
@@ -100,7 +99,6 @@ int Uopen(const char *path, int flags, int mode)
 
     path = DOUBLE_SLASH_REMOVE(path);
     retval = open(path, flags, mode);
-    ROMlib_fd_clear_locks_after_open(retval, true);
     return retval;
 }
 
@@ -108,7 +106,6 @@ int Uclose(int fd)
 {
     int retval;
 
-    ROMlib_fd_release_locks_for_close(fd);
     retval = close(fd);
     return retval;
 }

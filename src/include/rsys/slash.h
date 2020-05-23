@@ -1,11 +1,7 @@
 #if !defined(_SLASH_H_)
 #define _SLASH_H_
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#if defined(WIN32)
+#if defined(_WIN32)
 
 extern int Uaccess(const char *path, int mode);
 extern FILE *Ufopen(const char *path, const char *type);
@@ -15,7 +11,12 @@ extern DIR *Uopendir(const char *path);
 
 extern int Ustat(const char *path, struct stat *buf);
 
-#else /* !MSDOS && !defined (CYGWIN32) */
+#else
+
+#include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <dirent.h>
 
 #define Uaccess access
 #define Ufopen fopen
@@ -25,10 +26,10 @@ extern int Ustat(const char *path, struct stat *buf);
 extern int Uopen(const char *path, int flags, int mode);
 extern int Uclose(int fd);
 
-#endif /* !MSDOS && !defined (CYGWIN32) */
+#endif
 
-#ifdef __cplusplus
-}
+#ifndef O_BINARY
+#define O_BINARY 0
 #endif
 
 #endif /* !_SLASH_H_ */

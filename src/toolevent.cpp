@@ -46,7 +46,7 @@
 #include <menu/menu.h>
 #include <algorithm>
 
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #include <sys/socket.h>
 #endif
 
@@ -215,7 +215,7 @@ uint32_t Executor::C_KeyTranslate(Ptr mapp, unsigned short code, GUEST<uint32_t>
 
 void Executor::dofloppymount(void)
 {
-#if !defined(MSDOS) && !defined(LINUX) && !defined(CYGWIN32)
+#if !defined(MSDOS) && !defined(__linux__) && !defined(CYGWIN32)
     SysBeep(5);
 #else
     futzwithdosdisks();

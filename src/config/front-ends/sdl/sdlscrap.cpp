@@ -218,7 +218,7 @@ surface_from_dib(void *lp)
 #endif
 #endif
 
-#if defined(LINUX) /* DON'T USE THIS CODE FOR CYGWIN32! */
+#if defined(__linux__) /* DON'T USE THIS CODE FOR CYGWIN32! */
 
 #include "sdlscrap.h"
 

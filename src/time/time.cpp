@@ -35,6 +35,8 @@ static unsigned long last_interrupt_msecs;
 static unsigned long next_interrupt_msecs;
 
 #if !defined(CYGWIN32)
+#include <sys/time.h>
+
 unsigned long
 msecs_elapsed()
 {

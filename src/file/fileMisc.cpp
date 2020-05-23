@@ -22,7 +22,7 @@
 #include <rsys/paths.h>
 #include <rsys/macstrings.h>
 
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #include <pwd.h>
 #else
 #include "winfs.h"
@@ -45,7 +45,6 @@ using namespace Executor;
 namespace Executor
 {
 int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
-fs::path ROMlib_startdir;
 std::string ROMlib_appname;
 }
 
@@ -55,80 +54,6 @@ void Executor::fs_err_hook(OSErr err)
 {
 }
 #endif
-
-int ROMlib_lasterrnomapped;
-
-#define MAX_ERRNO 50
-
-#define install_errno(uerr, merr)         \
-    do                                    \
-    {                                     \
-        gui_assert(uerr < std::size(xtable)); \
-        xtable[uerr] = merr;              \
-    } while(false);
-
-OSErr Executor::ROMlib_maperrno() /* INTERNAL */
-{
-    OSErr retval;
-    static OSErr xtable[MAX_ERRNO + 1];
-    static char been_here = false;
-    int errno_save;
-
-    if(!been_here)
-    {
-        int i;
-
-        for(i = 0; i < (int)std::size(xtable); ++i)
-            xtable[i] = fsDSIntErr;
-
-        install_errno(0, noErr);
-        install_errno(EPERM, permErr);
-        install_errno(ENOENT, fnfErr);
-        install_errno(EIO, ioErr);
-        install_errno(ENXIO, paramErr);
-        install_errno(EBADF, fnOpnErr);
-        install_errno(EAGAIN, fLckdErr);
-        install_errno(ENOMEM, memFullErr);
-        install_errno(EACCES, permErr);
-        install_errno(EFAULT, paramErr);
-        install_errno(EBUSY, fBsyErr);
-        install_errno(EEXIST, dupFNErr);
-        install_errno(EXDEV, fsRnErr);
-        install_errno(ENODEV, nsvErr);
-        install_errno(ENOTDIR, dirNFErr);
-        install_errno(EINVAL, paramErr);
-        install_errno(ENFILE, tmfoErr);
-        install_errno(EMFILE, tmfoErr);
-        install_errno(EFBIG, dskFulErr);
-        install_errno(ENOSPC, dskFulErr);
-        install_errno(ESPIPE, posErr);
-        install_errno(EROFS, wPrErr);
-        install_errno(EMLINK, dirFulErr);
-#if !defined(WIN32)
-        install_errno(ETXTBSY, fBsyErr);
-        install_errno(EWOULDBLOCK, permErr);
-#endif
-
-        been_here = true;
-    }
-
-    errno_save = errno;
-    ROMlib_lasterrnomapped = errno_save;
-
-    if(errno_save < 0 || errno_save >= (int)std::size(xtable))
-        retval = fsDSIntErr;
-    else
-        retval = xtable[errno_save];
-
-    if(retval == fsDSIntErr)
-        warning_unexpected("fsDSIntErr errno = %d", errno_save);
-
-    if(retval == dirNFErr)
-        warning_trace_info("dirNFErr errno = %d", errno_save);
-
-    fs_err_hook(retval);
-    return retval;
-}
 
 
 Byte
@@ -244,9 +169,6 @@ Executor::expandPath(std::string name)
 
     switch(name[0])
     {
-        case '+':
-            name = ROMlib_startdir.string() + name.substr(1);
-            break;
         case '~':
         {
             auto home = getenv("HOME");
@@ -259,7 +181,7 @@ Executor::expandPath(std::string name)
         break;
     }
 
-#if defined(WIN32)
+#if defined(_WIN32)
     std::replace(name.begin(), name.end(), '/', '\\');
 #endif
 

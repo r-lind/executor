@@ -215,7 +215,7 @@ OSErr Executor::PBHDelete(HParmBlkPtr pb, Boolean async)
 static void
 try_to_reopen(DrvQExtra *dqp)
 {
-#if defined(LINUX)
+#if defined(__linux__)
     drive_flags_t flags;
     dqp->hfs.fd = linuxfloppy_open(0, &dqp->hfs.bsize, &flags,
                                    (char *)dqp->devicename);

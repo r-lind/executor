@@ -21,6 +21,10 @@
 #include <sane/floatconv.h>
 #include <sane/float_fcw.h>
 
+#if !defined(_WIN32)
+#include <signal.h>
+#endif
+
 using namespace Executor;
 
 #if !defined(CYGWIN32)
@@ -300,7 +304,7 @@ void Executor::C_ROMlib_Fsetenv(GUEST<INTEGER> *dp, INTEGER sel)
             :
             : "m"(i387_env));
     }
-#elif !defined(WIN32)
+#elif !defined(_WIN32)
     // FIXME: #warning ROMlib_Fsetenv not implemented!
     signal(SIGFPE, SIG_IGN);
 #else

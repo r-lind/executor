@@ -31,11 +31,10 @@
 #include <rsys/paths.h>
 #include <base/traps.impl.h>
 
+#include <sys/stat.h>
+
 #include <algorithm>
 
-#ifdef MACOSX_
-//#include "contextswitch.h"
-#endif
 
 #if defined(CYGWIN32)
 #include "win_print.h"
@@ -404,7 +403,7 @@ update_ROMlib_printer_vars(TPPrDlg dp)
     }
 }
 
-#if !defined(LINUX)
+#if !defined(__linux__)
 static void
 get_popup_bounding_box(Rect *rp, DialogPtr dp, INTEGER itemno)
 {
@@ -443,7 +442,7 @@ update_port(DialogPtr dp)
     {
         if(print_where != PRINT_TO_FILE)
         {
-#if !defined(LINUX)
+#if !defined(__linux__)
             Rect r;
 
             get_popup_bounding_box(&r, dp, LAYOUT_PORT_MENU_NO);
@@ -490,7 +489,7 @@ update_port(DialogPtr dp)
         {
             HideDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
             HideDialogItem(dp, LAYOUT_FILENAME_NO);
-#if !defined(LINUX)
+#if !defined(__linux__)
             {
                 Rect r;
 
@@ -984,7 +983,7 @@ adjust_printer_type_menu(TPPrDlg dlg)
 static void
 adjust_port(TPPrDlg dlg)
 {
-#if !defined(LINUX)
+#if !defined(__linux__)
     adjust_menu_common(dlg, LAYOUT_PORT_MENU_NO, "Port", ROMlib_port);
 #else
     HideDialogItem((DialogPtr)dlg, LAYOUT_PORT_LABEL_NO);

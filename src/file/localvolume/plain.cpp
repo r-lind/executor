@@ -1,6 +1,6 @@
 #include "plain.h"
 #include "host-os-config.h"
-#if !defined(WIN32)
+#if !defined(_WIN32)
     #include <unistd.h>
 #endif
 #include <sys/types.h>
@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <iostream>
 #include <rsys/macros.h>
+#include <rsys/slash.h>
 
 using namespace Executor;
 
@@ -39,7 +40,7 @@ size_t PlainDataFork::getEOF()
 }
 void PlainDataFork::setEOF(size_t sz)
 {
-#if defined(WIN32)
+#if defined(_WIN32)
     chsize(fd, sz);
 #else
     ftruncate(fd, sz);

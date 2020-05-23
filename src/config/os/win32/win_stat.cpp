@@ -16,7 +16,6 @@
 
 #include <error/error.h>
 
-#include "win_stat_private.h"
 #include "win_stat.h"
 
 /*

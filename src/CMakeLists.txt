@@ -56,12 +56,31 @@ add_custom_command(
 set(HOST_ARCH generic_le)
 
 if(WIN32)
-set(HOST_OS "win32")
+    set(HOST_OS "win32")
+    set(host_os_sources
+        config/os/win32/dirent.c
+        config/os/win32/gettimeofday.cpp
+        config/os/win32/win32.h
+        config/os/win32/win32.cpp
+        config/os/win32/win_serial.cpp
+        config/os/win32/win_serial.h
+        config/os/win32/win_launch.cpp
+        config/os/win32/winfs.h
+        config/os/win32/winfs.cpp
+        config/os/win32/win_stat.h
+        config/os/win32/win_stat.cpp)
 elseif(APPLE AND UNIX)
-set(HOST_OS "macosx")
+    set(HOST_OS "macosx")
+    set(host_os_sources
+        config/os/macosx/macosx.h
+        config/os/macosx/macosx.mm)
 elseif(UNIX AND NOT APPLE)
-set(HOST_OS "linux")
+    set(HOST_OS "linux")
+    set(host_os_sources)
+else()
+    set(host_os_sources)
 endif()
+source_group(HostOS FILES ${host_os_sources})
 
 set(FRONT_ENDS headless qt x sdl sdl2)
 
@@ -84,8 +103,6 @@ add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
 add_subdirectory(config/front-ends/headless)
 add_subdirectory(config/arch/generic_le)
-add_subdirectory(config/os/win32)
-add_subdirectory(config/os/macosx)
 
 function(linkheader from to variant)
     if(DEFINED ARGV3)
@@ -456,8 +473,7 @@ set(misc_sources
    adb.cpp color_wheel_bits.cpp finder.cpp  
   icon.cpp redrawscreen.cpp quicktime.cpp
   commtool.cpp cfm.cpp pef_hash.cpp
-  mixed_mode.cpp appearance.cpp lockrange.cpp
-  unix_like.cpp
+  mixed_mode.cpp appearance.cpp
   executor.cpp  
   prefpanel.cpp
   qColorPicker.cpp
@@ -486,7 +502,6 @@ set(include_sources
                   include/rsys/icon.h
                   include/rsys/keyboard.h
                   include/rsys/launch.h
-                  include/rsys/lockunlock.h
                   include/rsys/macros.h
                   include/rsys/macstrings.h
                   include/rsys/mon_debugger.h
@@ -512,12 +527,6 @@ set(include_sources
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
 
-if(WIN32)
-    set(host_platform_sources ../windows/dirent.c ../windows/gettimeofday.cpp)
-else()
-    set(host_platform_sources)
-endif()
-source_group(HostPlatform FILES ${host_platform_sources})
 
 set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${ctl_sources} ${dial_sources} 
@@ -527,7 +536,7 @@ set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${sound_sources} ${num_sources} ${misc_sources}
     ${file_sources} ${hfs_sources} ${time_sources} ${osevent_sources}
     ${error_sources} ${commandline_sources} ${prefs_sources}
-    ${api_headers} ${trap_instance_sources} ${host_platform_sources}
+    ${api_headers} ${trap_instance_sources} ${host_os_sources}
     ${include_sources})
 
 add_library(romlib ${sources}
@@ -538,10 +547,6 @@ target_include_directories(romlib PUBLIC . include/ ${CMAKE_CURRENT_BINARY_DIR}/
 
 target_link_libraries(romlib arch-${HOST_ARCH})
 target_link_libraries(romlib lmdb)
-
-if(HOST_OS STREQUAL win32 OR HOST_OS STREQUAL macosx)
-    target_link_libraries(romlib os-${HOST_OS})
-endif()
 
 target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 

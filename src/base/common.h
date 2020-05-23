@@ -4,7 +4,6 @@
 #define WIN32 /* evil hackage needed to make SDL happy */
 #endif
 
-#include "host-os-config.h"
 #include "host-arch-config.h"
 
 #include <rsys/macros.h>

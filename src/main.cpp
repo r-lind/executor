@@ -62,18 +62,15 @@
 
 #include "default_vdriver.h"
 
-#if defined(LINUX) && defined(PERSONALITY_HACK)
+#if defined(__linux__) && defined(PERSONALITY_HACK)
 #include <sys/personality.h>
 #define READ_IMPLIES_EXEC 0x0400000
 #endif
 
 
-
-static void setstartdir(char *);
-
 #include <ctype.h>
 
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #include <sys/wait.h>
 #endif
 
@@ -143,12 +140,12 @@ static const option_vec common_opts = {
     { "skipdrives", "drive letters that represent drives to avoid",
       opt_sep, "" },
 #endif
-#if defined(LINUX)
+#if defined(__linux__)
     { "nodrivesearch",
       "Do not look for a floppy drive, CD-ROM drive or any other drive "
       "except as specified by the MacVolumes environment variable",
       opt_no_arg, "" },
-#endif /* LINUX */
+#endif /* __linux__ */
     { "keyboards", "list available keyboard mappings",
       opt_no_arg, "" },
     { "keyboard", "choose a specific keyboard map", opt_sep, "" },
@@ -290,7 +287,7 @@ check_arg(string argname, int *arg, int min, int max)
 }
 
 
-#if !defined(LINUX)
+#if !defined(__linux__)
 #define SHELL "/bin/sh"
 #define WHICH "which "
 #else
@@ -311,63 +308,6 @@ set_appname(char *argv0)
     else
         p = argv0;
     ROMlib_appname = p;
-}
-
-static void setstartdir(char *argv0)
-{
-#if !defined(WIN32)
-    LONGINT p[2], pid;
-    char buf[MAXPATHLEN];
-    INTEGER nread, arg0len;
-    char *lookhere, *suffix, *whichstr;
-
-    if(argv0[0] == '/' || Uaccess(argv0, X_OK) == 0)
-        lookhere = argv0;
-    else
-    {
-        pipe(p);
-        if((pid = fork()) == 0)
-        {
-            close(1);
-            dup(p[1]);
-            arg0len = strlen(argv0);
-            whichstr = (char *)alloca(arg0len + sizeof(WHICH));
-            memmove(whichstr, WHICH, sizeof(WHICH) - 1);
-            memmove(whichstr + sizeof(WHICH) - 1, argv0, arg0len + 1);
-            execl(SHELL, "sh", "-c", whichstr, (char *)0);
-            fprintf(stderr, "``%s -c \"%s\"'' failed\n", SHELL, whichstr);
-            fflush(stderr);
-            _exit(127);
-/* NOTREACHED */
-#if !defined(LETGCCWAIL)
-            lookhere = 0;
-#endif /* LETGCCWAIL */
-        }
-        else
-        {
-            close(p[1]);
-            nread = read(p[0], buf, sizeof(buf) - 1);
-            waitpid(pid, nullptr, 0);
-            if(nread)
-                --nread; /* get rid of trailing \n */
-            buf[nread] = 0;
-            lookhere = buf;
-        }
-    }
-    suffix = rindex(lookhere, '/');
-    if(suffix)
-        *suffix = 0;
-    auto savedir = fs::current_path();
-    chdir(lookhere);
-    if(suffix)
-        *suffix = '/';
-    ROMlib_startdir = fs::current_path();
-    fs::current_path(savedir);
-    
-#else /* defined(MSDOS) || defined(CYGWIN32) */
-    // TODO: replace by GetModuleFilename()
-    ROMlib_startdir = fs::canonical(argv0).parent_path();
-#endif /* defined(MSDOS) */
 }
 
 
@@ -579,7 +519,7 @@ static void parseCommandLine(int& argc, char **argv)
 
     opt_bool_val(opt_db, "grayscale", &flag_grayscale, &bad_arg_p);
 
-#if defined(LINUX)
+#if defined(__linux__)
     opt_bool_val(opt_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
 #endif
 
@@ -655,7 +595,7 @@ int main(int argc, char **argv)
 {
     char thingOnStack; /* used to determine an approximation of the stack base address */
 
-#if defined(LINUX) && defined(PERSONALITY_HACK)
+#if defined(__linux__) && defined(PERSONALITY_HACK)
     int pers;
 
     // TODO: figure out how much of this is still necessary.
@@ -677,16 +617,9 @@ int main(int argc, char **argv)
         exit(-100);
     }
 
-    if(!os_init())
-    {
-        fprintf(stderr, "Unable to initialize operating system features.\n");
-        exit(-101);
-    }
-
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();
 
-    setstartdir(argv[0]);
     set_appname(argv[0]);
 
     VideoDriverCallbacks videoDriverCallbacks;

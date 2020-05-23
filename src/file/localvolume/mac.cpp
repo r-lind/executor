@@ -40,12 +40,12 @@ public:
 
 MacResourceFork::MacResourceFork(fs::path path)
 {
-    fd = open(path.string().c_str(), O_RDWR | O_BINARY, 0644);
+    fd = open(path.string().c_str(), O_RDWR, 0644);
 }
 
 MacResourceFork::MacResourceFork(fs::path path, create_t)
 {
-    fd = open(path.string().c_str(), O_RDWR | O_CREAT | O_BINARY, 0644);
+    fd = open(path.string().c_str(), O_RDWR | O_CREAT, 0644);
 
         // Note:
         // I'm tempted to initialize type and creator to 0,

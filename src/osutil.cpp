@@ -28,6 +28,10 @@
 #include <PowerCore.h>
 #include <base/traps.impl.h>
 
+#if !defined(_WIN32)
+#include <sys/time.h>
+#endif
+
 using namespace Executor;
 
 OSErr Executor::HandToHand(GUEST<Handle> *hp)
@@ -339,7 +343,7 @@ OSErr Executor::ReadDateTime(GUEST<ULONGINT> *secs)
 
 OSErr Executor::SetDateTime(ULONGINT mactime)
 {
-#if !defined(SYSV) && !defined(WIN32)
+#if !defined(_WIN32)
     struct timeval thetime;
 
     thetime.tv_sec = MACTIMETOGUNIXTIME(mactime);

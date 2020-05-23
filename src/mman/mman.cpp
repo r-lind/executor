@@ -26,7 +26,7 @@
 #include <vdriver/vdriver.h>   /* for WeOwnScrapX */
 #include <algorithm>
 
-#if defined(LINUX)
+#if defined(__linux__)
 extern char _etext, __data_start, _end; /* boundaries of data+bss sections, supplied by the linker */
 #endif
 
@@ -420,7 +420,7 @@ static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
         return dst;
     };
 
-#if defined(LINUX)
+#if defined(__linux__)
     SetupOneMemoryMapping(7, (uintptr_t)&__data_start & ~3ULL, &_end - &__data_start);
 #else
     static char staticThing[32];
@@ -452,7 +452,7 @@ static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
     // ... 4KB of slop above the "thingOnStack"
     SetupOneMemoryMapping(2, ((uintptr_t)thingOnStack - 16 * 1024 * 1024 + 4096) & ~3ULL, 16 * 1024 * 1024 + 4096);
 
-#if defined(LINUX)
+#if defined(__linux__)
     SetupOneMemoryMapping(3, (uintptr_t)&_etext & ~3ULL, &_end - &_etext);
 #else
     /* Mac OS X doesn't have _etext and _end, and the functions in

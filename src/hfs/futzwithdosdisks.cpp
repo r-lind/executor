@@ -5,7 +5,7 @@
 #include <prefs/prefs.h>
 #include <OSEvent.h>
 
-#if defined(LINUX)
+#if defined(__linux__)
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -31,7 +31,7 @@ using namespace Executor;
  * Instead, it has to do with mounting HFS floppies and CD-ROMs.
  */
 
-#if defined(LINUX)
+#if defined(__linux__)
 int Executor::linuxfloppy_open(int disk, LONGINT *bsizep,
                                drive_flags_t *flagsp, const char *dname)
 {
@@ -151,7 +151,7 @@ fd_of(int i)
 
 void Executor::futzwithdosdisks(void)
 {
-#if defined(MSDOS) || defined(LINUX) || defined(CYGWIN32)
+#if defined(MSDOS) || defined(__linux__) || defined(CYGWIN32)
     int i, fd;
     GUEST<LONGINT> mess_s;
     LONGINT mess;
@@ -165,7 +165,7 @@ void Executor::futzwithdosdisks(void)
 #define MARKER DOSFDBIT
 #define EXTRA_PARAM
 #define ROMLIB_MACDRIVES ROMlib_macdrives
-#elif defined(LINUX)
+#elif defined(__linux__)
     static dosdriveinfo_t drives[] = {
         { "/dev/fd0", (DrvQExtra *)0, false, IGNORED },
         { "/dev/cdrom", (DrvQExtra *)0, false, IGNORED },
