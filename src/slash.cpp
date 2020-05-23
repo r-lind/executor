@@ -53,12 +53,6 @@ FILE *Ufopen(const char *path, const char *type)
     return fopen(path, type);
 }
 
-DIR *Uopendir(const char *path)
-{
-    path = DOUBLE_SLASH_REMOVE(path);
-    return opendir((char *)path);
-}
-
 int Ustat(const char *path, struct stat *buf)
 {
     int retval;

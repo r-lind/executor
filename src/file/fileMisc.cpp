@@ -330,63 +330,36 @@ std::optional<FSSpec> Executor::cmdlinePathToFSSpec(const std::string& path)
     return {};
 }
 
+template<typename F>
+static void ForEachPath(std::string_view macVolumes, F f)
+{
+    std::string::size_type p = 0, q;
+    
+    while((q = macVolumes.find_first_of(":;",  p)) != std::string::npos)
+    {
+        if(auto s = macVolumes.substr(p, q-p); !s.empty())
+            f(s);
+        p = q + 1;
+    }
+    if(auto s = macVolumes.substr(p); !s.empty())
+        f(s);
+}
+
 static void MountMacVolumes(std::string macVolumes)
 {
-    GUEST<LONGINT> m;
-    char *p, *ep;
-    struct stat sbuf;
+    ForEachPath(macVolumes, [](std::string_view pathstr) {
+        fs::path path(expandPath(std::string(pathstr)));
+        GUEST<LONGINT> m;
 
-    m = 0;
-    p = (char *)alloca(macVolumes.size() + 1);
-    strcpy(p, macVolumes.c_str());
-    while(p && *p)
-    {
-        ep = strchr(p, ';');
-        if(ep)
-            *ep = 0;
-        std::string newp = expandPath(p);
-        if(Ustat(newp.c_str(), &sbuf) == 0)
+        if(fs::is_directory(path))
         {
-            if(!S_ISDIR(sbuf.st_mode))
-                ROMlib_openharddisk(newp.c_str(), &m);
-            else
-            {
-                DIR *dirp;
-
-                dirp = Uopendir(newp.c_str());
-                if(dirp)
-                {
-#if defined(USE_STRUCT_DIRECT)
-                    struct direct *direntp;
-#else
-                    struct dirent *direntp;
-#endif
-
-                    while((direntp = readdir(dirp)))
-                    {
-                        int namelen;
-
-                        namelen = strlen(direntp->d_name);
-                        if(namelen >= 4 && (strcasecmp(direntp->d_name + namelen - 4, ".hfv")
-                                                == 0
-                                            || strcasecmp(direntp->d_name + namelen - 4, ".ima")
-                                                == 0))
-                        {
-                            ROMlib_openharddisk((newp + "/" + direntp->d_name).c_str(), &m);
-                        }
-                    }
-                    closedir(dirp);
-                }
-            }
-        }
-        if(ep)
-        {
-            *ep = ';';
-            p = ep + 1;
+            for(auto& file : fs::directory_iterator(path))
+                if(!fs::is_directory(file))
+                    ROMlib_openharddisk(file.path().string().c_str(), &m);
         }
         else
-            p = 0;
-    }
+            ROMlib_openharddisk(path.string().c_str(), &m);
+    });
 
     futzwithdosdisks();
 }
