@@ -1,18 +1,40 @@
 #if !defined(_BYTESWAP_H_)
 #define _BYTESWAP_H_
 
-#if !defined(BIGENDIAN) && !defined(LITTLEENDIAN)
-#error "One of BIGENDIAN or LITTLEENDIAN must be #defined"
+#include <stdint.h>
+#include <type_traits>
+
+
+#if !defined(BIGENDIAN) & !defined(LITTLEENDIAN)
+
+#if defined(powerpc) || defined(__ppc__)
+#define BIGENDIAN
+#elif defined(i386) \
+     || defined(__x86_64) || defined(__x86_64__) \
+     || defined (_M_X64) || defined(_M_IX86) \
+     || defined(__arm__)
+#define LITTLEENDIAN
+#else
+#error "Unknown CPU type"
 #endif
 
-#include <stdint.h>
-#include <cstddef>
-#include <type_traits>
-#include <base/mactype.h>
-#include <syn68k_public.h> /* for ROMlib_offset */
+#endif
+
+#if defined(_MSC_VER) && defined(LITTLEENDIAN)
+#include <stdlib.h>     /* for _byteswap_* */
+#endif
 
 namespace Executor
 {
+#ifdef _MSC_VER
+inline uint16_t swap16(uint16_t v) { return _byteswap_ushort(v); }
+inline uint32_t swap32(uint32_t v) { return _byteswap_ulong(v); }
+inline uint64_t swap64(uint64_t v) { return _byteswap_uint64(v); }
+#else
+inline uint16_t swap16(uint16_t v) { return __builtin_bswap16(v); }
+inline uint32_t swap32(uint32_t v) { return __builtin_bswap32(v); }
+inline uint64_t swap64(uint64_t v) { return __builtin_bswap64(v); }
+#endif
 
 #if defined(BIGENDIAN)
 
@@ -23,7 +45,6 @@ namespace Executor
 
 #else /* !defined (BIGENDIAN) */
 
-#if 1
 template<class TT>
 inline TT CW_RAW(TT n)
 {
@@ -44,12 +65,6 @@ inline TT CL_RAW(TT n)
           | (((unsigned int)(n)&0x00FF0000) >> 8)        \
           | (((unsigned int)(n)&0xFF000000)              \
              >> 24))))
-#else
-#define CW_RAW(x) swap16(x)
-#define CL_RAW(x) swap32(x)
-#define CWC_RAW(x) swap16(x)
-#define CLC_RAW(x) swap32(x)
-#endif
 
 #endif /* !defined (BIGENDIAN) */
 

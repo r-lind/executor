@@ -16,7 +16,6 @@
 #undef SIGDIGLEN
 #include <base/common.h>
 #include <MemoryMgr.h>
-#include <base/byteswap.h>
 #include <SpeechManager-MacBridge.h>
 #undef BOOL
 #undef YES

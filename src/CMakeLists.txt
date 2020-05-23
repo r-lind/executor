@@ -53,8 +53,6 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal
 )
 
-set(HOST_ARCH generic_le)
-
 if(WIN32)
     set(HOST_OS "win32")
     set(host_os_sources
@@ -102,7 +100,6 @@ add_subdirectory(config/front-ends/sdl)
 add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
 add_subdirectory(config/front-ends/headless)
-add_subdirectory(config/arch/generic_le)
 
 function(linkheader from to variant)
     if(DEFINED ARGV3)
@@ -115,7 +112,6 @@ function(linkheader from to variant)
 endfunction()
 
 linkheader("config/os" "host-os-config.h" ${HOST_OS})
-linkheader("config/arch" "host-arch-config.h" ${HOST_ARCH})
 #linkheader("config/front-ends" "front-end-config.h" ${FRONT_END})
 linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
 
@@ -488,7 +484,6 @@ set(include_sources
                   include/rsys/adb.h
                   include/rsys/alias.h
                   include/rsys/appearance.h
-                  include/rsys/arch.h
                   include/rsys/arrowkeys.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/desk.h
@@ -506,7 +501,6 @@ set(include_sources
                   include/rsys/macstrings.h
                   include/rsys/mon_debugger.h
                   include/rsys/noreturn.h
-                  include/rsys/os.h
                   include/rsys/osutil.h
                   include/rsys/paths.h
                   include/rsys/prefpanel.h
@@ -545,7 +539,6 @@ add_library(romlib ${sources}
 
 target_include_directories(romlib PUBLIC . include/ ${CMAKE_CURRENT_BINARY_DIR}/api/ ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(romlib arch-${HOST_ARCH})
 target_link_libraries(romlib lmdb)
 
 target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)

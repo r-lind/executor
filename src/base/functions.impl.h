@@ -3,7 +3,6 @@
 
 #include <base/functions.h>
 #include <base/mactype.h>
-#include <base/byteswap.h>
 
 #include <string.h>
 #include <tuple>

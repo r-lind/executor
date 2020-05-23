@@ -1,6 +1,5 @@
 #include "localvolume.h"
 #include <base/common.h>
-#include <base/byteswap.h>
 #include <FileMgr.h>
 #include <MemoryMgr.h>
 #include <file/file.h>

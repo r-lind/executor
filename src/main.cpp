@@ -48,8 +48,6 @@
 #include <sane/float.h>
 #include <rsys/paths.h>
 #include <appleevent/apple_events.h>
-#include <rsys/os.h>
-#include <rsys/arch.h>
 #include <rsys/gestalt.h>
 #include <rsys/launch.h>
 #include <quickdraw/text.h>
@@ -610,12 +608,6 @@ int main(int argc, char **argv)
 #endif
 
     ROMlib_command_line = construct_command_line_string(argc, argv);
-
-    if(!arch_init())
-    {
-        fprintf(stderr, "Unable to initialize CPU information.\n");
-        exit(-100);
-    }
 
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();

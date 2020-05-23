@@ -7,11 +7,6 @@
 
 using namespace Executor;
 
-bool Executor::os_init()
-{
-    return true;
-}
-
 int
 Executor::ROMlib_lockunlockrange(int fd, uint32_t begin, uint32_t count, lockunlock_t op)
 {
