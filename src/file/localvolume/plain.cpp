@@ -1,8 +1,5 @@
 #include "plain.h"
-#include "host-os-config.h"
-#if !defined(_WIN32)
-    #include <unistd.h>
-#endif
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>

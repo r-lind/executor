@@ -1,5 +1,4 @@
 #include "mac.h"
-#include "host-os-config.h"
 #include "plain.h"
 #include <rsys/macros.h>
 

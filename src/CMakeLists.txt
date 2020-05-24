@@ -106,8 +106,6 @@ function(linkheader from to variant)
     configure_file(${from}/${variant}/${input} ${to} COPYONLY)
 endfunction()
 
-linkheader("config/os" "host-os-config.h" ${HOST_OS})
-#linkheader("config/front-ends" "front-end-config.h" ${FRONT_END})
 linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
 
 add_executable(map_to_c map_to_c/map_to_c.cpp)

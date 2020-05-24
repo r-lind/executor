@@ -6,8 +6,6 @@
 #include <QEventLoop>
 #include <QResizeEvent>
 
-#include "host-os-config.h"
-
 QVector<QRect> getScreenGeometries()
 {
     QVector<QRect> geometries;
