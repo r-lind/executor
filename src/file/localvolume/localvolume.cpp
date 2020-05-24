@@ -41,8 +41,8 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     itemCache = std::make_unique<ItemCache>(
             root,
             getVolumeName(),
-            //std::make_unique<SimpleCNIDMapper>(root, getVolumeName()),
-            std::make_unique<LMDBCNIDMapper>(root, getVolumeName()),
+            std::make_unique<SimpleCNIDMapper>(root, getVolumeName()),
+            //std::make_unique<LMDBCNIDMapper>(root, getVolumeName()),
             static_cast<ItemFactory*>(this)
         );
 
@@ -51,7 +51,7 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>());
     upgradedItemFactory = itemFactories.back().get();
     itemFactories.push_back(std::make_unique<BasiliskItemFactory>());
-#ifdef MACOSX
+#ifdef __APPLE__
     itemFactories.push_back(std::make_unique<MacItemFactory>());
     upgradedItemFactory = itemFactories.back().get();
 #endif

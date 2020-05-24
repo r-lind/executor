@@ -30,7 +30,6 @@ extern void display_keyboard_choices(void);
 extern bool ROMlib_set_keyboard(const char *keyboardname);
 extern Boolean ROMlib_bewaremovement;
 extern void ROMlib_showhidecursor(void);
-extern void maybe_wait_for_keyup(void);
 
 extern uint16_t ROMlib_right_to_left_key_map(uint16_t what);
 

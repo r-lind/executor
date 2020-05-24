@@ -2,7 +2,7 @@
 #include "plain.h"
 #include <rsys/macros.h>
 
-#ifdef MACOSX
+#ifdef __APPLE__
 using namespace Executor;
 
 #include <sys/types.h>

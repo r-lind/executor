@@ -121,14 +121,6 @@ static const option_vec common_opts = {
     { "nosound", "disable any sound hardware",
       opt_no_arg, "" },
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    { "macdrives", "drive letters that represent Mac formatted media",
-      opt_sep, "" },
-    { "dosdrives", "drive letters that represent DOS formatted media",
-      opt_sep, "" },
-    { "skipdrives", "drive letters that represent drives to avoid",
-      opt_sep, "" },
-#endif
 #if defined(__linux__)
     { "nodrivesearch",
       "Do not look for a floppy drive, CD-ROM drive or any other drive "
@@ -207,13 +199,6 @@ capable of color.",
                 "for New York when generating PostScript",
       opt_no_arg, "" },
 
-#if defined(CYGWIN32)
-    { "die", "allow Executor to die instead of catching trap", opt_no_arg,
-      "" },
-    { "noautoevents", "disable timer driven event checking", opt_no_arg,
-      "" },
-#endif
-
     { "prvers",
       "specify the printer version that executor reports to applications",
       opt_sep, "" },
@@ -224,10 +209,6 @@ capable of color.",
       "in addition to the standard 72dpi.  Not all apps will be able to use "
       "this additional resolution.",
       opt_sep, "" },
-
-#if defined(CYGWIN32) && defined(SDL)
-    { "clipleak", "UNSUPPORTED (ignored)", opt_no_arg, "" },
-#endif
 
     { "ppc", "prefer PPC code to 68K code when both are available", opt_no_arg, "" },
 
@@ -273,30 +254,6 @@ check_arg(string argname, int *arg, int min, int max)
         fputs(" inclusive.\n", stderr);
         bad_arg_p = true;
     }
-}
-
-
-#if !defined(__linux__)
-#define SHELL "/bin/sh"
-#define WHICH "which "
-#else
-#define SHELL "/bin/bash"
-#define WHICH "type -path "
-#endif
-
-static void
-set_appname(char *argv0)
-{
-    char *p = strrchr(argv0, '/');
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(!p)
-        p = strrchr(argv0, '\\');
-#endif
-    if(p)
-        ++p;
-    else
-        p = argv0;
-    ROMlib_appname = p;
 }
 
 
@@ -417,7 +374,7 @@ static void parseCommandLine(int& argc, char **argv)
     if(opt_val(opt_db, "debug", &arg))
         bad_arg_p |= !error_parse_option_string(arg);
 
-#if defined(MACOSX)
+#if defined(__APPLE__)
     // sync() really takes a long time on Mac OS X.
     ROMlib_nosync = true;
 #endif
@@ -432,13 +389,6 @@ static void parseCommandLine(int& argc, char **argv)
     use_native_code_p = !opt_val(opt_db, "notnative", nullptr);
 
     substitute_fonts_p = !opt_val(opt_db, "cities", nullptr);
-
-#if defined(CYGWIN32)
-    if(opt_val(opt_db, "die", nullptr))
-        uninstall_exception_handler();
-    if(opt_val(opt_db, "noautoevents", nullptr))
-        set_timer_driven_events(false);
-#endif
 
     /* Parse the "-memory" option. */
     {
@@ -603,7 +553,7 @@ int main(int argc, char **argv)
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();
 
-    set_appname(argv[0]);
+    ROMlib_appname = fs::path(argv[0]).filename().string();
 
     VideoDriverCallbacks videoDriverCallbacks;
     vdriver = new DefaultVDriver(&videoDriverCallbacks);
@@ -682,9 +632,6 @@ int main(int argc, char **argv)
 
     set_refresh_rate(ROMlib_refresh);
 
-#if defined(CYGWIN32)
-    complain_if_no_ghostscript();
-#endif
     InitMonDebugger();
     base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
 

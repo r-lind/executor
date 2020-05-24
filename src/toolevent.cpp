@@ -215,11 +215,7 @@ uint32_t Executor::C_KeyTranslate(Ptr mapp, unsigned short code, GUEST<uint32_t>
 
 void Executor::dofloppymount(void)
 {
-#if !defined(MSDOS) && !defined(__linux__) && !defined(CYGWIN32)
-    SysBeep(5);
-#else
     futzwithdosdisks();
-#endif
 }
 
 static void doscreendumptoprinter(void)
@@ -334,7 +330,7 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
         TRACE(17);
 
         short fkeyModifiers = shiftKey | cmdKey;
-#ifdef MACOSX
+#ifdef __APPLE__
         fkeyModifiers = optionKey | cmdKey;
 #endif
         if(retval && evt->what == keyDown && LM(ScrDmpEnb) && (evt->modifiers & fkeyModifiers) == fkeyModifiers)

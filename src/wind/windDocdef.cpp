@@ -181,10 +181,8 @@ Executor::validate_colors_for_window(GrafPtr w)
                 w_ctab_entry_index = w_ctab_entry->value;
                 if(w_ctab_entry_index < 0 || w_ctab_entry_index > 12)
                 {
-#if !defined(CYGWIN32) /* just gets in the way of debugging under windows */
                     warning_unexpected("window color table with index `%d' > 12 or < 0; ignored",
                                        w_ctab_entry_index);
-#endif
                     continue;
                 }
                 color_window_colors[w_ctab_entry_index] = w_ctab_entry->rgb;

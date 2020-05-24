@@ -5,9 +5,7 @@
 #undef _DARWIN_NO_64_BIT_INODE
 
 /* #include <base/common.h> */
-#if defined(__MINGW32__)
-#define CYGWIN32
-#endif
+
 
 #include <stdio.h>
 #include <time.h>

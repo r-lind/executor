@@ -28,7 +28,8 @@
  * }
  */
 
-#if defined(MSDOS) || defined(CYGWIN32)
+// #define TEMP_ALLOC_ON_MAC_HEAP_INSTEAD_OF_ALLOCA
+#if TEMP_ALLOC_ON_MAC_HEAP_INSTEAD_OF_ALLOCA
 
 #include <MemoryMgr.h>
 #include <mman/mman.h>

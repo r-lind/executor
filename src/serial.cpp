@@ -10,7 +10,7 @@
 
 #include <base/common.h>
 
-#if defined(MACOSX)
+#if defined(__APPLE__)
 // FIXME: #warning bad serial support right now
 //TODO: this seems to use sgtty functions instead of termios.
 #include <sgtty.h>
@@ -18,7 +18,7 @@
 #include <sys/types.h>
 #include <sys/param.h>
 #include <stdio.h>
-#endif /* !defined (MACOSX) */
+#endif /* !defined (__APPLE__) */
 
 #include <Serial.h>
 #include <DeviceMgr.h>
@@ -33,7 +33,7 @@
 #include <base/cpu.h>
 #include <base/traps.impl.h>
 
-#if defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
 #include "win_serial.h"
 #endif
 
@@ -41,7 +41,7 @@
 #include <termios.h>
 #endif
 
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
 #include <sys/ioctl.h>
 #endif
 
@@ -182,7 +182,7 @@ OSErr Executor::SerStatus(INTEGER rn, SerStaRec *serstap) /* IMII-253 */
 
 #define OPENBIT (1 << 0)
 
-#if !defined(MSDOS) && !defined(CYGWIN32) && !defined(_WIN32)
+#if !defined(_WIN32)
 #if defined(TERMIO)
 
 typedef struct
@@ -244,7 +244,7 @@ static DCtlPtr otherdctl(ParmBlkPtr pbp)
     return h ? *h : 0;
 }
 
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
 
 /*
  * NOTE:  Currently we're using cufa and cufb; we really should
@@ -269,7 +269,7 @@ static const char *specialname(ParmBlkPtr pbp)
     }
     return retval;
 }
-#endif /* defined (__linux__) || defined (MACOSX) */
+#endif /* defined (__linux__) || defined (__APPLE__) */
 
 typedef void (*compfuncp)(void);
 
@@ -383,7 +383,7 @@ static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
     OSErr err;
     DCtlPtr otherp; /* auto due to old compiler bug */
     hiddenh h;
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
     const char *devname;
 #endif
 
@@ -400,7 +400,7 @@ static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
         }
         else
         {
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
             err = permErr;
             if((devname = specialname(pbp)))
             {
@@ -409,7 +409,7 @@ static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 #endif
             if(err == noErr)
             {
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
                 (*h)->fd = ROMlib_priv_open(devname, O_RDWR);
                 if((*h)->fd < 0)
                     err = (*h)->fd; /* error return piggybacked */
@@ -427,7 +427,7 @@ static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                     dcp->dCtlFlags |= OPENBIT;
                     SerReset(pbp->cntrlParam.ioCRefNum,
                              (pbp->cntrlParam.ioCRefNum == AINREFNUM || pbp->cntrlParam.ioCRefNum == AOUTREFNUM) ? LM(SPPortA) : LM(SPPortB));
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
                 }
 #endif
             }
@@ -467,9 +467,9 @@ static OSErr C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 {
 /* this may have to be changed since we aren't looking for
 		   parity and framing errors */
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
                     pbp->ioParam.ioActCount = read((*h)->fd, buf, req_count);
-#elif defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#elif defined(_WIN32)
                     pbp->ioParam.ioActCount = serial_bios_read((*h)->fd, buf,
                                                                   req_count);
 #else
@@ -492,10 +492,10 @@ static OSErr C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                                        (LONGINT)req_count,
                                        (LONGINT)(unsigned char)buf[0]);
 #endif
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
                     pbp->ioParam.ioActCount = write((*h)->fd,
                                                        buf, req_count);
-#elif defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#elif defined(_WIN32)
                     pbp->ioParam.ioActCount = serial_bios_write((*h)->fd,
                                                                    buf, req_count);
 #else
@@ -538,7 +538,7 @@ static OSErr C_ROMlib_serialprime(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 
 static OSErr serset(LONGINT fd, INTEGER param)
 {
-#if defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
     OSErr retval;
 
     retval = serial_bios_serset(fd, param);
@@ -701,7 +701,7 @@ static OSErr serset(LONGINT fd, INTEGER param)
 
 static OSErr serxhshake(LONGINT fd, SerShk *sershkp)
 {
-#if defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
     OSErr retval;
 
     retval = serial_bios_serxhshake(fd, sershkp);
@@ -774,7 +774,7 @@ static OSErr serxhshake(LONGINT fd, SerShk *sershkp)
 
 static OSErr setbaud(LONGINT fd, INTEGER baud)
 {
-#if defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
     OSErr retval;
 
     retval = serial_bios_setbaud(fd, baud);
@@ -821,7 +821,7 @@ static OSErr setbaud(LONGINT fd, INTEGER baud)
 
 static OSErr ctlbrk(LONGINT fd, INTEGER flag)
 {
-#if defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
     OSErr retval;
 
     retval = serial_bios_ctlbrk(fd, flag);
@@ -846,7 +846,7 @@ static OSErr ctlbrk(LONGINT fd, INTEGER flag)
 
 static OSErr flow(LONGINT fd, LONGINT flag)
 {
-#if defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
     OSErr retval;
 
     retval = serial_bios_setflow(fd, flag);
@@ -910,14 +910,14 @@ static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 err = setbaud((*h)->fd, pbp->cntrlParam.csParam[0]);
                 break;
             case kSERDMiscOptions:
-#if defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
                 err = serial_bios_setdtr((*h)->fd);
 #else
                 err = controlErr; /* not supported */
 #endif
                 break;
             case kSERDAssertDTR:
-#if defined(MSDOS) || defined(CYGWIN32) || defined(_WIN32)
+#if defined(_WIN32)
                 err = serial_bios_clrdtr((*h)->fd);
 #else
                 err = controlErr; /* not supported */
@@ -943,7 +943,7 @@ static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 break;
             case kSERDSendXOnOut:
                 c = XONC;
-#if defined(__linux__) || defined(MACOSX)                
+#if defined(__linux__) || defined(__APPLE__)                
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
 #endif                
                 break;
@@ -952,7 +952,7 @@ static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 break;
             case kSERDSendXOffOut:
                 c = XOFFC;
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
 #endif
                 break;
@@ -991,7 +991,7 @@ static OSErr C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
         switch(pbp->cntrlParam.csCode)
         {
             case kSERDInputCount:
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
                 if(ioctl((*h)->fd, FIONREAD, &n) < 0)
 #else
                 if(serial_bios_fionread((*h)->fd, &n) < 0)
@@ -1007,7 +1007,7 @@ static OSErr C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 }
                 break;
             case kSERDStatus:
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
                 if(ioctl((*h)->fd, FIONREAD, &n) < 0)
 #else
                 if(serial_bios_fionread((*h)->fd, &n) < 0)
@@ -1037,7 +1037,7 @@ static OSErr C_ROMlib_serialstatus(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 
 static void restorecloseanddispose(hiddenh h)
 {
-#if defined(__linux__) || defined(MACOSX)
+#if defined(__linux__) || defined(__APPLE__)
 #if defined(TERMIO)
     ioctl((*h)->fd, TCSETAW, &(*h)->state);
 #else

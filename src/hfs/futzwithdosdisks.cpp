@@ -151,7 +151,7 @@ fd_of(int i)
 
 void Executor::futzwithdosdisks(void)
 {
-#if defined(MSDOS) || defined(__linux__) || defined(CYGWIN32)
+#if false
     int i, fd;
     GUEST<LONGINT> mess_s;
     LONGINT mess;

@@ -14,9 +14,6 @@
 #include <file/file.h>
 #include <hfs/hfs.h>
 #include <rsys/string.h>
-#if defined(CYGWIN32)
-#include "win_temp.h"
-#endif
 
 #include <rsys/alias.h>
 

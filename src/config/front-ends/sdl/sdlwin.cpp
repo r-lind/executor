@@ -7,10 +7,6 @@
 #include <vdriver/refresh.h>
 #include <commandline/option.h>
 
-#if defined(CYGWIN32)
-#include "win_screen.h"
-#endif
-
 #include <SDL/SDL.h>
 
 #include "sdlevents.h"
@@ -185,10 +181,6 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         framebuffer_ = (uint8_t *)screen->pixels;
 
     sdl_syswm_init();
-
-#if defined(CYGWIN32)
-    ROMlib_recenter_window();
-#endif
 
     return (true);
 }

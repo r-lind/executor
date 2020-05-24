@@ -103,16 +103,6 @@ bool Executor::parse_size_opt(string opt, string arg1)
     w = h = 0;
     if(arg != nullptr)
     {
-#if defined(CYGWIN32)
-        if(strcasecmp(arg, "maximum") == 0)
-        {
-            h = os_maximum_window_height();
-            w = os_maximum_window_width();
-        }
-        else
-#else
-// FIXME: #warning we should support "-size maximum"
-#endif
         {
             const char *p;
             for(p = arg; isdigit(*p); p++)

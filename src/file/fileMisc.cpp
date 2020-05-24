@@ -231,7 +231,7 @@ is_unix_path(const char *pathname)
 {
     bool retval;
 
-#if defined(MSDOS) || defined(CYGWIN32)
+#if defined(_WIN32)
     if(pathname[0] && pathname[1] == ':' && (pathname[2] == '/' || pathname[2] == '\\'))
         pathname += 3;
 #endif

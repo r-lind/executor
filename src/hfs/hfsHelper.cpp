@@ -44,7 +44,7 @@ void Executor::ROMlib_hfsinit(void)
  *	 which is an ARDI written NEXTSTEP atrocity.
  */
 
-#if !defined(__linux__) && !defined(MACOSX)
+#if !defined(__linux__) && !defined(__APPLE__)
 #define EJECTABLE(buf) false
 #else
 /* #warning this is not the proper way to tell if something is ejectable */
@@ -158,7 +158,7 @@ static Boolean isejectable(const charCx( *dname), LONGINT fd)
 
     /* look for rfd[0-9] */
     retval = false;
-#if defined(MACOSX_) || defined(MACOSX)
+#if defined(MACOSX_) || defined(__APPLE__)
     for (p = dname; p = index(p, 'r'); ++p) {
 	if (p[1] == 'f' && p[2] == 'd' && isdigit(p[3])) {
 	    retval = true;
@@ -620,23 +620,10 @@ OSErr Executor::ROMlib_readwrite(LONGINT fd, char *buffer, LONGINT count,
         blocksize = 2048;
         warning_unexpected("fd = 0x%x, zero block size", fd);
     }
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(fd & DOSFDBIT)
-    {
-        fd &= ~DOSFDBIT;
-        seekfp = dosdisk_seek;
-        readfp = dosdisk_read;
-        writefp = dosdisk_write;
-    }
-    else
-    {
-#endif
-        seekfp = (off_t(*)(int, off_t, int))lseek;
-        readfp = (int (*)(int, void *, int))read;
-        writefp = (int (*)(int, const void *, int))write;
-#if defined(MSDOS) || defined(CYGWIN32)
-    }
-#endif
+    seekfp = (off_t(*)(int, off_t, int))lseek;
+    readfp = (int (*)(int, void *, int))read;
+    writefp = (int (*)(int, const void *, int))write;
+
     err = noErr;
     newbuffer = 0;
     needlseek = true;
@@ -717,7 +704,6 @@ Executor::ROMlib_transphysblk(hfs_access_t *hfsp, LONGINT physblock, short nphys
 {
     LONGINT fd;
     OSErr err;
-    Ptr newbufp;
 
 #if defined(MAC)
     ioParam pb;
@@ -732,25 +718,12 @@ Executor::ROMlib_transphysblk(hfs_access_t *hfsp, LONGINT physblock, short nphys
     if(actp)
         *actp = pb.ioActCount;
 #else
-#if 0 && (defined(NEXTSTEP) || defined(MACOSX))
-    if ((LONGINT) bufp & 3) {
-        newbufp = alloca( (LONGINT) nphysblocks * PHYSBSIZE + 4);
-        newbufp = (Ptr) (((LONGINT) newbufp + 3) & ~3);
-        if (rw == writing)
-            memmove(newbufp, bufp, (LONGINT) nphysblocks * PHYSBSIZE);
-    } else
-#endif
-    newbufp = bufp;
     fd = hfsp->fd;
 
-    err = ROMlib_readwrite(fd, (char *)newbufp,
+    err = ROMlib_readwrite(fd, bufp,
                            (LONGINT)nphysblocks * PHYSBSIZE,
                            physblock + hfsp->offset, rw, hfsp->bsize,
                            hfsp->maxbytes);
-#if 0 && (defined(NEXTSTEP) || defined(MACOSX))
-    if (rw == reading && bufp != newbufp && err == noErr)
-        memmove(bufp, newbufp, (LONGINT) nphysblocks * PHYSBSIZE);
-#endif
     if(actp)
         *actp = err != noErr ? 0 : ((LONGINT)nphysblocks * PHYSBSIZE);
 

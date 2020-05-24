@@ -644,7 +644,7 @@ void SDLVideoDriver::putScrap(LONGINT type, LONGINT length, char *p, int scrap_c
 
 #endif
 
-#if defined(MACOSX)
+#if defined(__APPLE__)
 #warning "Need to support clipboard"
 
 bool

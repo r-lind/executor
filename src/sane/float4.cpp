@@ -1004,21 +1004,6 @@ void Executor::C_ROMlib_Fx2dec(DecForm *sp2, void *sp, Decimal *dp,
                            c_string, toHost(dp->exp));
 }
 
-#if defined(CYGWIN32)
-#define pow(a, b) my_pow10(b)
-
-static double
-my_pow10(int i)
-{
-    double retval;
-
-    retval = 1;
-    while(i-- > 0)
-        retval *= 10;
-    return retval;
-}
-#endif
-
 void Executor::C_ROMlib_Fdec2x(Decimal *sp, void *dp, unsigned short sel)
 {
     DECLAREIN();

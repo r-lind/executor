@@ -591,7 +591,6 @@ static Boolean C_ROMlib_stlfilterproc(
             c = evt->message & 0xFF;
             if(c == '\r' || c == NUMPAD_ENTER)
             {
-                maybe_wait_for_keyup();
                 *ith = OK;
                 retval = true;
             }
@@ -680,7 +679,6 @@ static Boolean C_ROMlib_numsonlyfilterproc(
         {
             case '\r':
             case NUMPAD_ENTER:
-                maybe_wait_for_keyup();
                 *ith = OK;
                 return true;
                 break;
