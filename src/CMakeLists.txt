@@ -56,7 +56,6 @@ add_custom_command(
 if(WIN32)
     set(HOST_OS "win32")
     set(host_os_sources
-        config/os/win32/win32.h
         config/os/win32/win_serial.cpp
         config/os/win32/win_serial.h
         config/os/win32/win_launch.cpp
@@ -65,7 +64,6 @@ if(WIN32)
 elseif(APPLE AND UNIX)
     set(HOST_OS "macosx")
     set(host_os_sources
-        config/os/macosx/macosx.h
         config/os/macosx/macosx.mm)
 elseif(UNIX AND NOT APPLE)
     set(HOST_OS "linux")
@@ -105,6 +103,7 @@ function(linkheader from to variant)
 
     configure_file(${from}/${variant}/${input} ${to} COPYONLY)
 endfunction()
+
 
 linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
 
