@@ -49,7 +49,6 @@ using namespace Executor;
 
 #if defined(__alpha) || defined(__linux__)
 #define TERMIO
-/* #define	MSDOS	ick! */
 #endif
 
 /*
