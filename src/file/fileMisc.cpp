@@ -494,7 +494,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 
     parse_offset_file();
     ROMlib_hfsinit();
-    MountLocalVolume();
+    MountLocalVolumes();
 
     MountMacVolumes(ROMlib_MacVolumes);
 

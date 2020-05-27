@@ -852,7 +852,7 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
         return std::nullopt;
 }
 
-void Executor::MountLocalVolume()
+static void MountLocalVolume(fs::path root)
 {
     VCBExtra *vp;
     GUEST<THz> savezone;
@@ -870,9 +870,14 @@ void Executor::MountLocalVolume()
     --ROMlib_nextvrn;
     vp->vcb.vcbVRefNum = ROMlib_nextvrn;
 
-    
-    strcpy((char *)vp->vcb.vcbVN + 1, "vol");
-    vp->vcb.vcbVN[0] = strlen((char *)vp->vcb.vcbVN+1);
+    std::string rootName = root.root_name().string();
+    if(rootName.empty())
+        rootName = "vol";
+    else if(rootName.back() == ':')
+        rootName.pop_back();
+
+    memcpy((char *)vp->vcb.vcbVN + 1, rootName.data(), rootName.size());
+    vp->vcb.vcbVN[0] = rootName.size();
 
     vp->vcb.vcbSigWord = 0x4244; /* IMIV-188 */
     vp->vcb.vcbFreeBks = 20480; /* arbitrary */
@@ -893,7 +898,17 @@ void Executor::MountLocalVolume()
     }
     Enqueue((QElemPtr)vp, &LM(VCBQHdr));
 
-    vp->volume = new LocalVolume(vp->vcb, "/");
+    vp->volume = new LocalVolume(vp->vcb, root);
+}
+
+void Executor::MountLocalVolumes()
+{
+#ifdef _WIN32
+    MountLocalVolume("Z:/");
+    MountLocalVolume("C:/");
+#else
+    MountLocalVolume("/");
+#endif
 }
 
 std::optional<FSSpec> Executor::nativePathToFSSpec(const fs::path& p)
