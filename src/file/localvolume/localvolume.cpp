@@ -17,6 +17,11 @@
 #include "lmdbcnidmapper.h"
 #include "itemcache.h"
 
+#ifdef _WIN32
+#define NOMINMAX 1
+#include <windows.h>
+#endif
+
 using namespace Executor;
 
 
@@ -879,6 +884,8 @@ static void MountLocalVolume(fs::path root)
     memcpy((char *)vp->vcb.vcbVN + 1, rootName.data(), rootName.size());
     vp->vcb.vcbVN[0] = rootName.size();
 
+    fprintf(stderr, "Volume %s mounted as %s, vref %d\n", root.string().c_str(), rootName.c_str(), int(vp->vcb.vcbVRefNum));
+
     vp->vcb.vcbSigWord = 0x4244; /* IMIV-188 */
     vp->vcb.vcbFreeBks = 20480; /* arbitrary */
     vp->vcb.vcbCrDate = 0; /* I'm lying here */
@@ -904,8 +911,15 @@ static void MountLocalVolume(fs::path root)
 void Executor::MountLocalVolumes()
 {
 #ifdef _WIN32
-    MountLocalVolume("Z:/");
-    MountLocalVolume("C:/");
+    uint32_t drives = ::GetLogicalDrives();
+    for(int i = 0; i < 26; i++)
+        if(drives & (1 << i))
+        {
+            boost::system::error_code ec;
+            fs::path path = fs::canonical(std::string(1, 'A' + i) + ":/", ec);
+            if(!ec)
+                MountLocalVolume(path);
+        }
 #else
     MountLocalVolume("/");
 #endif

@@ -389,7 +389,7 @@ void Executor::InitSystemFolder(std::string systemFolder)
     }
     else
     {
-        fprintf(stderr, "Couldn't open System: '%s'\n", ROMlib_SystemFolder.c_str());
+        fprintf(stderr, "Couldn't locate System: '%s'\n", ROMlib_SystemFolder.c_str());
         exit(1);
     }
 }
