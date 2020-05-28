@@ -16,6 +16,7 @@
 #include <rsys/version.h>
 #include <mman/mman.h>
 #include <commandline/flags.h>
+#include <sys/errno.h>
 
 using namespace Executor;
 

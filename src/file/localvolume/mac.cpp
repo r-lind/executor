@@ -7,6 +7,7 @@ using namespace Executor;
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/xattr.h>
 
 class MacResourceFork : public OpenFile

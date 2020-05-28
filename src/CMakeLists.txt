@@ -61,15 +61,20 @@ if(WIN32)
         config/os/win32/win_launch.cpp
         config/os/win32/win_stat.h
         config/os/win32/win_stat.cpp)
+    set(host_os_libs)
 elseif(APPLE AND UNIX)
     set(HOST_OS "macosx")
     set(host_os_sources
         config/os/macosx/macosx.mm)
+    find_library(COCOA_LIBRARY Cocoa)
+    set(host_os_libs ${COCOA_LIBRARY})    
 elseif(UNIX AND NOT APPLE)
     set(HOST_OS "linux")
     set(host_os_sources)
+    set(host_os_libs)
 else()
     set(host_os_sources)
+    set(host_os_libs)
 endif()
 source_group(HostOS FILES ${host_os_sources})
 
@@ -537,6 +542,8 @@ target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 
 target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
 target_link_libraries(romlib resources)
+
+target_link_libraries(romlib ${host_os_libs})
 
 foreach(FRONT_END ${FRONT_ENDS})
     if(TARGET front-end-${FRONT_END})
