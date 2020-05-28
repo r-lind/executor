@@ -169,7 +169,7 @@ void Executor::gd_update_colors()
 
     auto ctab = CTAB_TABLE(gd_ctab);
 
-    for(int i = 0; i <= n; i++)
+    for(int i = 0; i < n; i++)
     {
         colors[i] = { ctab[i].rgb.red, ctab[i].rgb.green, ctab[i].rgb.blue };
     }
