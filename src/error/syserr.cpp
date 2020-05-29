@@ -297,8 +297,7 @@ void Executor::C_SysError(short errorcode)
     /* 3. If no LM(DSAlertTab), bitch */
     if(!LM(DSAlertTab))
     {
-        write(2, "This machine thinks its a sadmac\n",
-              sizeof("This machine thinks its a sadmac\n") - 1);
+        fputs("This machine thinks its a sadmac\n", stderr);
         exit(255);
     }
 
