@@ -66,10 +66,13 @@ template<class T>
 void logValue(guestvalues::GuestWrapper<T*> p)
 {
     std::clog << "0x" << std::hex << p.raw() << std::dec;
-    if(validAddress(p.raw_host_order()))
+    if constexpr(!std::is_same_v<T, void>)
     {
-        std::clog << " => ";
-        logValue(*(p.get()));
+        if(validAddress(p.raw_host_order()))
+        {
+            std::clog << " => ";
+            logValue(*(p.get()));
+        }
     }
 }
 
