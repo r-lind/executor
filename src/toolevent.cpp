@@ -574,9 +574,8 @@ ULONGINT Executor::C_TickCount()
     if(ROMlib_clock)
         LM(Ticks) = ticks;
 
-    new_time = (UNIXTIMETOMACTIME(ROMlib_start_time.tv_sec)
-                + (long)((ROMlib_start_time.tv_usec / (1000000.0 / 60) + ticks) / 60));
-
+    new_time = UNIXTIMETOMACTIME(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+            
     LM(Time) = new_time;
     return ticks;
 }

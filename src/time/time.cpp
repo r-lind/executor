@@ -26,9 +26,6 @@ using namespace Executor;
 
 QHdr Executor::ROMlib_timehead;
 
-/* Actual time at which Executor started running, GMT. */
-struct timeval ROMlib_start_time;
-
 /* Msecs during last interrupt. */
 static unsigned long last_interrupt_msecs;
 

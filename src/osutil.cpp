@@ -327,11 +327,8 @@ void Executor::GetDateTime(GUEST<ULONGINT> *mactimepointer)
 {
     if(mactimepointer)
     {
-        unsigned long msecs;
-        msecs = msecs_elapsed();
-        *mactimepointer = UNIXTIMETOMACTIME(ROMlib_start_time.tv_sec)
-                             + (((ROMlib_start_time.tv_usec / 1000) + msecs)
-                                / 1000);
+        C_TickCount();  // force update of LM(Time)
+        *mactimepointer = LM(Time);
     }
 }
 
@@ -668,9 +665,7 @@ static void deriveglobals()
     struct tm *tm, tml, tmg, *tmlater, *tmearlier;
     time_t unixtimenow, gmtimenow, ltimenow;
 
-    unixtimenow = (ROMlib_start_time.tv_sec
-                   + ((ROMlib_start_time.tv_usec / 1000 + msecs_elapsed())
-                      / 1000));
+    time(&unixtimenow);
     tm = localtime(&unixtimenow);
     BlockMove((Ptr)tm, (Ptr)&tml, (Size)sizeof(tml));
     tm = gmtime(&unixtimenow);

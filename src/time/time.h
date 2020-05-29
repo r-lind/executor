@@ -8,8 +8,6 @@
 
  */
 
-extern struct timeval ROMlib_start_time;
-
 extern unsigned long msecs_elapsed(void);
 
 class PowerCore;
