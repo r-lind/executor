@@ -459,7 +459,7 @@ set(misc_sources
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp
   gestalt.cpp iu.cpp launch.cpp  notify.cpp 
    osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
-  slash.cpp stdfile.cpp romlib_stubs.cpp  toolevent.cpp toolutil.cpp 
+  stdfile.cpp romlib_stubs.cpp  toolevent.cpp toolutil.cpp 
    aboutbox.cpp
   version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
   process.cpp alias.cpp string.cpp  edition.cpp  balloon.cpp

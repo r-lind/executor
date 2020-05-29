@@ -365,22 +365,11 @@ OSErr Executor::ROMlib_maperrno() /* INTERNAL */
     return retval;
 }
 
-static long ROMlib_priv_open(const char *filename, long mode)
-{
-    long retval;
-
-    retval = Uopen(filename, mode, 0);
-    if(retval < 0)
-        retval = ROMlib_maperrno();
-
-    return retval;
-}
-
 
 static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
-    DCtlPtr otherp; /* auto due to old compiler bug */
+    DCtlPtr otherp;
     hiddenh h;
 #if defined(__linux__) || defined(__APPLE__)
     const char *devname;
@@ -409,9 +398,9 @@ static OSErr C_ROMlib_serialopen(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
             if(err == noErr)
             {
 #if defined(__linux__) || defined(__APPLE__)
-                (*h)->fd = ROMlib_priv_open(devname, O_RDWR);
+                (*h)->fd = open(devname, O_RDWR, 0);
                 if((*h)->fd < 0)
-                    err = (*h)->fd; /* error return piggybacked */
+                    err = ROMlib_maperrno();
                 else
                 {
 #if defined(TERMIO)

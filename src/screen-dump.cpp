@@ -256,7 +256,7 @@ dump_indirect_pm(PixMap *pm)
                          temp_file_name))
         return;
 
-    fd = Uopen((char *)temp_file_name + 1,
+    fd = open((char *)temp_file_name + 1,
                O_CREAT | O_TRUNC | O_WRONLY | O_BINARY, 0666);
     if(fd == -1)
     {

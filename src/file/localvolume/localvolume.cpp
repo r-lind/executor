@@ -688,8 +688,8 @@ void LocalVolume::PBGetFPos(ParmBlkPtr pb)
 void LocalVolume::setFPosCommon(ParmBlkPtr pb, bool checkEOF)
 {
     auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
-    ssize_t eof = (ssize_t) fcbx.access->getEOF();
-    ssize_t newPos = fcbx.fcb->fcbCrPs;
+    int32_t eof = (int32_t)fcbx.access->getEOF();
+    int32_t newPos = fcbx.fcb->fcbCrPs;
     
     switch(pb->ioParam.ioPosMode)
     {
