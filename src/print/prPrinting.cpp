@@ -503,7 +503,7 @@ open_ps_file(bool *need_pclosep)
             }
             else
             {
-                retval = Ufopen(ROMlib_spool_file, "w");
+                retval = fopen(ROMlib_spool_file, "w");
 #if !defined(MSDOS) && !defined(CYGWIN32)
                 free(ROMlib_spool_file);
                 ROMlib_spool_file = nullptr;

@@ -508,7 +508,7 @@ set(include_sources
                   include/rsys/screen-dump.h
                   include/rsys/segment.h
                   include/rsys/serial.h
-                  include/rsys/slash.h
+                  include/rsys/unixio.h
                   include/rsys/stdfile.h
                   include/rsys/string.h
                   include/rsys/toolevent.h

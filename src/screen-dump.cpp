@@ -20,6 +20,7 @@
 #include <file/file.h>
 #include <rsys/screen-dump.h>
 #include <rsys/paths.h>
+#include <rsys/unixio.h>
 
 using namespace Executor;
 

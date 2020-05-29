@@ -5,6 +5,7 @@
 #include <base/common.h>
 #include <rsys/uniquefile.h>
 #include <file/file.h>
+#include <rsys/unixio.h>
 
 using namespace Executor;
 
@@ -45,7 +46,7 @@ bool Executor::unique_file_name(const char *template1, const char *default_templ
     for(try_suff = suff; *try_suff; try_suff++)
     {
         try1[pos] = *try_suff;
-        if(Ustat(try1.c_str(), &sbuf) != 0 && errno == ENOENT)
+        if(stat(try1.c_str(), &sbuf) != 0 && errno == ENOENT)
         {
             /* If this file name isn't taken, grab it !*/
             strcpy((char *)result + 1, try1.c_str());

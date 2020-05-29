@@ -186,7 +186,7 @@ void Executor::dump_init(char *dst)
 {
     if(dst)
     {
-        o_fp = Ufopen(dst, "w");
+        o_fp = fopen(dst, "w");
         if(o_fp == nullptr)
             exit(1);
     }

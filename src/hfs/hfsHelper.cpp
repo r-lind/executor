@@ -32,6 +32,7 @@
 #include <sys/disk.h>
 #endif
 #endif
+#include <rsys/unixio.h>
 
 using namespace Executor;
 
@@ -213,20 +214,21 @@ static LONGINT try_to_open_disk(const char *dname, LONGINT *bsizep,
 #define EXTRA_BITS 0
 #endif
 
-    if((floppyfd = Uopen(dname, O_BINARY | O_RDWR | EXTRA_BITS, 0000)) < 0 && (*flagsp |= DRIVE_FLAGS_LOCKED,
-                                                                               (floppyfd = Uopen(dname, O_BINARY | O_RDONLY | EXTRA_BITS,
-                                                                                                 0000))
-                                                                                   < 0))
-        /* fprintf(stderr, "can't open %s\n", dname) */;
-    else
+
+    floppyfd = open(dname, O_BINARY | O_RDWR | EXTRA_BITS, 0000);
+
+    if(floppyfd < 0)
     {
-        *bsizep = PHYSBSIZE;
-        *maxbytesp = 1024L * 1024;
+        *flagsp |= DRIVE_FLAGS_LOCKED;
+        floppyfd = open(dname, O_BINARY | O_RDONLY | EXTRA_BITS, 0000);
     }
 
     if(floppyfd >= 0)
     {
         struct stat sbuf;
+
+        *bsizep = PHYSBSIZE;
+        *maxbytesp = 1024L * 1024;
 
         if(fstat(floppyfd, &sbuf) >= 0 && (S_IFREG & sbuf.st_mode))
             *offsetp = sbuf.st_size % PHYSBSIZE;
@@ -583,7 +585,7 @@ void Executor::ROMlib_openharddisk(const char *dname, GUEST<LONGINT> *messp)
     struct stat sbuf;
 
     *messp = 0;
-    if(Ustat(dname, &sbuf) == 0)
+    if(stat(dname, &sbuf) == 0)
     {
         ASSIGN_NAME_MODE_STRING(newbuf, &len, dname, sbuf);
         ROMlib_openfloppy(newbuf, messp);

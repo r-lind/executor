@@ -207,7 +207,7 @@ parse_offset_file(void)
 {
     FILE *fp;
 
-    fp = Ufopen(ROMlib_OffsetFile.c_str(), "r");
+    fp = fopen(ROMlib_OffsetFile.c_str(), "r");
     if(!fp)
     {
 #if 0

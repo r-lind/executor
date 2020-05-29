@@ -10,6 +10,5 @@
 #include <base/mactype.h>
 
 #include <ExMacTypes.h>
-#include <rsys/slash.h>
 #include <error/error.h>
 #include <base/lowglobals.h>
