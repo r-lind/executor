@@ -1068,12 +1068,13 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
 
 /* remove trailing .exe */
 #define EXE_SUFFIX ".exe"
+#ifndef _MSC_VER
                 if(strcasecmp((char *)appname + appname[0] + 1
                                   - sizeof EXE_SUFFIX + 1,
                               EXE_SUFFIX)
                    == 0)
                     appname[0] -= sizeof EXE_SUFFIX - 1;
-
+#endif
                 /* Capitalize first character */
                 if(islower(appname[1]))
                     appname[1] = toupper((unsigned char)appname[1]);
