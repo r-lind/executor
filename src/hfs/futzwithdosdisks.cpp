@@ -46,14 +46,14 @@ int Executor::linuxfloppy_open(int disk, LONGINT *bsizep,
         *flagsp |= DRIVE_FLAGS_FLOPPY;
 
     if(!force_read_only)
-        retval = Uopen(dname, O_RDWR, 0);
+        retval = open(dname, O_RDWR, 0);
 #if !defined(LETGCCWAIL)
     else
         retval = noErr;
 #endif
     if(force_read_only || retval < 0)
     {
-        retval = Uopen(dname, O_RDONLY, 0);
+        retval = open(dname, O_RDONLY, 0);
         if(retval >= 0)
             *flagsp |= DRIVE_FLAGS_LOCKED;
     }
