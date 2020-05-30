@@ -24,6 +24,10 @@
 #include <string>
 #include <algorithm>
 
+#if defined(linux) || defined(__APPLE__)
+#include <unistd.h>
+#endif
+
 using namespace Executor;
 
 static Fixed minvert(Fixed);
