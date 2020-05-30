@@ -35,6 +35,8 @@
 
 #if defined(_WIN32)
 #include "win_serial.h"
+#else
+#include <rsys/unixio.h>
 #endif
 
 #if !defined(_WIN32)
