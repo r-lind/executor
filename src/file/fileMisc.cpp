@@ -161,7 +161,11 @@ Executor::expandPath(std::string name)
     {
         case '~':
         {
+#ifdef _WIN32
+            auto home = getenv("USERPROFILE");
+#else
             auto home = getenv("HOME");
+#endif
             if(home)
             {
                 name = home + name.substr(1);
