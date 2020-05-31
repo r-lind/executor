@@ -154,6 +154,18 @@ OSErr handleExceptions(Volume& v, void (Volume::*member)(PB*), PB* pb)
         (v.*member)(pb);
         return noErr;
     }
+    catch(const fs::filesystem_error& e)
+    {
+        // these should be caught inside LocalVolume, but it's just more convenient here
+        auto ec = e.code();
+
+        if(ec == boost::system::errc::no_such_file_or_directory)
+            return fnfErr;
+        else if(ec == boost::system::errc::permission_denied)
+            return permErr;
+        else
+            return ioErr;
+    }
     catch(const OSErrorException& e)
     {
         return e.code;
