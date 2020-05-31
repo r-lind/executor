@@ -58,7 +58,6 @@ if(WIN32)
     set(host_os_sources
         config/os/win32/win_serial.cpp
         config/os/win32/win_serial.h
-        config/os/win32/win_launch.cpp
         config/os/win32/win_stat.h
         config/os/win32/win_stat.cpp)
     set(host_os_libs)
