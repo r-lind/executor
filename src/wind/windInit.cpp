@@ -501,7 +501,7 @@ WindowPtr Executor::C_GetNewCWindow(INTEGER window_id, void* window_storage,
 
     palette = GetNewPalette(window_id);
     if(palette)
-        NSetPalette((WindowPtr)new_cwin, palette, pmAllUpdates);
+        NSetPalette((WindowPtr)new_cwin, palette, (INTEGER)pmAllUpdates);
 
     return new_cwin;
 }

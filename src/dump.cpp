@@ -1027,7 +1027,7 @@ void dump_menu_info(MenuHandle x)
             p += 4;
         }
         indent -= 2;
-        iprintf((o_fp, "total chars = %ld\n", p - (unsigned char *)*x));
+        iprintf((o_fp, "total chars = %ld\n", (long)(p - (unsigned char *)*x)));
     }
     indent -= 2;
 }
