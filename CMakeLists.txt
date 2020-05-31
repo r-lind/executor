@@ -13,9 +13,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 if(WIN32)
     add_compile_definitions(
-        # Prevent currently-non-compiling assembly functions from being included 
-        NO_FAST_CC_FUNCS
-
         # Don't warn if standard C library functions get used.
         # The alternatives suggested by Microsoft are an *optional* part of the
         # standard and many of them are actually not useful for us.
