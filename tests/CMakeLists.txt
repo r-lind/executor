@@ -38,6 +38,7 @@ endfunction()
 
 set(NATIVE_TEST_SOURCES
         files_internal.cpp guestvalues.cpp cpu.cpp
+        sane.cpp
     )
 
 set(TEST_SOURCES
