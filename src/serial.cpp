@@ -931,21 +931,21 @@ static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
             case kSERDSendXOn:
                 err = controlErr; /* not supported */
                 break;
+#if defined(__linux__) || defined(__APPLE__)
             case kSERDSendXOnOut:
                 c = XONC;
-#if defined(__linux__) || defined(__APPLE__)                
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
-#endif                
                 break;
+#endif
             case kSERDSendXOff:
                 err = controlErr; /* not supported */
                 break;
+#if defined(__linux__) || defined(__APPLE__)
             case kSERDSendXOffOut:
                 c = XOFFC;
-#if defined(__linux__) || defined(__APPLE__)
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
-#endif
                 break;
+#endif
             case kSERDResetChannel:
                 err = controlErr; /* not supported */
                 break;
