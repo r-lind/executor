@@ -863,7 +863,6 @@ static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
 {
     OSErr err;
     hiddenh h;
-    char c;
 
     if(!(dcp->dCtlFlags & OPENBIT))
         err = notOpenErr;
@@ -933,18 +932,22 @@ static OSErr C_ROMlib_serialctl(ParmBlkPtr pbp, DCtlPtr dcp) /* INTERNAL */
                 break;
 #if defined(__linux__) || defined(__APPLE__)
             case kSERDSendXOnOut:
-                c = XONC;
+            {
+                char c = XONC;
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
                 break;
+            }
 #endif
             case kSERDSendXOff:
                 err = controlErr; /* not supported */
                 break;
 #if defined(__linux__) || defined(__APPLE__)
             case kSERDSendXOffOut:
-                c = XOFFC;
+            {
+                char c = XOFFC;
                 err = write((*h)->fd, &c, 1) != 1 ? ROMlib_maperrno() : noErr;
                 break;
+            }
 #endif
             case kSERDResetChannel:
                 err = controlErr; /* not supported */
