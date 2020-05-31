@@ -1,55 +1,57 @@
 trigger:
 - master
 jobs:
-- job: Windows
+- job: Experiment
   condition: false
   pool:
-    vmImage: 'vs2017-win2016'
+    vmImage: 'windows-2019'
+  steps:
+  - script: |
+      cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\"
+      C:
+      tree /A
+
+- job: Windows
+  condition: true
+  pool:
+    vmImage: 'windows-2019'
 
   steps:
-  - checkout: self
-    submodules: true
+  - script: |
+      choco install msys2 --yes
+      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm bison"
+    displayName: 'install msys2 / bison'
   - script: |
       pip install aqtinstall
       C:
       cd \
-      python -m aqt 5.11.3 windows desktop win64_msvc2017_64
+      python -m aqt install -O C:\Qt 5.15.0 windows desktop win64_msvc2019_64
     displayName: 'install qt'
+  - checkout: self
+    submodules: true
   - script: |
-      set
-      dir C:\Qt5.11.3\5.11.3
-      dir "C:/Program Files/Boost/1.69.0"
-      dir "C:/Program Files/Boost/1.69.0/lib"
-      dir "C:/Program Files/Boost/1.69.0/libs"
-      dir "C:/Program Files/Boost/1.69.0/include/boost-1_69"
-    displayName: 'show dirs'
-  - script: |
-      choco install llvm ninja winflexbison3 --yes
-      set PATH=C:\Program Files\LLVM\bin;%PATH%
-      clang-cl --version    
-    displayName: 'install llvm, ninja, bison'
-  #- script: |
-  #    vcpkg install sdl2
-  #  displayName: 'vcpkg install'
-  - script: |
-      set PATH=C:\Program Files\LLVM\bin;%PATH%
-      call "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\vcvarsall.bat" x64
       mkdir build
       cd build
-      cmake -G Ninja ^
-        -DCMAKE_BUILD_TYPE=Release ^
-        -DCMAKE_C_COMPILER=clang-cl ^
-        -DCMAKE_CXX_COMPILER=clang-cl ^
-        -DFRONT_END=qt ^
-        -DBISON_COMMAND=win_bison ^
-        -DCMAKE_PREFIX_PATH=C:\Qt5.11.3\5.11.3\msvc2017_64\lib\cmake ^
-        -DBoost_COMPILER=-vc141 ^
-        ..
-      cmake --build .
 
-  #       -DCMAKE_TOOLCHAIN_FILE=C:\vcpkg\scripts\buildsystems\vcpkg.cmake 
+      set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
+      set CMAKE=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe
+      
+      call "%STUDIO%\VC\Auxiliary\Build\vcvarsall.bat" x64
+      "%CMAKE%" ^
+        .. ^
+        -G Ninja ^
+        -DCMAKE_BUILD_TYPE="Release" ^
+        -DBOOST_ROOT=%BOOST_ROOT_1_72_0% ^
+        -DBISON_COMMAND=c:\tools\msys64\usr\bin\bison.exe ^
+        -DCMAKE_PREFIX_PATH=C:\Qt\5.15.0\msvc2019_64\lib\cmake ^
+        -DCMAKE_MAKE_PROGRAM="%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" ^
+        -DCMAKE_C_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe"  ^
+        -DCMAKE_CXX_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe"
+      "%CMAKE%" --build . --config Release
+
 
 - job: macOS
+  condition: false
   pool:
     vmImage: 'macOS-10.14'
   steps:
@@ -82,6 +84,7 @@ jobs:
       artifactName: Executor2000-Darwin.tar.bz2
 
 - job: Linux
+  condition: false
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -109,6 +112,7 @@ jobs:
       artifactName: Executor2000-Linux.tar.bz2
 
 - job: Linux32
+  condition: false
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
