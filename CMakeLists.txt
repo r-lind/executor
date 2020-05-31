@@ -28,9 +28,6 @@ if(WIN32)
         # Microsoft should know better, after all they're supplying <windows.h> as well...
         _CRT_NONSTDC_NO_WARNINGS
     )
-
-
-    include_directories(BEFORE ${CMAKE_CURRENT_LIST_DIR}/windows)
 endif()
 
 if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
