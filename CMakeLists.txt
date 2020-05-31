@@ -12,19 +12,23 @@ project(Executor2000 VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 17)
 
 if(WIN32)
-    add_compile_options(
+    add_compile_definitions(
         # Prevent currently-non-compiling assembly functions from being included 
-        -DNO_FAST_CC_FUNCS
+        NO_FAST_CC_FUNCS
 
-        # Don't warn if older C-runtime functions get used
-        -D_CRT_SECURE_NO_WARNINGS
+        # Don't warn if standard C library functions get used.
+        # The alternatives suggested by Microsoft are an *optional* part of the
+        # standard and many of them are actually not useful for us.
+        _CRT_SECURE_NO_WARNINGS
 
-        # FIXME: disable common warnings, for now
-        -Wno-unused-variable
-        -Wno-deprecated-declarations
-        -Wno-unused-function
-        -Wno-unused-lambda-capture
+        # Dont't warn if POSIX functions are used by their proper name.
+        # There is really no need to rename POSIX standard functions that
+        # aren't defined in C standard headers anyway and thus aren't subject
+        # to the C standard's rules for naming non-standard identifiers.
+        # Microsoft should know better, after all they're supplying <windows.h> as well...
+        _CRT_NONSTDC_NO_WARNINGS
     )
+
 
     include_directories(BEFORE ${CMAKE_CURRENT_LIST_DIR}/windows)
 endif()
