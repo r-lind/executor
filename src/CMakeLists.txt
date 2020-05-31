@@ -17,6 +17,18 @@ find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 find_package(Threads REQUIRED)
 
+
+if(WIN32 AND MSVC)
+    # compiler uses msvc-style command line
+    # only clang supported at the moment
+    add_compile_options(
+        -Xclang -Wall -Xclang -Wextra
+
+        -Wno-unused-parameter
+        -Wno-sign-compare
+    )
+endif()
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/api/)
 include_directories(include)
 include_directories(.)

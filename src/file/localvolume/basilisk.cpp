@@ -38,7 +38,7 @@ void BasiliskItemFactory::createFile(const fs::path& newPath)
     fs::create_directory(parentPath / ".finf");
 
     fs::ofstream(parentPath / ".rsrc" / fn, std::ios::binary);
-    FInfo info = {0};
+    FInfo info = {};
     fs::ofstream(parentPath / ".finf" / fn, std::ios::binary).write((char*)&info, sizeof(info));
 }
 
