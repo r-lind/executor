@@ -36,7 +36,7 @@ jobs:
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
       set CMAKE=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe
       
-      call "%STUDIO%\VC\Auxiliary\Build\vcvarsall.bat" x64
+      call "%STUDIO%\VC\Auxiliary\Build\vcvarsall64.bat"
       "%CMAKE%" ^
         .. ^
         -G Ninja ^
@@ -49,6 +49,63 @@ jobs:
         -DCMAKE_CXX_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe"
       "%CMAKE%" --build . --config Release
 
+- job: WindowsMingw
+  condition: true
+  pool:
+    vmImage: 'windows-2019'
+
+  steps:
+  - script: |
+      choco install msys2 --yes
+    displayName: 'install msys2'
+  - script: |
+      set MSYSTEM=MINGW64
+      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm bison perl ruby"
+      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-cmake"
+      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm mingw-w64-x86_64-qt5 mingw-w64-x86_64-boost"
+    displayName: 'install msys packages'
+
+  - checkout: self
+    submodules: true
+
+  - script: |
+      rem case insensitivity conflict
+      del lmdbxx\version
+    displayName: 'case insensitivity hack'
+
+  - script: |
+      mkdir build
+      cd build
+
+      set MSYSTEM=MINGW64
+      set CHERE_INVOKING=1
+      C:\tools\msys64\usr\bin\bash --login -c "cmake .. -G 'MinGW Makefiles'  -DCMAKE_BUILD_TYPE=Release && cmake --build ."
+    displayName: 'Build'
+
+  - script: |
+      cd build
+
+      set MSYSTEM=MINGW64
+      set CHERE_INVOKING=1
+      C:\tools\msys64\usr\bin\bash --login -c "ctest . -LE xfail --no-compress-output -T test || true"
+    displayName: 'Run tests'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'CTest'
+      testResultsFiles: build/Testing/**/*.xml
+      buildPlatform: 'x86_64-mingw'
+  - script: |
+      cd build
+      set MSYSTEM=MINGW64
+      set CHERE_INVOKING=1
+      C:\tools\msys64\usr\bin\bash --login -c "cpack"
+    displayName: 'CPack'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: build/Executor2000-0.1.0-win64.tar.bz2
+      artifactName: Executor2000-mingw64.tar.bz2
 
 - job: macOS
   condition: false
