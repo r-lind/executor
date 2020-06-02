@@ -7,9 +7,19 @@ jobs:
     vmImage: 'windows-2019'
   steps:
   - script: |
-      cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\"
       C:
+      cd "C:\Program Files (x86)"
+      dir
+      cd "C:\Program Files (x86)\Windows Kits"
       tree /A
+      rem cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\"
+      rem tree /A
+      set
+
+      set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
+      
+      call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
+      set
 
 - job: Windows
   condition: true
@@ -34,23 +44,49 @@ jobs:
       cd build
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
-      set CMAKE=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin\cmake.exe
+      set PATH=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin;%PATH%
       
-      call "%STUDIO%\VC\Auxiliary\Build\vcvarsall64.bat"
-      "%CMAKE%" ^
-        .. ^
-        -G Ninja ^
-        -DCMAKE_BUILD_TYPE="Release" ^
-        -DBOOST_ROOT=%BOOST_ROOT_1_72_0% ^
-        -DBISON_COMMAND=c:\tools\msys64\usr\bin\bison.exe ^
-        -DCMAKE_PREFIX_PATH=C:\Qt\5.15.0\msvc2019_64\lib\cmake ^
-        -DCMAKE_MAKE_PROGRAM="%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\Ninja\ninja.exe" ^
-        -DCMAKE_C_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe"  ^
-        -DCMAKE_CXX_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe"
-      "%CMAKE%" --build . --config Release
+      call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
+      cmake ^
+          ..  ^
+          -TClangCL ^
+          -DCMAKE_C_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe"  ^
+          -DCMAKE_CXX_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe" ^
+          -DCMAKE_LINKER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/lld-link.exe" ^
+          -DBOOST_ROOT=%BOOST_ROOT_1_72_0% ^
+          -DBISON_COMMAND=c:\tools\msys64\usr\bin\bison.exe
+
+      cmake --build . --config Release
+
+  - script: |
+      cd build
+
+      set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
+      set PATH=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin;%PATH%
+      ctest . -LE xfail --no-compress-output -T test -C Release
+
+    displayName: 'Run tests'
+
+  - task: PublishTestResults@2
+    inputs:
+      testResultsFormat: 'CTest'
+      testResultsFiles: build/Testing/**/*.xml
+      buildPlatform: 'x86_64-win64'
+  - script: |
+      cd build
+
+      set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
+      set PATH=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin;%PATH%
+      cpack
+    displayName: 'CPack'
+
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: build/Executor2000-0.1.0-win64.tar.bz2
+      artifactName: Executor2000-win64.tar.bz2
 
 - job: WindowsMingw
-  condition: true
+  condition: false
   pool:
     vmImage: 'windows-2019'
 
