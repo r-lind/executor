@@ -7,19 +7,12 @@ jobs:
     vmImage: 'windows-2019'
   steps:
   - script: |
-      C:
-      cd "C:\Program Files (x86)"
-      dir
-      cd "C:\Program Files (x86)\Windows Kits"
-      tree /A
-      rem cd "C:\Program Files (x86)\Microsoft Visual Studio\2019\"
-      rem tree /A
-      set
+      c:
 
-      set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
-      
-      call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
-      set
+      cd C:\hostedtoolcache\windows\Boost\1.72.0\lib
+      dir
+
+
 
 - job: Windows
   condition: true
@@ -28,9 +21,11 @@ jobs:
 
   steps:
   - script: |
-      choco install msys2 --yes
+      choco install msys2 llvm --yes
+    displayName: 'choco install msys2, llvm'
+  - script: |
       C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm bison"
-    displayName: 'install msys2 / bison'
+    displayName: 'msys/pacman install bison'
   - script: |
       pip install aqtinstall
       C:
@@ -44,26 +39,35 @@ jobs:
       cd build
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
-      set PATH=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin;%PATH%
-      
       call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
+      set PATH=C:\Program Files\LLVM\bin;C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
+
       cmake ^
           ..  ^
-          -TClangCL ^
-          -DCMAKE_C_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe"  ^
-          -DCMAKE_CXX_COMPILER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/clang-cl.exe" ^
-          -DCMAKE_LINKER:FILEPATH="%STUDIO%/VC/Tools/Llvm/bin/lld-link.exe" ^
+          -G Ninja ^
+          -DCMAKE_BUILD_TYPE="Release" ^
+          -DCMAKE_C_COMPILER:FILEPATH=clang-cl.exe  ^
+          -DCMAKE_CXX_COMPILER:FILEPATH=clang-cl.exe ^
+          -DCMAKE_LINKER:FILEPATH=lld-link.exe ^
+          -DCMAKE_PREFIX_PATH=C:\Qt\5.15.0\msvc2019_64\lib\cmake ^
           -DBOOST_ROOT=%BOOST_ROOT_1_72_0% ^
           -DBISON_COMMAND=c:\tools\msys64\usr\bin\bison.exe
 
-      cmake --build . --config Release
+      type CMakeCache.txt
+
+      cmake --build .
+
+      rem -DBoost_COMPILER=-vc142
+    displayName: 'Build'
 
   - script: |
       cd build
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
-      set PATH=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin;%PATH%
-      ctest . -LE xfail --no-compress-output -T test -C Release
+      call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
+      set PATH=C:\Program Files\LLVM\bin;C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
+
+      ctest . -LE xfail --no-compress-output -T test
 
     displayName: 'Run tests'
 
@@ -76,7 +80,9 @@ jobs:
       cd build
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
-      set PATH=%STUDIO%\COMMON7\IDE\COMMONEXTENSIONS\MICROSOFT\CMAKE\CMake\bin;%PATH%
+      call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
+      set PATH=C:\Program Files\LLVM\bin;C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
+
       cpack
     displayName: 'CPack'
 

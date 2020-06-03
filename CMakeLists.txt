@@ -35,7 +35,8 @@ endif()
 
 enable_testing()
 
-set(Boost_USE_STATIC_LIBS YES)
+#set(Boost_USE_STATIC_LIBS YES)
+add_compile_definitions(BOOST_ALL_NO_LIB)
 
 add_library(lmdb
     lmdb/libraries/liblmdb/lmdb.h lmdb/libraries/liblmdb/mdb.c
