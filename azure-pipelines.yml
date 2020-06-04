@@ -1,18 +1,6 @@
 trigger:
 - master
 jobs:
-- job: Experiment
-  condition: false
-  pool:
-    vmImage: 'windows-2019'
-  steps:
-  - script: |
-      c:
-
-      cd C:\hostedtoolcache\windows\Boost\1.72.0\lib
-      dir
-
-
 
 - job: Windows
   condition: true
@@ -92,7 +80,7 @@ jobs:
       artifactName: Executor2000-win64.tar.bz2
 
 - job: WindowsMingw
-  condition: false
+  condition: true
   pool:
     vmImage: 'windows-2019'
 
@@ -150,7 +138,7 @@ jobs:
       artifactName: Executor2000-mingw64.tar.bz2
 
 - job: macOS
-  condition: false
+  condition: true
   pool:
     vmImage: 'macOS-10.14'
   steps:
@@ -183,7 +171,7 @@ jobs:
       artifactName: Executor2000-Darwin.tar.bz2
 
 - job: Linux
-  condition: false
+  condition: true
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
@@ -211,7 +199,7 @@ jobs:
       artifactName: Executor2000-Linux.tar.bz2
 
 - job: Linux32
-  condition: false
+  condition: true
   pool:
     vmImage: 'ubuntu-16.04'
   steps:
