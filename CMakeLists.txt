@@ -97,9 +97,18 @@ macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var _prefix)
 endmacro()
 
 find_package(Qt5 COMPONENTS Gui)
+find_package(Boost)
+
+set(DIRS)
+list(APPEND DIRS ${CMAKE_BINARY_DIR})
+list(APPEND DIRS ${Boost_LIBRARY_DIRS})
+get_target_property(QT_GUI_LOCATION Qt5::Gui LOCATION)
+get_filename_component(QT_GUI_LOCATION "${QT_GUI_LOCATION}" PATH)
+list(APPEND DIRS ${QT_GUI_LOCATION})
+message("DIRECTORIES: ${DIRS}")
 if(WIN32)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/executor.exe")
-    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"\" \"\")")
+    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
 
     install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS "bin/")
 
