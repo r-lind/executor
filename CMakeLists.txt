@@ -35,7 +35,7 @@ endif()
 
 enable_testing()
 
-#set(Boost_USE_STATIC_LIBS YES)
+set(Boost_USE_STATIC_LIBS YES)
 add_compile_definitions(BOOST_ALL_NO_LIB)
 
 add_library(lmdb
@@ -68,12 +68,45 @@ add_subdirectory(cxmon)
 add_subdirectory(src)
 add_subdirectory(tests)
 
+if(WIN32)
+set(CPACK_GENERATOR "ZIP")
+else()
 set(CPACK_GENERATOR "TBZ2")
+endif()
+
 set(CPACK_PACKAGE_CONTACT "Wolfgang Thaller <wolfgang.thaller@gmx.net>")
 set(CPACK_STRIP_FILES TRUE)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS YES)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+
+macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var _prefix)
+    get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
+    if(EXISTS "${_qt_plugin_path}")
+        get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+        set(_qt_plugin_dest "${_prefix}/${_qt_plugin_type}")
+        install(FILES "${_qt_plugin_path}"
+            DESTINATION "${_qt_plugin_dest}")
+        set(${_qt_plugins_var}
+            "${${_qt_plugins_var}};\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
+    else()
+        message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+    endif()
+endmacro()
+
+find_package(Qt5 COMPONENTS Gui)
+if(WIN32)
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/executor.exe")
+    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"\" \"\")")
+
+    install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS "bin/")
+
+    if(NOT MSVC)
+        set(CPACK_SYSTEM_NAME win64-mingw)
+    endif()
+endif()
 
 if(APPLE)
 list(APPEND CPACK_GENERATOR "DragNDrop")
