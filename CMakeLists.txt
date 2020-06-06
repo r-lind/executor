@@ -107,14 +107,21 @@ get_filename_component(QT_GUI_LOCATION "${QT_GUI_LOCATION}" PATH)
 list(APPEND DIRS ${QT_GUI_LOCATION})
 message("DIRECTORIES: ${DIRS}")
 if(WIN32)
+    install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS "bin/")
+
     set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/executor.exe")
     install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
-
-    install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS "bin/")
 
     if(NOT MSVC)
         set(CPACK_SYSTEM_NAME win64-mingw)
     endif()
+elseif(APPLE)
+    install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS "Executor.app/Contents/PlugIns")
+
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/Executor.app")
+    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
+
+    set(CPACK_SYSTEM_NAME macos)
 endif()
 
 if(APPLE)
