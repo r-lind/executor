@@ -164,6 +164,10 @@ jobs:
       buildPlatform: 'x86_64-macos'
   - script: |
       cd build
+      # hack: for some reason homebrew write-locks this framework.
+      # it is then copied by the fixup_bundle command, preserving the write-lock
+      # ... and that causes it to fail.
+      chmod +w /usr/local/Cellar/qt/*/Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport
       cpack
   - task: PublishBuildArtifacts@1
     inputs:
