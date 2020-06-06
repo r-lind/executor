@@ -17,6 +17,18 @@ find_package(Boost REQUIRED COMPONENTS filesystem system)
 
 find_package(Threads REQUIRED)
 
+
+if(WIN32 AND MSVC)
+    # compiler uses msvc-style command line
+    # only clang supported at the moment
+    add_compile_options(
+        -Xclang -Wall -Xclang -Wextra
+
+        -Wno-unused-parameter
+        -Wno-sign-compare
+    )
+endif()
+
 include_directories(${CMAKE_CURRENT_BINARY_DIR}/api/)
 include_directories(include)
 include_directories(.)
@@ -53,15 +65,29 @@ add_custom_command(
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal
 )
 
-set(HOST_ARCH generic_le)
-
 if(WIN32)
-set(HOST_OS "win32")
+    set(HOST_OS "win32")
+    set(host_os_sources
+        config/os/win32/win_serial.cpp
+        config/os/win32/win_serial.h
+        config/os/win32/win_stat.h
+        config/os/win32/win_stat.cpp)
+    set(host_os_libs)
 elseif(APPLE AND UNIX)
-set(HOST_OS "macosx")
+    set(HOST_OS "macosx")
+    set(host_os_sources
+        config/os/macosx/macosx.mm)
+    find_library(COCOA_LIBRARY Cocoa)
+    set(host_os_libs ${COCOA_LIBRARY})    
 elseif(UNIX AND NOT APPLE)
-set(HOST_OS "linux")
+    set(HOST_OS "linux")
+    set(host_os_sources)
+    set(host_os_libs)
+else()
+    set(host_os_sources)
+    set(host_os_libs)
 endif()
+source_group(HostOS FILES ${host_os_sources})
 
 set(FRONT_ENDS headless qt x sdl sdl2)
 
@@ -83,9 +109,6 @@ add_subdirectory(config/front-ends/sdl)
 add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
 add_subdirectory(config/front-ends/headless)
-add_subdirectory(config/arch/generic_le)
-add_subdirectory(config/os/win32)
-add_subdirectory(config/os/macosx)
 
 function(linkheader from to variant)
     if(DEFINED ARGV3)
@@ -97,9 +120,7 @@ function(linkheader from to variant)
     configure_file(${from}/${variant}/${input} ${to} COPYONLY)
 endfunction()
 
-linkheader("config/os" "host-os-config.h" ${HOST_OS})
-linkheader("config/arch" "host-arch-config.h" ${HOST_ARCH})
-#linkheader("config/front-ends" "front-end-config.h" ${FRONT_END})
+
 linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
 
 add_executable(map_to_c map_to_c/map_to_c.cpp)
@@ -449,15 +470,14 @@ set(misc_sources
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp
   gestalt.cpp iu.cpp launch.cpp  notify.cpp 
    osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
-  slash.cpp stdfile.cpp romlib_stubs.cpp  toolevent.cpp toolutil.cpp 
+  stdfile.cpp romlib_stubs.cpp  toolevent.cpp toolutil.cpp 
    aboutbox.cpp
   version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
   process.cpp alias.cpp string.cpp  edition.cpp  balloon.cpp
    adb.cpp color_wheel_bits.cpp finder.cpp  
   icon.cpp redrawscreen.cpp quicktime.cpp
   commtool.cpp cfm.cpp pef_hash.cpp
-  mixed_mode.cpp appearance.cpp lockrange.cpp
-  unix_like.cpp
+  mixed_mode.cpp appearance.cpp
   executor.cpp  
   prefpanel.cpp
   qColorPicker.cpp
@@ -472,7 +492,6 @@ set(include_sources
                   include/rsys/adb.h
                   include/rsys/alias.h
                   include/rsys/appearance.h
-                  include/rsys/arch.h
                   include/rsys/arrowkeys.h
                   include/rsys/color_wheel_bits.h
                   include/rsys/desk.h
@@ -486,12 +505,10 @@ set(include_sources
                   include/rsys/icon.h
                   include/rsys/keyboard.h
                   include/rsys/launch.h
-                  include/rsys/lockunlock.h
                   include/rsys/macros.h
                   include/rsys/macstrings.h
                   include/rsys/mon_debugger.h
                   include/rsys/noreturn.h
-                  include/rsys/os.h
                   include/rsys/osutil.h
                   include/rsys/paths.h
                   include/rsys/prefpanel.h
@@ -502,7 +519,7 @@ set(include_sources
                   include/rsys/screen-dump.h
                   include/rsys/segment.h
                   include/rsys/serial.h
-                  include/rsys/slash.h
+                  include/rsys/unixio.h
                   include/rsys/stdfile.h
                   include/rsys/string.h
                   include/rsys/toolevent.h
@@ -512,12 +529,6 @@ set(include_sources
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
 
-if(WIN32)
-    set(host_platform_sources ../windows/dirent.c ../windows/gettimeofday.cpp)
-else()
-    set(host_platform_sources)
-endif()
-source_group(HostPlatform FILES ${host_platform_sources})
 
 set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${ctl_sources} ${dial_sources} 
@@ -527,7 +538,7 @@ set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${sound_sources} ${num_sources} ${misc_sources}
     ${file_sources} ${hfs_sources} ${time_sources} ${osevent_sources}
     ${error_sources} ${commandline_sources} ${prefs_sources}
-    ${api_headers} ${trap_instance_sources} ${host_platform_sources}
+    ${api_headers} ${trap_instance_sources} ${host_os_sources}
     ${include_sources})
 
 add_library(romlib ${sources}
@@ -536,17 +547,14 @@ add_library(romlib ${sources}
 
 target_include_directories(romlib PUBLIC . include/ ${CMAKE_CURRENT_BINARY_DIR}/api/ ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(romlib arch-${HOST_ARCH})
 target_link_libraries(romlib lmdb)
-
-if(HOST_OS STREQUAL win32 OR HOST_OS STREQUAL macosx)
-    target_link_libraries(romlib os-${HOST_OS})
-endif()
 
 target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 
 target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
 target_link_libraries(romlib resources)
+
+target_link_libraries(romlib ${host_os_libs})
 
 foreach(FRONT_END ${FRONT_ENDS})
     if(TARGET front-end-${FRONT_END})

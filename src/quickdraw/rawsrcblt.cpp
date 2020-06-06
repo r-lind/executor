@@ -9,8 +9,6 @@
 #include <quickdraw/xdblt.h>
 #include <quickdraw/rawblt.h>
 
-#if defined(USE_PORTABLE_SRCBLT)
-
 static int srcblt_src_row_stride;
 static int srcblt_dst_row_stride;
 
@@ -226,5 +224,3 @@ done_looping:
 
 done_with_scanlines:;
 }
-
-#endif /* USE_PORTABLE_SRCBLT */

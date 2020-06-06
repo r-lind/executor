@@ -6,8 +6,6 @@
 #include <QEventLoop>
 #include <QResizeEvent>
 
-#include "host-os-config.h"
-
 QVector<QRect> getScreenGeometries()
 {
     QVector<QRect> geometries;
@@ -17,7 +15,7 @@ QVector<QRect> getScreenGeometries()
     return geometries;
 }
 
-#ifndef LINUX
+#ifndef __linux__
 
 /* Actually, this should be the Qt-on-anything-but-X11 case. */
 

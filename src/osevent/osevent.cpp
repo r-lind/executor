@@ -492,16 +492,3 @@ Executor::display_keyboard_choices(void)
     exit(0);
 }
 
-void
-Executor::maybe_wait_for_keyup(void)
-{
-#if defined(SDL) && defined(CYGWIN32)
-    /* Run SDL's event processor so that any pending events get
-     sent to us instead of the Win32 print stuff.  Specifically
-     we don't want to lose the key-up if someone hit <CR> to
-     choose the default button in a dialog.  Losing the key-up
-     can cause all sorts of trouble. */
-    while(lastdown != -1)
-        handle_sdl_events(0, nullptr);
-#endif
-}

@@ -22,16 +22,6 @@
 #include <rsys/paths.h>
 #include <rsys/macstrings.h>
 
-#if !defined(WIN32)
-#include <pwd.h>
-#else
-#include "winfs.h"
-//#include "dosdisk.h"
-#endif
-
-#ifndef S_ISDIR
-#define S_ISDIR(m) ((m) & S_IFDIR)
-#endif
 
 #include <ctype.h>
 #include <algorithm>
@@ -45,7 +35,6 @@ using namespace Executor;
 namespace Executor
 {
 int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
-fs::path ROMlib_startdir;
 std::string ROMlib_appname;
 }
 
@@ -55,80 +44,6 @@ void Executor::fs_err_hook(OSErr err)
 {
 }
 #endif
-
-int ROMlib_lasterrnomapped;
-
-#define MAX_ERRNO 50
-
-#define install_errno(uerr, merr)         \
-    do                                    \
-    {                                     \
-        gui_assert(uerr < std::size(xtable)); \
-        xtable[uerr] = merr;              \
-    } while(false);
-
-OSErr Executor::ROMlib_maperrno() /* INTERNAL */
-{
-    OSErr retval;
-    static OSErr xtable[MAX_ERRNO + 1];
-    static char been_here = false;
-    int errno_save;
-
-    if(!been_here)
-    {
-        int i;
-
-        for(i = 0; i < (int)std::size(xtable); ++i)
-            xtable[i] = fsDSIntErr;
-
-        install_errno(0, noErr);
-        install_errno(EPERM, permErr);
-        install_errno(ENOENT, fnfErr);
-        install_errno(EIO, ioErr);
-        install_errno(ENXIO, paramErr);
-        install_errno(EBADF, fnOpnErr);
-        install_errno(EAGAIN, fLckdErr);
-        install_errno(ENOMEM, memFullErr);
-        install_errno(EACCES, permErr);
-        install_errno(EFAULT, paramErr);
-        install_errno(EBUSY, fBsyErr);
-        install_errno(EEXIST, dupFNErr);
-        install_errno(EXDEV, fsRnErr);
-        install_errno(ENODEV, nsvErr);
-        install_errno(ENOTDIR, dirNFErr);
-        install_errno(EINVAL, paramErr);
-        install_errno(ENFILE, tmfoErr);
-        install_errno(EMFILE, tmfoErr);
-        install_errno(EFBIG, dskFulErr);
-        install_errno(ENOSPC, dskFulErr);
-        install_errno(ESPIPE, posErr);
-        install_errno(EROFS, wPrErr);
-        install_errno(EMLINK, dirFulErr);
-#if !defined(WIN32)
-        install_errno(ETXTBSY, fBsyErr);
-        install_errno(EWOULDBLOCK, permErr);
-#endif
-
-        been_here = true;
-    }
-
-    errno_save = errno;
-    ROMlib_lasterrnomapped = errno_save;
-
-    if(errno_save < 0 || errno_save >= (int)std::size(xtable))
-        retval = fsDSIntErr;
-    else
-        retval = xtable[errno_save];
-
-    if(retval == fsDSIntErr)
-        warning_unexpected("fsDSIntErr errno = %d", errno_save);
-
-    if(retval == dirNFErr)
-        warning_trace_info("dirNFErr errno = %d", errno_save);
-
-    fs_err_hook(retval);
-    return retval;
-}
 
 
 Byte
@@ -244,12 +159,13 @@ Executor::expandPath(std::string name)
 
     switch(name[0])
     {
-        case '+':
-            name = ROMlib_startdir.string() + name.substr(1);
-            break;
         case '~':
         {
+#ifdef _WIN32
+            auto home = getenv("USERPROFILE");
+#else
             auto home = getenv("HOME");
+#endif
             if(home)
             {
                 name = home + name.substr(1);
@@ -259,7 +175,7 @@ Executor::expandPath(std::string name)
         break;
     }
 
-#if defined(WIN32)
+#if defined(_WIN32)
     std::replace(name.begin(), name.end(), '/', '\\');
 #endif
 
@@ -295,7 +211,7 @@ parse_offset_file(void)
 {
     FILE *fp;
 
-    fp = Ufopen(ROMlib_OffsetFile.c_str(), "r");
+    fp = fopen(ROMlib_OffsetFile.c_str(), "r");
     if(!fp)
     {
 #if 0
@@ -319,7 +235,7 @@ is_unix_path(const char *pathname)
 {
     bool retval;
 
-#if defined(MSDOS) || defined(CYGWIN32)
+#if defined(_WIN32)
     if(pathname[0] && pathname[1] == ':' && (pathname[2] == '/' || pathname[2] == '\\'))
         pathname += 3;
 #endif
@@ -408,63 +324,36 @@ std::optional<FSSpec> Executor::cmdlinePathToFSSpec(const std::string& path)
     return {};
 }
 
+template<typename F>
+static void ForEachPath(std::string_view macVolumes, F f)
+{
+    std::string::size_type p = 0, q;
+    
+    while((q = macVolumes.find_first_of(":;",  p)) != std::string::npos)
+    {
+        if(auto s = macVolumes.substr(p, q-p); !s.empty())
+            f(s);
+        p = q + 1;
+    }
+    if(auto s = macVolumes.substr(p); !s.empty())
+        f(s);
+}
+
 static void MountMacVolumes(std::string macVolumes)
 {
-    GUEST<LONGINT> m;
-    char *p, *ep;
-    struct stat sbuf;
+    ForEachPath(macVolumes, [](std::string_view pathstr) {
+        fs::path path(expandPath(std::string(pathstr)));
+        GUEST<LONGINT> m;
 
-    m = 0;
-    p = (char *)alloca(macVolumes.size() + 1);
-    strcpy(p, macVolumes.c_str());
-    while(p && *p)
-    {
-        ep = strchr(p, ';');
-        if(ep)
-            *ep = 0;
-        std::string newp = expandPath(p);
-        if(Ustat(newp.c_str(), &sbuf) == 0)
+        if(fs::is_directory(path))
         {
-            if(!S_ISDIR(sbuf.st_mode))
-                ROMlib_openharddisk(newp.c_str(), &m);
-            else
-            {
-                DIR *dirp;
-
-                dirp = Uopendir(newp.c_str());
-                if(dirp)
-                {
-#if defined(USE_STRUCT_DIRECT)
-                    struct direct *direntp;
-#else
-                    struct dirent *direntp;
-#endif
-
-                    while((direntp = readdir(dirp)))
-                    {
-                        int namelen;
-
-                        namelen = strlen(direntp->d_name);
-                        if(namelen >= 4 && (strcasecmp(direntp->d_name + namelen - 4, ".hfv")
-                                                == 0
-                                            || strcasecmp(direntp->d_name + namelen - 4, ".ima")
-                                                == 0))
-                        {
-                            ROMlib_openharddisk((newp + "/" + direntp->d_name).c_str(), &m);
-                        }
-                    }
-                    closedir(dirp);
-                }
-            }
-        }
-        if(ep)
-        {
-            *ep = ';';
-            p = ep + 1;
+            for(auto& file : fs::directory_iterator(path))
+                if(!fs::is_directory(file))
+                    ROMlib_openharddisk(file.path().string().c_str(), &m);
         }
         else
-            p = 0;
-    }
+            ROMlib_openharddisk(path.string().c_str(), &m);
+    });
 
     futzwithdosdisks();
 }
@@ -504,7 +393,7 @@ void Executor::InitSystemFolder(std::string systemFolder)
     }
     else
     {
-        fprintf(stderr, "Couldn't open System: '%s'\n", ROMlib_SystemFolder.c_str());
+        fprintf(stderr, "Couldn't locate System: '%s'\n", ROMlib_SystemFolder.c_str());
         exit(1);
     }
 }
@@ -609,7 +498,7 @@ void Executor::ROMlib_fileinit() /* INTERNAL */
 
     parse_offset_file();
     ROMlib_hfsinit();
-    MountLocalVolume();
+    MountLocalVolumes();
 
     MountMacVolumes(ROMlib_MacVolumes);
 

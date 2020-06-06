@@ -48,8 +48,6 @@
 #include <sane/float.h>
 #include <rsys/paths.h>
 #include <appleevent/apple_events.h>
-#include <rsys/os.h>
-#include <rsys/arch.h>
 #include <rsys/gestalt.h>
 #include <rsys/launch.h>
 #include <quickdraw/text.h>
@@ -62,28 +60,16 @@
 
 #include "default_vdriver.h"
 
-#if defined(LINUX) && defined(PERSONALITY_HACK)
+#if defined(__linux__) && defined(PERSONALITY_HACK)
 #include <sys/personality.h>
 #define READ_IMPLIES_EXEC 0x0400000
 #endif
 
 
-
-static void setstartdir(char *);
-
 #include <ctype.h>
 
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #include <sys/wait.h>
-#endif
-
-#if defined(CYGWIN32)
-#include "winfs.h"
-#include "dosdisk.h"
-#include "win_except.h"
-#include "win_queue.h"
-#include "win_clip.h"
-#include "win_print.h"
 #endif
 
 #include <vector>
@@ -135,20 +121,12 @@ static const option_vec common_opts = {
     { "nosound", "disable any sound hardware",
       opt_no_arg, "" },
 
-#if defined(MSDOS) || defined(CYGWIN32)
-    { "macdrives", "drive letters that represent Mac formatted media",
-      opt_sep, "" },
-    { "dosdrives", "drive letters that represent DOS formatted media",
-      opt_sep, "" },
-    { "skipdrives", "drive letters that represent drives to avoid",
-      opt_sep, "" },
-#endif
-#if defined(LINUX)
+#if defined(__linux__)
     { "nodrivesearch",
       "Do not look for a floppy drive, CD-ROM drive or any other drive "
       "except as specified by the MacVolumes environment variable",
       opt_no_arg, "" },
-#endif /* LINUX */
+#endif /* __linux__ */
     { "keyboards", "list available keyboard mappings",
       opt_no_arg, "" },
     { "keyboard", "choose a specific keyboard map", opt_sep, "" },
@@ -221,13 +199,6 @@ capable of color.",
                 "for New York when generating PostScript",
       opt_no_arg, "" },
 
-#if defined(CYGWIN32)
-    { "die", "allow Executor to die instead of catching trap", opt_no_arg,
-      "" },
-    { "noautoevents", "disable timer driven event checking", opt_no_arg,
-      "" },
-#endif
-
     { "prvers",
       "specify the printer version that executor reports to applications",
       opt_sep, "" },
@@ -238,10 +209,6 @@ capable of color.",
       "in addition to the standard 72dpi.  Not all apps will be able to use "
       "this additional resolution.",
       opt_sep, "" },
-
-#if defined(CYGWIN32) && defined(SDL)
-    { "clipleak", "UNSUPPORTED (ignored)", opt_no_arg, "" },
-#endif
 
     { "ppc", "prefer PPC code to 68K code when both are available", opt_no_arg, "" },
 
@@ -287,87 +254,6 @@ check_arg(string argname, int *arg, int min, int max)
         fputs(" inclusive.\n", stderr);
         bad_arg_p = true;
     }
-}
-
-
-#if !defined(LINUX)
-#define SHELL "/bin/sh"
-#define WHICH "which "
-#else
-#define SHELL "/bin/bash"
-#define WHICH "type -path "
-#endif
-
-static void
-set_appname(char *argv0)
-{
-    char *p = strrchr(argv0, '/');
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(!p)
-        p = strrchr(argv0, '\\');
-#endif
-    if(p)
-        ++p;
-    else
-        p = argv0;
-    ROMlib_appname = p;
-}
-
-static void setstartdir(char *argv0)
-{
-#if !defined(WIN32)
-    LONGINT p[2], pid;
-    char buf[MAXPATHLEN];
-    INTEGER nread, arg0len;
-    char *lookhere, *suffix, *whichstr;
-
-    if(argv0[0] == '/' || Uaccess(argv0, X_OK) == 0)
-        lookhere = argv0;
-    else
-    {
-        pipe(p);
-        if((pid = fork()) == 0)
-        {
-            close(1);
-            dup(p[1]);
-            arg0len = strlen(argv0);
-            whichstr = (char *)alloca(arg0len + sizeof(WHICH));
-            memmove(whichstr, WHICH, sizeof(WHICH) - 1);
-            memmove(whichstr + sizeof(WHICH) - 1, argv0, arg0len + 1);
-            execl(SHELL, "sh", "-c", whichstr, (char *)0);
-            fprintf(stderr, "``%s -c \"%s\"'' failed\n", SHELL, whichstr);
-            fflush(stderr);
-            _exit(127);
-/* NOTREACHED */
-#if !defined(LETGCCWAIL)
-            lookhere = 0;
-#endif /* LETGCCWAIL */
-        }
-        else
-        {
-            close(p[1]);
-            nread = read(p[0], buf, sizeof(buf) - 1);
-            waitpid(pid, nullptr, 0);
-            if(nread)
-                --nread; /* get rid of trailing \n */
-            buf[nread] = 0;
-            lookhere = buf;
-        }
-    }
-    suffix = rindex(lookhere, '/');
-    if(suffix)
-        *suffix = 0;
-    auto savedir = fs::current_path();
-    chdir(lookhere);
-    if(suffix)
-        *suffix = '/';
-    ROMlib_startdir = fs::current_path();
-    fs::current_path(savedir);
-    
-#else /* defined(MSDOS) || defined(CYGWIN32) */
-    // TODO: replace by GetModuleFilename()
-    ROMlib_startdir = fs::canonical(argv0).parent_path();
-#endif /* defined(MSDOS) */
 }
 
 
@@ -488,7 +374,7 @@ static void parseCommandLine(int& argc, char **argv)
     if(opt_val(opt_db, "debug", &arg))
         bad_arg_p |= !error_parse_option_string(arg);
 
-#if defined(MACOSX)
+#if defined(__APPLE__)
     // sync() really takes a long time on Mac OS X.
     ROMlib_nosync = true;
 #endif
@@ -503,13 +389,6 @@ static void parseCommandLine(int& argc, char **argv)
     use_native_code_p = !opt_val(opt_db, "notnative", nullptr);
 
     substitute_fonts_p = !opt_val(opt_db, "cities", nullptr);
-
-#if defined(CYGWIN32)
-    if(opt_val(opt_db, "die", nullptr))
-        uninstall_exception_handler();
-    if(opt_val(opt_db, "noautoevents", nullptr))
-        set_timer_driven_events(false);
-#endif
 
     /* Parse the "-memory" option. */
     {
@@ -579,7 +458,7 @@ static void parseCommandLine(int& argc, char **argv)
 
     opt_bool_val(opt_db, "grayscale", &flag_grayscale, &bad_arg_p);
 
-#if defined(LINUX)
+#if defined(__linux__)
     opt_bool_val(opt_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
 #endif
 
@@ -655,7 +534,7 @@ int main(int argc, char **argv)
 {
     char thingOnStack; /* used to determine an approximation of the stack base address */
 
-#if defined(LINUX) && defined(PERSONALITY_HACK)
+#if defined(__linux__) && defined(PERSONALITY_HACK)
     int pers;
 
     // TODO: figure out how much of this is still necessary.
@@ -671,23 +550,10 @@ int main(int argc, char **argv)
 
     ROMlib_command_line = construct_command_line_string(argc, argv);
 
-    if(!arch_init())
-    {
-        fprintf(stderr, "Unable to initialize CPU information.\n");
-        exit(-100);
-    }
-
-    if(!os_init())
-    {
-        fprintf(stderr, "Unable to initialize operating system features.\n");
-        exit(-101);
-    }
-
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();
 
-    setstartdir(argv[0]);
-    set_appname(argv[0]);
+    ROMlib_appname = fs::path(argv[0]).filename().string();
 
     VideoDriverCallbacks videoDriverCallbacks;
     vdriver = new DefaultVDriver(&videoDriverCallbacks);
@@ -766,9 +632,6 @@ int main(int argc, char **argv)
 
     set_refresh_rate(ROMlib_refresh);
 
-#if defined(CYGWIN32)
-    complain_if_no_ghostscript();
-#endif
     InitMonDebugger();
     base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
 

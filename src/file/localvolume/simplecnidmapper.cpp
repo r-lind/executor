@@ -119,7 +119,6 @@ std::optional<CNIDMapper::Mapping> SimpleCNIDMapper::lookupCNID(CNID cnid)
 void SimpleCNIDMapper::deleteCNID(CNID cnid)
 {
     auto it = mappings_.find(cnid);
-    mappings_.find(cnid);
     if(it == mappings_.end())
         return;
     CNID parID = it->second.parID;
@@ -147,7 +146,6 @@ void SimpleCNIDMapper::deleteCNID(CNID cnid)
 void SimpleCNIDMapper::moveCNID(CNID cnid, CNID newParent, mac_string_view newMacName, std::function<fs::path()> fsop)
 {
     auto it = mappings_.find(cnid);
-    mappings_.find(cnid);
     if(it == mappings_.end())
         return;
 

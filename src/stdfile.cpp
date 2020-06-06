@@ -1543,7 +1543,7 @@ static Boolean ejected(HParmBlkPtr pb)
 
 static bool single_tree_fs_p(HParmBlkPtr pb)
 {
-#if true || defined(MSDOS) || defined(CYGWIN32)
+#if 1
     return false;
 #else
     HVCB *vcbp = ROMlib_vcbbyvrn(pb->volumeParam.ioVRefNum);
@@ -1704,31 +1704,15 @@ static void transformsfpdialog(DialogPtr dp, Point *offset, Rect *scrollrect,
 
 void adjustdrivebutton(DialogPtr dp)
 {
-    INTEGER count;
     Handle drhand;
     GUEST<Handle> tmpH;
     GUEST<INTEGER> i;
     Rect r;
-#if !defined(MSDOS) && !defined(CYGWIN32)
-    HVCB *vcbp;
-    Boolean seenunix;
 
-    count = 0;
-    seenunix = false;
-    for(vcbp = (HVCB *)LM(VCBQHdr).qHead; vcbp;
-        vcbp = (HVCB *)vcbp->qLink)
-        if(vcbp->vcbCTRef && vcbp->vcbDrvNum)
-            ++count;
-        else if(((VCBExtra*)vcbp)->volume)
-            ++count;
-        else if(!seenunix)
-        {
-            ++count;
-            seenunix = true;
-        }
-#else /* defined(MSDOS) */
-    count = 2; /* always allow the user to hit the drive button */
-#endif /* defined(MSDOS) */
+    int count = 0;
+    for(auto vcbp = (HVCB *)LM(VCBQHdr).qHead; vcbp; vcbp = (HVCB *)vcbp->qLink)
+        ++count;
+
     GetDialogItem(dp, putDrive, &i, &tmpH, &r); /* putDrive == getDrive */
     drhand = tmpH;
     HiliteControl((ControlHandle)drhand, count > 1 ? 0 : 255);

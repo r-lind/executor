@@ -31,11 +31,10 @@
 #include <rsys/paths.h>
 #include <base/traps.impl.h>
 
+#include <sys/stat.h>
+
 #include <algorithm>
 
-#ifdef MACOSX_
-//#include "contextswitch.h"
-#endif
 
 #if defined(CYGWIN32)
 #include "win_print.h"
@@ -404,7 +403,7 @@ update_ROMlib_printer_vars(TPPrDlg dp)
     }
 }
 
-#if !defined(LINUX)
+#if !defined(__linux__)
 static void
 get_popup_bounding_box(Rect *rp, DialogPtr dp, INTEGER itemno)
 {
@@ -443,7 +442,7 @@ update_port(DialogPtr dp)
     {
         if(print_where != PRINT_TO_FILE)
         {
-#if !defined(LINUX)
+#if !defined(__linux__)
             Rect r;
 
             get_popup_bounding_box(&r, dp, LAYOUT_PORT_MENU_NO);
@@ -490,7 +489,7 @@ update_port(DialogPtr dp)
         {
             HideDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
             HideDialogItem(dp, LAYOUT_FILENAME_NO);
-#if !defined(LINUX)
+#if !defined(__linux__)
             {
                 Rect r;
 
@@ -592,7 +591,6 @@ static Boolean C_ROMlib_stlfilterproc(
             c = evt->message & 0xFF;
             if(c == '\r' || c == NUMPAD_ENTER)
             {
-                maybe_wait_for_keyup();
                 *ith = OK;
                 retval = true;
             }
@@ -681,7 +679,6 @@ static Boolean C_ROMlib_numsonlyfilterproc(
         {
             case '\r':
             case NUMPAD_ENTER:
-                maybe_wait_for_keyup();
                 *ith = OK;
                 return true;
                 break;
@@ -984,7 +981,7 @@ adjust_printer_type_menu(TPPrDlg dlg)
 static void
 adjust_port(TPPrDlg dlg)
 {
-#if !defined(LINUX)
+#if !defined(__linux__)
     adjust_menu_common(dlg, LAYOUT_PORT_MENU_NO, "Port", ROMlib_port);
 #else
     HideDialogItem((DialogPtr)dlg, LAYOUT_PORT_LABEL_NO);
@@ -1071,12 +1068,13 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
 
 /* remove trailing .exe */
 #define EXE_SUFFIX ".exe"
+#ifndef _MSC_VER
                 if(strcasecmp((char *)appname + appname[0] + 1
                                   - sizeof EXE_SUFFIX + 1,
                               EXE_SUFFIX)
                    == 0)
                     appname[0] -= sizeof EXE_SUFFIX - 1;
-
+#endif
                 /* Capitalize first character */
                 if(islower(appname[1]))
                     appname[1] = toupper((unsigned char)appname[1]);

@@ -12,9 +12,7 @@ void ROMlib_hook(LONGINT);
 }
 using namespace Executor;
 
-#if !defined(NDEBUG) && !defined(MSDOS)
-
-#undef putchar
+#if !defined(NDEBUG)
 
 void Executor::ROMlib_printstring(unsigned char *p)
 {
@@ -33,7 +31,7 @@ void Executor::ROMlib_printostype(OSType t)
     putchar(t >> 0);
     putchar('\n');
 }
-#endif /* !defined(NDEBUG) && !defined(MSDOS) */
+#endif /* !defined(NDEBUG) */
 
 #if !defined(NDEBUG)
 void Executor::ROMlib_hook(LONGINT hn)

@@ -108,7 +108,7 @@ std::unordered_map<Qt::Key,int> qtToMacKeycodeMap {
     { Qt::Key_CapsLock, MKV_CAPS },
     { Qt::Key_ScrollLock, MKV_SCROLL_LOCK },
     { Qt::Key_Shift, MKV_LEFTSHIFT },
-#ifdef MACOSX
+#ifdef __APPLE__
     { Qt::Key_Control, MKV_CLOVER },
     { Qt::Key_Alt, MKV_LEFTOPTION },
     { Qt::Key_Meta, MKV_LEFTCNTL },

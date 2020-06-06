@@ -3,7 +3,6 @@
 
 #include <base/functions.h>
 #include <base/mactype.h>
-#include <base/byteswap.h>
 #include <base/functions.impl.h>
 #include <base/logging.h>
 #include <base/dispatcher.h>

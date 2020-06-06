@@ -1,13 +1,10 @@
 #include "plain.h"
-#include "host-os-config.h"
-#if !defined(WIN32)
-    #include <unistd.h>
-#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <iostream>
 #include <rsys/macros.h>
+#include <rsys/unixio.h>
 
 using namespace Executor;
 
@@ -39,7 +36,7 @@ size_t PlainDataFork::getEOF()
 }
 void PlainDataFork::setEOF(size_t sz)
 {
-#if defined(WIN32)
+#if defined(_WIN32)
     chsize(fd, sz);
 #else
     ftruncate(fd, sz);
@@ -49,18 +46,14 @@ void PlainDataFork::setEOF(size_t sz)
 size_t PlainDataFork::read(size_t offset, void *p, size_t n)
 {
     lseek(fd, offset, SEEK_SET);
-    ssize_t done;
-    
-    done = ::read(fd, p, n);
+    auto done = ::read(fd, p, n);
     
     return done;
 }
 size_t PlainDataFork::write(size_t offset, void *p, size_t n)
 {
     lseek(fd, offset, SEEK_SET);
-    ssize_t done;
-    
-    done = ::write(fd, p, n);
+    auto done = ::write(fd, p, n);
     
     if(done != n)
     {

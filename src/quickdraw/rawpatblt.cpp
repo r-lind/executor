@@ -8,8 +8,6 @@
 #include <quickdraw/quick.h>
 #include <quickdraw/rawblt.h>
 
-#if defined(USE_PORTABLE_PATBLT)
-
 /* This macro is used in `rawpatstubs.c' */
 #define NEXT_ROW (dst = (uint32_t *)&row_base[s[1].offset])
 
@@ -210,4 +208,3 @@ done_looping:
 done_with_scanlines:;
 }
 
-#endif /* USE_PORTABLE_PATBLT */

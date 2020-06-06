@@ -577,7 +577,6 @@ extern void try_to_mount_disk(const char *dname, LONGINT floppyfd,
 
 extern void ROMlib_OurClose(void);
 
-extern long ROMlib_priv_open(const char *filename, long mode);
 extern void vcbsync(HVCB *vcbp);
 
 static_assert(sizeof(xtntdesc) == 4);

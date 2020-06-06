@@ -21,6 +21,10 @@
 
 #include <prefs/prefs.h>
 
+#if defined(__linux__)
+#include <signal.h>
+#endif
+
 #if defined(MSDOS) || defined(CYGWIN32)
 #include <stdarg.h>
 #include <rsys/cleanup.h>
@@ -441,7 +445,7 @@ ourinit(TPPrPort port, Boolean preserve_font)
 
 static bool need_pclose;
 
-#if defined(LINUX)
+#if defined(__linux__)
 static void (*old_pipe_signal)(int);
 #endif
 
@@ -454,7 +458,7 @@ open_ps_file(bool *need_pclosep)
     retval = nullptr;
     *need_pclosep = false;
 
-#if defined(LINUX)
+#if defined(__linux__)
     if(ROMlib_printer != "PostScript File")
     {
         value_t prog;
@@ -499,7 +503,7 @@ open_ps_file(bool *need_pclosep)
             }
             else
             {
-                retval = Ufopen(ROMlib_spool_file, "w");
+                retval = fopen(ROMlib_spool_file, "w");
 #if !defined(MSDOS) && !defined(CYGWIN32)
                 free(ROMlib_spool_file);
                 ROMlib_spool_file = nullptr;
@@ -659,7 +663,7 @@ void Executor::C_PrCloseDoc(TPPrPort port)
 #else
         ; /* CYGWIN32 has no pclose */
 #endif
-#if defined(LINUX)
+#if defined(__linux__)
         signal(SIGPIPE, old_pipe_signal);
 #endif
     }

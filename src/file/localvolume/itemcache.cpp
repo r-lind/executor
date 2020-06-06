@@ -167,20 +167,17 @@ ItemPtr ItemCache::tryResolve(CNID cnid)
 
 ItemPtr ItemCache::tryResolve(fs::path inPath)
 {
-    if(!fs::exists(inPath))
-        return {};
+    const auto& rootPath = rootDirItem_->path();
+    auto [rootIter, pathIter] = std::mismatch(rootPath.begin(), rootPath.end(), inPath.begin(), inPath.end());
 
-    boost::system::error_code ec;
-    inPath = fs::canonical(inPath, ec);
-    if(ec)
-        return {};
-    auto relpath = fs::relative(inPath, rootDirItem_->path(), ec);
-    if(ec)
-        return {};
+    if(rootIter != rootPath.end())
+        return{};
 
     ItemPtr item = rootDirItem_;
-    for(auto elem : relpath)
+    for(; pathIter != inPath.end(); ++pathIter)
     {
+        const auto& elem = *pathIter;
+
         if(auto dir = std::dynamic_pointer_cast<DirectoryItem>(item))
         {
             cacheDirectory(dir);

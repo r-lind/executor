@@ -1,13 +1,13 @@
 #include "mac.h"
-#include "host-os-config.h"
 #include "plain.h"
 #include <rsys/macros.h>
 
-#ifdef MACOSX
+#ifdef __APPLE__
 using namespace Executor;
 
 #include <sys/types.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <sys/xattr.h>
 
 class MacResourceFork : public OpenFile
@@ -40,12 +40,12 @@ public:
 
 MacResourceFork::MacResourceFork(fs::path path)
 {
-    fd = open(path.string().c_str(), O_RDWR | O_BINARY, 0644);
+    fd = open(path.string().c_str(), O_RDWR, 0644);
 }
 
 MacResourceFork::MacResourceFork(fs::path path, create_t)
 {
-    fd = open(path.string().c_str(), O_RDWR | O_CREAT | O_BINARY, 0644);
+    fd = open(path.string().c_str(), O_RDWR | O_CREAT, 0644);
 
         // Note:
         // I'm tempted to initialize type and creator to 0,

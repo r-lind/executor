@@ -19,14 +19,12 @@
 #include <base/cpu.h>
 #include <PowerCore.h>
 #include <base/debugger.h>
+#include <chrono>
 
 using namespace Executor;
 
 
 QHdr Executor::ROMlib_timehead;
-
-/* Actual time at which Executor started running, GMT. */
-struct timeval ROMlib_start_time;
 
 /* Msecs during last interrupt. */
 static unsigned long last_interrupt_msecs;
@@ -34,27 +32,13 @@ static unsigned long last_interrupt_msecs;
 /* Msecs during next anticipated interrupt. */
 static unsigned long next_interrupt_msecs;
 
-#if !defined(CYGWIN32)
+
 unsigned long
 msecs_elapsed()
 {
-    struct timeval t;
-    struct timezone tz;
-    unsigned long m;
-    static unsigned long start_msecs;
-
-    tz.tz_minuteswest = 0;
-    tz.tz_dsttime = 0;
-    gettimeofday(&t, &tz); /* GMT */
-    m = (t.tv_sec * 1000 + t.tv_usec / 1000);
-    if(start_msecs == 0)
-    {
-        start_msecs = m;
-        ROMlib_start_time = t;
-    }
-    return m - start_msecs;
+    static auto startTime = std::chrono::steady_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime).count();
 }
-#endif
 
 /*
  * catchalarm has been written with an eye toward not having errors accumulate.

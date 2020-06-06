@@ -24,7 +24,7 @@ void Executor::syncint_check_interrupt()
     }
 }
 
-#if defined(WIN32)
+#if defined(_WIN32)
 
 #include <thread>
 #include <mutex>
@@ -102,6 +102,7 @@ void Executor::syncint_post(std::chrono::microseconds usecs, bool fromLast)
 #include <iostream>
 #include <unistd.h>
 #include <sys/time.h>
+#include <signal.h>
 
 static void
 handle_itimer_tick(int n)

@@ -24,7 +24,7 @@
 #include <memory>
 #include <unordered_map>
 
-#ifdef MACOSX
+#ifdef __APPLE__
 void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
 #endif
 #include <../x/x_keycodes.h>
@@ -98,7 +98,7 @@ public:
             if constexpr(log_key_events)
                 std::cout << "mkvkey: " << ev->nativeScanCode() << " -> " << std::hex << (int)mkvkey << std::dec << std::endl;
         }
-#ifdef MACOSX
+#ifdef __APPLE__
         if(ev->nativeVirtualKey())
             mkvkey = ev->nativeVirtualKey();
 #endif
@@ -185,7 +185,7 @@ bool QtVideoDriver::isAcceptableMode(int width, int height, int bpp,
 
 bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
-#ifdef MACOSX
+#ifdef __APPLE__
     macosx_hide_menu_bar(500, 0, 1000, 1000);
     QVector<QRect> screenGeometries = getScreenGeometries();
 #else
@@ -244,7 +244,7 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     if(!window)
         window = new ExecutorWindow(callbacks_);
     window->setGeometry(geom);
-#ifdef MACOSX
+#ifdef __APPLE__
     window->show();
 #else
     window->showMaximized();
@@ -353,7 +353,7 @@ void QtVideoDriver::pumpEvents()
     qapp->processEvents();
     
     auto cursorPos = QCursor::pos();
-#ifdef MACOSX
+#ifdef __APPLE__
     macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
 #endif
     cursorPos = window->mapFromGlobal(cursorPos);

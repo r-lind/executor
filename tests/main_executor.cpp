@@ -80,8 +80,9 @@ public:
 #endif
         EM_A5 = EM_A7 = ptr_to_longint(LM(MemTop)-4);
 
-        tempDir = fs::current_path() / fs::unique_path("temptest-%%%%-%%%%-%%%%-%%%%");
         Executor::ROMlib_fileinit();
+
+        tempDir = fs::current_path() / fs::unique_path("temptest-%%%%-%%%%-%%%%-%%%%");
         fs::create_directory(tempDir);
 
         if(auto fsspec = nativePathToFSSpec(tempDir))

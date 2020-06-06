@@ -18,49 +18,49 @@
 using namespace Executor;
 
 /* Holds the four-byte pattern value, for "short & narrow" patterns. */
-uint32_t xdblt_pattern_value asm("_xdblt_pattern_value");
+uint32_t xdblt_pattern_value;
 
 /* Holds the row bytes for the pattern.  Always evenly divisible by four. */
-uint32_t xdblt_log2_pattern_row_bytes asm("_xdblt_log2_pattern_row_bytes");
+uint32_t xdblt_log2_pattern_row_bytes;
 
 /* Holds the row bytes for the pattern.  Always evenly divisible by four. */
-uint32_t xdblt_pattern_height_minus_1 asm("_xdblt_pattern_height_minus_1");
+uint32_t xdblt_pattern_height_minus_1;
 
 /* Start and end of the pattern. */
-uint32_t *xdblt_pattern_baseaddr asm("_xdblt_pattern_baseaddr");
-uint32_t *xdblt_pattern_end asm("_xdblt_pattern_end");
+uint32_t *xdblt_pattern_baseaddr;
+uint32_t *xdblt_pattern_end;
 
 /* Since the pattern may be rotated vertically, we add this to the
  * row we would otherwise compute to display on bitmap row #N.
  */
-uint32_t xdblt_pattern_row_0 asm("_xdblt_pattern_row_0");
+uint32_t xdblt_pattern_row_0;
 
 /* Table of functions that describe this transfer mode. */
-const void **xdblt_stub_table asm("_xdblt_stub_table");
+const void **xdblt_stub_table;
 
 /* log base 2 of the bits per pixel of the destination bitmap [0, 5]. */
-uint32_t xdblt_log2_bpp asm("_xdblt_log2_bpp");
+uint32_t xdblt_log2_bpp;
 
 /* "Special region" data to be transferred. */
-const INTEGER *xdblt_rgn_start asm("_xdblt_rgn_start");
+const INTEGER *xdblt_rgn_start;
 
 /* Added to the X value grabbed from the region to get the "real" value. */
-uint32_t xdblt_x_offset asm("_xdblt_x_offset");
+uint32_t xdblt_x_offset;
 
 /* Canonicalized base address of the destination bitmap.  We offset
  * the bitmap's base so that (region_y_val * dst_rowbytes) is the
  * offset from the baseaddr to the proper row.
  */
-uint32_t *xdblt_dst_baseaddr asm("_xdblt_dst_baseaddr");
+uint32_t *xdblt_dst_baseaddr;
 
 /* Bytes per row of the destination bitmap. */
-uint32_t xdblt_dst_row_bytes asm("_xdblt_dst_row_bytes");
+uint32_t xdblt_dst_row_bytes;
 
 /* Bit pattern inserted for bit insertion modes. */
-uint32_t xdblt_insert_bits asm("_xdblt_insert_bits");
+uint32_t xdblt_insert_bits;
 
 #define M(n) CLC_RAW(0xFFFFFFFFU >> (n))
-const uint32_t xdblt_mask_array[32] asm("_xdblt_mask_array") = {
+const uint32_t xdblt_mask_array[32] = {
     M(0), M(1), M(2), M(3), M(4), M(5), M(6), M(7),
     M(8), M(9), M(10), M(11), M(12), M(13), M(14), M(15),
     M(16), M(17), M(18), M(19), M(20), M(21), M(22), M(23),

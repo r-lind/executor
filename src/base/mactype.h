@@ -7,18 +7,15 @@
  *
 
  */
-#include "host-arch-config.h"
 #include <stdint.h>
 #include <cstring>
+#include <stdexcept>
 #include <type_traits>
 #include <syn68k_public.h>
 
+#include <base/byteswap.h>
 #include <base/functions.h>
 #include <base/traps.h>
-
-#ifndef __cplusplus
-#error C++ required
-#endif
 
 
 namespace Executor

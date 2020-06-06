@@ -24,6 +24,10 @@
 #include <string>
 #include <algorithm>
 
+#if defined(linux) || defined(__APPLE__)
+#include <unistd.h>
+#endif
+
 using namespace Executor;
 
 static Fixed minvert(Fixed);
@@ -108,7 +112,7 @@ get_phoney_name_resource(void)
     if(!ROMlib_phoney_name_string)
     {
         string name = "";
-#if defined(linux) || defined(MACOSX)
+#if defined(linux) || defined(__APPLE__)
         name = string(getlogin());
         if(!name.length())
             name = string(getenv("LOGNAME"));

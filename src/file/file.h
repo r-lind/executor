@@ -178,7 +178,7 @@ extern fcbrec *PRNTOFPERR(INTEGER prn, OSErr *errp);
 #define ATTRIB_ISOPEN (1 << 7)
 
 class Volume;
-void MountLocalVolume();
+void MountLocalVolumes();
 std::optional<FSSpec> nativePathToFSSpec(const fs::path& p);
 std::optional<FSSpec> cmdlinePathToFSSpec(const std::string& p);
 

@@ -186,7 +186,7 @@ void Executor::dump_init(char *dst)
 {
     if(dst)
     {
-        o_fp = Ufopen(dst, "w");
+        o_fp = fopen(dst, "w");
         if(o_fp == nullptr)
             exit(1);
     }
@@ -1027,7 +1027,7 @@ void dump_menu_info(MenuHandle x)
             p += 4;
         }
         indent -= 2;
-        iprintf((o_fp, "total chars = %ld\n", p - (unsigned char *)*x));
+        iprintf((o_fp, "total chars = %ld\n", (long)(p - (unsigned char *)*x)));
     }
     indent -= 2;
 }

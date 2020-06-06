@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10...3.15)
+cmake_minimum_required(VERSION 3.12...3.15)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In-source build not allowed (for your own good)")
@@ -12,21 +12,19 @@ project(Executor2000 VERSION 0.1.0)
 set(CMAKE_CXX_STANDARD 17)
 
 if(WIN32)
-    add_compile_options(
-        # Prevent currently-non-compiling assembly functions from being included 
-        -DNO_FAST_CC_FUNCS
+    add_compile_definitions(
+        # Don't warn if standard C library functions get used.
+        # The alternatives suggested by Microsoft are an *optional* part of the
+        # standard and many of them are actually not useful for us.
+        _CRT_SECURE_NO_WARNINGS
 
-        # Don't warn if older C-runtime functions get used
-        -D_CRT_SECURE_NO_WARNINGS
-
-        # FIXME: disable common warnings, for now
-        -Wno-unused-variable
-        -Wno-deprecated-declarations
-        -Wno-unused-function
-        -Wno-unused-lambda-capture
+        # Dont't warn if POSIX functions are used by their proper name.
+        # There is really no need to rename POSIX standard functions that
+        # aren't defined in C standard headers anyway and thus aren't subject
+        # to the C standard's rules for naming non-standard identifiers.
+        # Microsoft should know better, after all they're supplying <windows.h> as well...
+        _CRT_NONSTDC_NO_WARNINGS
     )
-
-    include_directories(BEFORE ${CMAKE_CURRENT_LIST_DIR}/windows)
 endif()
 
 if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
@@ -38,6 +36,7 @@ endif()
 enable_testing()
 
 set(Boost_USE_STATIC_LIBS YES)
+add_compile_definitions(BOOST_ALL_NO_LIB)
 
 add_library(lmdb
     lmdb/libraries/liblmdb/lmdb.h lmdb/libraries/liblmdb/mdb.c
@@ -69,12 +68,54 @@ add_subdirectory(cxmon)
 add_subdirectory(src)
 add_subdirectory(tests)
 
+if(WIN32)
+set(CPACK_GENERATOR "ZIP")
+else()
 set(CPACK_GENERATOR "TBZ2")
+endif()
+
 set(CPACK_PACKAGE_CONTACT "Wolfgang Thaller <wolfgang.thaller@gmx.net>")
 set(CPACK_STRIP_FILES TRUE)
 set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS YES)
 set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
 set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+
+macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var _prefix)
+    get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
+    if(EXISTS "${_qt_plugin_path}")
+        get_filename_component(_qt_plugin_file "${_qt_plugin_path}" NAME)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_path}" PATH)
+        get_filename_component(_qt_plugin_type "${_qt_plugin_type}" NAME)
+        set(_qt_plugin_dest "${_prefix}/${_qt_plugin_type}")
+        install(FILES "${_qt_plugin_path}"
+            DESTINATION "${_qt_plugin_dest}")
+        set(${_qt_plugins_var}
+            "${${_qt_plugins_var}};\$ENV{DEST_DIR}\${CMAKE_INSTALL_PREFIX}/${_qt_plugin_dest}/${_qt_plugin_file}")
+    else()
+        message(FATAL_ERROR "QT plugin ${_qt_plugin_name} not found")
+    endif()
+endmacro()
+
+find_package(Qt5 COMPONENTS Gui)
+find_package(Boost)
+
+set(DIRS)
+list(APPEND DIRS ${CMAKE_BINARY_DIR})
+list(APPEND DIRS ${Boost_LIBRARY_DIRS})
+get_target_property(QT_GUI_LOCATION Qt5::Gui LOCATION)
+get_filename_component(QT_GUI_LOCATION "${QT_GUI_LOCATION}" PATH)
+list(APPEND DIRS ${QT_GUI_LOCATION})
+message("DIRECTORIES: ${DIRS}")
+if(WIN32)
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/executor.exe")
+    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
+
+    install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS "bin/")
+
+    if(NOT MSVC)
+        set(CPACK_SYSTEM_NAME win64-mingw)
+    endif()
+endif()
 
 if(APPLE)
 list(APPEND CPACK_GENERATOR "DragNDrop")

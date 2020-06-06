@@ -115,7 +115,7 @@ static sdl_to_mkv_map_t map[] = {
     { SDLK_LSHIFT, MKV_LEFTSHIFT },
     { SDLK_RCTRL, MKV_RIGHTCNTL },
     { SDLK_LCTRL, MKV_LEFTCNTL },
-#ifdef MACOSX
+#ifdef __APPLE__
     { SDLK_RGUI, MKV_CLOVER },
     { SDLK_LGUI, MKV_CLOVER },
     { SDLK_RALT, MKV_RIGHTOPTION },

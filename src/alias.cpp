@@ -14,9 +14,6 @@
 #include <file/file.h>
 #include <hfs/hfs.h>
 #include <rsys/string.h>
-#if defined(CYGWIN32)
-#include "win_temp.h"
-#endif
 
 #include <rsys/alias.h>
 
@@ -117,7 +114,7 @@ get_tmp_vref_and_dirid(INTEGER vref, INTEGER *tmp_vrefp, LONGINT *tmp_diridp)
 {
     // FIXME: get proper paths
     // FIXME: temp directory for other volumes?
-#ifdef WIN32
+#ifdef _WIN32
     auto spec = nativePathToFSSpec("C:/temp");
 #else
     auto spec = nativePathToFSSpec("/tmp");

@@ -46,7 +46,7 @@
 #include <menu/menu.h>
 #include <algorithm>
 
-#if !defined(WIN32)
+#if !defined(_WIN32)
 #include <sys/socket.h>
 #endif
 
@@ -215,11 +215,7 @@ uint32_t Executor::C_KeyTranslate(Ptr mapp, unsigned short code, GUEST<uint32_t>
 
 void Executor::dofloppymount(void)
 {
-#if !defined(MSDOS) && !defined(LINUX) && !defined(CYGWIN32)
-    SysBeep(5);
-#else
     futzwithdosdisks();
-#endif
 }
 
 static void doscreendumptoprinter(void)
@@ -334,7 +330,7 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
         TRACE(17);
 
         short fkeyModifiers = shiftKey | cmdKey;
-#ifdef MACOSX
+#ifdef __APPLE__
         fkeyModifiers = optionKey | cmdKey;
 #endif
         if(retval && evt->what == keyDown && LM(ScrDmpEnb) && (evt->modifiers & fkeyModifiers) == fkeyModifiers)
@@ -578,9 +574,8 @@ ULONGINT Executor::C_TickCount()
     if(ROMlib_clock)
         LM(Ticks) = ticks;
 
-    new_time = (UNIXTIMETOMACTIME(ROMlib_start_time.tv_sec)
-                + (long)((ROMlib_start_time.tv_usec / (1000000.0 / 60) + ticks) / 60));
-
+    new_time = UNIXTIMETOMACTIME(std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count());
+            
     LM(Time) = new_time;
     return ticks;
 }

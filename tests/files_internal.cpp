@@ -9,14 +9,29 @@ TEST(FilesInternal, pathToFSSpec)
 {
     auto path = fs::current_path();
 
-    std::string macpath = "vol" + path.string();
+    std::string macpath;
+    if(path.root_name().empty())
+        macpath = "vol" + path.string();
+    else
+    {
+        macpath = path.root_name().string();
+        if(macpath.back() == ':')
+            macpath.pop_back();
+        macpath += "/" + path.relative_path().string();
+    }
+
     for(char& c : macpath)
     {
         if(c == ':')
             c = '/';
         else if(c == '/')
             c = ':';
+#ifdef _WIN32
+        else if(c == '\\')
+            c = ':';
+#endif
     }
+    std::cout << macpath;
 
     auto native = nativePathToFSSpec(path);
     auto mac = cmdlinePathToFSSpec(macpath);

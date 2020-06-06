@@ -9,10 +9,12 @@
  */
 
 /* This header contains macros which are useful if you want to allocate
- * a potentially large amount of temporary storage.  Since we don't
- * have much stack space under some environments, this code will guarantee
- * you don't blow your stack.  It is safe to TEMP_ALLOC_FREE this memory
- * even if you never allocated it (in that case, nothing will happen).
+ * a potentially large amount of temporary storage, such as screen-sized
+ * temporary pixel buffers.
+ * Since we don't have much stack space under some environments,
+ * this code will guarantee you don't blow your stack.  It is safe to
+ * TEMP_ALLOC_FREE this memory even if you never allocated it
+ * (in that case, nothing will happen).
  * This is handy when you may conditionally allocate new memory, and
  * you want to make sure any allocated memory gets freed at the end.
  *
@@ -28,12 +30,20 @@
  * }
  */
 
-#if defined(MSDOS) || defined(CYGWIN32)
+#ifdef _WIN32
+// Windows also has a smaller default stack size.
+#define TEMP_ALLOC_ON_MAC_HEAP_INSTEAD_OF_ALLOCA
+#endif
+
+#ifdef TEMP_ALLOC_ON_MAC_HEAP_INSTEAD_OF_ALLOCA
 
 #include <MemoryMgr.h>
 #include <mman/mman.h>
 
-typedef enum {
+namespace Executor
+{
+typedef enum
+{
     TEMP_ALLOC_NO_FREE,
     TEMP_ALLOC_FREE,
     TEMP_ALLOC_DISPOSHANDLE
@@ -42,47 +52,49 @@ typedef enum {
 typedef struct
 {
     temp_alloc_status_t status;
-    union {
-        Handle handle;
+    union
+    {
+        Executor::Handle handle;
         void *ptr;
     } u;
 } temp_alloc_data_t;
 
 #define TEMP_ALLOC_DECL(name) \
-    temp_alloc_data_t name = { TEMP_ALLOC_NO_FREE, { 0 } }
+    temp_alloc_data_t name = {TEMP_ALLOC_NO_FREE, {0}}
 
-#define TEMP_ALLOC_ALLOCATE(ptr_var, name, size)                      \
-    do                                                                \
-    {                                                                 \
-        if((size) <= 8192) /* Satisfy small requests with alloca. */  \
-        {                                                             \
-            (name).status = TEMP_ALLOC_NO_FREE;                       \
-            ptr_var = (name).u.ptr = (void *)alloca(size);            \
-        }                                                             \
-        else                                                          \
-        {                                                             \
-            {                                                         \
-                TheZoneGuard guard(LM(SysZone)); /* Try LM(SysZone) first. */ \
-                (name).u.handle = NewHandle(size);                    \
-            }                                                         \
-            if(!(name).u.handle)                                      \
-            {                                                         \
-                TheZoneGuard guard(LM(ApplZone)); /* Then LM(ApplZone). */    \
-                (name).u.handle = NewHandle(size);                    \
-            }                                                         \
-            if((name).u.handle)                                       \
-            {                                                         \
-                (name).status = TEMP_ALLOC_DISPOSHANDLE;              \
-                HLock((name).u.handle);                               \
-                ptr_var = (void *)*(name).u.handle;             \
-            }                                                         \
-            else                                                      \
-            {                                                         \
-                /* Use malloc. */                                     \
-                (name).status = TEMP_ALLOC_FREE;                      \
-                ptr_var = (name).u.ptr = (void *)malloc(size);        \
-            }                                                         \
-        }                                                             \
+#define TEMP_ALLOC_ALLOCATE(ptr_var, name, size)                                        \
+    do                                                                                  \
+    {                                                                                   \
+        if((size) <= 8192) /* Satisfy small requests with alloca. */                    \
+        {                                                                               \
+            (name).status = TEMP_ALLOC_NO_FREE;                                         \
+            ptr_var = (decltype(ptr_var))alloca(size);                                  \
+        }                                                                               \
+        else                                                                            \
+        {                                                                               \
+            {                                                                           \
+                Executor::TheZoneGuard guard(LM(SysZone)); /* Try LM(SysZone) first. */ \
+                (name).u.handle = Executor::NewHandle(size);                            \
+            }                                                                           \
+            if(!(name).u.handle)                                                        \
+            {                                                                           \
+                TheZoneGuard guard(LM(ApplZone)); /* Then LM(ApplZone). */              \
+                (name).u.handle = NewHandle(size);                                      \
+            }                                                                           \
+            if((name).u.handle)                                                         \
+            {                                                                           \
+                (name).status = TEMP_ALLOC_DISPOSHANDLE;                                \
+                HLock((name).u.handle);                                                 \
+                ptr_var = (decltype(ptr_var))*(name).u.handle;                          \
+            }                                                                           \
+            else                                                                        \
+            {                                                                           \
+                /* Use malloc. */                                                       \
+                (name).status = TEMP_ALLOC_FREE;                                        \
+                (name).u.ptr = (void *)malloc(size);                                    \
+                ptr_var = (decltype(ptr_var))(name.u.ptr);                              \
+            }                                                                           \
+        }                                                                               \
     } while(0)
 
 #define TEMP_ALLOC_FREE(name)                             \
@@ -93,10 +105,12 @@ typedef struct
         else if((name).status == TEMP_ALLOC_DISPOSHANDLE) \
         {                                                 \
             HUnlock((name).u.handle);                     \
-            DisposeHandle((name).u.handle);                \
+            DisposeHandle((name).u.handle);               \
         }                                                 \
         (name).u.ptr = 0;                                 \
     } while(0)
+
+} // namespace Executor
 
 #else /* !MSDOS */
 

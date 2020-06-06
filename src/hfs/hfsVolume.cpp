@@ -10,9 +10,6 @@
 #include <file/file.h>
 #include <hfs/hfs_plus.h>
 
-#if defined(WIN32)
-#include "winfs.h"
-#endif
 
 using namespace Executor;
 
@@ -27,62 +24,6 @@ using namespace Executor;
  * NOTE: in the routines below there is no freeing of memory if an error is
  *       detected.  This should be done sometime.
  */
-
-/*
- * NOTE: NewPtr_aligned_4 is so that our miscellaneous buffers will be aligned
- *	 properly for DMA transfers on the NeXT.  Depending on the
- *	implementation of NewPtr, the following loop could
- *	eat all of memory, but it would require a pretty unlikely
- *	implementation of NewPtr.
- */
-
-#define NewPtr_aligned_4(x, y) NewPtr(x)
-
-#if !defined(NewPtr_aligned_4)
-static Ptr NewPtr_aligned_4(Size size, INTEGER align)
-{
-    Ptr p, p2, p3;
-    Size shim;
-
-    p = NewPtr(size);
-    if(((LONGINT)p & 3) == align)
-        return p;
-    else
-    {
-        shim = 0;
-        while(p)
-        {
-            DisposePtr(p);
-            p2 = NewPtr(++shim);
-            p = NewPtr(size);
-            p3 = NewPtr(shim);
-            DisposePtr(p3);
-            if(((LONGINT)p & 3) == align)
-            {
-                DisposePtr(p2);
-                return p;
-            }
-            else
-            {
-                DisposePtr(p);
-                DisposePtr(p2);
-                p2 = NewPtr(shim + 1);
-                p = NewPtr(size);
-                p3 = NewPtr(shim + 1);
-                DisposePtr(p3);
-                if(((LONGINT)p & 3) == align)
-                {
-                    DisposePtr(p2);
-                    return p;
-                }
-                else
-                    DisposePtr(p2);
-            }
-        }
-        return p;
-    }
-}
-#endif
 
 static OSErr readvolumebitmap(HVCB *vcbp, volumeinfoPtr vp)
 {
@@ -103,7 +44,7 @@ static OSErr readvolumebitmap(HVCB *vcbp, volumeinfoPtr vp)
     else
     {
         nphysrequired = NPHYSREQ(ROUNDUP8(vp->drNmAlBlks) / 8);
-        vcbp->vcbMAdr = NewPtr_aligned_4(PHYSBSIZE * nphysrequired + MADROFFSET, 0);
+        vcbp->vcbMAdr = NewPtr(PHYSBSIZE * nphysrequired + MADROFFSET);
         vcbp->vcbMLen = nphysrequired + MADROFFSET;
         /*really add MADROFFSET?*/
         if(!vcbp->vcbMAdr)
@@ -123,12 +64,10 @@ static OSErr initcache(HVCB *vcbp)
     GUEST<THz> savezone;
     cachehead *headp;
     cacheentry *cachep;
-    INTEGER align;
 
     savezone = LM(TheZone);
     LM(TheZone) = LM(SysZone);
-    align = offsetof(cacheentry,buf) & 3;
-    vcbp->vcbCtlBuf = NewPtr_aligned_4(sizeof(cachehead) + NCACHEENTRIES * sizeof(cacheentry), align);
+    vcbp->vcbCtlBuf = NewPtr(sizeof(cachehead) + NCACHEENTRIES * sizeof(cacheentry));
     if(!vcbp->vcbCtlBuf)
         return MemError();
     LM(TheZone) = savezone;
@@ -194,7 +133,7 @@ static OSErr readvolumeinfo(HVCB *vcbp) /* call once during mounting */
 {
     OSErr err;
 
-    vcbp->vcbBufAdr = NewPtr_aligned_4((Size)PHYSBSIZE, 0);
+    vcbp->vcbBufAdr = NewPtr((Size)PHYSBSIZE);
     if(!vcbp)
         err = MemError();
     else
@@ -220,8 +159,10 @@ static OSErr readvolumeinfo(HVCB *vcbp) /* call once during mounting */
 
 void Executor::vcbsync(HVCB *vcbp)
 {
+#ifndef _WIN32
     if(!ROMlib_nosync)
         fsync(((VCBExtra *)vcbp)->u.hfs.fd);
+#endif
 }
 
 static OSErr writevolumeinfo(HVCB *vcbp, Ptr p)
@@ -283,14 +224,6 @@ static HVCB *vcbbyname(StringPtr name)
         ;
     return vcbp;
 }
-
-#if defined(CYGWIN32) || defined(MSDOS)
-#define VCB_CMPN_FUNC strncasecmp
-#define VCB_CMP_FUNC strcasecmp
-#else
-#define VCB_CMPN_FUNC strncmp
-#define VCB_CMP_FUNC strcmp
-#endif
 
 HVCB *Executor::ROMlib_vcbbydrive(short vrefnum)
 {

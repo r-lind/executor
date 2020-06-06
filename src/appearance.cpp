@@ -227,9 +227,9 @@ Executor::ROMlib_parse_appearance(const char *appearance_str)
 {
     bool retval = true;
 
-    if(strcasecmp(appearance_str, "mac") == 0)
+    if(strcmp(appearance_str, "mac") == 0)
         appearance = appearance_sys7;
-    else if(strcasecmp(appearance_str, "windows") == 0)
+    else if(strcmp(appearance_str, "windows") == 0)
     {
         ROMlib_options |= ROMLIB_RECT_SCREEN_BIT;
         appearance = appearance_win3;

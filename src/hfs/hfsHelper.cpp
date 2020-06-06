@@ -20,7 +20,7 @@
 #if defined(MSDOS) || defined(CYGWIN32)
 #include "dosdisk.h"
 #include "aspi.h"
-#elif defined(WIN32)
+#elif defined(_WIN32)
 // ### TODO: new win32 OS code does not yet
 // include the direct disk access stuff
 #else
@@ -32,6 +32,7 @@
 #include <sys/disk.h>
 #endif
 #endif
+#include <rsys/unixio.h>
 
 using namespace Executor;
 
@@ -44,7 +45,7 @@ void Executor::ROMlib_hfsinit(void)
  *	 which is an ARDI written NEXTSTEP atrocity.
  */
 
-#if !defined(LINUX) && !defined(MACOSX)
+#if !defined(__linux__) && !defined(__APPLE__)
 #define EJECTABLE(buf) false
 #else
 /* #warning this is not the proper way to tell if something is ejectable */
@@ -64,18 +65,6 @@ void Executor::ROMlib_hfsinit(void)
     } while(0)
 
 #define NRETRIES 5
-
-long
-Executor::ROMlib_priv_open(const char *filename, long mode)
-{
-    long retval;
-
-    retval = Uopen(filename, mode, 0);
-    if(retval < 0)
-        retval = ROMlib_maperrno();
-
-    return retval;
-}
 
 #if !defined(MSDOS) && !defined(CYGWIN32)
 [[maybe_unused]]
@@ -125,7 +114,7 @@ OSErr Executor::ROMlib_ejectfloppy(LONGINT floppyfd)
 #endif
         if(floppyfd != -1)
             close(floppyfd);
-#if defined(LINUX) || defined(MACOSX_)
+#if defined(__linux__) || defined(MACOSX_)
         eject_floppy_notify();
 #endif
 #if defined(MSDOS) || defined(CYGWIN32)
@@ -170,7 +159,7 @@ static Boolean isejectable(const charCx( *dname), LONGINT fd)
 
     /* look for rfd[0-9] */
     retval = false;
-#if defined(MACOSX_) || defined(MACOSX)
+#if defined(MACOSX_) || defined(__APPLE__)
     for (p = dname; p = index(p, 'r'); ++p) {
 	if (p[1] == 'f' && p[2] == 'd' && isdigit(p[3])) {
 	    retval = true;
@@ -225,20 +214,21 @@ static LONGINT try_to_open_disk(const char *dname, LONGINT *bsizep,
 #define EXTRA_BITS 0
 #endif
 
-    if((floppyfd = Uopen(dname, O_BINARY | O_RDWR | EXTRA_BITS, 0000)) < 0 && (*flagsp |= DRIVE_FLAGS_LOCKED,
-                                                                               (floppyfd = Uopen(dname, O_BINARY | O_RDONLY | EXTRA_BITS,
-                                                                                                 0000))
-                                                                                   < 0))
-        /* fprintf(stderr, "can't open %s\n", dname) */;
-    else
+
+    floppyfd = open(dname, O_BINARY | O_RDWR | EXTRA_BITS, 0000);
+
+    if(floppyfd < 0)
     {
-        *bsizep = PHYSBSIZE;
-        *maxbytesp = 1024L * 1024;
+        *flagsp |= DRIVE_FLAGS_LOCKED;
+        floppyfd = open(dname, O_BINARY | O_RDONLY | EXTRA_BITS, 0000);
     }
 
     if(floppyfd >= 0)
     {
         struct stat sbuf;
+
+        *bsizep = PHYSBSIZE;
+        *maxbytesp = 1024L * 1024;
 
         if(fstat(floppyfd, &sbuf) >= 0 && (S_IFREG & sbuf.st_mode))
             *offsetp = sbuf.st_size % PHYSBSIZE;
@@ -595,7 +585,7 @@ void Executor::ROMlib_openharddisk(const char *dname, GUEST<LONGINT> *messp)
     struct stat sbuf;
 
     *messp = 0;
-    if(Ustat(dname, &sbuf) == 0)
+    if(stat(dname, &sbuf) == 0)
     {
         ASSIGN_NAME_MODE_STRING(newbuf, &len, dname, sbuf);
         ROMlib_openfloppy(newbuf, messp);
@@ -632,23 +622,10 @@ OSErr Executor::ROMlib_readwrite(LONGINT fd, char *buffer, LONGINT count,
         blocksize = 2048;
         warning_unexpected("fd = 0x%x, zero block size", fd);
     }
-#if defined(MSDOS) || defined(CYGWIN32)
-    if(fd & DOSFDBIT)
-    {
-        fd &= ~DOSFDBIT;
-        seekfp = dosdisk_seek;
-        readfp = dosdisk_read;
-        writefp = dosdisk_write;
-    }
-    else
-    {
-#endif
-        seekfp = (off_t(*)(int, off_t, int))lseek;
-        readfp = (int (*)(int, void *, int))read;
-        writefp = (int (*)(int, const void *, int))write;
-#if defined(MSDOS) || defined(CYGWIN32)
-    }
-#endif
+    seekfp = (off_t(*)(int, off_t, int))lseek;
+    readfp = (int (*)(int, void *, int))read;
+    writefp = (int (*)(int, const void *, int))write;
+
     err = noErr;
     newbuffer = 0;
     needlseek = true;
@@ -729,7 +706,6 @@ Executor::ROMlib_transphysblk(hfs_access_t *hfsp, LONGINT physblock, short nphys
 {
     LONGINT fd;
     OSErr err;
-    Ptr newbufp;
 
 #if defined(MAC)
     ioParam pb;
@@ -744,25 +720,12 @@ Executor::ROMlib_transphysblk(hfs_access_t *hfsp, LONGINT physblock, short nphys
     if(actp)
         *actp = pb.ioActCount;
 #else
-#if 0 && (defined(NEXTSTEP) || defined(MACOSX))
-    if ((LONGINT) bufp & 3) {
-        newbufp = alloca( (LONGINT) nphysblocks * PHYSBSIZE + 4);
-        newbufp = (Ptr) (((LONGINT) newbufp + 3) & ~3);
-        if (rw == writing)
-            memmove(newbufp, bufp, (LONGINT) nphysblocks * PHYSBSIZE);
-    } else
-#endif
-    newbufp = bufp;
     fd = hfsp->fd;
 
-    err = ROMlib_readwrite(fd, (char *)newbufp,
+    err = ROMlib_readwrite(fd, bufp,
                            (LONGINT)nphysblocks * PHYSBSIZE,
                            physblock + hfsp->offset, rw, hfsp->bsize,
                            hfsp->maxbytes);
-#if 0 && (defined(NEXTSTEP) || defined(MACOSX))
-    if (rw == reading && bufp != newbufp && err == noErr)
-        memmove(bufp, newbufp, (LONGINT) nphysblocks * PHYSBSIZE);
-#endif
     if(actp)
         *actp = err != noErr ? 0 : ((LONGINT)nphysblocks * PHYSBSIZE);
 

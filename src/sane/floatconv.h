@@ -42,8 +42,18 @@ inline ieee_t x80_to_ieee(const x80_t *x)
     if((exp & 0x7FFF) == 0x7FFF)
         mant |= 1LL<<63;
 
-    memcpy(&retval, &mant, 8);
-    memcpy((char*)&retval + 8, &exp, 2);
+    if constexpr(sizeof(ieee_t) >= 10) // ASSUME for now that this is the right kind of extended FP
+    {
+        memcpy(&retval, &mant, 8);
+        memcpy((char *)&retval + 8, &exp, 2);
+    }
+    else if constexpr(sizeof(ieee_t) == 8)
+    {
+        uint64_t bits = 0;
+        bits |= uint64_t(exp >> 4ULL) << 52ULL;
+        bits |= (mant & ~(1ULL << 63ULL)) >> 11;
+        std::memcpy(&retval, &bits, 8);
+    }
     return retval;
 }
 
@@ -51,8 +61,25 @@ inline void ieee_to_x80(ieee_t n, x80_t *x)
 {
     uint64_t mant;
     uint16_t exp;
-    memcpy(&mant, &n, 8);
-    memcpy(&exp, (char*)&n + 8, 2);
+
+    if constexpr(sizeof(ieee_t) >= 10) // ASSUME for now that this is the right kind of extended FP
+    {
+        memcpy(&mant, &n, 8);
+        memcpy(&exp, (char *)&n + 8, 2);
+    }
+    else if constexpr(sizeof(ieee_t) == 8)
+    {
+        uint64_t bits;
+        memcpy(&bits, &n, 8);
+
+        exp = (bits >> 52ULL) << 4ULL;
+        mant = (bits & ((1ULL << 52ULL) - 1)) << 11;
+
+        if((exp & 0x7FFF) == 0)
+            ;
+        else
+            mant |= 1ULL << 63;
+    }
 
     x->mantissa = mant;
     x->sgn_and_exp = exp;

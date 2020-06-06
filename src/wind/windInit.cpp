@@ -46,12 +46,6 @@ exit_executor(void)
     ExitToShell();
 }
 
-#if !defined(MSDOS)
-static std::string reinstall = "System and %System";
-#else
-static char *reinstall = "EXSYSTEM.HFV";
-#endif
-
 void Executor::C_InitWindows()
 {
     PatHandle ph;
@@ -69,16 +63,6 @@ void Executor::C_InitWindows()
         InitCPort(LM(WMgrCPort));
 
         ph = GetPattern(deskPatID);
-        if(ph == nullptr)
-        {
-            fprintf(stderr, "Can't open System file.\n"
-                            "This is very bad.  You will have to reinstall %s"
-                            " before\n"
-                            "Executor will work again.\n",
-                    reinstall.c_str());
-            ROMlib_exit = true;
-            ExitToShell();
-        }
         new_ph = GetPixPat(deskPatID);
         if(new_ph)
             LM(DeskCPat) = new_ph;
@@ -517,7 +501,7 @@ WindowPtr Executor::C_GetNewCWindow(INTEGER window_id, void* window_storage,
 
     palette = GetNewPalette(window_id);
     if(palette)
-        NSetPalette((WindowPtr)new_cwin, palette, pmAllUpdates);
+        NSetPalette((WindowPtr)new_cwin, palette, (INTEGER)pmAllUpdates);
 
     return new_cwin;
 }

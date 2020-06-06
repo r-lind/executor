@@ -1,11 +1,8 @@
 
-#include <dirent.h>
-
 #include <prefs/prefs.h>
 #include <prefs/options.h>
 #include <prefs/parse.h>
 #include <rsys/paths.h>
-#include <rsys/slash.h>
 #include <rsys/appearance.h>
 #include <sound/sounddriver.h>
 #include <quickdraw/cquick.h>
@@ -20,13 +17,13 @@ void Executor::ParseConfigFile(std::string appname, OSType type)
     ROMlib_desired_bpp = 0;
 
     ROMlib_configfilename = ROMlib_ConfigurationFolder + "/" + appname + CONFIGEXTENSION;
-    configfile = Ufopen(ROMlib_configfilename.c_str(), "r");
+    configfile = fopen(ROMlib_configfilename.c_str(), "r");
     if(!configfile && type != 0)
     {
         char buf[16];
         sprintf(buf, "%08x", type);
         ROMlib_configfilename = ROMlib_ConfigurationFolder + "/" + buf + CONFIGEXTENSION;
-        configfile = Ufopen(ROMlib_configfilename.c_str(), "r");
+        configfile = fopen(ROMlib_configfilename.c_str(), "r");
     }
     if(configfile)
     {
@@ -136,7 +133,7 @@ int Executor::saveprefvalues(const char *savefilename)
     int retval;
     FILE *fp;
 
-    if((fp = Ufopen(savefilename, "w")))
+    if((fp = fopen(savefilename, "w")))
     {
         {
             const char *lastslash;

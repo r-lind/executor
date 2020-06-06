@@ -1,6 +1,5 @@
 #include "localvolume.h"
 #include <base/common.h>
-#include <base/byteswap.h>
 #include <FileMgr.h>
 #include <MemoryMgr.h>
 #include <file/file.h>
@@ -17,6 +16,11 @@
 #include "simplecnidmapper.h"
 #include "lmdbcnidmapper.h"
 #include "itemcache.h"
+
+#ifdef _WIN32
+#define NOMINMAX 1
+#include <windows.h>
+#endif
 
 using namespace Executor;
 
@@ -42,8 +46,8 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     itemCache = std::make_unique<ItemCache>(
             root,
             getVolumeName(),
-            //std::make_unique<SimpleCNIDMapper>(root, getVolumeName()),
-            std::make_unique<LMDBCNIDMapper>(root, getVolumeName()),
+            std::make_unique<SimpleCNIDMapper>(root, getVolumeName()),
+            //std::make_unique<LMDBCNIDMapper>(root, getVolumeName()),
             static_cast<ItemFactory*>(this)
         );
 
@@ -52,7 +56,7 @@ LocalVolume::LocalVolume(VCB& vcb, fs::path root)
     itemFactories.push_back(std::make_unique<AppleDoubleItemFactory>());
     upgradedItemFactory = itemFactories.back().get();
     itemFactories.push_back(std::make_unique<BasiliskItemFactory>());
-#ifdef MACOSX
+#ifdef __APPLE__
     itemFactories.push_back(std::make_unique<MacItemFactory>());
     upgradedItemFactory = itemFactories.back().get();
 #endif
@@ -684,8 +688,8 @@ void LocalVolume::PBGetFPos(ParmBlkPtr pb)
 void LocalVolume::setFPosCommon(ParmBlkPtr pb, bool checkEOF)
 {
     auto& fcbx = getFCBX(pb->ioParam.ioRefNum);
-    ssize_t eof = (ssize_t) fcbx.access->getEOF();
-    ssize_t newPos = fcbx.fcb->fcbCrPs;
+    int32_t eof = (int32_t)fcbx.access->getEOF();
+    int32_t newPos = fcbx.fcb->fcbCrPs;
     
     switch(pb->ioParam.ioPosMode)
     {
@@ -853,7 +857,7 @@ std::optional<FSSpec> LocalVolume::nativePathToFSSpec(const fs::path& inPath)
         return std::nullopt;
 }
 
-void Executor::MountLocalVolume()
+static void MountLocalVolume(fs::path root)
 {
     VCBExtra *vp;
     GUEST<THz> savezone;
@@ -871,9 +875,16 @@ void Executor::MountLocalVolume()
     --ROMlib_nextvrn;
     vp->vcb.vcbVRefNum = ROMlib_nextvrn;
 
-    
-    strcpy((char *)vp->vcb.vcbVN + 1, "vol");
-    vp->vcb.vcbVN[0] = strlen((char *)vp->vcb.vcbVN+1);
+    std::string rootName = root.root_name().string();
+    if(rootName.empty())
+        rootName = "vol";
+    else if(rootName.back() == ':')
+        rootName.pop_back();
+
+    memcpy((char *)vp->vcb.vcbVN + 1, rootName.data(), rootName.size());
+    vp->vcb.vcbVN[0] = rootName.size();
+
+    fprintf(stderr, "Volume %s mounted as %s, vref %d\n", root.string().c_str(), rootName.c_str(), int(vp->vcb.vcbVRefNum));
 
     vp->vcb.vcbSigWord = 0x4244; /* IMIV-188 */
     vp->vcb.vcbFreeBks = 20480; /* arbitrary */
@@ -894,7 +905,24 @@ void Executor::MountLocalVolume()
     }
     Enqueue((QElemPtr)vp, &LM(VCBQHdr));
 
-    vp->volume = new LocalVolume(vp->vcb, "/");
+    vp->volume = new LocalVolume(vp->vcb, root);
+}
+
+void Executor::MountLocalVolumes()
+{
+#ifdef _WIN32
+    uint32_t drives = ::GetLogicalDrives();
+    for(int i = 0; i < 26; i++)
+        if(drives & (1 << i))
+        {
+            boost::system::error_code ec;
+            fs::path path = fs::canonical(std::string(1, 'A' + i) + ":/", ec);
+            if(!ec)
+                MountLocalVolume(path);
+        }
+#else
+    MountLocalVolume("/");
+#endif
 }
 
 std::optional<FSSpec> Executor::nativePathToFSSpec(const fs::path& p)

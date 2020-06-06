@@ -1352,7 +1352,7 @@ Boolean Executor::C_GetColor(Point where, Str255 prompt, RGBColor *in_color,
      of course, even the mac doesn't try it on 4bpp or b/w devices */
 
     palette = NewPalette(16, nullptr, pmAnimated | pmExplicit, -1);
-    NSetPalette(color_picker_window, palette, pmAllUpdates);
+    NSetPalette(color_picker_window, palette, (INTEGER)pmAllUpdates);
 
     SetEntryUsage(palette, 0, pmCourteous, -1);
     SetEntryColor(palette, 0, &ROMlib_white_rgb_color);

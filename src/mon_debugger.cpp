@@ -8,7 +8,7 @@
 #include <PowerCore.h>
 #include <syn68k_public.h>
 #include <SegmentLdr.h>
-#ifndef WIN32
+#ifndef _WIN32
 #include <signal.h>
 #endif
 
@@ -115,7 +115,7 @@ MonDebugger::MonDebugger()
     }, "s                        single step\n");
 
 
-#ifndef WIN32
+#ifndef _WIN32
     struct sigaction act = {};
     act.sa_handler = [](int) {
         nmi = true;

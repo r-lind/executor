@@ -14,7 +14,7 @@
 #include <SDL/SDL_syswm.h>
 
 /* System dependent variables */
-#if defined(__unix__) || defined(MACOSX)
+#if defined(__unix__) || defined(__APPLE__)
 /* * */
 extern Display *SDL_Display;
 extern Window SDL_Window;
