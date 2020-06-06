@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12...3.15)
+cmake_minimum_required(VERSION 3.12...3.17)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In-source build not allowed (for your own good)")
