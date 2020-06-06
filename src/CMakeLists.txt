@@ -89,7 +89,7 @@ else()
 endif()
 source_group(HostOS FILES ${host_os_sources})
 
-set(FRONT_ENDS headless qt x sdl sdl2)
+set(FRONT_ENDS qt x sdl sdl2)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     # -Wno-enum-compare: Mac OSErr codes are currently spread between different
@@ -559,7 +559,10 @@ target_link_libraries(romlib ${host_os_libs})
 foreach(FRONT_END ${FRONT_ENDS})
     if(TARGET front-end-${FRONT_END})
         add_executable(executor-${FRONT_END} main.cpp)
-        target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
+        target_link_libraries(executor-${FRONT_END} romlib front-end-headless)
+        if(NOT ${FRONT_END} STREQUAL headless)
+            target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
+        endif()
         set_target_properties(executor-${FRONT_END} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
