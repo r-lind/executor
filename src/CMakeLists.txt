@@ -556,9 +556,16 @@ target_link_libraries(romlib resources)
 
 target_link_libraries(romlib ${host_os_libs})
 
+if(APPLE)
+    set(platform_resource_files ../icon/executor.icns)
+    set_source_files_properties(../icon/executor.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+else()
+    set(platform_resource_files)
+endif()
+
 foreach(FRONT_END ${FRONT_ENDS})
     if(TARGET front-end-${FRONT_END})
-        add_executable(executor-${FRONT_END} main.cpp)
+        add_executable(executor-${FRONT_END} main.cpp ${platform_resource_files})
         target_link_libraries(executor-${FRONT_END} romlib front-end-headless)
         if(NOT ${FRONT_END} STREQUAL headless)
             target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
@@ -569,7 +576,9 @@ foreach(FRONT_END ${FRONT_ENDS})
         if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
             set_target_properties(executor-${FRONT_END} PROPERTIES
                     MACOSX_BUNDLE TRUE
-                    MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
+                    MACOSX_BUNDLE_IDENTIFIER com.github.autc04.executor
+                    MACOSX_BUNDLE_ICON_FILE executor.icns
+                    MACOSX_BUNDLE_BUNDLE_NAME "Executor 2000"
                 )
         endif()
         
