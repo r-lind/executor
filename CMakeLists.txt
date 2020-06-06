@@ -120,7 +120,7 @@ elseif(APPLE)
     set(APPS "\${CMAKE_INSTALL_PREFIX}/Executor\ 2000.app")
     install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
 
-    set(CPACK_SYSTEM_NAME macos)
+    set(CPACK_SYSTEM_NAME macOS)
 endif()
 
 if(APPLE)

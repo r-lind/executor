@@ -171,8 +171,12 @@ jobs:
       cpack
   - task: PublishBuildArtifacts@1
     inputs:
-      pathtoPublish: build/Executor2000-0.1.0-Darwin.tar.bz2
-      artifactName: Executor2000-Darwin.tar.bz2
+      pathtoPublish: build/Executor2000-0.1.0-macOS.tar.bz2
+      artifactName: Executor2000-macOS.tar.bz2
+  - task: PublishBuildArtifacts@1
+    inputs:
+      pathtoPublish: build/Executor2000-0.1.0-macOS.dmg
+      artifactName: Executor2000-macOS.dmg
 
 - job: Linux
   condition: true
