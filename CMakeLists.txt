@@ -121,6 +121,7 @@ elseif(APPLE)
     install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
 
     set(CPACK_SYSTEM_NAME macOS)
+    set(CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/icon/CMakeDSStore.applescript)
 endif()
 
 if(APPLE)
