@@ -171,7 +171,8 @@ dump_indirect_pm(PixMap *pm)
     }
 
     header_size = sizeof *header;
-    ifd_size = sizeof *ifd + (n_ifd_entries - 1) * sizeof *ifd->entries;
+    ifd_size = sizeof *ifd + (n_ifd_entries - 1) * sizeof *ifd->entries 
+        + 4;    // offset to next TIFF directory, remains 0
 
     color_map_size = 3 * (1 << bpp) * sizeof *color_map;
     color_map_offset = header_size + ifd_size;
