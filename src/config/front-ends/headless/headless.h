@@ -1,3 +1,5 @@
+#pragma once
+
 #include <vdriver/vdriver.h>
 
 class HeadlessVideoDriver : public Executor::VideoDriver

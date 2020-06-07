@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12...3.15)
+cmake_minimum_required(VERSION 3.12...3.17)
 
 if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     message(FATAL_ERROR "In-source build not allowed (for your own good)")
@@ -68,18 +68,6 @@ add_subdirectory(cxmon)
 add_subdirectory(src)
 add_subdirectory(tests)
 
-if(WIN32)
-set(CPACK_GENERATOR "ZIP")
-else()
-set(CPACK_GENERATOR "TBZ2")
-endif()
-
-set(CPACK_PACKAGE_CONTACT "Wolfgang Thaller <wolfgang.thaller@gmx.net>")
-set(CPACK_STRIP_FILES TRUE)
-set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS YES)
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
-set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
-
 macro(install_qt5_plugin _qt_plugin_name _qt_plugins_var _prefix)
     get_target_property(_qt_plugin_path "${_qt_plugin_name}" LOCATION)
     if(EXISTS "${_qt_plugin_path}")
@@ -105,20 +93,43 @@ list(APPEND DIRS ${Boost_LIBRARY_DIRS})
 get_target_property(QT_GUI_LOCATION Qt5::Gui LOCATION)
 get_filename_component(QT_GUI_LOCATION "${QT_GUI_LOCATION}" PATH)
 list(APPEND DIRS ${QT_GUI_LOCATION})
-message("DIRECTORIES: ${DIRS}")
+
+
+
+
+set(CPACK_PACKAGE_CONTACT "Wolfgang Thaller <wolfgang.thaller@gmx.net>")
+set(CPACK_STRIP_FILES TRUE)
+set(CPACK_DEBIAN_PACKAGE_SHLIBDEPS YES)
+#set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_SOURCE_DIR}/COPYING")
+set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
+
+
 if(WIN32)
-    set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/executor.exe")
-    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
+    set(CPACK_GENERATOR "ZIP")
 
     install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS "bin/")
+
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/executor.exe")
+    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
 
     if(NOT MSVC)
         set(CPACK_SYSTEM_NAME win64-mingw)
     endif()
+elseif(APPLE)
+    set(CPACK_GENERATOR "DragNDrop")
+
+    install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS "Executor 2000.app/Contents/PlugIns")
+
+    set(APPS "\${CMAKE_INSTALL_PREFIX}/Executor\ 2000.app")
+    install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
+
+    set(CPACK_SYSTEM_NAME macOS)
+    set(CPACK_DMG_VOLUME_NAME "Executor 2000")
+    #set(CPACK_DMG_DS_STORE_SETUP_SCRIPT ${CMAKE_SOURCE_DIR}/icon/CMakeDSStore.applescript)
+    set(CPACK_DMG_DS_STORE ${CMAKE_SOURCE_DIR}/icon/DS_Store)
+else()
+    set(CPACK_GENERATOR "TBZ2")
 endif()
 
-if(APPLE)
-list(APPEND CPACK_GENERATOR "DragNDrop")
-endif()
 
 include(CPack)

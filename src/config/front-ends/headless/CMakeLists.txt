@@ -1,5 +1,4 @@
 add_library(front-end-headless
-    default_vdriver.h
     headless.h
     headless.cpp
 )

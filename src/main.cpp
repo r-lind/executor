@@ -59,6 +59,7 @@
 #include <PowerCore.h>
 
 #include "default_vdriver.h"
+#include "headless.h"
 
 #if defined(__linux__) && defined(PERSONALITY_HACK)
 #include <sys/personality.h>
@@ -93,6 +94,7 @@ static std::string keyboard;
 static bool list_keyboards_p = false;
 
 static const option_vec common_opts = {
+    { "headless", "no graphics output", opt_no_arg, "" },
     { "sticky", "sticky menus", opt_no_arg, "" },
     { "nobrowser", "don't run Browser", opt_no_arg, "" },
     { "bpp", "default screen depth", opt_sep, "" },
@@ -555,8 +557,20 @@ int main(int argc, char **argv)
 
     ROMlib_appname = fs::path(argv[0]).filename().string();
 
+    bool headless = false;
+    for(char** p = argv + 1; *p && strcmp(*p, "--"); ++p)
+        if(!strcmp(*p, "--headless") || !strcmp(*p, "-headless"))
+        {
+            headless = true;
+            break;
+        }
+
     VideoDriverCallbacks videoDriverCallbacks;
-    vdriver = new DefaultVDriver(&videoDriverCallbacks);
+    if(headless)
+        vdriver = new HeadlessVideoDriver(&videoDriverCallbacks);
+    else
+        vdriver = new DefaultVDriver(&videoDriverCallbacks);
+    
     if(!vdriver->parseCommandLine(argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");

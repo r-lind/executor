@@ -89,7 +89,7 @@ else()
 endif()
 source_group(HostOS FILES ${host_os_sources})
 
-set(FRONT_ENDS headless qt x sdl sdl2)
+set(FRONT_ENDS qt x sdl sdl2)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     # -Wno-enum-compare: Mac OSErr codes are currently spread between different
@@ -556,26 +556,43 @@ target_link_libraries(romlib resources)
 
 target_link_libraries(romlib ${host_os_libs})
 
+if(APPLE)
+    set(platform_resource_files ../icon/executor.icns)
+    set_source_files_properties(../icon/executor.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+else()
+    set(platform_resource_files)
+endif()
+
 foreach(FRONT_END ${FRONT_ENDS})
     if(TARGET front-end-${FRONT_END})
-        add_executable(executor-${FRONT_END} main.cpp)
-        target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
+        add_executable(executor-${FRONT_END} main.cpp ${platform_resource_files})
+        target_link_libraries(executor-${FRONT_END} romlib front-end-headless)
+        if(NOT ${FRONT_END} STREQUAL headless)
+            target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
+        endif()
         set_target_properties(executor-${FRONT_END} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
         if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
             set_target_properties(executor-${FRONT_END} PROPERTIES
                     MACOSX_BUNDLE TRUE
-                    MACOSX_FRAMEWORK_IDENTIFIER com.github.autc04.executor
+                    MACOSX_BUNDLE_IDENTIFIER com.github.autc04.executor
+                    MACOSX_BUNDLE_ICON_FILE executor.icns
+                    MACOSX_BUNDLE_BUNDLE_NAME "Executor 2000"
                 )
         endif()
         
-        install(TARGETS executor-${FRONT_END}
-            RUNTIME DESTINATION bin
-            BUNDLE DESTINATION .)
     endif()
 endforeach()
 
 if(TARGET executor-qt)
-    set_target_properties(executor-qt PROPERTIES OUTPUT_NAME executor)
+    install(TARGETS executor-qt
+        RUNTIME DESTINATION bin
+        BUNDLE DESTINATION .)
+
+    if(APPLE)
+        set_target_properties(executor-qt PROPERTIES OUTPUT_NAME "Executor 2000")
+    else()
+        set_target_properties(executor-qt PROPERTIES OUTPUT_NAME executor)
+    endif()
 endif()
