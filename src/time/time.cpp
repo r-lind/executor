@@ -34,7 +34,7 @@ static unsigned long next_interrupt_msecs;
 
 
 unsigned long
-msecs_elapsed()
+Executor::msecs_elapsed()
 {
     static auto startTime = std::chrono::steady_clock::now();
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime).count();

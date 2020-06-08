@@ -8,16 +8,17 @@
 
  */
 
-extern unsigned long msecs_elapsed(void);
 
 class PowerCore;
 
 namespace Executor
 {
+unsigned long msecs_elapsed(void);
+
 extern QHdr ROMlib_timehead;
 
-extern syn68k_addr_t catchalarm(syn68k_addr_t pc, void *unused);
-extern void catchalarmPowerPC(PowerCore&);
+syn68k_addr_t catchalarm(syn68k_addr_t pc, void *unused);
+void catchalarmPowerPC(PowerCore&);
 }
 
 #endif /* _RSYS_TIME_H_ */

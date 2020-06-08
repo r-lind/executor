@@ -34,6 +34,8 @@
 
 #include <SegmentLdr.h>
 
+#include <vdriver/eventrecorder.h>
+
 using namespace Executor;
 
 #define NEVENT 20
@@ -378,6 +380,8 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
     ticks = TickCount();
 
     vdriver->pumpEvents();
+    if(auto *playback = EventPlayback::getInstance())
+        playback->pumpEvents();
 
     for(qp = (EvQEl *)LM(EventQueue).qHead; qp && !((1 << qp->evtQWhat) & evmask);
         qp = (EvQEl *)qp->qLink)

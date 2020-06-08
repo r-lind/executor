@@ -64,6 +64,8 @@ class VideoDriver
 {
 public:
     VideoDriver(VideoDriverCallbacks *cb) : callbacks_(cb) {}
+    void setCallbacks(VideoDriverCallbacks *cb) { callbacks_ = cb; }
+
     virtual ~VideoDriver();
 
     virtual bool parseCommandLine(int& argc, char *argv[]);
