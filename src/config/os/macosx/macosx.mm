@@ -19,60 +19,71 @@ void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height)
     // If the mouse is elsewhere, we set things to "autohide" so the user
     // can access the dock.
 
-    if(!inited)
+    @autoreleasepool
     {
-        [NSApp setPresentationOptions: NSApplicationPresentationHideMenuBar
-            | NSApplicationPresentationHideDock];
-
-        // Zap keyboard equivalents in the application menu.
-        // Emulated mac apps are used to owning Command-H,
-        // and they really need to handle Command-Q.
-        NSMenuItem *menutitle = [[NSApp mainMenu] itemAtIndex: 0];
-        NSMenu *menu = [menutitle submenu];
-        for(NSMenuItem *item in [menu itemArray])
-        {
-            item.keyEquivalent = @"";
-        }
-    }
-    inited = true;
-
-    NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
-    auto dockDefaults = [defaults persistentDomainForName:@"com.apple.dock"];
-    NSString *orientation = [dockDefaults valueForKey:@"orientation"];
-    
-    int distanceFromDock;
-    int tileSize = 64;
-    NSNumber *tileSizeNum = [dockDefaults valueForKey:@"tilesize"];
-    if(tileSizeNum)
-        tileSize = [tileSizeNum intValue];
-
-    if([@"left" isEqualTo: orientation])
-        distanceFromDock = mouseX - 2 * tileSize;
-    else if([@"right" isEqualTo: orientation])
-        distanceFromDock = width - 2 * tileSize - mouseX;
-    else
-        distanceFromDock = height - 2 * tileSize - mouseY;
-    
-    int distanceFromMenu = mouseY - 22;
-
-    //std::cout << "dock [" << (dock ? 'X':' ') << "]: " << distanceFromDock
-    //          << " menu [" << (dock ? ' ':'X') << "]: " << distanceFromMenu << std::endl;
-    if(dock)
-    {
-        if(distanceFromMenu < 20 || distanceFromDock > 40)
+        if(!inited)
         {
             [NSApp setPresentationOptions: NSApplicationPresentationHideMenuBar
                 | NSApplicationPresentationHideDock];
-            dock = false;
+
+            // Zap keyboard equivalents in the application menu.
+            // Emulated mac apps are used to owning Command-H,
+            // and they really need to handle Command-Q.
+            NSMenuItem *menutitle = [[NSApp mainMenu] itemAtIndex: 0];
+            NSMenu *menu = [menutitle submenu];
+            for(NSMenuItem *item in [menu itemArray])
+            {
+                item.keyEquivalent = @"";
+            }
+        }
+        inited = true;
+
+        NSUserDefaults *defaults = [NSUserDefaults standardUserDefaults];
+        auto dockDefaults = [defaults persistentDomainForName:@"com.apple.dock"];
+        NSString *orientation = [dockDefaults valueForKey:@"orientation"];
+        
+        int distanceFromDock;
+        int tileSize = 64;
+        NSNumber *tileSizeNum = [dockDefaults valueForKey:@"tilesize"];
+        if(tileSizeNum)
+            tileSize = [tileSizeNum intValue];
+
+        if([@"left" isEqualTo: orientation])
+            distanceFromDock = mouseX - 2 * tileSize;
+        else if([@"right" isEqualTo: orientation])
+            distanceFromDock = width - 2 * tileSize - mouseX;
+        else
+            distanceFromDock = height - 2 * tileSize - mouseY;
+        
+        int distanceFromMenu = mouseY - 22;
+
+        //std::cout << "dock [" << (dock ? 'X':' ') << "]: " << distanceFromDock
+        //          << " menu [" << (dock ? ' ':'X') << "]: " << distanceFromMenu << std::endl;
+        if(dock)
+        {
+            if(distanceFromMenu < 20 || distanceFromDock > 40)
+            {
+                [NSApp setPresentationOptions: NSApplicationPresentationHideMenuBar
+                    | NSApplicationPresentationHideDock];
+                dock = false;
+            }
+        }
+        else
+        {
+            if(distanceFromMenu > 40 && distanceFromDock < 20)
+            {
+                [NSApp setPresentationOptions: NSApplicationPresentationAutoHideMenuBar
+                    | NSApplicationPresentationAutoHideDock];
+                dock = true;
+            }
         }
     }
-    else
+}
+
+void macosx_autorelease_pool(const std::function<void ()>& fun)
+{
+    @autoreleasepool
     {
-        if(distanceFromMenu > 40 && distanceFromDock < 20)
-        {
-            [NSApp setPresentationOptions: NSApplicationPresentationAutoHideMenuBar
-                | NSApplicationPresentationAutoHideDock];
-            dock = true;
-        }
+        fun();
     }
 }

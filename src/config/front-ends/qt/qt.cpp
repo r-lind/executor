@@ -26,6 +26,7 @@
 
 #ifdef __APPLE__
 void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
+void macosx_autorelease_pool(const std::function<void ()>& fun);
 #endif
 #include <../x/x_keycodes.h>
 
@@ -166,7 +167,13 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
         (const uchar*)grayRegionPort.portBits.baseAddr,
         QImage::Format_Mono);
     
-    window->setMask(*rootlessRegion);
+#ifdef __APPLE__
+    macosx_autorelease_pool([&] {
+#endif
+        window->setMask(*rootlessRegion);
+#ifdef __APPLE__
+    });
+#endif
 }
 
 bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
@@ -345,13 +352,18 @@ void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
             convertRect(rect);
 
     window->update(rgn);
-    pumpEvents();
 }
 
 void QtVideoDriver::pumpEvents()
 {
-    qapp->processEvents();
-    
+#ifdef __APPLE__
+        macosx_autorelease_pool([&] {
+#endif
+        qapp->processEvents();
+#ifdef __APPLE__
+        });
+#endif
+
     auto cursorPos = QCursor::pos();
 #ifdef __APPLE__
     macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
@@ -362,7 +374,13 @@ void QtVideoDriver::pumpEvents()
     static bool beenHere = false;
     if(!beenHere && rootlessRegion)
     {
-        window->setMask(*rootlessRegion);
+#ifdef __APPLE__
+        macosx_autorelease_pool([&] {
+#endif
+            window->setMask(*rootlessRegion);
+#ifdef __APPLE__
+        });
+#endif
         beenHere = true;
     }
 }
