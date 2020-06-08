@@ -20,6 +20,8 @@ class WaylandVideoDriver : public Executor::VideoDriver
     wayland::surface_t surface_;
     wayland::xdg_surface_t xdg_surface_;
     wayland::xdg_toplevel_t xdg_toplevel_;
+
+    wayland::pointer_t pointer_;
     
     std::array<uint32_t, 256> colors_;
 

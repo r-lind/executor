@@ -123,6 +123,17 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     };
     xdg_toplevel_.on_close() = [this] () { };
 
+    pointer_ = seat_.get_pointer();
+    pointer_.on_button() = [this] (uint32_t serial, uint32_t time, uint32_t button, pointer_button_state state) {
+        std::cout << "button: " << button << " " << (int)state << std::endl;
+        if(button == BTN_LEFT)
+            callbacks_->mouseButtonEvent(state == pointer_button_state::pressed);
+    };
+    pointer_.on_motion() = [this] (uint32_t serial, double x, double y) {
+        std::cout << "motion: " << x << " " << y << std::endl;
+        callbacks_->mouseMoved(x, y);
+    };
+
     width_ = 1024;
     height_ = 768;
     bpp_ = 8;
