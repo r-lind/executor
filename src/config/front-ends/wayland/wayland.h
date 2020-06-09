@@ -23,6 +23,8 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
     wayland::pointer_t pointer_;
     wayland::keyboard_t keyboard_;
+
+
     
     std::array<uint32_t, 256> colors_;
 
@@ -83,12 +85,22 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
     Buffer buffer_;
     bool initDone_ = false;
+
+
+    wayland::surface_t cursorSurface_;
+    std::pair<int,int> hotSpot_;
+    Buffer cursorBuffer_;
+    uint32_t cursorEnterSerial_ = 0;
+
 public:
-    virtual void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
-    virtual bool setMode(int width, int height, int bpp,
+    void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
+    bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
-    virtual void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r,
+    void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r,
                                        bool cursor_p) override;
 
-    virtual void pumpEvents() override;
+    void pumpEvents() override;
+
+    void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
+    bool setCursorVisible(bool show_p) override;
 };

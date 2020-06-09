@@ -162,7 +162,26 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     xdg_toplevel_.set_maximized();
 
 	surface_.commit();
+
+
+    cursorBuffer_ = Buffer(shm_, 16,16);
+    cursorSurface_ = compositor_.create_surface();
+    hotSpot_ = {0,0};
+    
+
+
+
     display_.roundtrip();
+
+
+    cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
+    cursorSurface_.commit();
+    //pointer_.set_cursor(0, cursorSurface_, hotSpot_.first, hotSpot_.second);
+    //display_.roundtrip();
+    pointer_.on_enter() = [this](uint32_t serial, surface_t surface, double x, double y) {
+        pointer_.set_cursor(serial, cursorSurface_, hotSpot_.first, hotSpot_.second);
+        cursorEnterSerial_ = serial;
+    };
 
     rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
     framebuffer_ = new uint8_t[rowBytes_ * height_];
@@ -189,8 +208,35 @@ void WaylandVideoDriver::updateScreenRects(
             screen[y * width_ + x] = colors_[framebuffer_[y * rowBytes_ + x]];
         }
 
-    surface_.damage(0,0,width_,height_);
+    surface_.damage_buffer(0,0,width_,height_);
     surface_.attach(buffer_.wlbuffer(), 0, 0);
     surface_.commit();
     display_.flush();
+}
+
+void WaylandVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y)
+{
+    uint32_t *dst = reinterpret_cast<uint32_t*>(cursorBuffer_.data());
+    uint8_t *data = reinterpret_cast<uint8_t*>(cursor_data);
+    uint8_t *mask = reinterpret_cast<uint8_t*>(cursor_mask);
+    for(int y = 0; y < 16; y++)
+        for(int x = 0; x < 16; x++)
+        {
+            if(mask[2*y + x/8] & (0x80 >> x%8))
+                *dst++ = (data[2*y + x/8] & (0x80 >> x%8)) ? 0xFF000000 : 0xFFFFFFFF;
+            else
+                *dst++ = (data[2*y + x/8] & (0x80 >> x%8)) ? 0xFF000000 : 0;
+        }
+    cursorSurface_.damage_buffer(0,0,16,16);
+    cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
+
+    hotSpot_ = { hotspot_x, hotspot_y };
+    cursorSurface_.commit();
+    pointer_.set_cursor(cursorEnterSerial_, cursorSurface_, hotSpot_.first, hotSpot_.second);
+}
+
+bool WaylandVideoDriver::setCursorVisible(bool show_p)
+{
+    pointer_.set_cursor(cursorEnterSerial_, show_p ? cursorSurface_ : surface_t(), hotSpot_.first, hotSpot_.second);
+    return true;
 }
