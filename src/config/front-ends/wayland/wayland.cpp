@@ -86,6 +86,12 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
         //configuredX = std::max(0,x);
         //configuredY = std::max(0,y);
         
+        if(x && y && !initDone_)
+        {
+            width_ = x;
+            height_ = y;
+        }
+
         std::vector<xdg_toplevel_state> states1 = states;
 
         std::cout << "toplevel configure " << x << " " << y << "\n";
@@ -151,11 +157,16 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     width_ = 1024;
     height_ = 768;
     bpp_ = 8;
-    rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
-    framebuffer_ = new uint8_t[rowBytes_ * height_];
+
+
+    xdg_toplevel_.set_maximized();
 
 	surface_.commit();
     display_.roundtrip();
+
+    rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
+    framebuffer_ = new uint8_t[rowBytes_ * height_];
+    initDone_ = true;
     return true;
 }
 

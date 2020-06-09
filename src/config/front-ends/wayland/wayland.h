@@ -82,6 +82,7 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
 
     Buffer buffer_;
+    bool initDone_ = false;
 public:
     virtual void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
     virtual bool setMode(int width, int height, int bpp,
