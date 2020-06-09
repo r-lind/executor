@@ -1,4 +1,6 @@
 #include "wayland.h"
+#include <../x/x_keycodes.h>
+
 #include <iostream>
 #include <algorithm>
 
@@ -133,6 +135,18 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
         std::cout << "motion: " << x << " " << y << std::endl;
         callbacks_->mouseMoved(x, y);
     };
+
+    keyboard_ = seat_.get_keyboard();
+    keyboard_.on_key() = [this] (uint32_t serial, uint32_t time, uint32_t key, keyboard_key_state state) {
+        bool down = state == keyboard_key_state::pressed;
+
+        std::cout << "key: " << std::hex << key << std::dec << " " << (down ? "down" : "up") << std::endl;
+
+        auto mkvkey = x_keycode_to_mac_virt[key + 8];
+
+        callbacks_->keyboardEvent(down, mkvkey);
+    };
+
 
     width_ = 1024;
     height_ = 768;

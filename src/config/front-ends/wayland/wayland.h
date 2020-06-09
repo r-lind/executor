@@ -22,6 +22,7 @@ class WaylandVideoDriver : public Executor::VideoDriver
     wayland::xdg_toplevel_t xdg_toplevel_;
 
     wayland::pointer_t pointer_;
+    wayland::keyboard_t keyboard_;
     
     std::array<uint32_t, 256> colors_;
 
