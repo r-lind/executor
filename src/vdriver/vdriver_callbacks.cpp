@@ -8,12 +8,6 @@
 
 using namespace Executor;
 
-void VideoDriverCallbacks::mouseButtonEvent(bool down, int h, int v)
-{
-    mouseMoved(h,v);
-    mouseButtonEvent(down);
-}
-
 void VideoDriverCallbacks::mouseButtonEvent(bool down)
 {
     if(down)
