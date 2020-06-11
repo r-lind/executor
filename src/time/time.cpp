@@ -32,12 +32,20 @@ static unsigned long last_interrupt_msecs;
 /* Msecs during next anticipated interrupt. */
 static unsigned long next_interrupt_msecs;
 
+static int timewarpNumerator = 1, timewarpDenominator = 1;
 
 unsigned long
 Executor::msecs_elapsed()
 {
     static auto startTime = std::chrono::steady_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime).count();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+        (std::chrono::steady_clock::now() - startTime) * timewarpNumerator / timewarpDenominator).count();
+}
+
+void Executor::ROMlib_SetTimewarp(int speedup, int slowdown)
+{
+    timewarpNumerator = speedup;
+    timewarpDenominator = slowdown;
 }
 
 /*
