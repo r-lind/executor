@@ -218,11 +218,6 @@ void Executor::dofloppymount(void)
     futzwithdosdisks();
 }
 
-static void doscreendumptoprinter(void)
-{
-    SysBeep(5);
-}
-
 static void doquitreallyquits(void)
 {
     ROMlib_exit = !ROMlib_exit;
@@ -349,10 +344,6 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
                 case 0x14: /* command shift 3: Screen Dump to File */
                     retval = false;
                     do_dump_screen();
-                    break;
-                case 0x15: /* command shift 4: Screen Dump to Printer */
-                    retval = false;
-                    doscreendumptoprinter();
                     break;
                 case 0x17: /* command shift 5: Preferences */
                     retval = false;
