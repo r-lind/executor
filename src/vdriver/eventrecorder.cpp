@@ -6,10 +6,10 @@ using namespace Executor;
 
 EventPlayback* EventPlayback::instance = nullptr;
 
-void EventRecorder::mouseButtonEvent(bool down, int h, int v)
+void EventRecorder::mouseButtonEvent(bool down)
 {
-    out << msecs_elapsed() << " 1 " << (down ? 1 : 0) << " " << h << " " << v << "\n" << std::flush;
-    VideoDriverCallbacks::mouseButtonEvent(down, h, v);
+    out << msecs_elapsed() << " 1 " << (down ? 1 : 0) << "\n" << std::flush;
+    VideoDriverCallbacks::mouseButtonEvent(down);
 }
 void EventRecorder::mouseMoved(int h, int v)
 {
@@ -39,10 +39,10 @@ EventPlayback::EventPlayback(fs::path fn)
     instance = this;
 }
 
-void EventPlayback::mouseButtonEvent(bool down, int h, int v)
+void EventPlayback::mouseButtonEvent(bool down)
 {
     playbackActive = false;    
-    VideoDriverCallbacks::mouseButtonEvent(down, h, v);
+    VideoDriverCallbacks::mouseButtonEvent(down);
 }
 void EventPlayback::mouseMoved(int h, int v)
 {
@@ -65,8 +65,8 @@ void EventPlayback::pumpEvents()
         switch(type)
         {
             case 1:
-                in >> down >> h >> v;
-                VideoDriverCallbacks::mouseButtonEvent(down, h, v);
+                in >> down;
+                VideoDriverCallbacks::mouseButtonEvent(down);
                 break;
             case 2:
                 in >> h >> v;

@@ -14,7 +14,7 @@ class EventRecorder : public VideoDriverCallbacks
 public:
     EventRecorder(fs::path fn) : out(fn) {}
 
-    virtual void mouseButtonEvent(bool down, int h, int v) override;
+    virtual void mouseButtonEvent(bool down) override;
     virtual void mouseMoved(int h, int v) override;
     virtual void keyboardEvent(bool down, unsigned char mkvkey) override;
 };
@@ -30,7 +30,7 @@ class EventPlayback : public VideoDriverCallbacks
 public:
     EventPlayback(fs::path fn);
 
-    virtual void mouseButtonEvent(bool down, int h, int v) override;
+    virtual void mouseButtonEvent(bool down) override;
     virtual void mouseMoved(int h, int v) override;
     virtual void keyboardEvent(bool down, unsigned char mkvkey) override;
 
