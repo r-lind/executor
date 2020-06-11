@@ -52,6 +52,7 @@ class VideoDriverCallbacks
 {
 public:
     virtual void mouseButtonEvent(bool down, int h, int v);
+    virtual void mouseButtonEvent(bool down);
     virtual void mouseMoved(int h, int v);
     virtual void keyboardEvent(bool down, unsigned char mkvkey);
     virtual void suspendEvent();
