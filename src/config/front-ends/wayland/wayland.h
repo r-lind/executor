@@ -92,6 +92,8 @@ class WaylandVideoDriver : public Executor::VideoDriver
     Buffer cursorBuffer_;
     uint32_t cursorEnterSerial_ = 0;
 
+    std::vector<int16_t> rootlessRegion_;
+
 public:
     void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
     bool setMode(int width, int height, int bpp,
@@ -103,4 +105,7 @@ public:
 
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
     bool setCursorVisible(bool show_p) override;
+
+    void setRootlessRegion(Executor::RgnHandle rgn) override;
+
 };

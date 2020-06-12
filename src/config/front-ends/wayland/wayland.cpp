@@ -9,10 +9,12 @@
 #include <sys/mman.h>
 #include <linux/input-event-codes.h>
 
+#include <QuickDraw.h>
 
 using namespace wayland;
 using namespace Executor;
 
+constexpr int16_t rgnStop = 32767;
 
 WaylandVideoDriver::SharedMem::SharedMem(size_t size)
     : size_(size)
@@ -56,6 +58,8 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
 {
     if(xdg_wm_base_)
         return true;
+
+    rootlessRegion_ = { 0, 0, rgnStop, rgnStop };
 
     registry_ = display_.get_registry();
     registry_.on_global() = [this] (uint32_t name, const std::string& interface, uint32_t version) {
@@ -186,6 +190,8 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
     framebuffer_ = new uint8_t[rowBytes_ * height_];
     initDone_ = true;
+
+    isRootless_ = true;
     return true;
 }
 
@@ -195,6 +201,59 @@ void WaylandVideoDriver::pumpEvents()
     display_.roundtrip();
 }
 
+void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
+{
+    if((*rgn)->rgnSize == 10)
+    {
+        rootlessRegion_.clear();
+        rootlessRegion_.insert(rootlessRegion_.end(),
+            { (*rgn)->rgnBBox.top.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), rgnStop,
+            (*rgn)->rgnBBox.bottom.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), rgnStop,
+            rgnStop });
+    }
+    else
+    {
+        GUEST<uint16_t> *p = (GUEST<uint16_t>*) ((*(Handle)rgn) + 10);
+        GUEST<uint16_t> *q = (GUEST<uint16_t>*) ((*(Handle)rgn) + (*rgn)->rgnSize);
+        rootlessRegion_.clear();
+        rootlessRegion_.insert(rootlessRegion_.end(), p, q);
+    }
+
+
+    std::vector<int> rgnRow;
+    std::vector<int> rgnTmp;
+    auto rgnIt = rootlessRegion_.begin();
+    rgnRow.push_back(rgnStop);
+
+    region_t waylandRgn = compositor_.create_region();
+
+    int from = *rgnIt, to;
+
+    while(from < height_)
+    {
+        ++rgnIt;
+        auto end = rgnIt;
+        while(*end != rgnStop)
+            ++end;
+        std::set_symmetric_difference(rgnRow.begin(), rgnRow.end(), rgnIt, end, std::back_inserter(rgnTmp));
+        swap(rgnRow, rgnTmp);
+        rgnTmp.clear();
+        rgnIt = end;
+        ++rgnIt;
+        
+        to = *rgnIt;
+
+        for(int i = 0; i + 1 < rgnRow.size(); i += 2)
+        {
+            waylandRgn.add(rgnRow[i], from, rgnRow[i+1] - rgnRow[i], to - from);
+        }
+
+        from = to;
+    }
+
+    surface_.set_input_region(waylandRgn);
+}
+
 void WaylandVideoDriver::updateScreenRects(
     int num_rects, const vdriver_rect_t *r,
     bool cursor_p)
@@ -202,11 +261,46 @@ void WaylandVideoDriver::updateScreenRects(
     std::cout << "update.\n";
     //buffer_ = Buffer(shm_, width_, height_);
     uint32_t *screen = reinterpret_cast<uint32_t*>(buffer_.data());
+
+    std::vector<int> rgnRow;
+    std::vector<int> rgnTmp;
+    auto rgnIt = rootlessRegion_.begin();
+    rgnRow.push_back(rgnStop);
+
     for(int y = 0; y < height_; y++)
-        for(int x = 0; x < width_; x++)
+    {
+        while(y >= *rgnIt)
         {
-            screen[y * width_ + x] = colors_[framebuffer_[y * rowBytes_ + x]];
+            ++rgnIt;
+            auto end = rgnIt;
+            while(*end != rgnStop)
+                ++end;
+            std::set_symmetric_difference(rgnRow.begin(), rgnRow.end(), rgnIt, end, std::back_inserter(rgnTmp));
+            swap(rgnRow, rgnTmp);
+            rgnTmp.clear();
+            rgnIt = end;
+            ++rgnIt;
         }
+
+        auto rowIt = rgnRow.begin();
+        int x = 0;
+
+        while(x < width_)
+        {
+            int nextX = std::min(width_, *rowIt++);
+
+            for(; x < nextX; x++)
+                screen[y * width_ + x] = 0;
+            
+            if(x >= width_)
+                break;
+
+            nextX = std::min(width_, *rowIt++);
+
+            for(; x < nextX; x++)
+                screen[y * width_ + x] = colors_[framebuffer_[y * rowBytes_ + x]];
+        }
+    }
 
     surface_.damage_buffer(0,0,width_,height_);
     surface_.attach(buffer_.wlbuffer(), 0, 0);
