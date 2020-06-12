@@ -84,7 +84,7 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     xdg_surface_ = xdg_wm_base_.get_xdg_surface(surface_);
     xdg_toplevel_ = xdg_surface_.get_toplevel();
     xdg_toplevel_.set_title("Executor");
-    xdg_toplevel_.set_app_id("executor");
+    xdg_toplevel_.set_app_id("io.github.autc04.executor");
 
     xdg_toplevel_.on_configure() = [this] (int32_t x, int32_t y, array_t states) { 
         //configuredX = std::max(0,x);
