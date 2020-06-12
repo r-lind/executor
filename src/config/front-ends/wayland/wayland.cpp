@@ -305,7 +305,8 @@ void WaylandVideoDriver::updateScreenRects(
         }
     }
 
-    surface_.damage_buffer(0,0,width_,height_);
+    for(int i = 0; i < num_rects; i++)
+        surface_.damage_buffer(r[i].left,r[i].top,r[i].right-r[i].left,r[i].bottom-r[i].top);
     surface_.attach(buffer_.wlbuffer(), 0, 0);
     surface_.commit();
     display_.flush();
