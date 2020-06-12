@@ -290,7 +290,10 @@ void WaylandVideoDriver::updateScreenRects(
             int nextX = std::min(width_, *rowIt++);
 
             for(; x < nextX; x++)
-                screen[y * width_ + x] = 0;
+            {
+                uint32_t pixel = colors_[framebuffer_[y * rowBytes_ + x]];
+                screen[y * width_ + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
+            }
             
             if(x >= width_)
                 break;
