@@ -157,6 +157,14 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
         callbacks_->keyboardEvent(down, mkvkey);
     };
 
+    keyboard_.on_enter() = [this] (uint32_t serial, wayland::surface_t, wayland::array_t) {
+        callbacks_->resumeEvent(true);
+    };
+    
+    keyboard_.on_leave() = [this] (uint32_t serial, wayland::surface_t) {
+        callbacks_->suspendEvent();
+    };
+
 
     width_ = 1024;
     height_ = 768;
