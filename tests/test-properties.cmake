@@ -5,4 +5,5 @@
 set_tests_properties(
         FileTest.SetFInfo_CrDat 
         FileTest.SetFLock 
+        FileTest.MakeFSSpec
     APPEND PROPERTIES LABELS xfail)

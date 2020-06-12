@@ -1551,3 +1551,20 @@ TEST_F(FileTest, GetInfoOpenResFile)
     const auto expectedMask = expectedBits | kioFlAttribLockedMask | kioFlAttribDataOpenMask | kioFlAttribDirMask;
     EXPECT_EQ(expectedBits, hpb.fileParam.ioFlAttrib & expectedMask);
 }
+
+TEST_F(FileTest, MakeFSSpec)
+{
+    FSSpec spec;
+    OSErr err = FSMakeFSSpec(0,0,PSTR("someFile"),&spec);
+
+    EXPECT_EQ(fnfErr, err);
+    EXPECT_EQ(dirID, spec.parID);
+    EXPECT_EQ(vRefNum, spec.vRefNum);
+
+
+    err = FSMakeFSSpec(0,0,PSTR("temp-test"),&spec);
+
+    EXPECT_EQ(noErr, err);
+    EXPECT_EQ(dirID, spec.parID);
+    EXPECT_EQ(vRefNum, spec.vRefNum);
+}
