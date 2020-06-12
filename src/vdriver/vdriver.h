@@ -51,7 +51,13 @@ namespace Executor
 class VideoDriverCallbacks
 {
 public:
-    virtual void mouseButtonEvent(bool down, int h, int v);
+    void mouseButtonEvent(bool down, int h, int v)
+    {
+        mouseMoved(h,v);
+        mouseButtonEvent(down);
+    }
+
+    virtual void mouseButtonEvent(bool down);
     virtual void mouseMoved(int h, int v);
     virtual void keyboardEvent(bool down, unsigned char mkvkey);
     virtual void suspendEvent();
@@ -64,6 +70,8 @@ class VideoDriver
 {
 public:
     VideoDriver(VideoDriverCallbacks *cb) : callbacks_(cb) {}
+    void setCallbacks(VideoDriverCallbacks *cb) { callbacks_ = cb; }
+
     virtual ~VideoDriver();
 
     virtual bool parseCommandLine(int& argc, char *argv[]);

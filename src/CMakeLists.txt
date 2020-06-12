@@ -407,6 +407,8 @@ set(vdriver_sources
         vdriver/refresh.h
         vdriver/vdriver.h
         vdriver/vdriver_callbacks.cpp
+        vdriver/eventrecorder.h
+        vdriver/eventrecorder.cpp
     )
 
 set(mman_sources

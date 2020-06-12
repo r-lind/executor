@@ -57,6 +57,7 @@
 #include <base/debugger.h>
 #include <rsys/mon_debugger.h>
 #include <PowerCore.h>
+#include <vdriver/eventrecorder.h>
 
 #include "default_vdriver.h"
 #include "headless.h"
@@ -95,6 +96,9 @@ static bool list_keyboards_p = false;
 
 static const option_vec common_opts = {
     { "headless", "no graphics output", opt_no_arg, "" },
+    { "record", "record events to file", opt_sep, "" },
+    { "playback", "play back events from file", opt_sep, "" },
+    { "timewarp", "speed up or slow down time", opt_sep, "1/1" },
     { "sticky", "sticky menus", opt_no_arg, "" },
     { "nobrowser", "don't run Browser", opt_no_arg, "" },
     { "bpp", "default screen depth", opt_sep, "" },
@@ -499,6 +503,50 @@ static void parseCommandLine(int& argc, char **argv)
 
     opt_val(opt_db, "keyboard", &keyboard);
     opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
+
+    if(std::string str; opt_val(opt_db, "record", &str))
+    {
+        vdriver->setCallbacks(new EventRecorder(fs::path(str)));
+    }
+
+    if(std::string str; opt_val(opt_db, "playback", &str))
+    {
+        vdriver->setCallbacks(new EventPlayback(fs::path(str)));
+    }
+
+    if(std::string str; opt_val(opt_db, "timewarp", &str))
+    {
+        std::string numerStr, denomStr;
+        if(auto pos = str.find('/'); pos != std::string::npos)
+        {
+            numerStr = str.substr(0, pos);
+            denomStr = str.substr(pos + 1);
+        }
+        else
+        {
+            numerStr = str;
+            denomStr = "1";
+        }
+
+        int numer = 0, denom = 0;
+        try
+        {
+            numer = std::stoi(numerStr);
+            denom = std::stoi(denomStr);
+        }
+        catch(...)
+        {
+        }
+
+        if(numer > 0 && denom > 0)
+            ROMlib_SetTimewarp(numer, denom);
+        else
+        {
+            fprintf(stderr, "%s: bad arguments to -timewarp\n",
+                    ROMlib_appname.c_str());
+            bad_arg_p = true;
+        }
+    }
 
     /* If we failed to parse our arguments properly, exit now.
    * I don't think we should call ExitToShell yet because the
