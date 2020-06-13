@@ -3,7 +3,7 @@
 #include <prefs/prefs.h>
 #include <sound/sounddriver.h>
 #include <vdriver/refresh.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <quickdraw/cquick.h>
 #include <commandline/parseopt.h>
 #include <time/vbl.h>

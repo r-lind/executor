@@ -11,9 +11,9 @@
 
 #include <print/PSstrings.h>
 #include <mman/mman.h>
-#include <rsys/uniquefile.h>
+#include <util/uniquefile.h>
 #include <print/print.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <quickdraw/cquick.h>
 #include <vdriver/vdriver.h>
 #include <file/file.h>

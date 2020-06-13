@@ -1,6 +1,6 @@
 #pragma once
 
-#include <rsys/macstrings.h>
+#include <util/macstrings.h>
 #include <rsys/filesystem.h>
 #include <FileMgr.h>
 

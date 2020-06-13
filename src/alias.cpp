@@ -13,7 +13,7 @@
 
 #include <file/file.h>
 #include <hfs/hfs.h>
-#include <rsys/string.h>
+#include <util/string.h>
 
 #include <rsys/alias.h>
 

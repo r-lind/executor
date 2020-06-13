@@ -467,6 +467,17 @@ set(prefs_sources
     prefs/prefs.cpp
 )
 
+set(util_sources
+    util/macstrings.h
+    util/macstrings.cpp
+
+    util/string.h
+    util/string.cpp
+    
+    util/uniquefile.h
+    util/uniquefile.cpp 
+)
+
 set(misc_sources
   mon_debugger.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp
@@ -474,8 +485,8 @@ set(misc_sources
    osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
   stdfile.cpp romlib_stubs.cpp  toolevent.cpp toolutil.cpp 
    aboutbox.cpp
-  version.cpp shutdown.cpp uniquefile.cpp screen-dump.cpp
-  process.cpp alias.cpp string.cpp  edition.cpp  balloon.cpp
+  version.cpp shutdown.cpp screen-dump.cpp
+  process.cpp alias.cpp edition.cpp  balloon.cpp
    adb.cpp color_wheel_bits.cpp finder.cpp  
   icon.cpp redrawscreen.cpp quicktime.cpp
   commtool.cpp cfm.cpp pef_hash.cpp
@@ -485,7 +496,6 @@ set(misc_sources
   qColorPicker.cpp
   bindec.cpp 
   toolmath.cpp
-  macstrings.cpp
   init.cpp
   )
 
@@ -508,7 +518,6 @@ set(include_sources
                   include/rsys/keyboard.h
                   include/rsys/launch.h
                   include/rsys/macros.h
-                  include/rsys/macstrings.h
                   include/rsys/mon_debugger.h
                   include/rsys/noreturn.h
                   include/rsys/osutil.h
@@ -523,10 +532,8 @@ set(include_sources
                   include/rsys/serial.h
                   include/rsys/unixio.h
                   include/rsys/stdfile.h
-                  include/rsys/string.h
                   include/rsys/toolevent.h
                   include/rsys/toolutil.h
-                  include/rsys/uniquefile.h
                   include/rsys/version.h
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
@@ -540,6 +547,7 @@ set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${sound_sources} ${num_sources} ${misc_sources}
     ${file_sources} ${hfs_sources} ${time_sources} ${osevent_sources}
     ${error_sources} ${commandline_sources} ${prefs_sources}
+    ${util_sources}
     ${api_headers} ${trap_instance_sources} ${host_os_sources}
     ${include_sources})
 

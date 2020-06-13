@@ -3,7 +3,7 @@
 #include <file/volume.h>
 #include <FileMgr.h>
 #include <MemoryMgr.h>
-#include <rsys/macstrings.h>
+#include <util/macstrings.h>
 #include "item.h"
 
 #include <rsys/filesystem.h>

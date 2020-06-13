@@ -19,7 +19,7 @@
 #include <osevent/osevent.h>
 #include <print/print.h>
 #include <sane/floatconv.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <mman/mman.h>
 
 #include <ctype.h>

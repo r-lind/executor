@@ -3,7 +3,7 @@
  */
 
 #include <base/common.h>
-#include <rsys/string.h>
+#include <util/string.h>
 
 #include <MemoryMgr.h>
 

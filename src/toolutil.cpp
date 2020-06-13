@@ -17,7 +17,7 @@
 #include <SANE.h>
 #include <sane/float.h>
 #include <sane/floatconv.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <mman/mman_private.h>
 #include <res/resource.h>
 #include <rsys/toolutil.h>

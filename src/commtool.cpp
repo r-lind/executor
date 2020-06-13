@@ -8,7 +8,7 @@
 #include <MemoryMgr.h>
 #include <OSUtil.h>
 
-#include <rsys/string.h>
+#include <util/string.h>
 #include <mman/mman.h>
 
 using namespace Executor;

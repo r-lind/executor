@@ -29,7 +29,7 @@
 #include <vdriver/dirtyrect.h>
 #include <time/syncint.h>
 
-#include <rsys/string.h>
+#include <util/string.h>
 #include <rsys/keyboard.h>
 
 #include <SegmentLdr.h>

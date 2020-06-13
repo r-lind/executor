@@ -16,7 +16,7 @@
 #include <mman/mman.h>
 #include <mman/tempalloc.h>
 #include <prefs/prefs.h>
-#include <rsys/uniquefile.h>
+#include <util/uniquefile.h>
 #include <file/file.h>
 #include <rsys/screen-dump.h>
 #include <rsys/paths.h>

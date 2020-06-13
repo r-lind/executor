@@ -17,10 +17,10 @@
 #include <file/file.h>
 #include <hfs/futzwithdosdisks.h>
 #include <print/ini.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <rsys/segment.h>
 #include <rsys/paths.h>
-#include <rsys/macstrings.h>
+#include <util/macstrings.h>
 
 
 #include <ctype.h>
