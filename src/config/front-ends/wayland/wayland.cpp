@@ -10,11 +10,10 @@
 #include <linux/input-event-codes.h>
 
 #include <QuickDraw.h>
+#include <quickdraw/region.h>
 
 using namespace wayland;
 using namespace Executor;
-
-constexpr int16_t rgnStop = 32767;
 
 WaylandVideoDriver::SharedMem::SharedMem(size_t size)
     : size_(size)
@@ -59,7 +58,7 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     if(xdg_wm_base_)
         return true;
 
-    rootlessRegion_ = { 0, 0, rgnStop, rgnStop };
+    rootlessRegion_ = { 0, 0, RGN_STOP, RGN_STOP };
 
     registry_ = display_.get_registry();
     registry_.on_global() = [this] (uint32_t name, const std::string& interface, uint32_t version) {
@@ -209,45 +208,15 @@ void WaylandVideoDriver::pumpEvents()
     display_.roundtrip();
 }
 
-template<typename Iterator>
-struct RegionProcessor
-{
-    std::vector<int16_t> row { rgnStop };
-    std::vector<int16_t> tmp;
-    Iterator it;
-    int16_t top_;
-
-    RegionProcessor(Iterator rgnIt)
-        : it(rgnIt)
-    {
-    }
-
-    void advance()
-    {
-        top_ = *it++;
-        auto end = it;
-        while(*end != rgnStop)
-            ++end;
-        std::set_symmetric_difference(row.begin(), row.end(), it, end, std::back_inserter(tmp));
-        swap(row, tmp);
-        tmp.clear();
-        it = end;
-        ++it;
-    }
-
-    int16_t bottom() const { return *it; }
-    int16_t top() const { return top_; }
-};
-
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
     if((*rgn)->rgnSize == 10)
     {
         rootlessRegion_.clear();
         rootlessRegion_.insert(rootlessRegion_.end(),
-            { (*rgn)->rgnBBox.top.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), rgnStop,
-            (*rgn)->rgnBBox.bottom.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), rgnStop,
-            rgnStop });
+            { (*rgn)->rgnBBox.top.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
+            (*rgn)->rgnBBox.bottom.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
+            RGN_STOP });
     }
     else
     {

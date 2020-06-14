@@ -23,7 +23,6 @@ typedef struct ccrsr_res
 extern bool ROMlib_text_output_disabled_p;
 
 #define RGN_SMALL_SIZE (sizeof(Region))
-#define RGN_SMALL_SIZE (sizeof(Region))
 
 #define RGN_STOP_X (CWC_RAW(32767))
 #define RGN_STOP (32767)
