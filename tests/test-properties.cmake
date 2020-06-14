@@ -8,5 +8,4 @@ set_tests_properties(
         FileTest.MakeFSSpec
         QuickDraw.PaintCircle
         QuickDraw.FrameCircle1
-        QuickDraw.FrameRoundRect
     APPEND PROPERTIES LABELS xfail)
