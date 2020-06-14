@@ -12,7 +12,87 @@
 #include <quickdraw/cquick.h>
 #include <quickdraw/picture.h>
 
+#include <util/handle_vector.h>
+
 using namespace Executor;
+
+RgnHandle Executor::ROMlib_circrgn(const Rect *rectptr)
+{
+    const Rect& rect = *rectptr;
+    using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
+
+    RgnVector rgn;
+    /*
+    rgn.push_back(rect.top);
+    rgn.push_back(rect.left+1);
+    rgn.push_back(rect.right-1);
+    rgn.push_back(RGN_STOP);
+    rgn.push_back(rect.top+1);
+    rgn.push_back(rect.left);
+    rgn.push_back(rect.left+1);
+    rgn.push_back(rect.right-1);
+    rgn.push_back(rect.right);
+    rgn.push_back(RGN_STOP);
+    rgn.push_back(rect.bottom);
+    rgn.push_back(rect.left);
+    rgn.push_back(rect.right);
+    rgn.push_back(RGN_STOP);
+    rgn.push_back(RGN_STOP);*/
+
+
+
+/*
+    int x = 0, y = 0;
+    int64_t a = int64_t(int(rect.bottom) - rect.top) * (int(rect.bottom) - rect.top);
+    int64_t b = int64_t(int(rect.right) - rect.left) * (int(rect.right) - rect.left);
+
+
+    int64_t y2b = a * b;
+
+    {
+        ++x;
+        y2b -= a*x;
+
+
+    }*/
+
+    std::vector<int> vecA, vecB, vecC;
+
+    for(int y = rect.top; y <= rect.bottom; y++)
+    {
+        bool oldInside = false;
+        for(int x = rect.left; x <= rect.right; x++)
+        {
+            float xx = 2 * (x + 0.5f - rect.left) / float(rect.right - rect.left) - 1.0f;
+            float yy = 2 * (y + 0.5f - rect.top) / float(rect.bottom - rect.top) - 1.0f;
+
+            bool inside = xx*xx + yy*yy <= 1;
+            if(inside != oldInside)
+                vecB.push_back(x);
+            oldInside = inside;
+        }
+
+        vecC.clear();
+        std::set_symmetric_difference(vecA.begin(), vecA.end(), vecB.begin(), vecB.end(), std::back_inserter(vecC));
+        swap(vecA, vecB);
+        vecB.clear();
+
+        if(!vecC.empty())
+        {
+            rgn.push_back(y);
+            for(int x : vecC)
+                rgn.push_back(x);
+            rgn.push_back(RGN_STOP);
+        }
+    }
+    rgn.push_back(RGN_STOP);
+
+    size_t sz = sizeof(int16_t) * rgn.size() + 10;
+    RgnHandle rgnH = rgn.release();
+    (*rgnH)->rgnBBox = rect;
+    (*rgnH)->rgnSize = sz;
+    return rgnH;
+}
 
 #define TERM (*ip++ = RGN_STOP_X)
 
@@ -23,7 +103,7 @@ using namespace Executor;
     (*ip++ = CW_RAW((y)), *ip++ = CW_RAW((x1)), *ip++ = CW_RAW((x2)), \
      *ip++ = CW_RAW((x3)), *ip++ = CW_RAW((x4)), TERM)
 
-RgnHandle Executor::ROMlib_circrgn(const Rect *r) /* INTERNAL */
+RgnHandle xROMlib_circrgn(const Rect *r) /* INTERNAL */
 {
     RgnHandle rh;
     INTEGER x, y, temp; /* some variables need to be longs */
