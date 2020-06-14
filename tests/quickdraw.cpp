@@ -10,6 +10,8 @@
 #include <Windows.h>
 #endif
 
+#include <bitset>
+
 struct OffscreenPort
 {
     GrafPort port;
@@ -432,4 +434,105 @@ TEST(QuickDraw, InvalidCloseRgn)
     RgnHandle rgn = NewRgn();
     CloseRgn(rgn);      // CloseRgn without OpenRgn is invalid, but doesn't crash on real Macs.
     DisposeRgn(rgn);
+}
+
+TEST(QuickDraw, PaintCircle)
+{
+    OffscreenPort port(320, 320);
+
+    PaintOval(&port.r);
+
+    int count = 0;
+    for(int row = 0; row < port.r.bottom; row++)
+        for(int offset = 0; offset < port.r.right/8; offset++)
+            count += std::bitset<8>(port.data(row,offset)).count();
+    
+    int perfect = 0;
+    for(int y = 0; y < port.r.bottom/2; y++)
+        for(int x = 0; x < port.r.right/2; x++)
+        {
+            if(x*x + y*y < port.r.right*port.r.bottom/4)
+                perfect += 4;
+        }
+    
+    EXPECT_GE(perfect, count);
+    EXPECT_LE(port.r.right*port.r.right/4 * 31415926LL / 10000000LL, count);
+}
+
+
+TEST(QuickDraw, FrameCircle1)
+{
+    OffscreenPort port(32, 32);
+
+    FrameOval(&port.r);
+
+    int count = 0;
+    for(int row = 0; row < port.r.bottom; row++)
+        for(int offset = 0; offset < port.r.right/8; offset++)
+            count += std::bitset<8>(port.data(row,offset)).count();
+    
+    EXPECT_EQ(96, count);
+}
+
+TEST(QuickDraw, FrameCircle2)
+{
+    OffscreenPort port(32, 32);
+
+    PenSize(3, 3);
+    FrameOval(&port.r);
+
+    Rect r2 = port.r;
+    InsetRect(&r2, 3, 3);
+    InvertOval(&r2);
+
+    InvertOval(&port.r);
+
+    int count = 0;
+    for(int row = 0; row < port.r.bottom; row++)
+        for(int offset = 0; offset < port.r.right/8; offset++)
+            count += std::bitset<8>(port.data(row,offset)).count();
+    
+    EXPECT_EQ(0, count);
+}
+
+TEST(QuickDraw, FrameRoundRect)
+{
+    OffscreenPort port(32, 32);
+
+    PenSize(3, 3);
+    FrameRoundRect(&port.r, 16, 16);
+
+    Rect r2 = port.r;
+    InsetRect(&r2, 3, 3);
+    InvertRoundRect(&r2, 10, 10);
+
+    InvertRoundRect(&port.r, 16, 16);
+
+    int count = 0;
+    for(int row = 0; row < port.r.bottom; row++)
+        for(int offset = 0; offset < port.r.right/8; offset++)
+            count += std::bitset<8>(port.data(row,offset)).count();
+    
+    EXPECT_EQ(0, count);
+}
+
+TEST(QuickDraw, FrameArc1)
+{
+    OffscreenPort port(32, 32);
+
+    FrameArc(&port.r, 45, 90);
+    
+    int count = 0;
+    for(int row = 0; row < port.r.bottom; row++)
+    {
+        int rowcount = 0;
+        for(int offset = 0; offset < port.r.right/8; offset++)
+            rowcount += std::bitset<8>(port.data(row,offset)).count();
+
+        count += rowcount;
+        
+        EXPECT_LE(rowcount, 2);
+    }
+    
+    EXPECT_LT(port.r.bottom / 2, count);
 }
