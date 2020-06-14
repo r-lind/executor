@@ -3,7 +3,7 @@
  */
 
 #include <base/common.h>
-#include <rsys/uniquefile.h>
+#include <util/uniquefile.h>
 #include <file/file.h>
 #include <rsys/unixio.h>
 

@@ -34,7 +34,7 @@
 #include <base/trapname.h>
 
 #include <prefs/options.h>
-#include <rsys/string.h>
+#include <util/string.h>
 
 #include <algorithm>
 

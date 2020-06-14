@@ -21,10 +21,10 @@
 #include <ctype.h>
 #include <MenuMgr.h>
 #include <vdriver/vdriver.h>
-#include <rsys/uniquefile.h>
+#include <util/uniquefile.h>
 #include <error/system_error.h>
 #include <prefs/options.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <osevent/osevent.h>
 #include <base/functions.impl.h>
 #include <prefs/prefs.h>

@@ -6,7 +6,7 @@
 
 #include <rsys/aboutbox.h>
 #include <mman/mman.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <quickdraw/cquick.h>
 #include <quickdraw/quick.h>
 #include <ctl/ctl.h>

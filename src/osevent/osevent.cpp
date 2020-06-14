@@ -29,10 +29,12 @@
 #include <vdriver/dirtyrect.h>
 #include <time/syncint.h>
 
-#include <rsys/string.h>
+#include <util/string.h>
 #include <rsys/keyboard.h>
 
 #include <SegmentLdr.h>
+
+#include <vdriver/eventrecorder.h>
 
 using namespace Executor;
 
@@ -378,6 +380,8 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
     ticks = TickCount();
 
     vdriver->pumpEvents();
+    if(auto *playback = EventPlayback::getInstance())
+        playback->pumpEvents();
 
     for(qp = (EvQEl *)LM(EventQueue).qHead; qp && !((1 << qp->evtQWhat) & evmask);
         qp = (EvQEl *)qp->qLink)

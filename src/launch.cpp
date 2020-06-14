@@ -86,7 +86,7 @@
 #include <base/cpu.h>
 #include <PowerCore.h>
 
-#include <rsys/macstrings.h>
+#include <util/macstrings.h>
 #include <algorithm>
 
 using namespace Executor;

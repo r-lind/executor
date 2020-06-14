@@ -23,7 +23,7 @@
 #include <file/file.h>
 #include <rsys/launch.h>
 #include <hfs/hfs.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <base/builtinlibs.h>
 #include <algorithm>
 

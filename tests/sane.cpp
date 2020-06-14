@@ -44,8 +44,8 @@ TEST(SANE, convFloat)
     extended80 ext{};
     float b = 23.0f;
 
-    Ff2X(inout(a), &ext);
-    FX2f(&ext, out(b));
+    Ff2X(PTR(a), &ext);
+    FX2f(&ext, OPTR(b));
 
     EXPECT_EQ(42.0f, b);
 }

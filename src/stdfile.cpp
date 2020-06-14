@@ -38,7 +38,7 @@
 #include <mman/tempalloc.h>
 #include <rsys/hook.h>
 #include <rsys/toolevent.h>
-#include <rsys/string.h>
+#include <util/string.h>
 
 #include <rsys/osutil.h>
 #include <osevent/osevent.h>

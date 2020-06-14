@@ -15,7 +15,7 @@
 #include <ProcessMgr.h>
 
 #include <file/file.h>
-#include <rsys/string.h>
+#include <util/string.h>
 #include <hfs/hfs.h>
 #include <rsys/executor.h>
 

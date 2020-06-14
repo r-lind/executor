@@ -29,7 +29,7 @@
 #include <rsys/desk.h>
 #include <rsys/launch.h>
 #include <rsys/paths.h>
-#include <rsys/macstrings.h>
+#include <util/macstrings.h>
 #include <rsys/keyboard.h>
 
 #include <ctype.h>

@@ -48,4 +48,5 @@ TT ptr_from_longint(int32_t l)
 #endif
 
 #define PTR(x) (&inout(x))
+#define OPTR(x) (&out(x))
 
