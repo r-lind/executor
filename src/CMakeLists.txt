@@ -475,7 +475,9 @@ set(util_sources
     util/string.cpp
     
     util/uniquefile.h
-    util/uniquefile.cpp 
+    util/uniquefile.cpp
+
+    util/handle_vector.h
 )
 
 set(misc_sources
