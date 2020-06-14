@@ -209,6 +209,36 @@ void WaylandVideoDriver::pumpEvents()
     display_.roundtrip();
 }
 
+template<typename Iterator>
+struct RegionProcessor
+{
+    std::vector<int16_t> row { rgnStop };
+    std::vector<int16_t> tmp;
+    Iterator it;
+    int16_t top_;
+
+    RegionProcessor(Iterator rgnIt)
+        : it(rgnIt)
+    {
+    }
+
+    void advance()
+    {
+        top_ = *it++;
+        auto end = it;
+        while(*end != rgnStop)
+            ++end;
+        std::set_symmetric_difference(row.begin(), row.end(), it, end, std::back_inserter(tmp));
+        swap(row, tmp);
+        tmp.clear();
+        it = end;
+        ++it;
+    }
+
+    int16_t bottom() const { return *it; }
+    int16_t top() const { return top_; }
+};
+
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
     if((*rgn)->rgnSize == 10)
@@ -228,32 +258,21 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
     }
 
 
-    std::vector<int> rgnRow;
-    std::vector<int> rgnTmp;
-    auto rgnIt = rootlessRegion_.begin();
-    rgnRow.push_back(rgnStop);
+    RegionProcessor rgnP(rootlessRegion_.begin());
 
     region_t waylandRgn = compositor_.create_region();
 
-    int from = *rgnIt, to;
+    int from = *rgnP.it, to;
 
     while(from < height_)
     {
-        ++rgnIt;
-        auto end = rgnIt;
-        while(*end != rgnStop)
-            ++end;
-        std::set_symmetric_difference(rgnRow.begin(), rgnRow.end(), rgnIt, end, std::back_inserter(rgnTmp));
-        swap(rgnRow, rgnTmp);
-        rgnTmp.clear();
-        rgnIt = end;
-        ++rgnIt;
+        rgnP.advance();
         
-        to = *rgnIt;
+        to = *rgnP.it;
 
-        for(int i = 0; i + 1 < rgnRow.size(); i += 2)
+        for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
         {
-            waylandRgn.add(rgnRow[i], from, rgnRow[i+1] - rgnRow[i], to - from);
+            waylandRgn.add(rgnP.row[i], from, rgnP.row[i+1] - rgnP.row[i], to - from);
         }
 
         from = to;
@@ -270,32 +289,19 @@ void WaylandVideoDriver::updateScreenRects(
     //buffer_ = Buffer(shm_, width_, height_);
     uint32_t *screen = reinterpret_cast<uint32_t*>(buffer_.data());
 
-    std::vector<int> rgnRow;
-    std::vector<int> rgnTmp;
-    auto rgnIt = rootlessRegion_.begin();
-    rgnRow.push_back(rgnStop);
+    RegionProcessor rgnP(rootlessRegion_.begin());
 
     for(int y = 0; y < height_; y++)
     {
-        while(y >= *rgnIt)
-        {
-            ++rgnIt;
-            auto end = rgnIt;
-            while(*end != rgnStop)
-                ++end;
-            std::set_symmetric_difference(rgnRow.begin(), rgnRow.end(), rgnIt, end, std::back_inserter(rgnTmp));
-            swap(rgnRow, rgnTmp);
-            rgnTmp.clear();
-            rgnIt = end;
-            ++rgnIt;
-        }
+        while(y >= *rgnP.it)
+            rgnP.advance();
 
-        auto rowIt = rgnRow.begin();
+        auto rowIt = rgnP.row.begin(); 
         int x = 0;
 
         while(x < width_)
         {
-            int nextX = std::min(width_, *rowIt++);
+            int nextX = std::min(width_, (int)*rowIt++);
 
             for(; x < nextX; x++)
             {
@@ -306,7 +312,7 @@ void WaylandVideoDriver::updateScreenRects(
             if(x >= width_)
                 break;
 
-            nextX = std::min(width_, *rowIt++);
+            nextX = std::min(width_, (int)*rowIt++);
 
             for(; x < nextX; x++)
                 screen[y * width_ + x] = colors_[framebuffer_[y * rowBytes_ + x]];
