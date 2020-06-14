@@ -9,6 +9,18 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 project(Executor2000 VERSION 0.1.0)
 
+if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
+    message( FATAL_ERROR
+        "The git submodule 'syn68k' is not available. Please run\n"
+        "git submodule update --init --recursive" )
+endif()
+
+
+option(EXECUTOR_ENABLE_LOGGING "enable support for the -logtraps option")
+if(EXECUTOR_ENABLE_LOGGING)
+    add_compile_definitions(EXECUTOR_ENABLE_LOGGING)
+endif()
+
 set(CMAKE_CXX_STANDARD 17)
 
 if(WIN32)
@@ -27,11 +39,6 @@ if(WIN32)
     )
 endif()
 
-if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
-    message( FATAL_ERROR
-        "The git submodule 'syn68k' is not available. Please run\n"
-        "git submodule update --init --recursive" )
-endif()
 
 enable_testing()
 

@@ -91,6 +91,7 @@ template<typename Ret, typename... Args, Ret (*fptr)(Args...), typename CallConv
 void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
 {
     Entrypoint::init();
+#ifdef EXECUTOR_ENABLE_LOGGING
     if(logging::enabled())
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
                 [this](syn68k_addr_t addr)
@@ -103,6 +104,7 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
                 }
             ));    
     else
+#endif    
         guestFP = (UPP<Ret (Args...),CallConv>)SYN68K_TO_US(callback_install(
                 [this](syn68k_addr_t addr)
                 {
@@ -116,6 +118,7 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
 
     if(libname)
     {
+#ifdef EXECUTOR_ENABLE_LOGGING
         if(logging::enabled())
             builtinlibs::addPPCEntrypoint(libname, name,
                 [this](PowerCore& cpu) { 
@@ -126,6 +129,7 @@ void WrappedFunction<Ret (Args...), fptr, CallConv>::init()
                 }
             );
         else
+#endif
             builtinlibs::addPPCEntrypoint(libname, name,
                 [this](PowerCore& cpu) { 
                     if(auto ret = this->checkBreakPPC(cpu); ~ret)
@@ -164,6 +168,7 @@ template<typename Ret, typename... Args, Ret (*fptr)(Args...), int trapno, uint3
 void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
 {
     WrappedFunction<Ret(Args...),fptr,CallConv>::init();
+#ifdef EXECUTOR_ENABLE_LOGGING
     if(logging::enabled())
         dispatcher.addSelector(selector, this,
             [this](syn68k_addr_t addr)
@@ -173,6 +178,7 @@ void SubTrapFunction<Ret (Args...), fptr, trapno, selector, CallConv>::init()
             }
         );
     else
+#endif
         dispatcher.addSelector(selector, this,
             [](syn68k_addr_t addr)
             {
@@ -244,6 +250,7 @@ void TrapVariant<Trap, Ret (Args...), flags...>::init()
     Entrypoint::init();
     if(libname)
     {
+#ifdef EXECUTOR_ENABLE_LOGGING
         if(logging::enabled())
         {
             builtinlibs::addPPCEntrypoint(libname, name,
@@ -260,6 +267,7 @@ void TrapVariant<Trap, Ret (Args...), flags...>::init()
                 });
         }
         else
+#endif        
         {
             builtinlibs::addPPCEntrypoint(libname, name,
                 [this](PowerCore& cpu)
