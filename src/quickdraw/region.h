@@ -76,7 +76,7 @@ struct RegionProcessor
     std::vector<int16_t> row { RGN_STOP };
     std::vector<int16_t> tmp;
     Iterator it;
-    int16_t top_;
+    int16_t top_ = -32768;
 
     RegionProcessor(Iterator rgnIt)
         : it(rgnIt)

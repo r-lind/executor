@@ -231,20 +231,12 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 
     region_t waylandRgn = compositor_.create_region();
 
-    int from = *rgnP.it, to;
-
-    while(from < height_)
+    while(rgnP.bottom() < height_)
     {
         rgnP.advance();
         
-        to = *rgnP.it;
-
         for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
-        {
-            waylandRgn.add(rgnP.row[i], from, rgnP.row[i+1] - rgnP.row[i], to - from);
-        }
-
-        from = to;
+            waylandRgn.add(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
     }
 
     surface_.set_input_region(waylandRgn);
@@ -255,14 +247,13 @@ void WaylandVideoDriver::updateScreenRects(
     bool cursor_p)
 {
     std::cout << "update.\n";
-    //buffer_ = Buffer(shm_, width_, height_);
     uint32_t *screen = reinterpret_cast<uint32_t*>(buffer_.data());
 
     RegionProcessor rgnP(rootlessRegion_.begin());
 
     for(int y = 0; y < height_; y++)
     {
-        while(y >= *rgnP.it)
+        while(y >= rgnP.bottom())
             rgnP.advance();
 
         auto rowIt = rgnP.row.begin(); 
