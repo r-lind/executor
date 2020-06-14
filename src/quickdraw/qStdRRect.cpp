@@ -196,22 +196,64 @@ RgnHandle Executor::ROMlib_circrgn(const Rect *r) /* INTERNAL */
     return rh;
 }
 
-/*
- * TODO:  speed up this code... it is ridiculously slow
- */
+static RgnHandle roundRectRgn(const Rect* r, int16_t width, int16_t height)
+{
+    /*
+    * TODO:  speed up this code... it is ridiculously slow
+    */
+
+    int16_t ovaldx = r->right - r->left - width;
+    int16_t ovaldy = r->bottom - r->top - height;
+    int16_t rectdx = r->right - r->left - width / 2;
+    int16_t rectdy = r->bottom - r->top - height / 2;
+
+    RgnHandle rh = NewRgn();    
+    RectRgn(rh, r);
+    
+    Rect tempr;
+    SetRect(&tempr, r->left, r->top,
+            r->left + width, r->top + height);
+    RgnHandle oval = ROMlib_circrgn(&tempr);
+
+    SetRect(&tempr, r->left, r->top,
+            r->left + width / 2, r->top + height / 2);
+    
+    RgnHandle smallr = NewRgn();
+    RectRgn(smallr, &tempr);
+
+    RgnHandle corner = NewRgn();
+    DiffRgn(smallr, oval, corner);
+    DiffRgn(rh, corner, rh);
+
+    OffsetRgn(oval, ovaldx, 0);
+    OffsetRgn(smallr, rectdx, 0);
+    DiffRgn(smallr, oval, corner);
+    DiffRgn(rh, corner, rh);
+
+    OffsetRgn(oval, 0, ovaldy);
+    OffsetRgn(smallr, 0, rectdy);
+    DiffRgn(smallr, oval, corner);
+    DiffRgn(rh, corner, rh);
+
+    OffsetRgn(oval, -ovaldx, 0);
+    OffsetRgn(smallr, -rectdx, 0);
+    DiffRgn(smallr, oval, corner);
+    DiffRgn(rh, corner, rh);
+
+    DisposeRgn(smallr);
+    DisposeRgn(corner);
+    DisposeRgn(oval);
+    
+    return rh;
+}
 
 void Executor::C_StdRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER height)
 {
-    RgnHandle rh, oval, corner, smallr;
-    Rect tempr;
-    INTEGER ovaldx, ovaldy, rectdx, rectdy;
-    GUEST<Point> p;
     PAUSEDECL;
 
     if(qdGlobals().thePort->picSave)
     {
-        p.h = width;
-        p.v = height;
+        GUEST<Point> p = { height, width };
         ROMlib_drawingverbrectovalpicupdate(verb, r, &p);
         PICOP(OP_frameRRect + (int)verb);
         PICWRITE(r, sizeof(*r));
@@ -222,52 +264,26 @@ void Executor::C_StdRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER h
         /*-->*/ return;
 
     PAUSERECORDING;
-    ovaldx = r->right - r->left - width;
-    ovaldy = r->bottom - r->top - height;
     if(width < 4 && height < 4)
         StdRect(verb, r);
     else
     {
-        rectdx = r->right - r->left - width / 2;
-        rectdy = r->bottom - r->top - height / 2;
+        RgnHandle rh = roundRectRgn(r, width, height);
+        if(verb == frame)
+        {
+            if(RgnHandle rsave = (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort))
+                XorRgn(rh, rsave, rsave);
 
-        rh = NewRgn();
-        corner = NewRgn();
-        smallr = NewRgn();
-
-        RectRgn(rh, r);
-
-        SetRect(&tempr, r->left, r->top,
-                r->left + width, r->top + height);
-        oval = ROMlib_circrgn(&tempr);
-
-        SetRect(&tempr, r->left, r->top,
-                r->left + width / 2, r->top + height / 2);
-        RectRgn(smallr, &tempr);
-
-        DiffRgn(smallr, oval, corner);
-        DiffRgn(rh, corner, rh);
-
-        OffsetRgn(oval, ovaldx, 0);
-        OffsetRgn(smallr, rectdx, 0);
-        DiffRgn(smallr, oval, corner);
-        DiffRgn(rh, corner, rh);
-
-        OffsetRgn(oval, 0, ovaldy);
-        OffsetRgn(smallr, 0, rectdy);
-        DiffRgn(smallr, oval, corner);
-        DiffRgn(rh, corner, rh);
-
-        OffsetRgn(oval, -ovaldx, 0);
-        OffsetRgn(smallr, -rectdx, 0);
-        DiffRgn(smallr, oval, corner);
-        DiffRgn(rh, corner, rh);
-
-        StdRgn(verb, rh);
-
-        DisposeRgn(smallr);
-        DisposeRgn(corner);
-        DisposeRgn(oval);
+            Rect inner = *r;
+            Point penSize = PORT_PEN_SIZE(qdGlobals().thePort);
+            InsetRect(&inner, penSize.h, penSize.v);
+            RgnHandle innerRgn = roundRectRgn(&inner, width - 2 * penSize.h, height - 2 * penSize.v);
+            DiffRgn(rh, innerRgn, rh);
+            DisposeRgn(innerRgn);
+            StdRgn(paint, rh);
+        }
+        else
+            StdRgn(verb, rh);
         DisposeRgn(rh);
     }
     RESUMERECORDING;
