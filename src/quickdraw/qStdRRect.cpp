@@ -281,55 +281,34 @@ RgnHandle Executor::ROMlib_circrgn(const Rect *r) /* INTERNAL */
 }
 #endif
 
-static RgnHandle roundRectRgn(const Rect* r, int16_t width, int16_t height)
+
+static RgnHandle roundRectRgn(const Rect& r, int16_t width, int16_t height)
 {
-    /*
-    * TODO:  speed up this code... it is ridiculously slow
-    */
-
-    int16_t ovaldx = r->right - r->left - width;
-    int16_t ovaldy = r->bottom - r->top - height;
-    int16_t rectdx = r->right - r->left - width / 2;
-    int16_t rectdy = r->bottom - r->top - height / 2;
-
-    RgnHandle rh = NewRgn();    
-    RectRgn(rh, r);
+    width = std::min<int16_t>(width, r.right - r.left);
+    height = std::min<int16_t>(height, r.bottom - r.top);
+    Rect ovalRect { r.top, r.left, r.top + height, r.left + width };
+    RgnHandle rgn = ROMlib_circrgn(&ovalRect);
     
-    Rect tempr;
-    SetRect(&tempr, r->left, r->top,
-            r->left + width, r->top + height);
-    RgnHandle oval = ROMlib_circrgn(&tempr);
-
-    SetRect(&tempr, r->left, r->top,
-            r->left + width / 2, r->top + height / 2);
+    (*rgn)->rgnBBox = r;
+    RgnVector vec(rgn);
     
-    RgnHandle smallr = NewRgn();
-    RectRgn(smallr, &tempr);
+    int16_t midX = r.left + width / 2;
+    int16_t midY = r.top + height / 2;
 
-    RgnHandle corner = NewRgn();
-    DiffRgn(smallr, oval, corner);
-    DiffRgn(rh, corner, rh);
+    int16_t insertX = r.right - r.left - width;
+    int16_t insertY = r.bottom - r.top - width;
 
-    OffsetRgn(oval, ovaldx, 0);
-    OffsetRgn(smallr, rectdx, 0);
-    DiffRgn(smallr, oval, corner);
-    DiffRgn(rh, corner, rh);
+    for(auto p = vec.begin(); *p != RGN_STOP; ++p)
+    {
+        if(*p >= midY)
+            *p += insertY;
 
-    OffsetRgn(oval, 0, ovaldy);
-    OffsetRgn(smallr, 0, rectdy);
-    DiffRgn(smallr, oval, corner);
-    DiffRgn(rh, corner, rh);
+        for(++p; *p != RGN_STOP; ++p)
+            if(*p >= midX)
+                *p += insertX;
+    }
 
-    OffsetRgn(oval, -ovaldx, 0);
-    OffsetRgn(smallr, -rectdx, 0);
-    DiffRgn(smallr, oval, corner);
-    DiffRgn(rh, corner, rh);
-
-    DisposeRgn(smallr);
-    DisposeRgn(corner);
-    DisposeRgn(oval);
-    
-    return rh;
+    return vec.release();
 }
 
 void Executor::C_StdRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER height)
@@ -353,7 +332,7 @@ void Executor::C_StdRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER h
         StdRect(verb, r);
     else
     {
-        RgnHandle rh = roundRectRgn(r, width, height);
+        RgnHandle rh = roundRectRgn(*r, width, height);
         if(verb == frame)
         {
             if(RgnHandle rsave = (RgnHandle)PORT_REGION_SAVE(qdGlobals().thePort))
@@ -362,7 +341,7 @@ void Executor::C_StdRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER h
             Rect inner = *r;
             Point penSize = PORT_PEN_SIZE(qdGlobals().thePort);
             InsetRect(&inner, penSize.h, penSize.v);
-            RgnHandle innerRgn = roundRectRgn(&inner, width - 2 * penSize.h, height - 2 * penSize.v);
+            RgnHandle innerRgn = roundRectRgn(inner, width - 2 * penSize.h, height - 2 * penSize.v);
             DiffRgn(rh, innerRgn, rh);
             DisposeRgn(innerRgn);
             StdRgn(paint, rh);
