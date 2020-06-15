@@ -16,10 +16,12 @@
 
 using namespace Executor;
 
+using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
+
+#if 1
 RgnHandle Executor::ROMlib_circrgn(const Rect *rectptr)
 {
     const Rect& rect = *rectptr;
-    using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
 
     RgnVector rgn;
     /*
@@ -94,6 +96,8 @@ RgnHandle Executor::ROMlib_circrgn(const Rect *rectptr)
     return rgnH;
 }
 
+#else
+
 #define TERM (*ip++ = RGN_STOP_X)
 
 #define ADD4(y, x1, x2) \
@@ -103,7 +107,7 @@ RgnHandle Executor::ROMlib_circrgn(const Rect *rectptr)
     (*ip++ = CW_RAW((y)), *ip++ = CW_RAW((x1)), *ip++ = CW_RAW((x2)), \
      *ip++ = CW_RAW((x3)), *ip++ = CW_RAW((x4)), TERM)
 
-RgnHandle xROMlib_circrgn(const Rect *r) /* INTERNAL */
+RgnHandle Executor::ROMlib_circrgn(const Rect *r) /* INTERNAL */
 {
     RgnHandle rh;
     INTEGER x, y, temp; /* some variables need to be longs */
@@ -130,7 +134,7 @@ RgnHandle xROMlib_circrgn(const Rect *r) /* INTERNAL */
     rh = (RgnHandle)NewHandle(maxsize);
     (*rh)->rgnBBox = *r;
 
-    if(dh == dv && dh < 10)
+    if(false && dh == dv && dh < 10)
     { /* do small ones by hand */
         ip = (INTEGER *)*rh + 5;
         if(dh >= 4)
@@ -275,6 +279,7 @@ RgnHandle xROMlib_circrgn(const Rect *r) /* INTERNAL */
 
     return rh;
 }
+#endif
 
 static RgnHandle roundRectRgn(const Rect* r, int16_t width, int16_t height)
 {
