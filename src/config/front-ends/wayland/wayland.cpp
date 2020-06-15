@@ -167,8 +167,7 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
 
     width_ = 1024;
     height_ = 768;
-    bpp_ = 8;
-
+    bpp_ = bpp ? bpp : 8;
 
     xdg_toplevel_.set_maximized();
 
@@ -242,40 +241,120 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
     surface_.set_input_region(waylandRgn);
 }
 
+template<int depth>
+struct IndexedPixelGetter
+{
+    uint8_t *src;
+    int shift;
+    std::array<uint32_t, 256>& colors;
+
+    static constexpr uint8_t mask = (1 << depth) - 1;
+
+    IndexedPixelGetter(std::array<uint32_t, 256>& colors, uint8_t *line, int x)
+        : colors(colors)
+    {
+        src = line + x * depth / 8;
+        shift = 8 - (x * depth % 8) - depth;
+    }
+
+    uint32_t operator() ()
+    {
+        auto c = colors[(*src >> shift) & mask];
+        shift -= depth;
+        if(shift < 0)
+        {
+            ++src;
+            shift = 8 - depth;
+        }
+        return c;
+    }
+};
+
 void WaylandVideoDriver::updateScreenRects(
     int num_rects, const vdriver_rect_t *r,
     bool cursor_p)
 {
     std::cout << "update.\n";
+    for(int i = 0; i < num_rects; i++)
+        std::cout << r[i].left << ", " << r[i].top << " - " << r[i].right << ", " << r[i].bottom << std::endl;
     uint32_t *screen = reinterpret_cast<uint32_t*>(buffer_.data());
 
-    RegionProcessor rgnP(rootlessRegion_.begin());
-
-    for(int y = 0; y < height_; y++)
+    for(int i = 0; i < num_rects; i++)
     {
-        while(y >= rgnP.bottom())
-            rgnP.advance();
+        RegionProcessor rgnP(rootlessRegion_.begin());
 
-        auto rowIt = rgnP.row.begin(); 
-        int x = 0;
-
-        while(x < width_)
+        for(int y = r[i].top; y < r[i].bottom; y++)
         {
-            int nextX = std::min(width_, (int)*rowIt++);
+            while(y >= rgnP.bottom())
+                rgnP.advance();
 
-            for(; x < nextX; x++)
+            auto blitLine = [this, &rgnP, screen, y, r, i](auto getPixel) {
+                auto rowIt = rgnP.row.begin();
+                int x = r[i].left;
+
+                while(x < r[i].right)
+                {
+                    int nextX = std::min(r[i].right, (int)*rowIt++);
+
+                    for(; x < nextX; x++)
+                    {
+                        uint32_t pixel = getPixel();
+                        screen[y * width_ + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
+                    }
+                    
+                    if(x >= r[i].right)
+                        break;
+
+                    nextX = std::min(r[i].right, (int)*rowIt++);
+
+                    for(; x < nextX; x++)
+                        screen[y * width_ + x] = getPixel();
+                }
+            };
+
+            uint8_t *src = framebuffer_ + y * rowBytes_;
+            switch(bpp_)
             {
-                uint32_t pixel = colors_[framebuffer_[y * rowBytes_ + x]];
-                screen[y * width_ + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
+                case 8:
+                    src += r[i].left;
+                    blitLine([&] { return colors_[*src++]; });
+                    break;
+
+                case 1: 
+                    blitLine(IndexedPixelGetter<1>(colors_, src, r[i].left));
+                    break;
+                case 2: 
+                    blitLine(IndexedPixelGetter<2>(colors_, src, r[i].left));
+                    break;
+                case 4: 
+                    blitLine(IndexedPixelGetter<4>(colors_, src, r[i].left));
+                    break;
+                case 16:
+                    {
+                        auto *src16 = reinterpret_cast<GUEST<uint16_t>*>(src);
+                        src16 += r[i].left;
+                        blitLine([&] { 
+                            uint16_t pix = *src16++;
+                            auto fiveToEight = [](uint32_t x) {
+                                return (x << 3) | (x >> 2);
+                            };
+                            return 0xFF000000
+                                | (fiveToEight((pix >> 10) & 31) << 16)
+                                | (fiveToEight((pix >> 5) & 31) << 8)
+                                | fiveToEight(pix & 31);
+                        });
+                    }
+                    break;
+
+                case 32:
+                    {
+                        auto *src32 = reinterpret_cast<GUEST<uint32_t>*>(src);
+                        src32 += r[i].left;
+                        blitLine([&] { return (*src32++) | 0xFF000000; });
+                    }
+                    break;
+
             }
-            
-            if(x >= width_)
-                break;
-
-            nextX = std::min(width_, (int)*rowIt++);
-
-            for(; x < nextX; x++)
-                screen[y * width_ + x] = colors_[framebuffer_[y * rowBytes_ + x]];
         }
     }
 
