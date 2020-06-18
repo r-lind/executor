@@ -14,49 +14,180 @@
 
 #include <util/handle_vector.h>
 
+#include <iostream>
+
 using namespace Executor;
 
 using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
 
 #if 1
+
+std::vector<int16_t> bresenham(int64_t width, int64_t height)
+{
+    std::vector<int16_t> steps;
+    steps.reserve(height);
+
+    int64_t a = int64_t(height) * height;
+    int64_t b = int64_t(width) * width;
+
+   // std::cout << "CIRCLE: " << width << " x " << height << std::endl;
+
+    bool oddWidth = width % 2;
+    bool oddHeight = height % 2;
+
+    int64_t d = (oddWidth ? 4 : 1) * height * height + (1 - 2 * height) * width * width;
+
+    int x = oddWidth ? 0 : 0, y = height/2;
+
+//        float xx = 0.5;
+//        float yy = height / 2.0f - 0.5f;
+//        float dd = 4 * a * xx * xx + 4 * b * yy * yy - a * b;
+
+    while(width * y >= height * x)
+    {    
+   //     std::cout << "d = " << d << std::endl;
+
+
+
+        /*std::cout << "d " << d << " dd " << dd << std::endl;
+        std::cout << "x " << x << " xx " << xx << std::endl;
+        std::cout << "y " << y << " yy " << yy << std::endl;*/
+
+
+        if(d < 0)
+        {
+            d += 4 * a * (2 * x + 1 + (oddWidth ? 2 : 1));
+
+            //float deltadd = 4 * a * ( 2 * xx + 1 );
+
+            //std::cout << "deltaD " << deltad << " deltaDD " << deltadd << std::endl;
+        }
+        else
+        {
+            std::cout << "step" << x << " " << y << std::endl;
+            steps.push_back(x);
+            d += 4 * a * (2 * x + 1 + (oddWidth ? 2 : 1)) - 4 * b * (2 * y - (oddHeight ? 1 : 2));
+            --y;
+        }
+        ++x;
+    }
+    return steps;
+}
+
+
+RgnHandle Executor::ROMlib_circrgn(const Rect *rectptr)
+{
+    //const Rect& rect = *rectptr;
+    Rect rect = *rectptr;
+    //rect.right--;
+    //rect.bottom--;
+
+    RgnVector rgn;
+
+
+    int64_t width = int(rect.right) - rect.left;
+    int64_t height = int(rect.bottom) - rect.top;
+
+    auto xsteps = bresenham(width, height);
+    auto ysteps = bresenham(height, width);
+
+    std::cout << "CIRCLE " << width << "x" << height << std::endl;
+    for(auto x : xsteps)
+        std::cout << " " << x;
+    std::cout << "\n";
+    for(auto y : ysteps)
+        std::cout << " " << y;
+    std::cout << "\n";
+
+    int16_t centl = rect.left + width / 2;
+    int16_t centr = rect.right - width / 2;
+    int16_t centt = rect.top + height / 2;
+    int16_t centb = rect.bottom - height / 2;
+
+    int16_t ox = 0;
+
+    auto pointUpper = [&ox, &rgn, centl, centr](int16_t x, int16_t y) {
+        if(x == ox)
+            return;
+        rgn.push_back(y);
+        rgn.push_back(centl - x);
+        if(ox)
+        {
+            rgn.push_back(centl - ox);
+            rgn.push_back(centr + ox);
+        }
+        rgn.push_back(centr + x);
+        rgn.push_back(RGN_STOP);
+        ox = x;
+    };
+    auto pointLower = [&ox, &rgn, centl, centr](int16_t x, int16_t y) {
+        if(x == ox)
+            return;
+        rgn.push_back(y);
+        rgn.push_back(centl - ox);
+        rgn.push_back(centl - x);
+        rgn.push_back(centr + x);
+        rgn.push_back(centr + ox);
+        rgn.push_back(RGN_STOP);
+        ox = x;
+    };
+
+
+    {
+        int16_t y = rect.top;
+        
+        for(int16_t x : xsteps)
+            pointUpper(x, y++);
+    }
+        
+    for(int i = ysteps.size() - 1; i >= 0; i--)
+    {
+        int16_t x = width / 2 - i;
+        int16_t y = centt - ysteps[i];
+
+        pointUpper(x, y);
+    }
+    //pointUpper(width / 2, centt - ysteps[0]);
+    //point(width / 2, centb + ysteps[0]);
+    for(int i = 0; i < ysteps.size()-1; i++)
+    {
+        int16_t x = width / 2 - i - 1;
+        int16_t y = centb + ysteps[i];
+
+        pointLower(x, y);
+    }
+
+    for(int i = xsteps.size() - 1; i >= 0; i--)
+    {
+        int16_t y = rect.bottom - i - 1;
+        int16_t x = xsteps[i];
+
+        pointLower(x, y);
+    }
+
+
+    rgn.push_back(rect.bottom);
+    rgn.push_back(centl - ox);
+    rgn.push_back(centr + ox);
+    rgn.push_back(RGN_STOP);
+    rgn.push_back(RGN_STOP);
+
+    //exit(1);
+
+    size_t sz = sizeof(int16_t) * rgn.size() + 10;
+    RgnHandle rgnH = rgn.release();
+    (*rgnH)->rgnBBox = rect;
+    (*rgnH)->rgnSize = sz;
+    return rgnH;
+}
+
+#elif 1
+
 RgnHandle Executor::ROMlib_circrgn(const Rect *rectptr)
 {
     const Rect& rect = *rectptr;
 
     RgnVector rgn;
-    /*
-    rgn.push_back(rect.top);
-    rgn.push_back(rect.left+1);
-    rgn.push_back(rect.right-1);
-    rgn.push_back(RGN_STOP);
-    rgn.push_back(rect.top+1);
-    rgn.push_back(rect.left);
-    rgn.push_back(rect.left+1);
-    rgn.push_back(rect.right-1);
-    rgn.push_back(rect.right);
-    rgn.push_back(RGN_STOP);
-    rgn.push_back(rect.bottom);
-    rgn.push_back(rect.left);
-    rgn.push_back(rect.right);
-    rgn.push_back(RGN_STOP);
-    rgn.push_back(RGN_STOP);*/
-
-
-
-/*
-    int x = 0, y = 0;
-    int64_t a = int64_t(int(rect.bottom) - rect.top) * (int(rect.bottom) - rect.top);
-    int64_t b = int64_t(int(rect.right) - rect.left) * (int(rect.right) - rect.left);
-
-
-    int64_t y2b = a * b;
-
-    {
-        ++x;
-        y2b -= a*x;
-
-
-    }*/
 
     std::vector<int> vecA, vecB, vecC;
 
