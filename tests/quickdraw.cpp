@@ -515,7 +515,6 @@ TEST(QuickDraw, PaintCircle)
             perfect += port.r.right - 2 * expectedWhitePixels;
             EXPECT_EQ(expectedWhitePixels, whitepixels);
         }
-        std::cout << w << "x" << h << " x pi^2/4 = " << count << " (" << perfect << ")\n";
         EXPECT_EQ(perfect, count);
     }
 }
