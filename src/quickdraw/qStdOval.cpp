@@ -10,12 +10,11 @@
 #include <MemoryMgr.h>
 #include <quickdraw/cquick.h>
 #include <quickdraw/picture.h>
-#include <util/handle_vector.h>
+#include <quickdraw/region.h>
 
 using namespace Executor;
 
 
-using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
 
 std::vector<int16_t> bresenham(int64_t width, int64_t height)
 {

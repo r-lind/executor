@@ -12,13 +12,12 @@
 #include <quickdraw/cquick.h>
 #include <quickdraw/picture.h>
 
-#include <util/handle_vector.h>
+#include <quickdraw/region.h>
 
 #include <algorithm>
 
 using namespace Executor;
 
-using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
 
 static RgnHandle roundRectRgn(const Rect& r, int16_t width, int16_t height)
 {

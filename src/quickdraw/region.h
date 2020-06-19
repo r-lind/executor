@@ -2,6 +2,7 @@
 
 #include "quick.h"
 #include <vector>
+#include <util/handle_vector.h>
 
 #define RGN_SIZE_MASK (0x7FFF)
 #define RGN_SPECIAL_FLAG (0x8000)
@@ -99,5 +100,8 @@ struct RegionProcessor
     int16_t bottom() const { return *it; }
     int16_t top() const { return top_; }
 };
+
+using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
+
 
 }
