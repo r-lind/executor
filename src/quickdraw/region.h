@@ -1,8 +1,7 @@
-#if !defined(_REGION_H_)
-#define _REGION_H_
+#pragma once
 
-/* region.h
- */
+#include "quick.h"
+#include <vector>
 
 #define RGN_SIZE_MASK (0x7FFF)
 #define RGN_SPECIAL_FLAG (0x8000)
@@ -67,4 +66,38 @@
 
 #define RGN_DATA(rgn) (RGNP_DATA(*(rgn)))
 
-#endif /* !_REGION_H_ */
+
+namespace Executor
+{
+
+template<typename Iterator>
+struct RegionProcessor
+{
+    std::vector<int16_t> row { RGN_STOP };
+    std::vector<int16_t> tmp;
+    Iterator it;
+    int16_t top_ = -32768;
+
+    RegionProcessor(Iterator rgnIt)
+        : it(rgnIt)
+    {
+    }
+
+    void advance()
+    {
+        top_ = *it++;
+        auto end = it;
+        while(*end != RGN_STOP)
+            ++end;
+        std::set_symmetric_difference(row.begin(), row.end(), it, end, std::back_inserter(tmp));
+        swap(row, tmp);
+        tmp.clear();
+        it = end;
+        ++it;
+    }
+
+    int16_t bottom() const { return *it; }
+    int16_t top() const { return top_; }
+};
+
+}

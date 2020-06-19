@@ -97,6 +97,7 @@ Optional (for additional front-ends):
 * SDL 2
 * SDL 1.2
 * X11 libraries
+* waylandpp
 
 Building:
 ```
@@ -116,12 +117,7 @@ When `./build/src/executor` is first invoked, it will automatically install its
 fake Mac system file and the `Browser` finder replacement to `~/.executor/`, so
 no further setup should be needed.
 
-If you're using Wayland, you may need to force Qt to use its X11 backend, as their
-Wayland backend causes problems for executor:
-
-```
-export QT_QPA_PLATFORM=xcb
-```
+If you're using Wayland, avoid the Qt front-end and use the `executor-wayland` binary instead.
 
 Executor 2000 should be able to use native Mac files on macOS, AppleDouble 
 file pairs (`foo` and `%foo`) as used by older executor verions, as well as
