@@ -14,7 +14,7 @@
 
 #include <util/handle_vector.h>
 
-#include <iostream>
+#include <algorithm>
 
 using namespace Executor;
 
