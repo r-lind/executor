@@ -22,13 +22,13 @@ std::vector<int16_t> bresenham(int64_t width, int64_t height)
     std::vector<int16_t> steps;
     steps.reserve(height);
 
-    int64_t a = int64_t(height) * height;
-    int64_t b = int64_t(width) * width;
+    int64_t a = height * height;
+    int64_t b = width * width;
 
     bool oddWidth = width % 2;
     bool oddHeight = height % 2;
 
-    int64_t d = (oddWidth ? 4 : 1) * height * height + (1 - 2 * height) * width * width;
+    int64_t d = (oddWidth ? 4 : 1) * a + (1 - 2 * height) * b;
 
     int x = 0, y = height/2;
 
@@ -106,36 +106,19 @@ RgnHandle Executor::ROMlib_circrgn(const Rect& rect)
             ox = x;
         };
 
-        {
-            int16_t y = rect.top;
-            
-            for(int16_t x : xsteps)
-                pointUpper(x, y++);
-        }
-            
-        for(int i = ysteps.size() - 1; i >= 0; i--)
-        {
-            int16_t x = width / 2 - i;
-            int16_t y = centt - ysteps[i];
+        rgn.reserve(12 * xsteps.size() + 12 * ysteps.size() + 5 /* end */ - 2 /* no ox at start */);
 
-            pointUpper(x, y);
-        }
+        for(int i = 0; i < xsteps.size(); i++)
+            pointUpper(xsteps[i], rect.top + i);
+
+        for(int i = ysteps.size() - 1; i >= 0; i--)
+            pointUpper(width / 2 - i, centt - ysteps[i]);
 
         for(int i = 0; i < ysteps.size()-1; i++)
-        {
-            int16_t x = width / 2 - i - 1;
-            int16_t y = centb + ysteps[i];
-
-            pointLower(x, y);
-        }
+            pointLower(width / 2 - i - 1, centb + ysteps[i]);
 
         for(int i = xsteps.size() - 1; i >= 0; i--)
-        {
-            int16_t y = rect.bottom - i - 1;
-            int16_t x = xsteps[i];
-
-            pointLower(x, y);
-        }
+            pointLower(xsteps[i], rect.bottom - i - 1);
 
         rgn.push_back(rect.bottom);
         rgn.push_back(centl - ox);
