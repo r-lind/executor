@@ -6,7 +6,4 @@ set_tests_properties(
         FileTest.SetFInfo_CrDat 
         FileTest.SetFLock 
         FileTest.MakeFSSpec
-        QuickDraw.PaintCircle
-        QuickDraw.FrameCircle1
-        QuickDraw.FrameRoundRect
     APPEND PROPERTIES LABELS xfail)

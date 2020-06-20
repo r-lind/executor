@@ -82,7 +82,7 @@ extern void ROMlib_PICWRITE(Ptr addr, INTEGER count);
 #define PICWRITE(a, c) ROMlib_PICWRITE((Ptr)(a), (c)) /* Cast is handy. */
 
 
-extern RgnHandle ROMlib_circrgn(const Rect *rp);
+extern RgnHandle ROMlib_circrgn(const Rect& rp);
 extern void ROMlib_initport(GrafPtr p);
 extern void ROMlib_printrgn(RgnHandle h);
 

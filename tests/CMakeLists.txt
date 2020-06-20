@@ -63,7 +63,6 @@ if(CMAKE_SYSTEM_NAME MATCHES Retro.*)
         ${TEST_SOURCES} 
         main.cpp googletest/googletest/src/gtest-all.cc size.r)
     set_target_properties(tests PROPERTIES LINK_FLAGS "-Wl,-gc-sections")
-
 else()
     set(INSTALL_GTEST FALSE CACHE BOOL "" FORCE)
 	set( gtest_force_shared_crt ON CACHE BOOL "Always use msvcrt.dll" FORCE)
@@ -92,3 +91,5 @@ else()
         APPEND PROPERTY TEST_INCLUDE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/test-properties.cmake"
     )
 endif()
+
+target_compile_features(tests PRIVATE cxx_std_17)

@@ -164,10 +164,6 @@ static void dobuttons(INTEGER id, INTEGER offsetx, INTEGER offsety)
     int done;
     int tcnt, twid;
     Point p;
-#define BILLBUTTONS /*  */
-#if defined(BILLBUTTONS)
-    INTEGER h, v;
-#endif /* BILLBUTTONS */
     char *textp;
 
     if((bp = (struct bdef *)findid(id)))
@@ -189,21 +185,10 @@ static void dobuttons(INTEGER id, INTEGER offsetx, INTEGER offsety)
                        (bp->buts[i].butloc.top + bp->buts[i].butloc.bottom) / 2 + 4);
                 DrawText((Ptr)textp, 0, tcnt);
             }
-#if defined(BILLBUTTONS)
-            h = bp->buts[i].butloc.right - bp->buts[i].butloc.left;
-            v = (bp->buts[i].butloc.bottom - bp->buts[i].butloc.top) / 2;
-            if(h > v)
-                h = v;
-            if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
-                FrameRoundRect(&bp->buts[i].butloc, h, v);
-            else
-                FrameRect(&bp->buts[i].butloc);
-#else /* BILLBUTTONS */
             if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
                 FrameRoundRect(&bp->buts[i].butloc, 10, 10);
             else
                 FrameRect(&bp->buts[i].butloc);
-#endif /* BILLBUTTONS */
         }
 
         for(done = 0; !done;)

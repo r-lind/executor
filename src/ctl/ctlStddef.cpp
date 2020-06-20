@@ -235,14 +235,11 @@ static void
 draw_push(ControlHandle c, int16_t part)
 {
     GUEST<RgnHandle> save;
-    int16_t h, v;
+    int16_t h = 10, v = 10;
     Rect r;
 
     r = CTL_RECT(c);
-    h = r.right - r.left;
-    v = (r.bottom - r.top) / 2;
-    if(h > v)
-        h = v;
+    
     save = PORT_CLIP_REGION(CTL_OWNER(c));
     PORT_CLIP_REGION(CTL_OWNER(c)) = NewRgn();
     OpenRgn();

@@ -17,7 +17,7 @@ struct OffscreenPort
     GrafPort port;
     Rect r;
 
-    OffscreenPort(int height = 2, int width = 2)
+    OffscreenPort(int width = 2, int height = 2)
     {
         OpenPort(&port);
 
@@ -438,25 +438,85 @@ TEST(QuickDraw, InvalidCloseRgn)
 
 TEST(QuickDraw, PaintCircle)
 {
-    OffscreenPort port(320, 320);
+    using whlist = std::initializer_list<std::pair<int,int>>;
+    for(auto [w,h] : whlist{
+        {16,16},{15,15},{15,16},{16,15},{4,4},{3,3},{3,10},{10,3},
 
-    PaintOval(&port.r);
+        // {9,4},{8,5},{90,47} // real macOS doesn't quite agree with my theory for these
+        
+        })
+    {
+        std::ostringstream str;
+        str << "oval " << w << "x" << h;
+        SCOPED_TRACE(str.str());
 
-    int count = 0;
-    for(int row = 0; row < port.r.bottom; row++)
-        for(int offset = 0; offset < port.r.right/8; offset++)
-            count += std::bitset<8>(port.data(row,offset)).count();
-    
-    int perfect = 0;
-    for(int y = 0; y < port.r.bottom/2; y++)
-        for(int x = 0; x < port.r.right/2; x++)
+        OffscreenPort port(w, h);
+
+        PaintOval(&port.r);
+
+        int count = 0;
+        for(int row = 0; row < port.r.bottom; row++)
+            for(int offset = 0; offset < (port.r.right+7)/8; offset++)
+                count += std::bitset<8>(port.data(row,offset)).count();
+        
+        int perfect = 0;
+        for(int y = 0; y < port.r.bottom; y++)
         {
-            if(x*x + y*y < port.r.right*port.r.bottom/4)
-                perfect += 4;
+            float yy = (y + 0.5f) * 2.0f / port.r.bottom - 1.0f;
+
+                
+            int whitepixels = 0;
+            int mask = 0x80;
+            int offset = 0;
+            while(offset < (port.r.right+7)/8 && (port.data(y,offset) & mask) == 0)
+            {
+                whitepixels++;
+                mask >>= 1;
+                if(!mask)
+                {
+                    mask = 0x80;
+                    offset++;
+                }
+            }
+
+            int expectedWhitePixels = 0;
+
+                // takes a while on an ancient mac
+            /*for(int x = 0; x < port.r.right; x++)
+            {
+                float xx = (x + 0.5f) * 2.0f / port.r.right - 1.0f;
+                
+                if(xx*xx + yy*yy < 1.0f)
+                    expectedWhitePixels ++;
+                else
+                    break;
+            }*/
+
+                // binary search makes 8MHz feel fast.
+            if(float xx = 0.5f * 2.0f / port.r.right - 1.0f;
+                xx*xx + yy*yy >= 1.0f)
+            {
+                int a = 0;
+                int b = port.r.right/2;
+
+                while(b - a > 1)
+                {
+                    int m = (a + b) / 2;
+
+                    if(float xx = (m + 0.5f) * 2.0f / port.r.right - 1.0f;
+                        xx*xx + yy*yy < 1.0f)
+                        b = m;
+                    else
+                        a = m;
+                }
+                expectedWhitePixels = b;
+            }
+
+            perfect += port.r.right - 2 * expectedWhitePixels;
+            EXPECT_EQ(expectedWhitePixels, whitepixels);
         }
-    
-    EXPECT_GE(perfect, count);
-    EXPECT_LE(port.r.right*port.r.right/4 * 31415926LL / 10000000LL, count);
+        EXPECT_EQ(perfect, count);
+    }
 }
 
 
