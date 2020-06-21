@@ -521,7 +521,7 @@ void Executor::C_DisposeGWorld(GWorldPtr graphics_world)
 void Executor::C_GetGWorld(GUEST<CGrafPtr> *port,
                            GUEST<GDHandle> *graphics_device)
 {
-    *port = theCPortX;
+    *port = theCPort;
     *graphics_device = LM(TheGDevice);
 }
 
@@ -552,7 +552,7 @@ void Executor::C_SetGWorld(CGrafPtr port, GDHandle graphics_device)
         }
     }
 
-    theCPortX = port;
+    theCPort = port;
 }
 
 void Executor::C_AllowPurgePixels(PixMapHandle pixels)
