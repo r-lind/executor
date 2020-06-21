@@ -29,11 +29,6 @@ if(WIN32 AND MSVC)
     )
 endif()
 
-include_directories(${CMAKE_CURRENT_BINARY_DIR}/api/)
-include_directories(include)
-include_directories(.)
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-
 file(GLOB api_yaml_files
     CONFIGURE_DEPENDS
     ${CMAKE_CURRENT_SOURCE_DIR}/../multiversal/defs/*.yaml)
@@ -125,8 +120,7 @@ endfunction()
 linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
 
 add_executable(map_to_c map_to_c/map_to_c.cpp)
-
-include_directories(config/os/${HOST_OS})
+target_include_directories(map_to_c PRIVATE .)
 
 set(MAP_FILES
         wind/active.map                 ctl/arrow_down_inactive.map
@@ -559,6 +553,8 @@ add_library(romlib ${sources}
     )
 
 target_include_directories(romlib PUBLIC . include/ ${CMAKE_CURRENT_BINARY_DIR}/api/ ${CMAKE_CURRENT_BINARY_DIR})
+target_include_directories(romlib PUBLIC config/os/${HOST_OS})
+
 
 target_link_libraries(romlib lmdb)
 
