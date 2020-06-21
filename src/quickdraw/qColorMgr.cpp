@@ -249,11 +249,6 @@ LONGINT Executor::C_Color2Index(RGBColor *rgb)
             success_p = POPUB();
             memcpy(cpu_state.regs, save_regs, 16 * sizeof cpu_state.regs[0]);
         }
-#if 0
-      /* return value from the search procedure is a Boolean, ignore
-	 all but the low byte */
-      success_p &= 0xFF;
-#endif
     }
 
     if(!success_p)
@@ -480,19 +475,19 @@ static unsigned current_red, current_green, current_blue;
     static ULONGINT                                                            \
         rgb_error_for_res_##RES(unsigned components)                           \
     {                                                                          \
-        unsigned rc, bc, gc;                                                   \
+        int rc, bc, gc;                                                   \
         ULONGINT error;                                                        \
         const unsigned mask = (1 << (RES)) - 1;                                \
         const unsigned mid_bit = (0x8000 >> (RES));                            \
                                                                                \
         bc = ((components & mask) << (16 - (RES))) | mid_bit;                  \
-        error = std::abs((long)(bc - current_blue));                                \
+        error = std::abs(bc - int(current_blue));                                \
                                                                                \
         gc = ((components & (mask << (RES))) << (16 - (RES)*2)) | mid_bit;     \
-        error += std::abs((long)(gc - current_green));                              \
+        error += std::abs(gc - int(current_green));                              \
                                                                                \
         rc = ((components & (mask << ((RES)*2))) << (16 - (RES)*3)) | mid_bit; \
-        error += std::abs((long)(rc - current_red));                                \
+        error += std::abs(rc - int(current_red));                                \
                                                                                \
         return error;                                                          \
     }
@@ -820,7 +815,7 @@ void Executor::C_MakeITable(CTabHandle color_table, ITabHandle inverse_table,
     {
         ULONGINT color_sum;
 
-        color_sum = (color_for_index[i].rgb.red
+        color_sum = (unsigned(color_for_index[i].rgb.red)
                      + color_for_index[i].rgb.green
                      + color_for_index[i].rgb.blue);
 
