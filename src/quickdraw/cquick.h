@@ -628,8 +628,7 @@ extern void ROMlib_fill_pixpat(PixPatHandle);
 
 extern RGBColor *ROMlib_qd_color_to_rgb(LONGINT);
 
-extern void gd_allocate_main_device(void);
-extern void gd_set_bpp();
+extern void gd_vdriver_mode_changed();
 extern void gd_update_colors();
 extern void ROMlib_InitGWorlds(void);
 extern void ROMlib_InitGDevices();

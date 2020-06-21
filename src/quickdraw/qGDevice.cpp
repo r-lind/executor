@@ -50,14 +50,65 @@ mode_from_bpp(int bpp)
     return retval;
 }
 
-void Executor::gd_allocate_main_device(void)
+static void gd_setup_main_device()
+{
+    GDHandle gd = LM(MainDevice);
+    bool color_p = !vdriver->isGrayscale();
+    int bpp = vdriver->bpp();
+
+    PixMapHandle gd_pixmap = GD_PMAP(gd);
+    
+    /* set the color bit, all other flag bits should be the same */
+    if(color_p)
+        GD_FLAGS(gd) |= 1 << gdDevType;
+    else
+        GD_FLAGS(gd) &= ~(1 << gdDevType);
+
+    GD_TYPE(gd) = (bpp > 8 ? directType : clutType);
+
+    pixmap_set_pixel_fields(*gd_pixmap, bpp);
+
+    if(bpp <= 8)
+    {
+        CTabHandle gd_color_table;
+
+        gd_color_table = PIXMAP_TABLE(gd_pixmap);
+
+        CTabHandle temp_color_table;
+
+        temp_color_table = GetCTable(color_p
+                                            ? bpp
+                                            : (bpp + 32));
+        if(temp_color_table == nullptr)
+            gui_fatal("unable to get color table `%d'",
+                        color_p ? bpp : (bpp + 32));
+        ROMlib_copy_ctab(temp_color_table, gd_color_table);
+        DisposeCTable(temp_color_table);
+
+        CTAB_FLAGS(gd_color_table) = CTAB_GDEVICE_BIT;
+        MakeITable(gd_color_table, GD_ITABLE(gd), GD_RES_PREF(gd));
+
+        gd_update_colors();
+    }
+
+    PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
+
+    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
+    PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
+
+    Rect *gd_rect = &GD_RECT(gd);
+    gd_rect->top = gd_rect->left = 0;
+    gd_rect->bottom = vdriver->height();
+    gd_rect->right = vdriver->width();
+    PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
+}
+
+static void gd_allocate_main_device(void)
 {
     if(vdriver->framebuffer() == nullptr)
         gui_fatal("vdriver not initialized, unable to allocate `LM(MainDevice)'");
 
     TheZoneGuard guard(LM(SysZone));
-
-    PixMapHandle gd_pixmap;
 
     SET_HILITE_BIT();
     LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = nullptr;
@@ -81,9 +132,8 @@ void Executor::gd_allocate_main_device(void)
 						 be setting this bit.
 					    | (1 << noDriver) */;
 
-    gd_set_bpp();
+    gd_setup_main_device();
 
-    gd_pixmap = GD_PMAP(graphics_device);
 
     /* add ourselves to the device list */
     GD_NEXT_GD(graphics_device) = LM(DeviceList);
@@ -177,59 +227,6 @@ void Executor::gd_update_colors()
 
     vdriver->setColors(n, colors);
 }
-
-void Executor::gd_set_bpp()
-{
-    GDHandle gd = LM(MainDevice);
-    bool color_p = !vdriver->isGrayscale();
-    int bpp = vdriver->bpp();
-
-    PixMapHandle gd_pixmap = GD_PMAP(gd);
-    
-    /* set the color bit, all other flag bits should be the same */
-    if(color_p)
-        GD_FLAGS(gd) |= 1 << gdDevType;
-    else
-        GD_FLAGS(gd) &= ~(1 << gdDevType);
-
-    GD_TYPE(gd) = (bpp > 8 ? directType : clutType);
-
-    pixmap_set_pixel_fields(*gd_pixmap, bpp);
-
-    if(bpp <= 8)
-    {
-        CTabHandle gd_color_table;
-
-        gd_color_table = PIXMAP_TABLE(gd_pixmap);
-
-        CTabHandle temp_color_table;
-
-        temp_color_table = GetCTable(color_p
-                                            ? bpp
-                                            : (bpp + 32));
-        if(temp_color_table == nullptr)
-            gui_fatal("unable to get color table `%d'",
-                        color_p ? bpp : (bpp + 32));
-        ROMlib_copy_ctab(temp_color_table, gd_color_table);
-        DisposeCTable(temp_color_table);
-
-        CTAB_FLAGS(gd_color_table) = CTAB_GDEVICE_BIT;
-        MakeITable(gd_color_table, GD_ITABLE(gd), GD_RES_PREF(gd));
-
-        gd_update_colors();
-    }
-
-    PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
-
-    PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
-
-    Rect *gd_rect = &GD_RECT(gd);
-    gd_rect->top = gd_rect->left = 0;
-    gd_rect->bottom = vdriver->height();
-    gd_rect->right = vdriver->width();
-    PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
-}
-
 /* it seems that `gd_ref_num' describes which device to initialize,
    and `mode' tells it what mode to start it in */
 void Executor::C_InitGDevice(INTEGER gd_ref_num, LONGINT mode, GDHandle gdh)
@@ -396,10 +393,64 @@ INTEGER Executor::C_HasDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
                                       false));
 }
 
+static void gd_update_all_ports(GDHandle gdh, GUEST<Ptr> oldBaseAddr, Rect oldGDRect)
+{
+    PixMapHandle gd_pixmap = GD_PMAP(gdh);
+
+    /* FIXME: assuming (1) all windows are on the current
+     graphics device, and (2) the rowbytes and baseaddr
+     of the gdevice cannot change */
+    /* set the pixel size, rowbytes, etc
+     of windows and the window manager color graphics port */
+
+    if(LM(QDExist) == EXIST_YES)
+    {
+        // FIXME: this is not what the Mac does.
+        // on MacOS, a lowmem global at 0xD66 contains a Handle to a system heap block
+        // that contains a list of all GrafPorts in the system.
+        // It starts with a two-byte count and then contains the specified number of pointers.
+        // It is updated by Open[C]Port and Close[C]Port.
+        // When reconfiguring displays, the DisplayManager updates bitmaps/pixmaps/colors for
+        // all ports, and portRects/regions for all screen-sized ports.
+
+        handle_vector<GrafPtr, Handle, 2, true> portList(LM(PortList));
+        for(GrafPtr gp : portList)
+        {
+            if(CGrafPort_p(gp))
+            {
+                PixMapHandle port_pixmap = CPORT_PIXMAP(gp);
+                if(PIXMAP_BASEADDR(port_pixmap) != oldBaseAddr)
+                    continue;
+
+                pixmap_set_pixel_fields(*port_pixmap, PIXMAP_PIXEL_SIZE(gd_pixmap));
+                PIXMAP_SET_ROWBYTES(port_pixmap,
+                                      PIXMAP_ROWBYTES(gd_pixmap));
+
+                ROMlib_copy_ctab(PIXMAP_TABLE(gd_pixmap),
+                                 PIXMAP_TABLE(port_pixmap));
+
+                ThePortGuard guard(gp);
+                RGBForeColor(&CPORT_RGB_FG_COLOR(gp));
+                RGBBackColor(&CPORT_RGB_BK_COLOR(gp));
+            }
+            else
+            {
+                if(PORT_BITS(gp).baseAddr != oldBaseAddr)
+                    continue;
+                BITMAP_SET_ROWBYTES(&PORT_BITS(gp),
+                                      PIXMAP_ROWBYTES(gd_pixmap));
+            }
+        }
+    }
+}
+
+void Executor::gd_vdriver_mode_changed()
+{
+}
+
 OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
                            INTEGER flags)
 {
-    PixMapHandle gd_pixmap;
 
     if(gdh != LM(MainDevice))
     {
@@ -407,10 +458,12 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
                            "this violates bogus assumptions in SetDepth.");
     }
 
-    gd_pixmap = GD_PMAP(gdh);
+    PixMapHandle gd_pixmap = GD_PMAP(gdh);
 
     if(bpp == PIXMAP_PIXEL_SIZE(gd_pixmap))
         return noErr;
+    GUEST<Ptr> oldBase = PIXMAP_BASEADDR(gd_pixmap);    // store this pointer as GUEST<Ptr> because we might be changing memory mappings
+    Rect oldRect = PIXMAP_BOUNDS(gd_pixmap);
 
     HideCursor();
 
@@ -426,54 +479,14 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     if(vdriver->framebuffer() == nullptr)
         gui_fatal("vdriver not initialized, unable to change bpp");
 
-    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
 
-    gd_set_bpp();
+    gd_setup_main_device();
 
     cursor_reset_current_cursor();
 
     ShowCursor();
 
-    /* FIXME: assuming (1) all windows are on the current
-     graphics device, and (2) the rowbytes and baseaddr
-     of the gdevice cannot change */
-    /* set the pixel size, rowbytes, etc
-     of windows and the window manager color graphics port */
-
-    if(LM(WWExist) == EXIST_YES)
-    {
-        // FIXME: this is not what the Mac does.
-        // on MacOS, a lowmem global at 0xD66 contains a Handle to a system heap block
-        // that contains a list of all GrafPorts in the system.
-        // It starts with a two-byte count and then contains the specified number of pointers.
-        // It is updated by Open[C]Port and Close[C]Port.
-        // When reconfiguring displays, the DisplayManager updates bitmaps/pixmaps/colors for
-        // all ports, and portRects/regions for all screen-sized ports.
-
-        handle_vector<GrafPtr, Handle, 2, true> portList(LM(PortList));
-        for(GrafPtr gp : portList)
-        {
-            if(CGrafPort_p(gp))
-            {
-                PixMapHandle window_pixmap = CPORT_PIXMAP(gp);
-                pixmap_set_pixel_fields(*window_pixmap, bpp);
-                PIXMAP_SET_ROWBYTES(window_pixmap,
-                                      PIXMAP_ROWBYTES(gd_pixmap));
-
-                ROMlib_copy_ctab(PIXMAP_TABLE(gd_pixmap),
-                                 PIXMAP_TABLE(window_pixmap));
-
-                ThePortGuard guard(gp);
-                RGBForeColor(&CPORT_RGB_FG_COLOR(gp));
-                RGBBackColor(&CPORT_RGB_BK_COLOR(gp));
-            }
-            else
-            {
-                BITMAP_SET_ROWBYTES(&PORT_BITS(gp),
-                                      PIXMAP_ROWBYTES(gd_pixmap));
-            }
-        }
-    }
+    gd_update_all_ports(gdh, oldBase, oldRect);
 
     /* Redraw the screen if that's what changed. */
     if(gdh == LM(MainDevice))
@@ -499,7 +512,6 @@ void Executor::ROMlib_InitGDevices()
 
     if(vdriver->framebuffer() == 0)
         abort();
-    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
 
     if(vdriver->isGrayscale())
     {

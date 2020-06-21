@@ -952,7 +952,6 @@ Executor::NewLaunch(ConstStringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBl
         AE_reinit();
         print_reinit();
 
-        gd_set_bpp();
         ROMlib_init_stdfile();
 
         launchchain(fName, vRefNum, true, &lpb);
