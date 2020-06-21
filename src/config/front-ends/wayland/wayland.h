@@ -95,6 +95,7 @@ class WaylandVideoDriver : public Executor::VideoDriver
     std::vector<int16_t> rootlessRegion_;
 
 public:
+    bool init() override;
     void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
     bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
