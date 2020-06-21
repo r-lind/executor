@@ -52,12 +52,8 @@ void WaylandVideoDriver::setColors(int num_colors, const Executor::vdriver_color
     }
 }
 
-bool WaylandVideoDriver::setMode(int width, int height, int bpp,
-                                  bool grayscale_p)
+bool WaylandVideoDriver::init()
 {
-    if(xdg_wm_base_)
-        return true;
-
     rootlessRegion_ = { 0, 0, RGN_STOP, RGN_STOP };
 
     registry_ = display_.get_registry();
@@ -76,7 +72,6 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
         };
     display_.roundtrip();
 
-    // TODO: 
     xdg_wm_base_.on_ping() = [this] (uint32_t serial) { xdg_wm_base_.pong(serial); };
 
     surface_ = compositor_.create_surface();
@@ -86,9 +81,6 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     xdg_toplevel_.set_app_id("io.github.autc04.executor");
 
     xdg_toplevel_.on_configure() = [this] (int32_t x, int32_t y, array_t states) { 
-        //configuredX = std::max(0,x);
-        //configuredY = std::max(0,y);
-        
         if(x && y && !initDone_)
         {
             width_ = x;
@@ -98,25 +90,9 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
         std::vector<xdg_toplevel_state> states1 = states;
 
         std::cout << "toplevel configure " << x << " " << y << "\n";
-
     };
 
-    auto fillBuffer = [this](Buffer& buf) {
-        //uint32_t colors[] = { 0xFFFFFF00, 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0x80808080 };
-        int w = buf.width(), h = buf.height();
-        uint32_t color = 0x80808080;//colors[colorIdx];
-        for(int y = 0; y < h; y++)
-            for(int x = 0; x < w; x++)
-            {
-                uint32_t& pixel = ((uint32_t*)buf.data())[y * w + x];
-                if(x < w/3 || x > 2*w/3)
-                    pixel = color;
-                else
-                    pixel = 0;
-            }
-    };
-
-    xdg_surface_.on_configure() = [this, fillBuffer] (uint32_t serial) {
+    xdg_surface_.on_configure() = [this] (uint32_t serial) {
         xdg_surface_.ack_configure(serial);
 
         if(width_ == buffer_.width() && height_ == buffer_.height())
@@ -126,7 +102,7 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
 
         buffer_ = Buffer(shm_, width_, height_);
 
-        fillBuffer(buffer_);
+        std::fill(buffer_.data(), buffer_.data() + width_ * height_ * 4, 0);
         
 
         surface_.attach(buffer_.wlbuffer(), 0, 0);
@@ -165,19 +141,34 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     };
 
 
-    width_ = 1024;
-    height_ = 768;
-    bpp_ = bpp ? bpp : 8;
-
-    xdg_toplevel_.set_maximized();
-
-	surface_.commit();
+    pointer_.on_enter() = [this](uint32_t serial, surface_t surface, double x, double y) {
+        pointer_.set_cursor(serial, cursorSurface_, hotSpot_.first, hotSpot_.second);
+        cursorEnterSerial_ = serial;
+    };
 
 
     cursorBuffer_ = Buffer(shm_, 16,16);
     cursorSurface_ = compositor_.create_surface();
     hotSpot_ = {0,0};
     
+
+
+    width_ = 1024;
+    height_ = 768;
+
+
+    xdg_toplevel_.set_maximized();
+
+    return true;
+}
+
+bool WaylandVideoDriver::setMode(int width, int height, int bpp,
+                                  bool grayscale_p)
+{
+    bpp_ = bpp ? bpp : 8;
+
+
+	surface_.commit();
 
 
 
@@ -188,11 +179,6 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     cursorSurface_.commit();
     //pointer_.set_cursor(0, cursorSurface_, hotSpot_.first, hotSpot_.second);
     //display_.roundtrip();
-    pointer_.on_enter() = [this](uint32_t serial, surface_t surface, double x, double y) {
-        pointer_.set_cursor(serial, cursorSurface_, hotSpot_.first, hotSpot_.second);
-        cursorEnterSerial_ = serial;
-    };
-
     rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
     framebuffer_ = new uint8_t[rowBytes_ * height_];
     initDone_ = true;
