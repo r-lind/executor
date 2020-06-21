@@ -77,7 +77,7 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
         int width() const { return width_; }
         int height() const { return height_; }
-        uint8_t *data() { return (uint8_t*)mem_.data(); }
+        uint32_t *data() { return (uint32_t*)mem_.data(); }
 
         wayland::buffer_t& wlbuffer() { return wlbuffer_; }
     };
@@ -93,6 +93,8 @@ class WaylandVideoDriver : public Executor::VideoDriver
     uint32_t cursorEnterSerial_ = 0;
 
     std::vector<int16_t> rootlessRegion_;
+
+    int configuredWidth_, configuredHeight_;
 
 public:
     bool init() override;

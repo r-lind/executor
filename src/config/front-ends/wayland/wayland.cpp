@@ -81,11 +81,10 @@ bool WaylandVideoDriver::init()
     xdg_toplevel_.set_app_id("io.github.autc04.executor");
 
     xdg_toplevel_.on_configure() = [this] (int32_t x, int32_t y, array_t states) { 
-        if(x && y && !initDone_)
-        {
-            width_ = x;
-            height_ = y;
-        }
+        if(x)
+            configuredWidth_ = x;
+        if(y)
+            configuredHeight_ = y;
 
         std::vector<xdg_toplevel_state> states1 = states;
 
@@ -95,15 +94,16 @@ bool WaylandVideoDriver::init()
     xdg_surface_.on_configure() = [this] (uint32_t serial) {
         xdg_surface_.ack_configure(serial);
 
-        if(width_ == buffer_.width() && height_ == buffer_.height())
+        if(configuredWidth_ == buffer_.width() && configuredHeight_ == buffer_.height())
             return;
 
         //updateScreenRects(0,nullptr,false);
 
-        buffer_ = Buffer(shm_, width_, height_);
+        buffer_ = Buffer(shm_, configuredWidth_, configuredHeight_);
 
-        std::fill(buffer_.data(), buffer_.data() + width_ * height_ * 4, 0);
-        
+        std::fill(buffer_.data(), buffer_.data() + configuredWidth_ * configuredHeight_, 0x80404040);
+        if(framebuffer_)
+            updateScreen();
 
         surface_.attach(buffer_.wlbuffer(), 0, 0);
         surface_.commit();
@@ -113,8 +113,15 @@ bool WaylandVideoDriver::init()
     pointer_ = seat_.get_pointer();
     pointer_.on_button() = [this] (uint32_t serial, uint32_t time, uint32_t button, pointer_button_state state) {
         std::cout << "button: " << button << " " << (int)state << std::endl;
+
+
         if(button == BTN_LEFT)
             callbacks_->mouseButtonEvent(state == pointer_button_state::pressed);
+        else if(button == BTN_RIGHT)
+        {
+            if(state == pointer_button_state::pressed)
+                xdg_toplevel_.resize(seat_, serial, xdg_toplevel_resize_edge::bottom_right);
+        }
     };
     pointer_.on_motion() = [this] (uint32_t serial, double x, double y) {
         std::cout << "motion: " << x << " " << y << std::endl;
@@ -157,7 +164,7 @@ bool WaylandVideoDriver::init()
     height_ = 768;
 
 
-    xdg_toplevel_.set_maximized();
+    //xdg_toplevel_.set_maximized();
 
     return true;
 }
@@ -167,13 +174,25 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
 {
     bpp_ = bpp ? bpp : 8;
 
+    if(!initDone_)
+    {
+        if(width && height)
+        {
+            configuredWidth_ = width;
+            configuredHeight_ = height;
+        }
+        else
+        {
+            configuredWidth_ = 1024;
+            configuredHeight_ = 768;
+            xdg_toplevel_.set_maximized();
+        }
+        surface_.commit();
+        display_.roundtrip();
 
-	surface_.commit();
-
-
-
-    display_.roundtrip();
-
+        width_ = configuredWidth_;
+        height_ = configuredHeight_;
+    }
 
     cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
     cursorSurface_.commit();
@@ -257,44 +276,55 @@ struct IndexedPixelGetter
 };
 
 void WaylandVideoDriver::updateScreenRects(
-    int num_rects, const vdriver_rect_t *r,
+    int num_rects, const vdriver_rect_t *rects,
     bool cursor_p)
 {
     std::cout << "update.\n";
     for(int i = 0; i < num_rects; i++)
-        std::cout << r[i].left << ", " << r[i].top << " - " << r[i].right << ", " << r[i].bottom << std::endl;
-    uint32_t *screen = reinterpret_cast<uint32_t*>(buffer_.data());
+        std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
+    uint32_t *screen = buffer_.data();
+
+    int width = std::min(width_, buffer_.width());
+    int height = std::min(height_, buffer_.height());
 
     for(int i = 0; i < num_rects; i++)
     {
+        vdriver_rect_t r = rects[i];
+
+        if(r.left >= width || r.top >= height)
+            continue;
+        
+        r.right = std::min(width, r.right);
+        r.bottom = std::min(height, r.bottom);
+
         RegionProcessor rgnP(rootlessRegion_.begin());
 
-        for(int y = r[i].top; y < r[i].bottom; y++)
+        for(int y = r.top; y < r.bottom; y++)
         {
             while(y >= rgnP.bottom())
                 rgnP.advance();
 
             auto blitLine = [this, &rgnP, screen, y, r, i](auto getPixel) {
                 auto rowIt = rgnP.row.begin();
-                int x = r[i].left;
+                int x = r.left;
 
-                while(x < r[i].right)
+                while(x < r.right)
                 {
-                    int nextX = std::min(r[i].right, (int)*rowIt++);
+                    int nextX = std::min(r.right, (int)*rowIt++);
 
                     for(; x < nextX; x++)
                     {
                         uint32_t pixel = getPixel();
-                        screen[y * width_ + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
+                        screen[y * buffer_.width() + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
                     }
                     
-                    if(x >= r[i].right)
+                    if(x >= r.right)
                         break;
 
-                    nextX = std::min(r[i].right, (int)*rowIt++);
+                    nextX = std::min(r.right, (int)*rowIt++);
 
                     for(; x < nextX; x++)
-                        screen[y * width_ + x] = getPixel();
+                        screen[y * buffer_.width() + x] = getPixel();
                 }
             };
 
@@ -302,23 +332,23 @@ void WaylandVideoDriver::updateScreenRects(
             switch(bpp_)
             {
                 case 8:
-                    src += r[i].left;
+                    src += r.left;
                     blitLine([&] { return colors_[*src++]; });
                     break;
 
                 case 1: 
-                    blitLine(IndexedPixelGetter<1>(colors_, src, r[i].left));
+                    blitLine(IndexedPixelGetter<1>(colors_, src, r.left));
                     break;
                 case 2: 
-                    blitLine(IndexedPixelGetter<2>(colors_, src, r[i].left));
+                    blitLine(IndexedPixelGetter<2>(colors_, src, r.left));
                     break;
                 case 4: 
-                    blitLine(IndexedPixelGetter<4>(colors_, src, r[i].left));
+                    blitLine(IndexedPixelGetter<4>(colors_, src, r.left));
                     break;
                 case 16:
                     {
                         auto *src16 = reinterpret_cast<GUEST<uint16_t>*>(src);
-                        src16 += r[i].left;
+                        src16 += r.left;
                         blitLine([&] { 
                             uint16_t pix = *src16++;
                             auto fiveToEight = [](uint32_t x) {
@@ -335,7 +365,7 @@ void WaylandVideoDriver::updateScreenRects(
                 case 32:
                     {
                         auto *src32 = reinterpret_cast<GUEST<uint32_t>*>(src);
-                        src32 += r[i].left;
+                        src32 += r.left;
                         blitLine([&] { return (*src32++) | 0xFF000000; });
                     }
                     break;
@@ -345,7 +375,7 @@ void WaylandVideoDriver::updateScreenRects(
     }
 
     for(int i = 0; i < num_rects; i++)
-        surface_.damage_buffer(r[i].left,r[i].top,r[i].right-r[i].left,r[i].bottom-r[i].top);
+        surface_.damage_buffer(rects[i].left,rects[i].top,rects[i].right-rects[i].left,rects[i].bottom-rects[i].top);
     surface_.attach(buffer_.wlbuffer(), 0, 0);
     surface_.commit();
     display_.flush();
