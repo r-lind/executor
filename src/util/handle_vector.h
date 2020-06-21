@@ -8,13 +8,14 @@
 namespace Executor
 {
 
-template<typename T, typename TypedHandle = GUEST<GUEST<T>*>*, size_t offset = 0>
+template<typename T, typename TypedHandle = GUEST<GUEST<T>*>*, size_t offset = 0, bool tight = false>
 class handle_vector
 {
     static_assert(std::is_trivially_copyable_v<T>);
     Handle handle_ = nullptr;
     size_t size_ = 0;
     size_t capacity_ = 0;
+    bool owned_ = false;
 
     static constexpr size_t elem_size = sizeof(GUEST<T>);
 public:
@@ -22,11 +23,12 @@ public:
     explicit handle_vector(TypedHandle h) noexcept
         : handle_((Handle) h)
         , size_((GetHandleSize(handle_) - offset) / elem_size)
+        , capacity_(size_)
     {
     }
     ~handle_vector()
     {
-        if(handle_)
+        if(owned_ && handle_)
             DisposeHandle(handle_);
     }
 
@@ -42,6 +44,7 @@ public:
         if(other.handle_)
         {
             handle_ = NewHandle(offset + elem_size * other.size_);
+            owned_ = true;
             size_ = other.size_;
             capacity_ = other.size_;
             memcpy(*handle_, *other.handle_, offset + other.size_ * elem_size);
@@ -78,6 +81,7 @@ public:
             SetHandleSize(handle_, offset + size_ * elem_size);
         TypedHandle h = (TypedHandle) handle_;
         handle_ = nullptr;
+        owned_ = false;
         size_ = capacity_ = 0;
         return h;
     }
@@ -95,25 +99,63 @@ public:
             else
             {
                 handle_ = NewHandle(offset + capacity_ * elem_size);
+                owned_ = true;
                 if(offset)
                     memset(*handle_, 0, offset);
             }
         }
     }
 
-    using pointer = GUEST<T>*;
+    void shrink_to_fit()
+    {
+        if(size_ != capacity_)
+        {
+            capacity_ = size_;
+            SetHandleSize(handle_, offset + capacity_ * elem_size);
+        }
+    }
 
-    pointer data() const noexcept { return handle_ ? reinterpret_cast<pointer>(*handle_ + offset) : nullptr; }
-    pointer begin() const noexcept { return data(); }
-    pointer end() const noexcept { return data() + size_; }
-    GUEST<T>& operator[] (size_t idx) const noexcept { return *begin()[idx]; }
+    using pointer = GUEST<T>*;
+    using const_pointer = const GUEST<T>*;
+    using iterator = pointer;
+    using const_iterator = const_pointer;
+
+    pointer data() noexcept { return handle_ ? reinterpret_cast<pointer>(*handle_ + offset) : nullptr; }
+    iterator begin() noexcept { return data(); }
+    iterator end() noexcept { return data() + size_; }
+    GUEST<T>& operator[] (size_t idx) noexcept { return *begin()[idx]; }
+
+    const_pointer data() const noexcept { return handle_ ? reinterpret_cast<pointer>(*handle_ + offset) : nullptr; }
+    const_iterator begin() const noexcept { return data(); }
+    const_iterator end() const noexcept { return data() + size_; }
+    const GUEST<T>& operator[] (size_t idx) const noexcept { return *begin()[idx]; }
+
 
     void push_back(T x)
     {
         if(size_ == capacity_)
-            reserve(capacity_ + 32 + capacity_/10);
+            reserve(tight ? capacity_ + 1 : capacity_ + 32 + capacity_/10);
         new(data() + size_) GUEST<T>(x);
         ++size_;
+    }
+
+    iterator erase(iterator first, iterator last)
+    {
+        std::copy(last, end(), first);
+        size_ -= last - first;
+        if(tight)
+        {
+            size_t newOffset = first - begin();
+            shrink_to_fit();
+            return begin() + newOffset;
+        }
+        else
+            return first;
+    }
+
+    iterator erase(iterator pos)
+    {
+        return erase(pos, pos+1);
     }
 };
 

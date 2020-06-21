@@ -18,6 +18,7 @@
 #include <rsys/redrawscreen.h>
 #include <rsys/executor.h>
 #include <base/functions.impl.h>
+#include <util/handle_vector.h>
 
 using namespace Executor;
 
@@ -399,7 +400,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
                            INTEGER flags)
 {
     PixMapHandle gd_pixmap;
-    WindowPeek tw;
 
     if(gdh != LM(MainDevice))
     {
@@ -423,7 +423,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
         ShowCursor();
         return cDepthErr;
     }
-
     if(vdriver->framebuffer() == nullptr)
         gui_fatal("vdriver not initialized, unable to change bpp");
 
@@ -451,12 +450,9 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
         // When reconfiguring displays, the DisplayManager updates bitmaps/pixmaps/colors for
         // all ports, and portRects/regions for all screen-sized ports.
 
-        for(tw = LM(WindowList); tw; tw = WINDOW_NEXT_WINDOW(tw))
+        handle_vector<GrafPtr, Handle, 2, true> portList(LM(PortList));
+        for(GrafPtr gp : portList)
         {
-            GrafPtr gp;
-
-            gp = WINDOW_PORT(tw);
-
             if(CGrafPort_p(gp))
             {
                 PixMapHandle window_pixmap = CPORT_PIXMAP(gp);
@@ -477,23 +473,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
                                       PIXMAP_ROWBYTES(gd_pixmap));
             }
         }
-
-        /* do the same for the LM(WMgrCPort) */
-        {
-            PixMapHandle wmgr_cport_pixmap = CPORT_PIXMAP(LM(WMgrCPort));
-
-            pixmap_set_pixel_fields(*wmgr_cport_pixmap, bpp);
-                
-            PIXMAP_SET_ROWBYTES(wmgr_cport_pixmap,
-                                  PIXMAP_ROWBYTES(gd_pixmap));
-
-            ROMlib_copy_ctab(PIXMAP_TABLE(gd_pixmap),
-                             PIXMAP_TABLE(wmgr_cport_pixmap));
-        }
-
-        ThePortGuard guard(wmgr_port);
-        RGBForeColor(&ROMlib_black_rgb_color);
-        RGBBackColor(&ROMlib_white_rgb_color);
     }
 
     /* Redraw the screen if that's what changed. */

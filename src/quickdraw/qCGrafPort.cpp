@@ -15,6 +15,8 @@
 #include <quickdraw/xdata.h>
 #include <rsys/evil.h>
 
+#include <util/handle_vector.h>
+
 using namespace Executor;
 
 void Executor::C_OpenCPort(CGrafPtr port)
@@ -50,6 +52,10 @@ void Executor::C_OpenCPort(CGrafPtr port)
     PORT_CLIP_REGION(port) = NewRgn();
 
     InitCPort(port);
+
+    handle_vector<CGrafPtr, Handle, 2, true> portList(LM(PortList));
+    portList.push_back(port);
+    *(GUEST<int16_t>*) *LM(PortList) = portList.size();
 }
 
 void Executor::C_CloseCPort(CGrafPtr port)
