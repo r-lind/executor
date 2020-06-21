@@ -15,6 +15,7 @@
 #include <mman/mman.h>
 #include <quickdraw/cquick.h>
 #include <quickdraw/picture.h>
+#include <util/handle_vector.h>
 
 using namespace Executor;
 
@@ -40,6 +41,11 @@ void Executor::C_InitGraf(GUEST<GrafPtr> *gp)
     patinit(qdGlobals().gray, 0xaa55aa55);
     patinit(qdGlobals().ltGray, 0x88228822);
     patinit(qdGlobals().dkGray, 0x77dd77dd);
+
+        // list of all open ports.
+        // On MacOS, this might be kept in the system heap
+        // and initialized earlier.
+    LM(PortList) = NewHandleClear(2);
 
     LM(WMgrPort) = (WindowPtr)NewPtr(sizeof(GrafPort));
     OpenPort(LM(WMgrPort));
@@ -129,6 +135,10 @@ void Executor::C_OpenPort(GrafPtr p)
     PORT_VIS_REGION(p) = NewRgn();
     PORT_CLIP_REGION(p) = NewRgn();
     InitPort(p);
+
+    handle_vector<GrafPtr, Handle, 2, true> portList(LM(PortList));
+    portList.push_back(p);
+    *(GUEST<int16_t>*) *LM(PortList) = portList.size();
 }
 
 /*
@@ -139,6 +149,10 @@ void Executor::C_OpenPort(GrafPtr p)
 
 void Executor::C_ClosePort(GrafPtr p)
 {
+    handle_vector<GrafPtr, Handle, 2, true> portList(LM(PortList));
+    portList.erase(std::remove(portList.begin(), portList.end(), p), portList.end());
+    *(GUEST<int16_t>*) *LM(PortList) = portList.size();
+
     DisposeRgn(PORT_VIS_REGION(p));
     if(LM(MemErr) == noErr)
     {
