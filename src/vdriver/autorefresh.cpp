@@ -79,6 +79,11 @@ void note_executor_changed_screen(int top, int bottom)
         executor_changed_screen_p[i] = true;
 }
 
+void note_executor_changed_screen()
+{
+    std::fill(std::begin(executor_changed_screen_p), std::end(executor_changed_screen_p), true);
+}
+
 /* Returns true if refresh should be turned on. */
 bool autodetect_refresh(void)
 {

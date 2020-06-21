@@ -30,9 +30,9 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
     class SharedMem
     {
-        int fd_;
+        int fd_ = -1;
         void *mem_ = nullptr;
-        size_t size_;
+        size_t size_ = 0;
     public:
         SharedMem() = default;
         SharedMem(size_t size);
@@ -70,7 +70,7 @@ class WaylandVideoDriver : public Executor::VideoDriver
     {
         SharedMem mem_;
         wayland::buffer_t wlbuffer_;
-        int width_, height_;
+        int width_ = 0, height_ = 0;
     public:
         Buffer() = default;
         Buffer(wayland::shm_t& shm, int w, int h);
@@ -94,7 +94,9 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
     std::vector<int16_t> rootlessRegion_;
 
-    int configuredWidth_, configuredHeight_;
+    int configuredWidth_ = 0, configuredHeight_ = 0;
+    bool configuredMaximized_ = false;
+    bool configurePending_ = false;
 
 public:
     bool init() override;

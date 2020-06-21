@@ -46,11 +46,52 @@ exit_executor(void)
     ExitToShell();
 }
 
+void Executor::ROMLib_InitGrayRgn()
+{
+    ThePortGuard guard((GrafPtr)LM(WMgrCPort));
+
+        // reset clip and vis, in case this is invoked when resizing the screen
+    RectRgn(PORT_VIS_REGION(wmgr_port), &PORT_RECT(wmgr_port));
+    RectRgn(PORT_CLIP_REGION(wmgr_port), &PORT_RECT(wmgr_port));
+    OpenRgn();
+    if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
+        FrameRoundRect(&GD_BOUNDS(LM(TheGDevice)), 16, 16);
+    else
+        FrameRect(&GD_BOUNDS(LM(TheGDevice)));
+    CloseRgn(LM(GrayRgn));
+    RgnHandle mrgn = NewRgn();
+    SetRectRgn(mrgn, 0, 0, GD_BOUNDS(LM(TheGDevice)).right,
+                LM(MBarHeight));
+    SectRgn(LM(GrayRgn), mrgn, mrgn);
+    RgnHandle corners = NewRgn();
+    SetRectRgn(corners, 0, 0, GD_BOUNDS(LM(TheGDevice)).right,
+                GD_BOUNDS(LM(TheGDevice)).bottom);
+    DiffRgn(corners, LM(GrayRgn), corners);
+    PaintRgn(corners);
+    CopyRgn(LM(GrayRgn), PORT_VIS_REGION(wmgr_port));
+    DiffRgn(LM(GrayRgn), mrgn, LM(GrayRgn));
+    PenPat(&qdGlobals().white);
+    PaintRgn(mrgn);
+    PenPat(&qdGlobals().black);
+    MoveTo(0, LM(MBarHeight) - 1);
+    Line(GD_BOUNDS(LM(TheGDevice)).right, 0);
+    if(!ROMlib_rootless_drawdesk(LM(GrayRgn)))
+    {
+        if((USE_DESKCPAT_VAR & USE_DESKCPAT_BIT)
+        && PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice))) > 2)
+            FillCRgn(LM(GrayRgn), LM(DeskCPat));
+        else
+            FillRgn(LM(GrayRgn), &LM(DeskPattern));
+    }
+    DisposeRgn(mrgn);
+    DisposeRgn(corners);
+    CopyRgn(LM(GrayRgn), PORT_CLIP_REGION(wmgr_port));
+}
+
 void Executor::C_InitWindows()
 {
     PatHandle ph;
     PixPatHandle new_ph;
-    RgnHandle mrgn, corners;
 
     LM(AuxWinHead) = default_aux_win;
     LM(SaveVisRgn) = nullptr;
@@ -72,40 +113,7 @@ void Executor::C_InitWindows()
         InitMenus();
         LM(DeskPattern) = **ph;
         LM(GrayRgn) = NewRgn();
-
-        OpenRgn();
-        if(ROMlib_creator && !(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
-            FrameRoundRect(&GD_BOUNDS(LM(TheGDevice)), 16, 16);
-        else
-            FrameRect(&GD_BOUNDS(LM(TheGDevice)));
-        CloseRgn(LM(GrayRgn));
-        mrgn = NewRgn();
-        SetRectRgn(mrgn, 0, 0, GD_BOUNDS(LM(TheGDevice)).right,
-                   LM(MBarHeight));
-        SectRgn(LM(GrayRgn), mrgn, mrgn);
-        corners = NewRgn();
-        SetRectRgn(corners, 0, 0, GD_BOUNDS(LM(TheGDevice)).right,
-                   GD_BOUNDS(LM(TheGDevice)).bottom);
-        DiffRgn(corners, LM(GrayRgn), corners);
-        PaintRgn(corners);
-        CopyRgn(LM(GrayRgn), PORT_VIS_REGION(wmgr_port));
-        DiffRgn(LM(GrayRgn), mrgn, LM(GrayRgn));
-        PenPat(&qdGlobals().white);
-        PaintRgn(mrgn);
-        PenPat(&qdGlobals().black);
-        MoveTo(0, LM(MBarHeight) - 1);
-        Line(GD_BOUNDS(LM(TheGDevice)).right, 0);
-        if(!ROMlib_rootless_drawdesk(LM(GrayRgn)))
-        {
-            if((USE_DESKCPAT_VAR & USE_DESKCPAT_BIT)
-            && PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice))) > 2)
-                FillCRgn(LM(GrayRgn), LM(DeskCPat));
-            else
-                FillRgn(LM(GrayRgn), &LM(DeskPattern));
-        }
-        DisposeRgn(mrgn);
-        DisposeRgn(corners);
-        CopyRgn(LM(GrayRgn), PORT_CLIP_REGION(wmgr_port));
+        ROMLib_InitGrayRgn();
         LM(WindowList) = nullptr;
         LM(SaveUpdate) = -1;
         LM(PaintWhite) = -1;

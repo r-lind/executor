@@ -9,6 +9,7 @@ namespace Executor
 #define NUM_AUTOREFRESH_STRIPS 8U
 
 extern void note_executor_changed_screen(int top, int bottom);
+extern void note_executor_changed_screen();
 extern bool autodetect_refresh(void);
 }
 #endif /* !_RSYS_SCREENCHECKSUM_H_ */
