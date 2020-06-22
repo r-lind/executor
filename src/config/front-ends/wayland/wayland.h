@@ -94,7 +94,9 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
     std::vector<int16_t> rootlessRegion_;
 
-    int configuredWidth_, configuredHeight_;
+    int configuredWidth_ = 0, configuredHeight_ = 0;
+    bool configuredMaximized_ = false;
+    bool configurePending_ = false;
 
 public:
     bool init() override;

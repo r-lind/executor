@@ -19,6 +19,9 @@
 #include <rsys/executor.h>
 #include <base/functions.impl.h>
 #include <util/handle_vector.h>
+#include <quickdraw/region.h>
+
+#include <iostream>
 
 using namespace Executor;
 
@@ -68,6 +71,18 @@ static void gd_setup_main_device()
 
     pixmap_set_pixel_fields(*gd_pixmap, bpp);
 
+    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
+    PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
+    PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
+
+    Rect *gd_rect = &GD_RECT(gd);
+    gd_rect->top = gd_rect->left = 0;
+    gd_rect->bottom = vdriver->height();
+    gd_rect->right = vdriver->width();
+    PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
+
+    note_executor_changed_screen();
+
     if(bpp <= 8)
     {
         CTabHandle gd_color_table;
@@ -90,17 +105,6 @@ static void gd_setup_main_device()
 
         gd_update_colors();
     }
-
-    PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
-
-    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
-    PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
-
-    Rect *gd_rect = &GD_RECT(gd);
-    gd_rect->top = gd_rect->left = 0;
-    gd_rect->bottom = vdriver->height();
-    gd_rect->right = vdriver->width();
-    PIXMAP_BOUNDS(gd_pixmap) = *gd_rect;
 }
 
 static void gd_allocate_main_device(void)
@@ -405,6 +409,10 @@ static void gd_update_all_ports(GDHandle gdh, GUEST<Ptr> oldBaseAddr, Rect oldGD
 
     if(LM(QDExist) == EXIST_YES)
     {
+        qdGlobals().screenBits.baseAddr = PIXMAP_BASEADDR(gd_pixmap);
+        qdGlobals().screenBits.rowBytes = PIXMAP_ROWBYTES(gd_pixmap) / PIXMAP_PIXEL_SIZE(gd_pixmap);
+        qdGlobals().screenBits.bounds = PIXMAP_BOUNDS(gd_pixmap);
+
         // FIXME: this is not what the Mac does.
         // on MacOS, a lowmem global at 0xD66 contains a Handle to a system heap block
         // that contains a list of all GrafPorts in the system.
@@ -414,8 +422,20 @@ static void gd_update_all_ports(GDHandle gdh, GUEST<Ptr> oldBaseAddr, Rect oldGD
         // all ports, and portRects/regions for all screen-sized ports.
 
         handle_vector<GrafPtr, Handle, 2, true> portList(LM(PortList));
+
+        assert(std::find(portList.begin(), portList.end(), LM(WMgrPort)) != portList.end());
+        assert(std::find(portList.begin(), portList.end(), GrafPtr(LM(WMgrCPort))) != portList.end());
+
+
+        Rect screen;
+
         for(GrafPtr gp : portList)
         {
+            Rect newBounds = PORT_BOUNDS(gp);
+            newBounds.right = newBounds.left - screen.left + screen.right;
+            newBounds.bottom = newBounds.top - screen.top + screen.bottom;
+            PORT_BOUNDS(gp) = newBounds;
+
             if(CGrafPort_p(gp))
             {
                 PixMapHandle port_pixmap = CPORT_PIXMAP(gp);
@@ -423,8 +443,8 @@ static void gd_update_all_ports(GDHandle gdh, GUEST<Ptr> oldBaseAddr, Rect oldGD
                     continue;
 
                 pixmap_set_pixel_fields(*port_pixmap, PIXMAP_PIXEL_SIZE(gd_pixmap));
-                PIXMAP_SET_ROWBYTES(port_pixmap,
-                                      PIXMAP_ROWBYTES(gd_pixmap));
+                PIXMAP_SET_ROWBYTES(port_pixmap, PIXMAP_ROWBYTES(gd_pixmap));
+                
 
                 ROMlib_copy_ctab(PIXMAP_TABLE(gd_pixmap),
                                  PIXMAP_TABLE(port_pixmap));
@@ -440,18 +460,42 @@ static void gd_update_all_ports(GDHandle gdh, GUEST<Ptr> oldBaseAddr, Rect oldGD
                 BITMAP_SET_ROWBYTES(&PORT_BITS(gp),
                                       PIXMAP_ROWBYTES(gd_pixmap));
             }
+
+            if(EqualRect(&PORT_RECT(gp), &oldGDRect))
+            {
+                PORT_RECT(gp) = PIXMAP_BOUNDS(gd_pixmap);
+                
+                RgnHandle rgn = PORT_VIS_REGION(gp);
+                if(RGN_SMALL_P(rgn) && EqualRect(&RGN_BBOX(rgn), &oldGDRect))
+                    RectRgn(rgn, &PIXMAP_BOUNDS(gd_pixmap));
+                
+                rgn = PORT_CLIP_REGION(gp);
+                if(RGN_SMALL_P(rgn) && EqualRect(&RGN_BBOX(rgn), &oldGDRect))
+                    RectRgn(rgn, &PIXMAP_BOUNDS(gd_pixmap));
+            }
         }
     }
 }
 
 void Executor::gd_vdriver_mode_changed()
 {
+    PixMapHandle gd_pixmap = GD_PMAP(LM(MainDevice));
+
+    GUEST<Ptr> oldBase = PIXMAP_BASEADDR(gd_pixmap);    // store this pointer as GUEST<Ptr> because we might be changing memory mappings
+    Rect oldRect = PIXMAP_BOUNDS(gd_pixmap);
+    gd_setup_main_device();
+    gd_update_all_ports(LM(MainDevice), oldBase, oldRect);
+
+    if(LM(WWExist) == EXIST_YES)
+    {
+        ROMLib_InitGrayRgn();
+        redraw_screen();
+    }
 }
 
 OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
                            INTEGER flags)
 {
-
     if(gdh != LM(MainDevice))
     {
         warning_unexpected("Setting the depth of a device not the screen; "
@@ -466,8 +510,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     Rect oldRect = PIXMAP_BOUNDS(gd_pixmap);
 
     HideCursor();
-
-    note_executor_changed_screen(0, vdriver->height());
 
     if(bpp == 0 || !vdriver->setMode(0, 0, bpp, ((which_flags & (1 << gdDevType)) ? !(flags & (1 << gdDevType)) : vdriver->isGrayscale())))
     {

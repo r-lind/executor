@@ -81,12 +81,20 @@ bool WaylandVideoDriver::init()
     xdg_toplevel_.set_app_id("io.github.autc04.executor");
 
     xdg_toplevel_.on_configure() = [this] (int32_t x, int32_t y, array_t states) { 
-        if(x)
+        if(x && x != configuredWidth_)
+        {
             configuredWidth_ = x;
-        if(y)
+            configurePending_ = true;
+        }
+        if(y && y != configuredHeight_)
+        {
             configuredHeight_ = y;
+            configurePending_ = true;
+        }
 
         std::vector<xdg_toplevel_state> states1 = states;
+
+        configuredMaximized_ = std::find(states1.begin(), states1.end(), xdg_toplevel_state::maximized) != states1.end();
 
         std::cout << "toplevel configure " << x << " " << y << "\n";
     };
@@ -102,11 +110,6 @@ bool WaylandVideoDriver::init()
         buffer_ = Buffer(shm_, configuredWidth_, configuredHeight_);
 
         std::fill(buffer_.data(), buffer_.data() + configuredWidth_ * configuredHeight_, 0x80404040);
-        if(framebuffer_)
-            updateScreen();
-
-        surface_.attach(buffer_.wlbuffer(), 0, 0);
-        surface_.commit();
     };
     xdg_toplevel_.on_close() = [this] () { };
 
@@ -200,16 +203,44 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     //display_.roundtrip();
     rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
     framebuffer_ = new uint8_t[rowBytes_ * height_];
+    isRootless_ = configuredMaximized_;
+
+    configurePending_ = false;
     initDone_ = true;
 
-    isRootless_ = true;
     return true;
+}
+
+namespace Executor
+{
+    void gd_vdriver_mode_changed(); // FIXME
 }
 
 void WaylandVideoDriver::pumpEvents()
 {
     //display_.dispatch();
     display_.roundtrip();
+    if(configurePending_)
+    {
+        if(configuredWidth_ && configuredHeight_)
+        {
+            width_ = configuredWidth_;
+            height_ = configuredHeight_;
+            delete[] framebuffer_;
+            rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
+            framebuffer_ = new uint8_t[rowBytes_ * height_];
+            std::fill(framebuffer_, framebuffer_ + height_ * rowBytes_, 0);
+            isRootless_ = configuredMaximized_;
+
+            Executor::gd_vdriver_mode_changed();
+            updateScreen();
+
+            //surface_.attach(buffer_.wlbuffer(), 0, 0);
+            //surface_.commit();
+        }
+
+        configurePending_ = false;
+    }
 }
 
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
