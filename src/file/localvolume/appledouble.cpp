@@ -117,8 +117,8 @@ ItemPtr AppleSingleItemFactory::createItemForDirEntry(ItemCache& itemcache, CNID
 {
     if(!fs::is_regular(e.path()))
         return nullptr;
-    uint64_t magic = 0;
-    fs::ifstream(e.path(), std::ios::binary).read((char*)&out(magic), 8);
+    GUEST<uint64_t> magic = 0;
+    fs::ifstream(e.path(), std::ios::binary).read((char*)&magic, 8);
 
     if(magic == 0x0005160000020000)
         return std::make_shared<AppleSingleFileItem>(itemcache, parID, cnid, e.path(), macname);
@@ -171,11 +171,11 @@ void AppleSingleFileItem::setInfo(ItemInfo info)
 AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile)
     : file(std::move(aFile))
 {
-    //uint64_t magicAndVersion;
-    //file->read(0, &out(magicAndVersion), 8);
+    //GUEST<uint64_t> magicAndVersion;
+    //file->read(0, &magicAndVersion, 8);
 
-    uint16_t n;
-    file->read(24, &out(n), 2);
+    GUEST<uint16_t> n;
+    file->read(24, &n, 2);
     descriptors.resize(n);
     file->read(26, descriptors.data(), sizeof(EntryDescriptor) * n);
     std::sort(descriptors.begin(), descriptors.end(), [](auto& a, auto& b) { return a.offset < b.offset; });
@@ -184,8 +184,8 @@ AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile)
 AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile, create_single_t)
     : file(std::move(aFile))
 {
-    uint64_t magicAndVersion = 0x0005160000020000;
-    file->write(0, &inout(magicAndVersion), 8);
+    GUEST<uint64_t> magicAndVersion = 0x0005160000020000;
+    file->write(0, &magicAndVersion, 8);
     uint16_t zero = 0;
     file->write(24, &zero, 2);
 }
@@ -193,8 +193,8 @@ AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile, cr
 AppleSingleDoubleFile::AppleSingleDoubleFile(std::unique_ptr<OpenFile> aFile, create_double_t)
     : file(std::move(aFile))
 {
-    uint64_t magicAndVersion = 0x0005160700020000;
-    file->write(0, &inout(magicAndVersion), 8);
+    GUEST<uint64_t> magicAndVersion = 0x0005160700020000;
+    file->write(0, &magicAndVersion, 8);
     uint16_t zero = 0;
     file->write(24, &zero, 2);
 }
@@ -304,8 +304,8 @@ AppleSingleDoubleFile::EntryDescriptorIterator AppleSingleDoubleFile::setEOFComm
 
     // update headers
     {
-        uint16_t n = descriptors.size();
-        file->write(24, &inout(n), 2);
+        GUEST<uint16_t> n = descriptors.size();
+        file->write(24, &n, 2);
         file->write(26, descriptors.data(), sizeof(EntryDescriptor) * n);
     }
 
