@@ -50,6 +50,9 @@ void Executor::ROMLib_InitGrayRgn()
 {
     ThePortGuard guard((GrafPtr)LM(WMgrCPort));
 
+        // reset clip and vis, in case this is invoked when resizing the screen
+    RectRgn(PORT_VIS_REGION(wmgr_port), &PORT_RECT(wmgr_port));
+    RectRgn(PORT_CLIP_REGION(wmgr_port), &PORT_RECT(wmgr_port));
     OpenRgn();
     if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
         FrameRoundRect(&GD_BOUNDS(LM(TheGDevice)), 16, 16);

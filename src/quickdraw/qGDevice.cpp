@@ -427,7 +427,7 @@ static void gd_update_all_ports(GDHandle gdh, GUEST<Ptr> oldBaseAddr, Rect oldGD
         assert(std::find(portList.begin(), portList.end(), GrafPtr(LM(WMgrCPort))) != portList.end());
 
 
-        Rect screen;
+        Rect screen = PIXMAP_BOUNDS(gd_pixmap);
 
         for(GrafPtr gp : portList)
         {
@@ -490,6 +490,7 @@ void Executor::gd_vdriver_mode_changed()
     {
         ROMLib_InitGrayRgn();
         redraw_screen();
+        ROMlib_rootless_update();
     }
 }
 
