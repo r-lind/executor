@@ -71,6 +71,7 @@ class WaylandVideoDriver : public Executor::VideoDriver
         SharedMem mem_;
         wayland::buffer_t wlbuffer_;
         int width_ = 0, height_ = 0;
+        bool available_ = true;
     public:
         Buffer() = default;
         Buffer(wayland::shm_t& shm, int w, int h);
@@ -80,10 +81,13 @@ class WaylandVideoDriver : public Executor::VideoDriver
         uint32_t *data() { return (uint32_t*)mem_.data(); }
 
         wayland::buffer_t& wlbuffer() { return wlbuffer_; }
+
+        bool available() const { return available_; }
+        void setBusy() { available_ = false; }
     };
 
 
-    Buffer buffer_;
+    std::vector<Buffer> buffers_;
     bool initDone_ = false;
 
 

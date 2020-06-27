@@ -38,6 +38,10 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
             .create_buffer(0, w, h, w*4, wayland::shm_format::argb8888)),
     width_(w), height_(h)
 {
+    wlbuffer_.on_release() = [this] {
+        std::cout << "buffer released.\n";
+        available_ = true;
+    };
 }
 
 
@@ -114,14 +118,6 @@ bool WaylandVideoDriver::init()
     xdg_surface_.on_configure() = [this] (uint32_t serial) {
         xdg_surface_.ack_configure(serial);
 
-        if(configuredWidth_ == buffer_.width() && configuredHeight_ == buffer_.height())
-            return;
-
-        //updateScreenRects(0,nullptr,false);
-
-        buffer_ = Buffer(shm_, configuredWidth_, configuredHeight_);
-
-        std::fill(buffer_.data(), buffer_.data() + configuredWidth_ * configuredHeight_, 0x80404040);
     };
     xdg_toplevel_.on_close() = [this] () { };
 
@@ -209,8 +205,8 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
         height_ = configuredHeight_;
     }
 
-    cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
-    cursorSurface_.commit();
+    //cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
+    //cursorSurface_.commit();
     //pointer_.set_cursor(0, cursorSurface_, hotSpot_.first, hotSpot_.second);
     //display_.roundtrip();
     rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
@@ -230,12 +226,12 @@ namespace Executor
 
 void WaylandVideoDriver::pumpEvents()
 {
-    //display_.dispatch();
     display_.roundtrip();
+
     if(configurePending_)
     {
         std::cout << width_ << "x" << height_ << " --> " << (int)configuredMaximized_ << " " << configuredWidth_ << "x" << configuredHeight_ << std::endl;
-        if(configuredWidth_ && configuredHeight_ || (configuredMaximized_ != isRootless_ && width_ && height_))
+        if((configuredWidth_ && configuredHeight_) || (configuredMaximized_ != isRootless_ && width_ && height_))
         {
             if(configuredWidth_ && configuredHeight_)
             {
@@ -331,13 +327,31 @@ void WaylandVideoDriver::updateScreenRects(
     int num_rects, const vdriver_rect_t *rects,
     bool cursor_p)
 {
+    vdriver_rect_t entireScreen = { 0, 0, height_, width_ };
+    buffers_.erase(std::remove_if(buffers_.begin(), buffers_.end(),
+        [this](Buffer& buf) {
+            return buf.available() && (buf.width() != configuredWidth_ || buf.height() != configuredHeight_);
+        }), buffers_.end());
+    auto bufferIt = std::find_if(buffers_.begin(), buffers_.end(), std::mem_fn(&Buffer::available));
+    if(bufferIt == buffers_.end())
+    {
+        std::cout << "create buffer.\n";
+        buffers_.emplace_back(shm_, configuredWidth_, configuredHeight_);
+        bufferIt = buffers_.end() - 1;
+        num_rects = 1;
+        rects = &entireScreen;
+        if(width_ > configuredWidth_ || height_ > configuredHeight_)
+            std::fill(bufferIt->data(), bufferIt->data() + configuredWidth_ * configuredHeight_, 0x80404040);
+    }
+    auto& buffer = *bufferIt;
+
     std::cout << "update.\n";
     for(int i = 0; i < num_rects; i++)
         std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
-    uint32_t *screen = buffer_.data();
+    uint32_t *screen = buffer.data();
 
-    int width = std::min(width_, buffer_.width());
-    int height = std::min(height_, buffer_.height());
+    int width = std::min(width_, buffer.width());
+    int height = std::min(height_, buffer.height());
 
     for(int i = 0; i < num_rects; i++)
     {
@@ -356,7 +370,7 @@ void WaylandVideoDriver::updateScreenRects(
             while(y >= rgnP.bottom())
                 rgnP.advance();
 
-            auto blitLine = [this, &rgnP, screen, y, r, i](auto getPixel) {
+            auto blitLine = [this, &rgnP, screen, y, r, i, &buffer](auto getPixel) {
                 auto rowIt = rgnP.row.begin();
                 int x = r.left;
 
@@ -367,7 +381,7 @@ void WaylandVideoDriver::updateScreenRects(
                     for(; x < nextX; x++)
                     {
                         uint32_t pixel = getPixel();
-                        screen[y * buffer_.width() + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
+                        screen[y * buffer.width() + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
                     }
                     
                     if(x >= r.right)
@@ -376,7 +390,7 @@ void WaylandVideoDriver::updateScreenRects(
                     nextX = std::min(r.right, (int)*rowIt++);
 
                     for(; x < nextX; x++)
-                        screen[y * buffer_.width() + x] = getPixel();
+                        screen[y * buffer.width() + x] = getPixel();
                 }
             };
 
@@ -428,13 +442,15 @@ void WaylandVideoDriver::updateScreenRects(
 
     for(int i = 0; i < num_rects; i++)
         surface_.damage_buffer(rects[i].left,rects[i].top,rects[i].right-rects[i].left,rects[i].bottom-rects[i].top);
-    surface_.attach(buffer_.wlbuffer(), 0, 0);
+    surface_.attach(buffer.wlbuffer(), 0, 0);
+    buffer.setBusy();
     surface_.commit();
     display_.flush();
 }
 
 void WaylandVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y)
 {
+    std::cout << "cursor: " << (cursorBuffer_.available() ? "available" : "locked") << std::endl;
     uint32_t *dst = reinterpret_cast<uint32_t*>(cursorBuffer_.data());
     uint8_t *data = reinterpret_cast<uint8_t*>(cursor_data);
     uint8_t *mask = reinterpret_cast<uint8_t*>(cursor_mask);
@@ -448,10 +464,12 @@ void WaylandVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], 
         }
     cursorSurface_.damage_buffer(0,0,16,16);
     cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
+    cursorBuffer_.setBusy();
 
     hotSpot_ = { hotspot_x, hotspot_y };
     cursorSurface_.commit();
     pointer_.set_cursor(cursorEnterSerial_, cursorSurface_, hotSpot_.first, hotSpot_.second);
+    display_.flush();
 }
 
 bool WaylandVideoDriver::setCursorVisible(bool show_p)
