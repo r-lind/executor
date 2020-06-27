@@ -98,6 +98,8 @@ class WaylandVideoDriver : public Executor::VideoDriver
     bool configuredMaximized_ = false;
     bool configurePending_ = false;
 
+    double mouseX_, mouseY_;
+
 public:
     bool init() override;
     void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;

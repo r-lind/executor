@@ -131,15 +131,19 @@ bool WaylandVideoDriver::init()
 
 
         if(button == BTN_LEFT)
-            callbacks_->mouseButtonEvent(state == pointer_button_state::pressed);
-        else if(button == BTN_RIGHT)
         {
-            if(state == pointer_button_state::pressed)
+            if(state == pointer_button_state::pressed
+                && !configuredMaximized_
+                && mouseX_ > configuredWidth_ - 16 && mouseY_ > configuredHeight_ - 16)
                 xdg_toplevel_.resize(seat_, serial, xdg_toplevel_resize_edge::bottom_right);
+            else
+                callbacks_->mouseButtonEvent(state == pointer_button_state::pressed);
         }
     };
     pointer_.on_motion() = [this] (uint32_t serial, double x, double y) {
         //std::cout << "motion: " << x << " " << y << std::endl;
+        mouseX_ = x;
+        mouseY_ = y;
         callbacks_->mouseMoved(x, y);
     };
 
@@ -235,7 +239,7 @@ void WaylandVideoDriver::pumpEvents()
     if(configurePending_)
     {
         std::cout << width_ << "x" << height_ << " --> " << (int)configuredMaximized_ << " " << configuredWidth_ << "x" << configuredHeight_ << std::endl;
-        if(configuredWidth_ && configuredHeight_ || (configuredMaximized_ != isRootless_ && width_ && height_))
+        if((configuredWidth_ && configuredHeight_) || (configuredMaximized_ != isRootless_ && width_ && height_))
         {
             if(configuredWidth_ && configuredHeight_)
             {
