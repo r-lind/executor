@@ -105,6 +105,14 @@ bool WaylandVideoDriver::init()
             }
         }
 
+        bool activated = std::find(states1.begin(), states1.end(), xdg_toplevel_state::activated) != states1.end();
+        if(activated && !configuredActivated_)
+            callbacks_->resumeEvent(true);
+        else if(!activated && configuredActivated_)
+            callbacks_->suspendEvent();
+
+        configuredActivated_ = activated;
+
         std::cout << "toplevel configure " << x << " " << y << "\n";
         for(auto s : states1)
             std::cout << " " << (int)s << std::endl;
@@ -157,14 +165,14 @@ bool WaylandVideoDriver::init()
 
         callbacks_->keyboardEvent(down, mkvkey);
     };
-
+/*
     keyboard_.on_enter() = [this] (uint32_t serial, wayland::surface_t, wayland::array_t) {
         callbacks_->resumeEvent(true);
     };
     
     keyboard_.on_leave() = [this] (uint32_t serial, wayland::surface_t) {
         callbacks_->suspendEvent();
-    };
+    };*/
 
 
     pointer_.on_enter() = [this](uint32_t serial, surface_t surface, double x, double y) {

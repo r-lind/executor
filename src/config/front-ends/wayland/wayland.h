@@ -97,6 +97,7 @@ class WaylandVideoDriver : public Executor::VideoDriver
     int configuredWidth_ = 0, configuredHeight_ = 0;
     bool configuredMaximized_ = false;
     bool configurePending_ = false;
+    bool configuredActivated_ = false;
 
     double mouseX_, mouseY_;
 
