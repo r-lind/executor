@@ -40,18 +40,6 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
 {
 }
 
-
-void WaylandVideoDriver::setColors(int num_colors, const Executor::vdriver_color_t *color_array)
-{
-    for(int i = 0; i < num_colors; i++)
-    {
-        colors_[i] = (0xFF << 24)
-                    | ((color_array[i].red >> 8) << 16)
-                    | ((color_array[i].green >> 8) << 8)
-                    | (color_array[i].blue >> 8);
-    }
-}
-
 bool WaylandVideoDriver::init()
 {
     rootlessRegion_ = { 0, 0, RGN_STOP, RGN_STOP };
@@ -278,22 +266,7 @@ void WaylandVideoDriver::pumpEvents()
 
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
-    if((*rgn)->rgnSize == 10)
-    {
-        rootlessRegion_.clear();
-        rootlessRegion_.insert(rootlessRegion_.end(),
-            { (*rgn)->rgnBBox.top.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
-            (*rgn)->rgnBBox.bottom.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
-            RGN_STOP });
-    }
-    else
-    {
-        GUEST<uint16_t> *p = (GUEST<uint16_t>*) ((*(Handle)rgn) + 10);
-        GUEST<uint16_t> *q = (GUEST<uint16_t>*) ((*(Handle)rgn) + (*rgn)->rgnSize);
-        rootlessRegion_.clear();
-        rootlessRegion_.insert(rootlessRegion_.end(), p, q);
-    }
-
+    VideoDriverCommon::setRootlessRegion(rgn);
 
     RegionProcessor rgnP(rootlessRegion_.begin());
 
@@ -310,34 +283,6 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
     surface_.set_input_region(waylandRgn);
 }
 
-template<int depth>
-struct IndexedPixelGetter
-{
-    uint8_t *src;
-    int shift;
-    std::array<uint32_t, 256>& colors;
-
-    static constexpr uint8_t mask = (1 << depth) - 1;
-
-    IndexedPixelGetter(std::array<uint32_t, 256>& colors, uint8_t *line, int x)
-        : colors(colors)
-    {
-        src = line + x * depth / 8;
-        shift = 8 - (x * depth % 8) - depth;
-    }
-
-    uint32_t operator() ()
-    {
-        auto c = colors[(*src >> shift) & mask];
-        shift -= depth;
-        if(shift < 0)
-        {
-            ++src;
-            shift = 8 - depth;
-        }
-        return c;
-    }
-};
 
 void WaylandVideoDriver::updateScreenRects(
     int num_rects, const vdriver_rect_t *rects,
@@ -346,97 +291,8 @@ void WaylandVideoDriver::updateScreenRects(
     std::cout << "update.\n";
     for(int i = 0; i < num_rects; i++)
         std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
-    uint32_t *screen = buffer_.data();
 
-    int width = std::min(width_, buffer_.width());
-    int height = std::min(height_, buffer_.height());
-
-    for(int i = 0; i < num_rects; i++)
-    {
-        vdriver_rect_t r = rects[i];
-
-        if(r.left >= width || r.top >= height)
-            continue;
-        
-        r.right = std::min(width, r.right);
-        r.bottom = std::min(height, r.bottom);
-
-        RegionProcessor rgnP(rootlessRegion_.begin());
-
-        for(int y = r.top; y < r.bottom; y++)
-        {
-            while(y >= rgnP.bottom())
-                rgnP.advance();
-
-            auto blitLine = [this, &rgnP, screen, y, r, i](auto getPixel) {
-                auto rowIt = rgnP.row.begin();
-                int x = r.left;
-
-                while(x < r.right)
-                {
-                    int nextX = std::min(r.right, (int)*rowIt++);
-
-                    for(; x < nextX; x++)
-                    {
-                        uint32_t pixel = getPixel();
-                        screen[y * buffer_.width() + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
-                    }
-                    
-                    if(x >= r.right)
-                        break;
-
-                    nextX = std::min(r.right, (int)*rowIt++);
-
-                    for(; x < nextX; x++)
-                        screen[y * buffer_.width() + x] = getPixel();
-                }
-            };
-
-            uint8_t *src = framebuffer_ + y * rowBytes_;
-            switch(bpp_)
-            {
-                case 8:
-                    src += r.left;
-                    blitLine([&] { return colors_[*src++]; });
-                    break;
-
-                case 1: 
-                    blitLine(IndexedPixelGetter<1>(colors_, src, r.left));
-                    break;
-                case 2: 
-                    blitLine(IndexedPixelGetter<2>(colors_, src, r.left));
-                    break;
-                case 4: 
-                    blitLine(IndexedPixelGetter<4>(colors_, src, r.left));
-                    break;
-                case 16:
-                    {
-                        auto *src16 = reinterpret_cast<GUEST<uint16_t>*>(src);
-                        src16 += r.left;
-                        blitLine([&] { 
-                            uint16_t pix = *src16++;
-                            auto fiveToEight = [](uint32_t x) {
-                                return (x << 3) | (x >> 2);
-                            };
-                            return 0xFF000000
-                                | (fiveToEight((pix >> 10) & 31) << 16)
-                                | (fiveToEight((pix >> 5) & 31) << 8)
-                                | fiveToEight(pix & 31);
-                        });
-                    }
-                    break;
-
-                case 32:
-                    {
-                        auto *src32 = reinterpret_cast<GUEST<uint32_t>*>(src);
-                        src32 += r.left;
-                        blitLine([&] { return (*src32++) | 0xFF000000; });
-                    }
-                    break;
-
-            }
-        }
-    }
+    updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), num_rects, rects);
 
     for(int i = 0; i < num_rects; i++)
         surface_.damage_buffer(rects[i].left,rects[i].top,rects[i].right-rects[i].left,rects[i].bottom-rects[i].top);

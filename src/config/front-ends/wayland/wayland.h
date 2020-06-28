@@ -1,11 +1,11 @@
 #pragma once
 
-#include <vdriver/vdriver.h>
+#include <vdriver/vdrivercommon.h>
 
 #include <wayland-client.hpp>
 #include <wayland-client-protocol-extra.hpp>
 
-class WaylandVideoDriver : public Executor::VideoDriver
+class WaylandVideoDriver : public Executor::VideoDriverCommon
 {
     using VideoDriver::VideoDriver;
 
@@ -92,7 +92,6 @@ class WaylandVideoDriver : public Executor::VideoDriver
     Buffer cursorBuffer_;
     uint32_t cursorEnterSerial_ = 0;
 
-    std::vector<int16_t> rootlessRegion_;
 
     int configuredWidth_ = 0, configuredHeight_ = 0;
     bool configuredMaximized_ = false;
@@ -103,7 +102,6 @@ class WaylandVideoDriver : public Executor::VideoDriver
 
 public:
     bool init() override;
-    void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
     bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
     void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r,

@@ -14,7 +14,7 @@
 
 
 #include <vdriver/vdriver.h>
-#include <quickdraw/cquick.h> /* for ThePortGuard */
+#include <quickdraw/region.h>
 
 #include "available_geometry.h"
 
@@ -141,39 +141,32 @@ public:
 
 }
 
-std::optional<QBitmap> rootlessRegion;
+std::optional<QRegion> rootlessRegion;
 
 void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
-    ThePortGuard guard;
-    GrafPort grayRegionPort;
+    VideoDriverCommon::setRootlessRegion(rgn);
+    RegionProcessor rgnP(rootlessRegion_.begin());
 
-    C_OpenPort(&grayRegionPort);
-    short grayRegionRowBytes = ((width() + 31) & ~31) / 8;
-    grayRegionPort.portBits.baseAddr = (Ptr) framebuffer() + rowBytes() * height();
-    grayRegionPort.portBits.rowBytes =  grayRegionRowBytes ;
-    grayRegionPort.portBits.bounds = { 0, 0, height(), width() };
-    grayRegionPort.portRect = grayRegionPort.portBits.bounds;
+    QRegion qtRgn;
 
-    memset(framebuffer() + rowBytes() * height(), 0, grayRegionRowBytes * height());
-
-    C_SetPort(&grayRegionPort);
-    C_PaintRgn(rgn);
-
-    C_ClosePort(&grayRegionPort);
-
-    rootlessRegion = QBitmap::fromData(
-        QSize((width() + 31)&~31, height()),
-        (const uchar*)grayRegionPort.portBits.baseAddr,
-        QImage::Format_Mono);
+    while(rgnP.bottom() < height_)
+    {
+        rgnP.advance();
+        
+        for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
+            qtRgn += QRect(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
+    }
     
 #ifdef __APPLE__
     macosx_autorelease_pool([&] {
 #endif
-        window->setMask(*rootlessRegion);
+        window->setMask(qtRgn);
 #ifdef __APPLE__
     });
 #endif
+
+    rootlessRegion = qtRgn;
 }
 
 bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
@@ -225,54 +218,18 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 
     framebuffer_ = new uint8_t[rowBytes_ * height_ + width_ * height_];
 
-    switch(bpp_)
-    {
-        case 1:
-            qimage = new QImage(framebuffer_, width_, height_, rowBytes_, QImage::Format_Mono);
-            break;
-        case 2:
-        case 4:
-            qimage = new QImage(width_, height_, QImage::Format_Indexed8);
-            break;
-        case 8:
-            qimage = new QImage(framebuffer_, width_, height_, rowBytes_, QImage::Format_Indexed8);
-            break;
-        case 16:
-            qimage = new QImage(width_, height_, QImage::Format_RGB555);
-            break;
-        case 32:
-            qimage = new QImage(width_, height_, QImage::Format_RGB32);
-            break;
-    }
+   
+    qimage = new QImage(width_, height_, QImage::Format_RGB32);
     
-    if(bpp_ <= 8)
-        qimage->setColorTable({qRgb(0,0,0),qRgb(255,255,255)});
-
     if(!window)
         window = new ExecutorWindow(callbacks_);
     window->setGeometry(geom);
-#ifdef __APPLE__
-    window->show();
-#else
+//#ifdef __APPLE__
+//    window->show();
+//#else
     window->showMaximized();
-#endif
+//#endif
     return true;
-}
-void QtVideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
-{
-    if(bpp_ > 8)
-        return;
-
-    QVector<QRgb> qcolors(num_colors);
-    for(int i = 0; i < num_colors; i++)
-    {
-        qcolors[i] = qRgb(
-            colors[i].red >> 8,
-            colors[i].green >> 8,
-            colors[i].blue >> 8
-        );
-    }
-    qimage->setColorTable(qcolors);
 }
 
 void QtVideoDriver::convertRect(QRect r)
@@ -342,14 +299,10 @@ void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
 {
     QRegion rgn;
     for(int i = 0; i < num_rects; i++)
-    {
         rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
-    }
 
-    rgn &= QRect(0,0,width_,height_);
-    if(bpp_ != 1 && bpp_ != 8)
-        for(QRect rect : rgn)
-            convertRect(rect);
+    updateBuffer((uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
+        num_rects, r);
 
     window->update(rgn);
 }
