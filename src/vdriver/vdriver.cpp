@@ -28,7 +28,7 @@ void VideoDriver::shutdown()
 {
 }
 
-void VideoDriver::updateScreen(int top, int left, int bottom, int right, bool cursor_p)
+void VideoDriver::updateScreen(int top, int left, int bottom, int right)
 {
     if(top < 0)
         top = 0;
@@ -41,10 +41,10 @@ void VideoDriver::updateScreen(int top, int left, int bottom, int right, bool cu
         right = width();
 
     vdriver_rect_t r = {top, left, bottom, right};
-    updateScreenRects(1, &r, cursor_p);
+    updateScreenRects(1, &r);
 }
 
-void VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r, bool cursor_p)
+void VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
 }
 

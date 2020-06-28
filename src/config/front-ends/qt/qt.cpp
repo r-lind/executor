@@ -294,8 +294,7 @@ void QtVideoDriver::convertRect(QRect r)
     }
 }
 
-void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                      bool cursor_p)
+void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
     QRegion rgn;
     for(int i = 0; i < num_rects; i++)

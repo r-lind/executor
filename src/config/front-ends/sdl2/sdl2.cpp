@@ -117,8 +117,7 @@ void SDL2VideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
     SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, 0, num_colors);
 }
 
-void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                        bool cursor_p)
+void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
     /*SDL_UpdateTexture(sdlTexture, nullptr, vdriver_fbuf, vdriver_row_bytes);
     SDL_RenderCopy(sdlRenderer, sdlTexture, nullptr, nullptr);

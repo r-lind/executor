@@ -200,8 +200,7 @@ void SDLVideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
     SDL_SetColors(screen, sdl_cmap, 0, num_colors);
 }
 
-void SDLVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                       bool cursor_p)
+void SDLVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
     SDL_Rect *rects;
     int i;

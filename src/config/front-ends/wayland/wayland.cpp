@@ -113,8 +113,6 @@ bool WaylandVideoDriver::init()
         if(configuredWidth_ == buffer_.width() && configuredHeight_ == buffer_.height())
             return;
 
-        //updateScreenRects(0,nullptr,false);
-
         buffer_ = Buffer(shm_, configuredWidth_, configuredHeight_);
 
         std::fill(buffer_.data(), buffer_.data() + configuredWidth_ * configuredHeight_, 0x80404040);
@@ -285,8 +283,7 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 
 
 void WaylandVideoDriver::updateScreenRects(
-    int num_rects, const vdriver_rect_t *rects,
-    bool cursor_p)
+    int num_rects, const vdriver_rect_t *rects)
 {
     std::cout << "update.\n";
     for(int i = 0; i < num_rects; i++)

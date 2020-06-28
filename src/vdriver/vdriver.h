@@ -81,11 +81,9 @@ public:
     virtual bool init();
     
     virtual void shutdown();
-    virtual void updateScreen(int top, int left, int bottom, int right,
-                                 bool cursor_p);
-    void updateScreen() { updateScreen(0,0,height(),width(),false); }
-    virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                       bool cursor_p);
+    virtual void updateScreen(int top, int left, int bottom, int right);
+    void updateScreen() { updateScreen(0,0,height(),width()); }
+    virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r);
     virtual bool isAcceptableMode(int width, int height, int bpp,
                                       bool grayscale_p,
                                       bool exact_match_p);

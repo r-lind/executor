@@ -109,14 +109,8 @@ static int cursor_visible_p = false;
 
 static Atom x_selection_atom;
 
-static rgb_spec_t x_rgb_spec;
-
 static char *selectiontext = nullptr;
 static int selectionlength;
-
-/* true if `vdriver_set_colors ()' has been called, otherwise we can
-   blow off expose events */
-static int colors_initialized_p = false;
 
 /* true if we should turn of autorepeat when the pointer is the
    executor window */
@@ -908,10 +902,9 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                 break;
             }
             case Expose:
-                if(colors_initialized_p)
-                    vdriver->updateScreen(evt.xexpose.y, evt.xexpose.x,
-                                          evt.xexpose.y + evt.xexpose.height,
-                                          evt.xexpose.x + evt.xexpose.width, false);
+                vdriver->updateScreen(evt.xexpose.y, evt.xexpose.x,
+                                      evt.xexpose.y + evt.xexpose.height,
+                                      evt.xexpose.x + evt.xexpose.width);
                 break;
             case FocusIn:
                 if(frob_autorepeat_p)
@@ -982,9 +975,6 @@ bool X11VideoDriver::init()
     int n_visuals;
     int dummy_int;
     unsigned int geom_width, geom_height;
-    int num_red_bits, low_red_bit;
-    int num_green_bits, low_green_bit;
-    int num_blue_bits, low_blue_bit;
     char *geom;
 
     
@@ -1019,45 +1009,14 @@ bool X11VideoDriver::init()
     visuals = XGetVisualInfo(x_dpy,
                                 (VisualScreenMask | VisualClassMask),
                                 &vistemplate, &n_visuals);
-    if(n_visuals)
+
+    for(i = 0; i < n_visuals; i++)
     {
-        for(i = 0; i < n_visuals; i++)
+        if(visuals[i].depth >= 24)
         {
-            if(visuals[i].depth >= 24)
-            {
-                visual = &visuals[i];
-                x_fbuf_bpp = visual->depth;
-                break;
-            }
-        }
-
-        if(x_fbuf_bpp)
-        {
-            alloc_x_image(x_fbuf_bpp, max_width, max_height,
-                            &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
-                            &x_fbuf_bpp);
-
-            low_red_bit = ffs(visual->red_mask) - 1;
-            low_green_bit = ffs(visual->green_mask) - 1;
-            low_blue_bit = ffs(visual->blue_mask) - 1;
-            num_red_bits = ffs((visual->red_mask
-                                >> low_red_bit)
-                                + 1)
-                - 1;
-            num_green_bits = ffs((visual->green_mask
-                                    >> low_green_bit)
-                                    + 1)
-                - 1;
-            num_blue_bits = ffs((visual->blue_mask
-                                    >> low_blue_bit)
-                                + 1)
-                - 1;
-            make_rgb_spec(&x_rgb_spec,
-                            x_x_image->bits_per_pixel, false, 0,
-                            num_red_bits, low_red_bit,
-                            num_green_bits, low_green_bit,
-                            num_blue_bits, low_blue_bit,
-                            CL_RAW(GetCTSeed()));
+            visual = &visuals[i];
+            x_fbuf_bpp = visual->depth;
+            break;
         }
     }
 
@@ -1067,6 +1026,10 @@ bool X11VideoDriver::init()
                 ROMlib_appname.c_str());
         exit(EXIT_FAILURE);
     }
+
+    alloc_x_image(x_fbuf_bpp, max_width, max_height,
+                    &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
+                    &x_fbuf_bpp);
 
     if(max_bpp > 32)
         max_bpp = 32;
@@ -1396,8 +1359,7 @@ void cursor_init(void)
 }
 
 
-void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                       bool cursor_p)
+void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
     updateBuffer((uint32_t*)x_fbuf, width_, height_, num_rects, r);
 
@@ -1500,20 +1462,6 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     framebuffer_ = new uint8_t[rowBytes_ * height_];
     
     memset(framebuffer_, 0xFF, rowBytes_ * height);
-
-    /* Compute the rgb spec. */
-    /*rgbSpec_ = (conversion_func == nullptr
-                            ? (visual->c_class == TrueColor
-                                   ? &x_rgb_spec
-                                   : nullptr)
-                            : (this->bpp() == 32
-                                   ? &mac_32bpp_rgb_spec
-                                   : (this->bpp() == 16
-                                          ? &mac_16bpp_rgb_spec
-                                          : nullptr)));
-*/
-
-
 
     return true;
 }

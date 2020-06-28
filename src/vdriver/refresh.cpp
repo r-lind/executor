@@ -310,6 +310,6 @@ static void flush_shadow_screen()
     {
         vdriver->updateScreen(top_long, (left_long * 32) >> ROMlib_log2[vdriver->bpp()],
                               bottom_long,
-                              (right_long * 32) >> ROMlib_log2[vdriver->bpp()], false);
+                              (right_long * 32) >> ROMlib_log2[vdriver->bpp()]);
     }
 }

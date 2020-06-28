@@ -318,6 +318,6 @@ void Executor::dirty_rect_update_screen(void)
         /* Copy rects to a local copy so we are reentrant. */
         memcpy(&dirty_rect_copy[0], &dirty_rect[0], ndr * sizeof dirty_rect[0]);
 
-        vdriver->updateScreenRects(ndr, &dirty_rect_copy[0], false);
+        vdriver->updateScreenRects(ndr, &dirty_rect_copy[0]);
     }
 }
