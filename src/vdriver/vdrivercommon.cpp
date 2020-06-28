@@ -64,7 +64,12 @@ struct IndexedPixelGetter
 void VideoDriverCommon::updateBuffer(uint32_t* buffer, int bufferWidth, int bufferHeight,
                                 int num_rects, const vdriver_rect_t *rects)
 {
-
+    if(!rootlessRegion_.size())
+        rootlessRegion_.insert(rootlessRegion_.end(),
+            { 0, 0, (int16_t)bufferWidth, RGN_STOP,
+            (int16_t)bufferHeight, 0, (int16_t)bufferWidth, RGN_STOP,
+            RGN_STOP });
+    
     int width = std::min(width_, bufferWidth);
     int height = std::min(height_, bufferHeight);
 
