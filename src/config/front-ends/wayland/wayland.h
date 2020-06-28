@@ -7,7 +7,7 @@
 
 class WaylandVideoDriver : public Executor::VideoDriverCommon
 {
-    using VideoDriver::VideoDriver;
+    using VideoDriverCommon::VideoDriverCommon;
 
     wayland::display_t display_;
     wayland::registry_t registry_;
