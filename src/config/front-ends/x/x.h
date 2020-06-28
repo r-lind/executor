@@ -17,7 +17,6 @@ public:
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
     bool setCursorVisible(bool show_p) override;
     void registerOptions() override;
-    void flushDisplay() override;
     void beepAtUser() override;
     void putScrap(Executor::OSType type, Executor::LONGINT length, char *p, int scrap_count) override;
     void weOwnScrap(void) override;

@@ -1073,11 +1073,6 @@ bool X11VideoDriver::init()
     return true;
 }
 
-void X11VideoDriver::flushDisplay(void)
-{
-    XFlush(x_dpy);
-}
-
 void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool grayscale_p)
 {
     XSetWindowAttributes xswa;
@@ -1368,6 +1363,7 @@ void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
         (*x_put_image)(x_dpy, x_window, copy_gc, x_x_image,
                            r[i].left, r[i].top, r[i].left, r[i].top, r[i].right - r[i].left, r[i].bottom - r[i].top);
     }
+    XFlush(x_dpy);
 }
 
 void X11VideoDriver::shutdown(void)

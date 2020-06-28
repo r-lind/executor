@@ -56,10 +56,6 @@ bool VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscal
         return false;
 }
 
-void VideoDriver::flushDisplay()
-{
-}
-
 void VideoDriver::registerOptions()
 {
 }

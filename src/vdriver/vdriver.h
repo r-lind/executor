@@ -90,7 +90,6 @@ public:
     virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) = 0;
-    virtual void flushDisplay();
 
     virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
     virtual LONGINT getScrap(OSType type, Handle h);
