@@ -6,10 +6,12 @@ if(X11_LIBRARY AND Xext_LIBRARY)
 
 	add_library(front-end-x
             default_vdriver.h
-			x.cpp
-			x_keycodes.cpp
 			x.h
-            x_keycodes.h
+            x.cpp
+			x_keycodes.h
+			x_keycodes.cpp
+			x_keysym.h
+			x_keysym.cpp
 		)
 	target_link_libraries(front-end-x syn68k ${X11_LIBRARY} ${Xext_LIBRARY} romlib)
 	target_include_directories(front-end-x PUBLIC . ${X11_INCLUDE_PATH})
