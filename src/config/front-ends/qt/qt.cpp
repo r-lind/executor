@@ -232,68 +232,6 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     return true;
 }
 
-void QtVideoDriver::convertRect(QRect r)
-{
-    if(bpp_ == 2)
-    {
-        r.setLeft(r.left() & ~3);
-
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            uint8_t *src = framebuffer_ + y * rowBytes_ + r.left() / 4;
-            uint8_t *dst = qimage->scanLine(y) + r.left();
-
-            for(int i = 0; i < (r.width() + 3) / 4; i++)
-            {
-                uint8_t packed = *src++;
-                *dst++ = (packed >> 6) & 3;
-                *dst++ = (packed >> 4) & 3;
-                *dst++ = (packed >> 2) & 3;
-                *dst++ = packed & 3;
-            }
-        }
-    }
-    else if(bpp_ == 4)
-    {
-        r.setLeft(r.left() & ~1);
-
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            uint8_t *src = framebuffer_ + y * rowBytes_ + r.left() / 2;
-            uint8_t *dst = qimage->scanLine(y) + r.left();
-
-            for(int i = 0; i < (r.width() + 1) / 2; i++)
-            {
-                uint8_t packed = *src++;
-                *dst++ = packed >> 4;
-                *dst++ = packed & 0xF;
-            }
-        }
-    }
-    else if(bpp_ == 16)
-    {
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            auto src = (GUEST<uint16_t>*) (framebuffer_ + y * rowBytes_) + r.left();
-            auto dst = (uint16_t*) (qimage->scanLine(y)) + r.left();
-
-            for(int i = 0; i < r.width(); i++)
-                *dst++ = *src++;
-        }
-    }
-    else if(bpp_ == 32)
-    {
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            auto src = (GUEST<uint32_t>*) (framebuffer_ + y * rowBytes_) + r.left();
-            auto dst = (uint32_t*) (qimage->scanLine(y)) + r.left();
-
-            for(int i = 0; i < r.width(); i++)
-                *dst++ = *src++;
-        }
-    }
-}
-
 void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
     QRegion rgn;
