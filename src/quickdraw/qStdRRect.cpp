@@ -33,9 +33,9 @@ static RgnHandle roundRectRgn(const Rect& r, int16_t width, int16_t height)
     int16_t midY = r.top + height / 2;
 
     int16_t insertX = r.right - r.left - width;
-    int16_t insertY = r.bottom - r.top - width;
+    int16_t insertY = r.bottom - r.top - height;
 
-    for(auto p = vec.begin(); *p != RGN_STOP; ++p)
+    for(auto p = vec.begin(); p != vec.end() && *p != RGN_STOP; ++p)
     {
         if(*p >= midY)
             *p += insertY;
@@ -69,6 +69,9 @@ void Executor::C_StdRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER h
         StdRect(verb, r);
     else
     {
+        width = std::min<int16_t>(width, r->right - r->left);
+        height = std::min<int16_t>(height, r->bottom - r->top);
+
         RgnHandle rh = roundRectRgn(*r, width, height);
         if(verb == frame)
         {
