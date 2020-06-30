@@ -50,10 +50,15 @@ void VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 
 bool VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscale_p, bool exact_match_p)
 {
-    if(bpp == 1 || bpp == 4 || bpp == 8 || bpp == 16 || bpp == 32)
-        return true;
-    else
+    if(width && width < VDRIVER_MIN_SCREEN_WIDTH)
         return false;
+    if(height && height < VDRIVER_MIN_SCREEN_HEIGHT)
+        return false;
+    if(bpp & (bpp - 1))
+        return false;
+    if(bpp > 32)
+        return false;
+    return true;
 }
 
 void VideoDriver::registerOptions()

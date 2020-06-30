@@ -24,8 +24,8 @@ namespace Executor
 #define VDRIVER_MIN_SCREEN_HEIGHT 342
 
 /* Suggested default screen size (may be safely ignored). */
-#define VDRIVER_DEFAULT_SCREEN_WIDTH 640
-#define VDRIVER_DEFAULT_SCREEN_HEIGHT 480
+#define VDRIVER_DEFAULT_SCREEN_WIDTH 1024
+#define VDRIVER_DEFAULT_SCREEN_HEIGHT 768
 
 struct vdriver_rect_t
 {

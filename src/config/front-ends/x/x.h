@@ -10,7 +10,6 @@ public:
     bool parseCommandLine(int& argc, char *argv[]) override;
     bool init() override;
     void shutdown() override;
-    bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p, bool exact_match_p) override;
     bool setMode(int width, int height, int bpp, bool grayscale_p) override;
     void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r) override;
     void pumpEvents() override;

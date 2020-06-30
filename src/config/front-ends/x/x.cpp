@@ -943,30 +943,6 @@ void X11VideoDriver::shutdown(void)
     x_dpy = nullptr;
 }
 
-bool X11VideoDriver::isAcceptableMode(int width, int height, int bpp,
-                                      bool grayscale_p,
-                                      bool exact_match_p)
-{
-    if(width == 0)
-        width = this->width();
-    if(height == 0)
-        height = this->height();
-    if(bpp == 0)
-        bpp = this->bpp();
-
-    if(width > max_width
-       || width < 512
-       || height > max_height
-       || height < 342
-       || bpp > max_bpp
-       || (bpp != 8
-           && bpp != 4
-           && bpp != 2
-           && bpp != 1))
-        return false;
-    return true;
-}
-
 bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     if(!x_window)

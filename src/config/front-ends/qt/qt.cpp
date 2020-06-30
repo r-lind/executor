@@ -175,14 +175,6 @@ bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
     return true;
 }
 
-bool QtVideoDriver::isAcceptableMode(int width, int height, int bpp,
-                                      bool grayscale_p,
-                                      bool exact_match_p)
-{
-    return bpp == 1 || bpp == 2 || bpp == 4 || bpp == 8;
-}
-
-
 bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
 #ifdef __APPLE__
