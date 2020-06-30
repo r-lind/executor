@@ -596,3 +596,38 @@ TEST(QuickDraw, FrameArc1)
     
     EXPECT_LT(port.r.bottom / 2, count);
 }
+
+
+TEST(QuickDraw, PaintRoundRect_TooBig)
+{
+    OffscreenPort port(32, 24);
+
+    PaintRoundRect(&port.r, 64, 64);
+
+    InvertOval(&port.r);
+
+    int count = 0;
+    for(int row = 0; row < port.r.bottom; row++)
+        for(int offset = 0; offset < port.r.right/8; offset++)
+            count += std::bitset<8>(port.data(row,offset)).count();
+    
+    EXPECT_EQ(0, count);
+}
+
+
+
+TEST(QuickDraw, PaintRoundRect_TooSmall)
+{
+    OffscreenPort port(32, 1);
+
+    PaintRoundRect(&port.r, 5, 5);
+
+    InvertOval(&port.r);
+
+    int count = 0;
+    for(int row = 0; row < port.r.bottom; row++)
+        for(int offset = 0; offset < port.r.right/8; offset++)
+            count += std::bitset<8>(port.data(row,offset)).count();
+    
+    EXPECT_EQ(0, count);
+}
