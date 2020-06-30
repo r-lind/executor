@@ -88,12 +88,6 @@ static unsigned char *x_fbuf;
 static int x_fbuf_bpp;
 static int x_fbuf_row_bytes;
 
-static int (*x_put_image)(Display *x_dpy, Window x_window, GC copy_gc,
-                          XImage *x_image, int src_x, int src_y, int dst_x,
-                          int dst_y, unsigned int width,
-                          unsigned int height)
-    = nullptr;
-
 /* max dimensions */
 static int max_width, max_height, max_bpp;
 
@@ -222,33 +216,6 @@ int x_error_handler(Display *err_dpy, XErrorEvent *err_evt)
     return 0;
 }
 
-int x_normal_put_image(Display *x_dpy, Drawable x_window, GC copy_gc, XImage *x_image,
-                       int src_x, int src_y, int dst_x, int dst_y,
-                       unsigned int width, unsigned int height)
-{
-    int retval;
-
-    retval = XPutImage(x_dpy, x_window, copy_gc, x_image,
-                       src_x, src_y, dst_x, dst_y, width, height);
-    /* flush the output buffers */
-    XFlush(x_dpy);
-
-    return retval;
-}
-
-int x_shm_put_image(Display *x_dpy, Drawable x_window, GC copy_gc, XImage *x_image,
-                    int src_x, int src_y, int dst_x, int dst_y,
-                    unsigned int width, unsigned int height)
-{
-    int retval;
-
-    retval = XShmPutImage(x_dpy, x_window, copy_gc, x_image,
-                          src_x, src_y, dst_x, dst_y, width, height, False);
-    /* flush the output buffers */
-    XFlush(x_dpy);
-
-    return retval;
-}
 
 void alloc_x_image(int bpp, int width, int height,
                    int *row_bytes_return,
@@ -314,10 +281,6 @@ void alloc_x_image(int bpp, int width, int height,
                     else
                     {
                         shmctl(shminfo->shmid, IPC_RMID, 0);
-                        if(x_put_image == nullptr)
-                            x_put_image = x_shm_put_image;
-                        else if(x_put_image != x_shm_put_image)
-                            gui_abort();
                     }
                 }
             }
@@ -326,16 +289,14 @@ void alloc_x_image(int bpp, int width, int height,
 
     if(fbuf == nullptr)
     {
+        have_shm = false;
+
         warning_unexpected("not using shared memory");
         row_bytes = ((width * 32 + 31) / 32) * 4;
         fbuf = (unsigned char *)calloc(row_bytes * height, 1);
         x_image = XCreateImage(x_dpy, visual->visual, bpp, ZPixmap, 0,
                                (char *)fbuf, width, height, 32, row_bytes);
         resultant_bpp = x_image->bits_per_pixel;
-        if(x_put_image == nullptr)
-            x_put_image = x_normal_put_image;
-        else if(x_put_image != x_normal_put_image)
-            gui_abort();
     }
 
         // FIXME: this should be host byte order
@@ -1360,8 +1321,16 @@ void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 
     for(int i = 0; i < num_rects; i++)
     {
-        (*x_put_image)(x_dpy, x_window, copy_gc, x_x_image,
-                           r[i].left, r[i].top, r[i].left, r[i].top, r[i].right - r[i].left, r[i].bottom - r[i].top);
+        int x = r[i].left;
+        int y = r[i].top;
+        int w = r[i].right - r[i].left;
+        int h = r[i].bottom - r[i].top;
+        if(have_shm)
+            XShmPutImage(x_dpy, x_window, copy_gc, x_x_image,
+                    x, y, x, y, w, h, False);
+        else
+            XPutImage(x_dpy, x_window, copy_gc, x_x_image,
+                    x, y, x, y, w, h);
     }
     XFlush(x_dpy);
 }
