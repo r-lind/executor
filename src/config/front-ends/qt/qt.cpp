@@ -277,8 +277,10 @@ void QtVideoDriver::setCursor(char *cursor_data,
     if(cursor_data)
     {
         uchar data2[32];
-        uchar *mask2 = (uchar*)cursor_mask;
-        std::copy(cursor_data, cursor_data+32, data2);
+        uchar mask2[32];
+        memcpy(data2, cursor_data, 32);
+        memcpy(mask2, cursor_mask, 32);
+        
         for(int i = 0; i<32; i++)
             mask2[i] |= data2[i];
         QBitmap crsr = QBitmap::fromData(QSize(16, 16), (const uchar*)data2, QImage::Format_Mono);
@@ -286,7 +288,8 @@ void QtVideoDriver::setCursor(char *cursor_data,
         
         theCursor = QCursor(crsr, mask, hotspot_x, hotspot_y);
     }
-    window->setCursor(theCursor);   // TODO: should we check for visibility?
+    //window->setCursor(theCursor);   // TODO: should we check for visibility?
+    window->setCursor(Qt::ArrowCursor);   // TODO: should we check for visibility?
 }
 
 bool QtVideoDriver::setCursorVisible(bool show_p)

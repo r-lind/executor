@@ -39,7 +39,7 @@ void Executor::cursor_reset_current_cursor(void)
         SetCursor(&current_crsr);
 }
 
-void Executor::ROMlib_showcursor()
+static void ROMlib_showcursor()
 {
     if(!LM(CrsrVis))
     {
@@ -48,7 +48,7 @@ void Executor::ROMlib_showcursor()
     }
 }
 
-void Executor::ROMlib_restorecursor()
+static void ROMlib_restorecursor()
 {
     if(LM(CrsrVis))
     {
@@ -139,7 +139,7 @@ void Executor::C_HideCursor() /* IMI-168 */
 
 void Executor::C_ShowCursor() /* IMI-168 */
 {
-    if((LM(CrsrState) = LM(CrsrState) + 1) == 0)
+    if(++LM(CrsrState) == 0)
         ROMlib_showcursor();
     if(LM(CrsrState) > 0)
         LM(CrsrState) = 0;

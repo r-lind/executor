@@ -46,8 +46,6 @@ extern void ROMlib_bltrgn(RgnHandle rh, unsigned char *patp,
                           INTEGER mode, Rect *srcr, Rect *dstr);
 extern void ROMlib_sizergn(RgnHandle rh, bool special_p);
 extern void ROMlib_installhandle(Handle sh, Handle dh);
-extern void ROMlib_showcursor(void);
-extern void ROMlib_restorecursor(void);
 
 
 /* Declare functions in qHooks.c. */
