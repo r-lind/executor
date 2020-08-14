@@ -1665,3 +1665,8 @@ Executor::ROMlib_mbdfcall(INTEGER msg, INTEGER param1, LONGINT param2)
 
     return retval;
 }
+
+int16_t Executor::C_GetMBarHeight()
+{
+    return LM(MBarHeight);
+}
