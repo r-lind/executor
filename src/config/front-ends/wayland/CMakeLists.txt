@@ -1,6 +1,6 @@
 find_package(PkgConfig)
 if(PKG_CONFIG_FOUND)
-    pkg_check_modules(WaylandPP IMPORTED_TARGET wayland-client++ wayland-client-extra++)
+    pkg_check_modules(WaylandPP IMPORTED_TARGET wayland-client++ wayland-client-extra++ wayland-client)
 
     if(WaylandPP_FOUND)
 
