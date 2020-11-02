@@ -595,14 +595,14 @@ foreach(FRONT_END ${FRONT_ENDS})
                 )
         endif()
         
+        install(TARGETS executor-${FRONT_END}
+            RUNTIME DESTINATION bin
+            BUNDLE DESTINATION .)
+
     endif()
 endforeach()
 
 if(TARGET executor-qt)
-    install(TARGETS executor-qt
-        RUNTIME DESTINATION bin
-        BUNDLE DESTINATION .)
-
     if(APPLE)
         set_target_properties(executor-qt PROPERTIES OUTPUT_NAME "Executor 2000")
     else()
