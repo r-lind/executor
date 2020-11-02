@@ -12,7 +12,6 @@ pkgs.libsForQt5.callPackage(
         nativeBuildInputs = [cmake bison perl ruby pkgconfig];
         buildInputs = [
             qt5.qtbase
-            #(boost.override { enableShared = false; enableStatic = true; })
             boost
             readline
             SDL2

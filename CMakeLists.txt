@@ -42,7 +42,9 @@ endif()
 
 enable_testing()
 
-set(Boost_USE_STATIC_LIBS YES)
+if(NOT LINUX)
+    set(Boost_USE_STATIC_LIBS YES)
+endif()
 add_compile_definitions(BOOST_ALL_NO_LIB)
 
 add_library(lmdb
