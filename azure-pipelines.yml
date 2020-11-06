@@ -99,11 +99,6 @@ jobs:
     submodules: true
 
   - script: |
-      rem case insensitivity conflict
-      del lmdbxx\version
-    displayName: 'case insensitivity hack'
-
-  - script: |
       mkdir build
       cd build
 

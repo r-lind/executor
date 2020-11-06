@@ -42,14 +42,17 @@ endif()
 
 enable_testing()
 
-set(Boost_USE_STATIC_LIBS YES)
+if(NOT LINUX)
+    set(Boost_USE_STATIC_LIBS YES)
+endif()
 add_compile_definitions(BOOST_ALL_NO_LIB)
 
+configure_file(lmdbxx/lmdb++.h lmdbxx/lmdb++.h COPYONLY)
 add_library(lmdb
     lmdb/libraries/liblmdb/lmdb.h lmdb/libraries/liblmdb/mdb.c
     lmdb/libraries/liblmdb/midl.h lmdb/libraries/liblmdb/midl.c
     lmdbxx/lmdb++.h)
-target_include_directories(lmdb PUBLIC lmdb/libraries/liblmdb lmdbxx)
+target_include_directories(lmdb PUBLIC lmdb/libraries/liblmdb ${CMAKE_CURRENT_BINARY_DIR}/lmdbxx/)
 
 include(cmrc/CMakeRC.cmake)
 cmrc_add_resource_library(resources
