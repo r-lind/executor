@@ -42,8 +42,8 @@ endif()
 
 enable_testing()
 
-if(NOT LINUX)
-    set(Boost_USE_STATIC_LIBS YES)
+if(APPLE OR NOT UNIX)
+   set(Boost_USE_STATIC_LIBS YES)
 endif()
 add_compile_definitions(BOOST_ALL_NO_LIB)
 
