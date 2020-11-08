@@ -563,6 +563,13 @@ target_link_libraries(romlib lmdb)
 target_link_libraries(romlib Threads::Threads syn68k PowerCore mon)
 
 target_link_libraries(romlib Boost::filesystem)  # mxe doesn't like this
+if(WIN32 AND NOT MSVC)
+    # mingw build.
+    # Boost's 'superior' build system doesn't manage library dependencies correctly
+    # but relies on MSVC's autolink feature, which doesn't exist on mingw.
+    target_link_libraries(romlib bcrypt)
+endif()
+
 target_link_libraries(romlib resources)
 
 target_link_libraries(romlib ${host_os_libs})
@@ -593,14 +600,14 @@ foreach(FRONT_END ${FRONT_ENDS})
                 )
         endif()
         
+        install(TARGETS executor-${FRONT_END}
+            RUNTIME DESTINATION bin
+            BUNDLE DESTINATION .)
+
     endif()
 endforeach()
 
 if(TARGET executor-qt)
-    install(TARGETS executor-qt
-        RUNTIME DESTINATION bin
-        BUNDLE DESTINATION .)
-
     if(APPLE)
         set_target_properties(executor-qt PROPERTIES OUTPUT_NAME "Executor 2000")
     else()
