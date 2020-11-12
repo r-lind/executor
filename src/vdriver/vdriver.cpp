@@ -48,7 +48,7 @@ void VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
 }
 
-bool VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscale_p, bool exact_match_p)
+bool VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscale_p)
 {
     if(width && width < VDRIVER_MIN_SCREEN_WIDTH)
         return false;

@@ -960,8 +960,7 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
             bpp = std::min(8, maxBpp_);
     }
 
-    if(!isAcceptableMode(width, height, bpp, grayscale_p,
-                         /* ignored */ false))
+    if(!isAcceptableMode(width, height, bpp, grayscale_p))
         return false;
 
     if(width != width_

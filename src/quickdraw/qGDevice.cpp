@@ -393,8 +393,7 @@ INTEGER Executor::C_HasDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
     return (vdriver->isAcceptableMode(0, 0, bpp, ((which_flags & (1 << gdDevType))
                                                       ? (flags & (1 << gdDevType)) == (1 << gdDevType)
-                                                      : vdriver->isGrayscale()),
-                                      false));
+                                                      : vdriver->isGrayscale())));
 }
 
 static void gd_update_all_ports(GDHandle gdh, GUEST<Ptr> oldBaseAddr, Rect oldGDRect)

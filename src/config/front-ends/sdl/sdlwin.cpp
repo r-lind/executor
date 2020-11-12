@@ -100,7 +100,7 @@ bool SDLVideoDriver::init()
 }
 
 bool SDLVideoDriver::isAcceptableMode(int width, int height, int bpp,
-                                      bool grayscale_p, bool exact_match_p)
+                                      bool grayscale_p)
 {
     bool retval;
 
@@ -155,7 +155,7 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     if(bpp == 0)
         bpp = bpp_;
 
-    if(!isAcceptableMode(width, height, bpp, grayscale_p, false))
+    if(!isAcceptableMode(width, height, bpp, grayscale_p))
         return (false);
 
     /* Set the video mode */

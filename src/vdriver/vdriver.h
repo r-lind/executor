@@ -84,9 +84,7 @@ public:
     virtual void updateScreen(int top, int left, int bottom, int right);
     void updateScreen() { updateScreen(0,0,height(),width()); }
     virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r);
-    virtual bool isAcceptableMode(int width, int height, int bpp,
-                                      bool grayscale_p,
-                                      bool exact_match_p);
+    virtual bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p);
     virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) = 0;
