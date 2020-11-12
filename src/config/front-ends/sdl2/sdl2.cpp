@@ -25,6 +25,13 @@ bool SDL2VideoDriver::init()
     return true;
 }
 
+bool SDL2VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscale_p)
+{
+    return VideoDriver::isAcceptableMode(width, height, bpp, grayscale_p)
+        && bpp != 2;
+}
+
+
 bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     printf("set_mode: %d %d %d", width, height, bpp);
@@ -75,7 +82,7 @@ bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
             pixelFormat = SDL_PIXELFORMAT_BGRX8888;
             break;
         default:
-            std::abort();
+            return false;
     }
 
     framebuffer_ = new uint8_t[width_ * height_ * 4];

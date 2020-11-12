@@ -8,6 +8,7 @@ public:
     using VideoDriver::VideoDriver;
     
     bool init() override;
+    bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p) override;
     bool setMode(int width, int height, int bpp, bool grayscale_p) override;
     void setColors(int num_colors, const Executor::vdriver_color_t *colors) override;
     void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r) override;
