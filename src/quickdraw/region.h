@@ -1,8 +1,11 @@
 #pragma once
 
 #include "quick.h"
-#include <vector>
 #include <util/handle_vector.h>
+
+#include <vector>
+#include <algorithm>
+#include <iterator>
 
 #define RGN_SIZE_MASK (0x7FFF)
 #define RGN_SPECIAL_FLAG (0x8000)
