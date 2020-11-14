@@ -88,9 +88,6 @@ enough_time_has_passed(void)
     return retval;
 }
 
-/* Menu name for the about box. */
-StringPtr Executor::about_box_menu_name_pstr = (StringPtr) "\022\000About Executor...";
-
 static void
 help_scroll(ControlHandle c, INTEGER part)
 {

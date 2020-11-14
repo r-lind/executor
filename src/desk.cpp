@@ -2,7 +2,7 @@
  * Development, Inc.  All rights reserved.
  */
 
-/* Forward declarations in DeskMgr.h (DO NOT DELETE THIS LINE) */
+#include <rsys/desk.h>
 
 #include <base/common.h>
 #include <QuickDraw.h>
@@ -21,9 +21,28 @@
 #include <wind/wind.h>
 #include <rsys/hook.h>
 #include <rsys/aboutbox.h>
+#include <rsys/prefpanel.h>
 #include <base/cpu.h>
+#include <util/macstrings.h>
 
 using namespace Executor;
+
+AppleMenuEntry::AppleMenuEntry(const char32_t* n, void (*f)())
+    : function(f)
+{
+    assignPString(name, toMacRoman(n), 31);
+}
+
+const std::vector<AppleMenuEntry>& Executor::appleMenuEntries()
+{
+    static std::vector<AppleMenuEntry> entries {
+        { U"About Executor 2000...", &do_about_box },
+        { U"Emulation Settings...", &dopreferences }
+    };
+
+    return entries;
+}
+
 
 INTEGER Executor::C_OpenDeskAcc(ConstStringPtr acc) /* IMI-440 */
 {
@@ -35,14 +54,15 @@ INTEGER Executor::C_OpenDeskAcc(ConstStringPtr acc) /* IMI-440 */
     DCtlHandle dctlh;
     WindowPtr wp;
 
-    if(EqualString(acc, about_box_menu_name_pstr, true, true))
-    {
-        do_about_box();
-        retval = 0;
-        goto done;
-    }
+    const auto& entries = appleMenuEntries();
 
-    if(OpenDriver(acc, &retval_s) == noErr)
+    if(auto it = std::find_if(entries.begin(), entries.end(),
+            [acc](const AppleMenuEntry& e) { return EqualString(e.name, acc, true, true); });
+        it != entries.end())
+    {
+        it->function();
+    }
+    else if(OpenDriver(acc, &retval_s) == noErr)
     {
         retval = retval_s;
         dctlh = GetDCtlEntry(retval);
@@ -56,8 +76,6 @@ INTEGER Executor::C_OpenDeskAcc(ConstStringPtr acc) /* IMI-440 */
             }
         }
     }
-
-done:
 
     LM(SEvtEnb) = true;
     return retval;

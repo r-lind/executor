@@ -333,33 +333,19 @@ static Handle getnamedmapresource(resmaphand map, ResType typ, ConstStringPtr na
 
 Handle Executor::C_GetNamedResource(ResType typ, ConstStringPtr nam)
 {
-    Handle retval;
+    resmaphand map;
 
-    retval = nullptr;
-    if(EqualString(nam, about_box_menu_name_pstr, true, true))
+    WALKMAPCUR(map)
+    if(Handle retval = getnamedmapresource(map, typ, nam))
     {
-        static Handle phoney_hand;
-
-        if(!phoney_hand)
-            phoney_hand = NewHandleSys(0);
-        retval = phoney_hand;
+        ROMlib_setreserr(noErr);
+        return retval;
     }
-    else
-    {
-        resmaphand map;
+    EWALKMAP()
 
-        WALKMAPCUR(map)
-        if((retval = getnamedmapresource(map, typ, nam)))
-        {
-            ROMlib_setreserr(noErr);
-            goto DONE;
-        }
-        EWALKMAP()
-        warn_resource_not_found_name(typ, nam);
-        ROMlib_setreserr(resNotFound);
-    }
-DONE:
-    return retval;
+    warn_resource_not_found_name(typ, nam);
+    ROMlib_setreserr(resNotFound);
+    return nullptr;
 }
 
 Handle Executor::C_Get1NamedResource(ResType typ, ConstStringPtr s) /* IMIV-16 */

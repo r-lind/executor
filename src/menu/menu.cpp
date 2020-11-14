@@ -36,6 +36,7 @@
 #include <base/functions.impl.h>
 #include <prefs/prefs.h>
 #include <rsys/toolevent.h>
+#include <rsys/desk.h>
 
 using namespace Executor;
 
@@ -306,11 +307,11 @@ typedef struct
 { /* NOTE: These structures are strictly local */
     MenuHandle menh; /*	 There's no reason to swap the bytes */
     INTEGER menitem; /*	 in these fields */
-    INTEGER menoff; /* although *menh will still need to be swapped */
+    INTEGER menoff;
 } endinfo;
 
 static void toend(MenuHandle, endinfo *);
-static void app(StringPtr, char, char, char, char, char, endinfo *);
+static void app(ConstStringPtr, char, char, char, char, char, endinfo *);
 static void handleinsert(Handle, StringPtr);
 static void xInsertResMenu(MenuHandle, ConstStringPtr, ResType, INTEGER);
 
@@ -330,10 +331,9 @@ static void toend(MenuHandle mh, endinfo *eip)
     eip->menoff = menuop - (char *)*mh;
 }
 
-static void app(StringPtr str, char icon, char marker, char style,
+static void app(ConstStringPtr str, char icon, char marker, char style,
                 char keyequiv, char disflag, endinfo *eip)
 {
-    char *ip, *ep, *menuop;
     Size newsize;
     SignedByte state;
 
@@ -357,9 +357,9 @@ static void app(StringPtr str, char icon, char marker, char style,
         SetHandleSize((Handle)eip->menh, newsize);
         HSetState((Handle)eip->menh, state);
     }
-    menuop = (char *)(*eip->menh) + eip->menoff;
-    ip = (char *)str;
-    ep = ip + str[0] + 1;
+    char *menuop = (char *)(*eip->menh) + eip->menoff;
+    const unsigned char *ip = str;
+    const unsigned char *ep = ip + str[0] + 1;
     while(ip != ep)
         *menuop++ = *ip++;
     *menuop++ = icon;
@@ -508,8 +508,11 @@ void Executor::C_AppendResMenu(MenuHandle mh, ResType restype)
        * ask for desk accessories.
        */
 
-        if(restype == "DRVR"_4 && about_box_menu_name_pstr[0])
-            app(about_box_menu_name_pstr, 0, 0, 0, 0, false, &endinf);
+        if(restype == "DRVR"_4)
+        {
+            for(const auto& entry : appleMenuEntries())
+                app(entry.name, 0, 0, 0, 0, false, &endinf);
+        }
 
         n = GetHandleSize(temph);
         sp = (StringPtr)*temph;

@@ -1,12 +1,8 @@
-#if !defined(_RSYS_DESK_H_)
-#define _RSYS_DESK_H_
 
-/*
- * Copyright 1995 by Abacus Research and Development, Inc.
- * All rights reserved.
- *
+#pragma once
 
- */
+#include <api/ExMacTypes.h>
+
 namespace Executor
 {
 enum
@@ -14,5 +10,14 @@ enum
     DESK_ACC_MIN = 12,
     DESK_ACC_MAX = 31
 };
+
+struct AppleMenuEntry
+{
+    Str31 name;
+    void (*function)();
+    
+    AppleMenuEntry(const char32_t* n, void (*f)());
+};
+
+const std::vector<AppleMenuEntry>& appleMenuEntries();
 }
-#endif
