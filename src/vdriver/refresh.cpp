@@ -281,16 +281,24 @@ static void flush_shadow_screen()
 {
     int top_long, left_long, bottom_long, right_long;
     static unsigned char *shadow_fbuf = nullptr;
+    static int rowBytes, width, height;
 
     /* Lazily allocate a shadow screen.  We won't be doing refresh that often,
    * so don't waste the memory unless we need it.  Note: memory never reclaimed
    */
-    if(shadow_fbuf == nullptr)
+    if(shadow_fbuf == nullptr
+        || rowBytes != vdriver->rowBytes() || width != vdriver->width() || height != vdriver->height())
     {
+        if(shadow_fbuf)
+            free(shadow_fbuf);
         shadow_fbuf = (uint8_t *)malloc(vdriver->rowBytes() * vdriver->height());
         memcpy(shadow_fbuf, vdriver->framebuffer(),
                vdriver->rowBytes() * vdriver->height());
-        vdriver->updateScreen(0, 0, vdriver->height(), vdriver->width(), false);
+        vdriver->updateScreen();
+
+        rowBytes = vdriver->rowBytes();
+        width = vdriver->width();
+        height = vdriver->height();
     }
     else if(find_changed_rect_and_update_shadow((uint32_t *)vdriver->framebuffer(),
                                                 (uint32_t *)shadow_fbuf,
@@ -302,6 +310,6 @@ static void flush_shadow_screen()
     {
         vdriver->updateScreen(top_long, (left_long * 32) >> ROMlib_log2[vdriver->bpp()],
                               bottom_long,
-                              (right_long * 32) >> ROMlib_log2[vdriver->bpp()], false);
+                              (right_long * 32) >> ROMlib_log2[vdriver->bpp()]);
     }
 }

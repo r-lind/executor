@@ -25,6 +25,13 @@ bool SDL2VideoDriver::init()
     return true;
 }
 
+bool SDL2VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscale_p)
+{
+    return VideoDriver::isAcceptableMode(width, height, bpp, grayscale_p)
+        && bpp != 2;
+}
+
+
 bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     printf("set_mode: %d %d %d", width, height, bpp);
@@ -75,7 +82,7 @@ bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
             pixelFormat = SDL_PIXELFORMAT_BGRX8888;
             break;
         default:
-            std::abort();
+            return false;
     }
 
     framebuffer_ = new uint8_t[width_ * height_ * 4];
@@ -117,8 +124,7 @@ void SDL2VideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
     SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, 0, num_colors);
 }
 
-void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                        bool cursor_p)
+void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
     /*SDL_UpdateTexture(sdlTexture, nullptr, vdriver_fbuf, vdriver_row_bytes);
     SDL_RenderCopy(sdlRenderer, sdlTexture, nullptr, nullptr);

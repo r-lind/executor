@@ -45,7 +45,7 @@ static RgnHandle roundRectRgn(const Rect& r, int16_t width, int16_t height)
                 *p += insertX;
     }
 
-    return vec.release();
+    return rgn;
 }
 
 void Executor::C_StdRRect(GrafVerb verb, const Rect *r, INTEGER width, INTEGER height)

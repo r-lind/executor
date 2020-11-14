@@ -14,7 +14,7 @@
 
 
 #include <vdriver/vdriver.h>
-#include <quickdraw/cquick.h> /* for ThePortGuard */
+#include <quickdraw/region.h>
 
 #include "available_geometry.h"
 
@@ -141,39 +141,32 @@ public:
 
 }
 
-std::optional<QBitmap> rootlessRegion;
+std::optional<QRegion> rootlessRegion;
 
 void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
-    ThePortGuard guard;
-    GrafPort grayRegionPort;
+    VideoDriverCommon::setRootlessRegion(rgn);
+    RegionProcessor rgnP(rootlessRegion_.begin());
 
-    C_OpenPort(&grayRegionPort);
-    short grayRegionRowBytes = ((width() + 31) & ~31) / 8;
-    grayRegionPort.portBits.baseAddr = (Ptr) framebuffer() + rowBytes() * height();
-    grayRegionPort.portBits.rowBytes =  grayRegionRowBytes ;
-    grayRegionPort.portBits.bounds = { 0, 0, height(), width() };
-    grayRegionPort.portRect = grayRegionPort.portBits.bounds;
+    QRegion qtRgn;
 
-    memset(framebuffer() + rowBytes() * height(), 0, grayRegionRowBytes * height());
-
-    C_SetPort(&grayRegionPort);
-    C_PaintRgn(rgn);
-
-    C_ClosePort(&grayRegionPort);
-
-    rootlessRegion = QBitmap::fromData(
-        QSize((width() + 31)&~31, height()),
-        (const uchar*)grayRegionPort.portBits.baseAddr,
-        QImage::Format_Mono);
+    while(rgnP.bottom() < height_)
+    {
+        rgnP.advance();
+        
+        for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
+            qtRgn += QRect(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
+    }
     
 #ifdef __APPLE__
     macosx_autorelease_pool([&] {
 #endif
-        window->setMask(*rootlessRegion);
+        window->setMask(qtRgn);
 #ifdef __APPLE__
     });
 #endif
+
+    rootlessRegion = qtRgn;
 }
 
 bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
@@ -181,14 +174,6 @@ bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
     qapp = new QGuiApplication(argc, argv);
     return true;
 }
-
-bool QtVideoDriver::isAcceptableMode(int width, int height, int bpp,
-                                      bool grayscale_p,
-                                      bool exact_match_p)
-{
-    return bpp == 1 || bpp == 2 || bpp == 4 || bpp == 8;
-}
-
 
 bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
@@ -225,131 +210,28 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 
     framebuffer_ = new uint8_t[rowBytes_ * height_ + width_ * height_];
 
-    switch(bpp_)
-    {
-        case 1:
-            qimage = new QImage(framebuffer_, width_, height_, rowBytes_, QImage::Format_Mono);
-            break;
-        case 2:
-        case 4:
-            qimage = new QImage(width_, height_, QImage::Format_Indexed8);
-            break;
-        case 8:
-            qimage = new QImage(framebuffer_, width_, height_, rowBytes_, QImage::Format_Indexed8);
-            break;
-        case 16:
-            qimage = new QImage(width_, height_, QImage::Format_RGB555);
-            break;
-        case 32:
-            qimage = new QImage(width_, height_, QImage::Format_RGB32);
-            break;
-    }
+   
+    qimage = new QImage(width_, height_, QImage::Format_RGB32);
     
-    if(bpp_ <= 8)
-        qimage->setColorTable({qRgb(0,0,0),qRgb(255,255,255)});
-
     if(!window)
         window = new ExecutorWindow(callbacks_);
     window->setGeometry(geom);
-#ifdef __APPLE__
-    window->show();
-#else
+//#ifdef __APPLE__
+//    window->show();
+//#else
     window->showMaximized();
-#endif
+//#endif
     return true;
 }
-void QtVideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
-{
-    if(bpp_ > 8)
-        return;
 
-    QVector<QRgb> qcolors(num_colors);
-    for(int i = 0; i < num_colors; i++)
-    {
-        qcolors[i] = qRgb(
-            colors[i].red >> 8,
-            colors[i].green >> 8,
-            colors[i].blue >> 8
-        );
-    }
-    qimage->setColorTable(qcolors);
-}
-
-void QtVideoDriver::convertRect(QRect r)
-{
-    if(bpp_ == 2)
-    {
-        r.setLeft(r.left() & ~3);
-
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            uint8_t *src = framebuffer_ + y * rowBytes_ + r.left() / 4;
-            uint8_t *dst = qimage->scanLine(y) + r.left();
-
-            for(int i = 0; i < (r.width() + 3) / 4; i++)
-            {
-                uint8_t packed = *src++;
-                *dst++ = (packed >> 6) & 3;
-                *dst++ = (packed >> 4) & 3;
-                *dst++ = (packed >> 2) & 3;
-                *dst++ = packed & 3;
-            }
-        }
-    }
-    else if(bpp_ == 4)
-    {
-        r.setLeft(r.left() & ~1);
-
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            uint8_t *src = framebuffer_ + y * rowBytes_ + r.left() / 2;
-            uint8_t *dst = qimage->scanLine(y) + r.left();
-
-            for(int i = 0; i < (r.width() + 1) / 2; i++)
-            {
-                uint8_t packed = *src++;
-                *dst++ = packed >> 4;
-                *dst++ = packed & 0xF;
-            }
-        }
-    }
-    else if(bpp_ == 16)
-    {
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            auto src = (GUEST<uint16_t>*) (framebuffer_ + y * rowBytes_) + r.left();
-            auto dst = (uint16_t*) (qimage->scanLine(y)) + r.left();
-
-            for(int i = 0; i < r.width(); i++)
-                *dst++ = *src++;
-        }
-    }
-    else if(bpp_ == 32)
-    {
-        for(int y = r.top(); y <= r.bottom(); y++)
-        {
-            auto src = (GUEST<uint32_t>*) (framebuffer_ + y * rowBytes_) + r.left();
-            auto dst = (uint32_t*) (qimage->scanLine(y)) + r.left();
-
-            for(int i = 0; i < r.width(); i++)
-                *dst++ = *src++;
-        }
-    }
-}
-
-void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                      bool cursor_p)
+void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
     QRegion rgn;
     for(int i = 0; i < num_rects; i++)
-    {
         rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
-    }
 
-    rgn &= QRect(0,0,width_,height_);
-    if(bpp_ != 1 && bpp_ != 8)
-        for(QRect rect : rgn)
-            convertRect(rect);
+    updateBuffer((uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
+        num_rects, r);
 
     window->update(rgn);
 }
@@ -395,8 +277,10 @@ void QtVideoDriver::setCursor(char *cursor_data,
     if(cursor_data)
     {
         uchar data2[32];
-        uchar *mask2 = (uchar*)cursor_mask;
-        std::copy(cursor_data, cursor_data+32, data2);
+        uchar mask2[32];
+        memcpy(data2, cursor_data, 32);
+        memcpy(mask2, cursor_mask, 32);
+        
         for(int i = 0; i<32; i++)
             mask2[i] |= data2[i];
         QBitmap crsr = QBitmap::fromData(QSize(16, 16), (const uchar*)data2, QImage::Format_Mono);
@@ -404,7 +288,8 @@ void QtVideoDriver::setCursor(char *cursor_data,
         
         theCursor = QCursor(crsr, mask, hotspot_x, hotspot_y);
     }
-    window->setCursor(theCursor);   // TODO: should we check for visibility?
+    //window->setCursor(theCursor);   // TODO: should we check for visibility?
+    window->setCursor(Qt::ArrowCursor);   // TODO: should we check for visibility?
 }
 
 bool QtVideoDriver::setCursorVisible(bool show_p)

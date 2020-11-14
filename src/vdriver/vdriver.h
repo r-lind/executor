@@ -24,8 +24,8 @@ namespace Executor
 #define VDRIVER_MIN_SCREEN_HEIGHT 342
 
 /* Suggested default screen size (may be safely ignored). */
-#define VDRIVER_DEFAULT_SCREEN_WIDTH 640
-#define VDRIVER_DEFAULT_SCREEN_HEIGHT 480
+#define VDRIVER_DEFAULT_SCREEN_WIDTH 1024
+#define VDRIVER_DEFAULT_SCREEN_HEIGHT 768
 
 struct vdriver_rect_t
 {
@@ -81,17 +81,13 @@ public:
     virtual bool init();
     
     virtual void shutdown();
-    virtual void updateScreen(int top, int left, int bottom, int right,
-                                 bool cursor_p);
-    virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r,
-                                       bool cursor_p);
-    virtual bool isAcceptableMode(int width, int height, int bpp,
-                                      bool grayscale_p,
-                                      bool exact_match_p);
+    virtual void updateScreen(int top, int left, int bottom, int right);
+    void updateScreen() { updateScreen(0,0,height(),width()); }
+    virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r);
+    virtual bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p);
     virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) = 0;
-    virtual void flushDisplay();
 
     virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
     virtual LONGINT getScrap(OSType type, Handle h);

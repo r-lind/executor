@@ -40,24 +40,8 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
 {
 }
 
-
-void WaylandVideoDriver::setColors(int num_colors, const Executor::vdriver_color_t *color_array)
+bool WaylandVideoDriver::init()
 {
-    for(int i = 0; i < num_colors; i++)
-    {
-        colors_[i] = (0xFF << 24)
-                    | ((color_array[i].red >> 8) << 16)
-                    | ((color_array[i].green >> 8) << 8)
-                    | (color_array[i].blue >> 8);
-    }
-}
-
-bool WaylandVideoDriver::setMode(int width, int height, int bpp,
-                                  bool grayscale_p)
-{
-    if(xdg_wm_base_)
-        return true;
-
     rootlessRegion_ = { 0, 0, RGN_STOP, RGN_STOP };
 
     registry_ = display_.get_registry();
@@ -76,7 +60,6 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
         };
     display_.roundtrip();
 
-    // TODO: 
     xdg_wm_base_.on_ping() = [this] (uint32_t serial) { xdg_wm_base_.pong(serial); };
 
     surface_ = compositor_.create_surface();
@@ -86,62 +69,75 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     xdg_toplevel_.set_app_id("io.github.autc04.executor");
 
     xdg_toplevel_.on_configure() = [this] (int32_t x, int32_t y, array_t states) { 
-        //configuredX = std::max(0,x);
-        //configuredY = std::max(0,y);
-        
-        if(x && y && !initDone_)
+        if(x && x != configuredWidth_)
         {
-            width_ = x;
-            height_ = y;
+            configuredWidth_ = x;
+            configurePending_ = true;
+        }
+        if(y && y != configuredHeight_)
+        {
+            configuredHeight_ = y;
+            configurePending_ = true;
         }
 
         std::vector<xdg_toplevel_state> states1 = states;
 
-        std::cout << "toplevel configure " << x << " " << y << "\n";
-
-    };
-
-    auto fillBuffer = [this](Buffer& buf) {
-        //uint32_t colors[] = { 0xFFFFFF00, 0xFFFF0000, 0xFF00FF00, 0xFF0000FF, 0x80808080 };
-        int w = buf.width(), h = buf.height();
-        uint32_t color = 0x80808080;//colors[colorIdx];
-        for(int y = 0; y < h; y++)
-            for(int x = 0; x < w; x++)
+        configuredMaximized_ = std::find(states1.begin(), states1.end(), xdg_toplevel_state::maximized) != states1.end();
+        if(configuredMaximized_ != isRootless_)
+        {
+            configurePending_ = true;
+            if(!configuredMaximized_ && isRootless_)
             {
-                uint32_t& pixel = ((uint32_t*)buf.data())[y * w + x];
-                if(x < w/3 || x > 2*w/3)
-                    pixel = color;
-                else
-                    pixel = 0;
+                configuredWidth_ = std::max(512, width_ / 2);
+                configuredHeight_ = std::max(342, height_ / 2);
             }
+        }
+
+        bool activated = std::find(states1.begin(), states1.end(), xdg_toplevel_state::activated) != states1.end();
+        if(activated && !configuredActivated_)
+            callbacks_->resumeEvent(true);
+        else if(!activated && configuredActivated_)
+            callbacks_->suspendEvent();
+
+        configuredActivated_ = activated;
+
+        std::cout << "toplevel configure " << x << " " << y << "\n";
+        for(auto s : states1)
+            std::cout << " " << (int)s << std::endl;
+        std::cout << "confMax: " << (int)configuredMaximized_ << std::endl;
     };
 
-    xdg_surface_.on_configure() = [this, fillBuffer] (uint32_t serial) {
+    xdg_surface_.on_configure() = [this] (uint32_t serial) {
         xdg_surface_.ack_configure(serial);
 
-        if(width_ == buffer_.width() && height_ == buffer_.height())
+        if(configuredWidth_ == buffer_.width() && configuredHeight_ == buffer_.height())
             return;
 
-        //updateScreenRects(0,nullptr,false);
+        buffer_ = Buffer(shm_, configuredWidth_, configuredHeight_);
 
-        buffer_ = Buffer(shm_, width_, height_);
-
-        fillBuffer(buffer_);
-        
-
-        surface_.attach(buffer_.wlbuffer(), 0, 0);
-        surface_.commit();
+        std::fill(buffer_.data(), buffer_.data() + configuredWidth_ * configuredHeight_, 0x80404040);
     };
     xdg_toplevel_.on_close() = [this] () { };
 
     pointer_ = seat_.get_pointer();
     pointer_.on_button() = [this] (uint32_t serial, uint32_t time, uint32_t button, pointer_button_state state) {
         std::cout << "button: " << button << " " << (int)state << std::endl;
+
+
         if(button == BTN_LEFT)
-            callbacks_->mouseButtonEvent(state == pointer_button_state::pressed);
+        {
+            if(state == pointer_button_state::pressed
+                && !configuredMaximized_
+                && mouseX_ > configuredWidth_ - 16 && mouseY_ > configuredHeight_ - 16)
+                xdg_toplevel_.resize(seat_, serial, xdg_toplevel_resize_edge::bottom_right);
+            else
+                callbacks_->mouseButtonEvent(state == pointer_button_state::pressed);
+        }
     };
     pointer_.on_motion() = [this] (uint32_t serial, double x, double y) {
-        std::cout << "motion: " << x << " " << y << std::endl;
+        //std::cout << "motion: " << x << " " << y << std::endl;
+        mouseX_ = x;
+        mouseY_ = y;
         callbacks_->mouseMoved(x, y);
     };
 
@@ -155,23 +151,20 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
 
         callbacks_->keyboardEvent(down, mkvkey);
     };
-
+/*
     keyboard_.on_enter() = [this] (uint32_t serial, wayland::surface_t, wayland::array_t) {
         callbacks_->resumeEvent(true);
     };
     
     keyboard_.on_leave() = [this] (uint32_t serial, wayland::surface_t) {
         callbacks_->suspendEvent();
+    };*/
+
+
+    pointer_.on_enter() = [this](uint32_t serial, surface_t surface, double x, double y) {
+        pointer_.set_cursor(serial, cursorSurface_, hotSpot_.first, hotSpot_.second);
+        cursorEnterSerial_ = serial;
     };
-
-
-    width_ = 1024;
-    height_ = 768;
-    bpp_ = bpp ? bpp : 8;
-
-    xdg_toplevel_.set_maximized();
-
-	surface_.commit();
 
 
     cursorBuffer_ = Buffer(shm_, 16,16);
@@ -180,51 +173,98 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     
 
 
+    width_ = 1024;
+    height_ = 768;
 
-    display_.roundtrip();
 
+    //xdg_toplevel_.set_maximized();
+
+    return true;
+}
+
+bool WaylandVideoDriver::setMode(int width, int height, int bpp,
+                                  bool grayscale_p)
+{
+    bpp_ = bpp ? bpp : 8;
+
+    if(!initDone_)
+    {
+        if(width && height)
+        {
+            configuredWidth_ = width;
+            configuredHeight_ = height;
+        }
+        else
+        {
+            configuredWidth_ = 1024;
+            configuredHeight_ = 768;
+            xdg_toplevel_.set_maximized();
+        }
+        surface_.commit();
+        display_.roundtrip();
+
+        width_ = configuredWidth_;
+        height_ = configuredHeight_;
+    }
 
     cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
     cursorSurface_.commit();
     //pointer_.set_cursor(0, cursorSurface_, hotSpot_.first, hotSpot_.second);
     //display_.roundtrip();
-    pointer_.on_enter() = [this](uint32_t serial, surface_t surface, double x, double y) {
-        pointer_.set_cursor(serial, cursorSurface_, hotSpot_.first, hotSpot_.second);
-        cursorEnterSerial_ = serial;
-    };
-
     rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
     framebuffer_ = new uint8_t[rowBytes_ * height_];
+    isRootless_ = configuredMaximized_;
+
+    configurePending_ = false;
     initDone_ = true;
 
-    isRootless_ = true;
     return true;
+}
+
+namespace Executor
+{
+    void gd_vdriver_mode_changed(); // FIXME
 }
 
 void WaylandVideoDriver::pumpEvents()
 {
     //display_.dispatch();
     display_.roundtrip();
+    if(configurePending_)
+    {
+        std::cout << width_ << "x" << height_ << " --> " << (int)configuredMaximized_ << " " << configuredWidth_ << "x" << configuredHeight_ << std::endl;
+        if((configuredWidth_ && configuredHeight_) || (configuredMaximized_ != isRootless_ && width_ && height_))
+        {
+            if(configuredWidth_ && configuredHeight_)
+            {
+                width_ = configuredWidth_;
+                height_ = configuredHeight_;
+            }
+            delete[] framebuffer_;
+            rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
+            framebuffer_ = new uint8_t[rowBytes_ * height_];
+            std::fill(framebuffer_, framebuffer_ + height_ * rowBytes_, 0);
+            isRootless_ = configuredMaximized_;
+            if(!isRootless_)
+            {
+                surface_.set_input_region({});
+                rootlessRegion_ = { 0, 0, (int16_t)width_, RGN_STOP, (int16_t)height_, 0, (int16_t)width_, RGN_STOP };
+            }
+
+            Executor::gd_vdriver_mode_changed();
+            updateScreen();
+
+            //surface_.attach(buffer_.wlbuffer(), 0, 0);
+            //surface_.commit();
+        }
+
+        configurePending_ = false;
+    }
 }
 
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
-    if((*rgn)->rgnSize == 10)
-    {
-        rootlessRegion_.clear();
-        rootlessRegion_.insert(rootlessRegion_.end(),
-            { (*rgn)->rgnBBox.top.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
-            (*rgn)->rgnBBox.bottom.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
-            RGN_STOP });
-    }
-    else
-    {
-        GUEST<uint16_t> *p = (GUEST<uint16_t>*) ((*(Handle)rgn) + 10);
-        GUEST<uint16_t> *q = (GUEST<uint16_t>*) ((*(Handle)rgn) + (*rgn)->rgnSize);
-        rootlessRegion_.clear();
-        rootlessRegion_.insert(rootlessRegion_.end(), p, q);
-    }
-
+    VideoDriverCommon::setRootlessRegion(rgn);
 
     RegionProcessor rgnP(rootlessRegion_.begin());
 
@@ -241,125 +281,18 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
     surface_.set_input_region(waylandRgn);
 }
 
-template<int depth>
-struct IndexedPixelGetter
-{
-    uint8_t *src;
-    int shift;
-    std::array<uint32_t, 256>& colors;
-
-    static constexpr uint8_t mask = (1 << depth) - 1;
-
-    IndexedPixelGetter(std::array<uint32_t, 256>& colors, uint8_t *line, int x)
-        : colors(colors)
-    {
-        src = line + x * depth / 8;
-        shift = 8 - (x * depth % 8) - depth;
-    }
-
-    uint32_t operator() ()
-    {
-        auto c = colors[(*src >> shift) & mask];
-        shift -= depth;
-        if(shift < 0)
-        {
-            ++src;
-            shift = 8 - depth;
-        }
-        return c;
-    }
-};
 
 void WaylandVideoDriver::updateScreenRects(
-    int num_rects, const vdriver_rect_t *r,
-    bool cursor_p)
+    int num_rects, const vdriver_rect_t *rects)
 {
     std::cout << "update.\n";
     for(int i = 0; i < num_rects; i++)
-        std::cout << r[i].left << ", " << r[i].top << " - " << r[i].right << ", " << r[i].bottom << std::endl;
-    uint32_t *screen = reinterpret_cast<uint32_t*>(buffer_.data());
+        std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
+
+    updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), num_rects, rects);
 
     for(int i = 0; i < num_rects; i++)
-    {
-        RegionProcessor rgnP(rootlessRegion_.begin());
-
-        for(int y = r[i].top; y < r[i].bottom; y++)
-        {
-            while(y >= rgnP.bottom())
-                rgnP.advance();
-
-            auto blitLine = [this, &rgnP, screen, y, r, i](auto getPixel) {
-                auto rowIt = rgnP.row.begin();
-                int x = r[i].left;
-
-                while(x < r[i].right)
-                {
-                    int nextX = std::min(r[i].right, (int)*rowIt++);
-
-                    for(; x < nextX; x++)
-                    {
-                        uint32_t pixel = getPixel();
-                        screen[y * width_ + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
-                    }
-                    
-                    if(x >= r[i].right)
-                        break;
-
-                    nextX = std::min(r[i].right, (int)*rowIt++);
-
-                    for(; x < nextX; x++)
-                        screen[y * width_ + x] = getPixel();
-                }
-            };
-
-            uint8_t *src = framebuffer_ + y * rowBytes_;
-            switch(bpp_)
-            {
-                case 8:
-                    src += r[i].left;
-                    blitLine([&] { return colors_[*src++]; });
-                    break;
-
-                case 1: 
-                    blitLine(IndexedPixelGetter<1>(colors_, src, r[i].left));
-                    break;
-                case 2: 
-                    blitLine(IndexedPixelGetter<2>(colors_, src, r[i].left));
-                    break;
-                case 4: 
-                    blitLine(IndexedPixelGetter<4>(colors_, src, r[i].left));
-                    break;
-                case 16:
-                    {
-                        auto *src16 = reinterpret_cast<GUEST<uint16_t>*>(src);
-                        src16 += r[i].left;
-                        blitLine([&] { 
-                            uint16_t pix = *src16++;
-                            auto fiveToEight = [](uint32_t x) {
-                                return (x << 3) | (x >> 2);
-                            };
-                            return 0xFF000000
-                                | (fiveToEight((pix >> 10) & 31) << 16)
-                                | (fiveToEight((pix >> 5) & 31) << 8)
-                                | fiveToEight(pix & 31);
-                        });
-                    }
-                    break;
-
-                case 32:
-                    {
-                        auto *src32 = reinterpret_cast<GUEST<uint32_t>*>(src);
-                        src32 += r[i].left;
-                        blitLine([&] { return (*src32++) | 0xFF000000; });
-                    }
-                    break;
-
-            }
-        }
-    }
-
-    for(int i = 0; i < num_rects; i++)
-        surface_.damage_buffer(r[i].left,r[i].top,r[i].right-r[i].left,r[i].bottom-r[i].top);
+        surface_.damage_buffer(rects[i].left,rects[i].top,rects[i].right-rects[i].left,rects[i].bottom-rects[i].top);
     surface_.attach(buffer_.wlbuffer(), 0, 0);
     surface_.commit();
     display_.flush();

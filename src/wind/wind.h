@@ -40,6 +40,8 @@ extern WindowPeek ROMlib_firstvisible(WindowPtr w);
 extern Boolean ROMlib_window_zoomed(WindowPeek wp);
 extern void wind_color_init(void);
 
+void ROMLib_InitGrayRgn();
+
 void ROMlib_rootless_update(RgnHandle extra = nullptr);
 void ROMlib_rootless_openmenu(Rect r);
 void ROMlib_rootless_closemenu();
