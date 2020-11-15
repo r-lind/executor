@@ -78,7 +78,7 @@ void Executor::C_UseResFile(INTEGER rn)
 
     if(rn == 0)
         rn = LM(SysMap);
-    ROMlib_invalar();
+    ROMlib_resTypesChanged();
     if(ROMlib_rntohandl(rn, &map))
     {
         LM(CurMap) = rn;

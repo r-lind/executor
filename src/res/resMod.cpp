@@ -115,7 +115,7 @@ static LONGINT addtype(resmaphand map, ResType typ)
     if(tr->rtyp == typ)
         return ((LONGINT)((char *)tr - (char *)*map));
     EWALKTR(tr)
-    ROMlib_invalar();
+    ROMlib_resTypesChanged();
     t.rtyp = typ;
     t.nres = -1;
     t.rloff = NAMEOFF(map) - TYPEOFF(map);
@@ -266,7 +266,7 @@ void Executor::C_RemoveResource(Handle res)
     tr->nres = tr->nres - 1;
     if(tr->nres == -1)
     {
-        ROMlib_invalar();
+        ROMlib_resTypesChanged();
         NUMTMINUS1(map) -= 1;
         Munger((Handle)map, troff, (Ptr)0, (LONGINT)sizeof(typref), (Ptr) "",
                (LONGINT)0);
@@ -316,11 +316,11 @@ static OSErr writemap(resmaphand map)
     return (terr);
 }
 
-/* ROMlib_wr: ROMlib_wr is the helper routine for WriteResource, the
+/* writeResourceInternal is the helper routine for WriteResource, the
 	      resource file associated with map is updated to include
 	      the resource pointed to by rr */
 
-void Executor::ROMlib_wr(resmaphand map, resref *rr) /* INTERNAL */
+static void writeResourceInternal(resmaphand map, resref *rr)
 {
     LONGINT rsize, newloc, lc;
     GUEST<LONGINT> swappedrsize;
@@ -366,9 +366,6 @@ static void fillst(sorttypehand st, resref *rp, resref *rep)
     while(rp != rep)
     {
         newoff = B3TOLONG(rp->doff);
-#if 0 /* compiler botch if we leave the next line in */
-	gui_assert(newoff >= 0);
-#endif
         for(sp = end - 1; newoff < sp->diskoff; sp--)
             ;
         sp++;
@@ -523,9 +520,9 @@ void Executor::C_UpdateResFile(INTEGER rn)
     }
     ROMlib_setreserr(noErr);
     /*
- * NOTE:  This implementation looks more true to what IMI-125 implies than
- *	  the one (above) it replaces.
- */
+     * NOTE:  This implementation looks more true to what IMI-125 implies than
+     *	  the one (above) it replaces.
+     */
     fp = PRNTOFPERR((*map)->resfn, &err);
     if(err == noErr && (fp->fcflags & fcwriteperm))
     {
@@ -540,7 +537,7 @@ void Executor::C_UpdateResFile(INTEGER rn)
             if(needtowalk)
             {
                 WALKTANDR(map, i, tr, j, rr)
-                ROMlib_wr(map, rr);
+                writeResourceInternal(map, rr);
                 if(LM(ResErr) != noErr)
                     return;
                 EWALKTANDR(tr, rr)
@@ -563,7 +560,7 @@ void Executor::C_WriteResource(Handle res)
     ROMlib_setreserr(ROMlib_findres(res, &map, &tr, &rr));
     if(LM(ResErr) != noErr)
         return;
-    ROMlib_wr(map, rr);
+    writeResourceInternal(map, rr);
 }
 
 void Executor::C_SetResPurge(Boolean install)

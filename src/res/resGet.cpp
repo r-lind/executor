@@ -11,7 +11,6 @@
 #include <MemoryMgr.h>
 #include <OSUtil.h>
 #include <mman/mman.h>
-#include <rsys/aboutbox.h>
 
 #include <ctype.h>
 

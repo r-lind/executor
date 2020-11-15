@@ -412,7 +412,7 @@ void Executor::C_CloseResFile(INTEGER rn)
 
     invalidate_kchr_ptr();
 
-    ROMlib_invalar();
+    ROMlib_resTypesChanged();
     if(rn == REF0)
     {
         for(map = (resmaphand)LM(TopMapHndl); map; map = nextmap)
@@ -551,7 +551,7 @@ INTEGER Executor::C_HOpenResFile(INTEGER vref, LONGINT dirid, ConstStringPtr fn,
     if(LM(ResErr) != noErr)
         /*-->*/ return -1;
 
-    ROMlib_invalar();
+    ROMlib_resTypesChanged();
     pbr.ioParam.ioNamePtr = (StringPtr)fn;
     pbr.ioParam.ioVRefNum = vref;
     pbr.fileParam.ioFDirIndex = 0;

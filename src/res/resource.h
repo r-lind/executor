@@ -93,11 +93,10 @@ extern OSErr ROMlib_typidtop(ResType typ, INTEGER id, resmaphand *pth,
                              resref **ptr);
 extern OSErr ROMlib_maptypidtop(resmaphand map, ResType typ, INTEGER id,
                                 resref **ptr);
-extern void ROMlib_invalar(void);
+extern void ROMlib_resTypesChanged(void);
 
 extern Handle ROMlib_getrestid(ResType restype, INTEGER id);
 extern INTEGER ROMlib_setreserr(INTEGER reserr);
-extern void ROMlib_wr(resmaphand map, resref *rr);
 extern LONGINT ROMlib_SizeResource(Handle res, Boolean usehandle);
 extern Handle ROMlib_mgetres2(resmaphand map, resref *rr);
 

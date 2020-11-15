@@ -23,7 +23,7 @@ static INTEGER initar(INTEGER);
 
 static INTEGER arrn = ARRN_NOTINITTED;
 
-void Executor::ROMlib_invalar() /* INTERNAL */
+void Executor::ROMlib_resTypesChanged() /* INTERNAL */
 {
     if(ar)
         EmptyHandle((Handle)ar);

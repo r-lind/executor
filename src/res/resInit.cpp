@@ -100,7 +100,7 @@ INTEGER Executor::C_InitResources()
     }
 
     LM(SysMapHndl) = LM(TopMapHndl);
-    ROMlib_invalar();
+    ROMlib_resTypesChanged();
     SetResLoad(true);
     versh = GetResource("vers"_4, 1);
     versnum = extract_vers_num(versh);
