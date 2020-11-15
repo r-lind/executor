@@ -565,9 +565,9 @@ void Executor::ROMlib_InitGDevices()
     else
     {
         /* how about a nice yellow hilite color? no, it's ugly. */
-        LM(HiliteRGB).red = (unsigned short)0xAAAA;
-        LM(HiliteRGB).green = (unsigned short)0xAAAA;
-        LM(HiliteRGB).blue = (unsigned short)0xFFFF;
+        LM(HiliteRGB).red = (unsigned short)0x9999;
+        LM(HiliteRGB).green = (unsigned short)0xCCCC;
+        LM(HiliteRGB).blue = (unsigned short)0xCCCC;
     }
 
 
