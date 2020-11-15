@@ -6,6 +6,9 @@ void HeadlessVideoDriver::setColors(int num_colors, const Executor::vdriver_colo
 bool HeadlessVideoDriver::setMode(int width, int height, int bpp,
                                   bool grayscale_p)
 {
+    width_ = width;
+    height_ = height;
+    bpp_ = bpp;
     if(width_ == 0 || height_ == 0)
     {
         width_ = 512;
