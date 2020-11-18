@@ -21,15 +21,32 @@ public:
         filename = PSTR("test-resfile");
         CreateResFile(filename);
         EXPECT_EQ(noErr, ResError());
+        open();
+    }
+
+    void open()
+    {
         ref = OpenResFile(filename);
         EXPECT_EQ(noErr, ResError());
         EXPECT_NE(-1, ref);
     }
 
-    ~ResourceTest()
+    void close()
     {
         if(ref != -1)
             CloseResFile(ref);
+        ref = -1;
+    }
+
+    void reopen()
+    {
+        close();
+        open();
+    }
+
+    ~ResourceTest()
+    {
+        close();
         FSDelete(filename,0);
     }
 };
@@ -123,4 +140,42 @@ TEST_F(ResourceTest, AddResource)
 
     DisposeHandle(h3);
     DisposeHandle(h);
+}
+
+TEST_F(ResourceTest, Modify1)
+{
+    Handle h1;
+    h1 = NewHandle(4);
+    *(GUEST<uint32_t>*)*h1 = 0xDEADBEEF;
+    ASSERT_NE(nullptr, h1);
+
+    AddResource(h1, 'QUUX', 128, PSTR("Hello, world."));
+    EXPECT_EQ(noErr, ResError());
+
+    Handle h2;
+    h2 = NewHandle(4);
+    *(GUEST<uint32_t>*)*h2 = 0xFEEDFACE;
+
+    AddResource(h2, 'QUUX', 129, PSTR("Hello again."));
+    EXPECT_EQ(noErr, ResError());
+
+    reopen();
+
+    h1 = GetResource('QUUX', 128);
+    h2 = GetResource('QUUX', 129);
+
+    ASSERT_EQ(0xDEADBEEF, *(GUEST<uint32_t>*)*h1);
+    ASSERT_EQ(0xFEEDFACE, *(GUEST<uint32_t>*)*h2);
+
+    SetHandleSize(h1, 1024);
+    memset(*h1, 0xAB, 1024);
+    ChangedResource(h1);
+
+    reopen();
+
+    h1 = GetResource('QUUX', 128);
+    h2 = GetResource('QUUX', 129);
+
+    ASSERT_EQ(0xABABABAB, *(GUEST<uint32_t>*)*h1);
+    ASSERT_EQ(0xFEEDFACE, *(GUEST<uint32_t>*)*h2);
 }
