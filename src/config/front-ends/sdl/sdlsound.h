@@ -1,13 +1,7 @@
-#if !defined(_SDL_SOUND_H_)
-#define _SDL_SOUND_H_
+#pragma once
 
-#define SOUND_SDL
-
-#include <SDL_Sound/SDL_sound.h>
 #include <sound/sounddriver.h>
 
-namespace Executor
-{
 
 #define LOGBUFSIZE 11 /* Must be between 7 and 17 decimal */
 
@@ -21,7 +15,7 @@ namespace Executor
 
 #define BUFSIZE (1 << (LOGBUFSIZE + 1)) /* +1 as bug workaround */
 
-class SDLSound : public SoundDriver
+class SDLSound : public Executor::SoundDriver
 {
 public:
     virtual bool sound_init();
@@ -31,7 +25,7 @@ public:
     virtual void sound_go();
     virtual void sound_stop();
     virtual void HungerStart();
-    virtual struct hunger_info GetHungerInfo();
+    virtual Executor::hunger_info GetHungerInfo();
     virtual void HungerFinish();
     virtual void sound_clear_pending();
     virtual bool HasSoundClearPending() { return true; }
@@ -46,17 +40,14 @@ private:
     unsigned char buf[7 * BUFSIZE];
     void patl_wait();
     void patl_signal(void);
-    snd_time t1;
-    Uint8 *sdl_stream;
+    Executor::snd_time t1;
+    uint8_t *sdl_stream;
     ssize_t sdl_write(const void *buf, size_t len);
     void sdl_wait_until_callback_has_been_called(void);
     static void sound_sdl_shutdown_at_exit(void);
     static void *loop(void *unused);
-    static void hunger_callback(void *unused, Uint8 *stream, int len);
+    static void hunger_callback(void *unused, uint8_t *stream, int len);
 };
-}
 
 //extern bool sound_sdl_init (sound_driver_t *s);
 extern void ROMlib_set_sdl_audio_driver_name(const char *str);
-
-#endif /* !_SDL_SOUND_H_ */

@@ -39,6 +39,8 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         syswm_vars.h
         paramline.h
         paramline.c
+        sdlsound.h
+        sdlsound.cpp
         ${OS_SPECIFIC}
         )
 

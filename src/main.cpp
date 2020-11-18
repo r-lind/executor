@@ -357,13 +357,6 @@ static void parseCommandLine(int& argc, char **argv)
         bad_arg_p = true;
     }
 
-#if defined(Sound_SDL_Sound)
-
-    if(opt_val(opt_db, "sdlaudio", &arg))
-        ROMlib_set_sdl_audio_driver_name(arg);
-
-#endif
-
     if(opt_val(opt_db, "ppc", nullptr))
         ROMlib_set_ppc(true);
 

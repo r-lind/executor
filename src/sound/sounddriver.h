@@ -5,6 +5,8 @@
 
 namespace Executor
 {
+
+struct hunger_info;
 class SoundDriver
 {
 public:
@@ -15,7 +17,7 @@ public:
     virtual void sound_go() = 0;
     virtual void sound_stop() = 0;
     virtual void HungerStart() = 0;
-    virtual struct hunger_info GetHungerInfo() = 0;
+    virtual hunger_info GetHungerInfo() = 0;
     virtual void HungerFinish() = 0;
     virtual void sound_clear_pending() = 0;
     virtual bool HasSoundClearPending() = 0;

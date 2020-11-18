@@ -8,7 +8,12 @@
  */
 
 #include <base/common.h>
+#include <vdriver/vdriver.h>
+#include <sound/sounddriver.h>
+#include <base/m68kint.h>
+#include "sdlsound.h"
 
+#include <sys/types.h>
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/ioctl.h>
@@ -16,12 +21,9 @@
 #include <sys/socket.h>
 #include <sched.h>
 #include <pthread.h>
+#include <unistd.h>
 
-#include <vdriver/vdriver.h>
-#include <sound/sounddriver.h>
-#include <base/m68kint.h>
-#include "sdl-sound.h"
-#include <SDL_Audio.h>
+#include <SDL/SDL_audio.h>
 
 using namespace Executor;
 
@@ -138,7 +140,7 @@ SDLSound::sdl_write(const void *buf, size_t len)
 
 void SDLSound::HungerFinish()
 {
-    struct hunger_info info;
+    Executor::hunger_info info;
 
     info = GetHungerInfo();
 
@@ -155,15 +157,18 @@ void SDLSound::HungerFinish()
 }
 
 #if defined(_SEM_SEMUN_UNDEFINED)
-union semun {
+union xsemun {
     int unused_baggage;
 };
 #endif
 
+
 void SDLSound::sound_shutdown()
 {
+    xsemun su;
+    su.unused_baggage = 0;
     if(semid >= 0)
-        semctl(semid, 0, IPC_RMID, (union semun){.val = 0 });
+        semctl(semid, 0, IPC_RMID, su);
 
     if(have_sound_p)
     {
@@ -212,7 +217,7 @@ SDLSound::loop(void *unused)
         /* Request interrupt */
         if(ourSelf->sound_on)
         {
-            generate_interrup(M68K_SOUND_PRIORITY);
+            interrupt_generate(M68K_SOUND_PRIORITY);
         }
     }
 
@@ -272,7 +277,7 @@ bool SDLSound::sound_init()
         return false;
     }
 
-    if(sdl_audio_driver_name)
+    /*if(sdl_audio_driver_name)
     {
         const char *sanity_check_name;
         bool success = false;
@@ -286,7 +291,7 @@ bool SDLSound::sound_init()
                     sanity_check_name ? sanity_check_name : "nullptr");
             return false;
         }
-    }
+    }*/
 
     memset(&spec, 0, sizeof spec);
 
@@ -338,7 +343,7 @@ bool SDLSound::sound_init()
     atexit(sound_sdl_shutdown_at_exit); /* make sure semid gets freed */
 
     my_callback = callback_install(sound_callback, nullptr);
-    *(syn68k_addr_t *)SYN68K_TO_US(M68K_SOUND_VECTOR * 4) = BigEndianValue(my_callback);
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_SOUND_VECTOR * 4) = my_callback;
 
     {
         sigset_t all_signals, current_mask;

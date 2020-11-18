@@ -11,6 +11,7 @@
 
 #include "sdlevents.h"
 #include "syswm_map.h"
+#include "sdlsound.h"
 
 #if defined(linux) && !defined(powerpc) && !defined(__ppc__)
 #define USE_SDL_EVENT_THREAD
@@ -95,6 +96,8 @@ bool SDLVideoDriver::init()
     /* Allow unsafe fullscreen video memory access */
     if(getenv("SDL_HWSURFACE") || ROMlib_hwsurface_p)
         video_flags |= SDL_HWSURFACE;
+
+    //sound_driver = new SDLSound();
 
     return true;
 }
