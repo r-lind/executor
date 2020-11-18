@@ -124,8 +124,7 @@ void Executor::clear_pending_sounds(void)
 {
     call_back_info.headp = nullptr;
     call_back_info.busy = false;
-    if(sound_driver->HasSoundClearPending())
-        SOUND_CLEAR_PENDING();
+    sound_driver->sound_clear_pending();
     allchans = nullptr;
 }
 
@@ -231,7 +230,7 @@ OSErr Executor::C_SndPlayDoubleBuffer(SndChannelPtr chanp,
             SND_CHAN_TIME(chanp) = 0;
             SND_CHAN_CURRENT_START(chanp) = 0;
             chanp->flags |= CHAN_DBINPROG_FLAG;
-            SOUND_GO();
+            sound_driver->sound_go();
             retval = noErr;
             break;
 

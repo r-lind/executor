@@ -567,7 +567,7 @@ snd_duration(SoundHeaderPtr hp)
 #define CMD_DONE(c) ((c)->flags &= ~CHAN_CMDINPROG_FLAG)
 
 static void
-do_current_command(SndChannelPtr chanp, struct hunger_info info)
+do_current_command(SndChannelPtr chanp, HungerInfo info)
 {
     unsigned long duration;
     unsigned char *sp;
@@ -635,7 +635,7 @@ do_current_command(SndChannelPtr chanp, struct hunger_info info)
 #define SND_DB_DONE(c) ((c)->flags &= ~CHAN_DBINPROG_FLAG)
 
 static void
-do_current_db(SndChannelPtr chanp, struct hunger_info info)
+do_current_db(SndChannelPtr chanp, HungerInfo info)
 {
     SndDoubleBufferHeader *dbhp;
     SndDoubleBuffer *dbp;
@@ -697,7 +697,7 @@ do_current_db(SndChannelPtr chanp, struct hunger_info info)
 syn68k_addr_t
 Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
 {
-    struct hunger_info info;
+    HungerInfo info;
     SndChannelPtr chanp;
     int did_something = 0;
     M68kReg saved_regs[16];
@@ -718,8 +718,8 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
    */
     EM_A7 = (EM_A7 - 32) & ~3; /* Might as well long-align it. */
 
-    SOUND_HUNGER_START();
-    info = SOUND_GET_HUNGER_INFO();
+    sound_driver->HungerStart();
+    info = sound_driver->GetHungerInfo();
 
     /* For each channel, grab some samples and mix them in */
     for(chanp = allchans; chanp != nullptr; chanp = chanp->nextChan)
@@ -759,10 +759,10 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
 
     //  fprintf (stderr, "about to call sound_hunger_finish\n");
 
-    SOUND_HUNGER_FINISH();
+    sound_driver->HungerFinish();
 
     if(!did_something)
-        SOUND_STOP();
+        sound_driver->sound_stop();
 
     memcpy(&cpu_state.regs, saved_regs, sizeof saved_regs);
     cpu_state.ccnz = saved_ccnz;
@@ -814,7 +814,7 @@ OSErr Executor::C_SndDoCommand(SndChannelPtr chanp, SndCommand *cmdp,
 
         case soundon:
             retval = noErr;
-            SOUND_GO();
+            sound_driver->sound_go();
 
             if(qfull_p(chanp))
             {
@@ -855,7 +855,7 @@ OSErr Executor::C_SndDoImmediate(SndChannelPtr chanp, SndCommand *cmdp)
             retval = noErr;
             break;
         case soundon:
-            SOUND_GO();
+            sound_driver->sound_go();
 #if 0 /* This is not a good check for badChannel */
       if ((unsigned short) chanp->qLength
 	  != (unsigned short) stdQLength)

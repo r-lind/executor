@@ -116,9 +116,6 @@ function(linkheader from to variant)
     configure_file(${from}/${variant}/${input} ${to} COPYONLY)
 endfunction()
 
-
-linkheader("config/sound" "sound-config.h" "dummy" "dummy-sound.h")
-
 add_executable(map_to_c map_to_c/map_to_c.cpp)
 target_include_directories(map_to_c PRIVATE .)
 

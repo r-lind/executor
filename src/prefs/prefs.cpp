@@ -55,7 +55,7 @@ void Executor::ParseConfigFile(std::string appname, OSType type)
         if(ROMlib_options & ROMLIB_PRETENDSOUND_BIT)
             ROMlib_PretendSound = soundpretend;
         if(ROMlib_options & ROMLIB_SOUNDON_BIT)
-            ROMlib_PretendSound = SOUND_WORKS_P() ? soundon : soundpretend;
+            ROMlib_PretendSound = sound_driver->sound_works() ? soundon : soundpretend;
 #if 0
 	if (ROMlib_options & ROMLIB_PASSPOSTSCRIPT_BIT)
 	    ROMlib_passpostscript = true;

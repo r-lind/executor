@@ -25,10 +25,9 @@ public:
     virtual void sound_go();
     virtual void sound_stop();
     virtual void HungerStart();
-    virtual Executor::hunger_info GetHungerInfo();
+    virtual Executor::HungerInfo GetHungerInfo();
     virtual void HungerFinish();
     virtual void sound_clear_pending();
-    virtual bool HasSoundClearPending() { return true; }
 
 private:
     int num_samples;

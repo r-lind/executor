@@ -16,12 +16,8 @@ public:
     virtual void sound_go();
     virtual void sound_stop();
     virtual void HungerStart();
-    virtual struct hunger_info GetHungerInfo();
+    virtual HungerInfo GetHungerInfo();
     virtual void sound_clear_pending();
-    virtual bool HasSoundClearPending()
-    {
-        return true;
-    }
 
 private:
     snd_time t1;

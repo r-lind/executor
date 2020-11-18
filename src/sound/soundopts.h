@@ -28,12 +28,6 @@ extern void ROMlib_soundcomplete(void *chanp);
 #define CHAN_CMDINPROG_FLAG (1 << 3)
 #define CHAN_DBINPROG_FLAG (1 << 4)
 
-extern void ROMlib_MUTEX_CONDITION_CREATE(LONGINT *lp);
-extern void ROMlib_MUTEX_LOCK(LONGINT lp);
-extern void ROMlib_MUTEX_UNLOCK(LONGINT lp);
-extern void ROMlib_CONDITION_SIGNAL(LONGINT lp);
-extern void ROMlib_CONDITION_WAIT(LONGINT lp);
-extern void ROMlib_MUTEX_CONDITION_DESTROY(LONGINT lp);
 
 extern void clear_pending_sounds(void);
 
@@ -83,17 +77,6 @@ struct ModifierStub
 
 extern int ROMlib_SND_RATE;
 #define SND_RATE ROMlib_SND_RATE
-
-struct hunger_info
-{
-    snd_time t2; /* Time of earliest sample which can be provided */
-    snd_time t3; /* Time of latest sample which must be provided */
-    snd_time t4; /* Time of latest sample which can be provided */
-    unsigned char *buf; /* nullptr means there is no buffer; just "pretend" */
-    int bufsize; /* to fill it in; (!buf && bufsize) is possible! */
-};
-
-typedef struct hunger_info HungerInfo;
 
 extern syn68k_addr_t sound_callback(syn68k_addr_t, void *);
 

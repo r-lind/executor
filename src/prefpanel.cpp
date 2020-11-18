@@ -359,7 +359,7 @@ set_sound_on_string(DialogPtr dp)
     Rect junk2;
 
     str255_from_c_string(sound_string,
-                         (SOUND_SILENT_P()
+                         (sound_driver->sound_silent()
                               ? "On (silent)"
                               : "On"));
     GetDialogItem(dp, PREFSOUNDONITEM, &junk1, &h, &junk2);
@@ -411,7 +411,7 @@ static void enable_disable_pref_items(DialogPtr dp)
     for(i = 0; i < (int)std::size(to_disable); ++i)
         mod_item_enableness(dp, to_disable[i], disable);
 
-    if(SOUND_WORKS_P())
+    if(sound_driver->sound_works())
         mod_item_enableness(dp, PREFSOUNDONITEM, enable);
     set_sound_on_string(dp);
 

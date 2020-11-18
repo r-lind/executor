@@ -36,9 +36,9 @@ void SoundFake::HungerStart()
     t1 += FAKE_BUF_SIZE;
 }
 
-struct hunger_info SoundFake::GetHungerInfo()
+HungerInfo SoundFake::GetHungerInfo()
 {
-    struct hunger_info info;
+    HungerInfo info;
 
     info.buf = nullptr; /* no buffer at all */
     info.bufsize = NUM_FAKE_BUFS * FAKE_BUF_SIZE;

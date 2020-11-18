@@ -106,10 +106,10 @@ void SDLSound::HungerStart()
 
 /* Figure out how to feed the hungry output device. */
 
-struct hunger_info
+HungerInfo
 SDLSound::GetHungerInfo()
 {
-    struct hunger_info info;
+    HungerInfo info;
 
     info.buf = buf;
     info.bufsize = 7 * num_samples;
@@ -140,7 +140,7 @@ SDLSound::sdl_write(const void *buf, size_t len)
 
 void SDLSound::HungerFinish()
 {
-    Executor::hunger_info info;
+    Executor::HungerInfo info;
 
     info = GetHungerInfo();
 
@@ -190,7 +190,7 @@ bool SDLSound::sound_silent()
 
 void SDLSound::sound_sdl_shutdown_at_exit(void)
 {
-    SOUND_SHUTDOWN();
+    sound_driver->sound_shutdown();
 }
 
 void SDLSound::sdl_wait_until_callback_has_been_called(void)
