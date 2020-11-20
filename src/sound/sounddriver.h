@@ -29,7 +29,7 @@ public:
     virtual void HungerStart() = 0;
     virtual HungerInfo GetHungerInfo() = 0;
     virtual void HungerFinish() = 0;
-    virtual void sound_clear_pending() = 0;
+    virtual void sound_clear_pending() {};
 
     virtual ~SoundDriver();
 };

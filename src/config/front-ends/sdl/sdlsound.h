@@ -1,7 +1,8 @@
 #pragma once
 
 #include <sound/sounddriver.h>
-
+#include <mutex>
+#include <condition_variable>
 
 #define LOGBUFSIZE 11 /* Must be between 7 and 17 decimal */
 
@@ -27,25 +28,28 @@ public:
     virtual void HungerStart();
     virtual Executor::HungerInfo GetHungerInfo();
     virtual void HungerFinish();
-    virtual void sound_clear_pending();
 
 private:
-    int num_samples;
+    std::mutex mutex_;
+    std::condition_variable cond_;
 
-    int semid; /* Semaphore id */
+    enum class BufferState
+    {
+        none,
+        empty,
+        full,
+    };
+    BufferState state_ = BufferState::none;
+
     int sound_on; /* 1 if we are generating interrupts */
     bool have_sound_p; /* true if sound is supported */
 
-    unsigned char buf[7 * BUFSIZE];
-    void patl_wait();
-    void patl_signal(void);
     Executor::snd_time t1;
-    uint8_t *sdl_stream;
-    ssize_t sdl_write(const void *buf, size_t len);
-    void sdl_wait_until_callback_has_been_called(void);
-    static void sound_sdl_shutdown_at_exit(void);
-    static void *loop(void *unused);
-    static void hunger_callback(void *unused, uint8_t *stream, int len);
+
+    uint8_t* buffer_;
+    size_t buffersize_;
+
+    void audioCallback(uint8_t *buffer, int len);
 };
 
 //extern bool sound_sdl_init (sound_driver_t *s);

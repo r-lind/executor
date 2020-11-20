@@ -97,7 +97,7 @@ bool SDLVideoDriver::init()
     if(getenv("SDL_HWSURFACE") || ROMlib_hwsurface_p)
         video_flags |= SDL_HWSURFACE;
 
-    //sound_driver = new SDLSound();
+    sound_driver = new SDLSound();
 
     return true;
 }
