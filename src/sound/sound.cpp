@@ -513,10 +513,6 @@ static void dumpcmd(SndCommand *cmdp)
 
 Boolean callasynth(SndChannelPtr chanp, SndCommand *cmdp, ModifierStubPtr mp)
 {
-    /*
- * NOTE: when we support sound, we'll have to check for known P_routines
- *	 to avoid invoking syn68k on our own stuff.
- */
     return mp->code(chanp, cmdp, mp);
 }
 
@@ -543,20 +539,6 @@ static void recsndcmd(SndChannelPtr chanp, SndCommand *cmdp, ModifierStubPtr mp)
     }
 }
 #endif /* defined(OLD_BROKEN_NEXTSTEP_SOUND) */
-
-static inline bool
-earlier_p(snd_time t1, snd_time t2)
-{
-    return ((t1 - t2) >> ((8 * sizeof t1) - 1)) != 0;
-}
-
-#if 0
-static inline snd_time
-earlier (snd_time t1, snd_time t2)
-{
-  return earlier_p (t1, t2) ? t1 : t2;
-}
-#endif
 
 static inline unsigned int
 snd_duration(SoundHeaderPtr hp)
@@ -724,7 +706,7 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
     /* For each channel, grab some samples and mix them in */
     for(chanp = allchans; chanp != nullptr; chanp = chanp->nextChan)
     {
-        if(earlier_p(SND_CHAN_TIME(chanp), info.t2))
+        if(SND_CHAN_TIME(chanp) < info.t2)
         {
             snd_time diff = info.t2 - SND_CHAN_TIME(chanp);
 
@@ -732,7 +714,7 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
             SND_CHAN_CURRENT_START(chanp) += SND_PROMOTE(diff);
         }
 
-        while(earlier_p(SND_CHAN_TIME(chanp), info.t3))
+        while(SND_CHAN_TIME(chanp) < info.t3)
         {
             if(SND_CHAN_CMDINPROG_P(chanp))
             {
