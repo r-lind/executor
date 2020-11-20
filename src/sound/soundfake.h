@@ -15,8 +15,7 @@ public:
     virtual void HungerFinish();
     virtual void sound_go();
     virtual void sound_stop();
-    virtual void HungerStart();
-    virtual HungerInfo GetHungerInfo();
+    virtual HungerInfo HungerStart();
     virtual void sound_clear_pending();
 
 private:

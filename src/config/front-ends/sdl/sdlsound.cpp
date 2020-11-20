@@ -54,19 +54,13 @@ void SDLSound::sound_stop()
 
 /* Do any bookkeeping needed to start feeding a hungry device */
 
-void SDLSound::HungerStart()
+HungerInfo SDLSound::HungerStart()
 {
     std::unique_lock<std::mutex> lock(mutex_);
 
     while(state_ != BufferState::empty)
         cond_.wait(lock);
-}
 
-/* Figure out how to feed the hungry output device. */
-
-HungerInfo
-SDLSound::GetHungerInfo()
-{
     HungerInfo info;
 
     info.buf = buffer_;
@@ -75,7 +69,6 @@ SDLSound::GetHungerInfo()
 
     info.t2 = t1;
     info.t3 = info.t2 + buffersize_;
-    info.t4 = info.t3;
 
     return info;
 }

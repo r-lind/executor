@@ -11,7 +11,6 @@ struct HungerInfo
 {
     snd_time t2; /* Time of earliest sample which can be provided */
     snd_time t3; /* Time of latest sample which must be provided */
-    snd_time t4; /* Time of latest sample which can be provided */
     unsigned char *buf; /* nullptr means there is no buffer; just "pretend" */
     int bufsize; /* to fill it in; (!buf && bufsize) is possible! */
     int rate;
@@ -27,8 +26,7 @@ public:
     virtual bool sound_silent() = 0;
     virtual void sound_go() = 0;
     virtual void sound_stop() = 0;
-    virtual void HungerStart() = 0;
-    virtual HungerInfo GetHungerInfo() = 0;
+    virtual HungerInfo HungerStart() = 0;
     virtual void HungerFinish() = 0;
     virtual void sound_clear_pending() {};
 

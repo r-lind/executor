@@ -25,8 +25,7 @@ public:
     virtual bool sound_silent();
     virtual void sound_go();
     virtual void sound_stop();
-    virtual void HungerStart();
-    virtual Executor::HungerInfo GetHungerInfo();
+    virtual Executor::HungerInfo HungerStart();
     virtual void HungerFinish();
 
 private:

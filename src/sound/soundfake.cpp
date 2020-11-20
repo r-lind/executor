@@ -34,12 +34,7 @@ bool SoundFake::sound_works()
     return !no_more_sound_p;
 }
 
-void SoundFake::HungerStart()
-{
-    t1 += FAKE_BUF_SIZE;
-}
-
-HungerInfo SoundFake::GetHungerInfo()
+HungerInfo SoundFake::HungerStart()
 {
     HungerInfo info;
 
@@ -48,7 +43,6 @@ HungerInfo SoundFake::GetHungerInfo()
     info.rate = SND_RATE;
     info.t2 = t1 + FAKE_BUF_SIZE;
     info.t3 = info.t2 + FAKE_BUF_SIZE;
-    info.t4 = info.t3;
 
     return info;
 }
@@ -75,6 +69,8 @@ void SoundFake::set_up_tm_task(void)
 
 void SoundFake::HungerFinish()
 {
+    t1 += FAKE_BUF_SIZE;
+
     ++num_fake_buffers_enqueued;
     if(num_fake_buffers_enqueued > (int)NUM_FAKE_BUFS)
         warning_unexpected("Too many fake sound buffers got enqueued; this "

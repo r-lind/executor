@@ -679,9 +679,6 @@ do_current_db(SndChannelPtr chanp, HungerInfo info)
 syn68k_addr_t
 Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
 {
-    HungerInfo info;
-    SndChannelPtr chanp;
-    int did_something = 0;
     M68kReg saved_regs[16];
     CCRElement saved_ccnz, saved_ccn, saved_ccc, saved_ccv, saved_ccx;
 
@@ -700,11 +697,13 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
    */
     EM_A7 = (EM_A7 - 32) & ~3; /* Might as well long-align it. */
 
-    sound_driver->HungerStart();
-    info = sound_driver->GetHungerInfo();
+    
+    bool did_something = false;
+
+    HungerInfo info = sound_driver->HungerStart();
 
     /* For each channel, grab some samples and mix them in */
-    for(chanp = allchans; chanp != nullptr; chanp = chanp->nextChan)
+    for(SndChannelPtr chanp = allchans; chanp != nullptr; chanp = chanp->nextChan)
     {
         if(SND_CHAN_TIME(chanp) < info.t2)
         {
@@ -719,18 +718,18 @@ Executor::sound_callback(syn68k_addr_t interrupt_addr, void *unused)
             if(SND_CHAN_CMDINPROG_P(chanp))
             {
                 do_current_command(chanp, info);
-                did_something = 1;
+                did_something = true;
             }
             else if(SND_CHAN_DBINPROG_P(chanp))
             {
                 do_current_db(chanp, info);
-                did_something = 1;
+                did_something = true;
             }
             else if(!qempty_p(chanp))
             {
                 chanp->cmdInProg = deq(chanp);
                 chanp->flags |= CHAN_CMDINPROG_FLAG;
-                did_something = 1;
+                did_something = true;
             }
             else
             {
