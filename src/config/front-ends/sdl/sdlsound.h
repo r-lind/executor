@@ -48,6 +48,7 @@ private:
 
     uint8_t* buffer_;
     size_t buffersize_;
+    int rate_;
 
     void audioCallback(uint8_t *buffer, int len);
 };

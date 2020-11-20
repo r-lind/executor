@@ -583,7 +583,7 @@ do_current_command(SndChannelPtr chanp, HungerInfo info)
 
                 if(resample(sp, info.buf, hp->length,
                             info.bufsize, hp->sampleRate,
-                            SND_RATE << 16,
+                            info.rate << 16,
                             &SND_CHAN_CURRENT_START(chanp),
                             &SND_CHAN_PREV_SAMP(chanp),
                             &SND_CHAN_TIME(chanp),
@@ -646,7 +646,7 @@ do_current_db(SndChannelPtr chanp, HungerInfo info)
 #endif
     if(resample(sp, info.buf, dbp->dbNumFrames,
                 info.bufsize, dbhp->dbhSampleRate,
-                SND_RATE << 16,
+                info.rate << 16,
                 &SND_CHAN_CURRENT_START(chanp),
                 &SND_CHAN_PREV_SAMP(chanp),
                 &SND_CHAN_TIME(chanp),

@@ -14,6 +14,7 @@ struct HungerInfo
     snd_time t4; /* Time of latest sample which can be provided */
     unsigned char *buf; /* nullptr means there is no buffer; just "pretend" */
     int bufsize; /* to fill it in; (!buf && bufsize) is possible! */
+    int rate;
 };
 
 

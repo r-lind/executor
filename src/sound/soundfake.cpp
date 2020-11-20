@@ -21,10 +21,13 @@ using namespace Executor;
 #define LOGBUFSIZE 11
 #define FAKE_BUF_SIZE (1U << LOGBUFSIZE)
 #define NUM_FAKE_BUFS 4U
+#define SND_RATE 22255
 
 #define MSECS_FOR_BUFFER_TO_PLAY ((FAKE_BUF_SIZE * 1000L) / SND_RATE)
 
 static TMTask fake_sound_tm_task;
+
+static uint8_t fake_buf[FAKE_BUF_SIZE];
 
 bool SoundFake::sound_works()
 {
@@ -40,8 +43,9 @@ HungerInfo SoundFake::GetHungerInfo()
 {
     HungerInfo info;
 
-    info.buf = nullptr; /* no buffer at all */
-    info.bufsize = NUM_FAKE_BUFS * FAKE_BUF_SIZE;
+    info.buf = fake_buf;
+    info.bufsize = FAKE_BUF_SIZE;
+    info.rate = SND_RATE;
     info.t2 = t1 + FAKE_BUF_SIZE;
     info.t3 = info.t2 + FAKE_BUF_SIZE;
     info.t4 = info.t3;
@@ -143,7 +147,6 @@ bool SoundFake::sound_init()
     fake_sound_callback = callback_install(handle_fake_sound_callback, this);
     no_more_sound_p = false;
     num_fake_buffers_enqueued = 0;
-    ROMlib_SND_RATE = 22255;
 
     return true;
 }

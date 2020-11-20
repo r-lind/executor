@@ -71,6 +71,7 @@ SDLSound::GetHungerInfo()
 
     info.buf = buffer_;
     info.bufsize = buffersize_;
+    info.rate = rate_;
 
     info.t2 = t1;
     info.t3 = info.t2 + buffersize_;
@@ -132,7 +133,6 @@ bool SDLSound::sound_init()
 
     sound_on = 0; /* 1 if we are generating interrupts */
     t1 = 0;
-    ROMlib_SND_RATE = 22255; 
 
     have_sound_p = false;
 
@@ -151,7 +151,7 @@ bool SDLSound::sound_init()
 
     memset(&spec, 0, sizeof spec);
 
-    spec.freq = ROMlib_SND_RATE;
+    spec.freq = 22255;
     spec.format = AUDIO_U8;
     spec.channels = 1;
     spec.samples = BUFSIZE;
@@ -165,6 +165,8 @@ bool SDLSound::sound_init()
         fprintf(stderr, "SDL_OpenAudio failed '%s'\n", SDL_GetError());
         return false;
     }
+
+    rate_ = spec.freq;
 
     my_callback = callback_install(sound_callback, nullptr);
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_SOUND_VECTOR * 4) = my_callback;

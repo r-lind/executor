@@ -12,8 +12,6 @@ namespace Executor
 /* This is the current sound driver. */
 SoundDriver *sound_driver = nullptr;
 
-int ROMlib_SND_RATE = 22255;
-
 SoundDriver::~SoundDriver()
 {
 }

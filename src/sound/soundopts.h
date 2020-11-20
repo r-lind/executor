@@ -75,9 +75,6 @@ struct ModifierStub
 #define SND_CHAN_CMDINPROG_P(c) ((c)->flags & CHAN_CMDINPROG_FLAG)
 #define SND_CHAN_DBINPROG_P(c) ((c)->flags & CHAN_DBINPROG_FLAG)
 
-extern int ROMlib_SND_RATE;
-#define SND_RATE ROMlib_SND_RATE
-
 extern syn68k_addr_t sound_callback(syn68k_addr_t, void *);
 
 extern bool sound_disabled_p;
