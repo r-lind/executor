@@ -62,6 +62,8 @@ public:
     virtual void keyboardEvent(bool down, unsigned char mkvkey);
     virtual void suspendEvent();
     virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */);
+
+    virtual void framebufferSetupChanged();
 private:
     GUEST<uint32_t> keytransState = 0;
 };

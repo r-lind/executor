@@ -221,11 +221,6 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     return true;
 }
 
-namespace Executor
-{
-    void gd_vdriver_mode_changed(); // FIXME
-}
-
 void WaylandVideoDriver::pumpEvents()
 {
     //display_.dispatch();
@@ -251,7 +246,7 @@ void WaylandVideoDriver::pumpEvents()
                 rootlessRegion_ = { 0, 0, (int16_t)width_, RGN_STOP, (int16_t)height_, 0, (int16_t)width_, RGN_STOP };
             }
 
-            Executor::gd_vdriver_mode_changed();
+            callbacks_->framebufferSetupChanged();
             updateScreen();
 
             //surface_.attach(buffer_.wlbuffer(), 0, 0);
