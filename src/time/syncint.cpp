@@ -77,7 +77,7 @@ void Interrupt::trigger()
 #if USE_TIMER_THREAD
     wake_cond.notify_all();
 #else
-    // TODO
+    // TODO: if not on main thread, make sure main thread gets woken
 #endif
 }
 
@@ -193,6 +193,7 @@ void Executor::syncint_init(void)
             }
         }
     }).detach();
+    // FIXME: properly terminate thread
 #else
     struct sigaction s;
 
