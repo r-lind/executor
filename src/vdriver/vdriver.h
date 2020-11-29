@@ -115,6 +115,10 @@ public:
         // TODO: should move to sound driver?
     virtual void beepAtUser();
 
+    virtual void runEventLoop() {}  // fixme: shouldn't really be optional?
+    virtual void runOnThread(std::function<void ()> f) {}
+    virtual void endEventLoop() {}
+
     int cursorDepth() { return cursorDepth_; }
     uint8_t *framebuffer() { return framebuffer_; }
     int width() { return width_; }

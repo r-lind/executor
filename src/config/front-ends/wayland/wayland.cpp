@@ -319,3 +319,43 @@ bool WaylandVideoDriver::setCursorVisible(bool show_p)
     pointer_.set_cursor(cursorEnterSerial_, show_p ? cursorSurface_ : surface_t(), hotSpot_.first, hotSpot_.second);
     return true;
 }
+
+#include <mutex>
+#include <condition_variable>
+
+static std::mutex mtx;
+static bool running = true;
+static std::vector<std::function<void ()>> todo;
+
+void WaylandVideoDriver::runEventLoop()
+{
+    for(;;)
+    {
+        std::vector<std::function<void ()>> todonow;
+        {
+            std::scoped_lock lk(mtx);
+            if(!running)
+                break;
+            todonow = std::move(todo);
+        }   
+
+        for(const auto& f : todonow)
+            f();
+        
+        pumpEvents();
+    }
+}
+
+void WaylandVideoDriver::runOnThread(std::function<void ()> f)
+{
+    std::scoped_lock lk(mtx);
+    todo.push_back(f);
+}
+
+void WaylandVideoDriver::endEventLoop()
+{
+    std::scoped_lock lk(mtx);
+    running = false;
+}
+
+

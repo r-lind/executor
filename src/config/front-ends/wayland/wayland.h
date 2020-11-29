@@ -113,4 +113,7 @@ public:
 
     void setRootlessRegion(Executor::RgnHandle rgn) override;
 
+    void runEventLoop() override;
+    void runOnThread(std::function<void ()> f) override;
+    void endEventLoop() override;
 };
