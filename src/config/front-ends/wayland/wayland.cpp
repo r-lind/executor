@@ -349,7 +349,6 @@ void WaylandVideoDriver::runEventLoop()
                 {
                     uint64_t evt;
                     ::read(wakeFd_, &evt, sizeof(evt));
-
                 }
             }
         }

@@ -27,10 +27,6 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     wayland::pointer_t pointer_;
     wayland::keyboard_t keyboard_;
 
-
-    
-    std::array<uint32_t, 256> colors_;
-
     class SharedMem
     {
         int fd_ = -1;
