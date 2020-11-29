@@ -125,7 +125,6 @@ public:
     int height() { return height_; }
     int rowBytes() { return rowBytes_; }
     int bpp() { return bpp_; }
-    int maxBpp() { return maxBpp_; }
     rgb_spec_t *rgbSpec() { return rgbSpec_; }
     bool isGrayscale() { return isGrayscale_; }
     bool isRootless() { return isRootless_; }
@@ -140,7 +139,6 @@ public:
     int rowBytes_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
     bool isGrayscale_ = false;
 
-    int maxBpp_ = 8;
     int cursorDepth_ = 1;
     bool isRootless_ = false;
 

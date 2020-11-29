@@ -206,8 +206,6 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     rowBytes_ = width_ * bpp_ / 8;
     rowBytes_ = (rowBytes_+3) & ~3;
 
-    maxBpp_ = 8; //32;
-
     framebuffer_ = new uint8_t[rowBytes_ * height_ + width_ * height_];
 
    

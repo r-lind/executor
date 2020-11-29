@@ -25,6 +25,8 @@
 
 using namespace Executor;
 
+static int initialBpp;
+
 /*
  * determined experimentally -- this fix is needed for Energy Scheming because
  * they put a bogus test for mode >= 8 in their code to detect color.  NOTE:
@@ -584,4 +586,10 @@ void Executor::ROMlib_InitGDevices()
                     CL_RAW(GetCTSeed()));
 
     gd_allocate_main_device();
+    initialBpp = vdriver->bpp();
+}
+
+void Executor::ResetToInitialDepth()
+{
+    SetDepth(LM(MainDevice), initialBpp, 0, 0);
 }

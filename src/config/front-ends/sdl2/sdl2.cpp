@@ -46,8 +46,6 @@ bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         bpp_ = bpp;
     rowBytes_ = width_ * bpp_ / 8;
 
-    maxBpp_ = 8; //32;
-
     sdlWindow = SDL_CreateWindow("Window",
                                  SDL_WINDOWPOS_UNDEFINED,
                                  SDL_WINDOWPOS_UNDEFINED,

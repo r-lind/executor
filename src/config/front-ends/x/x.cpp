@@ -549,7 +549,6 @@ bool X11VideoDriver::init()
                          (std::max<int>(geom_width, flag_width)));
     max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT,
                           std::max<int>(geom_height, flag_height));
-    max_bpp = 32;
 
     vistemplate.screen = x_screen;
     vistemplate.depth = 8;
@@ -584,13 +583,6 @@ bool X11VideoDriver::init()
     alloc_x_image(x_fbuf_bpp, max_width, max_height,
                     &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
                     &x_fbuf_bpp);
-
-    if(max_bpp > 32)
-        max_bpp = 32;
-    if(max_bpp > x_fbuf_bpp)
-        max_bpp = x_fbuf_bpp;
-
-    maxBpp_ = max_bpp;
 
 
     cursor_init();
@@ -958,7 +950,7 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     {
         bpp = bpp_;
         if(bpp == 0)
-            bpp = std::min(8, maxBpp_);
+            bpp = 8;
     }
 
     if(!isAcceptableMode(width, height, bpp, grayscale_p))

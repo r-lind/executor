@@ -77,18 +77,6 @@ bool SDLVideoDriver::init()
         return (false);
     sdl_events_init();
 
-#if 0
-  {
-    SDL_PixelFormat format;
-
-    /* Find out our "best" pixel depth */
-    SDL_GetDisplayFormat(&format);
-    maxBpp_ = format.BitsPerPixel;
-  }
-#else
-    maxBpp_ = 8;
-#endif
-
     /* Try for fullscreen on platforms that support it */
     if(getenv("SDL_FULLSCREEN") || ROMlib_fullscreen_p)
         video_flags |= SDL_FULLSCREEN;
