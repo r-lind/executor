@@ -171,10 +171,10 @@ void ThreadedVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16],
         driver_->setCursor(cursor_data, cursor_mask, hotspot_x, hotspot_y);
     });
 }
-bool ThreadedVideoDriver::setCursorVisible(bool show_p)
+void ThreadedVideoDriver::setCursorVisible(bool show_p)
 {
-    return runOnGuiThreadSync([=]() {
-        return driver_->setCursorVisible(show_p);
+    driver_->runOnThread([=]() {
+        driver_->setCursorVisible(show_p);
     });
 }
 void ThreadedVideoDriver::setRootlessRegion(Executor::RgnHandle rgn)

@@ -518,11 +518,6 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 
     const rgb_spec_t *dst_rgb_spec;
 
-#if defined(SAVE_CURSOR)
-    int save_cursor_visible_p = false;
-    int screen_src_p;
-#endif /* SAVE_CURSOR */
-
     TEMP_ALLOC_DECL(temp_depth_bits);
     TEMP_ALLOC_DECL(temp_scale_bits);
     TEMP_ALLOC_DECL(temp_overlap_bits);
@@ -530,10 +525,6 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
     the_gd = LM(TheGDevice);
     the_gd_pmap = GD_PMAP(the_gd);
     current_port = qdGlobals().thePort;
-
-#if defined(SAVE_CURSOR)
-    screen_src_p = active_screen_addr_p(src);
-#endif
 
     dst_rgb_spec = pixmap_rgb_spec(dst);
     dst_depth = dst->pixelSize;
@@ -583,14 +574,6 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         int src_depth, src_sub_byte_bits;
         void *new_src_bits;
         int n_bytes_needed;
-
-#if defined(SAVE_CURSOR)
-        if(screen_src_p)
-        {
-            save_cursor_visible_p = vdriver->setCursorVisible(false);
-            screen_src_p = false;
-        }
-#endif /* SAVE_CURSOR */
 
         src_depth = src->pixelSize;
 
@@ -666,14 +649,6 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
         int new_src_row_bytes;
         void *scale_base;
 
-#if defined(SAVE_CURSOR)
-        if(screen_src_p)
-        {
-            save_cursor_visible_p = vdriver->setCursorVisible(false);
-            screen_src_p = false;
-        }
-#endif /* SAVE_CURSOR */
-
         new_src_row_bytes
             = (((RECT_WIDTH(dst_rect) * dst_depth
                  + /* dst_sub_byte_bits */ 7)
@@ -729,14 +704,6 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
 	 create a new src bitmap */
         new_src = (PixMap *)alloca(sizeof *new_src);
 
-#if defined(SAVE_CURSOR)
-        if(screen_src_p)
-        {
-            save_cursor_visible_p = vdriver->setCursorVisible(false);
-            screen_src_p = false;
-        }
-#endif /* SAVE_CURSOR */
-
         SectRect(&src->bounds, src_rect, &clipped_src_rect);
 
         height = RECT_HEIGHT(&clipped_src_rect);
@@ -783,11 +750,6 @@ ROMlib_real_copy_bits_helper(PixMap *src, PixMap *dst,
                                      src, dst, src_rect, dst_rect,
                                      fg_color, bk_color);
 
-#if defined(SAVE_CURSOR)
-    if(save_cursor_visible_p)
-        vdriver->setCursorVisible(true);
-#endif
-
     DisposeRgn(mask_region);
 
     TEMP_ALLOC_FREE(temp_overlap_bits);
@@ -832,20 +794,7 @@ ROMlib_real_copy_bits(PixMap *src, PixMap *dst,
         void *temp_bits;
         INTEGER temp_row_bytes;
         int src_depth;
-#if defined(SAVE_CURSOR)
-        int save_cursor_visible_p = false;
-        int screen_src_p;
-#endif /* SAVE_CURSOR */
         TEMP_ALLOC_DECL(temp_alloc_bits);
-
-#if defined(SAVE_CURSOR)
-        screen_src_p = active_screen_addr_p(src);
-        if(screen_src_p)
-        {
-            save_cursor_visible_p = vdriver->setCursorVisible(false);
-            screen_src_p = false;
-        }
-#endif /* SAVE_CURSOR */
 
         new_src = (PixMap *)alloca(sizeof *new_src);
         src_depth = src->pixelSize;

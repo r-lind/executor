@@ -290,11 +290,10 @@ void QtVideoDriver::setCursor(char *cursor_data,
     window->setCursor(Qt::ArrowCursor);   // TODO: should we check for visibility?
 }
 
-bool QtVideoDriver::setCursorVisible(bool show_p)
+void QtVideoDriver::setCursorVisible(bool show_p)
 {
     if(show_p)
         setCursor(nullptr, nullptr, 0, 0);
     else
         window->setCursor(Qt::BlankCursor);
-    return true;
 }

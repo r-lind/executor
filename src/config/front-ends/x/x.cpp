@@ -832,14 +832,11 @@ void X11VideoDriver::setCursor(char *cursor_data,
         XFreeCursor(x_dpy, orig_x_cursor);
 }
 
-bool X11VideoDriver::setCursorVisible(bool show_p)
+void X11VideoDriver::setCursorVisible(bool show_p)
 {
-    int orig_cursor_visible_p = cursor_visible_p;
     if(cursor_visible_p != show_p)
         XDefineCursor(x_dpy, x_window, show_p ? x_cursor : x_hidden_cursor);
     cursor_visible_p = show_p;
-
-    return orig_cursor_visible_p;
 }
 
 void cursor_init(void)

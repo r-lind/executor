@@ -319,10 +319,9 @@ void WaylandVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], 
     pointer_.set_cursor(cursorEnterSerial_, cursorSurface_, hotSpot_.first, hotSpot_.second);
 }
 
-bool WaylandVideoDriver::setCursorVisible(bool show_p)
+void WaylandVideoDriver::setCursorVisible(bool show_p)
 {
     pointer_.set_cursor(cursorEnterSerial_, show_p ? cursorSurface_ : surface_t(), hotSpot_.first, hotSpot_.second);
-    return true;
 }
 
 void WaylandVideoDriver::runEventLoop()

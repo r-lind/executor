@@ -32,7 +32,7 @@ void SDLVideoDriver::setCursor(char *cursor_data,
     }
 }
 
-bool SDLVideoDriver::setCursorVisible(bool show_p)
+void SDLVideoDriver::setCursorVisible(bool show_p)
 {
-    return (SDL_ShowCursor(show_p));
+    SDL_ShowCursor(show_p);
 }

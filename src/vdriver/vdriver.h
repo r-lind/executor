@@ -106,7 +106,7 @@ public:
     virtual void setCursor(char *cursor_data,
                                 uint16_t cursor_mask[16],
                                 int hotspot_x, int hotspot_y);
-    virtual bool setCursorVisible(bool show_p);
+    virtual void setCursorVisible(bool show_p);
 
 
     virtual void pumpEvents();

@@ -82,9 +82,8 @@ void VideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hot
 {
 }
 
-bool VideoDriver::setCursorVisible(bool show_p)
+void VideoDriver::setCursorVisible(bool show_p)
 {
-    return true;
 }
 
 void VideoDriver::beepAtUser()
