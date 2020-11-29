@@ -608,9 +608,9 @@ int main(int argc, char **argv)
 
     VideoDriverCallbacks videoDriverCallbacks;
     if(headless)
-        vdriver = new HeadlessVideoDriver(&videoDriverCallbacks);
+        vdriver = std::make_unique<HeadlessVideoDriver>(&videoDriverCallbacks);
     else
-        vdriver = new DefaultVDriver(&videoDriverCallbacks);
+        vdriver = std::make_unique<DefaultVDriver>(&videoDriverCallbacks);
     
     if(!vdriver->parseCommandLine(argc, argv))
     {

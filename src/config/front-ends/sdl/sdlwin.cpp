@@ -102,6 +102,11 @@ bool SDLVideoDriver::init()
     return true;
 }
 
+SDLVideoDriver::~SDLVideoDriver()
+{
+    SDL_Quit();
+}
+
 bool SDLVideoDriver::isAcceptableMode(int width, int height, int bpp,
                                       bool grayscale_p)
 {
@@ -217,9 +222,4 @@ void SDLVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
         rects[i].h = r[i].bottom - r[i].top;
     }
     SDL_UpdateRects(screen, num_rects, rects);
-}
-
-void SDLVideoDriver::shutdown(void)
-{
-    SDL_Quit();
 }

@@ -49,7 +49,7 @@ void Executor::mman_heap_death(const char *func, const char *where)
     }
 
     /* Don't bother calling ExitToShell; things are too smashed. */
-    vdriver->shutdown();
+    vdriver = {};
     puts(err_msg);
     exit(-2);
 }

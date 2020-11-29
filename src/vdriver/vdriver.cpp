@@ -3,7 +3,7 @@
 
 using namespace Executor;
 
-VideoDriver *Executor::vdriver = nullptr;
+std::unique_ptr<VideoDriver> Executor::vdriver;
 
 VideoDriver::~VideoDriver()
 {
@@ -22,10 +22,6 @@ bool VideoDriver::init()
 bool VideoDriver::setOptions(std::unordered_map<std::string, std::string> options)
 {
     return true;
-}
-
-void VideoDriver::shutdown()
-{
 }
 
 void VideoDriver::updateScreen(int top, int left, int bottom, int right)

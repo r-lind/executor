@@ -52,9 +52,9 @@ ExecutorWindow *window;
 
 class ExecutorWindow : public QRasterWindow
 {
-    VideoDriverCallbacks *callbacks_;
+    IVideoDriverCallbacks *callbacks_;
 public:
-    ExecutorWindow(VideoDriverCallbacks *callbacks)
+    ExecutorWindow(IVideoDriverCallbacks *callbacks)
         : callbacks_(callbacks)
     {
         setFlag(Qt::FramelessWindowHint, true);

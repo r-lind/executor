@@ -7,6 +7,8 @@
 
 #include <ExMacTypes.h>
 
+#include <memory>
+
 namespace Executor
 {
 struct ColorSpec;
@@ -42,13 +44,7 @@ struct vdriver_color_t
 namespace Executor
 {
 
-/*
- * VideoDriverCallbacks
- * 
- * This will probably become an abstract class that should be the only calls that
- * video drivers make into the rest of Executor.
- */
-class VideoDriverCallbacks
+class IVideoDriverCallbacks
 {
 public:
     void mouseButtonEvent(bool down, int h, int v)
@@ -57,13 +53,25 @@ public:
         mouseButtonEvent(down);
     }
 
-    virtual void mouseButtonEvent(bool down);
-    virtual void mouseMoved(int h, int v);
-    virtual void keyboardEvent(bool down, unsigned char mkvkey);
-    virtual void suspendEvent();
-    virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */);
+    virtual void mouseButtonEvent(bool down) = 0;
+    virtual void mouseMoved(int h, int v) = 0;
+    virtual void keyboardEvent(bool down, unsigned char mkvkey) = 0;
+    virtual void suspendEvent() = 0;
+    virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */) = 0;
 
-    virtual void framebufferSetupChanged();
+    virtual void framebufferSetupChanged() = 0;
+};
+
+class VideoDriverCallbacks : public IVideoDriverCallbacks
+{
+public:
+    virtual void mouseButtonEvent(bool down) override;
+    virtual void mouseMoved(int h, int v) override;
+    virtual void keyboardEvent(bool down, unsigned char mkvkey) override;
+    virtual void suspendEvent() override;
+    virtual void resumeEvent(bool updateClipboard) override;
+
+    virtual void framebufferSetupChanged() override;
 private:
     GUEST<uint32_t> keytransState = 0;
 };
@@ -71,8 +79,8 @@ private:
 class VideoDriver
 {
 public:
-    VideoDriver(VideoDriverCallbacks *cb) : callbacks_(cb) {}
-    void setCallbacks(VideoDriverCallbacks *cb) { callbacks_ = cb; }
+    VideoDriver(IVideoDriverCallbacks *cb) : callbacks_(cb) {}
+    void setCallbacks(IVideoDriverCallbacks *cb) { callbacks_ = cb; }
 
     virtual ~VideoDriver();
 
@@ -82,14 +90,12 @@ public:
 
     virtual bool init();
     
-    virtual void shutdown();
-    virtual void updateScreen(int top, int left, int bottom, int right);
+    void updateScreen(int top, int left, int bottom, int right);
     void updateScreen() { updateScreen(0,0,height(),width()); }
     virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r);
     virtual bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p);
     virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
-    virtual bool setMode(int width, int height, int bpp,
-                                bool grayscale_p) = 0;
+    virtual bool setMode(int width, int height, int bpp, bool grayscale_p) = 0;
 
     virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
     virtual LONGINT getScrap(OSType type, Handle h);
@@ -121,7 +127,7 @@ public:
     bool isRootless() { return isRootless_; }
 
 public:
-    VideoDriverCallbacks *callbacks_ = nullptr;
+    IVideoDriverCallbacks *callbacks_ = nullptr;
 
     uint8_t* framebuffer_ = nullptr;
     int width_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
@@ -137,7 +143,7 @@ public:
     rgb_spec_t *rgbSpec_ = nullptr;
 };
 
-extern VideoDriver *vdriver;
+extern std::unique_ptr<VideoDriver> vdriver;
 
 // #define VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT number-of-bytes
 

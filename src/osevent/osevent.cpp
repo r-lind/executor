@@ -471,7 +471,7 @@ Executor::display_keyboard_choices(void)
     INTEGER nres, i, nfound;
     unsigned char(*names)[256];
 
-    vdriver->shutdown();
+    vdriver = {};
     printf("Available keyboard maps:\n");
     SetResLoad(false);
     nres = CountResources("KCHR"_4);

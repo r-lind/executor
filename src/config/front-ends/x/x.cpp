@@ -374,8 +374,9 @@ static bool x_event_pending_p(void)
 }
 
 static syn68k_addr_t
-post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
+post_pending_x_events(syn68k_addr_t interrupt_addr, void *selfUntyped)
 {
+    auto *self = reinterpret_cast<X11VideoDriver*>(selfUntyped);
     XEvent evt;
 
     while(XCheckTypedEvent(x_dpy, SelectionRequest, &evt)
@@ -444,18 +445,18 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
 
                 if(x_keysym_to_mac_virt(keysym, &virt))
                 {
-                    vdriver->callbacks_->keyboardEvent(evt.type == KeyPress, virt);
+                    self->callbacks_->keyboardEvent(evt.type == KeyPress, virt);
                 }
                 break;
             }
             case ButtonPress:
             case ButtonRelease:
             {
-                vdriver->callbacks_->mouseButtonEvent(evt.type == ButtonPress, evt.xbutton.x, evt.xbutton.y);
+                self->callbacks_->mouseButtonEvent(evt.type == ButtonPress, evt.xbutton.x, evt.xbutton.y);
                 break;
             }
             case Expose:
-                vdriver->updateScreen(evt.xexpose.y, evt.xexpose.x,
+                self->updateScreen(evt.xexpose.y, evt.xexpose.x,
                                       evt.xexpose.y + evt.xexpose.height,
                                       evt.xexpose.x + evt.xexpose.width);
                 break;
@@ -470,16 +471,16 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                     cvt = selection_owner != None && selection_owner != x_window;
                     if(cvt)
                         ZeroScrap();
-                    vdriver->callbacks_->resumeEvent(cvt);
+                    self->callbacks_->resumeEvent(cvt);
                 }
                 break;
             case FocusOut:
                 if(frob_autorepeat_p)
                     XAutoRepeatOn(x_dpy);
-                vdriver->callbacks_->suspendEvent();
+                self->callbacks_->suspendEvent();
                 break;
             case MotionNotify:
-                vdriver->callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
+                self->callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
                 break;
         }
     }
@@ -600,7 +601,7 @@ bool X11VideoDriver::init()
     {
         syn68k_addr_t event_callback;
 
-        event_callback = callback_install(post_pending_x_events, nullptr);
+        event_callback = callback_install(post_pending_x_events, this);
         *(GUEST<ULONGINT> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = (ULONGINT)event_callback;
     }
 
@@ -913,7 +914,7 @@ void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
     XFlush(x_dpy);
 }
 
-void X11VideoDriver::shutdown(void)
+X11VideoDriver::~X11VideoDriver()
 {
     if(x_dpy == nullptr)
         return;
@@ -999,7 +1000,7 @@ void X11VideoDriver::pumpEvents()
                   &child_window, &dummy_int, &dummy_int,
                   &x, &y, &mods);
 
-    vdriver->callbacks_->mouseMoved(x,y);
+    callbacks_->mouseMoved(x,y);
 }
 
 /* stuff from x.c */

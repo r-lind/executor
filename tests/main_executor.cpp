@@ -61,7 +61,7 @@ public:
 
         Executor::InitMemory(thingOnStack);
 
-        vdriver = new MockVDriver(&videoDriverCallbacks);
+        vdriver = std::make_unique<MockVDriver>(&videoDriverCallbacks);
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
         traps::init(false);
         Executor::InitLowMem();
