@@ -1,6 +1,9 @@
 #include "wayland.h"
 #include <../x/x_keycodes.h>
 
+#include <QuickDraw.h>
+#include <quickdraw/region.h>
+
 #include <iostream>
 #include <algorithm>
 
@@ -8,9 +11,9 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <linux/input-event-codes.h>
+#include <sys/eventfd.h>
+#include <poll.h>
 
-#include <QuickDraw.h>
-#include <quickdraw/region.h>
 
 using namespace wayland;
 using namespace Executor;
@@ -42,6 +45,8 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
 
 bool WaylandVideoDriver::init()
 {
+    wakeFd_ = eventfd(0, 0);
+
     rootlessRegion_ = { 0, 0, RGN_STOP, RGN_STOP };
 
     registry_ = display_.get_registry();
@@ -320,42 +325,61 @@ bool WaylandVideoDriver::setCursorVisible(bool show_p)
     return true;
 }
 
-#include <mutex>
-#include <condition_variable>
-
-static std::mutex mtx;
-static bool running = true;
-static std::vector<std::function<void ()>> todo;
-
 void WaylandVideoDriver::runEventLoop()
 {
+    int waylandFd = display_.get_fd();    
+    pollfd fds[] = {
+        { waylandFd, POLLIN, 0 },
+        { wakeFd_, POLLIN, 0 }
+    };
+
     for(;;)
     {
-        std::vector<std::function<void ()>> todonow;
+        decltype(executeOnUiThreadQueue_) todo;
         {
-            std::scoped_lock lk(mtx);
-            if(!running)
-                break;
-            todonow = std::move(todo);
-        }   
+            auto intent = display_.obtain_read_intent();
+            int result = poll(fds, std::size(fds), -1);
 
-        for(const auto& f : todonow)
+
+            if(result > 0)
+            {
+                if(fds[0].revents & POLLIN)
+                    intent.read();
+                if(fds[1].revents & POLLIN)
+                {
+                    uint64_t evt;
+                    ::read(wakeFd_, &evt, sizeof(evt));
+
+                }
+            }
+        }
+        {
+            std::lock_guard lk(executeOnUiThreadMutex_);
+            todo = std::move(executeOnUiThreadQueue_);
+            if(exitMainThread_)
+                break;
+        }
+
+        display_.dispatch_pending();
+        for(const auto& f : todo)
             f();
-        
-        pumpEvents();
     }
 }
 
 void WaylandVideoDriver::runOnThread(std::function<void ()> f)
 {
-    std::scoped_lock lk(mtx);
-    todo.push_back(f);
+    std::lock_guard lk(executeOnUiThreadMutex_);
+    executeOnUiThreadQueue_.push_back(f);
+
+    uint64_t evt = 1;
+    ::write(wakeFd_, &evt, sizeof(evt));
 }
 
 void WaylandVideoDriver::endEventLoop()
 {
-    std::scoped_lock lk(mtx);
-    running = false;
+    std::lock_guard lk(executeOnUiThreadMutex_);
+    exitMainThread_ = true;
+
+    uint64_t evt = 1;
+    ::write(wakeFd_, &evt, sizeof(evt));
 }
-
-

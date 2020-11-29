@@ -5,6 +5,9 @@
 #include <wayland-client.hpp>
 #include <wayland-client-protocol-extra.hpp>
 
+#include <mutex>
+#include <vector>
+
 class WaylandVideoDriver : public Executor::VideoDriverCommon
 {
     using VideoDriverCommon::VideoDriverCommon;
@@ -99,6 +102,11 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     bool configuredActivated_ = false;
 
     double mouseX_, mouseY_;
+
+    int wakeFd_;
+    bool exitMainThread_ = false;
+    std::mutex executeOnUiThreadMutex_;
+    std::vector<std::function<void ()>> executeOnUiThreadQueue_;
 
 public:
     bool init() override;
