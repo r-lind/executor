@@ -124,7 +124,7 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     /* Massage the width and height parameters */
     if(width == 0)
     {
-        width = width_;
+        width = framebuffer_.width;
         if(width == 0)
         {
             width = VDRIVER_DEFAULT_SCREEN_WIDTH;
@@ -137,7 +137,7 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 
     if(height == 0)
     {
-        height = height_;
+        height = framebuffer_.height;
         if(height == 0)
         {
             height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
@@ -149,7 +149,7 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     }
 
     if(bpp == 0)
-        bpp = bpp_;
+        bpp = 8;
 
     if(!isAcceptableMode(width, height, bpp, grayscale_p))
         return (false);
@@ -159,22 +159,25 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     if(screen == nullptr)
         return (false);
 
-    /* Fill the vdriver globals */
-    width_ = screen->w;
-    height_ = screen->h;
-    bpp_ = screen->format->BitsPerPixel;
-    rowBytes_ = screen->pitch;
+    uint8_t *data;
     if(SDL_MUSTLOCK(screen))
     {
         /* WARNING!  This results in surface memory that is unsafe to access! */
         if(SDL_LockSurface(screen) < 0)
             return (false);
-        framebuffer_ = (uint8_t *)screen->pixels;
+        data = (uint8_t *)screen->pixels;
         SDL_UnlockSurface(screen);
         fprintf(stderr, "Warning: Executor performing unsafe video access\n");
     }
     else
-        framebuffer_ = (uint8_t *)screen->pixels;
+        data = (uint8_t *)screen->pixels;
+
+    framebuffer_ = {};
+    framebuffer_.data = std::shared_ptr<uint8_t[]>(data, [](uint8_t* p){ /* FIXME: delete */ });
+    framebuffer_.width = screen->w;
+    framebuffer_.height = screen->h;
+    framebuffer_.bpp = screen->format->BitsPerPixel;
+    framebuffer_.rowBytes = screen->pitch;
 
     sdl_syswm_init();
 

@@ -39,10 +39,20 @@ struct vdriver_color_t
     uint16_t red, green, blue;
 };
 
-}
-
-namespace Executor
+struct Framebuffer
 {
+    std::shared_ptr<uint8_t[]> data;
+    int width = 0, height = 0;
+    int bpp = 0;
+    int rowBytes = 0;
+    int cursorBpp = 1;
+    bool grayscale = false;
+    bool rootless = false;
+    rgb_spec_t *rgbSpec = nullptr;
+
+    Framebuffer() = default;
+    Framebuffer(int w, int h, int d);
+};
 
 class IVideoDriverCallbacks
 {
@@ -119,30 +129,20 @@ public:
     virtual void runOnThread(std::function<void ()> f) {}
     virtual void endEventLoop() {}
 
-    int cursorDepth() { return cursorDepth_; }
-    uint8_t *framebuffer() { return framebuffer_; }
-    int width() { return width_; }
-    int height() { return height_; }
-    int rowBytes() { return rowBytes_; }
-    int bpp() { return bpp_; }
-    rgb_spec_t *rgbSpec() { return rgbSpec_; }
-    bool isGrayscale() { return isGrayscale_; }
-    bool isRootless() { return isRootless_; }
+    uint8_t *framebuffer() { return framebuffer_.data.get(); }
+    int cursorDepth() { return framebuffer_.cursorBpp; }
+    int width() { return framebuffer_.width; }
+    int height() { return framebuffer_.height; }
+    int rowBytes() { return framebuffer_.rowBytes; }
+    int bpp() { return framebuffer_.bpp; }
+    rgb_spec_t *rgbSpec() { return framebuffer_.rgbSpec; }
+    bool isGrayscale() { return framebuffer_.grayscale; }
+    bool isRootless() { return framebuffer_.rootless; }
 
 public:
     IVideoDriverCallbacks *callbacks_ = nullptr;
 
-    uint8_t* framebuffer_ = nullptr;
-    int width_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
-    int height_ = VDRIVER_DEFAULT_SCREEN_HEIGHT;
-    int bpp_ = 8;
-    int rowBytes_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
-    bool isGrayscale_ = false;
-
-    int cursorDepth_ = 1;
-    bool isRootless_ = false;
-
-    rgb_spec_t *rgbSpec_ = nullptr;
+    Framebuffer framebuffer_;
 };
 
 extern std::unique_ptr<VideoDriver> vdriver;

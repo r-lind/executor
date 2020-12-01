@@ -138,15 +138,7 @@ bool ThreadedVideoDriver::setMode(int width, int height, int bpp, bool grayscale
     if (!success)
         return false;
 
-    width_ = driver_->width();
-    height_ = driver_->height();
-    bpp_ = driver_->bpp();
-    rowBytes_ = driver_->rowBytes();
-    isGrayscale_ = driver_->isGrayscale();
-    isRootless_ = driver_->isRootless();
-    cursorDepth_ = driver_->cursorDepth();
-    rgbSpec_ = driver_->rgbSpec();
-    framebuffer_ = driver_->framebuffer();
+    framebuffer_ = driver_->framebuffer_;   // ###
 
     return true;
 }

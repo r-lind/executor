@@ -70,8 +70,10 @@ void VideoDriverCommon::updateBuffer(uint32_t* buffer, int bufferWidth, int buff
             (int16_t)bufferHeight, 0, (int16_t)bufferWidth, RGN_STOP,
             RGN_STOP });
     
-    int width = std::min(width_, bufferWidth);
-    int height = std::min(height_, bufferHeight);
+    const Framebuffer& fb = framebuffer_;
+
+    int width = std::min(fb.width, bufferWidth);
+    int height = std::min(fb.height, bufferHeight);
 
     for(int i = 0; i < num_rects; i++)
     {
@@ -114,8 +116,8 @@ void VideoDriverCommon::updateBuffer(uint32_t* buffer, int bufferWidth, int buff
                 }
             };
 
-            uint8_t *src = framebuffer_ + y * rowBytes_;
-            switch(bpp_)
+            uint8_t *src = fb.data.get() + y * fb.rowBytes;
+            switch(fb.bpp)
             {
                 case 8:
                     src += r.left;

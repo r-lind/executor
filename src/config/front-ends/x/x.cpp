@@ -89,7 +89,7 @@ static int x_fbuf_bpp;
 static int x_fbuf_row_bytes;
 
 /* max dimensions */
-static int max_width, max_height, max_bpp;
+static int max_width, max_height;   // fixme: this hurts
 
 /* x cursor stuff */
 static ::Cursor x_hidden_cursor, x_cursor = -1;
@@ -643,33 +643,33 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
             geom_mask = XParseGeometry(geom, &x, &y, &w, &h);
             if(geom_mask & WidthValue)
             {
-                width_ = w;
-                if(width_ < VDRIVER_MIN_SCREEN_WIDTH)
-                    width_ = VDRIVER_MIN_SCREEN_WIDTH;
-                else if(width_ > max_width)
-                    width_ = max_width;
+                width = w;
+                if(width < VDRIVER_MIN_SCREEN_WIDTH)
+                    width = VDRIVER_MIN_SCREEN_WIDTH;
+                else if(width > max_width)
+                    width = max_width;
 
                 size_hints.flags |= USSize;
             }
             if(geom_mask & HeightValue)
             {
-                height_ = h;
-                if(height_ < VDRIVER_MIN_SCREEN_HEIGHT)
-                    height_ = VDRIVER_MIN_SCREEN_HEIGHT;
-                else if(height_ > max_height)
-                    height_ = max_height;
+                height = h;
+                if(height < VDRIVER_MIN_SCREEN_HEIGHT)
+                    height = VDRIVER_MIN_SCREEN_HEIGHT;
+                else if(height > max_height)
+                    height = max_height;
                 size_hints.flags |= USSize;
             }
             if(geom_mask & XValue)
             {
                 if(geom_mask & XNegative)
-                    x = XDisplayWidth(x_dpy, x_screen) + x - width_;
+                    x = XDisplayWidth(x_dpy, x_screen) + x - width;
                 size_hints.flags |= USPosition;
             }
             if(geom_mask & YValue)
             {
                 if(geom_mask & YNegative)
-                    y = XDisplayHeight(x_dpy, x_screen) + y - height_;
+                    y = XDisplayHeight(x_dpy, x_screen) + y - height;
                 size_hints.flags |= USPosition;
             }
             switch(geom_mask & (XNegative | YNegative))
@@ -704,15 +704,12 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
             height = 342;
         else if(height > max_height)
             height = max_height;
-
-        width_ = width;
-        height_ = height;
     }
 
     size_hints.min_width = size_hints.max_width
-        = size_hints.base_width = size_hints.width = width_;
+        = size_hints.base_width = size_hints.width = width;
     size_hints.min_height = size_hints.max_height
-        = size_hints.base_height = size_hints.height = height_;
+        = size_hints.base_height = size_hints.height = height;
 
     size_hints.x = x;
     size_hints.y = y;
@@ -720,17 +717,11 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
     /* #### allow command line options to select {16, 32}bpp modes, but
      don't make them the default since they still have problems */
     if(bpp == 0)
-        bpp = std::min(max_bpp, 8);
-    else if(bpp > max_bpp)
-        bpp = max_bpp;
-
-    bpp_ = bpp;
-
-    isGrayscale_ = grayscale_p;
+        bpp = 8;
 
     /* create the executor window */
     x_window = XCreateWindow(x_dpy, XRootWindow(x_dpy, x_screen),
-                             x, y, width_, height_,
+                             x, y, width, height,
                              0, 0, InputOutput, CopyFromParent, 0, &xswa);
 
     XDefineCursor(x_dpy, x_window, x_hidden_cursor);
@@ -769,6 +760,9 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
     XMapRaised(x_dpy, x_window);
     XClearWindow(x_dpy, x_window);
     XFlush(x_dpy);
+
+    framebuffer_ = Framebuffer(width, height, bpp);
+    framebuffer_.grayscale = grayscale_p;
 }
 
 ::Cursor
@@ -885,7 +879,7 @@ void cursor_init(void)
 
 void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
 {
-    updateBuffer((uint32_t*)x_fbuf, width_, height_, num_rects, r);
+    updateBuffer((uint32_t*)x_fbuf, framebuffer_.width, framebuffer_.height, num_rects, r);
 
     for(int i = 0; i < num_rects; i++)
     {
@@ -924,28 +918,18 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     if(!x_window)
     {
         alloc_x_window(width, height, bpp, grayscale_p);
-        rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
-        framebuffer_ = new uint8_t[rowBytes_ * height_];
         return true;
     }
 
     if(width == 0)
-        width = width_;
-    else if(width > max_width)
-        width = max_width;
-    else if(width < VDRIVER_MIN_SCREEN_WIDTH)
-        width = VDRIVER_MIN_SCREEN_WIDTH;
+        width = framebuffer_.width;
 
     if(height == 0)
-        height = height_;
-    else if(height > max_height)
-        height = max_height;
-    else if(height < VDRIVER_MIN_SCREEN_HEIGHT)
-        height = VDRIVER_MIN_SCREEN_HEIGHT;
+        height = framebuffer_.height;
 
     if(bpp == 0)
     {
-        bpp = bpp_;
+        bpp = framebuffer_.bpp;
         if(bpp == 0)
             bpp = 8;
     }
@@ -953,24 +937,17 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     if(!isAcceptableMode(width, height, bpp, grayscale_p))
         return false;
 
-    if(width != width_
-       || height != height_)
+    if(width != framebuffer_.width
+       || height != framebuffer_.height)
     {
         /* resize; the event code will deal with things when the resize
 	 event comes through */
         XResizeWindow(x_dpy, x_window, width, height);
     }
 
-    bpp_ = bpp;
-    isGrayscale_ = grayscale_p;
-
-    if(framebuffer_)
-        delete[] framebuffer_;
-    rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
-    framebuffer_ = new uint8_t[rowBytes_ * height_];
+    framebuffer_ = Framebuffer(width, height, bpp);
+    framebuffer_.grayscale = grayscale_p;
     
-    memset(framebuffer_, 0xFF, rowBytes_ * height);
-
     return true;
 }
 

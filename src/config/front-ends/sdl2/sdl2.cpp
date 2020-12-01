@@ -35,21 +35,28 @@ bool SDL2VideoDriver::isAcceptableMode(int width, int height, int bpp, bool gray
 bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     printf("set_mode: %d %d %d", width, height, bpp);
-    if(framebuffer_)
-        delete[] framebuffer_;
 
-    if(width)
-        width_ = width;
-    if(height)
-        height_ = height;
-    if(bpp)
-        bpp_ = bpp;
-    rowBytes_ = width_ * bpp_ / 8;
+    if(!width || !height)
+    {
+        width = framebuffer_.width;
+        height = framebuffer_.height;
+    }
+    if(!width || !height)
+    {
+        width = VDRIVER_DEFAULT_SCREEN_WIDTH;
+        height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
+    }
+    if(!bpp)
+        bpp = framebuffer_.bpp;
+    if(!bpp)
+        bpp = 8;
+
+    framebuffer_ = Framebuffer(width, height, bpp);
 
     sdlWindow = SDL_CreateWindow("Window",
                                  SDL_WINDOWPOS_UNDEFINED,
                                  SDL_WINDOWPOS_UNDEFINED,
-                                 width_, height_,
+                                 width, height,
                                  0);
     //SDL_WINDOW_FULLSCREEN_DESKTOP);
 
@@ -62,7 +69,7 @@ bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 
     uint32_t pixelFormat;
 
-    switch(bpp_)
+    switch(bpp)
     {
         case 1:
             pixelFormat = SDL_PIXELFORMAT_INDEX1LSB;
@@ -83,25 +90,23 @@ bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
             return false;
     }
 
-    framebuffer_ = new uint8_t[width_ * height_ * 4];
-
 #if 1
     uint32_t rmask, gmask, bmask, amask;
     int sdlBpp;
     SDL_PixelFormatEnumToMasks(pixelFormat, &sdlBpp, &rmask, &gmask, &bmask, &amask);
 
     sdlSurface = SDL_CreateRGBSurfaceFrom(
-        framebuffer_,
-        width_, height_,
+        framebuffer_.data.get(),
+        framebuffer_.width, framebuffer_.height,
         sdlBpp,
-        rowBytes_,
+        framebuffer_.rowBytes,
         rmask, gmask, bmask, amask);
 #else
     sdlSurface = SDL_CreateRGBSurfaceWithFormatFrom(
-        framebuffer_,
-        width_, height_,
-        bpp_,
-        rowBytes_,
+        framebuffer_.data.get(),
+        framebuffer_.width, framebuffer_.height,
+        framebuffer_.bpp,
+        framebuffer_.rowBytes,
         pixelFormat);
 #endif
 

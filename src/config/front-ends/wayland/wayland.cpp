@@ -51,18 +51,18 @@ bool WaylandVideoDriver::init()
 
     registry_ = display_.get_registry();
     registry_.on_global() = [this] (uint32_t name, const std::string& interface, uint32_t version) {
-            if(interface == compositor_t::interface_name)
-                registry_.bind(name, compositor_, version);
-            else if(interface == shell_t::interface_name)
-                registry_.bind(name, shell_, version);
-            else if(interface == xdg_wm_base_t::interface_name)
-                registry_.bind(name, xdg_wm_base_, version);
-            else if(interface == seat_t::interface_name)
-                registry_.bind(name, seat_, version);
-            else if(interface == shm_t::interface_name)
-                registry_.bind(name, shm_, version);
-            // TODO: handle changes
-        };
+        if(interface == compositor_t::interface_name)
+            registry_.bind(name, compositor_, version);
+        else if(interface == shell_t::interface_name)
+            registry_.bind(name, shell_, version);
+        else if(interface == xdg_wm_base_t::interface_name)
+            registry_.bind(name, xdg_wm_base_, version);
+        else if(interface == seat_t::interface_name)
+            registry_.bind(name, seat_, version);
+        else if(interface == shm_t::interface_name)
+            registry_.bind(name, shm_, version);
+        // TODO: handle changes
+    };
     display_.roundtrip();
 
     xdg_wm_base_.on_ping() = [this] (uint32_t serial) { xdg_wm_base_.pong(serial); };
@@ -88,7 +88,7 @@ bool WaylandVideoDriver::init()
         std::vector<xdg_toplevel_state> states1 = states;
 
         configuredMaximized_ = std::find(states1.begin(), states1.end(), xdg_toplevel_state::maximized) != states1.end();
-        if(configuredMaximized_ != isRootless_)
+        /* ### if(configuredMaximized_ != isRootless_)
         {
             configurePending_ = true;
             if(!configuredMaximized_ && isRootless_)
@@ -96,7 +96,7 @@ bool WaylandVideoDriver::init()
                 configuredWidth_ = std::max(512, width_ / 2);
                 configuredHeight_ = std::max(342, height_ / 2);
             }
-        }
+        }*/
 
         bool activated = std::find(states1.begin(), states1.end(), xdg_toplevel_state::activated) != states1.end();
         if(activated && !configuredActivated_)
@@ -156,15 +156,6 @@ bool WaylandVideoDriver::init()
 
         callbacks_->keyboardEvent(down, mkvkey);
     };
-/*
-    keyboard_.on_enter() = [this] (uint32_t serial, wayland::surface_t, wayland::array_t) {
-        callbacks_->resumeEvent(true);
-    };
-    
-    keyboard_.on_leave() = [this] (uint32_t serial, wayland::surface_t) {
-        callbacks_->suspendEvent();
-    };*/
-
 
     pointer_.on_enter() = [this](uint32_t serial, surface_t surface, double x, double y) {
         pointer_.set_cursor(serial, cursorSurface_, hotSpot_.first, hotSpot_.second);
@@ -176,13 +167,9 @@ bool WaylandVideoDriver::init()
     cursorSurface_ = compositor_.create_surface();
     hotSpot_ = {0,0};
     
+    cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
+    cursorSurface_.commit();
 
-
-    width_ = 1024;
-    height_ = 768;
-
-
-    //xdg_toplevel_.set_maximized();
 
     return true;
 }
@@ -190,8 +177,6 @@ bool WaylandVideoDriver::init()
 bool WaylandVideoDriver::setMode(int width, int height, int bpp,
                                   bool grayscale_p)
 {
-    bpp_ = bpp ? bpp : 8;
-
     if(!initDone_)
     {
         if(width && height)
@@ -205,20 +190,16 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
             configuredHeight_ = 768;
             xdg_toplevel_.set_maximized();
         }
+
         surface_.commit();
         display_.roundtrip();
 
-        width_ = configuredWidth_;
-        height_ = configuredHeight_;
+        width = configuredWidth_;
+        height = configuredHeight_;
     }
 
-    cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
-    cursorSurface_.commit();
-    //pointer_.set_cursor(0, cursorSurface_, hotSpot_.first, hotSpot_.second);
-    //display_.roundtrip();
-    rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
-    framebuffer_ = new uint8_t[rowBytes_ * height_];
-    isRootless_ = configuredMaximized_;
+    framebuffer_ = Framebuffer(width, height, bpp ? bpp : 8);
+    framebuffer_.rootless = configuredMaximized_;
 
     configurePending_ = false;
     initDone_ = true;
@@ -229,7 +210,7 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
 void WaylandVideoDriver::pumpEvents()
 {
     //display_.dispatch();
-    display_.roundtrip();
+   /* display_.roundtrip();
     if(configurePending_)
     {
         std::cout << width_ << "x" << height_ << " --> " << (int)configuredMaximized_ << " " << configuredWidth_ << "x" << configuredHeight_ << std::endl;
@@ -259,7 +240,7 @@ void WaylandVideoDriver::pumpEvents()
         }
 
         configurePending_ = false;
-    }
+    }*/
 }
 
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
@@ -270,7 +251,8 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 
     region_t waylandRgn = compositor_.create_region();
 
-    while(rgnP.bottom() < height_)
+    int height = framebuffer_.height;
+    while(rgnP.bottom() < height)
     {
         rgnP.advance();
         

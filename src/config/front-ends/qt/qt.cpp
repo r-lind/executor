@@ -150,7 +150,9 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 
     QRegion qtRgn;
 
-    while(rgnP.bottom() < height_)
+    int height = framebuffer_.height;
+
+    while(rgnP.bottom() < height)
     {
         rgnP.advance();
         
@@ -185,31 +187,16 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 #endif
 
     printf("set_mode: %d %d %d\n", width, height, bpp);
-    if(framebuffer_)
-        delete[] framebuffer_;
     
     QRect geom = screenGeometries[0];
     for(const QRect& r : screenGeometries)
         if(r.width() * r.height() > geom.width() * geom.height())
             geom = r;
 
-    width_ = geom.width();
-    height_ = geom.height();
+    framebuffer_ = Framebuffer(geom.width(), geom.height(), bpp ? bpp : 8);
+    framebuffer_.rootless = true;
 
-    isRootless_ = true;
-    if(width)
-        width_ = width;
-    if(height)
-        height_ = height;
-    if(bpp)
-        bpp_ = bpp;
-    rowBytes_ = width_ * bpp_ / 8;
-    rowBytes_ = (rowBytes_+3) & ~3;
-
-    framebuffer_ = new uint8_t[rowBytes_ * height_ + width_ * height_];
-
-   
-    qimage = new QImage(width_, height_, QImage::Format_RGB32);
+    qimage = new QImage(framebuffer_.width, framebuffer_.height, QImage::Format_RGB32);
     
     if(!window)
         window = new ExecutorWindow(callbacks_);

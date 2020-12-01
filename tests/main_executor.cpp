@@ -39,11 +39,7 @@ class MockVDriver : public VideoDriver
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override
     {
-        width_ = 512;
-        height_ = 342;
-        rowBytes_ = 64;
-        framebuffer_ = new uint8_t[64*342];
-        bpp_ = 1;
+        framebuffer_ = Framebuffer(512, 342, 1);
         return true;
     }
 };
