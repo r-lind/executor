@@ -104,10 +104,15 @@ void ThreadedVideoDriver::resumeEvent(bool updateClipboard)
         callbacks_->resumeEvent(updateClipboard);
     });
 }
-void ThreadedVideoDriver::framebufferSetupChanged()
+void ThreadedVideoDriver::framebufferAvailable(std::function<void()> acknowledge)
 {
-    runOnEmulatorThread([this]() {
-        callbacks_->framebufferSetupChanged();
+    runOnEmulatorThread([this, acknowledge = std::move(acknowledge)]() {
+        framebuffer_ = driver_->framebuffer_;   // ###
+        callbacks_->framebufferAvailable(
+            [this, acknowledge]() {
+                driver_->runOnThread(acknowledge);
+            }
+        );
     });
 }
 

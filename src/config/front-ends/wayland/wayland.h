@@ -10,23 +10,6 @@
 
 class WaylandVideoDriver : public Executor::VideoDriverCommon
 {
-    using VideoDriverCommon::VideoDriverCommon;
-
-    wayland::display_t display_;
-    wayland::registry_t registry_;
-    wayland::compositor_t compositor_;
-    wayland::shell_t shell_;
-    wayland::xdg_wm_base_t xdg_wm_base_;
-    wayland::seat_t seat_;
-    wayland::shm_t shm_;
-
-    wayland::surface_t surface_;
-    wayland::xdg_surface_t xdg_surface_;
-    wayland::xdg_toplevel_t xdg_toplevel_;
-
-    wayland::pointer_t pointer_;
-    wayland::keyboard_t keyboard_;
-
     class SharedMem
     {
         int fd_ = -1;
@@ -81,6 +64,20 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
         wayland::buffer_t& wlbuffer() { return wlbuffer_; }
     };
 
+    wayland::display_t display_;
+    wayland::registry_t registry_;
+    wayland::compositor_t compositor_;
+    wayland::shell_t shell_;
+    wayland::xdg_wm_base_t xdg_wm_base_;
+    wayland::seat_t seat_;
+    wayland::shm_t shm_;
+
+    wayland::surface_t surface_;
+    wayland::xdg_surface_t xdg_surface_;
+    wayland::xdg_toplevel_t xdg_toplevel_;
+
+    wayland::pointer_t pointer_;
+    wayland::keyboard_t keyboard_;
 
     Buffer buffer_;
     bool initDone_ = false;
@@ -92,9 +89,13 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     uint32_t cursorEnterSerial_ = 0;
 
 
+    bool configurePending_ = false;
+
+    int requestedBpp_ = 8;
+
+    uint32_t configuredSerial_ = 0;
     int configuredWidth_ = 0, configuredHeight_ = 0;
     bool configuredMaximized_ = false;
-    bool configurePending_ = false;
     bool configuredActivated_ = false;
 
     double mouseX_, mouseY_;
@@ -105,6 +106,8 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     std::vector<std::function<void ()>> executeOnUiThreadQueue_;
 
 public:
+    using VideoDriverCommon::VideoDriverCommon;
+
     bool init() override;
     bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;

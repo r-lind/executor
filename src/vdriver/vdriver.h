@@ -69,7 +69,7 @@ public:
     virtual void suspendEvent() = 0;
     virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */) = 0;
 
-    virtual void framebufferSetupChanged() = 0;
+    virtual void framebufferAvailable(std::function<void()> acknowledge) = 0;
 };
 
 class VideoDriverCallbacks : public IVideoDriverCallbacks
@@ -81,7 +81,7 @@ public:
     virtual void suspendEvent() override;
     virtual void resumeEvent(bool updateClipboard) override;
 
-    virtual void framebufferSetupChanged() override;
+    virtual void framebufferAvailable(std::function<void()> acknowledge) override;
 private:
     GUEST<uint32_t> keytransState = 0;
 };

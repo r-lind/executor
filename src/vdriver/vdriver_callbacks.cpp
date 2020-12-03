@@ -64,7 +64,8 @@ void VideoDriverCallbacks::resumeEvent(bool updateClipboard /* TODO: does this r
     sendresumeevent(updateClipboard);
 }
 
-void VideoDriverCallbacks::framebufferSetupChanged()
+void VideoDriverCallbacks::framebufferAvailable(std::function<void()> acknowledge)
 {
-     Executor::gd_vdriver_mode_changed();
+    Executor::gd_vdriver_mode_changed();
+    acknowledge();
 }

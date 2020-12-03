@@ -24,7 +24,7 @@ class ThreadedVideoDriver : public VideoDriver, public IVideoDriverCallbacks
     void keyboardEvent(bool down, unsigned char mkvkey) override;
     void suspendEvent() override;
     void resumeEvent(bool updateClipboard) override;
-    void framebufferSetupChanged() override;
+    void framebufferAvailable(std::function<void()> acknowledge) override;
 
     void runOnEmulatorThread(std::function<void ()> f);
 
