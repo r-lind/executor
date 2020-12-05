@@ -18,6 +18,17 @@
 using namespace wayland;
 using namespace Executor;
 
+
+template<typename... Args>
+std::shared_ptr<std::tuple<Args...>> argCollector(std::function<void (Args...)>& f)
+{
+    auto args = std::make_shared<std::tuple<Args...>>();
+    f = [args](Args... arg) {
+        *args = { arg... };
+    };
+    return args;
+}
+
 WaylandVideoDriver::SharedMem::SharedMem(size_t size)
     : size_(size)
 {
@@ -74,6 +85,30 @@ bool WaylandVideoDriver::init()
     xdg_toplevel_.set_app_id("io.github.autc04.executor");
     xdg_toplevel_.set_min_size(VDRIVER_MIN_SCREEN_WIDTH, VDRIVER_MIN_SCREEN_HEIGHT);
 
+    auto toplevelConfigureArgs = argCollector(xdg_toplevel_.on_configure());
+    xdg_surface_.on_configure() = [this, toplevelConfigureArgs] (uint32_t serial) {
+        auto [inWidth,inHeight,inStates] = *toplevelConfigureArgs;
+
+        std::cout << "configure " << inWidth << " " << inHeight << " " << serial << std::endl;
+
+        int width = std::max(inWidth, VDRIVER_MIN_SCREEN_WIDTH);
+        int height = std::max(inHeight, VDRIVER_MIN_SCREEN_HEIGHT);
+        std::vector<xdg_toplevel_state> states = inStates;
+
+        bool maximized = std::find(states.begin(), states.end(), xdg_toplevel_state::maximized) != states.end();
+        bool activated = std::find(states.begin(), states.end(), xdg_toplevel_state::activated) != states.end();
+
+        if(activated != activated_)
+        {
+            if(activated)
+                callbacks_->resumeEvent(true);
+            else 
+                callbacks_->suspendEvent();
+            activated_ = activated;
+        }
+    };
+
+#if 0
     xdg_toplevel_.on_configure() = [this] (int32_t x, int32_t y, array_t states) { 
         std::cout << "toplevel configure " << x << " " << y << std::endl;
         if(x && x != configuredWidth_)
@@ -167,6 +202,7 @@ bool WaylandVideoDriver::init()
             initDone_ = true;
         }
     };
+#endif    
     xdg_toplevel_.on_close() = [this] () { };
 
     pointer_ = seat_.get_pointer();
