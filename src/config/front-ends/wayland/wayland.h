@@ -89,14 +89,21 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     uint32_t cursorEnterSerial_ = 0;
 
 
-    bool configurePending_ = false;
 
     int requestedBpp_ = 8;
 
-    uint32_t configuredSerial_ = 0;
-    int configuredWidth_ = 0, configuredHeight_ = 0;
-    bool configuredMaximized_ = false;
-    bool configuredActivated_ = false;
+    struct WindowState
+    {
+        uint32_t serial;
+        int width, height;
+        bool maximized;
+    };
+
+    WindowState configuredState_ {};
+    WindowState committedState_ {};
+
+    bool activated_ = false;
+
 
     double mouseX_, mouseY_;
 
@@ -119,6 +126,9 @@ public:
     void setCursorVisible(bool show_p) override;
 
     void setRootlessRegion(Executor::RgnHandle rgn) override;
+
+    void noteUpdatesDone() override;
+    bool updateMode() override;
 
     void runEventLoop() override;
     void runOnThread(std::function<void ()> f) override;

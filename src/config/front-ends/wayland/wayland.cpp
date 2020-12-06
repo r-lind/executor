@@ -91,8 +91,8 @@ bool WaylandVideoDriver::init()
 
         std::cout << "configure " << inWidth << " " << inHeight << " " << serial << std::endl;
 
-        int width = std::max(inWidth, VDRIVER_MIN_SCREEN_WIDTH);
-        int height = std::max(inHeight, VDRIVER_MIN_SCREEN_HEIGHT);
+        int width = inWidth ? std::max(inWidth, VDRIVER_MIN_SCREEN_WIDTH) : configuredState_.width;
+        int height = inHeight ? std::max(inHeight, VDRIVER_MIN_SCREEN_HEIGHT) : configuredState_.height;
         std::vector<xdg_toplevel_state> states = inStates;
 
         bool maximized = std::find(states.begin(), states.end(), xdg_toplevel_state::maximized) != states.end();
@@ -106,103 +106,17 @@ bool WaylandVideoDriver::init()
                 callbacks_->suspendEvent();
             activated_ = activated;
         }
+
+        if(!maximized && committedState_.maximized)
+        {
+            width = std::max(VDRIVER_MIN_SCREEN_WIDTH, committedState_.width / 2);
+            height = std::max(VDRIVER_MIN_SCREEN_HEIGHT, committedState_.height / 2);
+        }
+
+        configuredState_ = { serial, width, height, maximized };
+        callbacks_->modeAboutToChange();
     };
 
-#if 0
-    xdg_toplevel_.on_configure() = [this] (int32_t x, int32_t y, array_t states) { 
-        std::cout << "toplevel configure " << x << " " << y << std::endl;
-        if(x && x != configuredWidth_)
-        {
-            configuredWidth_ = x;
-        }
-        if(y && y != configuredHeight_)
-        {
-            configuredHeight_ = y;
-            configurePending_ = true;
-        }
-        configuredWidth_ = std::max(configuredWidth_, VDRIVER_MIN_SCREEN_WIDTH);
-        configuredHeight_ = std::max(configuredHeight_, VDRIVER_MIN_SCREEN_HEIGHT);
-
-        std::vector<xdg_toplevel_state> states1 = states;
-
-        configuredMaximized_ = std::find(states1.begin(), states1.end(), xdg_toplevel_state::maximized) != states1.end();
-        if(initDone_)
-        if(configuredMaximized_ != framebuffer_.rootless)
-        {
-            configurePending_ = true;
-            if(!configuredMaximized_ && framebuffer_.rootless)
-            {
-                configuredWidth_ = std::max(512, framebuffer_.width / 2);
-                configuredHeight_ = std::max(342, framebuffer_.height / 2);
-            }
-        }
-
-        bool activated = std::find(states1.begin(), states1.end(), xdg_toplevel_state::activated) != states1.end();
-        if(activated && !configuredActivated_)
-            callbacks_->resumeEvent(true);
-        else if(!activated && configuredActivated_)
-            callbacks_->suspendEvent();
-
-        configuredActivated_ = activated;
-
-        for(auto s : states1)
-            std::cout << " " << (int)s << std::endl;
-        std::cout << "confMax: " << (int)configuredMaximized_ << std::endl;
-    };
-
-    xdg_surface_.on_configure() = [this] (uint32_t serial) {
-        std::cout << "surface configure" << std::endl;
-
-        if(configuredWidth_ == buffer_.width() && configuredHeight_ == buffer_.height())
-        {
-            xdg_surface_.ack_configure(serial);
-            //updateScreen();
-            surface_.commit();
-            
-            return;
-        }
-        configuredSerial_ = serial;
-
-        buffer_ = Buffer(shm_, configuredWidth_, configuredHeight_);
-
-        std::fill(buffer_.data(), buffer_.data() + configuredWidth_ * configuredHeight_, 0x80404040);
-    
-        framebuffer_ = Framebuffer(configuredWidth_, configuredHeight_, requestedBpp_);
-        std::fill(framebuffer_.data.get(), framebuffer_.data.get() + framebuffer_.rowBytes * framebuffer_.height, 0);
-        framebuffer_.rootless = configuredMaximized_;
-
-    
-
-        if(!configuredMaximized_)
-        {
-            rootlessRegion_ = { 0, 0, (int16_t)configuredWidth_, RGN_STOP, (int16_t)configuredHeight_, 0, (int16_t)configuredWidth_, RGN_STOP };
-        }
-
-        if(initDone_)
-        {
-            std::cout << "new framebufer " << serial << std::endl;
-            if(!configuredMaximized_)
-                surface_.set_input_region({});
-            xdg_surface_.ack_configure(serial);
-            updateScreen();
-
-            callbacks_->framebufferAvailable(
-                [this, serial] () {
-                    std::cout << "new framebufer acknowledged " << serial << " / " << configuredSerial_ << std::endl;
-                    if (serial != configuredSerial_)
-                        return;
-                    updateScreen();
-                }
-            );
-        }
-        else
-        {
-            xdg_surface_.ack_configure(serial);
-            updateScreen();
-            initDone_ = true;
-        }
-    };
-#endif    
     xdg_toplevel_.on_close() = [this] () { };
 
     pointer_ = seat_.get_pointer();
@@ -213,8 +127,8 @@ bool WaylandVideoDriver::init()
         if(button == BTN_LEFT)
         {
             if(state == pointer_button_state::pressed
-                && !configuredMaximized_
-                && mouseX_ > configuredWidth_ - 16 && mouseY_ > configuredHeight_ - 16)
+                && !committedState_.maximized
+                && mouseX_ > committedState_.width - 16 && mouseY_ > committedState_.height - 16)
             {
                 std::cout << "resizing.\n";
                 xdg_toplevel_.resize(seat_, serial, xdg_toplevel_resize_edge::bottom_right);
@@ -258,6 +172,48 @@ bool WaylandVideoDriver::init()
     return true;
 }
 
+
+void WaylandVideoDriver::noteUpdatesDone()
+{
+
+}
+
+bool WaylandVideoDriver::updateMode()
+{
+    bool sizeChanged = configuredState_.width != committedState_.width
+                    || configuredState_.height != committedState_.height;
+
+    bool depthChanged = requestedBpp_ != framebuffer_.bpp;
+
+    if(sizeChanged)
+    {
+        buffer_ = Buffer(shm_, configuredState_.width, configuredState_.height);
+        std::fill(buffer_.data(), buffer_.data() + configuredState_.width * configuredState_.height, 0x80404040);
+    }    
+
+    if(sizeChanged || depthChanged)
+    {
+        framebuffer_ = Framebuffer(configuredState_.width, configuredState_.height, requestedBpp_);
+        std::fill(framebuffer_.data.get(), framebuffer_.data.get() + framebuffer_.rowBytes * framebuffer_.height, 0);
+    
+        framebuffer_.rootless = configuredState_.maximized;
+
+        rootlessRegion_ = { 0, 0, (int16_t)configuredState_.width, RGN_STOP, 
+                        (int16_t)configuredState_.height, 0, (int16_t)configuredState_.width, RGN_STOP };
+
+
+        committedState_ = configuredState_;
+        xdg_surface_.ack_configure(configuredState_.serial);
+
+        updateScreen();
+    }
+
+    
+
+    return sizeChanged || depthChanged;
+}
+
+
 bool WaylandVideoDriver::setMode(int width, int height, int bpp,
                                   bool grayscale_p)
 {
@@ -268,64 +224,25 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     {
         if(width && height)
         {
-            configuredWidth_ = width;
-            configuredHeight_ = height;
+            configuredState_.width = width;
+            configuredState_.height = height;
         }
         else
-        {
-            configuredWidth_ = 1024;
-            configuredHeight_ = 768;
             xdg_toplevel_.set_maximized();
-        }
 
         surface_.commit();
         display_.roundtrip();
 
-        width = configuredWidth_;
-        height = configuredHeight_;
+        initDone_ = true;
     }
-
-
-    configurePending_ = false;
-    
+    updateMode();
 
     return true;
 }
 
 void WaylandVideoDriver::pumpEvents()
 {
-    //display_.dispatch();
-    display_.roundtrip();/*
-    if(configurePending_)
-    {
-        std::cout << width_ << "x" << height_ << " --> " << (int)configuredMaximized_ << " " << configuredWidth_ << "x" << configuredHeight_ << std::endl;
-        if((configuredWidth_ && configuredHeight_) || (configuredMaximized_ != isRootless_ && width_ && height_))
-        {
-            if(configuredWidth_ && configuredHeight_)
-            {
-                width_ = configuredWidth_;
-                height_ = configuredHeight_;
-            }
-            delete[] framebuffer_;
-            rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
-            framebuffer_ = new uint8_t[rowBytes_ * height_];
-            std::fill(framebuffer_, framebuffer_ + height_ * rowBytes_, 0);
-            isRootless_ = configuredMaximized_;
-            if(!isRootless_)
-            {
-                surface_.set_input_region({});
-                rootlessRegion_ = { 0, 0, (int16_t)width_, RGN_STOP, (int16_t)height_, 0, (int16_t)width_, RGN_STOP };
-            }
-
-            callbacks_->framebufferSetupChanged();
-            updateScreen();
-
-            //surface_.attach(buffer_.wlbuffer(), 0, 0);
-            //surface_.commit();
-        }
-
-        configurePending_ = false;
-    }*/
+    display_.roundtrip();
 }
 
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)

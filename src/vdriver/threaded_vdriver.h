@@ -4,6 +4,7 @@
 
 #include <thread>
 #include <mutex>
+#include <atomic>
 #include <functional>
 #include <vector>
 #include <type_traits>
@@ -19,14 +20,18 @@ class ThreadedVideoDriver : public VideoDriver, public IVideoDriverCallbacks
     std::mutex mutex_;
     std::vector<std::function<void ()>> todo_;
 
+    std::atomic<bool> modeChangeRequested_, updatesDoneRequested_;
+
     void mouseButtonEvent(bool down) override;
     void mouseMoved(int h, int v) override;
     void keyboardEvent(bool down, unsigned char mkvkey) override;
     void suspendEvent() override;
     void resumeEvent(bool updateClipboard) override;
-    void framebufferAvailable(std::function<void()> acknowledge) override;
 
     void runOnEmulatorThread(std::function<void ()> f);
+
+    void modeAboutToChange() override;
+    void requestUpdatesDone() override;
 
     template<typename F>
     std::invoke_result_t<F> runOnGuiThreadSync(F f);
@@ -56,6 +61,8 @@ public:
 
     void beepAtUser() override;
 
+    void noteUpdatesDone() override;
+    bool updateMode() override;
 };
 
 template<typename Driver>

@@ -6,7 +6,6 @@
 #include <rsys/scrap.h>
 #include <osevent/osevent.h>
 #include <rsys/keyboard.h>
-#include <quickdraw/cquick.h>
 
 using namespace Executor;
 
@@ -62,10 +61,4 @@ void VideoDriverCallbacks::suspendEvent()
 void VideoDriverCallbacks::resumeEvent(bool updateClipboard /* TODO: does this really make sense? */)
 {
     sendresumeevent(updateClipboard);
-}
-
-void VideoDriverCallbacks::framebufferAvailable(std::function<void()> acknowledge)
-{
-    Executor::gd_vdriver_mode_changed();
-    acknowledge();
 }

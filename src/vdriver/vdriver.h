@@ -69,7 +69,8 @@ public:
     virtual void suspendEvent() = 0;
     virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */) = 0;
 
-    virtual void framebufferAvailable(std::function<void()> acknowledge) = 0;
+    virtual void modeAboutToChange() {}
+    virtual void requestUpdatesDone() {}
 };
 
 class VideoDriverCallbacks : public IVideoDriverCallbacks
@@ -80,8 +81,6 @@ public:
     virtual void keyboardEvent(bool down, unsigned char mkvkey) override;
     virtual void suspendEvent() override;
     virtual void resumeEvent(bool updateClipboard) override;
-
-    virtual void framebufferAvailable(std::function<void()> acknowledge) override;
 private:
     GUEST<uint32_t> keytransState = 0;
 };
@@ -128,6 +127,9 @@ public:
     virtual void runEventLoop() {}  // fixme: shouldn't really be optional?
     virtual void runOnThread(std::function<void ()> f) {}
     virtual void endEventLoop() {}
+
+    virtual void noteUpdatesDone() {}
+    virtual bool updateMode() { return false; }
 
     uint8_t *framebuffer() { return framebuffer_.data.get(); }
     int cursorDepth() { return framebuffer_.cursorBpp; }

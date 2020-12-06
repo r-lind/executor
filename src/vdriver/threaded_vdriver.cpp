@@ -104,16 +104,14 @@ void ThreadedVideoDriver::resumeEvent(bool updateClipboard)
         callbacks_->resumeEvent(updateClipboard);
     });
 }
-void ThreadedVideoDriver::framebufferAvailable(std::function<void()> acknowledge)
+void ThreadedVideoDriver::modeAboutToChange()
 {
-    runOnEmulatorThread([this, acknowledge = std::move(acknowledge)]() {
-        framebuffer_ = driver_->framebuffer_;   // ###
-        callbacks_->framebufferAvailable(
-            [this, acknowledge]() {
-                driver_->runOnThread(acknowledge);
-            }
-        );
-    });
+    modeChangeRequested_ = true;
+}
+
+void ThreadedVideoDriver::requestUpdatesDone()
+{
+    updatesDoneRequested_ = true;
 }
 
 
@@ -187,3 +185,29 @@ void ThreadedVideoDriver::beepAtUser()
     });
 }
 
+void ThreadedVideoDriver::noteUpdatesDone()
+{
+    bool expected = true;
+    if(!updatesDoneRequested_.compare_exchange_strong(expected, false))
+        return;
+
+    driver_->runOnThread([this]() {
+        driver_->noteUpdatesDone();
+    });
+}
+
+bool ThreadedVideoDriver::updateMode()
+{
+    bool expected = true;
+    if(!modeChangeRequested_.compare_exchange_strong(expected, false))
+        return false;
+
+    return runOnGuiThreadSync([this]() {
+        bool modeChanged = driver_->updateMode();
+
+        if(modeChanged)
+            framebuffer_ = driver_->framebuffer_;
+        
+        return modeChanged;
+    });
+}

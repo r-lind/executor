@@ -241,6 +241,9 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
      * is a good place to check for timer interrupts. */
     syncint_check_interrupt();
 
+    if(vdriver->updateMode())
+        Executor::gd_vdriver_mode_changed();
+
     hle_reset();
 
     evt->message = 0;
@@ -396,6 +399,9 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
         TRACE(29);
         retval = CheckUpdate(evt);
     }
+
+    if(!retval)
+        vdriver->noteUpdatesDone();
 
     /* check for high level events */
     if(!retval && (em & highLevelEventMask))
