@@ -308,26 +308,8 @@ void WaylandVideoDriver::setCursorVisible(bool show_p)
     pointer_.set_cursor(cursorEnterSerial_, show_p ? cursorSurface_ : surface_t(), hotSpot_.first, hotSpot_.second);
 }
 
-//#define HACK_LOOP
-
 void WaylandVideoDriver::runEventLoop()
 {
-#ifdef HACK_LOOP
-    for(;;)
-    {
-        display_.roundtrip();
-        decltype(executeOnUiThreadQueue_) todo;
-        {
-            std::lock_guard lk(executeOnUiThreadMutex_);
-            todo = std::move(executeOnUiThreadQueue_);
-            if(exitMainThread_)
-                break;
-        }
-        for(const auto& f : todo)
-            f();
-    }
-
-#else
     int waylandFd = display_.get_fd();    
     pollfd fds[] = {
         { waylandFd, POLLIN, 0 },
@@ -368,26 +350,22 @@ void WaylandVideoDriver::runEventLoop()
         } while(!todo.empty());
         display_.flush();
     }
-#endif
 }
 
 void WaylandVideoDriver::runOnThread(std::function<void ()> f)
 {
     std::lock_guard lk(executeOnUiThreadMutex_);
     executeOnUiThreadQueue_.push_back(f);
-#ifndef HACK_LOOP
 
     uint64_t evt = 1;
     ::write(wakeFd_, &evt, sizeof(evt));
-#endif
 }
 
 void WaylandVideoDriver::endEventLoop()
 {
     std::lock_guard lk(executeOnUiThreadMutex_);
     exitMainThread_ = true;
-#ifndef HACK_LOOP
+
     uint64_t evt = 1;
     ::write(wakeFd_, &evt, sizeof(evt));
-#endif
 }
