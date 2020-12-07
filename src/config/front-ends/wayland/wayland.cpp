@@ -168,14 +168,17 @@ bool WaylandVideoDriver::init()
     cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
     cursorSurface_.commit();
 
-
     return true;
 }
 
 
 void WaylandVideoDriver::noteUpdatesDone()
 {
-
+    if (delayingUpdates_)
+    {
+        delayingUpdates_ = false;
+        commitBuffer();
+    }
 }
 
 bool WaylandVideoDriver::updateMode()
@@ -205,6 +208,10 @@ bool WaylandVideoDriver::updateMode()
         committedState_ = configuredState_;
         xdg_surface_.ack_configure(configuredState_.serial);
 
+        delayingUpdates_ = true;
+        callbacks_->requestUpdatesDone();
+
+        rectsToUpdate_.clear();
         updateScreen();
     }
 
@@ -265,6 +272,18 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
     surface_.set_input_region(waylandRgn);
 }
 
+void WaylandVideoDriver::commitBuffer()
+{
+    updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rectsToUpdate_.size(), rectsToUpdate_.data());
+
+    for(const auto& r : rectsToUpdate_)
+        surface_.damage_buffer(r.left,r.top,r.right-r.left,r.bottom-r.top);
+    surface_.attach(buffer_.wlbuffer(), 0, 0);
+    surface_.commit();
+    display_.flush();
+    rectsToUpdate_.clear();
+    std::cout << "commit.\n";
+}
 
 void WaylandVideoDriver::updateScreenRects(
     int num_rects, const vdriver_rect_t *rects)
@@ -273,13 +292,9 @@ void WaylandVideoDriver::updateScreenRects(
     for(int i = 0; i < num_rects; i++)
         std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
 
-    updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), num_rects, rects);
-
-    for(int i = 0; i < num_rects; i++)
-        surface_.damage_buffer(rects[i].left,rects[i].top,rects[i].right-rects[i].left,rects[i].bottom-rects[i].top);
-    surface_.attach(buffer_.wlbuffer(), 0, 0);
-    surface_.commit();
-    display_.flush();
+    rectsToUpdate_.insert(rectsToUpdate_.end(), rects, rects + num_rects);
+    
+    commitBuffer();
 }
 
 void WaylandVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y)

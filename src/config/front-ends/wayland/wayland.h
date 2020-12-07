@@ -112,6 +112,13 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     std::mutex executeOnUiThreadMutex_;
     std::vector<std::function<void ()>> executeOnUiThreadQueue_;
 
+
+    std::vector<Executor::vdriver_rect_t> rectsToUpdate_;
+
+    void commitBuffer();
+
+    bool delayingUpdates_ = false;
+    std::chrono::high_resolution_clock::time_point delayingUpdatesUntil_;
 public:
     using VideoDriverCommon::VideoDriverCommon;
 
