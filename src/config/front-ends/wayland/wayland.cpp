@@ -178,6 +178,7 @@ void WaylandVideoDriver::noteUpdatesDone()
     {
         delayingUpdates_ = false;
         commitBuffer();
+        callbacks_->modeAboutToChange();
     }
 }
 
@@ -187,6 +188,9 @@ bool WaylandVideoDriver::updateMode()
                     || configuredState_.height != committedState_.height;
 
     bool depthChanged = requestedBpp_ != framebuffer_.bpp;
+
+    if(delayingUpdates_)
+        return false;
 
     if(sizeChanged)
     {
@@ -203,19 +207,18 @@ bool WaylandVideoDriver::updateMode()
 
         rootlessRegion_ = { 0, 0, (int16_t)configuredState_.width, RGN_STOP, 
                         (int16_t)configuredState_.height, 0, (int16_t)configuredState_.width, RGN_STOP };
-
+        surface_.set_input_region({});
 
         committedState_ = configuredState_;
         xdg_surface_.ack_configure(configuredState_.serial);
 
         delayingUpdates_ = true;
         callbacks_->requestUpdatesDone();
+        noteUpdatesDone(); //###
 
         rectsToUpdate_.clear();
         updateScreen();
     }
-
-    
 
     return sizeChanged || depthChanged;
 }
@@ -294,7 +297,19 @@ void WaylandVideoDriver::updateScreenRects(
 
     rectsToUpdate_.insert(rectsToUpdate_.end(), rects, rects + num_rects);
     
-    commitBuffer();
+    if (!delayingUpdates_)
+    {
+        if (!frameRequested_)
+        {
+            frameCallback_ = surface_.frame();
+            frameCallback_.on_done() = [this](uint32_t) {
+                frameRequested_ = false;
+                commitBuffer();
+            };
+            surface_.commit();
+            frameRequested_ = true;
+        }
+    }
 }
 
 void WaylandVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y)
@@ -337,7 +352,6 @@ void WaylandVideoDriver::runEventLoop()
         {
             auto intent = display_.obtain_read_intent();
             int result = poll(fds, std::size(fds), 20);
-
 
             if(result > 0)
             {

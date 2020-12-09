@@ -79,6 +79,9 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     wayland::pointer_t pointer_;
     wayland::keyboard_t keyboard_;
 
+    bool frameRequested_ = false;
+    wayland::callback_t frameCallback_;
+
     Buffer buffer_;
     bool initDone_ = false;
 
