@@ -17,7 +17,7 @@
 
 using namespace wayland;
 using namespace Executor;
-
+using namespace std::chrono_literals;
 
 template<typename... Args>
 std::shared_ptr<std::tuple<Args...>> argCollector(std::function<void (Args...)>& f)
@@ -177,6 +177,7 @@ void WaylandVideoDriver::noteUpdatesDone()
     if (delayingUpdates_)
     {
         delayingUpdates_ = false;
+        delayingUpdatesUntil_ = {};
         commitBuffer();
         callbacks_->modeAboutToChange();
     }
@@ -213,9 +214,9 @@ bool WaylandVideoDriver::updateMode()
         xdg_surface_.ack_configure(configuredState_.serial);
 
         delayingUpdates_ = true;
+        delayingUpdatesUntil_ = std::chrono::steady_clock::now() + 100ms;
         callbacks_->requestUpdatesDone();
-        noteUpdatesDone(); //###
-
+        
         rectsToUpdate_.clear();
         updateScreen();
     }
@@ -350,8 +351,20 @@ void WaylandVideoDriver::runEventLoop()
     {
         decltype(executeOnUiThreadQueue_) todo;
         {
+            int timeout = -1;
+            
+            if(delayingUpdates_)
+            {
+                auto now = std::chrono::steady_clock::now();
+
+                if (delayingUpdatesUntil_ <= now)
+                    noteUpdatesDone();
+                else
+                    timeout = std::chrono::duration_cast<std::chrono::milliseconds>(delayingUpdatesUntil_ - now).count();
+            }
+            
             auto intent = display_.obtain_read_intent();
-            int result = poll(fds, std::size(fds), 20);
+            int result = poll(fds, std::size(fds), timeout);
 
             if(result > 0)
             {

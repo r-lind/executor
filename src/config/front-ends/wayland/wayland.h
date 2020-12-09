@@ -7,6 +7,7 @@
 
 #include <mutex>
 #include <vector>
+#include <chrono>
 
 class WaylandVideoDriver : public Executor::VideoDriverCommon
 {
@@ -121,7 +122,7 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     void commitBuffer();
 
     bool delayingUpdates_ = false;
-    std::chrono::high_resolution_clock::time_point delayingUpdatesUntil_;
+    std::chrono::steady_clock::time_point delayingUpdatesUntil_;
 public:
     using VideoDriverCommon::VideoDriverCommon;
 
