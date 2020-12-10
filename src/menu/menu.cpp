@@ -37,6 +37,7 @@
 #include <prefs/prefs.h>
 #include <rsys/toolevent.h>
 #include <rsys/desk.h>
+#include <vdriver/vdriver.h>
 
 using namespace Executor;
 
@@ -1017,7 +1018,7 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
     Point pt;
     LONGINT myd0;
     GUEST<Point> ptTmp;
-    bool seen_up_already = false, done = false;
+    bool seen_up_already = false;
 
     GUEST<GrafPtr> saveport_swapped;
     GetPort(&saveport_swapped);
@@ -1053,12 +1054,22 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
         return true;
     };
 
+    bool firstIteration = true;
+
     while(shouldKeepTracking())
     {
         GetMouse(&ptTmp);
         pt = ptTmp.get();
         pointaslong = ((int32_t)pt.v << 16) | (unsigned short)pt.h;
         where = MBDFCALL(mbHit, 0, pointaslong);
+
+        if(firstIteration && !ispopup && pt.v < LM(MBarHeight) && where == NOTHITINMBAR)
+        {
+            if(vdriver->handleMenuBarDrag())
+                break;
+        }
+        firstIteration = false;
+
         if(LM(MenuHook))
             CALLMENUHOOK(LM(MenuHook));
         if(where == oldwhere)

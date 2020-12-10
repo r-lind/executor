@@ -126,6 +126,9 @@ bool WaylandVideoDriver::init()
 
         if(button == BTN_LEFT)
         {
+            if(state == pointer_button_state::pressed)
+                lastMouseDownSerial_ = serial;
+
             if(state == pointer_button_state::pressed
                 && !committedState_.maximized
                 && mouseX_ > committedState_.width - 16 && mouseY_ > committedState_.height - 16)
@@ -168,6 +171,12 @@ bool WaylandVideoDriver::init()
     cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
     cursorSurface_.commit();
 
+    return true;
+}
+
+bool WaylandVideoDriver::handleMenuBarDrag()
+{
+    xdg_toplevel_.move(seat_, lastMouseDownSerial_);
     return true;
 }
 

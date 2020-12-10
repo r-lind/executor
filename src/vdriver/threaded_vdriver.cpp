@@ -211,3 +211,10 @@ bool ThreadedVideoDriver::updateMode()
         return modeChanged;
     });
 }
+
+bool ThreadedVideoDriver::handleMenuBarDrag()
+{
+    return runOnGuiThreadSync([this]() {
+        return driver_->handleMenuBarDrag();
+    });
+}

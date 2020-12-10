@@ -131,6 +131,8 @@ public:
     virtual void noteUpdatesDone() {}
     virtual bool updateMode() { return false; }
 
+    virtual bool handleMenuBarDrag() { return false; }
+
     uint8_t *framebuffer() { return framebuffer_.data.get(); }
     int cursorDepth() { return framebuffer_.cursorBpp; }
     int width() { return framebuffer_.width; }

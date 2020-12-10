@@ -110,6 +110,7 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
 
     double mouseX_, mouseY_;
+    uint32_t lastMouseDownSerial_ = 0;
 
     int wakeFd_;
     bool exitMainThread_ = false;
@@ -140,6 +141,9 @@ public:
 
     void noteUpdatesDone() override;
     bool updateMode() override;
+
+    bool handleMenuBarDrag() override;
+
 
     void runEventLoop() override;
     void runOnThread(std::function<void ()> f) override;

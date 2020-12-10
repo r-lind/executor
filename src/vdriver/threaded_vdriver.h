@@ -63,6 +63,8 @@ public:
 
     void noteUpdatesDone() override;
     bool updateMode() override;
+
+    bool handleMenuBarDrag() override;
 };
 
 template<typename Driver>
