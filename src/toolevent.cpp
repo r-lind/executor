@@ -515,7 +515,8 @@ void Executor::C_GetMouse(GUEST<Point> *p)
     GlobalToLocal(p);
 }
 
-// FIXME: #warning Button not coded per IM Macintosh Toolbox Essentials 2-108
+// Note: Button not coded per IM Macintosh Toolbox Essentials 2-108
+//   ... because it's completely wrong. Trust the original IM instead.
 Boolean Executor::C_Button()
 {
     EventRecord evt;
@@ -526,7 +527,8 @@ Boolean Executor::C_Button()
     return retval;
 }
 
-// FIXME: #warning StillDown not coded per IM Macintosh Toolbox Essentials 2-109
+// Note: StillDown not coded per IM Macintosh Toolbox Essentials 2-109
+//   ... because it's wrong. Trust the original IM instead.
 Boolean Executor::C_StillDown() /* IMI-259 */
 {
     EventRecord evt;
@@ -534,13 +536,8 @@ Boolean Executor::C_StillDown() /* IMI-259 */
     return Button() ? !OSEventAvail((mDownMask | mUpMask), &evt) : false;
 }
 
-/*
- * The weirdness below is because Word 5.1a gets very unhappy if
- * TickCount makes large adjustments to LM(Ticks).  Even when we
- * just increase by one there are problems... The "no clock" option
- * might be retiring soon.
- */
-
+// Note: Button not coded per IM Macintosh Toolbox Essentials 2-110
+//   ... because it's completely wrong. Trust the original IM instead.
 Boolean Executor::C_WaitMouseUp()
 {
     EventRecord evt;
@@ -556,6 +553,13 @@ void Executor::C_GetKeys(unsigned char *keys)
 {
     BlockMoveData((Ptr)LM(KeyMap), (Ptr)keys, (Size)sizeof_KeyMap);
 }
+
+/*
+ * The weirdness below is because Word 5.1a gets very unhappy if
+ * TickCount makes large adjustments to LM(Ticks).  Even when we
+ * just increase by one there are problems... The "no clock" option
+ * might be retiring soon.
+ */
 
 ULONGINT Executor::C_TickCount()
 {
