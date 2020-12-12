@@ -20,5 +20,6 @@ pkgs.libsForQt5.callPackage(
             waylandpp
         ];
         src = pkgs.nix-gitignore.gitignoreSource [] ./.;
+        hardeningDisable = [ "all" ];
     }
 ) {}
