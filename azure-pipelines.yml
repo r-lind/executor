@@ -135,7 +135,7 @@ jobs:
 - job: macOS
   condition: true
   pool:
-    vmImage: 'macOS-10.14'
+    vmImage: 'macOS-10.15'
   steps:
   - checkout: self
     submodules: true
