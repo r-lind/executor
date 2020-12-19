@@ -173,7 +173,7 @@ bool SDLVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         data = (uint8_t *)screen->pixels;
 
     framebuffer_ = {};
-    framebuffer_.data = std::shared_ptr<uint8_t[]>(data, [](uint8_t* p){ /* FIXME: delete */ });
+    framebuffer_.data = std::shared_ptr<uint8_t>(data, [](uint8_t* p){ /* FIXME: delete */ });
     framebuffer_.width = screen->w;
     framebuffer_.height = screen->h;
     framebuffer_.bpp = screen->format->BitsPerPixel;

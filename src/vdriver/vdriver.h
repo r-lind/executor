@@ -41,7 +41,11 @@ struct vdriver_color_t
 
 struct Framebuffer
 {
-    std::shared_ptr<uint8_t[]> data;
+        // The following should be shared_ptr<uint8_t[]>.
+        // This is possible in C++17 or later, but Apple is still causing problems (as of 10.15)
+    std::shared_ptr<uint8_t> data; 
+
+
     int width = 0, height = 0;
     int bpp = 0;
     int rowBytes = 0;

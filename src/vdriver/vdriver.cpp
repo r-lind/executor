@@ -9,7 +9,7 @@ Framebuffer::Framebuffer(int w, int h, int d)
     : width(w), height(h), bpp(d)
 {
     rowBytes = ((width * bpp + 31) & ~31) / 8;
-    data = std::shared_ptr<uint8_t[]>(new uint8_t[rowBytes * height]);
+    data = std::shared_ptr<uint8_t>(new uint8_t[rowBytes * height], [](uint8_t* p) { delete[] p; });
 }
 
 VideoDriver::~VideoDriver()
