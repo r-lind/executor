@@ -208,10 +208,6 @@ void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
 
         dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
                           r->bottom - dst_top, r->right - dst_left);
-        if(ROMlib_when == WriteInBltrgn)
-        {
-            dirty_rect_update_screen();
-        }
     }
 
     TEMP_ALLOC_FREE(temp_alloc_space);
@@ -341,10 +337,6 @@ blt_pattern_to_bitmap_simple_mode(RgnHandle rh, INTEGER mode,
         const Rect *r = &RGN_BBOX(rh);
         dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
                           r->bottom - dst_top, r->right - dst_left);
-        if(ROMlib_when == WriteInBltrgn)
-        {
-            dirty_rect_update_screen();
-        }
     }
 }
 
@@ -447,10 +439,6 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
         const Rect *r = &RGN_BBOX(rh);
         dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
                           r->bottom - dst_top, r->right - dst_left);
-        if(ROMlib_when == WriteInBltrgn)
-        {
-            dirty_rect_update_screen();
-        }
     }
 }
 
@@ -611,10 +599,6 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
 
         dirty_rect_accrue(r->top - dst_top, r->left - dst_left,
                           r->bottom - dst_top, r->right - dst_left);
-        if(ROMlib_when == WriteInBltrgn)
-        {
-            dirty_rect_update_screen();
-        }
     }
 
     HUnlock((Handle)xh);

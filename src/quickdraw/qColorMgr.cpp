@@ -978,7 +978,6 @@ void Executor::C_SetEntries(INTEGER start, INTEGER count, ColorSpec *atable)
         {
             if(num_colors > 0)
             {
-                dirty_rect_update_screen();
                 gd_update_colors();
             }
         }

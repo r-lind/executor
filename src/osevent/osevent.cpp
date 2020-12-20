@@ -424,14 +424,8 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
             ROMlib_bewaremovement = false;
         }
     }
-    if(ROMlib_when == WriteInOSEvent)
-    {
-        dirty_rect_update_screen();
-    }
-    else if(ROMlib_when == WriteAtEndOfTrap)
-    {
-        dirty_rect_update_screen();
-    }
+
+    dirty_rect_update_screen();
 
     return retval;
 }

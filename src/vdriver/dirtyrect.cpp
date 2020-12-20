@@ -19,7 +19,11 @@
 
 using namespace Executor;
 
-int Executor::num_dirty_rects = 0;
+static bool dirty_rect_subsumed_p(int top, int left, int bottom,
+                                  int right);
+
+
+static int num_dirty_rects = 0;
 static vdriver_rect_t dirty_rect[MAX_DIRTY_RECTS];
 
 /* We will glom a new rectangle into an existing one if it adds no more
@@ -101,6 +105,10 @@ void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
         dirty_rect[0].bottom = bottom;
         dirty_rect[0].right = right;
         num_dirty_rects = 1;
+
+        if(ROMlib_when == WriteInBltrgn)
+            dirty_rect_update_screen();
+
         return;
     }
 
@@ -210,12 +218,15 @@ void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
     }
 
     num_dirty_rects = ndr;
+
+    if(ROMlib_when == WriteInBltrgn)
+        dirty_rect_update_screen();
 }
 
 /* Returns true iff the specified rect is already encompassed by
  * the dirty rect list.
  */
-bool Executor::dirty_rect_subsumed_p(int top, int left, int bottom, int right)
+static bool dirty_rect_subsumed_p(int top, int left, int bottom, int right)
 {
     int i;
 
