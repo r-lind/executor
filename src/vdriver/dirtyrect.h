@@ -20,6 +20,7 @@ public:
     bool empty() const { return rects_.empty(); }
 
     static_vector<vdriver_rect_t, MAX_DIRTY_RECTS> getAndClear();
+    void clear() { rects_.clear(); }
 };
 
 extern void dirty_rect_accrue(int top, int left, int bottom, int right);

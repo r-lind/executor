@@ -226,7 +226,7 @@ bool WaylandVideoDriver::updateMode()
         delayingUpdatesUntil_ = std::chrono::steady_clock::now() + 100ms;
         callbacks_->requestUpdatesDone();
         
-        rectsToUpdate_.clear();
+        dirty_.clear();
         updateScreen();
     }
 
@@ -287,14 +287,14 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 
 void WaylandVideoDriver::commitBuffer()
 {
-    updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rectsToUpdate_.size(), rectsToUpdate_.data());
+    auto rects = dirty_.getAndClear();
+    updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
 
-    for(const auto& r : rectsToUpdate_)
+    for(const auto& r : rects)
         surface_.damage_buffer(r.left,r.top,r.right-r.left,r.bottom-r.top);
     surface_.attach(buffer_.wlbuffer(), 0, 0);
     surface_.commit();
     display_.flush();
-    rectsToUpdate_.clear();
     std::cout << "commit.\n";
 }
 
@@ -305,7 +305,8 @@ void WaylandVideoDriver::updateScreenRects(
     for(int i = 0; i < num_rects; i++)
         std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
 
-    rectsToUpdate_.insert(rectsToUpdate_.end(), rects, rects + num_rects);
+    for(int i = 0; i < num_rects; i++)
+        dirty_.add(rects[i].top, rects[i].left, rects[i].bottom, rects[i].right);
     
     if (!delayingUpdates_)
     {

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vdriver/vdrivercommon.h>
+#include <vdriver/dirtyrect.h>
 
 #include <wayland-client.hpp>
 #include <wayland-client-protocol-extra.hpp>
@@ -118,7 +119,7 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     std::vector<std::function<void ()>> executeOnUiThreadQueue_;
 
 
-    std::vector<Executor::vdriver_rect_t> rectsToUpdate_;
+    Executor::DirtyRects dirty_;
 
     void commitBuffer();
 
