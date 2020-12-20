@@ -53,10 +53,6 @@ FILE *configfile;   // hidden parameter for options parser
 
 // flags.h
 
-/* false if we are blitting straight to screen memory, true if we are
-   blitting to a shadow screen */
-bool ROMlib_shadow_screen_p = true; // currently always remains true
-
 /* Initial screen size.  This can be changed dynamically. */
 /* 0 means "use default". */
 int flag_width, flag_height;

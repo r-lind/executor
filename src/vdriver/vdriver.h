@@ -155,7 +155,5 @@ public:
 
 extern std::unique_ptr<VideoDriver> vdriver;
 
-// #define VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT number-of-bytes
-
 }
 #endif /* !_VDRIVER_H_ */

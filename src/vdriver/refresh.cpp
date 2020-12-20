@@ -26,12 +26,6 @@ static void C_handle_refresh()
 {
     static bool busy_p = false;
 
-    /* If we're going directly to the screen, hang out and wait to see
-   * if they stop writing directly to the screen later.
-   */
-    if(!ROMlib_shadow_screen_p)
-        PrimeTime((QElemPtr)&refresh_tm_task, 2000 /* Two seconds */);
-
     /* If refresh is off, see if we need to turn it on. */
     if(!ROMlib_refresh && do_autorefresh_p && autodetect_refresh())
         set_refresh_rate(10);
