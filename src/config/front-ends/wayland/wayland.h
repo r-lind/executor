@@ -97,15 +97,16 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
     int requestedBpp_ = 8;
 
-    struct WindowState
+    struct WindowShape
     {
         uint32_t serial;
         int width, height;
         bool maximized;
     };
 
-    WindowState configuredState_ {};
-    WindowState committedState_ {};
+    WindowShape configuredShape_ {};
+    WindowShape allocatedShape_ {};
+    WindowShape committedShape_ {};
 
     bool activated_ = false;
 
@@ -115,25 +116,50 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
     int wakeFd_;
     bool exitMainThread_ = false;
-    std::mutex executeOnUiThreadMutex_;
     std::vector<std::function<void ()>> executeOnUiThreadQueue_;
 
 
+    enum class ConfigureState
+    {
+        idle,
+        waitingForModeSwitch,
+        waitingForUpdate,
+        waitingForObsoleteUpdate
+    };
+/*
+    @startuml
+    
+    hide empty description
+
+    [*] --> idle
+
+    idle  --> waitingForModeSwitch : configure
+    waitingForModeSwitch --> waitingForUpdate : updateMode
+    waitingForUpdate --> idle : noteUpdatesDone, timeout
+    waitingForUpdate -> waitingForObsoleteUpdate : configure
+    waitingForObsoleteUpdate --> idle : noteUpdatesDone, timeout
+
+    @endumnl
+*/
+
+    ConfigureState configureState_ = ConfigureState::idle;
+    
     Executor::DirtyRects dirty_;
 
-    void commitBuffer();
 
-    bool delayingUpdates_ = false;
-    std::chrono::steady_clock::time_point delayingUpdatesUntil_;
+    std::chrono::steady_clock::time_point updateTimeout_;
+
+    void frameCallback();
+    bool requestFrame();
 public:
     using VideoDriverCommon::VideoDriverCommon;
+
+    ~WaylandVideoDriver();
 
     bool init() override;
     bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
     void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r) override;
-
-    void pumpEvents() override;
 
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
     void setCursorVisible(bool show_p) override;

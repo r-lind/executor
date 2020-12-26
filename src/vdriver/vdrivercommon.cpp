@@ -1,12 +1,27 @@
 #include "vdrivercommon.h"
 #include <quickdraw/region.h>
 
+#include <future>
+
 using namespace Executor;
 
+
+VideoDriverCommon::VideoDriverCommon(IVideoDriverCallbacks *cb)
+    : VideoDriver(cb)
+{
+
+}
+
+
+VideoDriverCommon::~VideoDriverCommon()
+{
+    assert(!thread_.joinable());
+}
 
 
 void VideoDriverCommon::setColors(int num_colors, const Executor::vdriver_color_t *color_array)
 {
+    std::lock_guard lk(mutex_);
     for(int i = 0; i < num_colors; i++)
     {
         colors_[i] = (0xFF << 24)
@@ -19,6 +34,8 @@ void VideoDriverCommon::setColors(int num_colors, const Executor::vdriver_color_
 
 void VideoDriverCommon::setRootlessRegion(RgnHandle rgn)
 {
+    std::lock_guard lk(mutex_);
+
     RgnVector inRgn(rgn);
     rootlessRegion_.clear();
         

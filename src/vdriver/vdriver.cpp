@@ -97,10 +97,6 @@ void VideoDriver::beepAtUser()
 {
 }
 
-void VideoDriver::pumpEvents()
-{
-}
-
 void VideoDriver::setRootlessRegion(RgnHandle rgn)
 {
 }

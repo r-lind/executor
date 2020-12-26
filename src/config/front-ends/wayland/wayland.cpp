@@ -54,6 +54,15 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
 {
 }
 
+WaylandVideoDriver::~WaylandVideoDriver()
+{
+    if(thread_.joinable())
+    {
+        endEventLoop();
+        thread_.join();
+    }
+}
+
 bool WaylandVideoDriver::init()
 {
     wakeFd_ = eventfd(0, 0);
@@ -91,8 +100,8 @@ bool WaylandVideoDriver::init()
 
         std::cout << "configure " << inWidth << " " << inHeight << " " << serial << std::endl;
 
-        int width = inWidth ? std::max(inWidth, VDRIVER_MIN_SCREEN_WIDTH) : configuredState_.width;
-        int height = inHeight ? std::max(inHeight, VDRIVER_MIN_SCREEN_HEIGHT) : configuredState_.height;
+        int width = inWidth ? std::max(inWidth, VDRIVER_MIN_SCREEN_WIDTH) : configuredShape_.width;
+        int height = inHeight ? std::max(inHeight, VDRIVER_MIN_SCREEN_HEIGHT) : configuredShape_.height;
         std::vector<xdg_toplevel_state> states = inStates;
 
         bool maximized = std::find(states.begin(), states.end(), xdg_toplevel_state::maximized) != states.end();
@@ -107,14 +116,20 @@ bool WaylandVideoDriver::init()
             activated_ = activated;
         }
 
-        if(!maximized && committedState_.maximized)
+        if(!maximized && committedShape_.maximized)
         {
-            width = std::max(VDRIVER_MIN_SCREEN_WIDTH, committedState_.width / 2);
-            height = std::max(VDRIVER_MIN_SCREEN_HEIGHT, committedState_.height / 2);
+            width = std::max(VDRIVER_MIN_SCREEN_WIDTH, committedShape_.width / 2);
+            height = std::max(VDRIVER_MIN_SCREEN_HEIGHT, committedShape_.height / 2);
         }
 
-        configuredState_ = { serial, width, height, maximized };
-        callbacks_->modeAboutToChange();
+        std::lock_guard lk(mutex_);
+        
+        configuredShape_ = { serial, width, height, maximized };
+        
+        if(configureState_ == ConfigureState::idle)
+            configureState_ = ConfigureState::waitingForModeSwitch;
+        else if(configureState_ == ConfigureState::waitingForUpdate)
+            configureState_ = ConfigureState::waitingForObsoleteUpdate;
     };
 
     xdg_toplevel_.on_close() = [this] () { };
@@ -130,8 +145,8 @@ bool WaylandVideoDriver::init()
                 lastMouseDownSerial_ = serial;
 
             if(state == pointer_button_state::pressed
-                && !committedState_.maximized
-                && mouseX_ > committedState_.width - 16 && mouseY_ > committedState_.height - 16)
+                && !committedShape_.maximized
+                && mouseX_ > committedShape_.width - 16 && mouseY_ > committedShape_.height - 16)
             {
                 std::cout << "resizing.\n";
                 xdg_toplevel_.resize(seat_, serial, xdg_toplevel_resize_edge::bottom_right);
@@ -171,6 +186,8 @@ bool WaylandVideoDriver::init()
     cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
     cursorSurface_.commit();
 
+    thread_ = std::thread([this] { runEventLoop(); });
+
     return true;
 }
 
@@ -183,51 +200,71 @@ bool WaylandVideoDriver::handleMenuBarDrag()
 
 void WaylandVideoDriver::noteUpdatesDone()
 {
-    if (delayingUpdates_)
+    std::lock_guard lk(mutex_);
+    if(configureState_ == ConfigureState::waitingForUpdate
+        || configureState_ == ConfigureState::waitingForObsoleteUpdate)
     {
-        delayingUpdates_ = false;
-        delayingUpdatesUntil_ = {};
-        commitBuffer();
-        callbacks_->modeAboutToChange();
+        std::cout << "updates done.\n";
+        if(configureState_ == ConfigureState::waitingForObsoleteUpdate)
+            configureState_ = ConfigureState::waitingForModeSwitch;
+        else
+            configureState_ = ConfigureState::idle;
+        if(requestFrame())
+        {
+            surface_.commit();
+            display_.flush();
+        }
     }
 }
 
 bool WaylandVideoDriver::updateMode()
 {
-    bool sizeChanged = configuredState_.width != committedState_.width
-                    || configuredState_.height != committedState_.height;
+    std::lock_guard lk(mutex_);
+    if (configureState_ != ConfigureState::waitingForModeSwitch)
+        return false;
+
+    bool sizeChanged = configuredShape_.width != allocatedShape_.width
+                    || configuredShape_.height != allocatedShape_.height;
 
     bool depthChanged = requestedBpp_ != framebuffer_.bpp;
 
-    if(delayingUpdates_)
-        return false;
-
     if(sizeChanged)
     {
-        buffer_ = Buffer(shm_, configuredState_.width, configuredState_.height);
-        std::fill(buffer_.data(), buffer_.data() + configuredState_.width * configuredState_.height, 0x80404040);
+        buffer_ = Buffer(shm_, configuredShape_.width, configuredShape_.height);
+        std::fill(buffer_.data(), buffer_.data() + configuredShape_.width * configuredShape_.height, 0x80404040);
     }    
 
     if(sizeChanged || depthChanged)
     {
-        framebuffer_ = Framebuffer(configuredState_.width, configuredState_.height, requestedBpp_);
+        framebuffer_ = Framebuffer(configuredShape_.width, configuredShape_.height, requestedBpp_);
         std::fill(framebuffer_.data.get(), framebuffer_.data.get() + framebuffer_.rowBytes * framebuffer_.height, 0);
     
-        framebuffer_.rootless = configuredState_.maximized;
+        framebuffer_.rootless = configuredShape_.maximized;
 
-        rootlessRegion_ = { 0, 0, (int16_t)configuredState_.width, RGN_STOP, 
-                        (int16_t)configuredState_.height, 0, (int16_t)configuredState_.width, RGN_STOP };
+        rootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
+                        (int16_t)configuredShape_.height, 0, (int16_t)configuredShape_.width, RGN_STOP };
         surface_.set_input_region({});
 
-        committedState_ = configuredState_;
-        xdg_surface_.ack_configure(configuredState_.serial);
+        allocatedShape_ = configuredShape_;
 
-        delayingUpdates_ = true;
-        delayingUpdatesUntil_ = std::chrono::steady_clock::now() + 100ms;
+        updateTimeout_ = std::chrono::steady_clock::now() + 100ms;
         callbacks_->requestUpdatesDone();
         
         dirty_.clear();
-        updateScreen();
+        dirty_.add(0, 0, configuredShape_.height, configuredShape_.width);
+
+        configureState_ = ConfigureState::waitingForUpdate;
+    }
+    else
+    {
+        allocatedShape_ = configuredShape_;
+        configureState_ = ConfigureState::idle;
+        
+        if(requestFrame())
+        {
+            surface_.commit();
+            display_.flush();
+        }
     }
 
     return sizeChanged || depthChanged;
@@ -237,37 +274,40 @@ bool WaylandVideoDriver::updateMode()
 bool WaylandVideoDriver::setMode(int width, int height, int bpp,
                                   bool grayscale_p)
 {
-    if(bpp)
-        requestedBpp_ = bpp;
+    return runOnGuiThreadSync([=]() {
+        if(bpp)
+            requestedBpp_ = bpp;
 
-    if(!initDone_)
-    {
-        if(width && height)
+        if(!initDone_)
         {
-            configuredState_.width = width;
-            configuredState_.height = height;
+            if(width && height)
+            {
+                configuredShape_.width = width;
+                configuredShape_.height = height;
+            }
+            else
+                xdg_toplevel_.set_maximized();
+
+            surface_.commit();
+            display_.roundtrip();
+
+            initDone_ = true;
         }
-        else
-            xdg_toplevel_.set_maximized();
+        updateMode();
+        frameRequested_ = true;
+        noteUpdatesDone();
+        frameCallback();
 
-        surface_.commit();
-        display_.roundtrip();
-
-        initDone_ = true;
-    }
-    updateMode();
-
-    return true;
-}
-
-void WaylandVideoDriver::pumpEvents()
-{
-    display_.roundtrip();
+        return true;
+    });
 }
 
 void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
+    std::cout << "rootlessRegion\n";
     VideoDriverCommon::setRootlessRegion(rgn);
+
+    std::lock_guard lk(mutex_);
 
     RegionProcessor rgnP(rootlessRegion_.begin());
 
@@ -285,41 +325,84 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
     surface_.set_input_region(waylandRgn);
 }
 
-void WaylandVideoDriver::commitBuffer()
+void WaylandVideoDriver::frameCallback()
 {
+    std::unique_lock lk(mutex_);
     auto rects = dirty_.getAndClear();
-    updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
+
+    if(rects.size())
+    {
+//        lk.unlock();  FIXME: need to protect buffer_
+        updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
+//        lk.lock();
+    }
+
 
     for(const auto& r : rects)
         surface_.damage_buffer(r.left,r.top,r.right-r.left,r.bottom-r.top);
+
+    frameRequested_ = false;
+
+    if(configureState_ != ConfigureState::idle
+        && configureState_ != ConfigureState::waitingForModeSwitch)
+        return;
+
     surface_.attach(buffer_.wlbuffer(), 0, 0);
+
+    if(allocatedShape_.serial != committedShape_.serial)
+    {
+        xdg_surface_.ack_configure(allocatedShape_.serial);
+        committedShape_ = allocatedShape_;
+    }
+
+
+    requestFrame();
+
     surface_.commit();
     display_.flush();
-    std::cout << "commit.\n";
+}
+
+bool WaylandVideoDriver::requestFrame()
+{
+    //std::cout << "requestFrame.\n";
+    if(dirty_.empty() && allocatedShape_.serial == committedShape_.serial)
+        return false;
+    //std::cout << "dirty.\n";
+
+    if(configureState_ != ConfigureState::idle
+        && configureState_ != ConfigureState::waitingForModeSwitch)
+        return false;
+
+    //std::cout << "interesting state.\n";
+
+    if(frameRequested_)
+        return false;
+
+    //std::cout << "requesting frame callback.\n";
+
+    frameCallback_ = surface_.frame();
+    frameCallback_.on_done() = [this](uint32_t) { frameCallback(); };
+    frameRequested_ = true;
+
+    return true;
 }
 
 void WaylandVideoDriver::updateScreenRects(
     int num_rects, const vdriver_rect_t *rects)
 {
-    std::cout << "update.\n";
-    for(int i = 0; i < num_rects; i++)
-        std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
+    //std::cout << "update.\n";
+    //for(int i = 0; i < num_rects; i++)
+    //    std::cout << rects[i].left << ", " << rects[i].top << " - " << rects[i].right << ", " << rects[i].bottom << std::endl;
+
+    std::lock_guard lk(mutex_);
 
     for(int i = 0; i < num_rects; i++)
         dirty_.add(rects[i].top, rects[i].left, rects[i].bottom, rects[i].right);
     
-    if (!delayingUpdates_)
+    if(requestFrame())
     {
-        if (!frameRequested_)
-        {
-            frameCallback_ = surface_.frame();
-            frameCallback_.on_done() = [this](uint32_t) {
-                frameRequested_ = false;
-                commitBuffer();
-            };
-            surface_.commit();
-            frameRequested_ = true;
-        }
+        surface_.commit();
+        display_.flush();
     }
 }
 
@@ -359,20 +442,35 @@ void WaylandVideoDriver::runEventLoop()
 
     for(;;)
     {
-        decltype(executeOnUiThreadQueue_) todo;
-        {
-            int timeout = -1;
-            
-            if(delayingUpdates_)
-            {
-                auto now = std::chrono::steady_clock::now();
+        int timeout = -1;
 
-                if (delayingUpdatesUntil_ <= now)
-                    noteUpdatesDone();
-                else
-                    timeout = std::chrono::duration_cast<std::chrono::milliseconds>(delayingUpdatesUntil_ - now).count();
+        decltype(executeOnUiThreadQueue_) todo;
+        do
+        {
+            display_.dispatch_pending();
+            {
+                std::lock_guard lk(mutex_);
+                todo = std::move(executeOnUiThreadQueue_);
+                if(exitMainThread_)
+                    return;
+
+                if(configureState_ == ConfigureState::waitingForUpdate
+                    || configureState_ == ConfigureState::waitingForObsoleteUpdate)
+                {
+                    auto now = std::chrono::steady_clock::now();
+
+                    if (updateTimeout_ <= now)
+                        todo.push_back([this] { noteUpdatesDone(); });
+                    else
+                        timeout = std::chrono::duration_cast<std::chrono::milliseconds>(updateTimeout_ - now).count();
+                }
             }
-            
+            for(const auto& f : todo)
+                f();
+        } while(!todo.empty());
+        display_.flush();
+
+        {
             auto intent = display_.obtain_read_intent();
             int result = poll(fds, std::size(fds), timeout);
 
@@ -387,26 +485,12 @@ void WaylandVideoDriver::runEventLoop()
                 }
             }
         }
-        
-        do
-        {
-            display_.dispatch_pending();
-            {
-                std::lock_guard lk(executeOnUiThreadMutex_);
-                todo = std::move(executeOnUiThreadQueue_);
-                if(exitMainThread_)
-                    return;
-            }
-            for(const auto& f : todo)
-                f();
-        } while(!todo.empty());
-        display_.flush();
     }
 }
 
 void WaylandVideoDriver::runOnThread(std::function<void ()> f)
 {
-    std::lock_guard lk(executeOnUiThreadMutex_);
+    std::lock_guard lk(mutex_);
     executeOnUiThreadQueue_.push_back(f);
 
     uint64_t evt = 1;
@@ -415,7 +499,7 @@ void WaylandVideoDriver::runOnThread(std::function<void ()> f)
 
 void WaylandVideoDriver::endEventLoop()
 {
-    std::lock_guard lk(executeOnUiThreadMutex_);
+    std::lock_guard lk(mutex_);
     exitMainThread_ = true;
 
     uint64_t evt = 1;

@@ -2,12 +2,13 @@
 #if !defined(_VDRIVER_H_)
 #define _VDRIVER_H_
 
-#include <unordered_map>
-#include <string>
-
 #include <ExMacTypes.h>
 
+#include <functional>
 #include <memory>
+#include <mutex>
+#include <unordered_map>
+#include <string>
 
 namespace Executor
 {
@@ -85,8 +86,16 @@ public:
     virtual void keyboardEvent(bool down, unsigned char mkvkey) override;
     virtual void suspendEvent() override;
     virtual void resumeEvent(bool updateClipboard) override;
+
+
+    void pumpEvents();
 private:
     GUEST<uint32_t> keytransState = 0;
+
+    std::mutex mutex_;
+    std::vector<std::function<void ()>> todo_;
+
+    void runOnEmulatorThread(std::function<void ()> f);
 };
 
 class VideoDriver
@@ -122,7 +131,6 @@ public:
     virtual void setCursorVisible(bool show_p);
 
 
-    virtual void pumpEvents();
     virtual void setRootlessRegion(RgnHandle rgn);
 
         // TODO: should move to sound driver?

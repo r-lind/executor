@@ -403,8 +403,6 @@ set(vdriver_sources
         vdriver/eventrecorder.cpp
         vdriver/vdrivercommon.h
         vdriver/vdrivercommon.cpp
-        vdriver/threaded_vdriver.h
-        vdriver/threaded_vdriver.cpp
     )
 
 set(mman_sources

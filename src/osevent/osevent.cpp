@@ -379,7 +379,7 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
     ROMlib_memnomove_p = false; /* this is an icky hack needed for Excel */
     ticks = TickCount();
 
-    vdriver->pumpEvents();
+    ((VideoDriverCallbacks*)vdriver->callbacks_)->pumpEvents();
     if(auto *playback = EventPlayback::getInstance())
         playback->pumpEvents();
 
