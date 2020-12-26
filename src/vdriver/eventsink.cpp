@@ -10,7 +10,7 @@
 
 using namespace Executor;
 
-void VideoDriverCallbacks::mouseButtonEvent(bool down)
+void EventSink::mouseButtonEvent(bool down)
 {
     runOnEmulatorThread([=]() {
         if(down)
@@ -22,7 +22,7 @@ void VideoDriverCallbacks::mouseButtonEvent(bool down)
     });
 }
 
-void VideoDriverCallbacks::mouseMoved(int h, int v)
+void EventSink::mouseMoved(int h, int v)
 {
     runOnEmulatorThread([=]() {
         LM(MouseLocation2) = LM(MTemp) = LM(MouseLocation) = Point{(int16_t)v, (int16_t)h};
@@ -31,7 +31,7 @@ void VideoDriverCallbacks::mouseMoved(int h, int v)
     });
 }
 
-void VideoDriverCallbacks::keyboardEvent(bool down, unsigned char rawMkvkey)
+void EventSink::keyboardEvent(bool down, unsigned char rawMkvkey)
 {
     runOnEmulatorThread([=]() {
         auto mkvkey = ROMlib_right_to_left_key_map(rawMkvkey);
@@ -59,23 +59,23 @@ void VideoDriverCallbacks::keyboardEvent(bool down, unsigned char rawMkvkey)
     });
 }
 
-void VideoDriverCallbacks::suspendEvent()
+void EventSink::suspendEvent()
 {
     runOnEmulatorThread(&sendsuspendevent);
 }
 
-void VideoDriverCallbacks::resumeEvent(bool updateClipboard /* TODO: does this really make sense? */)
+void EventSink::resumeEvent(bool updateClipboard /* TODO: does this really make sense? */)
 {
     runOnEmulatorThread([=]() { sendresumeevent(updateClipboard); });
 }
 
-void VideoDriverCallbacks::runOnEmulatorThread(std::function<void ()> f)
+void EventSink::runOnEmulatorThread(std::function<void ()> f)
 {
     std::lock_guard lk(mutex_);
     todo_.push_back(f);
 }
 
-void VideoDriverCallbacks::pumpEvents()
+void EventSink::pumpEvents()
 {
     std::vector<std::function<void()>> todo;
     {

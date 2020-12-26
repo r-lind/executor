@@ -48,7 +48,7 @@ class ExecutorTestEnvironment : public testing::Environment
 {
     char *thingOnStack;
     fs::path tempDir;
-    VideoDriverCallbacks videoDriverCallbacks;
+    EventSink videoDriverCallbacks;
 public:
     ExecutorTestEnvironment(char* thingOnStack) : thingOnStack(thingOnStack) {}
 

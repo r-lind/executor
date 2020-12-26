@@ -6,7 +6,7 @@
 using namespace Executor;
 
 
-VideoDriverCommon::VideoDriverCommon(IVideoDriverCallbacks *cb)
+VideoDriverCommon::VideoDriverCommon(IEventListener *cb)
     : VideoDriver(cb)
 {
 

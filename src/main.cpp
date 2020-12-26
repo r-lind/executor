@@ -606,7 +606,7 @@ int main(int argc, char **argv)
             break;
         }
 
-    VideoDriverCallbacks videoDriverCallbacks;
+    EventSink videoDriverCallbacks;
     if(headless)
         vdriver = std::make_unique<HeadlessVideoDriver>(&videoDriverCallbacks);
     else

@@ -7,7 +7,7 @@
 namespace Executor
 {
 
-class EventRecorder : public VideoDriverCallbacks
+class EventRecorder : public EventSink
 {
     fs::ofstream out;
     int lastH = -1, lastV = -1;
@@ -20,7 +20,7 @@ public:
 };
 
 
-class EventPlayback : public VideoDriverCallbacks
+class EventPlayback : public EventSink
 {
     fs::ifstream in;
     bool playbackActive;

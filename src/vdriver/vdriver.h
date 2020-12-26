@@ -59,7 +59,7 @@ struct Framebuffer
     Framebuffer(int w, int h, int d);
 };
 
-class IVideoDriverCallbacks
+class IEventListener
 {
 public:
     void mouseButtonEvent(bool down, int h, int v)
@@ -78,7 +78,7 @@ public:
     virtual void requestUpdatesDone() {}
 };
 
-class VideoDriverCallbacks : public IVideoDriverCallbacks
+class EventSink : public IEventListener
 {
 public:
     virtual void mouseButtonEvent(bool down) override;
@@ -101,8 +101,8 @@ private:
 class VideoDriver
 {
 public:
-    VideoDriver(IVideoDriverCallbacks *cb) : callbacks_(cb) {}
-    void setCallbacks(IVideoDriverCallbacks *cb) { callbacks_ = cb; }
+    VideoDriver(IEventListener *cb) : callbacks_(cb) {}
+    void setCallbacks(IEventListener *cb) { callbacks_ = cb; }
 
     virtual ~VideoDriver();
 
@@ -156,7 +156,7 @@ public:
     bool isRootless() { return framebuffer_.rootless; }
 
 public:
-    IVideoDriverCallbacks *callbacks_ = nullptr;
+    IEventListener *callbacks_ = nullptr;
 
     Framebuffer framebuffer_;
 };

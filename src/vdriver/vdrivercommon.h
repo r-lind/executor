@@ -55,7 +55,7 @@ protected:
     }
 
 public:
-    VideoDriverCommon(IVideoDriverCallbacks *cb);
+    VideoDriverCommon(IEventListener *cb);
     ~VideoDriverCommon();
 
     void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
