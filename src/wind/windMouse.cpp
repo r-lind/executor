@@ -176,4 +176,5 @@ void Executor::C_ZoomWindow(WindowPtr wp, INTEGER part,
         if(front)
             SelectWindow(wp);
     }
+    ROMlib_rootless_update();
 }
