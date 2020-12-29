@@ -10,6 +10,8 @@
 
 using namespace Executor;
 
+std::unique_ptr<EventSink> EventSink::instance;
+
 void EventSink::mouseButtonEvent(bool down)
 {
     runOnEmulatorThread([=]() {

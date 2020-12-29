@@ -151,6 +151,11 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
     void frameCallback();
     bool requestFrame();
+
+
+    void runEventLoop();
+    void runOnThread(std::function<void ()> f) override;
+    void endEventLoop();
 public:
     using VideoDriverCommon::VideoDriverCommon;
 
@@ -171,8 +176,4 @@ public:
 
     bool handleMenuBarDrag() override;
 
-
-    void runEventLoop() override;
-    void runOnThread(std::function<void ()> f) override;
-    void endEventLoop() override;
 };

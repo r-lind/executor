@@ -73,9 +73,6 @@ public:
     virtual void keyboardEvent(bool down, unsigned char mkvkey) = 0;
     virtual void suspendEvent() = 0;
     virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */) = 0;
-
-    virtual void modeAboutToChange() {}
-    virtual void requestUpdatesDone() {}
 };
 
 class EventSink : public IEventListener
@@ -89,6 +86,8 @@ public:
 
 
     void pumpEvents();
+
+    static std::unique_ptr<EventSink> instance;
 private:
     GUEST<uint32_t> keytransState = 0;
 
@@ -135,10 +134,6 @@ public:
 
         // TODO: should move to sound driver?
     virtual void beepAtUser();
-
-    virtual void runEventLoop() {}  // fixme: shouldn't really be optional?
-    virtual void runOnThread(std::function<void ()> f) {}
-    virtual void endEventLoop() {}
 
     virtual void noteUpdatesDone() {}
     virtual bool updateMode() { return false; }

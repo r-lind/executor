@@ -248,7 +248,6 @@ bool WaylandVideoDriver::updateMode()
         allocatedShape_ = configuredShape_;
 
         updateTimeout_ = std::chrono::steady_clock::now() + 100ms;
-        callbacks_->requestUpdatesDone();
         
         dirty_.clear();
         dirty_.add(0, 0, configuredShape_.height, configuredShape_.width);

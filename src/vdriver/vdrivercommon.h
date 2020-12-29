@@ -24,6 +24,8 @@ protected:
     void updateBuffer(uint32_t* buffer, int bufferWidth, int bufferHeight,
                     int num_rects, const vdriver_rect_t *rects);
 
+    virtual void runOnThread(std::function<void ()> f) = 0;
+
     template<typename F>
     std::invoke_result_t<F> runOnGuiThreadSync(F f)
     {

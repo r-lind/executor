@@ -311,6 +311,41 @@ construct_command_line_string(int argc, char **argv)
     return s;
 }
 
+static void reportBadArgs()
+{
+    fprintf(stderr,
+            "Type \"%s -help\" for a list of command-line options.\n",
+            ROMlib_appname.c_str());
+    exit(-10);
+}
+
+static void checkBadArgs(int argc, char **argv)
+{
+    if(argc >= 2)
+    {
+        int a;
+
+        /* Only complain if we see something with a leading dash; anything
+         * else might be a file to launch.
+         */
+        for(a = 1; a < argc; a++)
+        {
+            if(argv[a][0] == '-')
+            {
+                fprintf(stderr, "%s: unknown option `%s'\n",
+                        ROMlib_appname.c_str(), argv[a]);
+                bad_arg_p = true;
+            }
+        }
+    }
+
+    if(bad_arg_p)
+        reportBadArgs();
+}
+
+bool flag_headless = false;
+std::optional<fs::path> flag_record, flag_playback;
+
 static void parseCommandLine(int& argc, char **argv)
 {
     opt_database_t opt_db;
@@ -321,8 +356,6 @@ static void parseCommandLine(int& argc, char **argv)
     opt_register_pre_note("welcome to the executor help message.");
     opt_register_pre_note("usage: `executor [option...] "
                           "[program [document1 document2 ...]]'");
-
-    vdriver->registerOptions();
 
     if(!bad_arg_p)
         bad_arg_p = opt_parse(opt_db, &argc, argv);
@@ -342,8 +375,6 @@ static void parseCommandLine(int& argc, char **argv)
         fprintf(stdout, "%s", opt_help_message());
         exit(0);
     }
-
-    vdriver->setOptions(opt_db);
 
     /* Verify that the user input a legal bits per pixel.  "0" is a legal
    * value here; that means "use the vdriver's default."
@@ -497,15 +528,14 @@ static void parseCommandLine(int& argc, char **argv)
     opt_val(opt_db, "keyboard", &keyboard);
     opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
 
+    if(opt_val(opt_db, "headless", nullptr))
+        flag_headless = true;
+
     if(std::string str; opt_val(opt_db, "record", &str))
-    {
-        vdriver->setCallbacks(new EventRecorder(fs::path(str)));
-    }
+        flag_record = fs::path(str);
 
     if(std::string str; opt_val(opt_db, "playback", &str))
-    {
-        vdriver->setCallbacks(new EventPlayback(fs::path(str)));
-    }
+        flag_playback = fs::path(str);
 
     if(std::string str; opt_val(opt_db, "timewarp", &str))
     {
@@ -541,37 +571,12 @@ static void parseCommandLine(int& argc, char **argv)
         }
     }
 
-    /* If we failed to parse our arguments properly, exit now.
-   * I don't think we should call ExitToShell yet because the
-   * rest of the system isn't initialized.
-   */
-    if(argc >= 2)
-    {
-        int a;
-
-        /* Only complain if we see something with a leading dash; anything
-	 * else might be a file to launch.
-	 */
-        for(a = 1; a < argc; a++)
-        {
-            if(argv[a][0] == '-')
-            {
-                fprintf(stderr, "%s: unknown option `%s'\n",
-                        ROMlib_appname.c_str(), argv[a]);
-                bad_arg_p = true;
-            }
-        }
-    }
 
     if(bad_arg_p)
-    {
-        fprintf(stderr,
-                "Type \"%s -help\" for a list of command-line options.\n",
-                ROMlib_appname.c_str());
-        exit(-10);
-    }
+        reportBadArgs();
 }
 
+#include <iostream>
 
 int main(int argc, char **argv)
 {
@@ -598,27 +603,29 @@ int main(int argc, char **argv)
 
     ROMlib_appname = fs::path(argv[0]).filename().string();
 
-    bool headless = false;
-    for(char** p = argv + 1; *p && strcmp(*p, "--"); ++p)
-        if(!strcmp(*p, "--headless") || !strcmp(*p, "-headless"))
-        {
-            headless = true;
-            break;
-        }
+    parseCommandLine(argc, argv);
 
-    EventSink videoDriverCallbacks;
-    if(headless)
-        vdriver = std::make_unique<HeadlessVideoDriver>(&videoDriverCallbacks);
+    if(flag_playback)
+        EventSink::instance = std::make_unique<EventPlayback>(*flag_playback);
+    else if(flag_record)
+        EventSink::instance = std::make_unique<EventRecorder>(*flag_record);
     else
-        vdriver = std::make_unique<DefaultVDriver>(&videoDriverCallbacks);
+        EventSink::instance = std::make_unique<EventSink>();
+
+    bool headless = false;
+    if(headless)
+        vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());//, argc, argv);
+    else
+        vdriver = std::make_unique<DefaultVDriver>(EventSink::instance.get());//, argc, argv);
     
+
     if(!vdriver->parseCommandLine(argc, argv))
     {
         fprintf(stderr, "Unable to initialize video driver.\n");
         exit(-12);
     }
-
-    parseCommandLine(argc, argv);
+    
+    checkBadArgs(argc, argv);
 
     InitMemory(&thingOnStack);
 
