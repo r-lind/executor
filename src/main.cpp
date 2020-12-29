@@ -223,8 +223,6 @@ capable of color.",
                     "window have a blue title bar",
       opt_sep, "" },
 
-    { "hfsplusro", "unsupported -- do not use", opt_no_arg, "" },
-
     { "logtraps", "print every operating system and toolbox calls and their arguments", opt_no_arg, "" },
     { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""},
     { "break", "break into debugger at program start", opt_no_arg, ""}
@@ -390,9 +388,6 @@ static void parseCommandLine(int& argc, char **argv)
 
     if(opt_val(opt_db, "ppc", nullptr))
         ROMlib_set_ppc(true);
-
-    if(opt_val(opt_db, "hfsplusro", nullptr))
-        ROMlib_hfs_plus_support = true;
 
     if(opt_val(opt_db, "size", &arg))
         bad_arg_p |= !parse_size_opt("size", arg);
