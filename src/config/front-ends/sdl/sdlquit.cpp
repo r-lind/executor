@@ -13,37 +13,19 @@ using namespace Executor;
 
 #if defined(_WIN32)
 
-static int
+static bool
 os_specific_really_quit(void)
 {
-    /* This should really be an internal ROMlib dialog */
-    int retval;
-    int reply;
-    char *mess;
-    char *name;
-
-/* would be nice to use snprintf here, but mingw32 doesn't provide it */
-#define FORMAT_STR "Terminate %s?"
-
-    name = ROMlib_WindowName ? ROMlib_WindowName : "application";
-    mess = alloca(sizeof FORMAT_STR + strlen(name));
-    sprintf(mess, FORMAT_STR, name);
-
-    reply = MessageBox(nullptr, mess, "Terminate?", MB_OKCANCEL);
-
-    retval = reply == IDOK;
-    return retval;
+    return MessageBox(nullptr, "Terminate application?", "Terminate?", MB_OKCANCEL)
+        == IDOK;
 }
 
 #else
 
-static int
+static bool
 os_specific_really_quit(void)
 {
-    int retval;
-
-    retval = true;
-    return retval;
+    return true;
 }
 
 #endif

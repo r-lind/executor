@@ -304,21 +304,11 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, Boolean resetmemo
     }
     
 
-    ROMlib_ScreenSize.first = INITIALPAIRVALUE;
-    ROMlib_MacSize.first = INITIALPAIRVALUE;
     ROMlib_directdiskaccess = false;
     ROMlib_clear_gestalt_list();
     ParseConfigFile("ExecutorDefault", 0);
     ParseConfigFile(appNameUTF8, err == noErr ? finfo.fdCreator.raw() : 0);
     ROMlib_clockonoff(!ROMlib_noclock);
-    if((ROMlib_ScreenSize.first != INITIALPAIRVALUE
-        || ROMlib_MacSize.first != INITIALPAIRVALUE))
-    {
-        if(ROMlib_ScreenSize.first == INITIALPAIRVALUE)
-            ROMlib_ScreenSize = ROMlib_MacSize;
-        if(ROMlib_MacSize.first == INITIALPAIRVALUE)
-            ROMlib_MacSize = ROMlib_ScreenSize;
-    }
     code0 = Get1Resource("CODE"_4, 0);
     cfrg0 = Get1Resource("cfrg"_4, 0);
 

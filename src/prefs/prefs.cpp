@@ -42,12 +42,7 @@ void Executor::ParseConfigFile(std::string appname, OSType type)
             ROMlib_WriteWhen(WriteAtEndOfTrap);
         if(ROMlib_options & ROMLIB_BLIT_OFTEN_BIT)
             ROMlib_WriteWhen(WriteInBltrgn);
-#if 0
-	if (ROMlib_options & ROMLIB_ACCELERATED_BIT)
-	    ROMlib_accelerated = true;
-	else
-	    ROMlib_accelerated = false;
-#endif
+
         if(ROMlib_options & ROMLIB_REFRESH_BIT)
             ROMlib_refresh = 10;
         if(ROMlib_options & ROMLIB_SOUNDOFF_BIT)
@@ -157,11 +152,6 @@ int Executor::saveprefvalues(const char *savefilename)
         fprintf(fp, "BitsPerPixel = %d;\n",
                 toHost(PIXMAP_PIXEL_SIZE(GD_PMAP(LM(MainDevice)))));
 
-#if 0 && defined(MACOSX_)
-	fprintf(fp, "ScreenSize = { %ld, %ld };\n", (long) curr_width, (long) curr_height);
-	fprintf(fp, "MacSize = { %ld, %ld };\n", (long) orig_width, (long) orig_height);
-#endif
-
         fprintf(fp, "SystemVersion = %s;\n", C_STRING_FROM_SYSTEM_VERSION());
         fprintf(fp, "RefreshNumber = %d;\n", ROMlib_refresh);
         fprintf(fp, "Delay = %d;\n", ROMlib_delay);
@@ -199,12 +189,7 @@ int Executor::saveprefvalues(const char *savefilename)
             fprintf(fp, ", NewLineToCR");
         if(ROMlib_directdiskaccess)
             fprintf(fp, ", DirectDiskAccess");
-#if 0
-	if (ROMlib_accelerated)
-	    fprintf(fp, ", Accelerated");
-	if (ROMlib_clock != 2)
-	    fprintf(fp, ", NoClock");
-#endif
+
         if(ROMlib_nowarn32)
             fprintf(fp, ", NoWarn32");
         if(ROMlib_flushoften)

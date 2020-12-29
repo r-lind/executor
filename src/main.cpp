@@ -460,11 +460,6 @@ static void parseCommandLine(int& argc, char **argv)
     else
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
-
-    if(opt_val(opt_db, "keyboards", nullptr))
-        graphics_p = false;
-
-
     opt_bool_val(opt_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
     opt_bool_val(opt_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(opt_db, "print", &ROMlib_print, &bad_arg_p);
@@ -522,6 +517,8 @@ static void parseCommandLine(int& argc, char **argv)
 
     opt_val(opt_db, "keyboard", &keyboard);
     opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
+    if(list_keyboards_p)
+        graphics_p = false;
 
     if(opt_val(opt_db, "headless", nullptr))
         flag_headless = true;

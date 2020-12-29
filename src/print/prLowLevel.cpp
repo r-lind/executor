@@ -88,10 +88,7 @@ Handle Executor::C_PrDrvrDCE() /* TODO */
 
 INTEGER Executor::C_PrDrvrVers()
 {
-    INTEGER retval;
-
-    retval = ROMlib_PrDrvrVers;
-    return retval;
+    return ROMlib_PrDrvrVers;
 }
 
 static ControlHandle

@@ -79,9 +79,6 @@ bool ROMlib_dirtyvariant = false;   // unused
 
 // options.h
 
-std::pair<int,int> ROMlib_ScreenSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };  // unused
-std::pair<int,int> ROMlib_MacSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };     // unused
-std::pair<int,int> ROMlib_ScreenLocation = { INITIALPAIRVALUE, INITIALPAIRVALUE };  // unused
 int32_t ROMlib_options = 0;
 std::string ROMlib_WindowName;
 std::string ROMlib_Comments;      // unused on purpose

@@ -246,11 +246,11 @@ arrayassignment:	pairassignment
 
 pairassignment:	pairvar '=' '{' number ',' number '}' ';'
 	{
-	  if (validblock)
+	  /*if (validblock)
 	    {
 	      $1->first = $4;
 	      $1->second = $6;
-	    }
+	    }*/
 	}
 	;
 
@@ -275,11 +275,11 @@ gestalt_entry:	GESTALT '(' CHAR4CONSTANT ')'
 	;
 
 pairvar:	SCREENSIZE
-	{ $$ = &ROMlib_ScreenSize; }
+	{ $$ = nullptr; /*&ROMlib_ScreenSize;*/ }
 	| SCREENLOCATION
-	{ $$ = &ROMlib_ScreenLocation; }
+	{ $$ = nullptr; /*&ROMlib_ScreenLocation;*/ }
 	| MACSIZE
-	{ $$ = &ROMlib_MacSize; }
+	{ $$ = nullptr; /*&ROMlib_MacSize;*/ }
 	;
 
 unboundedassignment:	unboundedvar '=' '{' numberlist '}' ';'
