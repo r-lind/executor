@@ -101,15 +101,11 @@ class VideoDriver
 {
 public:
     VideoDriver(IEventListener *cb) : callbacks_(cb) {}
-    void setCallbacks(IEventListener *cb) { callbacks_ = cb; }
 
     virtual ~VideoDriver();
 
-    virtual bool parseCommandLine(int& argc, char *argv[]);
     virtual bool setOptions(std::unordered_map<std::string, std::string> options);
     virtual void registerOptions();
-
-    virtual bool init();
     
     void updateScreen(int top, int left, int bottom, int right);
     void updateScreen() { updateScreen(0,0,height(),width()); }

@@ -541,12 +541,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
 void Executor::ROMlib_InitGDevices()
 {
-    if(!vdriver->init())
-    {
-        fprintf(stderr, "Unable to initialize video driver.\n");
-        exit(-12);
-    }
-
     /* Set up the current graphics mode appropriately. */
     if(!vdriver->setMode(flag_width, flag_height, flag_bpp, flag_grayscale))
     {

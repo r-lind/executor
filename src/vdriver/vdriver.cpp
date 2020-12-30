@@ -16,16 +16,6 @@ VideoDriver::~VideoDriver()
 {
 }
 
-bool VideoDriver::parseCommandLine(int& argc, char *argv[])
-{
-    return true;
-}
-
-bool VideoDriver::init()
-{
-    return true;
-}
-
 bool VideoDriver::setOptions(std::unordered_map<std::string, std::string> options)
 {
     return true;

@@ -63,7 +63,8 @@ WaylandVideoDriver::~WaylandVideoDriver()
     }
 }
 
-bool WaylandVideoDriver::init()
+WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
+    : VideoDriverCommon(eventListener)
 {
     wakeFd_ = eventfd(0, 0);
 
@@ -187,8 +188,6 @@ bool WaylandVideoDriver::init()
     cursorSurface_.commit();
 
     thread_ = std::thread([this] { runEventLoop(); });
-
-    return true;
 }
 
 bool WaylandVideoDriver::handleMenuBarDrag()
@@ -196,7 +195,6 @@ bool WaylandVideoDriver::handleMenuBarDrag()
     xdg_toplevel_.move(seat_, lastMouseDownSerial_);
     return true;
 }
-
 
 void WaylandVideoDriver::noteUpdatesDone()
 {

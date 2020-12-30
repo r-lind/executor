@@ -83,10 +83,6 @@ using namespace std;
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
 
-/* Set to false when we know that the command line switches will result
-   in no graphics. */
-
-static bool graphics_p = true;
 
 static bool use_native_code_p = true;
 static bool breakOnProcessStart = false;
@@ -518,7 +514,7 @@ static void parseCommandLine(int& argc, char **argv)
     opt_val(opt_db, "keyboard", &keyboard);
     opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
     if(list_keyboards_p)
-        graphics_p = false;
+        flag_headless = true;
 
     if(opt_val(opt_db, "headless", nullptr))
         flag_headless = true;
@@ -604,19 +600,11 @@ int main(int argc, char **argv)
     else
         EventSink::instance = std::make_unique<EventSink>();
 
-    bool headless = false;
-    if(headless)
-        vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());//, argc, argv);
+    if(flag_headless)
+        vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());
     else
-        vdriver = std::make_unique<DefaultVDriver>(EventSink::instance.get());//, argc, argv);
-    
-
-    if(!vdriver->parseCommandLine(argc, argv))
-    {
-        fprintf(stderr, "Unable to initialize video driver.\n");
-        exit(-12);
-    }
-    
+        vdriver = std::make_unique<DefaultVDriver>(EventSink::instance.get(), argc, argv);
+        
     checkBadArgs(argc, argv);
 
     InitMemory(&thingOnStack);
@@ -631,8 +619,7 @@ int main(int argc, char **argv)
     Executor::traps::init(logtraps);
     InitLowMem();
 
-    if(graphics_p)
-        ROMlib_InitGDevices();
+    ROMlib_InitGDevices();
     
     ROMlib_eventinit();
     hle_init();

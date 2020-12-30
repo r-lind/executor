@@ -157,11 +157,9 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     void runOnThread(std::function<void ()> f) override;
     void endEventLoop();
 public:
-    using VideoDriverCommon::VideoDriverCommon;
-
+    WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[]);
     ~WaylandVideoDriver();
 
-    bool init() override;
     bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
     void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r) override;
