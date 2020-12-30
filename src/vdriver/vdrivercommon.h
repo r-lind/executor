@@ -20,6 +20,8 @@ protected:
     std::array<uint32_t, 256> colors_;
 
     std::vector<int16_t> rootlessRegion_;
+    std::vector<int16_t> pendingRootlessRegion_;
+    bool rootlessRegionDirty_ = false;
 
     void updateBuffer(uint32_t* buffer, int bufferWidth, int bufferHeight,
                     int num_rects, const vdriver_rect_t *rects);

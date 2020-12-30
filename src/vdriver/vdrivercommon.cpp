@@ -37,15 +37,16 @@ void VideoDriverCommon::setRootlessRegion(RgnHandle rgn)
     std::lock_guard lk(mutex_);
 
     RgnVector inRgn(rgn);
-    rootlessRegion_.clear();
+    pendingRootlessRegion_.clear();
         
     if(inRgn.size())
-        rootlessRegion_.insert(rootlessRegion_.end(), inRgn.begin(), inRgn.end());
+        pendingRootlessRegion_.insert(pendingRootlessRegion_.end(), inRgn.begin(), inRgn.end());
     else
-        rootlessRegion_.insert(rootlessRegion_.end(),
+        pendingRootlessRegion_.insert(pendingRootlessRegion_.end(),
             { (*rgn)->rgnBBox.top.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
             (*rgn)->rgnBBox.bottom.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
             RGN_STOP });
+    rootlessRegionDirty_ = true;
 }
 
 

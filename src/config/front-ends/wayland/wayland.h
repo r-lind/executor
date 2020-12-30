@@ -145,7 +145,6 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     ConfigureState configureState_ = ConfigureState::idle;
     
     Executor::DirtyRects dirty_;
-    bool rootlessRegionDirty_ = false;
 
     std::chrono::steady_clock::time_point updateTimeout_;
 
@@ -166,8 +165,6 @@ public:
 
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
     void setCursorVisible(bool show_p) override;
-
-    void setRootlessRegion(Executor::RgnHandle rgn) override;
 
     void noteUpdatesDone() override;
     bool updateMode() override;

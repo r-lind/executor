@@ -293,15 +293,6 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
     });
 }
 
-void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
-{
-    std::cout << "rootlessRegion\n";
-    VideoDriverCommon::setRootlessRegion(rgn);
-
-    std::lock_guard lk(mutex_);
-    rootlessRegionDirty_ = true;
-}
-
 void WaylandVideoDriver::frameCallback()
 {
     std::unique_lock lk(mutex_);
@@ -310,7 +301,29 @@ void WaylandVideoDriver::frameCallback()
     {
         buffer_ = Buffer(shm_, allocatedShape_.width, allocatedShape_.height);
         dirty_.add(0,0,allocatedShape_.height,allocatedShape_.width);
-    }    
+    }
+
+    if(rootlessRegionDirty_)
+    {
+        std::swap(rootlessRegion_, pendingRootlessRegion_);
+        rootlessRegionDirty_ = false;
+
+        RegionProcessor rgnP(rootlessRegion_.begin());
+
+        region_t waylandRgn = compositor_.create_region();
+
+        int height = framebuffer_.height;
+        while(rgnP.bottom() < height)
+        {
+            rgnP.advance();
+            
+            for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
+                waylandRgn.add(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
+        }
+
+        surface_.set_input_region(waylandRgn);
+    }
+
     auto rects = dirty_.getAndClear();
 
     if(rects.size())
@@ -334,7 +347,6 @@ void WaylandVideoDriver::frameCallback()
         std::cout << double(sum)/count << std::endl;
     }
 
-
     for(const auto& r : rects)
         surface_.damage_buffer(r.left,r.top,r.right-r.left,r.bottom-r.top);
 
@@ -350,25 +362,6 @@ void WaylandVideoDriver::frameCallback()
     {
         xdg_surface_.ack_configure(allocatedShape_.serial);
         committedShape_ = allocatedShape_;
-    }
-
-    if(rootlessRegionDirty_)
-    {
-        RegionProcessor rgnP(rootlessRegion_.begin());
-
-        region_t waylandRgn = compositor_.create_region();
-
-        int height = framebuffer_.height;
-        while(rgnP.bottom() < height)
-        {
-            rgnP.advance();
-            
-            for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
-                waylandRgn.add(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
-        }
-
-        surface_.set_input_region(waylandRgn);
-        rootlessRegionDirty_ = false;
     }
 
     requestFrame();
