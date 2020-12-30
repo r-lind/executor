@@ -299,21 +299,7 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
     VideoDriverCommon::setRootlessRegion(rgn);
 
     std::lock_guard lk(mutex_);
-
-    RegionProcessor rgnP(rootlessRegion_.begin());
-
-    region_t waylandRgn = compositor_.create_region();
-
-    int height = framebuffer_.height;
-    while(rgnP.bottom() < height)
-    {
-        rgnP.advance();
-        
-        for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
-            waylandRgn.add(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
-    }
-
-    surface_.set_input_region(waylandRgn);
+    rootlessRegionDirty_ = true;
 }
 
 void WaylandVideoDriver::frameCallback()
@@ -366,6 +352,24 @@ void WaylandVideoDriver::frameCallback()
         committedShape_ = allocatedShape_;
     }
 
+    if(rootlessRegionDirty_)
+    {
+        RegionProcessor rgnP(rootlessRegion_.begin());
+
+        region_t waylandRgn = compositor_.create_region();
+
+        int height = framebuffer_.height;
+        while(rgnP.bottom() < height)
+        {
+            rgnP.advance();
+            
+            for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
+                waylandRgn.add(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
+        }
+
+        surface_.set_input_region(waylandRgn);
+        rootlessRegionDirty_ = false;
+    }
 
     requestFrame();
 

@@ -145,7 +145,7 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     ConfigureState configureState_ = ConfigureState::idle;
     
     Executor::DirtyRects dirty_;
-
+    bool rootlessRegionDirty_ = false;
 
     std::chrono::steady_clock::time_point updateTimeout_;
 
