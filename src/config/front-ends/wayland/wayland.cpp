@@ -226,12 +226,6 @@ bool WaylandVideoDriver::updateMode()
 
     bool depthChanged = requestedBpp_ != framebuffer_.bpp;
 
-    if(sizeChanged)
-    {
-        buffer_ = Buffer(shm_, configuredShape_.width, configuredShape_.height);
-        std::fill(buffer_.data(), buffer_.data() + configuredShape_.width * configuredShape_.height, 0x80404040);
-    }    
-
     if(sizeChanged || depthChanged)
     {
         framebuffer_ = Framebuffer(configuredShape_.width, configuredShape_.height, requestedBpp_);
@@ -325,13 +319,33 @@ void WaylandVideoDriver::setRootlessRegion(RgnHandle rgn)
 void WaylandVideoDriver::frameCallback()
 {
     std::unique_lock lk(mutex_);
+
+    if(allocatedShape_.width != committedShape_.width || allocatedShape_.height != committedShape_.height)
+    {
+        buffer_ = Buffer(shm_, allocatedShape_.width, allocatedShape_.height);
+        dirty_.add(0,0,allocatedShape_.height,allocatedShape_.width);
+    }    
     auto rects = dirty_.getAndClear();
 
     if(rects.size())
     {
-//        lk.unlock();  FIXME: need to protect buffer_
+        auto before = std::chrono::high_resolution_clock::now();
+        lk.unlock();
+
         updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
-//        lk.lock();
+
+        auto after = std::chrono::high_resolution_clock::now();
+        lk.lock();
+
+        static int sum = 0, count = 0;
+
+        if(count > 100)
+            count = sum = 0;
+
+        sum += std::chrono::duration_cast<std::chrono::milliseconds>(after-before).count();
+        count++;
+
+        std::cout << double(sum)/count << std::endl;
     }
 
 
@@ -395,7 +409,8 @@ void WaylandVideoDriver::updateScreenRects(
 
     for(int i = 0; i < num_rects; i++)
         dirty_.add(rects[i].top, rects[i].left, rects[i].bottom, rects[i].right);
-    
+    //dirty_.add(0,0,height(),width());
+
     if(requestFrame())
     {
         surface_.commit();
