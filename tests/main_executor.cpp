@@ -48,16 +48,15 @@ class ExecutorTestEnvironment : public testing::Environment
 {
     char *thingOnStack;
     fs::path tempDir;
-    EventSink videoDriverCallbacks;
 public:
     ExecutorTestEnvironment(char* thingOnStack) : thingOnStack(thingOnStack) {}
 
     virtual void SetUp() override
     {
-
         Executor::InitMemory(thingOnStack);
 
-        vdriver = std::make_unique<MockVDriver>(&videoDriverCallbacks);
+        EventSink::instance = std::make_unique<EventSink>();
+        vdriver = std::make_unique<MockVDriver>(EventSink::instance.get());
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
         traps::init(false);
         Executor::InitLowMem();
