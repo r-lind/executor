@@ -2,6 +2,7 @@
 #include <quickdraw/region.h>
 
 #include <future>
+#include <iostream>
 
 using namespace Executor;
 
@@ -82,6 +83,8 @@ struct IndexedPixelGetter
 void VideoDriverCommon::updateBuffer(uint32_t* buffer, int bufferWidth, int bufferHeight,
                                 int num_rects, const vdriver_rect_t *rects)
 {
+    auto before = std::chrono::high_resolution_clock::now();
+
     if(!rootlessRegion_.size())
         rootlessRegion_.insert(rootlessRegion_.end(),
             { 0, 0, (int16_t)bufferWidth, RGN_STOP,
@@ -180,4 +183,14 @@ void VideoDriverCommon::updateBuffer(uint32_t* buffer, int bufferWidth, int buff
         }
     }
 
+    auto after = std::chrono::high_resolution_clock::now();
+    static int sum = 0, count = 0;
+
+    if(count > 100)
+        count = sum = 0;
+
+    sum += std::chrono::duration_cast<std::chrono::milliseconds>(after-before).count();
+    count++;
+
+    std::cout << double(sum)/count << std::endl;
 }

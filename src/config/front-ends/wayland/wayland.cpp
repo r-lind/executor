@@ -328,23 +328,12 @@ void WaylandVideoDriver::frameCallback()
 
     if(rects.size())
     {
-        auto before = std::chrono::high_resolution_clock::now();
         lk.unlock();
 
         updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
 
-        auto after = std::chrono::high_resolution_clock::now();
         lk.lock();
 
-        static int sum = 0, count = 0;
-
-        if(count > 100)
-            count = sum = 0;
-
-        sum += std::chrono::duration_cast<std::chrono::milliseconds>(after-before).count();
-        count++;
-
-        std::cout << double(sum)/count << std::endl;
     }
 
     for(const auto& r : rects)
