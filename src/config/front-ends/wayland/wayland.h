@@ -124,7 +124,8 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
         idle,
         waitingForModeSwitch,
         waitingForUpdate,
-        waitingForObsoleteUpdate
+        waitingForObsoleteUpdate,
+        drawingObsoleteUpdate
     };
 /*
     @startuml
@@ -135,9 +136,10 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
     idle  --> waitingForModeSwitch : configure
     waitingForModeSwitch --> waitingForUpdate : updateMode
-    waitingForUpdate --> idle : noteUpdatesDone, timeout
+    waitingForUpdate --> idle : noteUpdatesDone
     waitingForUpdate -> waitingForObsoleteUpdate : configure
-    waitingForObsoleteUpdate --> idle : noteUpdatesDone, timeout
+    waitingForObsoleteUpdate --> drawingObsoleteUpdate : noteUpdatesDone
+    drawingObsoleteUpdate --> waitingForModeSwitch : frame
 
     @endumnl
 */

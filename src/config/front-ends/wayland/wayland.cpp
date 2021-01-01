@@ -201,15 +201,16 @@ bool WaylandVideoDriver::handleMenuBarDrag()
 void WaylandVideoDriver::noteUpdatesDone()
 {
     std::lock_guard lk(mutex_);
-    if (foo)
-        return;
+    assert(!foo || frameRequested_);
+    //if (foo)
+    //    return;
 
     if(configureState_ == ConfigureState::waitingForUpdate
         || configureState_ == ConfigureState::waitingForObsoleteUpdate)
     {
         std::cout << "updates done.\n";
         if(configureState_ == ConfigureState::waitingForObsoleteUpdate)
-            configureState_ = ConfigureState::waitingForModeSwitch;
+            configureState_ = ConfigureState::drawingObsoleteUpdate;
         else
             configureState_ = ConfigureState::idle;
         if(requestFrame())
@@ -306,6 +307,17 @@ void WaylandVideoDriver::frameCallback()
 {
     std::unique_lock lk(mutex_);
 
+    if(configureState_ != ConfigureState::idle
+        && configureState_ != ConfigureState::waitingForModeSwitch
+        && configureState_ != ConfigureState::drawingObsoleteUpdate)
+    {
+        frameRequested_ = false;
+        return;
+    }
+
+    if(configureState_ == ConfigureState::drawingObsoleteUpdate)
+        configureState_ = ConfigureState::waitingForModeSwitch;
+
     auto shape = allocatedShape_;
 
     if(shape.width != committedShape_.width || shape.height != committedShape_.height)
@@ -352,10 +364,6 @@ void WaylandVideoDriver::frameCallback()
 
     frameRequested_ = false;
 
-    if(configureState_ != ConfigureState::idle
-        && configureState_ != ConfigureState::waitingForModeSwitch)
-        return;
-
     surface_.attach(buffer_.wlbuffer(), 0, 0);
 
     if(shape.serial != committedShape_.serial)
@@ -378,7 +386,8 @@ bool WaylandVideoDriver::requestFrame()
     //std::cout << "dirty.\n";
 
     if(configureState_ != ConfigureState::idle
-        && configureState_ != ConfigureState::waitingForModeSwitch)
+        && configureState_ != ConfigureState::waitingForModeSwitch
+        && configureState_ != ConfigureState::drawingObsoleteUpdate)
         return false;
 
     //std::cout << "interesting state.\n";
