@@ -19,8 +19,6 @@ using namespace wayland;
 using namespace Executor;
 using namespace std::chrono_literals;
 
-static std::atomic_bool foo = false;
-
 template<typename... Args>
 std::shared_ptr<std::tuple<Args...>> argCollector(std::function<void (Args...)>& f)
 {
@@ -201,9 +199,6 @@ bool WaylandVideoDriver::handleMenuBarDrag()
 void WaylandVideoDriver::noteUpdatesDone()
 {
     std::lock_guard lk(mutex_);
-    assert(!foo || frameRequested_);
-    //if (foo)
-    //    return;
 
     if(configureState_ == ConfigureState::waitingForUpdate
         || configureState_ == ConfigureState::waitingForObsoleteUpdate)
@@ -226,8 +221,6 @@ bool WaylandVideoDriver::updateMode()
     std::lock_guard lk(mutex_);
     if (configureState_ != ConfigureState::waitingForModeSwitch)
         return false;
-   // if (foo)
-   //     return false;
 
     bool sizeChanged = configuredShape_.width != allocatedShape_.width
                     || configuredShape_.height != allocatedShape_.height;
@@ -352,11 +345,9 @@ void WaylandVideoDriver::frameCallback()
     if(rects.size())
     {
         Framebuffer fb = framebuffer_;
-        foo = true;
         lk.unlock();
         updateBuffer(fb, buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
         lk.lock();
-        foo = false;
     }
 
     for(const auto& r : rects)
