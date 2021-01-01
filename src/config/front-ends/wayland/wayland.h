@@ -121,6 +121,7 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
     enum class ConfigureState
     {
+        unconfigured,
         idle,
         waitingForModeSwitch,
         waitingForUpdate,
@@ -129,11 +130,11 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     };
 /*
     @startuml
-    
     hide empty description
 
-    [*] --> idle
+    [*] --> unconfigured
 
+    unconfigured --> idle : configure
     idle  --> waitingForModeSwitch : configure
     waitingForModeSwitch --> waitingForUpdate : updateMode
     waitingForUpdate --> idle : noteUpdatesDone
@@ -144,7 +145,8 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     @endumnl
 */
 
-    ConfigureState configureState_ = ConfigureState::idle;
+    ConfigureState configureState_ = ConfigureState::unconfigured;
+    std::condition_variable stateChanged_;
     
     Executor::DirtyRects dirty_;
 

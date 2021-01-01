@@ -127,10 +127,16 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
         
         configuredShape_ = { serial, width, height, maximized };
         
-        if(configureState_ == ConfigureState::idle)
+        if(configureState_ == ConfigureState::idle || configureState_ == ConfigureState::unconfigured)
+        {
             configureState_ = ConfigureState::waitingForModeSwitch;
+            stateChanged_.notify_all();
+        }
         else if(configureState_ == ConfigureState::waitingForUpdate)
+        {
             configureState_ = ConfigureState::waitingForObsoleteUpdate;
+            stateChanged_.notify_all();
+        }
     };
 
     xdg_toplevel_.on_close() = [this] () { };
@@ -205,9 +211,15 @@ void WaylandVideoDriver::noteUpdatesDone()
     {
         std::cout << "updates done.\n";
         if(configureState_ == ConfigureState::waitingForObsoleteUpdate)
+        {
             configureState_ = ConfigureState::drawingObsoleteUpdate;
+            stateChanged_.notify_all();
+        }
         else
+        {
             configureState_ = ConfigureState::idle;
+            stateChanged_.notify_all();
+        }
         if(requestFrame())
         {
             surface_.commit();
@@ -234,10 +246,13 @@ bool WaylandVideoDriver::updateMode()
     
         framebuffer_.rootless = configuredShape_.maximized;
 
-        pendingRootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
-                        (int16_t)configuredShape_.height, 0, (int16_t)configuredShape_.width, RGN_STOP };
-        rootlessRegionDirty_ = true;
-        surface_.set_input_region({});
+        if(sizeChanged)
+        {
+            pendingRootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
+                            (int16_t)configuredShape_.height, 0, (int16_t)configuredShape_.width, RGN_STOP };
+            rootlessRegionDirty_ = true;
+            surface_.set_input_region({});
+        }
 
         allocatedShape_ = configuredShape_;
 
@@ -247,11 +262,16 @@ bool WaylandVideoDriver::updateMode()
         dirty_.add(0, 0, configuredShape_.height, configuredShape_.width);
 
         configureState_ = ConfigureState::waitingForUpdate;
+        stateChanged_.notify_all();
+
+        uint64_t evt = 1;
+        ::write(wakeFd_, &evt, sizeof(evt));
     }
     else
     {
         allocatedShape_ = configuredShape_;
         configureState_ = ConfigureState::idle;
+        stateChanged_.notify_all();
         
         if(requestFrame())
         {
@@ -267,7 +287,51 @@ bool WaylandVideoDriver::updateMode()
 bool WaylandVideoDriver::setMode(int width, int height, int bpp,
                                   bool grayscale_p)
 {
-    return runOnGuiThreadSync([=]() {
+    std::unique_lock lk(mutex_);
+
+    if(bpp)
+        requestedBpp_ = bpp;
+
+    if(configureState_ == ConfigureState::unconfigured)
+    {
+        if(width && height)
+        {
+            configuredShape_.width = width;
+            configuredShape_.height = height;
+        }
+        else
+            xdg_toplevel_.set_maximized();
+        //xdg_toplevel_.set_fullscreen({});
+
+        surface_.commit();
+        display_.flush();
+
+        stateChanged_.wait(lk, [this] {
+            return configureState_ == ConfigureState::waitingForModeSwitch;
+        });
+        frameRequested_ = true;
+
+        lk.unlock();
+        updateMode();
+        noteUpdatesDone();
+        frameCallback();
+    }
+    else
+    {
+        stateChanged_.wait(lk, [this] {
+            return configureState_ == ConfigureState::idle
+                || configureState_ == ConfigureState::waitingForModeSwitch;
+        });
+
+        configureState_ = ConfigureState::waitingForModeSwitch;
+        lk.unlock();
+        updateMode();
+    }
+
+    return true;
+
+
+    /*return runOnGuiThreadSync([=]() {
         if(bpp)
             requestedBpp_ = bpp;
 
@@ -287,13 +351,14 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
 
             initDone_ = true;
         }
+        configureState_ = ConfigureState::waitingForModeSwitch;
         updateMode();
         frameRequested_ = true;
         noteUpdatesDone();
         frameCallback();
 
         return true;
-    });
+    });*/
 }
 
 void WaylandVideoDriver::frameCallback()
@@ -309,7 +374,10 @@ void WaylandVideoDriver::frameCallback()
     }
 
     if(configureState_ == ConfigureState::drawingObsoleteUpdate)
+    {
         configureState_ = ConfigureState::waitingForModeSwitch;
+        stateChanged_.notify_all();
+    }
 
     auto shape = allocatedShape_;
 
@@ -469,7 +537,10 @@ void WaylandVideoDriver::runEventLoop()
                     auto now = std::chrono::steady_clock::now();
 
                     if (updateTimeout_ <= now)
+                    {
+                        std::cout << "wait for update timed out.\n";
                         todo.push_back([this] { noteUpdatesDone(); });
+                    }
                     else
                         timeout = std::chrono::duration_cast<std::chrono::milliseconds>(updateTimeout_ - now).count();
                 }
