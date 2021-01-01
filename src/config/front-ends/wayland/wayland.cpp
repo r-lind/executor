@@ -19,6 +19,8 @@ using namespace wayland;
 using namespace Executor;
 using namespace std::chrono_literals;
 
+static std::atomic_bool foo = false;
+
 template<typename... Args>
 std::shared_ptr<std::tuple<Args...>> argCollector(std::function<void (Args...)>& f)
 {
@@ -199,6 +201,9 @@ bool WaylandVideoDriver::handleMenuBarDrag()
 void WaylandVideoDriver::noteUpdatesDone()
 {
     std::lock_guard lk(mutex_);
+    if (foo)
+        return;
+
     if(configureState_ == ConfigureState::waitingForUpdate
         || configureState_ == ConfigureState::waitingForObsoleteUpdate)
     {
@@ -220,6 +225,8 @@ bool WaylandVideoDriver::updateMode()
     std::lock_guard lk(mutex_);
     if (configureState_ != ConfigureState::waitingForModeSwitch)
         return false;
+   // if (foo)
+   //     return false;
 
     bool sizeChanged = configuredShape_.width != allocatedShape_.width
                     || configuredShape_.height != allocatedShape_.height;
@@ -233,8 +240,9 @@ bool WaylandVideoDriver::updateMode()
     
         framebuffer_.rootless = configuredShape_.maximized;
 
-        rootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
+        pendingRootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
                         (int16_t)configuredShape_.height, 0, (int16_t)configuredShape_.width, RGN_STOP };
+        rootlessRegionDirty_ = true;
         surface_.set_input_region({});
 
         allocatedShape_ = configuredShape_;
@@ -278,6 +286,7 @@ bool WaylandVideoDriver::setMode(int width, int height, int bpp,
             }
             else
                 xdg_toplevel_.set_maximized();
+            //xdg_toplevel_.set_fullscreen({});
 
             surface_.commit();
             display_.roundtrip();
@@ -297,10 +306,12 @@ void WaylandVideoDriver::frameCallback()
 {
     std::unique_lock lk(mutex_);
 
-    if(allocatedShape_.width != committedShape_.width || allocatedShape_.height != committedShape_.height)
+    auto shape = allocatedShape_;
+
+    if(shape.width != committedShape_.width || shape.height != committedShape_.height)
     {
-        buffer_ = Buffer(shm_, allocatedShape_.width, allocatedShape_.height);
-        dirty_.add(0,0,allocatedShape_.height,allocatedShape_.width);
+        buffer_ = Buffer(shm_, shape.width, shape.height);
+        dirty_.add(0,0,shape.height,shape.width);
     }
 
     if(rootlessRegionDirty_)
@@ -328,12 +339,12 @@ void WaylandVideoDriver::frameCallback()
 
     if(rects.size())
     {
+        Framebuffer fb = framebuffer_;
+        foo = true;
         lk.unlock();
-
-        updateBuffer(buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
-
+        updateBuffer(fb, buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
         lk.lock();
-
+        foo = false;
     }
 
     for(const auto& r : rects)
@@ -347,10 +358,10 @@ void WaylandVideoDriver::frameCallback()
 
     surface_.attach(buffer_.wlbuffer(), 0, 0);
 
-    if(allocatedShape_.serial != committedShape_.serial)
+    if(shape.serial != committedShape_.serial)
     {
-        xdg_surface_.ack_configure(allocatedShape_.serial);
-        committedShape_ = allocatedShape_;
+        xdg_surface_.ack_configure(shape.serial);
+        committedShape_ = shape;
     }
 
     requestFrame();

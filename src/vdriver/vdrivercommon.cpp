@@ -6,20 +6,6 @@
 
 using namespace Executor;
 
-
-VideoDriverCommon::VideoDriverCommon(IEventListener *cb)
-    : VideoDriver(cb)
-{
-
-}
-
-
-VideoDriverCommon::~VideoDriverCommon()
-{
-    assert(!thread_.joinable());
-}
-
-
 void VideoDriverCommon::setColors(int num_colors, const Executor::vdriver_color_t *color_array)
 {
     std::lock_guard lk(mutex_);
@@ -80,7 +66,7 @@ struct IndexedPixelGetter
     }
 };
 
-void VideoDriverCommon::updateBuffer(uint32_t* buffer, int bufferWidth, int bufferHeight,
+void VideoDriverCommon::updateBuffer(const Framebuffer& fb, uint32_t* buffer, int bufferWidth, int bufferHeight,
                                 int num_rects, const vdriver_rect_t *rects)
 {
     auto before = std::chrono::high_resolution_clock::now();
@@ -91,8 +77,6 @@ void VideoDriverCommon::updateBuffer(uint32_t* buffer, int bufferWidth, int buff
             (int16_t)bufferHeight, 0, (int16_t)bufferWidth, RGN_STOP,
             RGN_STOP });
     
-    const Framebuffer& fb = framebuffer_;
-
     int width = std::min(fb.width, bufferWidth);
     int height = std::min(fb.height, bufferHeight);
 
