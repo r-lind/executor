@@ -14,7 +14,12 @@
 
 using namespace Executor;
 
-#define MAX_ROWBYTES_FOR_WIDTH(w) ((((w)*32 + 31) / 32) * 4)
+    // convert_pixmap rounds up the input size to input bytes,
+    // so we have to allocate enough space on the output side.
+    // The worst case is src_bpp = 1 and dst_bpp = 32,
+    // where we first have to align the 1-bit input to whole bytes,
+    // and then have 4 bytes of output space ready for each bit in the input bytes.
+#define MAX_ROWBYTES_FOR_WIDTH(w) ((((w) + 7) & ~7) * 4)
 
 pixel_image_t *
 Executor::image_init(pixel_image_desc_t *image_desc)
