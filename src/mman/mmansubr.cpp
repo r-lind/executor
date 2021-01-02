@@ -655,9 +655,12 @@ void Executor::ROMlib_moveblock(block_header_t *oldl, block_header_t *newl,
 
     auto state = HANDLE_STATE(master, oldl);
     ROMlib_setupblock(newl, newsize, REL, master, state);
-    BlockMove(BLOCK_DATA(oldl), BLOCK_DATA(newl), LSIZE(oldl));
+    memcpy(BLOCK_DATA(newl), BLOCK_DATA(oldl), LSIZE(oldl));
+    ROMlib_destroy_blocks(ptr_to_longint(BLOCK_DATA(newl)), LSIZE(oldl), true);
     SETMASTER(master, BLOCK_DATA(newl), state);
     ROMlib_freeblock(oldl);
+
+    MM_SLAM("exit moveblock");
 }
 
 /* Move the relocatable block at BLOCK to some point after the block

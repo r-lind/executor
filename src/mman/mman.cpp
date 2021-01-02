@@ -1542,7 +1542,9 @@ repeat:
                           BLOCK_DATA(target),
                           HANDLE_STATE(BLOCK_TO_HANDLE(current_zone, src), src));
 
-                BlockMove(BLOCK_DATA(src), BLOCK_DATA(target), LSIZE(src));
+                memcpy(BLOCK_DATA(target), BLOCK_DATA(src), LSIZE(src));
+                ROMlib_destroy_blocks(ptr_to_longint(BLOCK_DATA(target)), LSIZE(src), true);
+
 
                 src = (block_header_t *)((char *)src + PSIZE(target));
                 target = BLOCK_NEXT(target);
