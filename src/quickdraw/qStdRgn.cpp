@@ -529,11 +529,24 @@ blt_fancy_pat_mode_to_pixmap(RgnHandle rh, int mode,
         /* Note that we don't care if we clobber the bits of this temp xdata. */
         p = (uint32_t *)pattern_pm.baseAddr;
         end = (uint32_t *)((char *)p + x->byte_size);
-        for(; p != end; p++)
+
+        if(bpp >= 16)
         {
-            uint32_t v = *p;
-            /* #warning "not sure how this interacts w/RGB" */
-            *p = (v & tiled_fg_pixel) | ((~v) & tiled_bk_pixel);
+            for(; p != end; p++)
+            {
+                uint32_t v = ~*p;
+                /* #warning "not sure how this interacts w/RGB" */
+                *p = (v & tiled_fg_pixel) | ((~v) & tiled_bk_pixel);
+            }
+        }
+        else
+        {
+            for(; p != end; p++)
+            {
+                uint32_t v = *p;
+                /* #warning "not sure how this interacts w/RGB" */
+                *p = (v & tiled_fg_pixel) | ((~v) & tiled_bk_pixel);
+            }
         }
     }
 

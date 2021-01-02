@@ -231,7 +231,7 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
         {                                                            \
             for(x = 0; x < width; x++)                               \
             {                                                        \
-                long src1_v, src2_v, dst_v;                          \
+                uint32_t src1_v, src2_v, dst_v;                      \
                                                                      \
                 src1_v = read1(src1_row_base, x + src1_deltax, bpp); \
                 src2_v = read2(src2_row_base, x + src2_deltax, bpp); \
@@ -258,9 +258,9 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
          ? b[x]                        \
          : ((b[(x) * (bpp) / 8] >> SHIFT_COUNT((x), (bpp))) & ((1 << (bpp)) - 1)))
 #define READ_DIRECT16_PIXEL(b, x, bpp) \
-    ((uint16_t *)b)[x]
+    ((GUEST<uint16_t> *)b)[x]
 #define READ_DIRECT32_PIXEL(b, x, bpp) \
-    ((uint32_t *)b)[x]
+    ((GUEST<uint32_t> *)b)[x]
 
 #define READ_PAT_INDIRECT_PIXEL(b, x, bpp) \
     READ_INDIRECT_PIXEL(b, (x) & (s1_width - 1), bpp)
@@ -278,9 +278,9 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
                              *p |= (((v) & ((1 << (bpp)) - 1)) << SHIFT_COUNT(x, bpp)); \
                          })))
 #define WRITE_DIRECT16_PIXEL(v, b, x, bpp) \
-    ((void)(((uint16_t *)(b))[(x)] = (v)))
+    ((void)(((GUEST<uint16_t> *)(b))[(x)] = (v)))
 #define WRITE_DIRECT32_PIXEL(v, b, x, bpp) \
-    ((void)(((uint32_t *)(b))[(x)] = (v)))
+    ((void)(((GUEST<uint32_t> *)(b))[(x)] = (v)))
 
 #define TRANSPARENT_TRANSFORM(src1_v, src2_v) \
     (((decltype(bk_color))src1_v != bk_color) ? src1_v : src2_v)
@@ -321,6 +321,11 @@ void Executor::convert_transparent(const PixMap *src1, const PixMap *src2,
 #undef RGB_TO_PIXEL
 #undef RGB_TO_DIRECT_PIXEL
 #undef RGB_TO_INDIRECT_PIXEL
+
+#undef READ_DIRECT16_PIXEL
+#undef READ_DIRECT32_PIXEL
+#undef WRITE_DIRECT16_PIXEL
+#undef WRITE_DIRECT32_PIXEL
 
     /* Set up the dst bitmap's bounds so that rectangle r2 identifies
      the newly created bits.  */

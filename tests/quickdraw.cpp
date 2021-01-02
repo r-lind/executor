@@ -373,6 +373,77 @@ TEST(QuickDraw, CopyMask32)
     EXPECT_EQ(255, world2.data(1,7));
 }
 
+
+TEST(QuickDraw, Hilite8)
+{
+    if(!hasDeepGWorlds())
+        return;
+    OffscreenWorld world(8);
+
+    Rect upper = world.r;
+    upper.bottom /= 2;
+
+    FillRect(&world.r, &qd.black);
+    FillRect(&upper, &qd.white);
+
+    EXPECT_EQ(0x00, world.data(0,0));
+    EXPECT_EQ(0x00, world.data(0,1));
+    EXPECT_EQ(0xFF, world.data(1,0));
+    EXPECT_EQ(0xFF, world.data(1,1));
+
+    LMSetHiliteMode(LMGetHiliteMode() & ~(1<<7));
+    InvertRect(&world.r);
+
+    EXPECT_NE(0x00, world.data(0,0));
+    EXPECT_NE(0x00, world.data(0,1));
+    EXPECT_EQ(0xFF, world.data(1,0));
+    EXPECT_EQ(0xFF, world.data(1,1));
+
+    LMSetHiliteMode(LMGetHiliteMode() & ~(1<<7));
+    InvertRect(&world.r);
+
+    EXPECT_EQ(0x00, world.data(0,0));
+    EXPECT_EQ(0x00, world.data(0,1));
+    EXPECT_EQ(0xFF, world.data(1,0));
+    EXPECT_EQ(0xFF, world.data(1,1));
+}
+
+
+TEST(QuickDraw, Hilite32)
+{
+    if(!hasDeepGWorlds())
+        return;
+    OffscreenWorld world(32);
+
+    Rect upper = world.r;
+    upper.bottom /= 2;
+
+    FillRect(&world.r, &qd.black);
+    FillRect(&upper, &qd.white);
+
+    EXPECT_EQ(0x00FFFFFF, world.data32(0,0));
+    EXPECT_EQ(0x00FFFFFF, world.data32(0,1));
+    EXPECT_EQ(0x00000000, world.data32(1,0));
+    EXPECT_EQ(0x00000000, world.data32(1,1));
+
+    LMSetHiliteMode(LMGetHiliteMode() & ~(1<<7));
+    InvertRect(&world.r);
+
+    EXPECT_NE(0x00FFFFFF, world.data32(0,0));
+    EXPECT_NE(0x00FFFFFF, world.data32(0,1));
+    EXPECT_EQ(0x00000000, world.data32(1,0));
+    EXPECT_EQ(0x00000000, world.data32(1,1));
+
+    LMSetHiliteMode(LMGetHiliteMode() & ~(1<<7));
+    InvertRect(&world.r);
+
+    EXPECT_EQ(0x00FFFFFF, world.data32(0,0));
+    EXPECT_EQ(0x00FFFFFF, world.data32(0,1));
+    EXPECT_EQ(0x00000000, world.data32(1,0));
+    EXPECT_EQ(0x00000000, world.data32(1,1));
+}
+
+
 TEST(QuickDraw, UnionRect)
 {
     Rect r1,r2,r;
