@@ -85,7 +85,6 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     wayland::callback_t frameCallback_;
 
     Buffer buffer_;
-    bool initDone_ = false;
 
 
     wayland::surface_t cursorSurface_;
@@ -115,11 +114,10 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     uint32_t lastMouseDownSerial_ = 0;
 
     int wakeFd_;
-    bool exitMainThread_ = false;
-    std::vector<std::function<void ()>> executeOnUiThreadQueue_;
+    std::atomic_bool exitMainThread_ = false;
+    
 
-
-    enum class ConfigureState
+    enum class State
     {
         unconfigured,
         idle,
@@ -145,10 +143,10 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     @endumnl
 */
 
-    ConfigureState configureState_ = ConfigureState::unconfigured;
+    State state_ = State::unconfigured;
     std::condition_variable stateChanged_;
     
-    Executor::DirtyRects dirty_;
+    Executor::DirtyRects dirtyRects_;
 
     std::chrono::steady_clock::time_point updateTimeout_;
 
@@ -157,8 +155,7 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
 
     void runEventLoop();
-    void runOnThread(std::function<void ()> f) override;
-    void endEventLoop();
+    void wakeEventLoop();
 public:
     WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[]);
     ~WaylandVideoDriver();
