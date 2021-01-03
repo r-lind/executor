@@ -30,10 +30,12 @@
  * }
  */
 
-#ifdef _WIN32
-// Windows also has a smaller default stack size.
+//#ifdef _WIN32
+// Windows has a smaller default stack size.
+// But a large screen set to 32-bit depth is more than the
+// 8MB stack size default that's currently popular on Linux, as well.
 #define TEMP_ALLOC_ON_MAC_HEAP_INSTEAD_OF_ALLOCA
-#endif
+//#endif
 
 #ifdef TEMP_ALLOC_ON_MAC_HEAP_INSTEAD_OF_ALLOCA
 
