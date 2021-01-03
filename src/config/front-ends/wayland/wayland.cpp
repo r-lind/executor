@@ -54,13 +54,6 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
 {
 }
 
-WaylandVideoDriver::~WaylandVideoDriver()
-{
-    exitMainThread_ = true;
-    wakeEventLoop();
-    thread_.join();
-}
-
 WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
     : VideoDriverCommon(eventListener)
 {
@@ -192,6 +185,123 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
     thread_ = std::thread([this] { runEventLoop(); });
 }
 
+WaylandVideoDriver::~WaylandVideoDriver()
+{
+    exitMainThread_ = true;
+    wakeEventLoop();
+    thread_.join();
+}
+
+void WaylandVideoDriver::runEventLoop()
+{
+    int waylandFd = display_.get_fd();    
+    pollfd fds[] = {
+        { waylandFd, POLLIN, 0 },
+        { wakeFd_, POLLIN, 0 }
+    };
+
+    while(!exitMainThread_)
+    {
+        int timeout = -1;
+        bool timedOut = false;
+
+        display_.dispatch_pending();
+        {
+            std::lock_guard lk(mutex_);
+
+            if(state_ == State::waitingForUpdate
+                || state_ == State::waitingForObsoleteUpdate)
+            {
+                auto now = std::chrono::steady_clock::now();
+
+                if (updateTimeout_ <= now)
+                    timedOut = true;
+                else
+                    timeout = std::chrono::duration_cast<std::chrono::milliseconds>(updateTimeout_ - now).count();
+            }
+        }
+        if(timedOut)
+            noteUpdatesDone();
+
+        display_.flush();
+
+        {
+            auto intent = display_.obtain_read_intent();
+            int result = poll(fds, std::size(fds), timeout);
+
+            if(result > 0)
+            {
+                if(fds[0].revents & POLLIN)
+                    intent.read();
+                if(fds[1].revents & POLLIN)
+                {
+                    uint64_t evt;
+                    ::read(wakeFd_, &evt, sizeof(evt));
+                }
+            }
+        }
+    }
+}
+
+void WaylandVideoDriver::wakeEventLoop()
+{
+    uint64_t evt = 1;
+    ::write(wakeFd_, &evt, sizeof(evt));
+}
+
+bool WaylandVideoDriver::setMode(int width, int height, int bpp,
+                                  bool grayscale_p)
+{
+    std::unique_lock lk(mutex_);
+
+    if(bpp)
+        requestedBpp_ = bpp;
+
+    if(state_ == State::unconfigured)
+    {
+        if(width && height)
+        {
+            configuredShape_.width = width;
+            configuredShape_.height = height;
+        }
+        else
+            xdg_toplevel_.set_maximized();
+        //xdg_toplevel_.set_fullscreen({});
+
+        surface_.commit();
+        display_.flush();
+
+        stateChanged_.wait(lk, [this] {
+            return state_ == State::waitingForModeSwitch;
+        });
+        frameRequested_ = true;
+
+        lk.unlock();
+        updateMode();
+        noteUpdatesDone();
+        frameCallback();
+    }
+    else
+    {
+        if(state_ == State::waitingForUpdate || state_ == State::waitingForObsoleteUpdate)
+        {
+            updateTimeout_ = std::chrono::steady_clock::now();
+            wakeEventLoop();
+        }
+        stateChanged_.wait(lk, [this] {
+            return state_ == State::idle
+                || state_ == State::waitingForModeSwitch
+                || state_ == State::drawingObsoleteUpdate;
+        });
+
+        state_ = State::waitingForModeSwitch;
+        lk.unlock();
+        updateMode();
+    }
+
+    return true;
+}
+
 bool WaylandVideoDriver::handleMenuBarDrag()
 {
     xdg_toplevel_.move(seat_, lastMouseDownSerial_);
@@ -278,50 +388,22 @@ bool WaylandVideoDriver::updateMode()
     return sizeChanged || depthChanged;
 }
 
-
-bool WaylandVideoDriver::setMode(int width, int height, int bpp,
-                                  bool grayscale_p)
+bool WaylandVideoDriver::requestFrame()
 {
-    std::unique_lock lk(mutex_);
+    if(dirtyRects_.empty() && allocatedShape_.serial == committedShape_.serial)
+        return false;
 
-    if(bpp)
-        requestedBpp_ = bpp;
+    if(state_ != State::idle
+        && state_ != State::waitingForModeSwitch
+        && state_ != State::drawingObsoleteUpdate)
+        return false;
 
-    if(state_ == State::unconfigured)
-    {
-        if(width && height)
-        {
-            configuredShape_.width = width;
-            configuredShape_.height = height;
-        }
-        else
-            xdg_toplevel_.set_maximized();
-        //xdg_toplevel_.set_fullscreen({});
+    if(frameRequested_)
+        return false;
 
-        surface_.commit();
-        display_.flush();
-
-        stateChanged_.wait(lk, [this] {
-            return state_ == State::waitingForModeSwitch;
-        });
-        frameRequested_ = true;
-
-        lk.unlock();
-        updateMode();
-        noteUpdatesDone();
-        frameCallback();
-    }
-    else
-    {
-        stateChanged_.wait(lk, [this] {
-            return state_ == State::idle
-                || state_ == State::waitingForModeSwitch;
-        });
-
-        state_ = State::waitingForModeSwitch;
-        lk.unlock();
-        updateMode();
-    }
+    frameCallback_ = surface_.frame();
+    frameCallback_.on_done() = [this](uint32_t) { frameCallback(); };
+    frameRequested_ = true;
 
     return true;
 }
@@ -402,32 +484,6 @@ void WaylandVideoDriver::frameCallback()
     display_.flush();
 }
 
-bool WaylandVideoDriver::requestFrame()
-{
-    //std::cout << "requestFrame.\n";
-    if(dirtyRects_.empty() && allocatedShape_.serial == committedShape_.serial)
-        return false;
-    //std::cout << "dirty.\n";
-
-    if(state_ != State::idle
-        && state_ != State::waitingForModeSwitch
-        && state_ != State::drawingObsoleteUpdate)
-        return false;
-
-    //std::cout << "interesting state.\n";
-
-    if(frameRequested_)
-        return false;
-
-    //std::cout << "requesting frame callback.\n";
-
-    frameCallback_ = surface_.frame();
-    frameCallback_.on_done() = [this](uint32_t) { frameCallback(); };
-    frameRequested_ = true;
-
-    return true;
-}
-
 void WaylandVideoDriver::updateScreenRects(
     int num_rects, const vdriver_rect_t *rects)
 {
@@ -470,59 +526,3 @@ void WaylandVideoDriver::setCursorVisible(bool show_p)
     pointer_.set_cursor(cursorEnterSerial_, show_p ? cursorSurface_ : surface_t(), hotSpot_.first, hotSpot_.second);
 }
 
-void WaylandVideoDriver::runEventLoop()
-{
-    int waylandFd = display_.get_fd();    
-    pollfd fds[] = {
-        { waylandFd, POLLIN, 0 },
-        { wakeFd_, POLLIN, 0 }
-    };
-
-    while(!exitMainThread_)
-    {
-        int timeout = -1;
-        bool timedOut = false;
-
-        display_.dispatch_pending();
-        {
-            std::lock_guard lk(mutex_);
-
-            if(state_ == State::waitingForUpdate
-                || state_ == State::waitingForObsoleteUpdate)
-            {
-                auto now = std::chrono::steady_clock::now();
-
-                if (updateTimeout_ <= now)
-                    timedOut = true;
-                else
-                    timeout = std::chrono::duration_cast<std::chrono::milliseconds>(updateTimeout_ - now).count();
-            }
-        }
-        if(timedOut)
-            noteUpdatesDone();
-
-        display_.flush();
-
-        {
-            auto intent = display_.obtain_read_intent();
-            int result = poll(fds, std::size(fds), timeout);
-
-            if(result > 0)
-            {
-                if(fds[0].revents & POLLIN)
-                    intent.read();
-                if(fds[1].revents & POLLIN)
-                {
-                    uint64_t evt;
-                    ::read(wakeFd_, &evt, sizeof(evt));
-                }
-            }
-        }
-    }
-}
-
-void WaylandVideoDriver::wakeEventLoop()
-{
-    uint64_t evt = 1;
-    ::write(wakeFd_, &evt, sizeof(evt));
-}
