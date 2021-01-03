@@ -64,6 +64,7 @@ public:
     void paintEvent(QPaintEvent *e)
     {
         QPainter painter(this);
+
         if(qimage)
         {
             for(const QRect& r : e->region())
@@ -82,6 +83,14 @@ public:
     void mouseReleaseEvent(QMouseEvent *ev)
     {
         mousePressRelease(ev);
+    }
+
+    void mouseMoveEvent(QMouseEvent *ev)
+    {
+#ifdef __APPLE__
+        macosx_hide_menu_bar(ev->x(), ev->y(), width(), height());
+#endif
+        callbacks_->mouseMoved(ev->x(), ev->y());
     }
 
     void keyEvent(QKeyEvent *ev, bool down_p)
@@ -141,146 +150,170 @@ public:
 
 }
 
+
+QtVideoDriver::QtVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
+    : VideoDriverCommon(eventListener)
+{
+    std::mutex initEndMutex;
+    std::condition_variable initEndCond;
+    bool initEnded = false;
+
+    thread_ = std::thread([&] {
+        qapp = new QGuiApplication(argc, argv);
+
+        {
+            std::unique_lock lk(initEndMutex);
+            initEnded = true;
+            initEndCond.notify_all();
+        }
+        qapp->exec();
+    });
+    
+    std::unique_lock lk(initEndMutex);
+    initEndCond.wait(lk, [&] { return initEnded; });
+}
+
+QtVideoDriver::~QtVideoDriver()
+{
+    std::cout << "quitting.\n";
+    QMetaObject::invokeMethod(qapp, "quit");
+
+    thread_.join();
+}
+
+
 std::optional<QRegion> rootlessRegion;
 
 void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
 {
     VideoDriverCommon::setRootlessRegion(rgn);
-    RegionProcessor rgnP(rootlessRegion_.begin());
+    QMetaObject::invokeMethod(qapp, [=] {
 
-    QRegion qtRgn;
+        if(!rootlessRegionDirty_)
+            return;
+        rootlessRegion_ = pendingRootlessRegion_;
 
-    int height = framebuffer_.height;
+        RegionProcessor rgnP(rootlessRegion_.begin());
 
-    while(rgnP.bottom() < height)
-    {
-        rgnP.advance();
+        QRegion qtRgn;
+
+        int height = framebuffer_.height;
+
+        while(rgnP.bottom() < height)
+        {
+            rgnP.advance();
+            
+            for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
+                qtRgn += QRect(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
+        }
         
-        for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
-            qtRgn += QRect(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
-    }
-    
-#ifdef __APPLE__
-    macosx_autorelease_pool([&] {
-#endif
-        window->setMask(qtRgn);
-#ifdef __APPLE__
+    #ifdef __APPLE__
+        macosx_autorelease_pool([&] {
+    #endif
+            window->setMask(qtRgn);
+    #ifdef __APPLE__
+        });
+    #endif
+
+        rootlessRegion = qtRgn;
     });
-#endif
-
-    rootlessRegion = qtRgn;
 }
 
-bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
-{
-    qapp = new QGuiApplication(argc, argv);
-    return true;
-}
 
 bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
-#ifdef __APPLE__
-    macosx_hide_menu_bar(500, 0, 1000, 1000);
-    QVector<QRect> screenGeometries = getScreenGeometries();
-#else
-    QVector<QRect> screenGeometries = getAvailableScreenGeometries();
-#endif
+    std::mutex initEndMutex;
+    std::condition_variable initEndCond;
+    bool initEnded = false;
 
-    printf("set_mode: %d %d %d\n", width, height, bpp);
-    
-    QRect geom = screenGeometries[0];
-    for(const QRect& r : screenGeometries)
-        if(r.width() * r.height() > geom.width() * geom.height())
-            geom = r;
+    QMetaObject::invokeMethod(qapp, [=, &initEndMutex, &initEndCond, &initEnded] {
+    #ifdef __APPLE__
+        macosx_hide_menu_bar(500, 0, 1000, 1000);
+        QVector<QRect> screenGeometries = getScreenGeometries();
+    #else
+        QVector<QRect> screenGeometries = getAvailableScreenGeometries();
+    #endif
 
-    framebuffer_ = Framebuffer(geom.width(), geom.height(), bpp ? bpp : 8);
-    framebuffer_.rootless = true;
+        printf("set_mode: %d %d %d\n", width, height, bpp);
+        
+        QRect geom = screenGeometries[0];
+        for(const QRect& r : screenGeometries)
+            if(r.width() * r.height() > geom.width() * geom.height())
+                geom = r;
 
-    qimage = new QImage(framebuffer_.width, framebuffer_.height, QImage::Format_RGB32);
-    
-    if(!window)
-        window = new ExecutorWindow(callbacks_);
-    window->setGeometry(geom);
-//#ifdef __APPLE__
-//    window->show();
-//#else
-    window->showMaximized();
-//#endif
+        framebuffer_ = Framebuffer(geom.width(), geom.height(), bpp ? bpp : 8);
+        framebuffer_.rootless = true;
+
+        qimage = new QImage(framebuffer_.width, framebuffer_.height, QImage::Format_RGB32);
+        
+        if(!window)
+            window = new ExecutorWindow(callbacks_);
+        window->setGeometry(geom);
+        window->showMaximized();
+
+        {
+            std::unique_lock lk(initEndMutex);
+            initEnded = true;
+            initEndCond.notify_all();
+        }
+
+    });
+
+    std::unique_lock lk(initEndMutex);
+    initEndCond.wait(lk, [&] { return initEnded; });
+
     return true;
 }
 
-void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
+void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *rectP)
 {
-    QRegion rgn;
-    for(int i = 0; i < num_rects; i++)
-        rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
+    std::vector<vdriver_rect_t> r(rectP, rectP+num_rects);
+    QMetaObject::invokeMethod(qapp, [=] {
+        QRegion rgn;
+        for(int i = 0; i < r.size(); i++)
+        {
+            rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
+            std::cout << "update " << r[i].left << " " << r[i].top << " " << r[i].right << " " << r[i].bottom << std::endl;
+        }
 
-    updateBuffer((uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
-        num_rects, r);
+        updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
+            num_rects, r.data());
 
-    window->update(rgn);
+        window->update(rgn);
+    });
 }
-
-void QtVideoDriver::pumpEvents()
-{
-#ifdef __APPLE__
-        macosx_autorelease_pool([&] {
-#endif
-        qapp->processEvents();
-#ifdef __APPLE__
-        });
-#endif
-
-    auto cursorPos = QCursor::pos();
-#ifdef __APPLE__
-    macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
-#endif
-    cursorPos = window->mapFromGlobal(cursorPos);
-    callbacks_->mouseMoved(cursorPos.x(), cursorPos.y());
-
-    static bool beenHere = false;
-    if(!beenHere && rootlessRegion)
-    {
-#ifdef __APPLE__
-        macosx_autorelease_pool([&] {
-#endif
-            window->setMask(*rootlessRegion);
-#ifdef __APPLE__
-        });
-#endif
-        beenHere = true;
-    }
-}
-
 
 void QtVideoDriver::setCursor(char *cursor_data,
                               uint16_t cursor_mask[16],
                               int hotspot_x, int hotspot_y)
 {
-    static QCursor theCursor(Qt::ArrowCursor);
+    QMetaObject::invokeMethod(qapp, [=] {
+        static QCursor theCursor(Qt::ArrowCursor);
 
-    if(cursor_data)
-    {
-        uchar data2[32];
-        uchar mask2[32];
-        memcpy(data2, cursor_data, 32);
-        memcpy(mask2, cursor_mask, 32);
-        
-        for(int i = 0; i<32; i++)
-            mask2[i] |= data2[i];
-        QBitmap crsr = QBitmap::fromData(QSize(16, 16), (const uchar*)data2, QImage::Format_Mono);
-        QBitmap mask = QBitmap::fromData(QSize(16, 16), (const uchar*)mask2, QImage::Format_Mono);
-        
-        theCursor = QCursor(crsr, mask, hotspot_x, hotspot_y);
-    }
-    //window->setCursor(theCursor);   // TODO: should we check for visibility?
-    window->setCursor(Qt::ArrowCursor);   // TODO: should we check for visibility?
+        if(cursor_data)
+        {
+            uchar data2[32];
+            uchar mask2[32];
+            memcpy(data2, cursor_data, 32);
+            memcpy(mask2, cursor_mask, 32);
+            
+            for(int i = 0; i<32; i++)
+                mask2[i] |= data2[i];
+            QBitmap crsr = QBitmap::fromData(QSize(16, 16), (const uchar*)data2, QImage::Format_Mono);
+            QBitmap mask = QBitmap::fromData(QSize(16, 16), (const uchar*)mask2, QImage::Format_Mono);
+            
+            theCursor = QCursor(crsr, mask, hotspot_x, hotspot_y);
+        }
+        window->setCursor(theCursor);   // TODO: should we check for visibility?
+    });
 }
 
 void QtVideoDriver::setCursorVisible(bool show_p)
 {
-    if(show_p)
-        setCursor(nullptr, nullptr, 0, 0);
-    else
-        window->setCursor(Qt::BlankCursor);
+    QMetaObject::invokeMethod(qapp, [=] {
+        if(show_p)
+            setCursor(nullptr, nullptr, 0, 0);
+        else
+            window->setCursor(Qt::BlankCursor);
+    });
 }
