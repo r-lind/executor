@@ -5,7 +5,7 @@
 #include <base/debugger.h>
 
 #include <chrono>
-#include <iostream>
+#include <array>
 
 #if defined(_WIN32)
 #define USE_TIMER_THREAD 1
@@ -24,6 +24,7 @@
 #include <unistd.h>
 #include <sys/time.h>
 #include <signal.h>
+#include <pthread.h>
 #endif
 
 using namespace Executor;

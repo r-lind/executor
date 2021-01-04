@@ -43,8 +43,8 @@ class MockVDriver : public VideoDriver
         return true;
     }
 
-    virtual void runEventLoop() {}
-    virtual void endEventLoop() {}
+    virtual void runEventLoop() override {}
+    virtual void endEventLoop() override {}
 };
 
 class ExecutorTestEnvironment : public testing::Environment

@@ -10,6 +10,6 @@ class HeadlessVideoDriver : public Executor::VideoDriver
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
 
-    virtual void runEventLoop() {}
-    virtual void endEventLoop() {}
+    virtual void runEventLoop() override {}
+    virtual void endEventLoop() override {}
 };
