@@ -7,13 +7,13 @@
 #include <chrono>
 #include <iostream>
 
-//#if defined(_WIN32)
-//#define USE_TIMER_THREAD 1
-//#define USE_SIGNALS 0
-//#else
+#if defined(_WIN32)
+#define USE_TIMER_THREAD 1
+#define USE_SIGNALS 0
+#else
 #define USE_TIMER_THREAD 0
 #define USE_SIGNALS 1
-//#endif
+#endif
 
 
 #if USE_TIMER_THREAD
@@ -43,14 +43,32 @@ namespace
     Interrupt timerInterrupt;
 
 #if USE_TIMER_THREAD
-    using clock = std::chrono::steady_clock;
     std::mutex mutex;
-    std::condition_variable cond;
     std::condition_variable wake_cond;
-    clock::time_point last_interrupt;
-    clock::time_point scheduled_interrupt;
-    std::thread timer_thread;
+#else
+    pthread_t waitingThread;
 #endif
+
+    struct SyncintTimer
+    {
+#if USE_TIMER_THREAD
+        using clock = std::chrono::steady_clock;
+        std::thread thread;
+        std::condition_variable cond;
+        bool terminate = false;
+        clock::time_point last_interrupt;
+        clock::time_point scheduled_interrupt;
+#endif
+
+        SyncintTimer();
+        ~SyncintTimer();
+
+        void start();
+        void post(std::chrono::microseconds usecs, bool fromLast);
+        void wait();
+    };
+
+    SyncintTimer timer;
 }
 
 Interrupt::Interrupt(std::function<void ()> f)
@@ -77,7 +95,8 @@ void Interrupt::trigger()
 #if USE_TIMER_THREAD
     wake_cond.notify_all();
 #else
-    // TODO: if not on main thread, make sure main thread gets woken
+    if(pthread_self() != waitingThread)
+        pthread_kill(waitingThread, SIGUSR1);
 #endif
 }
 
@@ -97,8 +116,8 @@ void Interrupt::handleCommon()
     saved_ccx = cpu_state.ccx;
 
     /* There's no reason to think we need to decrement A7 by 32;
-   * it's just a paranoid thing to do.
-   */
+     * it's just a paranoid thing to do.
+     */
     EM_A7 = (EM_A7 - 32) & ~3; /* Might as well long-align it. */
 
     for(int i = 0; i < nInterrupts; i++)
@@ -126,7 +145,6 @@ syn68k_addr_t Interrupt::handle68K(syn68k_addr_t interrupt_pc, void *unused)
         return base::Debugger::instance->nmi68K(interrupt_pc);
 
     return MAGIC_RTE_ADDRESS;
-
 }
 
 void Interrupt::handlePowerPC(PowerCore& cpu)
@@ -145,9 +163,7 @@ void Interrupt::handlePowerPC(PowerCore& cpu)
 
     if(base::Debugger::instance && base::Debugger::instance->interruptRequested())
         base::Debugger::instance->nmiPPC();
-
 }
-
 
 void Executor::syncint_check_interrupt()
 {
@@ -163,19 +179,22 @@ void Executor::syncint_check_interrupt()
     }
 }
 
-void Executor::syncint_init(void)
+SyncintTimer::SyncintTimer()
 {
-    /* Set up the trap vector for the timer interrupt. */
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = 
-        callback_install(&Interrupt::handle68K, nullptr);
+#if USE_SIGNALS
+    sigset_t sigs;
+    sigemptyset(&sigs);
+    sigaddset(&sigs, SIGALRM);
+    pthread_sigmask(SIG_BLOCK, &sigs, NULL);
+#endif
+}
 
-    getPowerCore().handleInterrupt = &Interrupt::handlePowerPC;
-
-    timerInterrupt = Interrupt(&timeInterruptHandler);
+void SyncintTimer::start()
+{
 #if USE_TIMER_THREAD
-    std::thread([]() {
+    thread = std::thread([this] {
         std::unique_lock<std::mutex> lock(mutex);
-        for(;;)
+        while(!terminate)
         {
             if(scheduled_interrupt > last_interrupt)
             {
@@ -192,8 +211,7 @@ void Executor::syncint_init(void)
                 cond.wait(lock);
             }
         }
-    }).detach();
-    // FIXME: properly terminate thread
+    });
 #else
     struct sigaction s;
 
@@ -203,10 +221,55 @@ void Executor::syncint_init(void)
     sigemptyset(&s.sa_mask);
     s.sa_flags = 0;
     sigaction(SIGALRM, &s, nullptr);
+
+    sigset_t sigs;
+    sigemptyset(&sigs);
+    sigaddset(&sigs, SIGALRM);
+    pthread_sigmask(SIG_UNBLOCK, &sigs, NULL);
+
+    waitingThread = pthread_self();
 #endif
 }
 
-void Executor::syncint_wait_interrupt()
+SyncintTimer::~SyncintTimer()
+{
+#if USE_TIMER_THREAD
+    if(thread.joinable())
+    {
+        {
+            std::unique_lock<std::mutex> lock(mutex);
+            terminate = true;
+        }
+        thread.join();
+    }
+#endif
+}
+
+void SyncintTimer::post(std::chrono::microseconds usecs, bool fromLast)
+{
+#if USE_TIMER_THREAD
+    std::unique_lock<std::mutex> lock(mutex);
+
+    auto time = (fromLast ? last_interrupt : clock::now()) + usecs;
+
+    if(time <= last_interrupt)
+        last_interrupt = clock::time_point();
+    if(scheduled_interrupt <= last_interrupt || time < scheduled_interrupt)
+        scheduled_interrupt = time;
+    
+    cond.notify_one();
+#else
+    struct itimerval t;
+
+    t.it_value.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(usecs).count();
+    t.it_value.tv_usec = usecs.count() % 1000000;
+    t.it_interval.tv_sec = 0;
+    t.it_interval.tv_usec = 0;
+    setitimer(ITIMER_REAL, &t, nullptr);
+#endif
+}
+
+void SyncintTimer::wait()
 {
 #if USE_TIMER_THREAD
     using namespace std::literals::chrono_literals;
@@ -222,31 +285,27 @@ void Executor::syncint_wait_interrupt()
     sigemptyset(&zero_mask);
     sigsuspend(&zero_mask);
 #endif
+}
 
+void Executor::syncint_init()
+{
+    /* Set up the trap vector for the timer interrupt. */
+    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = 
+        callback_install(&Interrupt::handle68K, nullptr);
+
+    getPowerCore().handleInterrupt = &Interrupt::handlePowerPC;
+
+    timerInterrupt = Interrupt(&timeInterruptHandler);
+    timer.start();
+}
+
+void Executor::syncint_wait_interrupt()
+{
+    timer.wait();
     syncint_check_interrupt();
 }
 
 void Executor::syncint_post(std::chrono::microseconds usecs, bool fromLast)
 {
-#if USE_TIMER_THREAD
-    std::unique_lock<std::mutex> lock(mutex);
-
-    auto time = (fromLast ? last_interrupt : clock::now()) + usecs;
-
-    if(time <= last_interrupt)
-        last_interrupt = clock::time_point();
-    if(scheduled_interrupt <= last_interrupt || time < scheduled_interrupt)
-        scheduled_interrupt = time;
-    
-    cond.notify_one();
-
-#else
-    struct itimerval t;
-
-    t.it_value.tv_sec = std::chrono::duration_cast<std::chrono::seconds>(usecs).count();
-    t.it_value.tv_usec = usecs.count() % 1000000;
-    t.it_interval.tv_sec = 0;
-    t.it_interval.tv_usec = 0;
-    setitimer(ITIMER_REAL, &t, nullptr);
-#endif
+    timer.post(usecs, fromLast);
 }

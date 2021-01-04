@@ -566,7 +566,6 @@ static void parseCommandLine(int& argc, char **argv)
 
 int main(int argc, char **argv)
 {
-
 #if defined(__linux__) && defined(PERSONALITY_HACK)
     int pers;
 
