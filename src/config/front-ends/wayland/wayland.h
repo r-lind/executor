@@ -154,8 +154,8 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     bool requestFrame();
 
 
-    void runEventLoop();
     void wakeEventLoop();
+
 public:
     WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[]);
     ~WaylandVideoDriver();
@@ -172,4 +172,6 @@ public:
 
     bool handleMenuBarDrag() override;
 
+    void runEventLoop() override;
+    void endEventLoop() override;
 };

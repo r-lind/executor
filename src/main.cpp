@@ -564,11 +564,8 @@ static void parseCommandLine(int& argc, char **argv)
         reportBadArgs();
 }
 
-#include <iostream>
-
 int main(int argc, char **argv)
 {
-    char thingOnStack; /* used to determine an approximation of the stack base address */
 
 #if defined(__linux__) && defined(PERSONALITY_HACK)
     int pers;
@@ -607,78 +604,94 @@ int main(int argc, char **argv)
         
     checkBadArgs(argc, argv);
 
-    InitMemory(&thingOnStack);
-
-    initialize_68k_emulator(nullptr,
-                            use_native_code_p,
-                            (uint32_t *)SYN68K_TO_US(0),
-                            0);
-
-    EM_A7 = ptr_to_longint(LM(CurStackBase));
-
-    Executor::traps::init(logtraps);
-    InitLowMem();
-
-    ROMlib_InitGDevices();
-    
-    ROMlib_eventinit();
-    hle_init();
-
-    ROMlib_fileinit();
-
-    InitUtil();
-
-    InitResources();
-    
-    ROMlib_set_system_version(system_version);
-
-    {
-        bool keyboard_set_failed = false;
-
-        if(!keyboard.empty())
+    auto executorThread = std::thread([&] {
+        try
         {
-            keyboard_set_failed = !ROMlib_set_keyboard(keyboard.c_str());
-            if(keyboard_set_failed)
-                printf("``%s'' is not an available keyboard\n", keyboard.c_str());
+            char thingOnStack; /* used to determine an approximation of the stack base address */
+            InitMemory(&thingOnStack);
+
+            initialize_68k_emulator(nullptr,
+                                    use_native_code_p,
+                                    (uint32_t *)SYN68K_TO_US(0),
+                                    0);
+
+            EM_A7 = ptr_to_longint(LM(CurStackBase));
+
+            Executor::traps::init(logtraps);
+            InitLowMem();
+
+            ROMlib_InitGDevices();
+            
+            ROMlib_eventinit();
+            hle_init();
+
+            ROMlib_fileinit();
+
+            InitUtil();
+
+            InitResources();
+            
+            ROMlib_set_system_version(system_version);
+
+            {
+                bool keyboard_set_failed = false;
+
+                if(!keyboard.empty())
+                {
+                    keyboard_set_failed = !ROMlib_set_keyboard(keyboard.c_str());
+                    if(keyboard_set_failed)
+                        printf("``%s'' is not an available keyboard\n", keyboard.c_str());
+                }
+
+                if(keyboard_set_failed || list_keyboards_p)
+                    display_keyboard_choices();
+            }
+
+            InitAppFiles(argc, argv);
+
+            InitFonts();
+
+        #if !defined(NDEBUG)
+            dump_init(nullptr);
+        #endif
+
+            ROMlib_color_init();
+
+            wind_color_init();
+            image_inits();  // must be called after `ROMlib_color_init ()'
+            sb_ctl_init();  //  must be after `image_inits ()'
+
+            AE_init();
+
+            {
+                INTEGER env = 0;
+                ROMlib_Fsetenv(inout(env), 0);
+            }
+
+            syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
+
+            sound_init();
+
+            set_refresh_rate(ROMlib_refresh);
+
+            InitMonDebugger();
+            base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
+
+            executor_main();
+            ExitToShell();   
+        }
+        catch(const ExitToShellException& e)
+        {
         }
 
-        if(keyboard_set_failed || list_keyboards_p)
-            display_keyboard_choices();
-    }
+        vdriver->endEventLoop();
+    });
 
-    InitAppFiles(argc, argv);
+    vdriver->runEventLoop();
+    executorThread.join();
 
-    InitFonts();
+    vdriver.reset();
 
-#if !defined(NDEBUG)
-    dump_init(nullptr);
-#endif
-
-    ROMlib_color_init();
-
-    wind_color_init();
-    image_inits();  // must be called after `ROMlib_color_init ()'
-    sb_ctl_init();  //  must be after `image_inits ()'
-
-    AE_init();
-
-    {
-        INTEGER env = 0;
-        ROMlib_Fsetenv(inout(env), 0);
-    }
-
-    syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
-
-    sound_init();
-
-    set_refresh_rate(ROMlib_refresh);
-
-    InitMonDebugger();
-    base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
-
-    executor_main();
-
-    ExitToShell();
     /* NOT REACHED */
     return 0;
 }

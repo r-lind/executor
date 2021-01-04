@@ -3,7 +3,6 @@
 #include "vdriver.h"
 #include <array>
 #include <vector>
-#include <thread>
 #include <mutex>
 #include <type_traits>
 #include <future>
@@ -14,7 +13,6 @@ namespace Executor
 class VideoDriverCommon : public VideoDriver
 {
 protected:
-    std::thread thread_;
     std::mutex mutex_;
 
     std::array<uint32_t, 256> colors_;

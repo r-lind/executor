@@ -9,4 +9,7 @@ class HeadlessVideoDriver : public Executor::VideoDriver
     virtual void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
+
+    virtual void runEventLoop() {}
+    virtual void endEventLoop() {}
 };

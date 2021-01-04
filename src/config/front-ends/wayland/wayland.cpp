@@ -181,15 +181,16 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
     
     cursorSurface_.attach(cursorBuffer_.wlbuffer(), 0, 0);
     cursorSurface_.commit();
+}
 
-    thread_ = std::thread([this] { runEventLoop(); });
+void WaylandVideoDriver::endEventLoop()
+{
+    exitMainThread_ = true;
+    wakeEventLoop();
 }
 
 WaylandVideoDriver::~WaylandVideoDriver()
 {
-    exitMainThread_ = true;
-    wakeEventLoop();
-    thread_.join();
 }
 
 void WaylandVideoDriver::runEventLoop()

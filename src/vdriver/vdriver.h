@@ -104,6 +104,9 @@ public:
 
     virtual ~VideoDriver();
 
+    virtual void runEventLoop() = 0;
+    virtual void endEventLoop() = 0;
+
     virtual bool setOptions(std::unordered_map<std::string, std::string> options);
     virtual void registerOptions();
     

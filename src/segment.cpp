@@ -272,8 +272,7 @@ void Executor::C_ExitToShell()
     CloseResFile(0);
     ROMlib_OurClose();
 
-    exit(0);
-    ALLOCAEND /* yeah, right, if exit fails... */
+    throw ExitToShellException();
 }
 
 

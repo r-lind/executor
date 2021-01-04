@@ -154,33 +154,22 @@ public:
 QtVideoDriver::QtVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
     : VideoDriverCommon(eventListener)
 {
-    std::mutex initEndMutex;
-    std::condition_variable initEndCond;
-    bool initEnded = false;
-
-    thread_ = std::thread([&] {
-        qapp = new QGuiApplication(argc, argv);
-
-        {
-            std::unique_lock lk(initEndMutex);
-            initEnded = true;
-            initEndCond.notify_all();
-        }
-        qapp->exec();
-    });
-    
-    std::unique_lock lk(initEndMutex);
-    initEndCond.wait(lk, [&] { return initEnded; });
+    qapp = new QGuiApplication(argc, argv);
 }
 
 QtVideoDriver::~QtVideoDriver()
 {
-    std::cout << "quitting.\n";
-    QMetaObject::invokeMethod(qapp, "quit");
-
-    thread_.join();
 }
 
+void QtVideoDriver::endEventLoop()
+{
+    QMetaObject::invokeMethod(qapp, "quit");
+}
+
+void QtVideoDriver::runEventLoop()
+{
+    qapp->exec();
+}
 
 std::optional<QRegion> rootlessRegion;
 

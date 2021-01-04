@@ -42,6 +42,9 @@ class MockVDriver : public VideoDriver
         framebuffer_ = Framebuffer(512, 342, 1);
         return true;
     }
+
+    virtual void runEventLoop() {}
+    virtual void endEventLoop() {}
 };
 
 class ExecutorTestEnvironment : public testing::Environment
