@@ -97,7 +97,7 @@ void Interrupt::trigger()
     wake_cond.notify_all();
 #else
     if(pthread_self() != waitingThread)
-        pthread_kill(waitingThread, SIGUSR1);
+        pthread_kill(waitingThread, SIGALRM);
 #endif
 }
 
