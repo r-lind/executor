@@ -1,7 +1,6 @@
 #pragma once
 
 #include <vdriver/vdrivercommon.h>
-#include <vdriver/dirtyrect.h>
 
 #include <wayland-client.hpp>
 #include <wayland-client-protocol-extra.hpp>
@@ -146,7 +145,6 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     State state_ = State::unconfigured;
     std::condition_variable stateChanged_;
     
-    Executor::DirtyRects dirtyRects_;
 
     std::chrono::steady_clock::time_point updateTimeout_;
 
@@ -156,13 +154,14 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
 
     void wakeEventLoop();
 
+    void requestUpdate() override;
+
 public:
     WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[]);
     ~WaylandVideoDriver();
 
     bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
-    void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r) override;
 
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
     void setCursorVisible(bool show_p) override;

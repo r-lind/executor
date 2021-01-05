@@ -2,10 +2,11 @@
 
 #include <QGuiApplication>
 #include <QPainter>
-#include <QRasterWindow>
 #include <QMouseEvent>
 #include <QBitmap>
 #include <QScreen>
+#include <QBackingStore>
+#include <QPaintDevice>
 #ifdef STATIC_WINDOWS_QT
 #include <QtPlugin>
 #endif
@@ -43,54 +44,52 @@ namespace Executor
     extern std::unordered_map<Qt::Key,int> qtToMacKeycodeMap;
 }
 
-namespace
+class QtVideoDriver::ExecutorWindow : public QWindow
 {
-class ExecutorWindow;
-QGuiApplication *qapp;
-QImage *qimage;
-ExecutorWindow *window;
-
-class ExecutorWindow : public QRasterWindow
-{
-    IEventListener *callbacks_;
+    QtVideoDriver* drv_;
+    QBackingStore *backingStore_;
 public:
-    ExecutorWindow(IEventListener *callbacks)
-        : callbacks_(callbacks)
+    ExecutorWindow(QtVideoDriver* drv)
+        : drv_(drv)
     {
         setFlag(Qt::FramelessWindowHint, true);
         setFlag(Qt::NoDropShadowWindowHint, true);
+
+        backingStore_ = new QBackingStore(this);
     }
 
-    void paintEvent(QPaintEvent *e)
+    void resizeEvent(QResizeEvent *resizeEvent) override
     {
-        QPainter painter(this);
+        backingStore_->resize(resizeEvent->size());
+    }
 
-        if(qimage)
-        {
-            for(const QRect& r : e->region())
-                painter.drawImage(r, *qimage, r);
-        }
+    void exposeEvent(QExposeEvent *e) override
+    {
+        if (!isExposed())
+            return;
+
+        drv_->render(backingStore_, e->region());
     }
 
     void mousePressRelease(QMouseEvent *ev)
     {
-        callbacks_->mouseButtonEvent(!!(ev->buttons() & Qt::LeftButton), ev->x(), ev->y());
+        drv_->callbacks_->mouseButtonEvent(!!(ev->buttons() & Qt::LeftButton), ev->x(), ev->y());
     }
-    void mousePressEvent(QMouseEvent *ev)
+    void mousePressEvent(QMouseEvent *ev) override
     {
         mousePressRelease(ev);
     }
-    void mouseReleaseEvent(QMouseEvent *ev)
+    void mouseReleaseEvent(QMouseEvent *ev) override
     {
         mousePressRelease(ev);
     }
 
-    void mouseMoveEvent(QMouseEvent *ev)
+    void mouseMoveEvent(QMouseEvent *ev) override
     {
 #ifdef __APPLE__
         macosx_hide_menu_bar(ev->x(), ev->y(), width(), height());
 #endif
-        callbacks_->mouseMoved(ev->x(), ev->y());
+        drv_->callbacks_->mouseMoved(ev->x(), ev->y());
     }
 
     void keyEvent(QKeyEvent *ev, bool down_p)
@@ -112,17 +111,17 @@ public:
         if(ev->nativeVirtualKey())
             mkvkey = ev->nativeVirtualKey();
 #endif
-        callbacks_->keyboardEvent(down_p, mkvkey);
+        drv_->callbacks_->keyboardEvent(down_p, mkvkey);
     }
     
-    void keyPressEvent(QKeyEvent *ev)
+    void keyPressEvent(QKeyEvent *ev) override
     {
         if constexpr(log_key_events)
             std::cout << "press: " << std::hex << ev->key() << " " << ev->nativeScanCode() << " " << ev->nativeVirtualKey() << std::dec << std::endl;
         if(!ev->isAutoRepeat())
             keyEvent(ev, true);
     }
-    void keyReleaseEvent(QKeyEvent *ev)
+    void keyReleaseEvent(QKeyEvent *ev) override
     {
         if constexpr(log_key_events)
             std::cout << "release\n";
@@ -130,26 +129,25 @@ public:
             keyEvent(ev, false);
     }
 
-    bool event(QEvent *ev)
+    bool event(QEvent *ev) override
     {
         switch(ev->type())
         {
             case QEvent::FocusIn:
-                callbacks_->resumeEvent(true);
+                drv_->callbacks_->resumeEvent(true);
                 break;
             case QEvent::FocusOut:
-                callbacks_->suspendEvent();
+                drv_->callbacks_->suspendEvent();
                 break;
-
+            case QEvent::UpdateRequest:
+                drv_->render(backingStore_, {});
+                break;
             default:
                 ;
         }
-        return QRasterWindow::event(ev);
+        return QWindow::event(ev);
     }
 };
-
-}
-
 
 QtVideoDriver::QtVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
     : VideoDriverCommon(eventListener)
@@ -236,7 +234,7 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         qimage = new QImage(framebuffer_.width, framebuffer_.height, QImage::Format_RGB32);
         
         if(!window)
-            window = new ExecutorWindow(callbacks_);
+            window = new ExecutorWindow(this);
         window->setGeometry(geom);
         window->showMaximized();
 
@@ -245,7 +243,6 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
             initEnded = true;
             initEndCond.notify_all();
         }
-
     });
 
     std::unique_lock lk(initEndMutex);
@@ -254,22 +251,40 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     return true;
 }
 
-void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *rectP)
+void QtVideoDriver::render(QBackingStore *bs, QRegion rgn)
 {
-    std::vector<vdriver_rect_t> r(rectP, rectP+num_rects);
-    QMetaObject::invokeMethod(qapp, [=] {
-        QRegion rgn;
-        for(int i = 0; i < r.size(); i++)
-        {
-            rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
-            std::cout << "update " << r[i].left << " " << r[i].top << " " << r[i].right << " " << r[i].bottom << std::endl;
-        }
+    std::unique_lock lk(mutex_);
+    auto r = dirtyRects_.getAndClear();
+    lk.unlock();
 
-        updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
-            num_rects, r.data());
+    for(int i = 0; i < r.size(); i++)
+    {
+        rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
+    }
 
-        window->update(rgn);
-    });
+    updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
+        r.size(), r.data());
+
+    bs->beginPaint(rgn);
+
+    QPaintDevice *device = bs->paintDevice();
+    QPainter painter(device);
+
+    if(qimage)
+    {
+        for(const QRect& r : rgn)
+            painter.drawImage(r, *qimage, r);
+    }
+
+    painter.end();
+
+    bs->endPaint();
+    bs->flush(rgn);
+}
+
+void QtVideoDriver::requestUpdate()
+{
+    QMetaObject::invokeMethod(window, &QWindow::requestUpdate);
 }
 
 void QtVideoDriver::setCursor(char *cursor_data,

@@ -36,6 +36,17 @@ void VideoDriverCommon::setRootlessRegion(RgnHandle rgn)
     rootlessRegionDirty_ = true;
 }
 
+void VideoDriverCommon::updateScreenRects(
+    int num_rects, const vdriver_rect_t *rects)
+{
+    std::lock_guard lk(mutex_);
+
+    for(int i = 0; i < num_rects; i++)
+        dirtyRects_.add(rects[i].top, rects[i].left, rects[i].bottom, rects[i].right);
+    //dirtyRects_.add(0,0,height(),width());
+
+    requestUpdate();
+}
 
 template<int depth>
 struct IndexedPixelGetter

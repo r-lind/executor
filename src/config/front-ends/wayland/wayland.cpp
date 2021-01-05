@@ -327,11 +327,7 @@ void WaylandVideoDriver::noteUpdatesDone()
             state_ = State::idle;
             stateChanged_.notify_all();
         }
-        if(requestFrame())
-        {
-            surface_.commit();
-            display_.flush();
-        }
+        requestUpdate();
     }
 }
 
@@ -379,11 +375,7 @@ bool WaylandVideoDriver::updateMode()
         state_ = State::idle;
         stateChanged_.notify_all();
         
-        if(requestFrame())
-        {
-            surface_.commit();
-            display_.flush();
-        }
+        requestUpdate();
     }
 
     return sizeChanged || depthChanged;
@@ -407,6 +399,15 @@ bool WaylandVideoDriver::requestFrame()
     frameRequested_ = true;
 
     return true;
+}
+
+void WaylandVideoDriver::requestUpdate()
+{
+    if(requestFrame())
+    {
+        surface_.commit();
+        display_.flush();
+    }
 }
 
 void WaylandVideoDriver::frameCallback()
@@ -483,22 +484,6 @@ void WaylandVideoDriver::frameCallback()
 
     surface_.commit();
     display_.flush();
-}
-
-void WaylandVideoDriver::updateScreenRects(
-    int num_rects, const vdriver_rect_t *rects)
-{
-    std::lock_guard lk(mutex_);
-
-    for(int i = 0; i < num_rects; i++)
-        dirtyRects_.add(rects[i].top, rects[i].left, rects[i].bottom, rects[i].right);
-    //dirtyRects_.add(0,0,height(),width());
-
-    if(requestFrame())
-    {
-        surface_.commit();
-        display_.flush();
-    }
 }
 
 void WaylandVideoDriver::setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y)
