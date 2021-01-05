@@ -137,9 +137,7 @@ static const option_vec common_opts = {
       "specify a program to run and one or more documents to print.",
       opt_no_arg, "" },
 
-#if 0
   { "noclock",     "disable timer",               opt_no_arg,   "" },
-#endif
 
     { "noautorefresh",
       "turns off automatic detection of programs that bypass QuickDraw.",
@@ -460,9 +458,7 @@ static void parseCommandLine(int& argc, char **argv)
     opt_bool_val(opt_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(opt_db, "print", &ROMlib_print, &bad_arg_p);
     opt_bool_val(opt_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);
-#if 0
-  opt_int_val (opt_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
-#endif
+    opt_bool_val (opt_db, "noclock", &ROMlib_noclock,   &bad_arg_p);
     {
         int no_auto = false;
         opt_int_val(opt_db, "noautorefresh", &no_auto, &bad_arg_p);
