@@ -19,11 +19,6 @@ class Interrupt
 {
     int index = -1;
 
-    static constexpr int maxInterrupts = 10;
-    struct Impl;
-    static std::array<Impl, maxInterrupts> interrupts;
-    static int nInterrupts;
-
     static void handleCommon();
 
 public:

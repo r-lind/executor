@@ -29,18 +29,17 @@
 
 using namespace Executor;
 
-
-struct Interrupt::Impl
-{
-    std::function<void ()>  f;
-    std::atomic_flag triggered;
-};
-
-std::array<Interrupt::Impl, Interrupt::maxInterrupts> Interrupt::interrupts;
-int Interrupt::nInterrupts = 0;
-
 namespace
 {
+    constexpr int maxInterrupts = 10;
+        
+        // pointer to std::function to avoid static constructor
+        // (so Interrupt() can be constructed at static construction time)
+    std::array<std::function<void ()>*, maxInterrupts> interruptFunctions;
+    std::array<std::atomic_flag, maxInterrupts> interruptTriggered;
+    int nInterrupts = 0;
+
+
     Interrupt timerInterrupt;
 
 #if USE_TIMER_THREAD
@@ -76,10 +75,9 @@ Interrupt::Interrupt(std::function<void ()> f)
 {
     assert(nInterrupts < maxInterrupts);
     index = nInterrupts++;
-    auto& impl = interrupts[index];
 
-    impl.f = f;
-    impl.triggered.test_and_set();
+    interruptFunctions[index] = new std::function<void()>(f);
+    interruptTriggered[index].test_and_set();
 }
 
 void Interrupt::trigger()
@@ -87,7 +85,7 @@ void Interrupt::trigger()
     if(index < 0)
         return;
 
-    interrupts[index].triggered.clear();
+    interruptTriggered[index].clear();
 
     interrupt_generate(M68K_TIMER_PRIORITY);
     getPowerCore().requestInterrupt();
@@ -123,8 +121,8 @@ void Interrupt::handleCommon()
 
     for(int i = 0; i < nInterrupts; i++)
     {
-        if(!interrupts[i].triggered.test_and_set())
-            interrupts[i].f();
+        if(!interruptTriggered[i].test_and_set())
+            (*interruptFunctions[i])();
     }
 
     memcpy(&cpu_state.regs, saved_regs, sizeof saved_regs);
@@ -276,7 +274,7 @@ void SyncintTimer::wait()
     using namespace std::literals::chrono_literals;
 
     std::unique_lock<std::mutex> lock(mutex);
-    wake_cond.wait_for(lock, 1s, []() { return INTERRUPT_PENDING(); });
+    wake_cond.wait(lock, []() { return INTERRUPT_PENDING(); });
 
     // unlock here, in case the subsequent call to syncint_check_interrupt()
     // triggers a call to syncint_post(), which will need to lock 'mutex'.
@@ -295,6 +293,9 @@ void Executor::syncint_init()
         callback_install(&Interrupt::handle68K, nullptr);
 
     getPowerCore().handleInterrupt = &Interrupt::handlePowerPC;
+
+    for(auto& flag : interruptTriggered)
+        flag.test_and_set();
 
     timerInterrupt = Interrupt(&timeInterruptHandler);
     timer.start();
