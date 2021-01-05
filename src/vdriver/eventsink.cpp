@@ -6,11 +6,17 @@
 #include <rsys/scrap.h>
 #include <osevent/osevent.h>
 #include <rsys/keyboard.h>
-
+#include <time/syncint.h>
 
 using namespace Executor;
 
 std::unique_ptr<EventSink> EventSink::instance;
+
+Interrupt eventInterrupt {
+    [] {
+        EventSink::instance->pumpEvents();
+    }
+};
 
 void EventSink::mouseButtonEvent(bool down)
 {
@@ -75,6 +81,7 @@ void EventSink::runOnEmulatorThread(std::function<void ()> f)
 {
     std::lock_guard lk(mutex_);
     todo_.push_back(f);
+    eventInterrupt.trigger();
 }
 
 void EventSink::pumpEvents()
