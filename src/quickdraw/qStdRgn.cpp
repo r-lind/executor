@@ -25,11 +25,6 @@
 
 using namespace Executor;
 
-void Executor::ROMlib_WriteWhen(WriteWhenType when)
-{
-    ROMlib_when = when;
-}
-
 void Executor::ROMlib_blt_rgn_update_dirty_rect(RgnHandle rh,
                                                 int16_t mode, bool tile_src_p, int bpp,
                                                 const PixMap *src_pm, PixMap *dst_pm,

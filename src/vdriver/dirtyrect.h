@@ -24,5 +24,4 @@ public:
 };
 
 extern void dirty_rect_accrue(int top, int left, int bottom, int right);
-extern void dirty_rect_update_screen(void);
 }

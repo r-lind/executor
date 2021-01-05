@@ -424,8 +424,6 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
         }
     }
 
-    dirty_rect_update_screen();
-
     return retval;
 }
 

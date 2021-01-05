@@ -181,24 +181,7 @@ void setupprefvalues(DialogPtr dp)
     setedittextnum(dp, PREFREFRESHITEM, ROMlib_refresh);
     setedittextcstr(dp, PREF_COMMENTS, ROMlib_Comments);
 
-    switch(ROMlib_when)
-    {
-        case WriteAlways:
-        case WriteInBltrgn:
-            toset = PREFANIMATIONITEM;
-            break;
-#if !defined(LETGCCWAIL)
-        default:
-#endif /* !defined(LETGCCWAIL) */
-        case WriteNever:
-        case WriteInOSEvent:
-            toset = PREFNORMALITEM;
-            break;
-        case WriteAtEndOfTrap:
-            toset = PREFINBETWEENITEM;
-            break;
-    }
-    setoneofthree(dp, toset, PREFNORMALITEM, PREFINBETWEENITEM,
+    setoneofthree(dp, PREFNORMALITEM, PREFNORMALITEM, PREFINBETWEENITEM,
                   PREFANIMATIONITEM);
     modstate(dp, PREFNOCLOCKITEM, ROMlib_clock != 2 ? SETSTATE : CLEARSTATE);
     modstate(dp, PREFNO32BITWARNINGSITEM,
@@ -279,13 +262,6 @@ void readprefvalues(DialogPtr dp)
 {
     set_refresh_rate(getedittext(dp, PREFREFRESHITEM));
     update_string_from_edit_text(ROMlib_Comments, dp, PREF_COMMENTS);
-
-    if(getvalue(dp, PREFANIMATIONITEM))
-        ROMlib_WriteWhen(WriteInBltrgn);
-    else if(getvalue(dp, PREFINBETWEENITEM))
-        ROMlib_WriteWhen(WriteAtEndOfTrap);
-    else
-        ROMlib_WriteWhen(WriteInOSEvent);
 
     ROMlib_clockonoff(!getvalue(dp, PREFNOCLOCKITEM));
 

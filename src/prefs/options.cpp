@@ -21,7 +21,6 @@
 namespace Executor
 {
 // prefs.h 
-WriteWhenType ROMlib_when = WriteInOSEvent;
 sound_t ROMlib_PretendSound = soundpretend;
 bool ROMlib_cacheheuristic = false;     // unused
 //int ROMlib_clock;   // maybe this is actually internal state of vbl.cpp

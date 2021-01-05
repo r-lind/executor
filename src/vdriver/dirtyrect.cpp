@@ -204,7 +204,6 @@ DirtyRects::getAndClear()
     return rects;
 }
 
-static DirtyRects dirtyRects;
 
 void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
 {
@@ -215,20 +214,6 @@ void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
     /* Note that Executor has touched the screen. */
     note_executor_changed_screen(top, bottom);
 
-    dirtyRects.add(top, left, bottom, right);
-
-    if(ROMlib_when == WriteInBltrgn && !dirtyRects.empty())
-        dirty_rect_update_screen();
+    vdriver->updateScreen(top, left, bottom, right);
 }
-
-void Executor::dirty_rect_update_screen(void)
-{
-    if(!dirtyRects.empty())
-    {
-        auto dirty = dirtyRects.getAndClear();
-
-        vdriver->updateScreenRects(dirty.size(), dirty.data());
-    }
-}
-
 

@@ -36,13 +36,6 @@ void Executor::ParseConfigFile(std::string appname, OSType type)
 	if (ROMlib_options & ROMLIB_NOCLOCK_BIT)
 	    ROMlib_noclock = true;
 #endif
-        if(ROMlib_options & ROMLIB_BLIT_OS_BIT)
-            ROMlib_WriteWhen(WriteInOSEvent);
-        if(ROMlib_options & ROMLIB_BLIT_TRAP_BIT)
-            ROMlib_WriteWhen(WriteAtEndOfTrap);
-        if(ROMlib_options & ROMLIB_BLIT_OFTEN_BIT)
-            ROMlib_WriteWhen(WriteInBltrgn);
-
         if(ROMlib_options & ROMLIB_REFRESH_BIT)
             ROMlib_refresh = 10;
         if(ROMlib_options & ROMLIB_SOUNDOFF_BIT)
@@ -156,31 +149,16 @@ int Executor::saveprefvalues(const char *savefilename)
         fprintf(fp, "RefreshNumber = %d;\n", ROMlib_refresh);
         fprintf(fp, "Delay = %d;\n", ROMlib_delay);
         fprintf(fp, "Options = {");
-        switch(ROMlib_when)
-        {
-            case WriteAlways:
-            case WriteInBltrgn:
-                fprintf(fp, "BlitOften");
-                break;
-            default:
-            case WriteNever:
-            case WriteInOSEvent:
-                fprintf(fp, "BlitInOSEvent");
-                break;
-            case WriteAtEndOfTrap:
-                fprintf(fp, "BlitAtTrapEnd");
-                break;
-        }
         switch(ROMlib_PretendSound)
         {
             case soundoff:
-                fprintf(fp, ", SoundOff");
+                fprintf(fp, "SoundOff");
                 break;
             case soundpretend:
-                fprintf(fp, ", PretendSound");
+                fprintf(fp, "PretendSound");
                 break;
             case soundon:
-                fprintf(fp, ", SoundOn");
+                fprintf(fp, "SoundOn");
                 break;
         }
         if(ROMlib_passpostscript)
