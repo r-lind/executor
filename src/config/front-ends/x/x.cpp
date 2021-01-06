@@ -64,16 +64,14 @@ namespace Executor {
 
 using namespace Executor;
 
-/* save the original sigio flag; used when we shutdown */
-static int orig_sigio_flag;
-static int orig_sigio_owner;
 static int x_fd = -1;
+static int wait_fd[2] = {-1, -1};
 
 #define EXECUTOR_WINDOW_EVENT_MASK (KeyPressMask | KeyReleaseMask         \
                                     | ButtonPressMask | ButtonReleaseMask \
                                     | FocusChangeMask   \
                                     | ExposureMask | PointerMotionMask    \
-                                    | ColormapChangeMask)
+                                    )
 
 void cursor_init(void);
 
@@ -110,81 +108,17 @@ static int selectionlength;
    executor window */
 static int frob_autorepeat_p = false;
 
-static XrmOptionDescRec opts[] = {
-    { "-synchronous", ".synchronous", XrmoptionNoArg, "off" },
-    { "-geometry", ".geometry", XrmoptionSepArg, 0 },
-    { "-privatecmap", ".privateColormap", XrmoptionNoArg, "on" },
-    { "-truecolor", ".trueColor", XrmoptionNoArg, "on" },
-    { "-scancodes", ".scancodes", XrmoptionNoArg, "on" },
-
-/* options that are transfered from the x resource database to the
-     `common' executor options database */
-#define FIRST_COMMON_OPT 5
-    { "-debug", ".debug", XrmoptionSepArg, 0 },
-};
-
 void X11VideoDriver::registerOptions(void)
 {
     opt_register("vdriver", {
-            {"synchronous", "run in synchronous mode", opt_no_arg},
             {"geometry", "specify the executor window geometry", opt_sep},
-            {"privatecmap", "have executor use a private x colormap", opt_no_arg},
-            {"truecolor", "have executor use a TrueColor visual", opt_no_arg},
             {"scancodes", "different form of key mapping (may be useful in "
                 "conjunction with -keyboard)", opt_no_arg},
         });
 }
 
-static XrmDatabase xdb;
-
 Display *x_dpy;
 static int x_screen;
-
-int get_string_resource(char *resource, char **retval)
-{
-    char *res_type, res_name[256], res_class[256];
-    XrmValue v;
-
-    sprintf(res_name, "executor.%s", resource);
-    sprintf(res_class, "Executor.%s", resource);
-
-    if(!XrmGetResource(xdb, res_name, res_class, &res_type, &v))
-        return false;
-    *retval = v.addr;
-    return true;
-}
-
-int get_bool_resource(char *resource, int *retval)
-{
-    char *res_type, res_name[256], res_class[256];
-    XrmValue v;
-
-    sprintf(res_name, "executor.%s", resource);
-    sprintf(res_class, "Executor.%s", resource);
-
-    if(!XrmGetResource(xdb, res_name, res_class, &res_type, &v))
-        return false;
-    if(!strcasecmp(v.addr, "on")
-       || !strcasecmp(v.addr, "true")
-       || !strcasecmp(v.addr, "yes")
-       || !strcasecmp(v.addr, "1"))
-    {
-        *retval = true;
-        return true;
-    }
-    if(!strcasecmp(v.addr, "off")
-       || !strcasecmp(v.addr, "false")
-       || !strcasecmp(v.addr, "no")
-       || !strcasecmp(v.addr, "0"))
-    {
-        *retval = false;
-        return true;
-    }
-
-    /* FIXME: print warning */
-    *retval = false;
-    return true;
-}
 
 static int have_shm, shm_err = false;
 
@@ -360,140 +294,8 @@ x_keysym_to_mac_virt(unsigned int keysym, unsigned char *virt_out)
     return true;
 }
 
-static bool x_event_pending_p(void)
-{
-    fd_set fds;
-    struct timeval no_wait;
-    bool retval;
-
-    FD_ZERO(&fds);
-    FD_SET(x_fd, &fds);
-    no_wait.tv_sec = no_wait.tv_usec = 0;
-    retval = select(x_fd + 1, &fds, 0, 0, &no_wait) > 0;
-    return retval;
-}
-
-static syn68k_addr_t
-post_pending_x_events(syn68k_addr_t interrupt_addr, void *selfUntyped)
-{
-    auto *self = reinterpret_cast<X11VideoDriver*>(selfUntyped);
-    XEvent evt;
-
-    while(XCheckTypedEvent(x_dpy, SelectionRequest, &evt)
-          || XCheckMaskEvent(x_dpy, ~0L, &evt))
-    {
-        switch(evt.type)
-        {
-            case SelectionRequest:
-            {
-                Atom property;
-                XSelectionEvent xselevt;
-
-                property = evt.xselectionrequest.property;
-                if(property == None)
-                    property = x_selection_atom;
-
-                XChangeProperty(x_dpy, evt.xselectionrequest.requestor, property,
-                                XA_STRING, (int)8, (int)PropModeReplace,
-                                (unsigned char *)selectiontext, selectionlength);
-
-                xselevt.type = SelectionNotify;
-                xselevt.requestor = evt.xselectionrequest.requestor; /* check this */
-                xselevt.selection = evt.xselectionrequest.selection;
-                xselevt.target = evt.xselectionrequest.target;
-                xselevt.property = property;
-                xselevt.time = evt.xselectionrequest.time;
-
-                XSendEvent(x_dpy, xselevt.requestor, False, 0L,
-                           (XEvent *)&xselevt);
-
-                break;
-            }
-            case KeyPress:
-            case KeyRelease:
-            {
-                unsigned keysym;
-                unsigned char virt;
-
-                if(use_scan_codes)
-                {
-                    uint8_t keycode;
-
-                    keycode = evt.xkey.keycode;
-                    if(keycode < std::size(x_keycode_to_mac_virt))
-                        keysym = x_keycode_to_mac_virt[keycode];
-                    else
-                        keysym = NOTKEY;
-                }
-                else
-                {
-                    keysym = XLookupKeysym(&evt.xkey, 0);
-
-                    /* This hack is because the default is to map BACKSPACE to
-		   the same key that DELETE produces just because people
-		   don't like BACKSPACE generating a ^H ... yahoo! */
-
-                    if(keysym == 0xFFFF && evt.xkey.keycode == 0x16)
-                        keysym = 0xFF08;
-
-                    /* This hack is because the default is to map Scroll Lock
-		   and Right-Alt to the same key.  I'm not sure why */
-
-                    if(keysym == 0xFF7E && evt.xkey.keycode == 0x4e)
-                        keysym = 0xFF7D;
-                }
-
-                if(x_keysym_to_mac_virt(keysym, &virt))
-                {
-                    self->callbacks_->keyboardEvent(evt.type == KeyPress, virt);
-                }
-                break;
-            }
-            case ButtonPress:
-            case ButtonRelease:
-            {
-                self->callbacks_->mouseButtonEvent(evt.type == ButtonPress, evt.xbutton.x, evt.xbutton.y);
-                break;
-            }
-            case Expose:
-                self->updateScreen(evt.xexpose.y, evt.xexpose.x,
-                                      evt.xexpose.y + evt.xexpose.height,
-                                      evt.xexpose.x + evt.xexpose.width);
-                break;
-            case FocusIn:
-                if(frob_autorepeat_p)
-                    XAutoRepeatOff(x_dpy);
-                {
-                    bool cvt;
-                    Window selection_owner;
-
-                    selection_owner = XGetSelectionOwner(x_dpy, XA_PRIMARY);
-                    cvt = selection_owner != None && selection_owner != x_window;
-                    if(cvt)
-                        ZeroScrap();
-                    self->callbacks_->resumeEvent(cvt);
-                }
-                break;
-            case FocusOut:
-                if(frob_autorepeat_p)
-                    XAutoRepeatOn(x_dpy);
-                self->callbacks_->suspendEvent();
-                break;
-            case MotionNotify:
-                self->callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
-                break;
-        }
-    }
-    return MAGIC_RTE_ADDRESS;
-}
-
-void x_event_handler(int signo)
-{
-    /* request syncint */
-    interrupt_generate(M68K_EVENT_PRIORITY);
-}
-
-bool X11VideoDriver::parseCommandLine(int& argc, char *argv[])
+X11VideoDriver::X11VideoDriver(Executor::IEventListener *listener, int& argc, char* argv[])
+    : VideoDriverCommon(listener)
 {
     x_dpy = XOpenDisplay("");
     if(x_dpy == nullptr)
@@ -512,58 +314,25 @@ bool X11VideoDriver::parseCommandLine(int& argc, char *argv[])
                                &shm_first_event,
                                &shm_first_error);
 
-    char *xdefs = XResourceManagerString(x_dpy);
-    if(xdefs)
-        xdb = XrmGetStringDatabase(xdefs);
 
-    XrmParseCommand(&xdb, opts, std::size(opts), "Executor", &argc, argv);
 
-    return true;
-}
-
-bool X11VideoDriver::init()
-{
-    int i;
+    max_width = std::max<int>(VDRIVER_DEFAULT_SCREEN_WIDTH, flag_width);
+    max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT, flag_height);
 
     XVisualInfo *visuals, vistemplate;
+
+
     int n_visuals;
-    int dummy_int;
-    unsigned int geom_width, geom_height;
-    char *geom;
-
-    
-    get_bool_resource("scancodes", &use_scan_codes);
-
-    if(!get_string_resource("geometry", &geom))
-        geom = 0;
-    /* default */
-    geom_width = VDRIVER_DEFAULT_SCREEN_WIDTH;
-    geom_height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
-    if(geom)
-    {
-        /* override the maximum with possible geometry values */
-        XParseGeometry(geom, &dummy_int, &dummy_int,
-                       &geom_width, &geom_height);
-    }
-    max_width = std::max<int>(VDRIVER_DEFAULT_SCREEN_WIDTH,
-                         (std::max<int>(geom_width, flag_width)));
-    max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT,
-                          std::max<int>(geom_height, flag_height));
-
     vistemplate.screen = x_screen;
     vistemplate.depth = 8;
-
-    visual = nullptr;
-
-
-    vistemplate.screen = x_screen;
     vistemplate.c_class = TrueColor;
 
     visuals = XGetVisualInfo(x_dpy,
                                 (VisualScreenMask | VisualClassMask),
                                 &vistemplate, &n_visuals);
 
-    for(i = 0; i < n_visuals; i++)
+    visual = nullptr;
+    for(int i = 0; i < n_visuals; i++)
     {
         if(visuals[i].depth >= 24)
         {
@@ -584,39 +353,11 @@ bool X11VideoDriver::init()
                     &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
                     &x_fbuf_bpp);
 
-
     cursor_init();
 
     x_selection_atom = XInternAtom(x_dpy, "ROMlib_selection", False);
-
-    /* hook into syn68k synchronous interrupts */
-    {
-        syn68k_addr_t event_callback;
-
-        event_callback = callback_install(post_pending_x_events, this);
-        *(GUEST<ULONGINT> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = (ULONGINT)event_callback;
-    }
-
-    /* set up the async x even handler */
-    {
-        x_fd = XConnectionNumber(x_dpy);
-
-        struct sigaction sa;
-
-        sa.sa_handler = x_event_handler;
-        sigemptyset(&sa.sa_mask);
-        sigaddset(&sa.sa_mask, SIGIO);
-        sa.sa_flags = 0;
-
-        sigaction(SIGIO, &sa, nullptr);
-
-        fcntl(x_fd, F_GETOWN, &orig_sigio_owner);
-        fcntl(x_fd, F_SETOWN, getpid());
-        orig_sigio_flag = fcntl(x_fd, F_GETFL, 0) & ~FASYNC;
-        fcntl(x_fd, F_SETFL, orig_sigio_flag | FASYNC);
-    }
-
-    return true;
+    
+    x_fd = XConnectionNumber(x_dpy);
 }
 
 void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool grayscale_p)
@@ -625,86 +366,26 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
     XSizeHints size_hints = {};
     XGCValues gc_values;
 
-    char *geom;
-    int geom_mask;
     int x = 0, y = 0;
 
     /* size and base size are set below after parsing geometry */
-    size_hints.flags = PSize | PMinSize | PMaxSize | PBaseSize | PWinGravity;
+    size_hints.flags = PSize | PMinSize | PMaxSize | PBaseSize;
 
-    if(!width
-       || !height)
-    {
-        geom = nullptr;
-        get_string_resource("geometry", &geom);
-        if(geom)
-        {
-            unsigned w, h;
-            geom_mask = XParseGeometry(geom, &x, &y, &w, &h);
-            if(geom_mask & WidthValue)
-            {
-                width = w;
-                if(width < VDRIVER_MIN_SCREEN_WIDTH)
-                    width = VDRIVER_MIN_SCREEN_WIDTH;
-                else if(width > max_width)
-                    width = max_width;
-
-                size_hints.flags |= USSize;
-            }
-            if(geom_mask & HeightValue)
-            {
-                height = h;
-                if(height < VDRIVER_MIN_SCREEN_HEIGHT)
-                    height = VDRIVER_MIN_SCREEN_HEIGHT;
-                else if(height > max_height)
-                    height = max_height;
-                size_hints.flags |= USSize;
-            }
-            if(geom_mask & XValue)
-            {
-                if(geom_mask & XNegative)
-                    x = XDisplayWidth(x_dpy, x_screen) + x - width;
-                size_hints.flags |= USPosition;
-            }
-            if(geom_mask & YValue)
-            {
-                if(geom_mask & YNegative)
-                    y = XDisplayHeight(x_dpy, x_screen) + y - height;
-                size_hints.flags |= USPosition;
-            }
-            switch(geom_mask & (XNegative | YNegative))
-            {
-                case 0:
-                    size_hints.win_gravity = NorthWestGravity;
-                    break;
-                case XNegative:
-                    size_hints.win_gravity = NorthEastGravity;
-                    break;
-                case YNegative:
-                    size_hints.win_gravity = SouthWestGravity;
-                    break;
-                default:
-                    size_hints.win_gravity = SouthEastGravity;
-                    break;
-            }
-        }
-    }
-    else
-    {
+    //if(width && height)
+    //{
         /* size was specified; we aren't using defaults */
         size_hints.flags |= USSize;
-        size_hints.win_gravity = NorthWestGravity;
+    //}
 
-        if(width < 512)
-            width = 512;
-        else if(width > max_width)
-            width = max_width;
+    if(width < VDRIVER_MIN_SCREEN_WIDTH)
+        width = VDRIVER_MIN_SCREEN_WIDTH;
+    else if(width > max_width)
+        width = max_width;
 
-        if(height < 342)
-            height = 342;
-        else if(height > max_height)
-            height = max_height;
-    }
+    if(height < VDRIVER_MIN_SCREEN_HEIGHT)
+        height = VDRIVER_MIN_SCREEN_HEIGHT;
+    else if(height > max_height)
+        height = max_height;
 
     size_hints.min_width = size_hints.max_width
         = size_hints.base_width = size_hints.width = width;
@@ -813,6 +494,7 @@ void X11VideoDriver::setCursor(char *cursor_data,
                               uint16_t cursor_mask[16],
                               int hotspot_x, int hotspot_y)
 {
+    std::lock_guard lk(mutex_);
     ::Cursor orig_x_cursor = x_cursor;
 
     x_cursor = create_x_cursor(cursor_data, (char *)cursor_mask,
@@ -828,6 +510,7 @@ void X11VideoDriver::setCursor(char *cursor_data,
 
 void X11VideoDriver::setCursorVisible(bool show_p)
 {
+    std::lock_guard lk(mutex_);
     if(cursor_visible_p != show_p)
         XDefineCursor(x_dpy, x_window, show_p ? x_cursor : x_hidden_cursor);
     cursor_visible_p = show_p;
@@ -876,45 +559,48 @@ void cursor_init(void)
     x_hidden_cursor = create_x_cursor(zero, zero, 0, 0);
 }
 
-
-void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
+void X11VideoDriver::render(std::unique_lock<std::mutex>& lk, std::optional<DirtyRects::Rect> extra)
 {
-    updateBuffer((uint32_t*)x_fbuf, framebuffer_.width, framebuffer_.height, num_rects, r);
-
-    for(int i = 0; i < num_rects; i++)
+    auto rects = dirtyRects_.getAndClear();
+    
+    if(!rects.empty())
     {
-        int x = r[i].left;
-        int y = r[i].top;
-        int w = r[i].right - r[i].left;
-        int h = r[i].bottom - r[i].top;
+        lk.unlock();
+        updateBuffer(framebuffer_, (uint32_t*)x_fbuf, framebuffer_.width, framebuffer_.height, rects);
+        lk.lock();
+    }
+
+    auto draw = [this](const DirtyRects::Rect& r) {
+        int x = r.left;
+        int y = r.top;
+        int w = r.right - r.left;
+        int h = r.bottom - r.top;
         if(have_shm)
             XShmPutImage(x_dpy, x_window, copy_gc, x_x_image,
                     x, y, x, y, w, h, False);
         else
             XPutImage(x_dpy, x_window, copy_gc, x_x_image,
                     x, y, x, y, w, h);
-    }
-    XFlush(x_dpy);
+    };
+    
+    for(const auto& r : rects)
+        draw(r);
+    if(extra)
+        draw(*extra);
+    if(!rects.empty() || extra)
+        XFlush(x_dpy);
 }
+
 
 X11VideoDriver::~X11VideoDriver()
 {
-    if(x_dpy == nullptr)
-        return;
-
-    /* no more sigio */
-    signal(SIGIO, SIG_IGN);
-
-    fcntl(x_fd, F_SETOWN, orig_sigio_owner);
-    fcntl(x_fd, F_SETFL, orig_sigio_flag);
-
-    XCloseDisplay(x_dpy);
-
-    x_dpy = nullptr;
+    if(x_dpy)
+        XCloseDisplay(x_dpy);
 }
 
 bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
+    std::lock_guard lk(mutex_);
     if(!x_window)
     {
         alloc_x_window(width, height, bpp, grayscale_p);
@@ -951,34 +637,158 @@ bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     return true;
 }
 
-void X11VideoDriver::pumpEvents()
+void X11VideoDriver::handleEvents()
 {
-    if(x_event_pending_p())
-        post_pending_x_events(/* dummy */ -1, /* dummy */ nullptr);
+    std::unique_lock lk(mutex_);
+    while(XPending(x_dpy))
+    {
+        XEvent evt;
+        XNextEvent(x_dpy, &evt);
 
-    LONGINT x, y;
-    Window dummy_window;
-    Window child_window;
-    int dummy_int;
-    unsigned int mods;
+        switch(evt.type)
+        {
+            case SelectionRequest:
+            {
+                Atom property;
+                XSelectionEvent xselevt;
 
-    XQueryPointer(x_dpy, x_window, &dummy_window,
-                  &child_window, &dummy_int, &dummy_int,
-                  &x, &y, &mods);
+                property = evt.xselectionrequest.property;
+                if(property == None)
+                    property = x_selection_atom;
 
-    callbacks_->mouseMoved(x,y);
+                XChangeProperty(x_dpy, evt.xselectionrequest.requestor, property,
+                                XA_STRING, (int)8, (int)PropModeReplace,
+                                (unsigned char *)selectiontext, selectionlength);
+
+                xselevt.type = SelectionNotify;
+                xselevt.requestor = evt.xselectionrequest.requestor; /* check this */
+                xselevt.selection = evt.xselectionrequest.selection;
+                xselevt.target = evt.xselectionrequest.target;
+                xselevt.property = property;
+                xselevt.time = evt.xselectionrequest.time;
+
+                XSendEvent(x_dpy, xselevt.requestor, False, 0L,
+                           (XEvent *)&xselevt);
+
+                break;
+            }
+            case KeyPress:
+            case KeyRelease:
+            {
+                unsigned keysym;
+                unsigned char virt;
+
+                if(use_scan_codes)
+                {
+                    uint8_t keycode;
+
+                    keycode = evt.xkey.keycode;
+                    if(keycode < std::size(x_keycode_to_mac_virt))
+                        keysym = x_keycode_to_mac_virt[keycode];
+                    else
+                        keysym = NOTKEY;
+                }
+                else
+                {
+                    keysym = XLookupKeysym(&evt.xkey, 0);
+
+                    /* This hack is because the default is to map BACKSPACE to
+		   the same key that DELETE produces just because people
+		   don't like BACKSPACE generating a ^H ... yahoo! */
+
+                    if(keysym == 0xFFFF && evt.xkey.keycode == 0x16)
+                        keysym = 0xFF08;
+
+                    /* This hack is because the default is to map Scroll Lock
+		   and Right-Alt to the same key.  I'm not sure why */
+
+                    if(keysym == 0xFF7E && evt.xkey.keycode == 0x4e)
+                        keysym = 0xFF7D;
+                }
+
+                if(x_keysym_to_mac_virt(keysym, &virt))
+                {
+                    callbacks_->keyboardEvent(evt.type == KeyPress, virt);
+                }
+                break;
+            }
+            case ButtonPress:
+            case ButtonRelease:
+            {
+                callbacks_->mouseButtonEvent(evt.type == ButtonPress, evt.xbutton.x, evt.xbutton.y);
+                break;
+            }
+            case Expose:
+                render(lk, DirtyRects::Rect{
+                    evt.xexpose.y, evt.xexpose.x,
+                    evt.xexpose.y + evt.xexpose.height,
+                    evt.xexpose.x + evt.xexpose.width});
+                break;
+            case FocusIn:
+                if(frob_autorepeat_p)
+                    XAutoRepeatOff(x_dpy);
+                {
+                    bool cvt;
+                    Window selection_owner;
+
+                    selection_owner = XGetSelectionOwner(x_dpy, XA_PRIMARY);
+                    cvt = selection_owner != None && selection_owner != x_window;
+                    if(cvt)
+                        ZeroScrap();
+                    callbacks_->resumeEvent(cvt);
+                }
+                break;
+            case FocusOut:
+                if(frob_autorepeat_p)
+                    XAutoRepeatOn(x_dpy);
+                callbacks_->suspendEvent();
+                break;
+            case MotionNotify:
+                callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
+                break;
+        }
+    }
 }
+
+void X11VideoDriver::runEventLoop()
+{
+    for(;;)
+    {
+        fd_set fds;
+        
+        FD_ZERO(&fds);
+        FD_SET(x_fd, &fds);
+        select(x_fd + 1, &fds, 0, 0, nullptr);
+
+        handleEvents();
+
+        std::unique_lock lk(mutex_);
+        render(lk, {});
+    }
+}
+
+void X11VideoDriver::endEventLoop()
+{
+
+}
+
+void X11VideoDriver::requestUpdate()
+{
+}
+
 
 /* stuff from x.c */
 
 void X11VideoDriver::beepAtUser(void)
 {
+    std::lock_guard lk(mutex_);
     /* 50 for now */
     XBell(x_dpy, 0);
 }
 
 void X11VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_count)
 {
+    std::lock_guard lk(mutex_);
     if(type == "TEXT"_4)
     {
         if(selectiontext)
@@ -1002,11 +812,13 @@ void X11VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_co
 
 void X11VideoDriver::weOwnScrap(void)
 {
+    std::lock_guard lk(mutex_);
     XSetSelectionOwner(x_dpy, XA_PRIMARY, x_window, CurrentTime);
 }
 
 int X11VideoDriver::getScrap(OSType type, Handle h)
 {
+    std::lock_guard lk(mutex_);
     int retval;
 
     retval = -1;
@@ -1060,6 +872,7 @@ int X11VideoDriver::getScrap(OSType type, Handle h)
 
 void X11VideoDriver::setTitle(const std::string& newtitle)
 {
+    std::lock_guard lk(mutex_);
     XSizeHints xsh;
 
     memset(&xsh, 0, sizeof xsh);

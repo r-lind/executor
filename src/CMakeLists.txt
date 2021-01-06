@@ -99,7 +99,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
         -Wno-enum-compare)
 endif()
 
-#add_subdirectory(config/front-ends/x)
+add_subdirectory(config/front-ends/x)
 #add_subdirectory(config/front-ends/sdl)
 #add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
