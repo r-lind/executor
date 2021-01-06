@@ -288,11 +288,12 @@ static void flush_shadow_screen()
         shadow_fbuf = (uint8_t *)malloc(vdriver->rowBytes() * vdriver->height());
         memcpy(shadow_fbuf, vdriver->framebuffer(),
                vdriver->rowBytes() * vdriver->height());
-        vdriver->updateScreen();
 
         rowBytes = vdriver->rowBytes();
         width = vdriver->width();
         height = vdriver->height();
+
+        vdriver->updateScreen(0,0,height,width);
     }
     else if(find_changed_rect_and_update_shadow((uint32_t *)vdriver->framebuffer(),
                                                 (uint32_t *)shadow_fbuf,

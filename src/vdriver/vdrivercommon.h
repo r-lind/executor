@@ -26,7 +26,7 @@ protected:
     Executor::DirtyRects dirtyRects_;
 
     void updateBuffer(const Framebuffer& fb, uint32_t* buffer, int bufferWidth, int bufferHeight,
-                    int num_rects, const vdriver_rect_t *rects);
+                    const Executor::DirtyRects::Rects& rects);
 
     virtual void requestUpdate() = 0;
 
@@ -35,7 +35,7 @@ public:
 
     void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
     void setRootlessRegion(RgnHandle rgn) override;
-    void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r) override;
+    void updateScreen(int top, int left, int bottom, int right) override;
 };
 
 }

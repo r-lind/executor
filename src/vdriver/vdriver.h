@@ -30,11 +30,6 @@ namespace Executor
 #define VDRIVER_DEFAULT_SCREEN_WIDTH 1024
 #define VDRIVER_DEFAULT_SCREEN_HEIGHT 768
 
-struct vdriver_rect_t
-{
-    int top, left, bottom, right;
-};
-
 struct vdriver_color_t
 {
     uint16_t red, green, blue;
@@ -110,9 +105,7 @@ public:
     virtual bool setOptions(std::unordered_map<std::string, std::string> options);
     virtual void registerOptions();
     
-    void updateScreen(int top, int left, int bottom, int right);
-    void updateScreen() { updateScreen(0,0,height(),width()); }
-    virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r);
+    virtual void updateScreen(int top, int left, int bottom, int right);
     virtual bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p);
     virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
     virtual bool setMode(int width, int height, int bpp, bool grayscale_p) = 0;

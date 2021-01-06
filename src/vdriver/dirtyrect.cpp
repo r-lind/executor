@@ -23,7 +23,7 @@ using namespace Executor;
 
 static inline bool
 rects_overlap_p(int top, int left, int bottom, int right,
-                const vdriver_rect_t *r)
+                const DirtyRects::Rect *r)
 {
     return (top < r->bottom
             && r->top < bottom
@@ -34,7 +34,7 @@ rects_overlap_p(int top, int left, int bottom, int right,
 /* This routine is only valid for non-overlapping rectangles! */
 static inline unsigned long
 area_added(int top, int left, int bottom, int right, int r1_area,
-           const vdriver_rect_t *r2)
+           const DirtyRects::Rect *r2)
 {
     int t, l, b, r, new_area, r2_area;
 
@@ -51,7 +51,7 @@ area_added(int top, int left, int bottom, int right, int r1_area,
 }
 
 static inline void
-union_rect(int top, int left, int bottom, int right, vdriver_rect_t *r)
+union_rect(int top, int left, int bottom, int right, DirtyRects::Rect *r)
 {
     if(top < r->top)
         r->top = top;
@@ -145,7 +145,7 @@ void DirtyRects::add(int top, int left, int bottom, int right)
             }
             else
             {
-                vdriver_rect_t *d = &rects_[best];
+                Rect *d = &rects_[best];
 
                 /* We now re-insert the glommed rectangle into the list, to
                  * see if it overlaps anyone else.
@@ -196,8 +196,7 @@ void DirtyRects::add(int top, int left, int bottom, int right)
     }
 }
 
-static_vector<vdriver_rect_t, DirtyRects::MAX_DIRTY_RECTS> 
-DirtyRects::getAndClear()
+DirtyRects::Rects DirtyRects::getAndClear()
 {
     auto rects = rects_;
     rects_.clear();

@@ -36,15 +36,10 @@ void VideoDriverCommon::setRootlessRegion(RgnHandle rgn)
     rootlessRegionDirty_ = true;
 }
 
-void VideoDriverCommon::updateScreenRects(
-    int num_rects, const vdriver_rect_t *rects)
+void VideoDriverCommon::updateScreen(int top, int left, int bottom, int right)
 {
     std::lock_guard lk(mutex_);
-
-    for(int i = 0; i < num_rects; i++)
-        dirtyRects_.add(rects[i].top, rects[i].left, rects[i].bottom, rects[i].right);
-    //dirtyRects_.add(0,0,height(),width());
-
+    dirtyRects_.add(top, left, bottom, right);
     requestUpdate();
 }
 
@@ -78,7 +73,7 @@ struct IndexedPixelGetter
 };
 
 void VideoDriverCommon::updateBuffer(const Framebuffer& fb, uint32_t* buffer, int bufferWidth, int bufferHeight,
-                                int num_rects, const vdriver_rect_t *rects)
+                                const Executor::DirtyRects::Rects& rects)
 {
     auto before = std::chrono::high_resolution_clock::now();
 
@@ -91,16 +86,10 @@ void VideoDriverCommon::updateBuffer(const Framebuffer& fb, uint32_t* buffer, in
     int width = std::min(fb.width, bufferWidth);
     int height = std::min(fb.height, bufferHeight);
 
-    for(int i = 0; i < num_rects; i++)
+    for(const auto& r : rects)
     {
-        vdriver_rect_t r = rects[i];
-
-        if(r.left >= width || r.top >= height)
-            continue;
+        assert(r.left >= 0 && r.right >= 0 && r.left <= width && r.bottom <= height);
         
-        r.right = std::min(width, r.right);
-        r.bottom = std::min(height, r.bottom);
-
         RegionProcessor rgnP(rootlessRegion_.begin());
 
         for(int y = r.top; y < r.bottom; y++)
@@ -108,7 +97,7 @@ void VideoDriverCommon::updateBuffer(const Framebuffer& fb, uint32_t* buffer, in
             while(y >= rgnP.bottom())
                 rgnP.advance();
 
-            auto blitLine = [this, &rgnP, buffer, bufferWidth, bufferHeight, y, r, i](auto getPixel) {
+            auto blitLine = [this, &rgnP, buffer, bufferWidth, bufferHeight, y, &r](auto getPixel) {
                 auto rowIt = rgnP.row.begin();
                 int x = r.left;
 

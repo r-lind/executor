@@ -463,7 +463,7 @@ void WaylandVideoDriver::frameCallback()
     {
         Framebuffer fb = framebuffer_;
         lk.unlock();
-        updateBuffer(fb, buffer_.data(), buffer_.width(), buffer_.height(), rects.size(), rects.data());
+        updateBuffer(fb, buffer_.data(), buffer_.width(), buffer_.height(), rects);
         lk.lock();
     }
 

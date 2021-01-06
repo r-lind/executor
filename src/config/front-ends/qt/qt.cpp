@@ -258,12 +258,9 @@ void QtVideoDriver::render(QBackingStore *bs, QRegion rgn)
     lk.unlock();
 
     for(int i = 0; i < r.size(); i++)
-    {
         rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
-    }
 
-    updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
-        r.size(), r.data());
+    updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(), r);
 
     bs->beginPaint(rgn);
 
