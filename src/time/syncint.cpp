@@ -46,7 +46,7 @@ namespace
     std::mutex mutex;
     std::condition_variable wake_cond;
 #else
-    pthread_t waitingThread;
+    std::optional<pthread_t> waitingThread;
 #endif
 
     struct SyncintTimer
@@ -94,8 +94,8 @@ void Interrupt::trigger()
 #if USE_TIMER_THREAD
     wake_cond.notify_all();
 #else
-    if(pthread_self() != waitingThread)
-        pthread_kill(waitingThread, SIGALRM);
+    if(waitingThread && !pthread_equal(pthread_self(), *waitingThread))
+        pthread_kill(*waitingThread, SIGALRM);
 #endif
 }
 
