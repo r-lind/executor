@@ -65,7 +65,6 @@ namespace Executor {
 using namespace Executor;
 
 static int x_fd = -1;
-static int wait_fd[2] = {-1, -1};
 
 #define EXECUTOR_WINDOW_EVENT_MASK (KeyPressMask | KeyReleaseMask         \
                                     | ButtonPressMask | ButtonReleaseMask \
@@ -108,14 +107,6 @@ static int selectionlength;
    executor window */
 static int frob_autorepeat_p = false;
 
-void X11VideoDriver::registerOptions(void)
-{
-    opt_register("vdriver", {
-            {"geometry", "specify the executor window geometry", opt_sep},
-            {"scancodes", "different form of key mapping (may be useful in "
-                "conjunction with -keyboard)", opt_no_arg},
-        });
-}
 
 Display *x_dpy;
 static int x_screen;
@@ -125,6 +116,20 @@ static int have_shm, shm_err = false;
 static int shm_major_opcode;
 static int shm_first_event;
 static int shm_first_error;
+
+static int wakeup_fd[2] = {-1, -1};
+static std::atomic_bool exitMainLoop = false;
+static bool updateRequested = false;
+
+void X11VideoDriver::registerOptions(void)
+{
+    opt_register("vdriver", {
+            {"geometry", "specify the executor window geometry", opt_sep},
+            {"scancodes", "different form of key mapping (may be useful in "
+                "conjunction with -keyboard)", opt_no_arg},
+        });
+}
+
 
 int x_error_handler(Display *err_dpy, XErrorEvent *err_evt)
 {
@@ -358,6 +363,7 @@ X11VideoDriver::X11VideoDriver(Executor::IEventListener *listener, int& argc, ch
     x_selection_atom = XInternAtom(x_dpy, "ROMlib_selection", False);
     
     x_fd = XConnectionNumber(x_dpy);
+    pipe(wakeup_fd);
 }
 
 void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool grayscale_p)
@@ -566,7 +572,8 @@ void X11VideoDriver::render(std::unique_lock<std::mutex>& lk, std::optional<Dirt
     if(!rects.empty())
     {
         lk.unlock();
-        updateBuffer(framebuffer_, (uint32_t*)x_fbuf, framebuffer_.width, framebuffer_.height, rects);
+                // max_width, max_height are actually the size of the ximage
+        updateBuffer(framebuffer_, (uint32_t*)x_fbuf, max_width, max_height, rects);
         lk.lock();
     }
 
@@ -752,32 +759,46 @@ void X11VideoDriver::handleEvents()
 
 void X11VideoDriver::runEventLoop()
 {
-    for(;;)
+    while(!exitMainLoop)
     {
         fd_set fds;
         
         FD_ZERO(&fds);
         FD_SET(x_fd, &fds);
-        select(x_fd + 1, &fds, 0, 0, nullptr);
+        FD_SET(wakeup_fd[0], &fds);
+        select(std::max(x_fd, wakeup_fd[0]) + 1, &fds, 0, 0, nullptr);
 
         handleEvents();
 
+        if(FD_ISSET(wakeup_fd[0], &fds))
+        {
+            unsigned char b;
+            read(wakeup_fd[0], &b, 1);
+        }
+
         std::unique_lock lk(mutex_);
+        updateRequested = false;
         render(lk, {});
     }
 }
 
 void X11VideoDriver::endEventLoop()
 {
-
+    exitMainLoop = true;
+    unsigned char b = 42;
+    write(wakeup_fd[1], &b, 1);
 }
 
 void X11VideoDriver::requestUpdate()
 {
+    if(!updateRequested)
+    {
+        unsigned char b = 42;
+        write(wakeup_fd[1], &b, 1);
+        updateRequested = true;
+    }
 }
 
-
-/* stuff from x.c */
 
 void X11VideoDriver::beepAtUser(void)
 {
