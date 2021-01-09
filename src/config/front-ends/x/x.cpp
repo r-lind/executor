@@ -86,7 +86,7 @@ static int x_fbuf_bpp;
 static int x_fbuf_row_bytes;
 
 /* max dimensions */
-static int max_width, max_height;   // fixme: this hurts
+static int x_image_width, x_image_height;   // fixme: this hurts
 
 /* x cursor stuff */
 static ::Cursor x_hidden_cursor, x_cursor = -1;
@@ -124,7 +124,6 @@ static bool updateRequested = false;
 void X11VideoDriver::registerOptions(void)
 {
     opt_register("vdriver", {
-            {"geometry", "specify the executor window geometry", opt_sep},
             {"scancodes", "different form of key mapping (may be useful in "
                 "conjunction with -keyboard)", opt_no_arg},
         });
@@ -246,6 +245,9 @@ void alloc_x_image(int bpp, int width, int height,
     *row_bytes_return = row_bytes;
     *x_image_return = x_image;
     *bpp_return = resultant_bpp;
+
+    x_image_width = width;
+    x_image_height = height;
 }
 
 
@@ -321,9 +323,6 @@ X11VideoDriver::X11VideoDriver(Executor::IEventListener *listener, int& argc, ch
 
 
 
-    max_width = std::max<int>(VDRIVER_DEFAULT_SCREEN_WIDTH, flag_width);
-    max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT, flag_height);
-
     XVisualInfo *visuals, vistemplate;
 
 
@@ -354,10 +353,6 @@ X11VideoDriver::X11VideoDriver(Executor::IEventListener *listener, int& argc, ch
         exit(EXIT_FAILURE);
     }
 
-    alloc_x_image(x_fbuf_bpp, max_width, max_height,
-                    &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
-                    &x_fbuf_bpp);
-
     cursor_init();
 
     x_selection_atom = XInternAtom(x_dpy, "ROMlib_selection", False);
@@ -374,24 +369,7 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
 
     int x = 0, y = 0;
 
-    /* size and base size are set below after parsing geometry */
-    size_hints.flags = PSize | PMinSize | PMaxSize | PBaseSize;
-
-    //if(width && height)
-    //{
-        /* size was specified; we aren't using defaults */
-        size_hints.flags |= USSize;
-    //}
-
-    if(width < VDRIVER_MIN_SCREEN_WIDTH)
-        width = VDRIVER_MIN_SCREEN_WIDTH;
-    else if(width > max_width)
-        width = max_width;
-
-    if(height < VDRIVER_MIN_SCREEN_HEIGHT)
-        height = VDRIVER_MIN_SCREEN_HEIGHT;
-    else if(height > max_height)
-        height = max_height;
+    size_hints.flags = PSize | PMinSize | PMaxSize | PBaseSize | USSize;
 
     size_hints.min_width = size_hints.max_width
         = size_hints.base_width = size_hints.width = width;
@@ -401,10 +379,6 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
     size_hints.x = x;
     size_hints.y = y;
 
-    /* #### allow command line options to select {16, 32}bpp modes, but
-     don't make them the default since they still have problems */
-    if(bpp == 0)
-        bpp = 8;
 
     /* create the executor window */
     x_window = XCreateWindow(x_dpy, XRootWindow(x_dpy, x_screen),
@@ -447,9 +421,6 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
     XMapRaised(x_dpy, x_window);
     XClearWindow(x_dpy, x_window);
     XFlush(x_dpy);
-
-    framebuffer_ = Framebuffer(width, height, bpp);
-    framebuffer_.grayscale = grayscale_p;
 }
 
 ::Cursor
@@ -572,8 +543,7 @@ void X11VideoDriver::render(std::unique_lock<std::mutex>& lk, std::optional<Dirt
     if(!rects.empty())
     {
         lk.unlock();
-                // max_width, max_height are actually the size of the ximage
-        updateBuffer(framebuffer_, (uint32_t*)x_fbuf, max_width, max_height, rects);
+        updateBuffer(framebuffer_, (uint32_t*)x_fbuf, x_image_width, x_image_height, rects);
         lk.lock();
     }
 
@@ -608,23 +578,46 @@ X11VideoDriver::~X11VideoDriver()
 bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     std::lock_guard lk(mutex_);
-    if(!x_window)
-    {
-        alloc_x_window(width, height, bpp, grayscale_p);
-        return true;
-    }
 
     if(width == 0)
         width = framebuffer_.width;
-
     if(height == 0)
         height = framebuffer_.height;
-
     if(bpp == 0)
-    {
         bpp = framebuffer_.bpp;
-        if(bpp == 0)
-            bpp = 8;
+
+    if(width == 0)
+        width = VDRIVER_DEFAULT_SCREEN_WIDTH;
+    if(height == 0)
+        height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
+    if(bpp == 0)
+        bpp = 8;
+
+    if(width < VDRIVER_MIN_SCREEN_WIDTH)
+        width = VDRIVER_MIN_SCREEN_WIDTH;
+    if(height < VDRIVER_MIN_SCREEN_HEIGHT)
+        height = VDRIVER_MIN_SCREEN_HEIGHT;
+
+    if(!x_x_image)
+    {
+        alloc_x_image(x_fbuf_bpp, width, height,
+                        &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
+                        &x_fbuf_bpp);
+    }
+    else
+    {
+        if(width > x_image_width)
+            width = x_image_width;
+        if(height > x_image_height)
+            height = x_image_height;
+    }
+
+    if(!x_window)
+    {
+        alloc_x_window(width, height, bpp, grayscale_p);
+        framebuffer_ = Framebuffer(width, height, bpp);
+        framebuffer_.grayscale = grayscale_p;
+        return true;
     }
 
     if(!isAcceptableMode(width, height, bpp, grayscale_p))
