@@ -774,39 +774,38 @@ OSErr Executor::WriteParam() /* IMII-382 */
 
 void Executor::Enqueue(QElemPtr e, QHdrPtr h)
 {
-    GUEST<QElemPtr> *qpp;
+    GUEST<QElemPtr> q = h->qHead;
 
-    for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && *qpp != e;
-        qpp = (GUEST<QElemPtr> *)*qpp)
-        ;
-    if(!*qpp)
+    for(QElemPtr p = h->qHead; p; p = p->evQElem.qLink)
     {
-        e->evQElem.qLink = 0;
-        if(h->qTail)
-            h->qTail->evQElem.qLink = e;
-        else
-            h->qHead = e;
-        h->qTail = e;
+        GUEST<QElemPtr> q = p;
+        if(p == e)
+            return;
     }
+
+    e->evQElem.qLink = nullptr;
+    if(h->qTail)
+        h->qTail->evQElem.qLink = e;
+    else
+        h->qHead = e;
+    h->qTail = e;
 }
 
 OSErr Executor::Dequeue(QElemPtr e, QHdrPtr h)
 {
-    GUEST<QElemPtr> *qpp;       // ### HORRIBLE REINTERPRET-CASTING CODE OBFUSCATION....
-    OSErr retval;
-
-    retval = qErr;
-    for(qpp = (GUEST<QElemPtr> *)&h->qHead; *qpp && *qpp != e;
-        qpp = (GUEST<QElemPtr> *)*qpp)
-        ;
-    if(*qpp)
-    {
-        *qpp = e->evQElem.qLink;
-        if(h->qTail == e)
-            h->qTail = (qpp == (GUEST<QElemPtr> *)&h->qHead) ? nullptr : (QElemPtr)qpp;
-        retval = noErr;
-    }
-    return retval;
+    QElemPtr prev = nullptr;
+    for(QElemPtr p = h->qHead; p; prev = p, p = p->evQElem.qLink)
+        if(p == e)
+        {
+            if(!e->evQElem.qLink)
+                h->qTail = prev;
+            if(prev)
+                prev->evQElem.qLink = e->evQElem.qLink;
+            else
+                h->qHead = e->evQElem.qLink;
+            return noErr;
+        }
+    return qErr;
 }
 
 
