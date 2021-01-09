@@ -505,7 +505,7 @@ Boolean Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
         }
     } while(!retval && !wneTimeout);
 
-    if(sleep)
+    if(sleep > 0)
         RmvTime((QElemPtr)&tm);
 
     return retval;
