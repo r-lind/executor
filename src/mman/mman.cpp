@@ -429,7 +429,7 @@ static void SetupMemoryMapping(Ptr base, size_t size, void *thingOnStack)
 #else
     /*
     On 64-bit platforms, there is no single ROMlib_offset, but rather
-    a four-element array. The high two bits of the 69K address are mapped
+    a four-element array. The high two bits of the 68K address are mapped
     to an index in this array.
     This way, we can access:
         0 - the regular emulated memory
