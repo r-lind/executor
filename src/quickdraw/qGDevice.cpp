@@ -73,7 +73,7 @@ static void gd_setup_main_device()
 
     pixmap_set_pixel_fields(*gd_pixmap, bpp);
 
-    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
+    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->rowBytes() * vdriver->height());
     PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
     PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
 
