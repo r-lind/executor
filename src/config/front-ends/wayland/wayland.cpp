@@ -65,8 +65,6 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
     registry_.on_global() = [this] (uint32_t name, const std::string& interface, uint32_t version) {
         if(interface == compositor_t::interface_name)
             registry_.bind(name, compositor_, version);
-        else if(interface == shell_t::interface_name)
-            registry_.bind(name, shell_, version);
         else if(interface == xdg_wm_base_t::interface_name)
             registry_.bind(name, xdg_wm_base_, version);
         else if(interface == seat_t::interface_name)

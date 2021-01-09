@@ -68,7 +68,6 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     wayland::display_t display_;
     wayland::registry_t registry_;
     wayland::compositor_t compositor_;
-    wayland::shell_t shell_;
     wayland::xdg_wm_base_t xdg_wm_base_;
     wayland::seat_t seat_;
     wayland::shm_t shm_;
