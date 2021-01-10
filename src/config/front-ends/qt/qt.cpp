@@ -44,6 +44,15 @@ namespace Executor
     extern std::unordered_map<Qt::Key,int> qtToMacKeycodeMap;
 }
 
+#ifdef __APPLE__
+    // for some inexplicable reason, when we create a window that covers every pixel of the screen,
+    // a click at y = 0 still misses the window and brings a background app to the front.
+    // As a hack, extend the window by 1 pixel upwards.
+const int windowTopPadding = 1;
+#else
+const int windowTopPadding = 0;
+#endif
+
 class QtVideoDriver::ExecutorWindow : public QWindow
 {
     QtVideoDriver* drv_;
@@ -73,7 +82,7 @@ public:
 
     void mousePressRelease(QMouseEvent *ev)
     {
-        drv_->callbacks_->mouseButtonEvent(!!(ev->buttons() & Qt::LeftButton), ev->x(), ev->y());
+        drv_->callbacks_->mouseButtonEvent(!!(ev->buttons() & Qt::LeftButton), ev->x(), ev->y() - windowTopPadding);
     }
     void mousePressEvent(QMouseEvent *ev) override
     {
@@ -87,9 +96,9 @@ public:
     void mouseMoveEvent(QMouseEvent *ev) override
     {
 #ifdef __APPLE__
-        macosx_hide_menu_bar(ev->x(), ev->y(), width(), height());
+        macosx_hide_menu_bar(ev->x(), ev->y() - windowTopPadding, width(), height());
 #endif
-        drv_->callbacks_->mouseMoved(ev->x(), ev->y());
+        drv_->callbacks_->mouseMoved(ev->x(), ev->y() - windowTopPadding);
     }
 
     void keyEvent(QKeyEvent *ev, bool down_p)
@@ -161,7 +170,7 @@ QtVideoDriver::~QtVideoDriver()
 
 void QtVideoDriver::endEventLoop()
 {
-    QMetaObject::invokeMethod(qapp, "quit");
+    QMetaObject::invokeMethod(qapp, &QGuiApplication::quit);
 }
 
 void QtVideoDriver::runEventLoop()
@@ -191,7 +200,7 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
             rgnP.advance();
             
             for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
-                qtRgn += QRect(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
+                qtRgn += QRect(rgnP.row[i], rgnP.top() + windowTopPadding, rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
         }
         
     #ifdef __APPLE__
@@ -214,12 +223,12 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
     bool initEnded = false;
 
     QMetaObject::invokeMethod(qapp, [=, &initEndMutex, &initEndCond, &initEnded] {
-    #ifdef __APPLE__
+#ifdef __APPLE__
         macosx_hide_menu_bar(500, 0, 1000, 1000);
         QVector<QRect> screenGeometries = getScreenGeometries();
-    #else
+#else
         QVector<QRect> screenGeometries = getAvailableScreenGeometries();
-    #endif
+#endif
 
         printf("set_mode: %d %d %d\n", width, height, bpp);
         
@@ -238,6 +247,11 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
         window->setGeometry(geom);
         window->showMaximized();
 
+#ifdef __APPLE__
+        geom.setY(geom.y() - 1);
+        geom.setHeight(geom.height() + 1);
+        window->setGeometry(geom);
+#endif
         {
             std::unique_lock lk(initEndMutex);
             initEnded = true;
@@ -258,8 +272,8 @@ void QtVideoDriver::render(QBackingStore *bs, QRegion rgn)
     lk.unlock();
 
     for(int i = 0; i < r.size(); i++)
-        rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
-
+        rgn += QRect(r[i].left, r[i].top + windowTopPadding, r[i].right-r[i].left, r[i].bottom-r[i].top);
+                                
     updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(), r);
 
     bs->beginPaint(rgn);
@@ -270,7 +284,7 @@ void QtVideoDriver::render(QBackingStore *bs, QRegion rgn)
     if(qimage)
     {
         for(const QRect& r : rgn)
-            painter.drawImage(r, *qimage, r);
+            painter.drawImage(r, *qimage, r.translated(0, -windowTopPadding));
     }
 
     painter.end();
