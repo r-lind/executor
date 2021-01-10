@@ -39,6 +39,9 @@ if(WIN32)
     )
 endif()
 
+if(CMAKE_GENERATOR STREQUAL "Xcode")
+    add_compile_options($<$<CONFIG:Debug,RelWithDebInfo>:-g>)
+endif()
 
 enable_testing()
 
