@@ -381,7 +381,7 @@ bool WaylandVideoDriver::updateMode()
 
 bool WaylandVideoDriver::requestFrame()
 {
-    if(dirtyRects_.empty() && allocatedShape_.serial == committedShape_.serial)
+    if(dirtyRects_.empty() && allocatedShape_.serial == committedShape_.serial && !rootlessRegionDirty_)
         return false;
 
     if(state_ != State::idle

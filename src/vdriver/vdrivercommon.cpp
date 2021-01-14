@@ -34,6 +34,7 @@ void VideoDriverCommon::setRootlessRegion(RgnHandle rgn)
             (*rgn)->rgnBBox.bottom.get(), (*rgn)->rgnBBox.left.get(), (*rgn)->rgnBBox.right.get(), RGN_STOP,
             RGN_STOP });
     rootlessRegionDirty_ = true;
+    requestUpdate();
 }
 
 void VideoDriverCommon::updateScreen(int top, int left, int bottom, int right)
