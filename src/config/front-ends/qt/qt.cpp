@@ -189,20 +189,13 @@ void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
             return;
         rootlessRegion_ = pendingRootlessRegion_;
 
-        RegionProcessor rgnP(rootlessRegion_.begin());
-
         QRegion qtRgn;
-
-        int height = framebuffer_.height;
-
-        while(rgnP.bottom() < height)
-        {
-            rgnP.advance();
-            
-            for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
-                qtRgn += QRect(rgnP.row[i], rgnP.top() + windowTopPadding, rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
-        }
         
+        forEachRect(rootlessRegion_.begin(), [&](int l, int t, int r, int b) {
+            qtRgn += QRect(l, t + windowTopPadding, r-l, b-t);
+        });
+
+
     #ifdef __APPLE__
         macosx_autorelease_pool([&] {
     #endif
