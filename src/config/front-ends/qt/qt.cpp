@@ -178,37 +178,6 @@ void QtVideoDriver::runEventLoop()
     qapp->exec();
 }
 
-std::optional<QRegion> rootlessRegion;
-
-void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
-{
-    VideoDriverCommon::setRootlessRegion(rgn);
-    QMetaObject::invokeMethod(qapp, [=] {
-
-        if(!rootlessRegionDirty_)
-            return;
-        rootlessRegion_ = pendingRootlessRegion_;
-
-        QRegion qtRgn;
-        
-        forEachRect(rootlessRegion_.begin(), [&](int l, int t, int r, int b) {
-            qtRgn += QRect(l, t + windowTopPadding, r-l, b-t);
-        });
-
-
-    #ifdef __APPLE__
-        macosx_autorelease_pool([&] {
-    #endif
-            window->setMask(qtRgn);
-    #ifdef __APPLE__
-        });
-    #endif
-
-        rootlessRegion = qtRgn;
-    });
-}
-
-
 bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
     std::mutex initEndMutex;
@@ -261,6 +230,25 @@ bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 void QtVideoDriver::render(QBackingStore *bs, QRegion rgn)
 {
     std::unique_lock lk(mutex_);
+    
+    if(rootlessRegionDirty_)
+    {
+        commitRootlessRegion();
+        
+        QRegion qtRgn;
+        forEachRect(rootlessRegion_.begin(), [&](int l, int t, int r, int b) {
+            qtRgn += QRect(l, t + windowTopPadding, r-l, b-t);
+        });
+
+#ifdef __APPLE__
+        macosx_autorelease_pool([&] {
+#endif
+            window->setMask(qtRgn);
+#ifdef __APPLE__
+        });
+#endif
+    }
+    
     auto r = dirtyRects_.getAndClear();
     lk.unlock();
 

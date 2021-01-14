@@ -46,6 +46,9 @@ void VideoDriverCommon::updateScreen(int top, int left, int bottom, int right)
 
 void VideoDriverCommon::commitRootlessRegion()
 {
+    if(!rootlessRegionDirty_)
+        return;
+    
     // calculate symmetric difference (XorRgn) and add to dirtyRects.
     std::vector<int16_t> rgnDiff(rootlessRegion_.size() + pendingRootlessRegion_.size());
 
