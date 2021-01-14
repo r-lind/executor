@@ -19,7 +19,7 @@ protected:
 
     std::array<uint32_t, 256> colors_;
 
-    std::vector<int16_t> rootlessRegion_;
+    std::vector<int16_t> rootlessRegion_ = { 32767 };
     std::vector<int16_t> pendingRootlessRegion_;
     bool rootlessRegionDirty_ = false;
 
@@ -29,6 +29,8 @@ protected:
                     const Executor::DirtyRects::Rects& rects);
 
     virtual void requestUpdate() = 0;
+
+    void commitRootlessRegion();
 
 public:
     using VideoDriver::VideoDriver;

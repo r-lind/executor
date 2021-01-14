@@ -44,6 +44,58 @@ void VideoDriverCommon::updateScreen(int top, int left, int bottom, int right)
     requestUpdate();
 }
 
+void VideoDriverCommon::commitRootlessRegion()
+{
+    // calculate symmetric difference (XorRgn) and add to dirtyRects.
+    std::vector<int16_t> rgnDiff(rootlessRegion_.size() + pendingRootlessRegion_.size());
+
+    auto p = rootlessRegion_.begin();
+    auto q = pendingRootlessRegion_.begin();
+    auto dst = rgnDiff.begin();
+
+    while(*p < RGN_STOP || *q < RGN_STOP)
+    {
+        if(*p < *q)
+            while((*dst++ = *p++) < RGN_STOP)
+                ;
+        else if(*p > *q)
+            while((*dst++ = *q++) < RGN_STOP)
+                ;
+        else
+        {
+            auto startOfLine = dst;
+            *dst++ = *p++;
+            q++;
+
+            while(*p < RGN_STOP || *q < RGN_STOP)
+            {
+                if(*p < *q)
+                    *dst++ = *p++;
+                else if(*p > *q)
+                    *dst++ = *q++;
+                else
+                    p++, q++;
+            }
+
+            if(dst == startOfLine + 1)
+                dst = startOfLine;
+            else
+                *dst++ = RGN_STOP;
+                
+            p++, q++;
+        }
+    }
+    *dst++ = RGN_STOP;
+
+    forEachRect(rgnDiff.begin(), [this](int l, int t, int r, int b) {
+        //std::cout << "region changed: " << l << " " << t << " " << r << " " << b << std::endl;
+        dirtyRects_.add(t, l, b, r);
+    });
+
+    rootlessRegion_ = pendingRootlessRegion_;
+    rootlessRegionDirty_ = false;
+}
+
 template<int depth>
 struct IndexedPixelGetter
 {

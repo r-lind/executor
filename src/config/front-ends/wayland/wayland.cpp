@@ -59,7 +59,7 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
 {
     wakeFd_ = eventfd(0, 0);
 
-    rootlessRegion_ = { 0, 0, RGN_STOP, RGN_STOP };
+    rootlessRegion_ = { RGN_STOP };
 
     registry_ = display_.get_registry();
     registry_.on_global() = [this] (uint32_t name, const std::string& interface, uint32_t version) {
@@ -350,7 +350,7 @@ bool WaylandVideoDriver::updateMode()
         if(sizeChanged)
         {
             pendingRootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
-                            (int16_t)configuredShape_.height, 0, (int16_t)configuredShape_.width, RGN_STOP };
+                            (int16_t)configuredShape_.height, 0, (int16_t)configuredShape_.width, RGN_STOP, RGN_STOP };
             rootlessRegionDirty_ = true;
             surface_.set_input_region({});
         }
@@ -436,8 +436,7 @@ void WaylandVideoDriver::frameCallback()
 
     if(rootlessRegionDirty_)
     {
-        std::swap(rootlessRegion_, pendingRootlessRegion_);
-        rootlessRegionDirty_ = false;
+        commitRootlessRegion();
 
         region_t waylandRgn = compositor_.create_region();
         forEachRect(rootlessRegion_.begin(), [&](int l, int t, int r, int b) {
