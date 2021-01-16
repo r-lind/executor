@@ -6,6 +6,82 @@
 
 using namespace Executor;
 
+class VideoDriverCommon::ThreadPool
+{
+    std::vector<std::thread> threads_;
+    std::mutex mutex_;
+    std::condition_variable workCond_, doneCond_;
+    
+    bool terminate_ = false;
+    int workingThreads_;
+    
+    int workNumber_ = 0;
+    std::function<void()> work_;
+    
+public:
+    ThreadPool()
+    {
+        int nThreads = std::thread::hardware_concurrency() ? std::max(0, (int)std::thread::hardware_concurrency() - 2) : 4;
+        nThreads = 0;
+        for(int i = 0; i < nThreads; i++)
+            threads_.emplace_back([this]() {
+                std::unique_lock lk(mutex_);
+                for(int round = 1;;round++)
+                {
+                    workCond_.wait(lk, [this, round] { return terminate_ || workNumber_ == round; });
+                    if(terminate_)
+                        return;
+                    
+                    if(auto w = work_)
+                    {
+                        lk.unlock();
+                        w();
+                        lk.lock();
+                    }
+                    
+                    work_ = {};
+                    if(--workingThreads_ == 0)
+                        doneCond_.notify_one();
+                }
+            });
+    }
+    
+    ~ThreadPool()
+    {
+        {
+            std::lock_guard lk(mutex_);
+            terminate_ = true;
+            workCond_.notify_all();
+        }
+        for(auto& t : threads_)
+            t.join();
+    }
+    
+    void run(std::function<void()> work)
+    {
+        if(threads_.empty())
+        {
+            work();
+            return;
+        }
+        std::unique_lock lk(mutex_);
+        work_ = work;
+        workingThreads_ = threads_.size();
+        ++workNumber_;
+        workCond_.notify_all();
+        doneCond_.wait(lk, [this] { return workingThreads_ == 0; });
+    }
+};
+
+VideoDriverCommon::VideoDriverCommon(IEventListener *listener)
+    : VideoDriver(listener)
+{
+}
+
+VideoDriverCommon::~VideoDriverCommon()
+{
+}
+
 void VideoDriverCommon::setColors(int num_colors, const Executor::vdriver_color_t *color_array)
 {
     std::lock_guard lk(mutex_);
@@ -41,6 +117,7 @@ void VideoDriverCommon::updateScreen(int top, int left, int bottom, int right)
 {
     std::lock_guard lk(mutex_);
     dirtyRects_.add(top, left, bottom, right);
+    dirtyRects_.add(0,0, height(), width());
     requestUpdate();
 }
 
@@ -49,6 +126,12 @@ void VideoDriverCommon::commitRootlessRegion()
     if(!rootlessRegionDirty_)
         return;
     
+    if(!rootlessRegion_.size())
+        rootlessRegion_.insert(rootlessRegion_.end(),
+            { 0, 0, (int16_t)width(), RGN_STOP,
+            (int16_t)height(), 0, (int16_t)width(), RGN_STOP,
+            RGN_STOP });
+
     // calculate symmetric difference (XorRgn) and add to dirtyRects.
     std::vector<int16_t> rgnDiff(rootlessRegion_.size() + pendingRootlessRegion_.size());
 
@@ -132,104 +215,124 @@ void VideoDriverCommon::updateBuffer(const Framebuffer& fb, uint32_t* buffer, in
                                 const Executor::DirtyRects::Rects& rects)
 {
     auto before = std::chrono::high_resolution_clock::now();
-
-    if(!rootlessRegion_.size())
-        rootlessRegion_.insert(rootlessRegion_.end(),
-            { 0, 0, (int16_t)bufferWidth, RGN_STOP,
-            (int16_t)bufferHeight, 0, (int16_t)bufferWidth, RGN_STOP,
-            RGN_STOP });
+    
+    if(!threadpool_)
+        threadpool_ = std::make_unique<ThreadPool>();
     
     int width = std::min(fb.width, bufferWidth);
     int height = std::min(fb.height, bufferHeight);
 
-    for(const auto& r : rects)
-    {
-        assert(r.left >= 0 && r.right >= 0 && r.left <= width && r.bottom <= height);
-        
-        RegionProcessor rgnP(rootlessRegion_.begin());
-
-        for(int y = r.top; y < r.bottom; y++)
+    Executor::DirtyRects::Rects rectList = rects;
+    int nextRect = 0;
+    std::mutex mut;
+    
+    threadpool_->run([=, &rectList, &nextRect, &mut] {
+        for(;;)
         {
-            while(y >= rgnP.bottom())
-                rgnP.advance();
-
-            auto blitLine = [this, &rgnP, buffer, bufferWidth, bufferHeight, y, &r](auto getPixel) {
-                auto rowIt = rgnP.row.begin();
-                int x = r.left;
-
-                while(x < r.right)
+            Executor::DirtyRects::Rect r;
+            {
+                std::lock_guard lk(mut);
+                
+                if(nextRect == rectList.size())
+                    return;
+                
+                r = rectList[nextRect];
+                if(r.bottom - r.top > 160)
                 {
-                    int nextX = std::min(r.right, (int)*rowIt++);
+                    r.bottom = r.top + 100;
+                    rectList[nextRect].top = r.bottom;
+                }
+                else
+                    ++nextRect;
+            }
+            
+            assert(r.left >= 0 && r.right >= 0 && r.left <= width && r.bottom <= height);
+            
+            RegionProcessor rgnP(rootlessRegion_.begin());
 
-                    for(; x < nextX; x++)
+            for(int y = r.top; y < r.bottom; y++)
+            {
+                while(y >= rgnP.bottom())
+                    rgnP.advance();
+
+                auto blitLine = [this, &rgnP, buffer, bufferWidth, bufferHeight, y, &r](auto getPixel) {
+                    auto rowIt = rgnP.row.begin();
+                    int x = r.left;
+
+                    while(x < r.right)
                     {
-                        uint32_t pixel = getPixel();
-                        buffer[y * bufferWidth + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
+                        int nextX = std::min(r.right, (int)*rowIt++);
+
+                        for(; x < nextX; x++)
+                        {
+                            uint32_t pixel = getPixel();
+                            buffer[y * bufferWidth + x] = pixel == 0xFFFFFFFF ? 0 : pixel;
+                        }
+                        
+                        if(x >= r.right)
+                            break;
+
+                        nextX = std::min(r.right, (int)*rowIt++);
+
+                        for(; x < nextX; x++)
+                            buffer[y * bufferWidth + x] = getPixel();
                     }
-                    
-                    if(x >= r.right)
+                };
+
+                uint8_t *src = fb.data.get() + y * fb.rowBytes;
+                switch(fb.bpp)
+                {
+                    case 8:
+                        src += r.left;
+                        blitLine([&] { return colors_[*src++]; });
                         break;
 
-                    nextX = std::min(r.right, (int)*rowIt++);
+                    case 1:
+                        blitLine(IndexedPixelGetter<1>(colors_, src, r.left));
+                        break;
+                    case 2:
+                        blitLine(IndexedPixelGetter<2>(colors_, src, r.left));
+                        break;
+                    case 4:
+                        blitLine(IndexedPixelGetter<4>(colors_, src, r.left));
+                        break;
+                    case 16:
+                        {
+                            auto *src16 = reinterpret_cast<GUEST<uint16_t>*>(src);
+                            src16 += r.left;
+                            blitLine([&] {
+                                uint16_t pix = *src16++;
+                                auto fiveToEight = [](uint32_t x) {
+                                    return (x << 3) | (x >> 2);
+                                };
+                                return 0xFF000000
+                                    | (fiveToEight((pix >> 10) & 31) << 16)
+                                    | (fiveToEight((pix >> 5) & 31) << 8)
+                                    | fiveToEight(pix & 31);
+                            });
+                        }
+                        break;
 
-                    for(; x < nextX; x++)
-                        buffer[y * bufferWidth + x] = getPixel();
+                    case 32:
+                        {
+                            auto *src32 = reinterpret_cast<GUEST<uint32_t>*>(src);
+                            src32 += r.left;
+                            blitLine([&] { return (*src32++) | 0xFF000000; });
+                        }
+                        break;
+
                 }
-            };
-
-            uint8_t *src = fb.data.get() + y * fb.rowBytes;
-            switch(fb.bpp)
-            {
-                case 8:
-                    src += r.left;
-                    blitLine([&] { return colors_[*src++]; });
-                    break;
-
-                case 1: 
-                    blitLine(IndexedPixelGetter<1>(colors_, src, r.left));
-                    break;
-                case 2: 
-                    blitLine(IndexedPixelGetter<2>(colors_, src, r.left));
-                    break;
-                case 4: 
-                    blitLine(IndexedPixelGetter<4>(colors_, src, r.left));
-                    break;
-                case 16:
-                    {
-                        auto *src16 = reinterpret_cast<GUEST<uint16_t>*>(src);
-                        src16 += r.left;
-                        blitLine([&] { 
-                            uint16_t pix = *src16++;
-                            auto fiveToEight = [](uint32_t x) {
-                                return (x << 3) | (x >> 2);
-                            };
-                            return 0xFF000000
-                                | (fiveToEight((pix >> 10) & 31) << 16)
-                                | (fiveToEight((pix >> 5) & 31) << 8)
-                                | fiveToEight(pix & 31);
-                        });
-                    }
-                    break;
-
-                case 32:
-                    {
-                        auto *src32 = reinterpret_cast<GUEST<uint32_t>*>(src);
-                        src32 += r.left;
-                        blitLine([&] { return (*src32++) | 0xFF000000; });
-                    }
-                    break;
-
             }
         }
-    }
-
+    });
+    
     auto after = std::chrono::high_resolution_clock::now();
     static int sum = 0, count = 0;
 
     if(count > 100)
         count = sum = 0;
 
-    sum += std::chrono::duration_cast<std::chrono::milliseconds>(after-before).count();
+    sum += std::chrono::duration_cast<std::chrono::microseconds>(after-before).count();
     count++;
 
     std::cout << double(sum)/count << std::endl;

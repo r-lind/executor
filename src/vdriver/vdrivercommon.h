@@ -8,6 +8,7 @@
 #include <mutex>
 #include <type_traits>
 #include <future>
+#include <memory>
 
 namespace Executor
 {
@@ -19,7 +20,7 @@ protected:
 
     std::array<uint32_t, 256> colors_;
 
-    std::vector<int16_t> rootlessRegion_ = { 32767 };
+    std::vector<int16_t> rootlessRegion_;
     std::vector<int16_t> pendingRootlessRegion_;
     bool rootlessRegionDirty_ = false;
 
@@ -32,8 +33,11 @@ protected:
 
     void commitRootlessRegion();
 
+    class ThreadPool;
+    std::unique_ptr<ThreadPool> threadpool_;
 public:
-    using VideoDriver::VideoDriver;
+    VideoDriverCommon(IEventListener *listener);
+    ~VideoDriverCommon();
 
     void setColors(int num_colors, const Executor::vdriver_color_t *color_array) override;
     void setRootlessRegion(RgnHandle rgn) override;

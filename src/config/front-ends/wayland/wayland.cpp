@@ -59,8 +59,6 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
 {
     wakeFd_ = eventfd(0, 0);
 
-    rootlessRegion_ = { RGN_STOP };
-
     registry_ = display_.get_registry();
     registry_.on_global() = [this] (uint32_t name, const std::string& interface, uint32_t version) {
         if(interface == compositor_t::interface_name)
