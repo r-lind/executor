@@ -22,7 +22,7 @@ public:
     ThreadPool()
     {
         int nThreads = std::thread::hardware_concurrency() ? std::max(0, (int)std::thread::hardware_concurrency() - 2) : 4;
-        nThreads = 0;
+        
         for(int i = 0; i < nThreads; i++)
             threads_.emplace_back([this]() {
                 std::unique_lock lk(mutex_);
@@ -69,6 +69,7 @@ public:
         workingThreads_ = threads_.size();
         ++workNumber_;
         workCond_.notify_all();
+        work();
         doneCond_.wait(lk, [this] { return workingThreads_ == 0; });
     }
 };
