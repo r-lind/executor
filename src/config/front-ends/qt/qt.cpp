@@ -257,21 +257,30 @@ void QtVideoDriver::render(QBackingStore *bs, QRegion rgn)
                                 
     updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(), r);
 
+    if(!window->isExposed())
+        return;
+
     bs->beginPaint(rgn);
 
-    QPaintDevice *device = bs->paintDevice();
-    QPainter painter(device);
-
-    if(qimage)
+    if(QPaintDevice *device = bs->paintDevice())
     {
-        for(const QRect& r : rgn)
-            painter.drawImage(r, *qimage, r.translated(0, -windowTopPadding));
+        // Qt documentation failed to mention that bs->paintDevice() can return nullptr
+        // if window->isExposed() is false. In that case, calling bs->endPaint() crashes.
+        // There is now a check for isExposed, but now I'm paranoid.
+
+        QPainter painter(device);
+
+        if(qimage)
+        {
+            for(const QRect& r : rgn)
+                painter.drawImage(r, *qimage, r.translated(0, -windowTopPadding));
+        }
+
+        painter.end();
+
+        bs->endPaint();
+        bs->flush(rgn);
     }
-
-    painter.end();
-
-    bs->endPaint();
-    bs->flush(rgn);
 }
 
 void QtVideoDriver::requestUpdate()
