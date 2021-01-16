@@ -96,7 +96,8 @@ class VideoDriver
 {
 public:
     VideoDriver(IEventListener *cb) : callbacks_(cb) {}
-
+    VideoDriver(const VideoDriver&) = delete;
+    VideoDriver& operator=(const VideoDriver&) = delete;
     virtual ~VideoDriver();
 
     virtual void runEventLoop() = 0;
