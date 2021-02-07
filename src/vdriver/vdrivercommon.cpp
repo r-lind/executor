@@ -224,6 +224,12 @@ void VideoDriverCommon::updateBuffer(const Framebuffer& fb, uint32_t* buffer, in
     int width = std::min(fb.width, bufferWidth);
     int height = std::min(fb.height, bufferHeight);
 
+    if(!rootlessRegion_.size())
+        rootlessRegion_.insert(rootlessRegion_.end(),
+            { 0, 0, (int16_t)width, RGN_STOP,
+            (int16_t)height, 0, (int16_t)width, RGN_STOP,
+            RGN_STOP });
+
     Executor::DirtyRects::Rects rectList = rects;
     int nextRect = 0;
     std::mutex mut;
