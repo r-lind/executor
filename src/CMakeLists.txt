@@ -100,7 +100,7 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 add_subdirectory(config/front-ends/x)
-#add_subdirectory(config/front-ends/sdl)
+add_subdirectory(config/front-ends/sdl)
 add_subdirectory(config/front-ends/sdl2)
 add_subdirectory(config/front-ends/qt)
 add_subdirectory(config/front-ends/wayland)

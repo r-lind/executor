@@ -634,12 +634,16 @@ LONGINT SDLVideoDriver::getScrap(LONGINT type, Executor::Handle h)
 {
     int scraplen;
 
-    get_scrap(type, &scraplen, h);
+    onMainThread([&] {
+        get_scrap(type, &scraplen, h);
+    });
     return (scraplen);
 }
 void SDLVideoDriver::putScrap(LONGINT type, LONGINT length, char *p, int scrap_count)
 {
-    put_scrap(type, length, p);
+    onMainThread([&] {
+        put_scrap(type, length, p);
+    });
 }
 
 #endif
