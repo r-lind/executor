@@ -3,12 +3,17 @@
 #define _VDRIVER_H_
 
 #include <ExMacTypes.h>
+#include <vdriver/dirtyrect.h>
+
 
 #include <functional>
 #include <memory>
 #include <mutex>
 #include <unordered_map>
 #include <string>
+#include <array>
+#include <vector>
+
 
 namespace Executor
 {
@@ -96,7 +101,7 @@ private:
 class VideoDriver
 {
 public:
-    VideoDriver(IEventListener *cb) : callbacks_(cb) {}
+    VideoDriver(IEventListener *cb);
     VideoDriver(const VideoDriver&) = delete;
     VideoDriver& operator=(const VideoDriver&) = delete;
     virtual ~VideoDriver();
@@ -109,7 +114,7 @@ public:
     
     virtual void updateScreen(int top, int left, int bottom, int right);
     virtual bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p);
-    virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
+    virtual void setColors(int num_colors, const vdriver_color_t *colors);
     virtual bool setMode(int width, int height, int bpp, bool grayscale_p) = 0;
 
     virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
@@ -144,10 +149,29 @@ public:
     bool isGrayscale() { return framebuffer_.grayscale; }
     bool isRootless() { return framebuffer_.rootless; }
 
-public:
+protected:
     IEventListener *callbacks_ = nullptr;
 
     Framebuffer framebuffer_;
+
+    std::mutex mutex_;
+    std::array<uint32_t, 256> colors_;
+
+    std::vector<int16_t> rootlessRegion_;
+    std::vector<int16_t> pendingRootlessRegion_;
+    bool rootlessRegionDirty_ = false;
+
+    Executor::DirtyRects dirtyRects_;
+
+    void updateBuffer(const Framebuffer& fb, uint32_t* buffer, int bufferWidth, int bufferHeight,
+                    const Executor::DirtyRects::Rects& rects);
+
+    virtual void requestUpdate() = 0;
+
+    void commitRootlessRegion();
+
+    class ThreadPool;
+    std::unique_ptr<ThreadPool> threadpool_;
 };
 
 extern std::unique_ptr<VideoDriver> vdriver;

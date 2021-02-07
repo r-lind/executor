@@ -16,7 +16,7 @@ SDL_Surface *sdlSurface;
 }
 
 SDL2VideoDriver::SDL2VideoDriver(Executor::IEventListener *listener, int& argc, char* argv[])
-    : VideoDriverCommon(listener)
+    : VideoDriver(listener)
 {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
     {

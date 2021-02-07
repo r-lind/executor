@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vdriver/vdrivercommon.h>
+#include <vdriver/vdriver.h>
 
 class QRect;
 class QGuiApplication;
@@ -8,7 +8,7 @@ class QImage;
 class QBackingStore;
 class QRegion;
 
-class QtVideoDriver : public Executor::VideoDriverCommon
+class QtVideoDriver : public Executor::VideoDriver
 {
     class ExecutorWindow;
 

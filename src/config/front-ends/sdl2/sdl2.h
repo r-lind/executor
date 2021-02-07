@@ -1,8 +1,11 @@
 #pragma once
 
-#include <vdriver/vdrivercommon.h>
+#include <vdriver/vdriver.h>
+#include <vector>
+#include <functional>
+#include <condition_variable>
 
-class SDL2VideoDriver : public Executor::VideoDriverCommon
+class SDL2VideoDriver : public Executor::VideoDriver
 {
 public:
     SDL2VideoDriver(Executor::IEventListener *listener, int& argc, char* argv[]);

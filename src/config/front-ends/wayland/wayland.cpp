@@ -55,7 +55,7 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
 }
 
 WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
-    : VideoDriverCommon(eventListener)
+    : VideoDriver(eventListener)
 {
     wakeFd_ = eventfd(0, 0);
 

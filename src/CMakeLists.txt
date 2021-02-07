@@ -401,8 +401,6 @@ set(vdriver_sources
         vdriver/eventsink.cpp
         vdriver/eventrecorder.h
         vdriver/eventrecorder.cpp
-        vdriver/vdrivercommon.h
-        vdriver/vdrivercommon.cpp
     )
 
 set(mman_sources

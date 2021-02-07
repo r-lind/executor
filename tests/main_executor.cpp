@@ -31,11 +31,6 @@ class MockVDriver : public VideoDriver
 {
     using VideoDriver::VideoDriver;
 
-    virtual void setColors(int num_colors, const vdriver_color_t *colors) override
-    {
-
-    }
-
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override
     {
@@ -45,6 +40,8 @@ class MockVDriver : public VideoDriver
 
     virtual void runEventLoop() override {}
     virtual void endEventLoop() override {}
+protected:
+    virtual void requestUpdate() override {}
 };
 
 class ExecutorTestEnvironment : public testing::Environment

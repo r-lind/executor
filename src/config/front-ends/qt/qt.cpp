@@ -24,6 +24,7 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+#include <condition_variable>
 
 #ifdef __APPLE__
 void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
@@ -163,7 +164,7 @@ public:
 };
 
 QtVideoDriver::QtVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
-    : VideoDriverCommon(eventListener)
+    : VideoDriver(eventListener)
 {
     qapp = new QGuiApplication(argc, argv);
 }

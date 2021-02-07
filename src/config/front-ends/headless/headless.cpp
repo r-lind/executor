@@ -1,8 +1,5 @@
 #include "headless.h"
 
-void HeadlessVideoDriver::setColors(int num_colors, const Executor::vdriver_color_t *color_array)
-{
-}
 bool HeadlessVideoDriver::setMode(int width, int height, int bpp,
                                   bool grayscale_p)
 {

@@ -1,10 +1,14 @@
 #pragma once
 
-#include <vdriver/vdrivercommon.h>
+#include <vdriver/vdriver.h>
+
+#include <vector>
+#include <functional>
+#include <condition_variable>
 
 typedef struct SDL_Surface SDLSurface;
 
-class SDLVideoDriver : public Executor::VideoDriverCommon
+class SDLVideoDriver : public Executor::VideoDriver
 {
 public:
     SDLVideoDriver(Executor::IEventListener *listener, int& argc, char* argv[]);

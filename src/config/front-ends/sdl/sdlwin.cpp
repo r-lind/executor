@@ -61,7 +61,7 @@ bool SDLVideoDriver::setOptions(std::unordered_map<std::string, std::string> opt
 }
 
 SDLVideoDriver::SDLVideoDriver(Executor::IEventListener *listener, int& argc, char* argv[])
-    : VideoDriverCommon(listener)
+    : VideoDriver(listener)
 {
     int flags;
 

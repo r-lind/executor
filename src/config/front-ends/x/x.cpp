@@ -53,6 +53,8 @@
 #include "x_keycodes.h"
 #include "x_keysym.h"
 
+#include <atomic>
+
 static int use_scan_codes = false;
 
 namespace Executor {
@@ -302,7 +304,7 @@ x_keysym_to_mac_virt(unsigned int keysym, unsigned char *virt_out)
 }
 
 X11VideoDriver::X11VideoDriver(Executor::IEventListener *listener, int& argc, char* argv[])
-    : VideoDriverCommon(listener)
+    : VideoDriver(listener)
 {
     x_dpy = XOpenDisplay("");
     if(x_dpy == nullptr)

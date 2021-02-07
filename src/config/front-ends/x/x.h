@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vdriver/vdrivercommon.h>
+#include <vdriver/vdriver.h>
 
-class X11VideoDriver : public Executor::VideoDriverCommon
+class X11VideoDriver : public Executor::VideoDriver
 {
 public:    
     X11VideoDriver(Executor::IEventListener *listener, int& argc, char* argv[]);

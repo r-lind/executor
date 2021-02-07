@@ -1,6 +1,6 @@
 #pragma once
 
-#include <vdriver/vdrivercommon.h>
+#include <vdriver/vdriver.h>
 
 #include <wayland-client.hpp>
 #include <wayland-client-protocol-extra.hpp>
@@ -8,8 +8,9 @@
 #include <mutex>
 #include <vector>
 #include <chrono>
+#include <condition_variable>
 
-class WaylandVideoDriver : public Executor::VideoDriverCommon
+class WaylandVideoDriver : public Executor::VideoDriver
 {
     class SharedMem
     {
