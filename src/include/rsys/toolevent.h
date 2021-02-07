@@ -12,6 +12,9 @@ namespace Executor
 {
 extern void dofloppymount(void);
 extern Boolean ROMlib_beepedonce;
+
+extern void sendsuspendevent(void);
+extern void sendresumeevent(bool cvtclip);
 extern void ROMlib_send_quit(void);
 extern void ROMlib_alarmoffmbar(void);
 

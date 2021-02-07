@@ -151,6 +151,10 @@ public:
             case QEvent::UpdateRequest:
                 drv_->render(backingStore_, {});
                 break;
+            case QEvent::Close:
+                drv_->callbacks_->requestQuit();
+                ev->ignore();
+                break;
             default:
                 ;
         }

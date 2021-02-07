@@ -129,7 +129,9 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
         }
     };
 
-    xdg_toplevel_.on_close() = [this] () { };
+    xdg_toplevel_.on_close() = [this] () {
+        callbacks_->requestQuit();
+    };
 
     pointer_ = seat_.get_pointer();
     pointer_.on_button() = [this] (uint32_t serial, uint32_t time, uint32_t button, pointer_button_state state) {

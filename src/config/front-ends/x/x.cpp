@@ -10,7 +10,6 @@
 
 #include <vdriver/dirtyrect.h>
 #include <rsys/keyboard.h>
-#include <rsys/scrap.h>
 
 #include <assert.h>
 

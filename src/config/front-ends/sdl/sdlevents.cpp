@@ -413,7 +413,6 @@ init_sdlk_to_mkv(void)
 
 #include "sdlevents.h"
 #include "sdlscrap.h"
-#include "sdlquit.h"
 #include "syswm_map.h"
 
 
@@ -498,8 +497,8 @@ void SDLVideoDriver::runEventLoop()
                 break;
 
             case SDL_QUIT:
-                ROMlib_exit = true;
-                return;
+                callbacks_->requestQuit();
+                break;
         }
 
         std::lock_guard lk(mutex_);

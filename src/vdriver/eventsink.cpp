@@ -3,7 +3,7 @@
 #include <ToolboxEvent.h>
 
 #include <rsys/adb.h>
-#include <rsys/scrap.h>
+#include <rsys/toolevent.h>
 #include <osevent/osevent.h>
 #include <rsys/keyboard.h>
 #include <time/syncint.h>
@@ -75,6 +75,11 @@ void EventSink::suspendEvent()
 void EventSink::resumeEvent(bool updateClipboard /* TODO: does this really make sense? */)
 {
     runOnEmulatorThread([=]() { sendresumeevent(updateClipboard); });
+}
+
+void EventSink::requestQuit()
+{
+    runOnEmulatorThread(&ROMlib_send_quit);
 }
 
 void EventSink::runOnEmulatorThread(std::function<void ()> f)

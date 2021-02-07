@@ -42,7 +42,6 @@
 #include <rsys/redrawscreen.h>
 #include <rsys/toolevent.h>
 #include <print/nextprint.h>
-#include <rsys/scrap.h>
 #include <time/time.h>
 #include <menu/menu.h>
 #include <base/traps.impl.h>

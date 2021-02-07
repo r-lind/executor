@@ -10,9 +10,6 @@
 
 namespace Executor
 {
-extern void sendsuspendevent(void);
-extern void sendresumeevent(bool cvtclip);
-
 #if defined(CYGWIN32)
 extern int get_scrap_helper(void *vh, void *lp, int len, bool cvt_rets);
 extern int count_char(const char *p, int len, char c);

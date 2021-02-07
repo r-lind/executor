@@ -157,26 +157,6 @@ void SDL2VideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
     });
 }
 
-static bool ConfirmQuit()
-{
-    const SDL_MessageBoxButtonData buttons[] = {
-        { SDL_MESSAGEBOX_BUTTON_ESCAPEKEY_DEFAULT, 2, "Cancel" },
-        { SDL_MESSAGEBOX_BUTTON_RETURNKEY_DEFAULT, 1, "Force Quit" },
-    };
-    const SDL_MessageBoxData messageboxdata = {
-        SDL_MESSAGEBOX_INFORMATION, /* .flags */
-        sdlWindow, /* .window */
-        "Quit", /* .title */
-        "Do you want to quit Executor?", /* .message */
-        SDL_arraysize(buttons), /* .numbuttons */
-        buttons, /* .buttons */
-        nullptr /* .colorScheme */
-    };
-    int buttonid;
-    SDL_ShowMessageBox(&messageboxdata, &buttonid);
-    return buttonid == 1;
-}
-
 void SDL2VideoDriver::runEventLoop()
 {
     SDL_Event event;
@@ -229,8 +209,7 @@ void SDL2VideoDriver::runEventLoop()
                 callbacks_->suspendEvent();
                 break;
             case SDL_QUIT:
-                if(ConfirmQuit())
-                    return;//ExitToShell();
+                callbacks_->requestQuit();
                 break;
             default:
                 if(event.type == wakeEventType_ + 1)
