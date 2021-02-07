@@ -98,6 +98,7 @@ static GC copy_gc, cursor_data_gc, cursor_mask_gc;
 static int cursor_visible_p = false;
 
 static Atom x_selection_atom;
+static Atom wmDeleteMessage;
 
 static char *selectiontext = nullptr;
 static int selectionlength;
@@ -414,6 +415,8 @@ void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool graysca
                          &name, &name, /* _argv, *_argc, */ nullptr, 0,
                          &size_hints, &wm_hints, &class_hint);
     }
+    wmDeleteMessage = XInternAtom(x_dpy, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(x_dpy, x_window, &wmDeleteMessage, 1);
 
     XSelectInput(x_dpy, x_window, EXECUTOR_WINDOW_EVENT_MASK);
 
@@ -744,6 +747,10 @@ void X11VideoDriver::handleEvents()
                 break;
             case MotionNotify:
                 callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
+                break;
+            case ClientMessage:
+                if (evt.xclient.data.l[0] == wmDeleteMessage)
+                    callbacks_->requestQuit();
                 break;
         }
     }
