@@ -88,6 +88,7 @@ public:
 VideoDriver::VideoDriver(IEventListener *cb)
     : callbacks_(cb)
 {
+    std::fill(begin(colors_), end(colors_), 0);
 }
 
 VideoDriver::~VideoDriver()

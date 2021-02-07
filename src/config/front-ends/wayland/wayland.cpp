@@ -52,6 +52,7 @@ WaylandVideoDriver::Buffer::Buffer(shm_t& shm, int w, int h)
             .create_buffer(0, w, h, w*4, wayland::shm_format::argb8888)),
     width_(w), height_(h)
 {
+    std::fill(data(), data() + w * h, 0);
 }
 
 WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
@@ -349,8 +350,12 @@ bool WaylandVideoDriver::updateMode()
 
         if(sizeChanged)
         {
-            pendingRootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
+            if(framebuffer_.rootless)
+                pendingRootlessRegion_ = { RGN_STOP, RGN_STOP };
+            else
+                pendingRootlessRegion_ = { 0, 0, (int16_t)configuredShape_.width, RGN_STOP, 
                             (int16_t)configuredShape_.height, 0, (int16_t)configuredShape_.width, RGN_STOP, RGN_STOP };
+            
             rootlessRegionDirty_ = true;
             surface_.set_input_region({});
         }
