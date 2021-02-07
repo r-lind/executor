@@ -93,6 +93,8 @@ void VideoDriverCommon::setColors(int num_colors, const Executor::vdriver_color_
                     | ((color_array[i].green >> 8) << 8)
                     | (color_array[i].blue >> 8);
     }
+    dirtyRects_.add(0,0, height(), width());
+    requestUpdate();
 }
 
 
@@ -118,7 +120,6 @@ void VideoDriverCommon::updateScreen(int top, int left, int bottom, int right)
 {
     std::lock_guard lk(mutex_);
     dirtyRects_.add(top, left, bottom, right);
-    dirtyRects_.add(0,0, height(), width());
     requestUpdate();
 }
 
