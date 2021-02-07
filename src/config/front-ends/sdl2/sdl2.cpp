@@ -15,15 +15,42 @@ SDL_Texture *sdlTexture;*/
 SDL_Surface *sdlSurface;
 }
 
-bool SDL2VideoDriver::init()
+SDL2VideoDriver::SDL2VideoDriver(Executor::IEventListener *listener, int& argc, char* argv[])
+    : VideoDriverCommon(listener)
 {
     if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_EVENTS) != 0)
     {
         SDL_Log("Failed to initialize SDL: %s", SDL_GetError());
-        return false;
+        throw std::runtime_error("Failed to initialize SDL.");
     }
-    return true;
+    wakeEventType_ = SDL_RegisterEvents(2);
 }
+
+
+void SDL2VideoDriver::endEventLoop()
+{
+    SDL_Event evt;
+    evt.type = wakeEventType_ + 1;
+    SDL_PushEvent(&evt);
+}
+
+
+void SDL2VideoDriver::requestUpdate()
+{
+    SDL_Event evt;
+    evt.type = wakeEventType_;
+    SDL_PushEvent(&evt);
+}
+
+void SDL2VideoDriver::onMainThread(std::function<void()> f)
+{
+    std::unique_lock lk(mutex_);
+    todos_.push_back(f);
+    requestUpdate();
+
+    done_.wait(lk, [this] { return todos_.empty(); });
+}
+
 
 bool SDL2VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscale_p)
 {
@@ -34,106 +61,100 @@ bool SDL2VideoDriver::isAcceptableMode(int width, int height, int bpp, bool gray
 
 bool SDL2VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
-    printf("set_mode: %d %d %d", width, height, bpp);
+    onMainThread([&] {
+        printf("set_mode: %d %d %d", width, height, bpp);
 
-    if(!width || !height)
-    {
-        width = framebuffer_.width;
-        height = framebuffer_.height;
-    }
-    if(!width || !height)
-    {
-        width = VDRIVER_DEFAULT_SCREEN_WIDTH;
-        height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
-    }
-    if(!bpp)
-        bpp = framebuffer_.bpp;
-    if(!bpp)
-        bpp = 8;
+        if(!width || !height)
+        {
+            width = framebuffer_.width;
+            height = framebuffer_.height;
+        }
+        if(!width || !height)
+        {
+            width = VDRIVER_DEFAULT_SCREEN_WIDTH;
+            height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
+        }
+        if(!bpp)
+            bpp = framebuffer_.bpp;
+        if(!bpp)
+            bpp = 8;
 
-    framebuffer_ = Framebuffer(width, height, bpp);
+        framebuffer_ = Framebuffer(width, height, bpp);
 
-    sdlWindow = SDL_CreateWindow("Window",
-                                 SDL_WINDOWPOS_UNDEFINED,
-                                 SDL_WINDOWPOS_UNDEFINED,
-                                 width, height,
-                                 0);
-    //SDL_WINDOW_FULLSCREEN_DESKTOP);
+        sdlWindow = SDL_CreateWindow("Window",
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    SDL_WINDOWPOS_UNDEFINED,
+                                    width, height,
+                                    0);
+        //SDL_WINDOW_FULLSCREEN_DESKTOP);
 
-    /*sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, 0);
+        /*sdlRenderer = SDL_CreateRenderer(sdlWindow, -1, 0);
 
-    SDL_RenderSetLogicalSize(sdlRenderer, vdriver_width, vdriver_height);
-    SDL_SetRenderDrawColor(sdlRenderer, 128, 128, 128, 255);
-    SDL_RenderClear(sdlRenderer);
-    SDL_RenderPresent(sdlRenderer);*/
+        SDL_RenderSetLogicalSize(sdlRenderer, vdriver_width, vdriver_height);
+        SDL_SetRenderDrawColor(sdlRenderer, 128, 128, 128, 255);
+        SDL_RenderClear(sdlRenderer);
+        SDL_RenderPresent(sdlRenderer);*/
 
-    uint32_t pixelFormat;
+        uint32_t pixelFormat;
 
-    switch(bpp)
-    {
-        case 1:
-            pixelFormat = SDL_PIXELFORMAT_INDEX1LSB;
-            break;
-        case 4:
-            pixelFormat = SDL_PIXELFORMAT_INDEX4LSB;
-            break;
-        case 8:
-            pixelFormat = SDL_PIXELFORMAT_INDEX8;
-            break;
-        case 16:
-            pixelFormat = SDL_PIXELFORMAT_RGB555;
-            break;
-        case 32:
-            pixelFormat = SDL_PIXELFORMAT_BGRX8888;
-            break;
-        default:
-            return false;
-    }
+        switch(bpp)
+        {
+            case 1:
+                pixelFormat = SDL_PIXELFORMAT_INDEX1LSB;
+                break;
+            case 4:
+                pixelFormat = SDL_PIXELFORMAT_INDEX4LSB;
+                break;
+            case 8:
+                pixelFormat = SDL_PIXELFORMAT_INDEX8;
+                break;
+            case 16:
+                pixelFormat = SDL_PIXELFORMAT_RGB555;
+                break;
+            case 32:
+                pixelFormat = SDL_PIXELFORMAT_BGRX8888;
+                break;
+        }
 
 #if 1
-    uint32_t rmask, gmask, bmask, amask;
-    int sdlBpp;
-    SDL_PixelFormatEnumToMasks(pixelFormat, &sdlBpp, &rmask, &gmask, &bmask, &amask);
+        uint32_t rmask, gmask, bmask, amask;
+        int sdlBpp;
+        SDL_PixelFormatEnumToMasks(pixelFormat, &sdlBpp, &rmask, &gmask, &bmask, &amask);
 
-    sdlSurface = SDL_CreateRGBSurfaceFrom(
-        framebuffer_.data.get(),
-        framebuffer_.width, framebuffer_.height,
-        sdlBpp,
-        framebuffer_.rowBytes,
-        rmask, gmask, bmask, amask);
+        sdlSurface = SDL_CreateRGBSurfaceFrom(
+            framebuffer_.data.get(),
+            framebuffer_.width, framebuffer_.height,
+            sdlBpp,
+            framebuffer_.rowBytes,
+            rmask, gmask, bmask, amask);
 #else
-    sdlSurface = SDL_CreateRGBSurfaceWithFormatFrom(
-        framebuffer_.data.get(),
-        framebuffer_.width, framebuffer_.height,
-        framebuffer_.bpp,
-        framebuffer_.rowBytes,
-        pixelFormat);
+        sdlSurface = SDL_CreateRGBSurfaceWithFormatFrom(
+            framebuffer_.data.get(),
+            framebuffer_.width, framebuffer_.height,
+            framebuffer_.bpp,
+            framebuffer_.rowBytes,
+            pixelFormat);
 #endif
-
+    });
     return true;
 }
 
 void SDL2VideoDriver::setColors(int num_colors, const vdriver_color_t *colors)
 {
-    SDL_Color *sdlColors = (SDL_Color *)alloca(sizeof(SDL_Color) * num_colors);
-    for(int i = 0; i < num_colors; i++)
-    {
-        sdlColors[i].a = 255;
-        sdlColors[i].r = colors[i].red >> 8;
-        sdlColors[i].g = colors[i].green >> 8;
-        sdlColors[i].b = colors[i].blue >> 8;
-    }
+    onMainThread([&] {
+        SDL_Color *sdlColors = (SDL_Color *)alloca(sizeof(SDL_Color) * num_colors);
+        for(int i = 0; i < num_colors; i++)
+        {
+            sdlColors[i].a = 255;
+            sdlColors[i].r = colors[i].red >> 8;
+            sdlColors[i].g = colors[i].green >> 8;
+            sdlColors[i].b = colors[i].blue >> 8;
+        }
 
-    SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, 0, num_colors);
-}
+        SDL_SetPaletteColors(sdlSurface->format->palette, sdlColors, 0, num_colors);
 
-void SDL2VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
-{
-    /*SDL_UpdateTexture(sdlTexture, nullptr, vdriver_fbuf, vdriver_row_bytes);
-    SDL_RenderCopy(sdlRenderer, sdlTexture, nullptr, nullptr);
-    SDL_RenderPresent(sdlRenderer);*/
-    SDL_BlitSurface(sdlSurface, nullptr, SDL_GetWindowSurface(sdlWindow), nullptr);
-    SDL_UpdateWindowSurface(sdlWindow);
+        dirtyRects_.add(0, 0, height(), width());
+    });
 }
 
 static bool ConfirmQuit()
@@ -156,12 +177,14 @@ static bool ConfirmQuit()
     return buttonid == 1;
 }
 
-void SDL2VideoDriver::pumpEvents()
+void SDL2VideoDriver::runEventLoop()
 {
     SDL_Event event;
 
-    while(SDL_PollEvent(&event))
+    for(;;)
     {
+        SDL_WaitEvent(&event);
+
         switch(event.type)
         {
             case SDL_MOUSEMOTION:
@@ -207,8 +230,36 @@ void SDL2VideoDriver::pumpEvents()
                 break;
             case SDL_QUIT:
                 if(ConfirmQuit())
-                    ExitToShell();
+                    return;//ExitToShell();
                 break;
+            default:
+                if(event.type == wakeEventType_ + 1)
+                    return;
+        }
+        
+        std::lock_guard lk(mutex_);
+        if(!todos_.empty())
+        {
+            for(const auto& f : todos_)
+                f();
+            todos_.clear();
+            done_.notify_all();
+        }
+        if(!dirtyRects_.empty())
+        {
+            auto rects = dirtyRects_.getAndClear();
+            for(const auto& r : rects)
+            {
+                SDL_Rect sdlR;
+                sdlR.x = r.left;
+                sdlR.y = r.top;
+                sdlR.w = r.right - r.left;
+                sdlR.h = r.bottom - r.top;
+
+                SDL_BlitSurface(sdlSurface, &sdlR, SDL_GetWindowSurface(sdlWindow), &sdlR);
+            }
+            
+            SDL_UpdateWindowSurface(sdlWindow);
         }
     }
 }
@@ -218,20 +269,24 @@ void SDL2VideoDriver::setCursor(char *cursor_data,
                                unsigned short cursor_mask[16],
                                int hotspot_x, int hotspot_y)
 {
-    SDL_Cursor *old_cursor, *new_cursor;
+    onMainThread([&] {
+        SDL_Cursor *old_cursor, *new_cursor;
 
-    old_cursor = SDL_GetCursor();
-    new_cursor = SDL_CreateCursor((unsigned char *)cursor_data,
-                                  (unsigned char *)cursor_mask,
-                                  16, 16, hotspot_x, hotspot_y);
-    if(new_cursor != nullptr)
-    {
-        SDL_SetCursor(new_cursor);
-        SDL_FreeCursor(old_cursor);
-    }
+        old_cursor = SDL_GetCursor();
+        new_cursor = SDL_CreateCursor((unsigned char *)cursor_data,
+                                    (unsigned char *)cursor_mask,
+                                    16, 16, hotspot_x, hotspot_y);
+        if(new_cursor != nullptr)
+        {
+            SDL_SetCursor(new_cursor);
+            SDL_FreeCursor(old_cursor);
+        }
+    });
 }
 
 void SDL2VideoDriver::setCursorVisible(bool show_p)
 {
-    SDL_ShowCursor(show_p);
+    onMainThread([&] {
+        SDL_ShowCursor(show_p);
+    });
 }
