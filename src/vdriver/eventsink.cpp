@@ -82,6 +82,11 @@ void EventSink::requestQuit()
     runOnEmulatorThread(&ROMlib_send_quit);
 }
 
+void EventSink::wake()
+{
+    eventInterrupt.trigger();
+}
+
 void EventSink::runOnEmulatorThread(std::function<void ()> f)
 {
     std::lock_guard lk(mutex_);

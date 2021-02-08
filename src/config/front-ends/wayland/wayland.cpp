@@ -128,6 +128,8 @@ WaylandVideoDriver::WaylandVideoDriver(Executor::IEventListener *eventListener, 
             state_ = State::waitingForObsoleteUpdate;
             stateChanged_.notify_all();
         }
+        if(state_ == State::waitingForModeSwitch)
+            callbacks_->wake();
     };
 
     xdg_toplevel_.on_close() = [this] () {
