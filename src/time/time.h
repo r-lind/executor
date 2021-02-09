@@ -1,13 +1,6 @@
-#if !defined(_RSYS_TIME_H_)
-#define _RSYS_TIME_H_
+#pragma once
 
-/*
- * Copyright 1995 by Abacus Research and Development, Inc.
- * All rights reserved.
- *
-
- */
-
+#include <ExMacTypes.h>
 
 class PowerCore;
 
@@ -18,8 +11,5 @@ void ROMlib_SetTimewarp(int speedup, int slowdown);
 
 extern QHdr ROMlib_timehead;
 
-syn68k_addr_t catchalarm(syn68k_addr_t pc, void *unused);
-void catchalarmPowerPC(PowerCore&);
+void timeInterruptHandler();
 }
-
-#endif /* _RSYS_TIME_H_ */

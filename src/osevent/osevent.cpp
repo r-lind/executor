@@ -379,7 +379,6 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
     ROMlib_memnomove_p = false; /* this is an icky hack needed for Excel */
     ticks = TickCount();
 
-    vdriver->pumpEvents();
     if(auto *playback = EventPlayback::getInstance())
         playback->pumpEvents();
 
@@ -424,14 +423,6 @@ static Boolean OSEventCommon(INTEGER evmask, EventRecord *eventp,
             ROMlib_bewaremovement = false;
         }
     }
-    if(ROMlib_when == WriteInOSEvent)
-    {
-        dirty_rect_update_screen();
-    }
-    else if(ROMlib_when == WriteAtEndOfTrap)
-    {
-        dirty_rect_update_screen();
-    }
 
     return retval;
 }
@@ -471,7 +462,7 @@ Executor::display_keyboard_choices(void)
     INTEGER nres, i, nfound;
     unsigned char(*names)[256];
 
-    vdriver->shutdown();
+    vdriver = {};
     printf("Available keyboard maps:\n");
     SetResLoad(false);
     nres = CountResources("KCHR"_4);

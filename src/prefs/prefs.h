@@ -9,21 +9,12 @@ namespace Executor
 {
 
 typedef enum {
-    WriteAlways,
-    WriteInBltrgn,
-    WriteInOSEvent,
-    WriteAtEndOfTrap,
-    WriteNever
-} WriteWhenType; /* This is an extension */
-
-typedef enum {
     soundoff,
     soundpretend,
     soundon
 } sound_t;
 
 
-extern WriteWhenType ROMlib_when;
 extern sound_t ROMlib_PretendSound;
 extern bool ROMlib_cacheheuristic;
 extern int ROMlib_clock;
@@ -56,8 +47,6 @@ extern uint32_t ROMlib_PrDrvrVers;
 extern uint32_t system_version;
 
 #define ROMLIB_DEBUG_BIT (1 << 1)
-
-extern void ROMlib_WriteWhen(WriteWhenType when);
 
 extern void do_dump_screen(void);
 extern std::string ROMlib_configfilename;

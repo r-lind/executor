@@ -25,6 +25,8 @@
 
 using namespace Executor;
 
+static int initialBpp;
+
 /*
  * determined experimentally -- this fix is needed for Energy Scheming because
  * they put a bogus test for mode >= 8 in their code to detect color.  NOTE:
@@ -71,7 +73,7 @@ static void gd_setup_main_device()
 
     pixmap_set_pixel_fields(*gd_pixmap, bpp);
 
-    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->width() * vdriver->height() * 5);
+    SetupVideoMemoryMapping(vdriver->framebuffer(), vdriver->rowBytes() * vdriver->height());
     PIXMAP_BASEADDR(gd_pixmap) = (Ptr)vdriver->framebuffer();
     PIXMAP_SET_ROWBYTES(gd_pixmap, vdriver->rowBytes());
 
@@ -539,12 +541,6 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
 
 void Executor::ROMlib_InitGDevices()
 {
-    if(!vdriver->init())
-    {
-        fprintf(stderr, "Unable to initialize video driver.\n");
-        exit(-12);
-    }
-
     /* Set up the current graphics mode appropriately. */
     if(!vdriver->setMode(flag_width, flag_height, flag_bpp, flag_grayscale))
     {
@@ -584,4 +580,10 @@ void Executor::ROMlib_InitGDevices()
                     CL_RAW(GetCTSeed()));
 
     gd_allocate_main_device();
+    initialBpp = vdriver->bpp();
+}
+
+void Executor::ResetToInitialDepth()
+{
+    SetDepth(LM(MainDevice), initialBpp, 0, 0);
 }

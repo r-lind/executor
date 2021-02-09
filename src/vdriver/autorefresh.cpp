@@ -95,7 +95,7 @@ bool autodetect_refresh(void)
     /* We don't need to autodetect refresh if we're already doing refresh
    * or if we have direct screen access.
    */
-    if(ROMlib_refresh != 0 || !ROMlib_shadow_screen_p)
+    if(ROMlib_refresh != 0)
     {
         memset(last_checksum_valid_p, 0, sizeof last_checksum_valid_p);
         return false;

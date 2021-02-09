@@ -210,8 +210,6 @@ struct HFSPlusAttrExtents
     GUEST<HFSPlusExtentRecord> extents;
 };
 
-extern bool ROMlib_hfs_plus_support;
-
 static_assert(sizeof(HFSUniStr255) == 512);
 static_assert(sizeof(HFSPlusPermissions) == 16);
 static_assert(sizeof(HFSPlusExtentDescriptor) == 8);

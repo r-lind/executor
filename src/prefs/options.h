@@ -14,9 +14,6 @@
 
 namespace Executor
 {
-extern std::pair<int,int> ROMlib_ScreenSize;
-extern std::pair<int,int> ROMlib_MacSize;
-extern std::pair<int,int> ROMlib_ScreenLocation;
 extern int32_t ROMlib_options;
 extern std::string ROMlib_WindowName;
 extern std::string ROMlib_Comments;
@@ -41,7 +38,7 @@ extern int ROMlib_desired_bpp;
 #define ROMLIB_NEWLINETOCR_BIT (1 << 10)
 #define ROMLIB_DIRECTDISKACCESS_BIT (1 << 11)
 
-#define ROMLIB_ACCELERATED_BIT (1 << 12)
+#define ROMLIB_ACCELERATED_BIT (1 << 12)    /* unused */
 #define ROMLIB_SOUNDOFF_BIT (1 << 13)
 #define ROMLIB_SOUNDON_BIT (1 << 14)
 #define ROMLIB_NOWARN32_BIT (1 << 15)

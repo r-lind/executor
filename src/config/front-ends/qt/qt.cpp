@@ -2,10 +2,11 @@
 
 #include <QGuiApplication>
 #include <QPainter>
-#include <QRasterWindow>
 #include <QMouseEvent>
 #include <QBitmap>
 #include <QScreen>
+#include <QBackingStore>
+#include <QPaintDevice>
 #ifdef STATIC_WINDOWS_QT
 #include <QtPlugin>
 #endif
@@ -23,6 +24,7 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+#include <condition_variable>
 
 #ifdef __APPLE__
 void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
@@ -43,45 +45,61 @@ namespace Executor
     extern std::unordered_map<Qt::Key,int> qtToMacKeycodeMap;
 }
 
-namespace
-{
-class ExecutorWindow;
-QGuiApplication *qapp;
-QImage *qimage;
-ExecutorWindow *window;
+#ifdef __APPLE__
+    // for some inexplicable reason, when we create a window that covers every pixel of the screen,
+    // a click at y = 0 still misses the window and brings a background app to the front.
+    // As a hack, extend the window by 1 pixel upwards.
+const int windowTopPadding = 1;
+#else
+const int windowTopPadding = 0;
+#endif
 
-class ExecutorWindow : public QRasterWindow
+class QtVideoDriver::ExecutorWindow : public QWindow
 {
-    VideoDriverCallbacks *callbacks_;
+    QtVideoDriver* drv_;
+    QBackingStore *backingStore_;
 public:
-    ExecutorWindow(VideoDriverCallbacks *callbacks)
-        : callbacks_(callbacks)
+    ExecutorWindow(QtVideoDriver* drv)
+        : drv_(drv)
     {
         setFlag(Qt::FramelessWindowHint, true);
         setFlag(Qt::NoDropShadowWindowHint, true);
+
+        backingStore_ = new QBackingStore(this);
     }
 
-    void paintEvent(QPaintEvent *e)
+    void resizeEvent(QResizeEvent *resizeEvent) override
     {
-        QPainter painter(this);
-        if(qimage)
-        {
-            for(const QRect& r : e->region())
-                painter.drawImage(r, *qimage, r);
-        }
+        backingStore_->resize(resizeEvent->size());
+    }
+
+    void exposeEvent(QExposeEvent *e) override
+    {
+        if (!isExposed())
+            return;
+
+        drv_->render(backingStore_, e->region());
     }
 
     void mousePressRelease(QMouseEvent *ev)
     {
-        callbacks_->mouseButtonEvent(!!(ev->buttons() & Qt::LeftButton), ev->x(), ev->y());
+        drv_->callbacks_->mouseButtonEvent(!!(ev->buttons() & Qt::LeftButton), ev->x(), ev->y() - windowTopPadding);
     }
-    void mousePressEvent(QMouseEvent *ev)
+    void mousePressEvent(QMouseEvent *ev) override
     {
         mousePressRelease(ev);
     }
-    void mouseReleaseEvent(QMouseEvent *ev)
+    void mouseReleaseEvent(QMouseEvent *ev) override
     {
         mousePressRelease(ev);
+    }
+
+    void mouseMoveEvent(QMouseEvent *ev) override
+    {
+#ifdef __APPLE__
+        macosx_hide_menu_bar(ev->x(), ev->y() - windowTopPadding, width(), height());
+#endif
+        drv_->callbacks_->mouseMoved(ev->x(), ev->y() - windowTopPadding);
     }
 
     void keyEvent(QKeyEvent *ev, bool down_p)
@@ -103,17 +121,17 @@ public:
         if(ev->nativeVirtualKey())
             mkvkey = ev->nativeVirtualKey();
 #endif
-        callbacks_->keyboardEvent(down_p, mkvkey);
+        drv_->callbacks_->keyboardEvent(down_p, mkvkey);
     }
     
-    void keyPressEvent(QKeyEvent *ev)
+    void keyPressEvent(QKeyEvent *ev) override
     {
         if constexpr(log_key_events)
             std::cout << "press: " << std::hex << ev->key() << " " << ev->nativeScanCode() << " " << ev->nativeVirtualKey() << std::dec << std::endl;
         if(!ev->isAutoRepeat())
             keyEvent(ev, true);
     }
-    void keyReleaseEvent(QKeyEvent *ev)
+    void keyReleaseEvent(QKeyEvent *ev) override
     {
         if constexpr(log_key_events)
             std::cout << "release\n";
@@ -121,182 +139,191 @@ public:
             keyEvent(ev, false);
     }
 
-    bool event(QEvent *ev)
+    bool event(QEvent *ev) override
     {
         switch(ev->type())
         {
             case QEvent::FocusIn:
-                callbacks_->resumeEvent(true);
+                drv_->callbacks_->resumeEvent(true);
                 break;
             case QEvent::FocusOut:
-                callbacks_->suspendEvent();
+                drv_->callbacks_->suspendEvent();
                 break;
-
+            case QEvent::UpdateRequest:
+                drv_->render(backingStore_, {});
+                break;
+            case QEvent::Close:
+                drv_->callbacks_->requestQuit();
+                ev->ignore();
+                break;
             default:
                 ;
         }
-        return QRasterWindow::event(ev);
+        return QWindow::event(ev);
     }
 };
 
-}
-
-std::optional<QRegion> rootlessRegion;
-
-void QtVideoDriver::setRootlessRegion(RgnHandle rgn)
-{
-    VideoDriverCommon::setRootlessRegion(rgn);
-    RegionProcessor rgnP(rootlessRegion_.begin());
-
-    QRegion qtRgn;
-
-    while(rgnP.bottom() < height_)
-    {
-        rgnP.advance();
-        
-        for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
-            qtRgn += QRect(rgnP.row[i], rgnP.top(), rgnP.row[i+1] - rgnP.row[i], rgnP.bottom() - rgnP.top());
-    }
-    
-#ifdef __APPLE__
-    macosx_autorelease_pool([&] {
-#endif
-        window->setMask(qtRgn);
-#ifdef __APPLE__
-    });
-#endif
-
-    rootlessRegion = qtRgn;
-}
-
-bool QtVideoDriver::parseCommandLine(int& argc, char *argv[])
+QtVideoDriver::QtVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[])
+    : VideoDriver(eventListener)
 {
     qapp = new QGuiApplication(argc, argv);
-    return true;
+}
+
+QtVideoDriver::~QtVideoDriver()
+{
+}
+
+void QtVideoDriver::endEventLoop()
+{
+    QMetaObject::invokeMethod(qapp, &QGuiApplication::quit);
+}
+
+void QtVideoDriver::runEventLoop()
+{
+    qapp->exec();
 }
 
 bool QtVideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
 {
+    std::mutex initEndMutex;
+    std::condition_variable initEndCond;
+    bool initEnded = false;
+
+    QMetaObject::invokeMethod(qapp, [=, &initEndMutex, &initEndCond, &initEnded] {
 #ifdef __APPLE__
-    macosx_hide_menu_bar(500, 0, 1000, 1000);
-    QVector<QRect> screenGeometries = getScreenGeometries();
+        macosx_hide_menu_bar(500, 0, 1000, 1000);
+        QVector<QRect> screenGeometries = getScreenGeometries();
 #else
-    QVector<QRect> screenGeometries = getAvailableScreenGeometries();
+        QVector<QRect> screenGeometries = getAvailableScreenGeometries();
 #endif
 
-    printf("set_mode: %d %d %d\n", width, height, bpp);
-    if(framebuffer_)
-        delete[] framebuffer_;
-    
-    QRect geom = screenGeometries[0];
-    for(const QRect& r : screenGeometries)
-        if(r.width() * r.height() > geom.width() * geom.height())
-            geom = r;
+        printf("set_mode: %d %d %d\n", width, height, bpp);
+        
+        QRect geom = screenGeometries[0];
+        for(const QRect& r : screenGeometries)
+            if(r.width() * r.height() > geom.width() * geom.height())
+                geom = r;
 
-    width_ = geom.width();
-    height_ = geom.height();
+        framebuffer_ = Framebuffer(geom.width(), geom.height(), bpp ? bpp : 8);
+        framebuffer_.rootless = true;
 
-    isRootless_ = true;
-    if(width)
-        width_ = width;
-    if(height)
-        height_ = height;
-    if(bpp)
-        bpp_ = bpp;
-    rowBytes_ = width_ * bpp_ / 8;
-    rowBytes_ = (rowBytes_+3) & ~3;
+        qimage = new QImage(framebuffer_.width, framebuffer_.height, QImage::Format_RGB32);
+        
+        if(!window)
+            window = new ExecutorWindow(this);
+        window->setGeometry(geom);
+        window->showMaximized();
 
-    maxBpp_ = 8; //32;
+#ifdef __APPLE__
+        geom.setY(geom.y() - 1);
+        geom.setHeight(geom.height() + 1);
+        window->setGeometry(geom);
+#endif
+        {
+            std::unique_lock lk(initEndMutex);
+            initEnded = true;
+            initEndCond.notify_all();
+        }
+    });
 
-    framebuffer_ = new uint8_t[rowBytes_ * height_ + width_ * height_];
+    std::unique_lock lk(initEndMutex);
+    initEndCond.wait(lk, [&] { return initEnded; });
 
-   
-    qimage = new QImage(width_, height_, QImage::Format_RGB32);
-    
-    if(!window)
-        window = new ExecutorWindow(callbacks_);
-    window->setGeometry(geom);
-//#ifdef __APPLE__
-//    window->show();
-//#else
-    window->showMaximized();
-//#endif
     return true;
 }
 
-void QtVideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
+void QtVideoDriver::render(QBackingStore *bs, QRegion rgn)
 {
-    QRegion rgn;
-    for(int i = 0; i < num_rects; i++)
-        rgn += QRect(r[i].left, r[i].top, r[i].right-r[i].left, r[i].bottom-r[i].top);
-
-    updateBuffer((uint32_t*)qimage->bits(), qimage->width(), qimage->height(),
-        num_rects, r);
-
-    window->update(rgn);
-}
-
-void QtVideoDriver::pumpEvents()
-{
-#ifdef __APPLE__
-        macosx_autorelease_pool([&] {
-#endif
-        qapp->processEvents();
-#ifdef __APPLE__
-        });
-#endif
-
-    auto cursorPos = QCursor::pos();
-#ifdef __APPLE__
-    macosx_hide_menu_bar(cursorPos.x(), cursorPos.y(), window->width(), window->height());
-#endif
-    cursorPos = window->mapFromGlobal(cursorPos);
-    callbacks_->mouseMoved(cursorPos.x(), cursorPos.y());
-
-    static bool beenHere = false;
-    if(!beenHere && rootlessRegion)
+    std::unique_lock lk(mutex_);
+    
+    if(rootlessRegionDirty_)
     {
+        commitRootlessRegion();
+        
+        QRegion qtRgn;
+        forEachRect(rootlessRegion_.begin(), [&](int l, int t, int r, int b) {
+            qtRgn += QRect(l, t + windowTopPadding, r-l, b-t);
+        });
+
 #ifdef __APPLE__
         macosx_autorelease_pool([&] {
 #endif
-            window->setMask(*rootlessRegion);
+            window->setMask(qtRgn);
 #ifdef __APPLE__
         });
 #endif
-        beenHere = true;
+    }
+    
+    auto r = dirtyRects_.getAndClear();
+    lk.unlock();
+
+    for(int i = 0; i < r.size(); i++)
+        rgn += QRect(r[i].left, r[i].top + windowTopPadding, r[i].right-r[i].left, r[i].bottom-r[i].top);
+                                
+    updateBuffer(framebuffer_, (uint32_t*)qimage->bits(), qimage->width(), qimage->height(), r);
+
+    if(!window->isExposed())
+        return;
+
+    bs->beginPaint(rgn);
+
+    if(QPaintDevice *device = bs->paintDevice())
+    {
+        // Qt documentation failed to mention that bs->paintDevice() can return nullptr
+        // if window->isExposed() is false. In that case, calling bs->endPaint() crashes.
+        // There is now a check for isExposed, but now I'm paranoid.
+
+        QPainter painter(device);
+
+        if(qimage)
+        {
+            for(const QRect& r : rgn)
+                painter.drawImage(r, *qimage, r.translated(0, -windowTopPadding));
+        }
+
+        painter.end();
+
+        bs->endPaint();
+        bs->flush(rgn);
     }
 }
 
+void QtVideoDriver::requestUpdate()
+{
+    QMetaObject::invokeMethod(window, &QWindow::requestUpdate);
+}
 
 void QtVideoDriver::setCursor(char *cursor_data,
                               uint16_t cursor_mask[16],
                               int hotspot_x, int hotspot_y)
 {
-    static QCursor theCursor(Qt::ArrowCursor);
+    QMetaObject::invokeMethod(qapp, [=] {
+        static QCursor theCursor(Qt::ArrowCursor);
 
-    if(cursor_data)
-    {
-        uchar data2[32];
-        uchar mask2[32];
-        memcpy(data2, cursor_data, 32);
-        memcpy(mask2, cursor_mask, 32);
-        
-        for(int i = 0; i<32; i++)
-            mask2[i] |= data2[i];
-        QBitmap crsr = QBitmap::fromData(QSize(16, 16), (const uchar*)data2, QImage::Format_Mono);
-        QBitmap mask = QBitmap::fromData(QSize(16, 16), (const uchar*)mask2, QImage::Format_Mono);
-        
-        theCursor = QCursor(crsr, mask, hotspot_x, hotspot_y);
-    }
-    //window->setCursor(theCursor);   // TODO: should we check for visibility?
-    window->setCursor(Qt::ArrowCursor);   // TODO: should we check for visibility?
+        if(cursor_data)
+        {
+            uchar data2[32];
+            uchar mask2[32];
+            memcpy(data2, cursor_data, 32);
+            memcpy(mask2, cursor_mask, 32);
+            
+            for(int i = 0; i<32; i++)
+                mask2[i] |= data2[i];
+            QBitmap crsr = QBitmap::fromData(QSize(16, 16), (const uchar*)data2, QImage::Format_Mono);
+            QBitmap mask = QBitmap::fromData(QSize(16, 16), (const uchar*)mask2, QImage::Format_Mono);
+            
+            theCursor = QCursor(crsr, mask, hotspot_x, hotspot_y);
+        }
+        window->setCursor(theCursor);   // TODO: should we check for visibility?
+    });
 }
 
-bool QtVideoDriver::setCursorVisible(bool show_p)
+void QtVideoDriver::setCursorVisible(bool show_p)
 {
-    if(show_p)
-        setCursor(nullptr, nullptr, 0, 0);
-    else
-        window->setCursor(Qt::BlankCursor);
-    return true;
+    QMetaObject::invokeMethod(qapp, [=] {
+        if(show_p)
+            setCursor(nullptr, nullptr, 0, 0);
+        else
+            window->setCursor(Qt::BlankCursor);
+    });
 }

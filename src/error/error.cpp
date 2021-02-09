@@ -345,7 +345,7 @@ void _errno_fatal(const char *file, int line, const char *fn,
     if(fmt == nullptr)
         fmt = "";
 
-    vdriver->shutdown();
+    vdriver = {};
 
     err_printf("%s:%d; fatal error in `%s': ",
                notdir(file), line, fn);

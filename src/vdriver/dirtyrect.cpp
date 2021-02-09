@@ -13,14 +13,8 @@
 #include <OSEvent.h>
 #include <algorithm>
 
-#if !defined(MAX_DIRTY_RECTS)
-#define MAX_DIRTY_RECTS 5
-#endif
 
 using namespace Executor;
-
-int Executor::num_dirty_rects = 0;
-static vdriver_rect_t dirty_rect[MAX_DIRTY_RECTS];
 
 /* We will glom a new rectangle into an existing one if it adds no more
  * than this many pixels.
@@ -29,7 +23,7 @@ static vdriver_rect_t dirty_rect[MAX_DIRTY_RECTS];
 
 static inline bool
 rects_overlap_p(int top, int left, int bottom, int right,
-                const vdriver_rect_t *r)
+                const DirtyRects::Rect *r)
 {
     return (top < r->bottom
             && r->top < bottom
@@ -40,7 +34,7 @@ rects_overlap_p(int top, int left, int bottom, int right,
 /* This routine is only valid for non-overlapping rectangles! */
 static inline unsigned long
 area_added(int top, int left, int bottom, int right, int r1_area,
-           const vdriver_rect_t *r2)
+           const DirtyRects::Rect *r2)
 {
     int t, l, b, r, new_area, r2_area;
 
@@ -57,7 +51,7 @@ area_added(int top, int left, int bottom, int right, int r1_area,
 }
 
 static inline void
-union_rect(int top, int left, int bottom, int right, vdriver_rect_t *r)
+union_rect(int top, int left, int bottom, int right, DirtyRects::Rect *r)
 {
     if(top < r->top)
         r->top = top;
@@ -78,29 +72,27 @@ union_rect(int top, int left, int bottom, int right, vdriver_rect_t *r)
  * rectangle might suddenly overlap other rectangles already in the
  * list, that glommed rectangle must get reinserted.
  */
-void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
+void DirtyRects::add(int top, int left, int bottom, int right)
 {
     unsigned long best_area_added;
-    int ndr, i, best;
+    int i, best;
 
-    if(bottom <= top || right <= left
-       || ROMlib_refresh
-       || !ROMlib_shadow_screen_p)
+    int width = vdriver->width();
+    int height = vdriver->height();
+
+    top = std::clamp(top, 0, height);
+    bottom = std::clamp(bottom, 0, height);
+    left = std::clamp(left, 0, width);
+    right = std::clamp(right, 0, width);
+
+    if(bottom <= top || right <= left)
         return;
-
-    /* Note that Executor has touched the screen. */
-    note_executor_changed_screen(top, bottom);
-
-    ndr = num_dirty_rects;
+    
 
     /* Quickly handle the common case of no dirty rects. */
-    if(ndr == 0)
+    if(rects_.empty())
     {
-        dirty_rect[0].top = top;
-        dirty_rect[0].left = left;
-        dirty_rect[0].bottom = bottom;
-        dirty_rect[0].right = right;
-        num_dirty_rects = 1;
+        rects_.push_back({top, left, bottom, right});
         return;
     }
 
@@ -114,14 +106,14 @@ void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
         /* Figure out which union adds the least new area. */
         best_area_added = ~0UL;
         best = 0;
-        for(i = ndr - 1; i >= 0; i--)
+        for(i = rects_.size() - 1; i >= 0; i--)
         {
             unsigned long added;
 
             /* We don't allow overlapping rectangles, so if this overlaps
-	   * _any_ of them, then we glom them together.
-	   */
-            if(rects_overlap_p(top, left, bottom, right, &dirty_rect[i]))
+             * _any_ of them, then we glom them together.
+             */
+            if(rects_overlap_p(top, left, bottom, right, &rects_[i]))
             {
                 best_area_added = 0;
                 best = i;
@@ -131,7 +123,7 @@ void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
             {
                 /* We know that they don't overlap. */
                 added = area_added(top, left, bottom, right, new_area,
-                                   &dirty_rect[i]);
+                                   &rects_[i]);
                 if(added < best_area_added)
                 {
                     best_area_added = added;
@@ -141,30 +133,27 @@ void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
         }
 
         /* Add this rect to the dirty list, either by glomming together
-       * with an existing rect, or by adding a new rect.
-       */
+         * with an existing rect, or by adding a new rect.
+         */
         if(best_area_added <= ACCEPTABLE_PIXELS_ADDED
-           || ndr == MAX_DIRTY_RECTS)
+           || rects_.size() == MAX_DIRTY_RECTS)
         {
-            if(ndr == 1)
+            if(rects_.size() == 1)
             {
-                union_rect(top, left, bottom, right, &dirty_rect[0]);
+                union_rect(top, left, bottom, right, &rects_[0]);
                 done = true;
             }
             else
             {
-                bool old_rect_grows_p;
-                vdriver_rect_t *d = &dirty_rect[best];
+                Rect *d = &rects_[best];
 
                 /* We now re-insert the glommed rectangle into the list, to
-	       * see if it overlaps anyone else.
-	       */
+                 * see if it overlaps anyone else.
+                 */
 
+                bool old_rect_grows_p = false;
                 if(d->top <= top)
-                {
                     top = d->top;
-                    old_rect_grows_p = false;
-                }
                 else
                     old_rect_grows_p = true;
 
@@ -184,140 +173,46 @@ void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
                     old_rect_grows_p = true;
 
                 /* If this new rect is not entirely subsumed by the rect
-	       * it interesects, then we delete the subsumed rect,
-	       * and insert the union of the two rectangles into
-	       * our rect list.  Otherwise, we're done, because the
-	       * new rectangle doesn't add any new information.
-	       */
+                 * it interesects, then we delete the subsumed rect,
+                 * and insert the union of the two rectangles into
+                 * our rect list.  Otherwise, we're done, because the
+                 * new rectangle doesn't add any new information.
+                 */
                 if(old_rect_grows_p)
-                    *d = dirty_rect[--ndr];
+                {
+                    *d = rects_.back();
+                    rects_.pop_back();
+                }
                 else
                     done = true;
             }
         }
         else /* No glomming required. */
         {
-            vdriver_rect_t *n = &dirty_rect[ndr];
-
             /* Just add a new rectangle to the list. */
-            n->top = top;
-            n->left = left;
-            n->bottom = bottom;
-            n->right = right;
-            ++ndr;
+            rects_.push_back({top, left, bottom, right});
             done = true;
         }
     }
-
-    num_dirty_rects = ndr;
 }
 
-/* Returns true iff the specified rect is already encompassed by
- * the dirty rect list.
- */
-bool Executor::dirty_rect_subsumed_p(int top, int left, int bottom, int right)
+DirtyRects::Rects DirtyRects::getAndClear()
 {
-    int i;
-
-    for(i = num_dirty_rects - 1; i >= 0; i--)
-    {
-        const vdriver_rect_t *r = &dirty_rect[i];
-        if(r->top <= top && r->left <= left
-           && r->bottom >= bottom && r->right >= right)
-            return true;
-    }
-
-    return false;
+    auto rects = rects_;
+    rects_.clear();
+    return rects;
 }
 
-/* Note: the process of aligning these rectangles can make some of them
- * overlap slightly in strange cases.
- */
-static inline void
-clip_and_align_dirty_rects(void)
+
+void Executor::dirty_rect_accrue(int top, int left, int bottom, int right)
 {
-    vdriver_rect_t *r;
-    int i;
-#if VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT
-    int log2_bpp = ROMlib_log2[vdriver->bpp()];
-#endif
+    if(bottom <= top || right <= left
+       || ROMlib_refresh)
+        return;
 
-    /* Loop over all rects and canonicalize them. */
-    for(i = num_dirty_rects, r = &dirty_rect[0]; --i >= 0; r++)
-    {
-        int left, right;
+    /* Note that Executor has touched the screen. */
+    note_executor_changed_screen(top, bottom);
 
-        if(r->top < 0)
-            r->top = 0;
-        if(r->bottom > vdriver->height())
-            r->bottom = vdriver->height();
-
-        /* Pin left and round it down. */
-        left = r->left;
-        if(left < 0)
-            left = 0;
-#if VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT
-#define ALIGN_BITS (VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT * 8UL - 1)
-        else
-            left &= ~(ALIGN_BITS >> log2_bpp);
-#endif
-        r->left = left;
-
-        /* Pin right and round it up. */
-        right = r->right;
-        if(right > vdriver->width())
-            right = vdriver->width();
-#if VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT
-        right = ((((right << log2_bpp) + ALIGN_BITS) & ~ALIGN_BITS)
-                 >> log2_bpp);
-#endif
-        r->right = right;
-    }
+    vdriver->updateScreen(top, left, bottom, right);
 }
 
-static inline void
-sort_dirty_rects_by_top(void)
-{
-#if defined(VDRIVER_SORT_DIRTY_RECTS_BY_TOP)
-    int i, j;
-
-    /* Bubble sort is fine for only a small number of rectangles. */
-    for(i = num_dirty_rects - 1; i > 0; i--)
-    {
-        int cur_top = dirty_rect[0].top;
-
-        for(j = 0; j < i; j++)
-        {
-            int next_top = dirty_rect[j + 1].top;
-            if(cur_top > next_top)
-            {
-                vdriver_rect_t tmp;
-                tmp = dirty_rect[j];
-                dirty_rect[j] = dirty_rect[j + 1];
-                dirty_rect[j + 1] = tmp;
-            }
-            else
-                cur_top = next_top;
-        }
-    }
-#endif
-}
-
-void Executor::dirty_rect_update_screen(void)
-{
-    if(num_dirty_rects)
-    {
-        vdriver_rect_t dirty_rect_copy[MAX_DIRTY_RECTS];
-        int ndr;
-
-        clip_and_align_dirty_rects();
-        sort_dirty_rects_by_top();
-        ndr = num_dirty_rects;
-        num_dirty_rects = 0;
-
-        /* Copy rects to a local copy so we are reentrant. */
-        memcpy(&dirty_rect_copy[0], &dirty_rect[0], ndr * sizeof dirty_rect[0]);
-
-        vdriver->updateScreenRects(ndr, &dirty_rect_copy[0]);
-    }
-}

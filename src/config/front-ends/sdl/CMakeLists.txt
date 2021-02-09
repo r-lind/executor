@@ -21,7 +21,6 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         default_vdriver.h
         sdlevents.cpp
         sdl_mem.cpp
-        sdlquit.cpp
         sdlscrap.cpp
         sdlwin.cpp
         sdlwm.cpp
@@ -32,7 +31,6 @@ if(SDL_LIBRARY AND SDL_INCLUDE_DIR AND X11_LIBRARY AND Xext_LIBRARY)
         sdl_mem.h
         sdlevents.h
         sdlk_to_mkv.h
-        sdlquit.h
         sdlscrap.h
         sdlX.h
         syswm_map.h

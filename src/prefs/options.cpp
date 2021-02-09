@@ -21,7 +21,6 @@
 namespace Executor
 {
 // prefs.h 
-WriteWhenType ROMlib_when = WriteInOSEvent;
 sound_t ROMlib_PretendSound = soundpretend;
 bool ROMlib_cacheheuristic = false;     // unused
 //int ROMlib_clock;   // maybe this is actually internal state of vbl.cpp
@@ -53,10 +52,6 @@ FILE *configfile;   // hidden parameter for options parser
 
 // flags.h
 
-/* false if we are blitting straight to screen memory, true if we are
-   blitting to a shadow screen */
-bool ROMlib_shadow_screen_p = true; // currently always remains true
-
 /* Initial screen size.  This can be changed dynamically. */
 /* 0 means "use default". */
 int flag_width, flag_height;
@@ -83,9 +78,6 @@ bool ROMlib_dirtyvariant = false;   // unused
 
 // options.h
 
-std::pair<int,int> ROMlib_ScreenSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };  // unused
-std::pair<int,int> ROMlib_MacSize = { INITIALPAIRVALUE, INITIALPAIRVALUE };     // unused
-std::pair<int,int> ROMlib_ScreenLocation = { INITIALPAIRVALUE, INITIALPAIRVALUE };  // unused
 int32_t ROMlib_options = 0;
 std::string ROMlib_WindowName;
 std::string ROMlib_Comments;      // unused on purpose

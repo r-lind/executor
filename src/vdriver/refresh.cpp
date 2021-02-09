@@ -26,12 +26,6 @@ static void C_handle_refresh()
 {
     static bool busy_p = false;
 
-    /* If we're going directly to the screen, hang out and wait to see
-   * if they stop writing directly to the screen later.
-   */
-    if(!ROMlib_shadow_screen_p)
-        PrimeTime((QElemPtr)&refresh_tm_task, 2000 /* Two seconds */);
-
     /* If refresh is off, see if we need to turn it on. */
     if(!ROMlib_refresh && do_autorefresh_p && autodetect_refresh())
         set_refresh_rate(10);
@@ -294,11 +288,12 @@ static void flush_shadow_screen()
         shadow_fbuf = (uint8_t *)malloc(vdriver->rowBytes() * vdriver->height());
         memcpy(shadow_fbuf, vdriver->framebuffer(),
                vdriver->rowBytes() * vdriver->height());
-        vdriver->updateScreen();
 
         rowBytes = vdriver->rowBytes();
         width = vdriver->width();
         height = vdriver->height();
+
+        vdriver->updateScreen(0,0,height,width);
     }
     else if(find_changed_rect_and_update_shadow((uint32_t *)vdriver->framebuffer(),
                                                 (uint32_t *)shadow_fbuf,

@@ -398,11 +398,9 @@ set(vdriver_sources
         vdriver/autorefresh.h
         vdriver/refresh.h
         vdriver/vdriver.h
-        vdriver/vdriver_callbacks.cpp
+        vdriver/eventsink.cpp
         vdriver/eventrecorder.h
         vdriver/eventrecorder.cpp
-        vdriver/vdrivercommon.h
-        vdriver/vdrivercommon.cpp
     )
 
 set(mman_sources
@@ -472,6 +470,7 @@ set(util_sources
     util/uniquefile.cpp
 
     util/handle_vector.h
+    util/static_vector.h
 )
 
 set(misc_sources

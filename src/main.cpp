@@ -75,6 +75,7 @@
 #endif
 
 #include <vector>
+#include <thread>
 
 using namespace Executor;
 using namespace std;
@@ -83,10 +84,6 @@ using namespace std;
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
 
-/* Set to false when we know that the command line switches will result
-   in no graphics. */
-
-static bool graphics_p = true;
 
 static bool use_native_code_p = true;
 static bool breakOnProcessStart = false;
@@ -141,9 +138,7 @@ static const option_vec common_opts = {
       "specify a program to run and one or more documents to print.",
       opt_no_arg, "" },
 
-#if 0
   { "noclock",     "disable timer",               opt_no_arg,   "" },
-#endif
 
     { "noautorefresh",
       "turns off automatic detection of programs that bypass QuickDraw.",
@@ -222,8 +217,6 @@ capable of color.",
                     "menus.  For example \"executor -appearance windows\" will make each "
                     "window have a blue title bar",
       opt_sep, "" },
-
-    { "hfsplusro", "unsupported -- do not use", opt_no_arg, "" },
 
     { "logtraps", "print every operating system and toolbox calls and their arguments", opt_no_arg, "" },
     { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""},
@@ -311,6 +304,41 @@ construct_command_line_string(int argc, char **argv)
     return s;
 }
 
+static void reportBadArgs()
+{
+    fprintf(stderr,
+            "Type \"%s -help\" for a list of command-line options.\n",
+            ROMlib_appname.c_str());
+    exit(-10);
+}
+
+static void checkBadArgs(int argc, char **argv)
+{
+    if(argc >= 2)
+    {
+        int a;
+
+        /* Only complain if we see something with a leading dash; anything
+         * else might be a file to launch.
+         */
+        for(a = 1; a < argc; a++)
+        {
+            if(argv[a][0] == '-')
+            {
+                fprintf(stderr, "%s: unknown option `%s'\n",
+                        ROMlib_appname.c_str(), argv[a]);
+                bad_arg_p = true;
+            }
+        }
+    }
+
+    if(bad_arg_p)
+        reportBadArgs();
+}
+
+bool flag_headless = false;
+std::optional<fs::path> flag_record, flag_playback;
+
 static void parseCommandLine(int& argc, char **argv)
 {
     opt_database_t opt_db;
@@ -321,8 +349,6 @@ static void parseCommandLine(int& argc, char **argv)
     opt_register_pre_note("welcome to the executor help message.");
     opt_register_pre_note("usage: `executor [option...] "
                           "[program [document1 document2 ...]]'");
-
-    vdriver->registerOptions();
 
     if(!bad_arg_p)
         bad_arg_p = opt_parse(opt_db, &argc, argv);
@@ -343,8 +369,6 @@ static void parseCommandLine(int& argc, char **argv)
         exit(0);
     }
 
-    vdriver->setOptions(opt_db);
-
     /* Verify that the user input a legal bits per pixel.  "0" is a legal
    * value here; that means "use the vdriver's default."
    */
@@ -359,9 +383,6 @@ static void parseCommandLine(int& argc, char **argv)
 
     if(opt_val(opt_db, "ppc", nullptr))
         ROMlib_set_ppc(true);
-
-    if(opt_val(opt_db, "hfsplusro", nullptr))
-        ROMlib_hfs_plus_support = true;
 
     if(opt_val(opt_db, "size", &arg))
         bad_arg_p |= !parse_size_opt("size", arg);
@@ -434,18 +455,11 @@ static void parseCommandLine(int& argc, char **argv)
     else
         check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
 
-
-    if(opt_val(opt_db, "keyboards", nullptr))
-        graphics_p = false;
-
-
     opt_bool_val(opt_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
     opt_bool_val(opt_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
     opt_bool_val(opt_db, "print", &ROMlib_print, &bad_arg_p);
     opt_bool_val(opt_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);
-#if 0
-  opt_int_val (opt_db, "noclock",     &ROMlib_noclock,   &bad_arg_p);
-#endif
+    opt_bool_val (opt_db, "noclock", &ROMlib_noclock,   &bad_arg_p);
     {
         int no_auto = false;
         opt_int_val(opt_db, "noautorefresh", &no_auto, &bad_arg_p);
@@ -496,16 +510,17 @@ static void parseCommandLine(int& argc, char **argv)
 
     opt_val(opt_db, "keyboard", &keyboard);
     opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
+    if(list_keyboards_p)
+        flag_headless = true;
+
+    if(opt_val(opt_db, "headless", nullptr))
+        flag_headless = true;
 
     if(std::string str; opt_val(opt_db, "record", &str))
-    {
-        vdriver->setCallbacks(new EventRecorder(fs::path(str)));
-    }
+        flag_record = fs::path(str);
 
     if(std::string str; opt_val(opt_db, "playback", &str))
-    {
-        vdriver->setCallbacks(new EventPlayback(fs::path(str)));
-    }
+        flag_playback = fs::path(str);
 
     if(std::string str; opt_val(opt_db, "timewarp", &str))
     {
@@ -541,42 +556,13 @@ static void parseCommandLine(int& argc, char **argv)
         }
     }
 
-    /* If we failed to parse our arguments properly, exit now.
-   * I don't think we should call ExitToShell yet because the
-   * rest of the system isn't initialized.
-   */
-    if(argc >= 2)
-    {
-        int a;
-
-        /* Only complain if we see something with a leading dash; anything
-	 * else might be a file to launch.
-	 */
-        for(a = 1; a < argc; a++)
-        {
-            if(argv[a][0] == '-')
-            {
-                fprintf(stderr, "%s: unknown option `%s'\n",
-                        ROMlib_appname.c_str(), argv[a]);
-                bad_arg_p = true;
-            }
-        }
-    }
 
     if(bad_arg_p)
-    {
-        fprintf(stderr,
-                "Type \"%s -help\" for a list of command-line options.\n",
-                ROMlib_appname.c_str());
-        exit(-10);
-    }
+        reportBadArgs();
 }
-
 
 int main(int argc, char **argv)
 {
-    char thingOnStack; /* used to determine an approximation of the stack base address */
-
 #if defined(__linux__) && defined(PERSONALITY_HACK)
     int pers;
 
@@ -598,101 +584,110 @@ int main(int argc, char **argv)
 
     ROMlib_appname = fs::path(argv[0]).filename().string();
 
-    bool headless = false;
-    for(char** p = argv + 1; *p && strcmp(*p, "--"); ++p)
-        if(!strcmp(*p, "--headless") || !strcmp(*p, "-headless"))
-        {
-            headless = true;
-            break;
-        }
-
-    VideoDriverCallbacks videoDriverCallbacks;
-    if(headless)
-        vdriver = new HeadlessVideoDriver(&videoDriverCallbacks);
-    else
-        vdriver = new DefaultVDriver(&videoDriverCallbacks);
-    
-    if(!vdriver->parseCommandLine(argc, argv))
-    {
-        fprintf(stderr, "Unable to initialize video driver.\n");
-        exit(-12);
-    }
-
     parseCommandLine(argc, argv);
 
-    InitMemory(&thingOnStack);
+    if(flag_playback)
+        EventSink::instance = std::make_unique<EventPlayback>(*flag_playback);
+    else if(flag_record)
+        EventSink::instance = std::make_unique<EventRecorder>(*flag_record);
+    else
+        EventSink::instance = std::make_unique<EventSink>();
 
-    initialize_68k_emulator(nullptr,
-                            use_native_code_p,
-                            (uint32_t *)SYN68K_TO_US(0),
-                            0);
+    if(flag_headless)
+        vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());
+    else
+        vdriver = std::make_unique<DefaultVDriver>(EventSink::instance.get(), argc, argv);
+        
+    checkBadArgs(argc, argv);
 
-    EM_A7 = ptr_to_longint(LM(CurStackBase));
-
-    Executor::traps::init(logtraps);
-    InitLowMem();
-
-    if(graphics_p)
-        ROMlib_InitGDevices();
-    
-    ROMlib_eventinit();
-    hle_init();
-
-    ROMlib_fileinit();
-
-    InitUtil();
-
-    InitResources();
-    
-    ROMlib_set_system_version(system_version);
-
-    {
-        bool keyboard_set_failed = false;
-
-        if(!keyboard.empty())
+    auto executorThread = std::thread([&] {
+        try
         {
-            keyboard_set_failed = !ROMlib_set_keyboard(keyboard.c_str());
-            if(keyboard_set_failed)
-                printf("``%s'' is not an available keyboard\n", keyboard.c_str());
+            char thingOnStack; /* used to determine an approximation of the stack base address */
+            InitMemory(&thingOnStack);
+
+            initialize_68k_emulator(nullptr,
+                                    use_native_code_p,
+                                    (uint32_t *)SYN68K_TO_US(0),
+                                    0);
+
+            EM_A7 = ptr_to_longint(LM(CurStackBase));
+
+            Executor::traps::init(logtraps);
+            InitLowMem();
+
+            ROMlib_InitGDevices();
+            
+            ROMlib_eventinit();
+            hle_init();
+
+            ROMlib_fileinit();
+
+            InitUtil();
+
+            InitResources();
+            
+            ROMlib_set_system_version(system_version);
+
+            {
+                bool keyboard_set_failed = false;
+
+                if(!keyboard.empty())
+                {
+                    keyboard_set_failed = !ROMlib_set_keyboard(keyboard.c_str());
+                    if(keyboard_set_failed)
+                        printf("``%s'' is not an available keyboard\n", keyboard.c_str());
+                }
+
+                if(keyboard_set_failed || list_keyboards_p)
+                    display_keyboard_choices();
+            }
+
+            InitAppFiles(argc, argv);
+
+            InitFonts();
+
+        #if !defined(NDEBUG)
+            dump_init(nullptr);
+        #endif
+
+            ROMlib_color_init();
+
+            wind_color_init();
+            image_inits();  // must be called after `ROMlib_color_init ()'
+            sb_ctl_init();  //  must be after `image_inits ()'
+
+            AE_init();
+
+            {
+                INTEGER env = 0;
+                ROMlib_Fsetenv(inout(env), 0);
+            }
+
+            syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
+
+            sound_init();
+
+            set_refresh_rate(ROMlib_refresh);
+
+            InitMonDebugger();
+            base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
+
+            executor_main();
+            ExitToShell();   
+        }
+        catch(const ExitToShellException& e)
+        {
         }
 
-        if(keyboard_set_failed || list_keyboards_p)
-            display_keyboard_choices();
-    }
+        vdriver->endEventLoop();
+    });
 
-    InitAppFiles(argc, argv);
+    vdriver->runEventLoop();
+    executorThread.join();
 
-    InitFonts();
+    vdriver.reset();
 
-#if !defined(NDEBUG)
-    dump_init(nullptr);
-#endif
-
-    ROMlib_color_init();
-
-    wind_color_init();
-    image_inits();  // must be called after `ROMlib_color_init ()'
-    sb_ctl_init();  //  must be after `image_inits ()'
-
-    AE_init();
-
-    {
-        INTEGER env = 0;
-        ROMlib_Fsetenv(inout(env), 0);
-    }
-
-    syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
-
-    sound_init();
-
-    set_refresh_rate(ROMlib_refresh);
-
-    InitMonDebugger();
-    base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
-
-    executor_main();
-
-    ExitToShell();
     /* NOT REACHED */
     return 0;
 }

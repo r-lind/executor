@@ -31,37 +31,32 @@ class MockVDriver : public VideoDriver
 {
     using VideoDriver::VideoDriver;
 
-    virtual void setColors(int num_colors, const vdriver_color_t *colors) override
-    {
-
-    }
-
     virtual bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override
     {
-        width_ = 512;
-        height_ = 342;
-        rowBytes_ = 64;
-        framebuffer_ = new uint8_t[64*342];
-        bpp_ = 1;
+        framebuffer_ = Framebuffer(512, 342, 1);
         return true;
     }
+
+    virtual void runEventLoop() override {}
+    virtual void endEventLoop() override {}
+protected:
+    virtual void requestUpdate() override {}
 };
 
 class ExecutorTestEnvironment : public testing::Environment
 {
     char *thingOnStack;
     fs::path tempDir;
-    VideoDriverCallbacks videoDriverCallbacks;
 public:
     ExecutorTestEnvironment(char* thingOnStack) : thingOnStack(thingOnStack) {}
 
     virtual void SetUp() override
     {
-
         Executor::InitMemory(thingOnStack);
 
-        vdriver = new MockVDriver(&videoDriverCallbacks);
+        EventSink::instance = std::make_unique<EventSink>();
+        vdriver = std::make_unique<MockVDriver>(EventSink::instance.get());
         initialize_68k_emulator(nullptr, false, (uint32_t *)SYN68K_TO_US(0), 0);
         traps::init(false);
         Executor::InitLowMem();

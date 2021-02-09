@@ -37,6 +37,7 @@
 #include <prefs/prefs.h>
 #include <rsys/toolevent.h>
 #include <rsys/desk.h>
+#include <vdriver/vdriver.h>
 
 using namespace Executor;
 
@@ -1001,25 +1002,23 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
 {
     mbdfentry *oldentry, *newentry;
     Rect r, r2;
-    Point dummy_pt;
     Point tempp;
     INTEGER mid, item, olditem, tempi;
     GUEST<INTEGER> item_swapped;
-    INTEGER firstitem;
     MenuHandle newmh;
     int i;
     LONGINT pointaslong;
     LONGINT where, templ;
     GUEST<RgnHandle> saveclip;
     RgnHandle restoredrgn;
-    Boolean changedmenus;
+    bool changedmenus = false;
     INTEGER oldwhichmenuhit, whichmenuhit;
     GrafPtr saveport;
-    EventRecord ev;
+    
     Point pt;
     LONGINT myd0;
     GUEST<Point> ptTmp;
-    bool seen_up_already, done;
+    bool seen_up_already = false;
 
     GUEST<GrafPtr> saveport_swapped;
     GetPort(&saveport_swapped);
@@ -1028,26 +1027,49 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
 
     olditem = -1;
     item = 0;
-    if(!ispopup)
-        firstitem = 0;
-    else
-        firstitem = -1;
-    changedmenus = false;
+
+    short firstitem = ispopup ? -1 : 0;
+
     r = *saverp;
-    memset(&dummy_pt, 0xFF, sizeof dummy_pt);
+    Point dummy_pt = {-1, -1};
     oldwhichmenuhit = whichmenuhit = wheretowhich(oldwhere);
     restoredrgn = NewRgn();
 
-    seen_up_already = false;
-    done = false;
+    auto shouldKeepTracking = [&seen_up_already, &item, &firstitem]() -> bool {
+        if(!ROMlib_sticky_menus_p)
+            return WaitMouseUp();
+    
+        EventRecord ev;
+        if(GetOSEvent(mUpMask | mDownMask, &ev))
+        {
+            if(ev.what == mouseUp)
+            {
+                if(seen_up_already || (item != firstitem && firstitem != -1))
+                    return false;
+                else
+                    seen_up_already = true;
+            }
+        }
 
-    goto enter; // The 90s were hard times...
-    while(!done)
+        return true;
+    };
+
+    bool firstIteration = true;
+
+    while(shouldKeepTracking())
     {
         GetMouse(&ptTmp);
         pt = ptTmp.get();
         pointaslong = ((int32_t)pt.v << 16) | (unsigned short)pt.h;
         where = MBDFCALL(mbHit, 0, pointaslong);
+
+        if(firstIteration && !ispopup && pt.v < LM(MBarHeight) && where == NOTHITINMBAR)
+        {
+            if(vdriver->handleMenuBarDrag())
+                break;
+        }
+        firstIteration = false;
+
         if(LM(MenuHook))
             CALLMENUHOOK(LM(MenuHook));
         if(where == oldwhere)
@@ -1098,7 +1120,7 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                         {
                             myd0 = CALLMBARHOOK(&r2, LM(MBarHook));
                             if(myd0 != 0)
-                                goto out;
+                                break;
                         }
                         ROMlib_rootless_openmenu(r2);
                         ((mbdfentry *)*LM(MBSaveLoc))
@@ -1150,7 +1172,7 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
                     {
                         myd0 = CALLMBARHOOK(&r, LM(MBarHook));
                         if(myd0 != 0)
-                            goto out;
+                            break;
                     }
                     ROMlib_rootless_openmenu(r);                    
                     olditem = item = 0;
@@ -1207,35 +1229,8 @@ int32_t Executor::ROMlib_menuhelper(MenuHandle mh, Rect *saverp,
             oldwhere = where;
             oldwhichmenuhit = whichmenuhit;
         }
-    /* we're done if we get our first mouse-up while item is non-zero,
-	 or when we get our first mouse-down while item is non-zero
-	 or when we get our second mouse-up, no matter what */
-
-    enter:
-        if(!ROMlib_sticky_menus_p)
-            done = !StillDown();
-        else
-        {
-            if(OSEventAvail(mUpMask, &ev))
-            {
-                if(seen_up_already || (item != firstitem && firstitem != -1))
-                    done = true;
-                else
-                {
-                    GetOSEvent(mUpMask, &ev);
-                    seen_up_already = true;
-                }
-            }
-            if(!done && OSEventAvail(mDownMask, &ev))
-            {
-                GetOSEvent(mDownMask, &ev);
-                done = item != 0;
-            }
-        }
     }
-    while(!GetOSEvent(mUpMask, &ev))
-        ;
-out:
+
     if(mh)
     {
         if(item)

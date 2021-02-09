@@ -18,6 +18,7 @@
 #include <SysErr.h>
 #include <BinaryDecimal.h>
 #include <SegmentLdr.h>
+#include <TimeMgr.h>
 
 #include <quickdraw/cquick.h>
 #include <hfs/hfs.h>
@@ -41,14 +42,11 @@
 #include <rsys/redrawscreen.h>
 #include <rsys/toolevent.h>
 #include <print/nextprint.h>
-#include <rsys/scrap.h>
 #include <time/time.h>
 #include <menu/menu.h>
-#include <algorithm>
+#include <base/traps.impl.h>
 
-#if !defined(_WIN32)
-#include <sys/socket.h>
-#endif
+#include <algorithm>
 
 using namespace Executor;
 
@@ -241,6 +239,9 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
      * is a good place to check for timer interrupts. */
     syncint_check_interrupt();
 
+    if(vdriver->updateMode())
+        Executor::gd_vdriver_mode_changed();
+
     hle_reset();
 
     evt->message = 0;
@@ -397,6 +398,9 @@ static Boolean doevent(INTEGER em, EventRecord *evt,
         retval = CheckUpdate(evt);
     }
 
+    if(!retval)
+        vdriver->noteUpdatesDone();
+
     /* check for high level events */
     if(!retval && (em & highLevelEventMask))
     {
@@ -449,22 +453,30 @@ Boolean Executor::C_GetNextEvent(INTEGER em, EventRecord *evt)
     return retval;
 }
 
-/*
- * NOTE: the code for WaitNextEvent below is not really according to spec,
- *	 but it should do the job.  We could rig a fancy scheme that
- *	 communicates with the display postscript loop on the NeXT but that
- *	 wouldn't be general purpose and this *should* be good enough.  We
- *	 have to use Delay rather than timer calls ourself in case the timer
- *	 is already in use.  We also can't delay the full interval because
- *	 that would prevent window resizing from working on the NeXT (and
- *	 we'd never get the mouse moved messages we need)
- */
+static bool wneTimeout = false;;
+
+static void C_ROMlib_WNETimeout()
+{
+    wneTimeout = true;
+}
+PASCAL_FUNCTION_PTR(ROMlib_WNETimeout);
 
 Boolean Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
                                   LONGINT sleep, RgnHandle mousergn)
 {
     Boolean retval;
     Point p;
+    TMTask tm;
+
+    if(sleep > 0)
+    {
+        wneTimeout = false;
+        tm.tmAddr = (ProcPtr)&ROMlib_WNETimeout;
+        InsTime((QElemPtr)&tm);
+        PrimeTime((QElemPtr)&tm, sleep * 1000 / 60);
+    }
+    else
+        wneTimeout = true;
 
     do
     {
@@ -483,15 +495,18 @@ Boolean Executor::C_WaitNextEvent(INTEGER mask, EventRecord *evp,
                 evp->message = mouseMovedMessage << 24;
                 retval = true;
             }
-            else if(sleep > 0)
+            else if(!wneTimeout)
             {
-                Delay(std::min(sleep, 4), nullptr);
-                sleep -= 4;
+                syncint_wait_interrupt();
             }
             saved_h = p.h;
             saved_v = p.v;
         }
-    } while(!retval && sleep > 0);
+    } while(!retval && !wneTimeout);
+
+    if(sleep > 0)
+        RmvTime((QElemPtr)&tm);
+
     return retval;
 }
 
@@ -509,7 +524,8 @@ void Executor::C_GetMouse(GUEST<Point> *p)
     GlobalToLocal(p);
 }
 
-// FIXME: #warning Button not coded per IM Macintosh Toolbox Essentials 2-108
+// Note: Button not coded per IM Macintosh Toolbox Essentials 2-108
+//   ... because it's completely wrong. Trust the original IM instead.
 Boolean Executor::C_Button()
 {
     EventRecord evt;
@@ -520,7 +536,8 @@ Boolean Executor::C_Button()
     return retval;
 }
 
-// FIXME: #warning StillDown not coded per IM Macintosh Toolbox Essentials 2-109
+// Note: StillDown not coded per IM Macintosh Toolbox Essentials 2-109
+//   ... because it's wrong. Trust the original IM instead.
 Boolean Executor::C_StillDown() /* IMI-259 */
 {
     EventRecord evt;
@@ -528,13 +545,8 @@ Boolean Executor::C_StillDown() /* IMI-259 */
     return Button() ? !OSEventAvail((mDownMask | mUpMask), &evt) : false;
 }
 
-/*
- * The weirdness below is because Word 5.1a gets very unhappy if
- * TickCount makes large adjustments to LM(Ticks).  Even when we
- * just increase by one there are problems... The "no clock" option
- * might be retiring soon.
- */
-
+// Note: Button not coded per IM Macintosh Toolbox Essentials 2-110
+//   ... because it's completely wrong. Trust the original IM instead.
 Boolean Executor::C_WaitMouseUp()
 {
     EventRecord evt;
@@ -550,6 +562,13 @@ void Executor::C_GetKeys(unsigned char *keys)
 {
     BlockMoveData((Ptr)LM(KeyMap), (Ptr)keys, (Size)sizeof_KeyMap);
 }
+
+/*
+ * The weirdness below is because Word 5.1a gets very unhappy if
+ * TickCount makes large adjustments to LM(Ticks).  Even when we
+ * just increase by one there are problems... The "no clock" option
+ * might be retiring soon.
+ */
 
 ULONGINT Executor::C_TickCount()
 {

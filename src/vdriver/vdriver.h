@@ -2,10 +2,18 @@
 #if !defined(_VDRIVER_H_)
 #define _VDRIVER_H_
 
+#include <ExMacTypes.h>
+#include <vdriver/dirtyrect.h>
+
+
+#include <functional>
+#include <memory>
+#include <mutex>
 #include <unordered_map>
 #include <string>
+#include <array>
+#include <vector>
 
-#include <ExMacTypes.h>
 
 namespace Executor
 {
@@ -27,28 +35,31 @@ namespace Executor
 #define VDRIVER_DEFAULT_SCREEN_WIDTH 1024
 #define VDRIVER_DEFAULT_SCREEN_HEIGHT 768
 
-struct vdriver_rect_t
-{
-    int top, left, bottom, right;
-};
-
 struct vdriver_color_t
 {
     uint16_t red, green, blue;
 };
 
-}
-
-namespace Executor
+struct Framebuffer
 {
+        // The following should be shared_ptr<uint8_t[]>.
+        // This is possible in C++17 or later, but Apple is still causing problems (as of 10.15)
+    std::shared_ptr<uint8_t> data; 
 
-/*
- * VideoDriverCallbacks
- * 
- * This will probably become an abstract class that should be the only calls that
- * video drivers make into the rest of Executor.
- */
-class VideoDriverCallbacks
+
+    int width = 0, height = 0;
+    int bpp = 0;
+    int rowBytes = 0;
+    int cursorBpp = 1;
+    bool grayscale = false;
+    bool rootless = false;
+    rgb_spec_t *rgbSpec = nullptr;
+
+    Framebuffer() = default;
+    Framebuffer(int w, int h, int d);
+};
+
+class IEventListener
 {
 public:
     void mouseButtonEvent(bool down, int h, int v)
@@ -57,37 +68,56 @@ public:
         mouseButtonEvent(down);
     }
 
-    virtual void mouseButtonEvent(bool down);
-    virtual void mouseMoved(int h, int v);
-    virtual void keyboardEvent(bool down, unsigned char mkvkey);
-    virtual void suspendEvent();
-    virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */);
+    virtual void mouseButtonEvent(bool down) = 0;
+    virtual void mouseMoved(int h, int v) = 0;
+    virtual void keyboardEvent(bool down, unsigned char mkvkey) = 0;
+    virtual void suspendEvent() = 0;
+    virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */) = 0;
+    virtual void requestQuit() = 0;
+    virtual void wake() = 0;
+};
+
+class EventSink : public IEventListener
+{
+public:
+    virtual void mouseButtonEvent(bool down) override;
+    virtual void mouseMoved(int h, int v) override;
+    virtual void keyboardEvent(bool down, unsigned char mkvkey) override;
+    virtual void suspendEvent() override;
+    virtual void resumeEvent(bool updateClipboard) override;
+    virtual void requestQuit() override;
+    virtual void wake() override;
+
+    void pumpEvents();
+
+    static std::unique_ptr<EventSink> instance;
 private:
     GUEST<uint32_t> keytransState = 0;
+
+    std::mutex mutex_;
+    std::vector<std::function<void ()>> todo_;
+
+    void runOnEmulatorThread(std::function<void ()> f);
 };
 
 class VideoDriver
 {
 public:
-    VideoDriver(VideoDriverCallbacks *cb) : callbacks_(cb) {}
-    void setCallbacks(VideoDriverCallbacks *cb) { callbacks_ = cb; }
-
+    VideoDriver(IEventListener *cb);
+    VideoDriver(const VideoDriver&) = delete;
+    VideoDriver& operator=(const VideoDriver&) = delete;
     virtual ~VideoDriver();
 
-    virtual bool parseCommandLine(int& argc, char *argv[]);
+    virtual void runEventLoop() = 0;
+    virtual void endEventLoop() = 0;
+
     virtual bool setOptions(std::unordered_map<std::string, std::string> options);
     virtual void registerOptions();
-
-    virtual bool init();
     
-    virtual void shutdown();
     virtual void updateScreen(int top, int left, int bottom, int right);
-    void updateScreen() { updateScreen(0,0,height(),width()); }
-    virtual void updateScreenRects(int num_rects, const vdriver_rect_t *r);
     virtual bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p);
-    virtual void setColors(int num_colors, const vdriver_color_t *colors) = 0;
-    virtual bool setMode(int width, int height, int bpp,
-                                bool grayscale_p) = 0;
+    virtual void setColors(int num_colors, const vdriver_color_t *colors);
+    virtual bool setMode(int width, int height, int bpp, bool grayscale_p) = 0;
 
     virtual void putScrap(OSType type, LONGINT length, char *p, int scrap_cnt);
     virtual LONGINT getScrap(OSType type, Handle h);
@@ -98,46 +128,55 @@ public:
     virtual void setCursor(char *cursor_data,
                                 uint16_t cursor_mask[16],
                                 int hotspot_x, int hotspot_y);
-    virtual bool setCursorVisible(bool show_p);
+    virtual void setCursorVisible(bool show_p);
 
 
-    virtual void pumpEvents();
     virtual void setRootlessRegion(RgnHandle rgn);
 
         // TODO: should move to sound driver?
     virtual void beepAtUser();
 
-    int cursorDepth() { return cursorDepth_; }
-    uint8_t *framebuffer() { return framebuffer_; }
-    int width() { return width_; }
-    int height() { return height_; }
-    int rowBytes() { return rowBytes_; }
-    int bpp() { return bpp_; }
-    int maxBpp() { return maxBpp_; }
-    rgb_spec_t *rgbSpec() { return rgbSpec_; }
-    bool isGrayscale() { return isGrayscale_; }
-    bool isRootless() { return isRootless_; }
+    virtual void noteUpdatesDone() {}
+    virtual bool updateMode() { return false; }
 
-public:
-    VideoDriverCallbacks *callbacks_ = nullptr;
+    virtual bool handleMenuBarDrag() { return false; }
 
-    uint8_t* framebuffer_ = nullptr;
-    int width_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
-    int height_ = VDRIVER_DEFAULT_SCREEN_HEIGHT;
-    int bpp_ = 8;
-    int rowBytes_ = VDRIVER_DEFAULT_SCREEN_WIDTH;
-    bool isGrayscale_ = false;
+    uint8_t *framebuffer() { return framebuffer_.data.get(); }
+    int cursorDepth() { return framebuffer_.cursorBpp; }
+    int width() { return framebuffer_.width; }
+    int height() { return framebuffer_.height; }
+    int rowBytes() { return framebuffer_.rowBytes; }
+    int bpp() { return framebuffer_.bpp; }
+    rgb_spec_t *rgbSpec() { return framebuffer_.rgbSpec; }
+    bool isGrayscale() { return framebuffer_.grayscale; }
+    bool isRootless() { return framebuffer_.rootless; }
 
-    int maxBpp_ = 8;
-    int cursorDepth_ = 1;
-    bool isRootless_ = false;
+protected:
+    IEventListener *callbacks_ = nullptr;
 
-    rgb_spec_t *rgbSpec_ = nullptr;
+    Framebuffer framebuffer_;
+
+    std::mutex mutex_;
+    std::array<uint32_t, 256> colors_;
+
+    std::vector<int16_t> rootlessRegion_;
+    std::vector<int16_t> pendingRootlessRegion_;
+    bool rootlessRegionDirty_ = false;
+
+    Executor::DirtyRects dirtyRects_;
+
+    void updateBuffer(const Framebuffer& fb, uint32_t* buffer, int bufferWidth, int bufferHeight,
+                    const Executor::DirtyRects::Rects& rects);
+
+    virtual void requestUpdate() = 0;
+
+    void commitRootlessRegion();
+
+    class ThreadPool;
+    std::unique_ptr<ThreadPool> threadpool_;
 };
 
-extern VideoDriver *vdriver;
-
-// #define VDRIVER_DIRTY_RECT_BYTE_ALIGNMENT number-of-bytes
+extern std::unique_ptr<VideoDriver> vdriver;
 
 }
 #endif /* !_VDRIVER_H_ */

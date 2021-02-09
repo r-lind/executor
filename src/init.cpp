@@ -128,6 +128,7 @@ unhandled_trap(syn68k_addr_t callback_address, void *arg)
 static void
 setup_trap_vectors(void)
 {
+#if 0
     syn68k_addr_t timer_callback;
 
     /* Set up the trap vector for the timer interrupt. */
@@ -135,6 +136,7 @@ setup_trap_vectors(void)
     *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_TIMER_VECTOR * 4) = timer_callback;
 
     getPowerCore().handleInterrupt = &catchalarmPowerPC;
+#endif
 
     /* Fill in unhandled trap vectors so they cause graceful deaths.
    * Skip over those trap vectors which are known to have legitimate

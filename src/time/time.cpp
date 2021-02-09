@@ -65,31 +65,13 @@ void Executor::ROMlib_SetTimewarp(int speedup, int slowdown)
 
 #define REALLONGTIME 0x7FFFFFFF
 
-static void catchalarmCommon()
+void Executor::timeInterruptHandler()
 {
     ULONGINT diff;
     TMTask *qp;
     LONGINT min;
     LONGINT tm_count;
-    M68kReg saved_regs[16];
-    CCRElement saved_ccnz, saved_ccn, saved_ccc, saved_ccv, saved_ccx;
     unsigned long now_msecs;
-
-    cpu_state.interrupt_pending[M68K_TIMER_PRIORITY] = false;
-    getPowerCore().cancelInterrupt();
-
-    /* We save the 68k registers and cc bits away. */
-    memcpy(saved_regs, &cpu_state.regs, sizeof saved_regs);
-    saved_ccnz = cpu_state.ccnz;
-    saved_ccn = cpu_state.ccn;
-    saved_ccc = cpu_state.ccc;
-    saved_ccv = cpu_state.ccv;
-    saved_ccx = cpu_state.ccx;
-
-    /* There's no reason to think we need to decrement A7 by 32;
-   * it's just a paranoid thing to do.
-   */
-    EM_A7 = (EM_A7 - 32) & ~3; /* Might as well long-align it. */
 
     /* Loop while it's still time to do stuff sitting in the queue. */
     do
@@ -162,49 +144,8 @@ static void catchalarmCommon()
         /* Note that there's no interrupt queued up. */
         next_interrupt_msecs = 0;
     }
-
-    memcpy(&cpu_state.regs, saved_regs, sizeof saved_regs);
-    cpu_state.ccnz = saved_ccnz;
-    cpu_state.ccn = saved_ccn;
-    cpu_state.ccc = saved_ccc;
-    cpu_state.ccv = saved_ccv;
-    cpu_state.ccx = saved_ccx;
 }
 
-syn68k_addr_t Executor::catchalarm(syn68k_addr_t interrupt_pc, void *unused)
-{
-    currentCPUMode = CPUMode::m68k;
-    currentM68KPC = *ptr_from_longint<GUEST<uint32_t>*>(EM_A7 + 2);
-
-    catchalarmCommon();
-
-    if(base::Debugger::instance && base::Debugger::instance->interruptRequested())
-        return base::Debugger::instance->nmi68K(interrupt_pc);
-
-    return MAGIC_RTE_ADDRESS;
-}
-
-void Executor::catchalarmPowerPC(PowerCore&)
-{
-    currentCPUMode = CPUMode::ppc;
-
-    auto& cpu = getPowerCore();
-
-    PowerCoreState saveState = (PowerCoreState&)cpu;
-
-    // TODO: save registers, and so on
-
-    cpu.r[1] -= 128;
-    EM_A7 = cpu.r[1];
-    catchalarmCommon();
-    cpu.r[1] += 128;
-    EM_A7 = cpu.r[1];
-
-    (PowerCoreState&)cpu = saveState;
-
-    if(base::Debugger::instance && base::Debugger::instance->interruptRequested())
-        base::Debugger::instance->nmiPPC();
-}
 
 
 static void ROMlib_PrimeTime(QElemPtr taskp, LONGINT count)

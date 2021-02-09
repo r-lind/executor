@@ -413,157 +413,145 @@ init_sdlk_to_mkv(void)
 
 #include "sdlevents.h"
 #include "sdlscrap.h"
-#include "sdlquit.h"
 #include "syswm_map.h"
 
-/* The current state of the keyboard modifiers */
-static uint16_t right_button_keymod = 0;
-static GUEST<Point> mouseloc; /* To save mouse location at interrupt */
-
-syn68k_addr_t
-handle_sdl_mouse(syn68k_addr_t interrupt_addr, void *unused)
-{
-    vdriver->callbacks_->mouseMoved(mouseloc.h, mouseloc.v);
-    return (MAGIC_RTE_ADDRESS);
-}
-
-syn68k_addr_t
-handle_sdl_events(syn68k_addr_t interrupt_addr, void *unused)
-{
-    SDL_Event event;
-
-    while(SDL_PollEvent(&event))
-    {
-        switch(event.type)
-        {
-            case SDL_ACTIVEEVENT:
-            {
-                if(event.active.state & SDL_APPINPUTFOCUS)
-                {
-                    if(!event.active.gain)
-                        vdriver->callbacks_->suspendEvent();
-                    else
-                    {
-                        if(!we_lost_clipboard())
-                            vdriver->callbacks_->resumeEvent(false);
-                        else
-                        {
-                            ZeroScrap();
-                            vdriver->callbacks_->resumeEvent(true);
-                        }
-                    }
-                }
-            }
-            break;
-
-            case SDL_MOUSEBUTTONDOWN:
-            case SDL_MOUSEBUTTONUP:
-            {
-                if(event.button.button == 3)
-                {
-                    if(ROMlib_right_button_modifier != (optionKey | keyDownMask | keyUpMask))
-                    {
-                        if(event.type == SDL_MOUSEBUTTONDOWN)
-                            right_button_keymod |= ROMlib_right_button_modifier;
-                        else
-                            right_button_keymod &= ~ROMlib_right_button_modifier;
-                    }
-                    else
-                    {
-                        /* rewrite the event as though it were the option
-		       key rather than a mouse click */
-                        if(event.type == SDL_MOUSEBUTTONDOWN)
-                        {
-                            event.type = SDL_KEYDOWN;
-                            event.key.state = SDL_PRESSED;
-                        }
-                        else
-                        {
-                            event.type = SDL_KEYUP;
-                            event.key.state = 0;
-                        }
-                        event.key.keysym.scancode = 0x64;
-                        event.key.keysym.sym = SDLK_RALT;
-                        /*-->*/ goto key_down_or_key_up;
-                    }
-                }
-
-                vdriver->callbacks_->mouseButtonEvent(event.button.state == SDL_PRESSED, event.button.x, event.button.y);
-            }
-            break;
-
-            case SDL_KEYDOWN:
-            case SDL_KEYUP:
-            key_down_or_key_up:
-            {
-                unsigned char mkvkey;
-
-                init_sdlk_to_mkv();
-
-                if(use_scan_codes)
-                    mkvkey = ibm_virt_to_mac_virt[event.key.keysym.scancode];
-                else
-                    mkvkey = sdlk_to_mkv[event.key.keysym.sym];
-                
-                vdriver->callbacks_->keyboardEvent(event.key.state == SDL_PRESSED, mkvkey);
-            }
-            break;
-
-            case SDL_QUIT:
-            {
-                ROMlib_exit = true;
-                ExitToShell();
-            }
-            break;
-        }
-    }
-    return (MAGIC_RTE_ADDRESS);
-}
-
-void SDLVideoDriver::pumpEvents()
-{
-    handle_sdl_events(/* dummy */ -1, /* dummy */ nullptr);
-}
 
 /* This function runs in a separate thread (usually) */
 int sdl_event_interrupt(const SDL_Event *event)
 {
-    if(event->type == SDL_MOUSEMOTION)
-    {
-        mouseloc.h = event->motion.x;
-        mouseloc.v = event->motion.y;
-        interrupt_generate(M68K_MOUSE_MOVED_PRIORITY);
-        return (0); /* Drop the event */
-    }
-    else if(event->type == SDL_QUIT)
+    if(event->type == SDL_QUIT)
     {
         /* Query whether or not we should quit */
-        if(!sdl_really_quit())
-            return (0);
+     //   if(!sdl_really_quit())
+      //      return (0);
     }
     else if(event->type == SDL_SYSWMEVENT)
     {
         /* Pass it to a system-specific event handler */
         return (sdl_syswm_event(event));
     }
-
-    /* All other events go here */
-    interrupt_generate(M68K_EVENT_PRIORITY);
     return (1);
 }
 
 void sdl_events_init(void)
 {
-    syn68k_addr_t mouse_callback;
-    syn68k_addr_t event_callback;
-
-    /* hook into syn68k synchronous interrupts */
-    mouse_callback = callback_install(handle_sdl_mouse, nullptr);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_MOUSE_MOVED_VECTOR * 4) = mouse_callback;
-    event_callback = callback_install(handle_sdl_events, nullptr);
-    *(GUEST<syn68k_addr_t> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = event_callback;
-
     /* then set up a filter that triggers the event interrupt */
     SDL_SetEventFilter(sdl_event_interrupt);
     SDL_EventState(SDL_SYSWMEVENT, SDL_ENABLE);
+}
+
+
+void SDLVideoDriver::runEventLoop()
+{
+    SDL_Event event;
+
+    for(;;)
+    {
+        SDL_WaitEvent(&event);
+
+        switch(event.type)
+        {
+            case SDL_ACTIVEEVENT:
+                {
+                    if(event.active.state & SDL_APPINPUTFOCUS)
+                    {
+                        if(!event.active.gain)
+                            callbacks_->suspendEvent();
+                        else
+                        {
+                            if(!we_lost_clipboard())
+                                callbacks_->resumeEvent(false);
+                            else
+                            {
+                                ZeroScrap();
+                                callbacks_->resumeEvent(true);
+                            }
+                        }
+                    }
+                }
+                break;
+
+            case SDL_MOUSEMOTION:
+                callbacks_->mouseMoved(event.motion.x, event.motion.y);
+                break;
+
+            case SDL_MOUSEBUTTONDOWN:
+            case SDL_MOUSEBUTTONUP:
+                callbacks_->mouseButtonEvent(event.button.state == SDL_PRESSED, event.button.x, event.button.y);
+                break;
+
+            case SDL_KEYDOWN:
+            case SDL_KEYUP:
+                {
+                    unsigned char mkvkey;
+
+                    init_sdlk_to_mkv();
+
+                    if(use_scan_codes)
+                        mkvkey = ibm_virt_to_mac_virt[event.key.keysym.scancode];
+                    else
+                        mkvkey = sdlk_to_mkv[event.key.keysym.sym];
+                    
+                    callbacks_->keyboardEvent(event.key.state == SDL_PRESSED, mkvkey);
+                }
+                break;
+
+            case SDL_QUIT:
+                callbacks_->requestQuit();
+                break;
+        }
+
+        std::lock_guard lk(mutex_);
+        if(quit_)
+            return;
+        if(!todos_.empty())
+        {
+            for(const auto& f : todos_)
+                f();
+            todos_.clear();
+            done_.notify_all();
+        }
+        if(!dirtyRects_.empty())
+        {
+            auto rects = dirtyRects_.getAndClear();
+            SDL_Rect sdlRects[DirtyRects::MAX_DIRTY_RECTS];
+
+            for(int i = 0; i < rects.size(); i++)
+            {
+                const auto& r = rects[i];
+                SDL_Rect& sdlR = sdlRects[i];
+                sdlR.x = r.left;
+                sdlR.y = r.top;
+                sdlR.w = r.right - r.left;
+                sdlR.h = r.bottom - r.top;
+
+            }
+            SDL_UpdateRects(screen, rects.size(), sdlRects);
+        }
+    }
+}
+
+
+void SDLVideoDriver::endEventLoop()
+{
+    std::lock_guard lk(mutex_);
+    requestUpdate();
+    quit_ = true;
+}
+
+
+void SDLVideoDriver::requestUpdate()
+{
+    SDL_Event evt;
+    evt.type = SDL_USEREVENT;
+    SDL_PushEvent(&evt);
+}
+
+void SDLVideoDriver::onMainThread(std::function<void()> f)
+{
+    std::unique_lock lk(mutex_);
+    todos_.push_back(f);
+    requestUpdate();
+
+    done_.wait(lk, [this] { return todos_.empty(); });
 }

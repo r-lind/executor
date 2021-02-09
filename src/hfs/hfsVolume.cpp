@@ -91,8 +91,6 @@ static OSErr initcache(HVCB *vcbp)
     return noErr;
 }
 
-bool Executor::ROMlib_hfs_plus_support = false;
-
 static bool
 is_hfs_plus_wrapper(volumeinfoPtr vp)
 {

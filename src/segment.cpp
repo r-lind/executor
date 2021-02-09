@@ -161,15 +161,7 @@ static Boolean valid_browser(void)
 
 static void launch_browser(void)
 {
-    /* Set the depth to what was specified on the command line;
-   * if nothing was specified there, set the depth to the maximum
-   * supported bits per pixel.
-   */
-    SetDepth(LM(MainDevice),
-             (flag_bpp
-                  ? std::min(flag_bpp, vdriver->maxBpp())
-                  : vdriver->maxBpp()),
-             0, 0);
+    ResetToInitialDepth();
     Launch(LM(FinderName), LM(BootDrive));
 }
 
@@ -280,8 +272,7 @@ void Executor::C_ExitToShell()
     CloseResFile(0);
     ROMlib_OurClose();
 
-    exit(0);
-    ALLOCAEND /* yeah, right, if exit fails... */
+    throw ExitToShellException();
 }
 
 

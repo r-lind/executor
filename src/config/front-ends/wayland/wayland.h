@@ -1,33 +1,17 @@
 #pragma once
 
-#include <vdriver/vdrivercommon.h>
+#include <vdriver/vdriver.h>
 
 #include <wayland-client.hpp>
 #include <wayland-client-protocol-extra.hpp>
 
-class WaylandVideoDriver : public Executor::VideoDriverCommon
+#include <mutex>
+#include <vector>
+#include <chrono>
+#include <condition_variable>
+
+class WaylandVideoDriver : public Executor::VideoDriver
 {
-    using VideoDriverCommon::VideoDriverCommon;
-
-    wayland::display_t display_;
-    wayland::registry_t registry_;
-    wayland::compositor_t compositor_;
-    wayland::shell_t shell_;
-    wayland::xdg_wm_base_t xdg_wm_base_;
-    wayland::seat_t seat_;
-    wayland::shm_t shm_;
-
-    wayland::surface_t surface_;
-    wayland::xdg_surface_t xdg_surface_;
-    wayland::xdg_toplevel_t xdg_toplevel_;
-
-    wayland::pointer_t pointer_;
-    wayland::keyboard_t keyboard_;
-
-
-    
-    std::array<uint32_t, 256> colors_;
-
     class SharedMem
     {
         int fd_ = -1;
@@ -82,9 +66,24 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
         wayland::buffer_t& wlbuffer() { return wlbuffer_; }
     };
 
+    wayland::display_t display_;
+    wayland::registry_t registry_;
+    wayland::compositor_t compositor_;
+    wayland::xdg_wm_base_t xdg_wm_base_;
+    wayland::seat_t seat_;
+    wayland::shm_t shm_;
+
+    wayland::surface_t surface_;
+    wayland::xdg_surface_t xdg_surface_;
+    wayland::xdg_toplevel_t xdg_toplevel_;
+
+    wayland::pointer_t pointer_;
+    wayland::keyboard_t keyboard_;
+
+    bool frameRequested_ = false;
+    wayland::callback_t frameCallback_;
 
     Buffer buffer_;
-    bool initDone_ = false;
 
 
     wayland::surface_t cursorSurface_;
@@ -93,24 +92,85 @@ class WaylandVideoDriver : public Executor::VideoDriverCommon
     uint32_t cursorEnterSerial_ = 0;
 
 
-    int configuredWidth_ = 0, configuredHeight_ = 0;
-    bool configuredMaximized_ = false;
-    bool configurePending_ = false;
-    bool configuredActivated_ = false;
+
+    int requestedBpp_ = 8;
+
+    struct WindowShape
+    {
+        uint32_t serial;
+        int width, height;
+        bool maximized;
+    };
+
+    WindowShape configuredShape_ {};
+    WindowShape allocatedShape_ {};
+    WindowShape committedShape_ {};
+
+    bool activated_ = false;
+
 
     double mouseX_, mouseY_;
+    uint32_t lastMouseDownSerial_ = 0;
+
+    int wakeFd_;
+    std::atomic_bool exitMainThread_ = false;
+    
+
+    enum class State
+    {
+        unconfigured,
+        idle,
+        waitingForModeSwitch,
+        waitingForUpdate,
+        waitingForObsoleteUpdate,
+        drawingObsoleteUpdate
+    };
+/*
+    @startuml
+    hide empty description
+
+    [*] --> unconfigured
+
+    unconfigured --> idle : configure
+    idle  --> waitingForModeSwitch : configure
+    waitingForModeSwitch --> waitingForUpdate : updateMode
+    waitingForUpdate --> idle : noteUpdatesDone
+    waitingForUpdate -> waitingForObsoleteUpdate : configure
+    waitingForObsoleteUpdate --> drawingObsoleteUpdate : noteUpdatesDone
+    drawingObsoleteUpdate --> waitingForModeSwitch : frame
+
+    @endumnl
+*/
+
+    State state_ = State::unconfigured;
+    std::condition_variable stateChanged_;
+    
+
+    std::chrono::steady_clock::time_point updateTimeout_;
+
+    void frameCallback();
+    bool requestFrame();
+
+
+    void wakeEventLoop();
+
+    void requestUpdate() override;
 
 public:
-    bool init() override;
+    WaylandVideoDriver(Executor::IEventListener *eventListener, int& argc, char* argv[]);
+    ~WaylandVideoDriver();
+
     bool setMode(int width, int height, int bpp,
                                 bool grayscale_p) override;
-    void updateScreenRects(int num_rects, const Executor::vdriver_rect_t *r) override;
-
-    void pumpEvents() override;
 
     void setCursor(char *cursor_data, uint16_t cursor_mask[16], int hotspot_x, int hotspot_y) override;
-    bool setCursorVisible(bool show_p) override;
+    void setCursorVisible(bool show_p) override;
 
-    void setRootlessRegion(Executor::RgnHandle rgn) override;
+    void noteUpdatesDone() override;
+    bool updateMode() override;
 
+    bool handleMenuBarDrag() override;
+
+    void runEventLoop() override;
+    void endEventLoop() override;
 };

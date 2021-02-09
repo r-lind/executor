@@ -11,7 +11,9 @@
 
 void SDLVideoDriver::setTitle(const std::string& title)
 {
-    SDL_WM_SetCaption(title.c_str(), "executor");
+    onMainThread([&] {
+        SDL_WM_SetCaption(title.c_str(), "executor");
+    });
 }
 
 /* This is really inefficient.  We should hash the cursors */
@@ -19,20 +21,24 @@ void SDLVideoDriver::setCursor(char *cursor_data,
                                unsigned short cursor_mask[16],
                                int hotspot_x, int hotspot_y)
 {
-    SDL_Cursor *old_cursor, *new_cursor;
+    onMainThread([&] {
+        SDL_Cursor *old_cursor, *new_cursor;
 
-    old_cursor = SDL_GetCursor();
-    new_cursor = SDL_CreateCursor((unsigned char *)cursor_data,
-                                  (unsigned char *)cursor_mask,
-                                  16, 16, hotspot_x, hotspot_y);
-    if(new_cursor != nullptr)
-    {
-        SDL_SetCursor(new_cursor);
-        SDL_FreeCursor(old_cursor);
-    }
+        old_cursor = SDL_GetCursor();
+        new_cursor = SDL_CreateCursor((unsigned char *)cursor_data,
+                                    (unsigned char *)cursor_mask,
+                                    16, 16, hotspot_x, hotspot_y);
+        if(new_cursor != nullptr)
+        {
+            SDL_SetCursor(new_cursor);
+            SDL_FreeCursor(old_cursor);
+        }
+    });
 }
 
-bool SDLVideoDriver::setCursorVisible(bool show_p)
+void SDLVideoDriver::setCursorVisible(bool show_p)
 {
-    return (SDL_ShowCursor(show_p));
+    onMainThread([&] {
+        SDL_ShowCursor(show_p);
+    });
 }

@@ -104,6 +104,20 @@ struct RegionProcessor
     int16_t top() const { return top_; }
 };
 
+template<typename Iterator, typename F>
+void forEachRect(Iterator rgnIt, F fun)
+{
+    RegionProcessor rgnP(rgnIt);
+
+    while(rgnP.bottom() < 32767)
+    {
+        rgnP.advance();
+        
+        for(int i = 0; i + 1 < rgnP.row.size(); i += 2)
+            fun(rgnP.row[i], rgnP.top(), rgnP.row[i+1], rgnP.bottom());
+    }
+}
+
 using RgnVector = handle_vector<int16_t, RgnHandle, 10>;
 
 

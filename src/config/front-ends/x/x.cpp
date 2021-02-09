@@ -10,7 +10,6 @@
 
 #include <vdriver/dirtyrect.h>
 #include <rsys/keyboard.h>
-#include <rsys/scrap.h>
 
 #include <assert.h>
 
@@ -54,6 +53,8 @@
 #include "x_keycodes.h"
 #include "x_keysym.h"
 
+#include <atomic>
+
 static int use_scan_codes = false;
 
 namespace Executor {
@@ -64,16 +65,13 @@ namespace Executor {
 
 using namespace Executor;
 
-/* save the original sigio flag; used when we shutdown */
-static int orig_sigio_flag;
-static int orig_sigio_owner;
 static int x_fd = -1;
 
 #define EXECUTOR_WINDOW_EVENT_MASK (KeyPressMask | KeyReleaseMask         \
                                     | ButtonPressMask | ButtonReleaseMask \
                                     | FocusChangeMask   \
                                     | ExposureMask | PointerMotionMask    \
-                                    | ColormapChangeMask)
+                                    )
 
 void cursor_init(void);
 
@@ -89,7 +87,7 @@ static int x_fbuf_bpp;
 static int x_fbuf_row_bytes;
 
 /* max dimensions */
-static int max_width, max_height, max_bpp;
+static int x_image_width, x_image_height;   // fixme: this hurts
 
 /* x cursor stuff */
 static ::Cursor x_hidden_cursor, x_cursor = -1;
@@ -102,6 +100,7 @@ static GC copy_gc, cursor_data_gc, cursor_mask_gc;
 static int cursor_visible_p = false;
 
 static Atom x_selection_atom;
+static Atom wmDeleteMessage;
 
 static char *selectiontext = nullptr;
 static int selectionlength;
@@ -110,87 +109,28 @@ static int selectionlength;
    executor window */
 static int frob_autorepeat_p = false;
 
-static XrmOptionDescRec opts[] = {
-    { "-synchronous", ".synchronous", XrmoptionNoArg, "off" },
-    { "-geometry", ".geometry", XrmoptionSepArg, 0 },
-    { "-privatecmap", ".privateColormap", XrmoptionNoArg, "on" },
-    { "-truecolor", ".trueColor", XrmoptionNoArg, "on" },
-    { "-scancodes", ".scancodes", XrmoptionNoArg, "on" },
-
-/* options that are transfered from the x resource database to the
-     `common' executor options database */
-#define FIRST_COMMON_OPT 5
-    { "-debug", ".debug", XrmoptionSepArg, 0 },
-};
-
-void X11VideoDriver::registerOptions(void)
-{
-    opt_register("vdriver", {
-            {"synchronous", "run in synchronous mode", opt_no_arg},
-            {"geometry", "specify the executor window geometry", opt_sep},
-            {"privatecmap", "have executor use a private x colormap", opt_no_arg},
-            {"truecolor", "have executor use a TrueColor visual", opt_no_arg},
-            {"scancodes", "different form of key mapping (may be useful in "
-                "conjunction with -keyboard)", opt_no_arg},
-        });
-}
-
-static XrmDatabase xdb;
 
 Display *x_dpy;
 static int x_screen;
-
-int get_string_resource(char *resource, char **retval)
-{
-    char *res_type, res_name[256], res_class[256];
-    XrmValue v;
-
-    sprintf(res_name, "executor.%s", resource);
-    sprintf(res_class, "Executor.%s", resource);
-
-    if(!XrmGetResource(xdb, res_name, res_class, &res_type, &v))
-        return false;
-    *retval = v.addr;
-    return true;
-}
-
-int get_bool_resource(char *resource, int *retval)
-{
-    char *res_type, res_name[256], res_class[256];
-    XrmValue v;
-
-    sprintf(res_name, "executor.%s", resource);
-    sprintf(res_class, "Executor.%s", resource);
-
-    if(!XrmGetResource(xdb, res_name, res_class, &res_type, &v))
-        return false;
-    if(!strcasecmp(v.addr, "on")
-       || !strcasecmp(v.addr, "true")
-       || !strcasecmp(v.addr, "yes")
-       || !strcasecmp(v.addr, "1"))
-    {
-        *retval = true;
-        return true;
-    }
-    if(!strcasecmp(v.addr, "off")
-       || !strcasecmp(v.addr, "false")
-       || !strcasecmp(v.addr, "no")
-       || !strcasecmp(v.addr, "0"))
-    {
-        *retval = false;
-        return true;
-    }
-
-    /* FIXME: print warning */
-    *retval = false;
-    return true;
-}
 
 static int have_shm, shm_err = false;
 
 static int shm_major_opcode;
 static int shm_first_event;
 static int shm_first_error;
+
+static int wakeup_fd[2] = {-1, -1};
+static std::atomic_bool exitMainLoop = false;
+static bool updateRequested = false;
+
+void X11VideoDriver::registerOptions(void)
+{
+    opt_register("vdriver", {
+            {"scancodes", "different form of key mapping (may be useful in "
+                "conjunction with -keyboard)", opt_no_arg},
+        });
+}
+
 
 int x_error_handler(Display *err_dpy, XErrorEvent *err_evt)
 {
@@ -307,6 +247,9 @@ void alloc_x_image(int bpp, int width, int height,
     *row_bytes_return = row_bytes;
     *x_image_return = x_image;
     *bpp_return = resultant_bpp;
+
+    x_image_width = width;
+    x_image_height = height;
 }
 
 
@@ -360,27 +303,352 @@ x_keysym_to_mac_virt(unsigned int keysym, unsigned char *virt_out)
     return true;
 }
 
-static bool x_event_pending_p(void)
+X11VideoDriver::X11VideoDriver(Executor::IEventListener *listener, int& argc, char* argv[])
+    : VideoDriver(listener)
 {
-    fd_set fds;
-    struct timeval no_wait;
-    bool retval;
+    x_dpy = XOpenDisplay("");
+    if(x_dpy == nullptr)
+    {
+        fprintf(stderr, "%s: could not open x server `%s'.\n",
+                ROMlib_appname.c_str(), XDisplayName(""));
+        exit(EXIT_FAILURE);
+    }
+    x_screen = XDefaultScreen(x_dpy);
 
-    FD_ZERO(&fds);
-    FD_SET(x_fd, &fds);
-    no_wait.tv_sec = no_wait.tv_usec = 0;
-    retval = select(x_fd + 1, &fds, 0, 0, &no_wait) > 0;
+    XSetErrorHandler(x_error_handler);
+
+    /* determine if the server supports the `XShm' extension */
+    have_shm = XQueryExtension(x_dpy, "MIT-SHM",
+                               &shm_major_opcode,
+                               &shm_first_event,
+                               &shm_first_error);
+
+
+
+    XVisualInfo *visuals, vistemplate;
+
+
+    int n_visuals;
+    vistemplate.screen = x_screen;
+    vistemplate.depth = 8;
+    vistemplate.c_class = TrueColor;
+
+    visuals = XGetVisualInfo(x_dpy,
+                                (VisualScreenMask | VisualClassMask),
+                                &vistemplate, &n_visuals);
+
+    visual = nullptr;
+    for(int i = 0; i < n_visuals; i++)
+    {
+        if(visuals[i].depth >= 24)
+        {
+            visual = &visuals[i];
+            x_fbuf_bpp = visual->depth;
+            break;
+        }
+    }
+
+    if(visual == nullptr)
+    {
+        fprintf(stderr, "%s: no acceptable visual found, exiting.\n",
+                ROMlib_appname.c_str());
+        exit(EXIT_FAILURE);
+    }
+
+    cursor_init();
+
+    x_selection_atom = XInternAtom(x_dpy, "ROMlib_selection", False);
+    
+    x_fd = XConnectionNumber(x_dpy);
+    pipe(wakeup_fd);
+}
+
+void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool grayscale_p)
+{
+    XSetWindowAttributes xswa;
+    XSizeHints size_hints = {};
+    XGCValues gc_values;
+
+    int x = 0, y = 0;
+
+    size_hints.flags = PSize | PMinSize | PMaxSize | PBaseSize | USSize;
+
+    size_hints.min_width = size_hints.max_width
+        = size_hints.base_width = size_hints.width = width;
+    size_hints.min_height = size_hints.max_height
+        = size_hints.base_height = size_hints.height = height;
+
+    size_hints.x = x;
+    size_hints.y = y;
+
+
+    /* create the executor window */
+    x_window = XCreateWindow(x_dpy, XRootWindow(x_dpy, x_screen),
+                             x, y, width, height,
+                             0, 0, InputOutput, CopyFromParent, 0, &xswa);
+
+    XDefineCursor(x_dpy, x_window, x_hidden_cursor);
+
+    gc_values.function = GXcopy;
+    gc_values.foreground = XBlackPixel(x_dpy, x_screen);
+    gc_values.background = XWhitePixel(x_dpy, x_screen);
+    gc_values.plane_mask = AllPlanes;
+
+    copy_gc = XCreateGC(x_dpy, x_window,
+                        (GCFunction | GCForeground
+                         | GCBackground | GCPlaneMask),
+                        &gc_values);
+
+    {
+        /* various hints for `XSetWMProperties ()' */
+        XWMHints wm_hints;
+        XClassHint class_hint;
+        XTextProperty name;
+
+        memset(&wm_hints, 0, sizeof wm_hints);
+
+        class_hint.res_name = "executor";
+        class_hint.res_class = "Executor";
+
+        char *program_name = const_cast<char*>(ROMlib_appname.c_str());
+        XStringListToTextProperty(&program_name, 1, &name);
+
+        XSetWMProperties(x_dpy, x_window,
+                         &name, &name, /* _argv, *_argc, */ nullptr, 0,
+                         &size_hints, &wm_hints, &class_hint);
+    }
+    wmDeleteMessage = XInternAtom(x_dpy, "WM_DELETE_WINDOW", False);
+    XSetWMProtocols(x_dpy, x_window, &wmDeleteMessage, 1);
+
+    XSelectInput(x_dpy, x_window, EXECUTOR_WINDOW_EVENT_MASK);
+
+    XMapRaised(x_dpy, x_window);
+    XClearWindow(x_dpy, x_window);
+    XFlush(x_dpy);
+}
+
+::Cursor
+create_x_cursor(char *data, char *mask,
+                int hotspot_x, int hotspot_y)
+{
+    ::Cursor retval;
+    char x_mask[32], x_data[32];
+    int i;
+
+    static XColor x_black = { 0, 0, 0, 0 },
+                  x_white = { (unsigned long)~0,
+                              (unsigned short)~0,
+                              (unsigned short)~0,
+                              (unsigned short)~0 };
+
+    for(i = 0; i < 32; i++)
+    {
+        x_mask[i] = data[i] | mask[i];
+        x_data[i] = data[i];
+    }
+
+    x_image_cursor_data->data = x_data;
+    x_image_cursor_mask->data = x_mask;
+
+    XPutImage(x_dpy, pixmap_cursor_data, cursor_data_gc, x_image_cursor_data,
+              0, 0, 0, 0, 16, 16);
+    XPutImage(x_dpy, pixmap_cursor_mask, cursor_mask_gc, x_image_cursor_mask,
+              0, 0, 0, 0, 16, 16);
+
+    if(hotspot_x < 0)
+        hotspot_x = 0;
+    else if(hotspot_x > 16)
+        hotspot_x = 16;
+
+    if(hotspot_y < 0)
+        hotspot_y = 0;
+    else if(hotspot_y > 16)
+        hotspot_y = 16;
+
+    retval = XCreatePixmapCursor(x_dpy, pixmap_cursor_data, pixmap_cursor_mask,
+                                 &x_black, &x_white,
+                                 hotspot_x, hotspot_y);
     return retval;
 }
 
-static syn68k_addr_t
-post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
+void X11VideoDriver::setCursor(char *cursor_data,
+                              uint16_t cursor_mask[16],
+                              int hotspot_x, int hotspot_y)
 {
-    XEvent evt;
+    std::lock_guard lk(mutex_);
+    ::Cursor orig_x_cursor = x_cursor;
 
-    while(XCheckTypedEvent(x_dpy, SelectionRequest, &evt)
-          || XCheckMaskEvent(x_dpy, ~0L, &evt))
+    x_cursor = create_x_cursor(cursor_data, (char *)cursor_mask,
+                               hotspot_x, hotspot_y);
+
+    /* if visible, set `x_cursor' to be the current cursor */
+    if(cursor_visible_p)
+        XDefineCursor(x_dpy, x_window, x_cursor);
+
+    if(orig_x_cursor != (::Cursor)-1)
+        XFreeCursor(x_dpy, orig_x_cursor);
+}
+
+void X11VideoDriver::setCursorVisible(bool show_p)
+{
+    std::lock_guard lk(mutex_);
+    if(cursor_visible_p != show_p)
+        XDefineCursor(x_dpy, x_window, show_p ? x_cursor : x_hidden_cursor);
+    cursor_visible_p = show_p;
+}
+
+void cursor_init(void)
+{
+    XGCValues gc_values;
+    static char zero[2 * 16] = {
+        0,
+    };
+
+    /* the following are used to create x cursors, they must
+     be done before calling `create_x_cursor ()' */
+    x_image_cursor_data = XCreateImage(x_dpy, XDefaultVisual(x_dpy, x_screen),
+                                       1, XYBitmap, 0, nullptr, 16, 16, 8, 2);
+    x_image_cursor_mask = XCreateImage(x_dpy, XDefaultVisual(x_dpy, x_screen),
+                                       1, XYBitmap, 0, nullptr, 16, 16, 8, 2);
+
+    x_image_cursor_data->byte_order = MSBFirst;
+    x_image_cursor_mask->byte_order = MSBFirst;
+
+    x_image_cursor_data->bitmap_bit_order = MSBFirst;
+    x_image_cursor_mask->bitmap_bit_order = MSBFirst;
+
+    pixmap_cursor_data = XCreatePixmap(x_dpy, XRootWindow(x_dpy, x_screen),
+                                       16, 16, 1);
+    pixmap_cursor_mask = XCreatePixmap(x_dpy, XRootWindow(x_dpy, x_screen),
+                                       16, 16, 1);
+
+    gc_values.function = GXcopy;
+    gc_values.foreground = ~0;
+    gc_values.background = 0;
+
+    gc_values.plane_mask = AllPlanes;
+
+    cursor_data_gc = XCreateGC(x_dpy, pixmap_cursor_data,
+                               (GCFunction | GCForeground
+                                | GCBackground | GCPlaneMask),
+                               &gc_values);
+    cursor_mask_gc = XCreateGC(x_dpy, pixmap_cursor_mask,
+                               (GCFunction | GCForeground
+                                | GCBackground | GCPlaneMask),
+                               &gc_values);
+
+    x_hidden_cursor = create_x_cursor(zero, zero, 0, 0);
+}
+
+void X11VideoDriver::render(std::unique_lock<std::mutex>& lk, std::optional<DirtyRects::Rect> extra)
+{
+    auto rects = dirtyRects_.getAndClear();
+    
+    if(!rects.empty())
     {
+        lk.unlock();
+        updateBuffer(framebuffer_, (uint32_t*)x_fbuf, x_image_width, x_image_height, rects);
+        lk.lock();
+    }
+
+    auto draw = [this](const DirtyRects::Rect& r) {
+        int x = r.left;
+        int y = r.top;
+        int w = r.right - r.left;
+        int h = r.bottom - r.top;
+        if(have_shm)
+            XShmPutImage(x_dpy, x_window, copy_gc, x_x_image,
+                    x, y, x, y, w, h, False);
+        else
+            XPutImage(x_dpy, x_window, copy_gc, x_x_image,
+                    x, y, x, y, w, h);
+    };
+    
+    for(const auto& r : rects)
+        draw(r);
+    if(extra)
+        draw(*extra);
+    if(!rects.empty() || extra)
+        XFlush(x_dpy);
+}
+
+
+X11VideoDriver::~X11VideoDriver()
+{
+    if(x_dpy)
+        XCloseDisplay(x_dpy);
+}
+
+bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
+{
+    std::lock_guard lk(mutex_);
+
+    if(width == 0)
+        width = framebuffer_.width;
+    if(height == 0)
+        height = framebuffer_.height;
+    if(bpp == 0)
+        bpp = framebuffer_.bpp;
+
+    if(width == 0)
+        width = VDRIVER_DEFAULT_SCREEN_WIDTH;
+    if(height == 0)
+        height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
+    if(bpp == 0)
+        bpp = 8;
+
+    if(width < VDRIVER_MIN_SCREEN_WIDTH)
+        width = VDRIVER_MIN_SCREEN_WIDTH;
+    if(height < VDRIVER_MIN_SCREEN_HEIGHT)
+        height = VDRIVER_MIN_SCREEN_HEIGHT;
+
+    if(!x_x_image)
+    {
+        alloc_x_image(x_fbuf_bpp, width, height,
+                        &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
+                        &x_fbuf_bpp);
+    }
+    else
+    {
+        if(width > x_image_width)
+            width = x_image_width;
+        if(height > x_image_height)
+            height = x_image_height;
+    }
+
+    if(!x_window)
+    {
+        alloc_x_window(width, height, bpp, grayscale_p);
+        framebuffer_ = Framebuffer(width, height, bpp);
+        framebuffer_.grayscale = grayscale_p;
+        return true;
+    }
+
+    if(!isAcceptableMode(width, height, bpp, grayscale_p))
+        return false;
+
+    if(width != framebuffer_.width
+       || height != framebuffer_.height)
+    {
+        /* resize; the event code will deal with things when the resize
+	 event comes through */
+        XResizeWindow(x_dpy, x_window, width, height);
+    }
+
+    framebuffer_ = Framebuffer(width, height, bpp);
+    framebuffer_.grayscale = grayscale_p;
+    
+    return true;
+}
+
+void X11VideoDriver::handleEvents()
+{
+    std::unique_lock lk(mutex_);
+    while(XPending(x_dpy))
+    {
+        XEvent evt;
+        XNextEvent(x_dpy, &evt);
+
         switch(evt.type)
         {
             case SelectionRequest:
@@ -444,20 +712,21 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
 
                 if(x_keysym_to_mac_virt(keysym, &virt))
                 {
-                    vdriver->callbacks_->keyboardEvent(evt.type == KeyPress, virt);
+                    callbacks_->keyboardEvent(evt.type == KeyPress, virt);
                 }
                 break;
             }
             case ButtonPress:
             case ButtonRelease:
             {
-                vdriver->callbacks_->mouseButtonEvent(evt.type == ButtonPress, evt.xbutton.x, evt.xbutton.y);
+                callbacks_->mouseButtonEvent(evt.type == ButtonPress, evt.xbutton.x, evt.xbutton.y);
                 break;
             }
             case Expose:
-                vdriver->updateScreen(evt.xexpose.y, evt.xexpose.x,
-                                      evt.xexpose.y + evt.xexpose.height,
-                                      evt.xexpose.x + evt.xexpose.width);
+                render(lk, DirtyRects::Rect{
+                    evt.xexpose.y, evt.xexpose.x,
+                    evt.xexpose.y + evt.xexpose.height,
+                    evt.xexpose.x + evt.xexpose.width});
                 break;
             case FocusIn:
                 if(frob_autorepeat_p)
@@ -470,548 +739,78 @@ post_pending_x_events(syn68k_addr_t interrupt_addr, void *unused)
                     cvt = selection_owner != None && selection_owner != x_window;
                     if(cvt)
                         ZeroScrap();
-                    vdriver->callbacks_->resumeEvent(cvt);
+                    callbacks_->resumeEvent(cvt);
                 }
                 break;
             case FocusOut:
                 if(frob_autorepeat_p)
                     XAutoRepeatOn(x_dpy);
-                vdriver->callbacks_->suspendEvent();
+                callbacks_->suspendEvent();
                 break;
             case MotionNotify:
-                vdriver->callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
+                callbacks_->mouseMoved(evt.xmotion.x, evt.xmotion.y);
+                break;
+            case ClientMessage:
+                if (evt.xclient.data.l[0] == wmDeleteMessage)
+                    callbacks_->requestQuit();
                 break;
         }
     }
-    return MAGIC_RTE_ADDRESS;
 }
 
-void x_event_handler(int signo)
+void X11VideoDriver::runEventLoop()
 {
-    /* request syncint */
-    interrupt_generate(M68K_EVENT_PRIORITY);
-}
-
-bool X11VideoDriver::parseCommandLine(int& argc, char *argv[])
-{
-    x_dpy = XOpenDisplay("");
-    if(x_dpy == nullptr)
+    while(!exitMainLoop)
     {
-        fprintf(stderr, "%s: could not open x server `%s'.\n",
-                ROMlib_appname.c_str(), XDisplayName(""));
-        exit(EXIT_FAILURE);
-    }
-    x_screen = XDefaultScreen(x_dpy);
+        fd_set fds;
+        
+        FD_ZERO(&fds);
+        FD_SET(x_fd, &fds);
+        FD_SET(wakeup_fd[0], &fds);
+        select(std::max(x_fd, wakeup_fd[0]) + 1, &fds, 0, 0, nullptr);
 
-    XSetErrorHandler(x_error_handler);
+        handleEvents();
 
-    /* determine if the server supports the `XShm' extension */
-    have_shm = XQueryExtension(x_dpy, "MIT-SHM",
-                               &shm_major_opcode,
-                               &shm_first_event,
-                               &shm_first_error);
-
-    char *xdefs = XResourceManagerString(x_dpy);
-    if(xdefs)
-        xdb = XrmGetStringDatabase(xdefs);
-
-    XrmParseCommand(&xdb, opts, std::size(opts), "Executor", &argc, argv);
-
-    return true;
-}
-
-bool X11VideoDriver::init()
-{
-    int i;
-
-    XVisualInfo *visuals, vistemplate;
-    int n_visuals;
-    int dummy_int;
-    unsigned int geom_width, geom_height;
-    char *geom;
-
-    
-    get_bool_resource("scancodes", &use_scan_codes);
-
-    if(!get_string_resource("geometry", &geom))
-        geom = 0;
-    /* default */
-    geom_width = VDRIVER_DEFAULT_SCREEN_WIDTH;
-    geom_height = VDRIVER_DEFAULT_SCREEN_HEIGHT;
-    if(geom)
-    {
-        /* override the maximum with possible geometry values */
-        XParseGeometry(geom, &dummy_int, &dummy_int,
-                       &geom_width, &geom_height);
-    }
-    max_width = std::max<int>(VDRIVER_DEFAULT_SCREEN_WIDTH,
-                         (std::max<int>(geom_width, flag_width)));
-    max_height = std::max<int>(VDRIVER_DEFAULT_SCREEN_HEIGHT,
-                          std::max<int>(geom_height, flag_height));
-    max_bpp = 32;
-
-    vistemplate.screen = x_screen;
-    vistemplate.depth = 8;
-
-    visual = nullptr;
-
-
-    vistemplate.screen = x_screen;
-    vistemplate.c_class = TrueColor;
-
-    visuals = XGetVisualInfo(x_dpy,
-                                (VisualScreenMask | VisualClassMask),
-                                &vistemplate, &n_visuals);
-
-    for(i = 0; i < n_visuals; i++)
-    {
-        if(visuals[i].depth >= 24)
+        if(FD_ISSET(wakeup_fd[0], &fds))
         {
-            visual = &visuals[i];
-            x_fbuf_bpp = visual->depth;
-            break;
+            unsigned char b;
+            read(wakeup_fd[0], &b, 1);
         }
+
+        std::unique_lock lk(mutex_);
+        updateRequested = false;
+        render(lk, {});
     }
-
-    if(visual == nullptr)
-    {
-        fprintf(stderr, "%s: no acceptable visual found, exiting.\n",
-                ROMlib_appname.c_str());
-        exit(EXIT_FAILURE);
-    }
-
-    alloc_x_image(x_fbuf_bpp, max_width, max_height,
-                    &x_fbuf_row_bytes, &x_x_image, &x_fbuf,
-                    &x_fbuf_bpp);
-
-    if(max_bpp > 32)
-        max_bpp = 32;
-    if(max_bpp > x_fbuf_bpp)
-        max_bpp = x_fbuf_bpp;
-
-    maxBpp_ = max_bpp;
-
-
-    cursor_init();
-
-    x_selection_atom = XInternAtom(x_dpy, "ROMlib_selection", False);
-
-    /* hook into syn68k synchronous interrupts */
-    {
-        syn68k_addr_t event_callback;
-
-        event_callback = callback_install(post_pending_x_events, nullptr);
-        *(GUEST<ULONGINT> *)SYN68K_TO_US(M68K_EVENT_VECTOR * 4) = (ULONGINT)event_callback;
-    }
-
-    /* set up the async x even handler */
-    {
-        x_fd = XConnectionNumber(x_dpy);
-
-        struct sigaction sa;
-
-        sa.sa_handler = x_event_handler;
-        sigemptyset(&sa.sa_mask);
-        sigaddset(&sa.sa_mask, SIGIO);
-        sa.sa_flags = 0;
-
-        sigaction(SIGIO, &sa, nullptr);
-
-        fcntl(x_fd, F_GETOWN, &orig_sigio_owner);
-        fcntl(x_fd, F_SETOWN, getpid());
-        orig_sigio_flag = fcntl(x_fd, F_GETFL, 0) & ~FASYNC;
-        fcntl(x_fd, F_SETFL, orig_sigio_flag | FASYNC);
-    }
-
-    return true;
 }
 
-void X11VideoDriver::alloc_x_window(int width, int height, int bpp, bool grayscale_p)
+void X11VideoDriver::endEventLoop()
 {
-    XSetWindowAttributes xswa;
-    XSizeHints size_hints = {};
-    XGCValues gc_values;
-
-    char *geom;
-    int geom_mask;
-    int x = 0, y = 0;
-
-    /* size and base size are set below after parsing geometry */
-    size_hints.flags = PSize | PMinSize | PMaxSize | PBaseSize | PWinGravity;
-
-    if(!width
-       || !height)
-    {
-        geom = nullptr;
-        get_string_resource("geometry", &geom);
-        if(geom)
-        {
-            unsigned w, h;
-            geom_mask = XParseGeometry(geom, &x, &y, &w, &h);
-            if(geom_mask & WidthValue)
-            {
-                width_ = w;
-                if(width_ < VDRIVER_MIN_SCREEN_WIDTH)
-                    width_ = VDRIVER_MIN_SCREEN_WIDTH;
-                else if(width_ > max_width)
-                    width_ = max_width;
-
-                size_hints.flags |= USSize;
-            }
-            if(geom_mask & HeightValue)
-            {
-                height_ = h;
-                if(height_ < VDRIVER_MIN_SCREEN_HEIGHT)
-                    height_ = VDRIVER_MIN_SCREEN_HEIGHT;
-                else if(height_ > max_height)
-                    height_ = max_height;
-                size_hints.flags |= USSize;
-            }
-            if(geom_mask & XValue)
-            {
-                if(geom_mask & XNegative)
-                    x = XDisplayWidth(x_dpy, x_screen) + x - width_;
-                size_hints.flags |= USPosition;
-            }
-            if(geom_mask & YValue)
-            {
-                if(geom_mask & YNegative)
-                    y = XDisplayHeight(x_dpy, x_screen) + y - height_;
-                size_hints.flags |= USPosition;
-            }
-            switch(geom_mask & (XNegative | YNegative))
-            {
-                case 0:
-                    size_hints.win_gravity = NorthWestGravity;
-                    break;
-                case XNegative:
-                    size_hints.win_gravity = NorthEastGravity;
-                    break;
-                case YNegative:
-                    size_hints.win_gravity = SouthWestGravity;
-                    break;
-                default:
-                    size_hints.win_gravity = SouthEastGravity;
-                    break;
-            }
-        }
-    }
-    else
-    {
-        /* size was specified; we aren't using defaults */
-        size_hints.flags |= USSize;
-        size_hints.win_gravity = NorthWestGravity;
-
-        if(width < 512)
-            width = 512;
-        else if(width > max_width)
-            width = max_width;
-
-        if(height < 342)
-            height = 342;
-        else if(height > max_height)
-            height = max_height;
-
-        width_ = width;
-        height_ = height;
-    }
-
-    size_hints.min_width = size_hints.max_width
-        = size_hints.base_width = size_hints.width = width_;
-    size_hints.min_height = size_hints.max_height
-        = size_hints.base_height = size_hints.height = height_;
-
-    size_hints.x = x;
-    size_hints.y = y;
-
-    /* #### allow command line options to select {16, 32}bpp modes, but
-     don't make them the default since they still have problems */
-    if(bpp == 0)
-        bpp = std::min(max_bpp, 8);
-    else if(bpp > max_bpp)
-        bpp = max_bpp;
-
-    bpp_ = bpp;
-
-    isGrayscale_ = grayscale_p;
-
-    /* create the executor window */
-    x_window = XCreateWindow(x_dpy, XRootWindow(x_dpy, x_screen),
-                             x, y, width_, height_,
-                             0, 0, InputOutput, CopyFromParent, 0, &xswa);
-
-    XDefineCursor(x_dpy, x_window, x_hidden_cursor);
-
-    gc_values.function = GXcopy;
-    gc_values.foreground = XBlackPixel(x_dpy, x_screen);
-    gc_values.background = XWhitePixel(x_dpy, x_screen);
-    gc_values.plane_mask = AllPlanes;
-
-    copy_gc = XCreateGC(x_dpy, x_window,
-                        (GCFunction | GCForeground
-                         | GCBackground | GCPlaneMask),
-                        &gc_values);
-
-    {
-        /* various hints for `XSetWMProperties ()' */
-        XWMHints wm_hints;
-        XClassHint class_hint;
-        XTextProperty name;
-
-        memset(&wm_hints, 0, sizeof wm_hints);
-
-        class_hint.res_name = "executor";
-        class_hint.res_class = "Executor";
-
-        char *program_name = const_cast<char*>(ROMlib_appname.c_str());
-        XStringListToTextProperty(&program_name, 1, &name);
-
-        XSetWMProperties(x_dpy, x_window,
-                         &name, &name, /* _argv, *_argc, */ nullptr, 0,
-                         &size_hints, &wm_hints, &class_hint);
-    }
-
-    XSelectInput(x_dpy, x_window, EXECUTOR_WINDOW_EVENT_MASK);
-
-    XMapRaised(x_dpy, x_window);
-    XClearWindow(x_dpy, x_window);
-    XFlush(x_dpy);
+    exitMainLoop = true;
+    unsigned char b = 42;
+    write(wakeup_fd[1], &b, 1);
 }
 
-::Cursor
-create_x_cursor(char *data, char *mask,
-                int hotspot_x, int hotspot_y)
+void X11VideoDriver::requestUpdate()
 {
-    ::Cursor retval;
-    char x_mask[32], x_data[32];
-    int i;
-
-    static XColor x_black = { 0, 0, 0, 0 },
-                  x_white = { (unsigned long)~0,
-                              (unsigned short)~0,
-                              (unsigned short)~0,
-                              (unsigned short)~0 };
-
-    for(i = 0; i < 32; i++)
+    if(!updateRequested)
     {
-        x_mask[i] = data[i] | mask[i];
-        x_data[i] = data[i];
+        unsigned char b = 42;
+        write(wakeup_fd[1], &b, 1);
+        updateRequested = true;
     }
-
-    x_image_cursor_data->data = x_data;
-    x_image_cursor_mask->data = x_mask;
-
-    XPutImage(x_dpy, pixmap_cursor_data, cursor_data_gc, x_image_cursor_data,
-              0, 0, 0, 0, 16, 16);
-    XPutImage(x_dpy, pixmap_cursor_mask, cursor_mask_gc, x_image_cursor_mask,
-              0, 0, 0, 0, 16, 16);
-
-    if(hotspot_x < 0)
-        hotspot_x = 0;
-    else if(hotspot_x > 16)
-        hotspot_x = 16;
-
-    if(hotspot_y < 0)
-        hotspot_y = 0;
-    else if(hotspot_y > 16)
-        hotspot_y = 16;
-
-    retval = XCreatePixmapCursor(x_dpy, pixmap_cursor_data, pixmap_cursor_mask,
-                                 &x_black, &x_white,
-                                 hotspot_x, hotspot_y);
-    return retval;
 }
 
-void X11VideoDriver::setCursor(char *cursor_data,
-                              uint16_t cursor_mask[16],
-                              int hotspot_x, int hotspot_y)
-{
-    ::Cursor orig_x_cursor = x_cursor;
-
-    x_cursor = create_x_cursor(cursor_data, (char *)cursor_mask,
-                               hotspot_x, hotspot_y);
-
-    /* if visible, set `x_cursor' to be the current cursor */
-    if(cursor_visible_p)
-        XDefineCursor(x_dpy, x_window, x_cursor);
-
-    if(orig_x_cursor != (::Cursor)-1)
-        XFreeCursor(x_dpy, orig_x_cursor);
-}
-
-bool X11VideoDriver::setCursorVisible(bool show_p)
-{
-    int orig_cursor_visible_p = cursor_visible_p;
-    if(cursor_visible_p != show_p)
-        XDefineCursor(x_dpy, x_window, show_p ? x_cursor : x_hidden_cursor);
-    cursor_visible_p = show_p;
-
-    return orig_cursor_visible_p;
-}
-
-void cursor_init(void)
-{
-    XGCValues gc_values;
-    static char zero[2 * 16] = {
-        0,
-    };
-
-    /* the following are used to create x cursors, they must
-     be done before calling `create_x_cursor ()' */
-    x_image_cursor_data = XCreateImage(x_dpy, XDefaultVisual(x_dpy, x_screen),
-                                       1, XYBitmap, 0, nullptr, 16, 16, 8, 2);
-    x_image_cursor_mask = XCreateImage(x_dpy, XDefaultVisual(x_dpy, x_screen),
-                                       1, XYBitmap, 0, nullptr, 16, 16, 8, 2);
-
-    x_image_cursor_data->byte_order = MSBFirst;
-    x_image_cursor_mask->byte_order = MSBFirst;
-
-    x_image_cursor_data->bitmap_bit_order = MSBFirst;
-    x_image_cursor_mask->bitmap_bit_order = MSBFirst;
-
-    pixmap_cursor_data = XCreatePixmap(x_dpy, XRootWindow(x_dpy, x_screen),
-                                       16, 16, 1);
-    pixmap_cursor_mask = XCreatePixmap(x_dpy, XRootWindow(x_dpy, x_screen),
-                                       16, 16, 1);
-
-    gc_values.function = GXcopy;
-    gc_values.foreground = ~0;
-    gc_values.background = 0;
-
-    gc_values.plane_mask = AllPlanes;
-
-    cursor_data_gc = XCreateGC(x_dpy, pixmap_cursor_data,
-                               (GCFunction | GCForeground
-                                | GCBackground | GCPlaneMask),
-                               &gc_values);
-    cursor_mask_gc = XCreateGC(x_dpy, pixmap_cursor_mask,
-                               (GCFunction | GCForeground
-                                | GCBackground | GCPlaneMask),
-                               &gc_values);
-
-    x_hidden_cursor = create_x_cursor(zero, zero, 0, 0);
-}
-
-
-void X11VideoDriver::updateScreenRects(int num_rects, const vdriver_rect_t *r)
-{
-    updateBuffer((uint32_t*)x_fbuf, width_, height_, num_rects, r);
-
-    for(int i = 0; i < num_rects; i++)
-    {
-        int x = r[i].left;
-        int y = r[i].top;
-        int w = r[i].right - r[i].left;
-        int h = r[i].bottom - r[i].top;
-        if(have_shm)
-            XShmPutImage(x_dpy, x_window, copy_gc, x_x_image,
-                    x, y, x, y, w, h, False);
-        else
-            XPutImage(x_dpy, x_window, copy_gc, x_x_image,
-                    x, y, x, y, w, h);
-    }
-    XFlush(x_dpy);
-}
-
-void X11VideoDriver::shutdown(void)
-{
-    if(x_dpy == nullptr)
-        return;
-
-    /* no more sigio */
-    signal(SIGIO, SIG_IGN);
-
-    fcntl(x_fd, F_SETOWN, orig_sigio_owner);
-    fcntl(x_fd, F_SETFL, orig_sigio_flag);
-
-    XCloseDisplay(x_dpy);
-
-    x_dpy = nullptr;
-}
-
-bool X11VideoDriver::setMode(int width, int height, int bpp, bool grayscale_p)
-{
-    if(!x_window)
-    {
-        alloc_x_window(width, height, bpp, grayscale_p);
-        rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
-        framebuffer_ = new uint8_t[rowBytes_ * height_];
-        return true;
-    }
-
-    if(width == 0)
-        width = width_;
-    else if(width > max_width)
-        width = max_width;
-    else if(width < VDRIVER_MIN_SCREEN_WIDTH)
-        width = VDRIVER_MIN_SCREEN_WIDTH;
-
-    if(height == 0)
-        height = height_;
-    else if(height > max_height)
-        height = max_height;
-    else if(height < VDRIVER_MIN_SCREEN_HEIGHT)
-        height = VDRIVER_MIN_SCREEN_HEIGHT;
-
-    if(bpp == 0)
-    {
-        bpp = bpp_;
-        if(bpp == 0)
-            bpp = std::min(8, maxBpp_);
-    }
-
-    if(!isAcceptableMode(width, height, bpp, grayscale_p))
-        return false;
-
-    if(width != width_
-       || height != height_)
-    {
-        /* resize; the event code will deal with things when the resize
-	 event comes through */
-        XResizeWindow(x_dpy, x_window, width, height);
-    }
-
-    bpp_ = bpp;
-    isGrayscale_ = grayscale_p;
-
-    if(framebuffer_)
-        delete[] framebuffer_;
-    rowBytes_ = ((width_ * bpp_ + 31) & ~31) / 8;
-    framebuffer_ = new uint8_t[rowBytes_ * height_];
-    
-    memset(framebuffer_, 0xFF, rowBytes_ * height);
-
-    return true;
-}
-
-void X11VideoDriver::pumpEvents()
-{
-    if(x_event_pending_p())
-        post_pending_x_events(/* dummy */ -1, /* dummy */ nullptr);
-
-    LONGINT x, y;
-    Window dummy_window;
-    Window child_window;
-    int dummy_int;
-    unsigned int mods;
-
-    XQueryPointer(x_dpy, x_window, &dummy_window,
-                  &child_window, &dummy_int, &dummy_int,
-                  &x, &y, &mods);
-
-    vdriver->callbacks_->mouseMoved(x,y);
-}
-
-/* stuff from x.c */
 
 void X11VideoDriver::beepAtUser(void)
 {
+    std::lock_guard lk(mutex_);
     /* 50 for now */
     XBell(x_dpy, 0);
 }
 
 void X11VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_count)
 {
+    std::lock_guard lk(mutex_);
     if(type == "TEXT"_4)
     {
         if(selectiontext)
@@ -1035,11 +834,13 @@ void X11VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_co
 
 void X11VideoDriver::weOwnScrap(void)
 {
+    std::lock_guard lk(mutex_);
     XSetSelectionOwner(x_dpy, XA_PRIMARY, x_window, CurrentTime);
 }
 
 int X11VideoDriver::getScrap(OSType type, Handle h)
 {
+    std::lock_guard lk(mutex_);
     int retval;
 
     retval = -1;
@@ -1093,6 +894,7 @@ int X11VideoDriver::getScrap(OSType type, Handle h)
 
 void X11VideoDriver::setTitle(const std::string& newtitle)
 {
+    std::lock_guard lk(mutex_);
     XSizeHints xsh;
 
     memset(&xsh, 0, sizeof xsh);

@@ -9,7 +9,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 
 project(Executor2000 VERSION 0.1.0)
 
-if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/.git" )
+if( NOT EXISTS "${CMAKE_SOURCE_DIR}/syn68k/CMakeLists.txt" )
     message( FATAL_ERROR
         "The git submodule 'syn68k' is not available. Please run\n"
         "git submodule update --init --recursive" )
@@ -39,6 +39,9 @@ if(WIN32)
     )
 endif()
 
+if(CMAKE_GENERATOR STREQUAL "Xcode")
+    add_compile_options($<$<CONFIG:Debug,RelWithDebInfo>:-g>)
+endif()
 
 enable_testing()
 

@@ -632,6 +632,7 @@ extern void gd_vdriver_mode_changed();
 extern void gd_update_colors();
 extern void ROMlib_InitGWorlds(void);
 extern void ROMlib_InitGDevices();
+extern void ResetToInitialDepth();
 
 extern void pixmap_set_pixel_fields(PixMap *pixmap, int bpp);
 extern const rgb_spec_t *pixmap_rgb_spec(const PixMap *pixmap);

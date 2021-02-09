@@ -586,7 +586,6 @@ pm_do_updates_gd_changed(void)
     }
     LM(PaintWhite) = -1;
 
-    dirty_rect_update_screen();
     gd_update_colors();
 }
 
@@ -1323,7 +1322,6 @@ void Executor::C_AnimateEntry(WindowPtr dst_window, INTEGER dst_entry,
             *r = *src_rgb_color;
             if(update_host_colors_p)
             {
-                dirty_rect_update_screen();
                 gd_update_colors();
             }
         }
@@ -1360,7 +1358,6 @@ void Executor::C_AnimatePalette(WindowPtr dst_window, CTabHandle src_ctab,
     update_host_colors_p = save_update;
 
     /* To be safe, update the colors visible on the screen. */
-    dirty_rect_update_screen();
     gd_update_colors();
 }
 

@@ -40,7 +40,6 @@ Boolean Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
     DialogPeek dp = (DialogPeek)dlg;
     itmp ip;
     ControlHandle c;
-    WriteWhenType when;
     SignedByte flags;
 
     if(evt->what == keyDown && ((evt->message & 0xFF) == '\r' || (evt->message & 0xFF) == NUMPAD_ENTER))
@@ -51,13 +50,10 @@ Boolean Executor::C_ROMlib_myfilt(DialogPtr dlg, EventRecord *evt,
             c = (ControlHandle)ip->itmhand;
             if((*c)->contrlVis && (*c)->contrlHilite != INACTIVE)
             {
-                if((when = ROMlib_when) != WriteNever)
-                    ROMlib_WriteWhen(WriteInBltrgn);
                 HiliteControl(c, inButton);
                 Delay(5, nullptr);
                 HiliteControl(c, 0);
                 HSetState(((DialogPeek)dp)->items, flags);
-                ROMlib_WriteWhen(when);
                 /*-->*/ return -1;
             }
         }
