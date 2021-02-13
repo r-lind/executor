@@ -5,6 +5,8 @@
 
  */
 
+#include <FontMgr.h>
+
 namespace Executor
 {
 struct fatabentry

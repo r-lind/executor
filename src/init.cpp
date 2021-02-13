@@ -31,6 +31,10 @@
 #include <StartMgr.h>
 #include <SegmentLdr.h>
 #include <LowMem.h>
+#include <Package.h>
+#include <ADB.h>
+#include <ToolboxEvent.h>
+#include <AppleEvents.h>
 
 #include <quickdraw/cquick.h> /* SET_HILITE_BIT */
 #include <base/emustubs.h>  /* Key1Trans, Key2Trans */
@@ -187,7 +191,6 @@ void Executor::InitLowMem()
 {
     setup_trap_vectors();
 
-
     /*
      * Executor Custom Entrypoints
      * There is a pointer to a table of entrypoints hidden
@@ -245,30 +248,11 @@ void Executor::InitLowMem()
     //memset(&LM(DrvQHdr), 0, sizeof(LM(DrvQHdr)));     // inited in ROMlib_fileinit
     //memset(&LM(VCBQHdr), 0, sizeof(LM(VCBQHdr)));     // inited in ROMlib_fileinit
     //memset(&LM(FSQHdr), 0, sizeof(LM(FSQHdr)));       // inited in ROMlib_fileinit
-    LM(TESysJust) = 0;
     LM(BootDrive) = 0;
     //LM(DefVCBPtr) = 0;  // inited in ROMlib_fileinit
     LM(CurMap) = 0;
     LM(TopMapHndl) = 0;
-    LM(DSAlertTab) = 0;
-    LM(ResumeProc) = 0;
     LM(SFSaveDisk) = 0;
-    LM(GZRootHnd) = 0;
-    LM(ANumber) = 0;
-    LM(ResErrProc) = 0;
-    LM(FractEnable) = 0;
-    LM(SEvtEnb) = 0;
-    LM(MenuList) = 0;
-    LM(MBarEnable) = 0;
-    LM(MenuFlash) = 0;
-    LM(TheMenu) = 0;
-    LM(MBarHook) = 0;
-    LM(MenuHook) = 0;
-    LM(MenuCInfo) = nullptr;
-    LM(HeapEnd) = 0;
-    LM(ApplLimit) = 0;
-    LM(SoundActive) = soundactiveoff;
-    LM(PortBUse) = 2; /* configured for Serial driver */
     memset(LM(KeyMap), 0, sizeof(LM(KeyMap)));
     {
         static GUEST<uint16_t> ret = (unsigned short)0x4E75;
@@ -276,32 +260,166 @@ void Executor::InitLowMem()
         LM(JCrsrTask) = (ProcPtr)&ret;
     }
 
-    SET_HILITE_BIT();
     LM(TheGDevice) = LM(MainDevice) = LM(DeviceList) = nullptr;
+
+    LM(TopMapHndl) = 0;
+    LM(SysMapHndl) = 0;
+
+    LM(ScrapState) = -1;
+
+    LM(UTableBase) = (DCtlHandlePtr)NewPtrSysClear(4 * NDEVICES);
+    LM(VIA) = NewPtrSysClear(16 * 512); /* IMIII-43 */
+    *(char *)LM(VIA) = 0x80; /* Sound Off */
+
+    const size_t SCC_SIZE = 1024;
+    LM(SCCRd) = NewPtrSysClear(SCC_SIZE);
+    LM(SCCWr) = NewPtrSysClear(SCC_SIZE);
+
+    LM(SoundBase) = NewPtrSys(370 * sizeof(INTEGER));
+    for(int i = 0; i < 370; ++i)
+        ((GUEST<INTEGER> *)LM(SoundBase))[i] = 0x8000; /* reference 0 sound */
+
+    InitPerProcessLowMem();
+
+    LM(TheZone) = LM(ApplZone);
+}
+
+
+static void resetAllGlobalsBut(std::byte *base)
+{
+    /* Set low globals to 0xFF, but don't touch exception vectors. */
+    memset((char *)&LM(nilhandle) + 64 * sizeof(ULONGINT),
+           0xFF,
+           ((char *)&LM(lastlowglobal) - (char *)&LM(nilhandle)
+            - 64 * sizeof(ULONGINT)));
+}
+
+template<typename A, typename... Args>
+static void resetAllGlobalsBut(std::byte *base, LowMemGlobal<A> var1, Args... vars)
+{
+    std::byte save[sizeof(A)];
+    memcpy(save, base + var1.address, sizeof(A));
+    resetAllGlobalsBut(base, vars...);
+    memcpy(base + var1.address, save, sizeof(A));
+}
+
+void Executor::InitPerProcessLowMem()
+{
+    resetAllGlobalsBut(
+        (std::byte*)&LM(nilhandle),
+        SysZone,
+        ApplZone,
+        TheZone,
+        Ticks,
+        BootDrive,
+        LowMemGlobal<LONGINT>{0x20},
+        LowMemGlobal<LONGINT>{0x28},
+        LowMemGlobal<LONGINT>{0x58},
+        LowMemGlobal<LONGINT>{0x5C},
+        VIA,
+        SCCRd,
+        SCCWr,
+        SoundBase,
+        AppParmHandle,
+        VCBQHdr,
+        DrvQHdr,
+        FSFCBLen,
+        FCBSPtr,
+        WDCBsPtr,
+        SFSaveDisk,
+        CurDirStore,
+        EventQueue,
+        VBLQueue,
+        DefVCBPtr,
+        CurApName,
+        CurApRefNum,
+        CurMap,
+        TopMapHndl,
+        SysMapHndl,
+        SysMap,
+        ScrapSize,
+        ScrapHandle,
+        ScrapCount,
+        ScrapState,
+        ScrapName,
+        ROMFont0,
+        WidthListHand,
+        SPValid,
+        SPATalkA,
+        SPATalkB,
+        SPConfig,
+        SPPortA,
+        SPPortB,
+        SPAlarm,
+        SPFont,
+        SPKbd,
+        SPPrint,
+        SPVolCtl,
+        SPClikCaret,
+        SPMisc2,
+        KeyThresh,
+        KeyRepThresh,
+        MenuFlash,
+        CaretTime,
+        DoubleTime,
+        HiliteRGB,
+        TheGDevice,
+        MainDevice,
+        DeviceList,
+        DAStrings,
+        MemTop,
+        UTableBase,
+        MouseLocation,
+        DABeeper,
+        FinderName,
+        WMgrCPort,
+        JCrsrTask,
+        AE_info,
+        KeyMap
+        
+        // if it ever becomes a LoMem global: DefDirID
+     );
+ 
+    LM(nilhandle) = 0; /* so nil dereferences "work" */
+    LM(WindowList) = nullptr;
+
+    LM(CrsrBusy) = 0;
+    LM(TESysJust) = 0;
+    LM(DSAlertTab) = 0;
+    LM(ResumeProc) = 0;
+    LM(GZRootHnd) = 0;
+    LM(ANumber) = 0;
+    LM(ResErrProc) = 0;
+    LM(FractEnable) = 0;
+    LM(SEvtEnb) = 0;
+    LM(MenuList) = 0;
+    LM(MBarEnable) = 0;
+    LM(TheMenu) = 0;
+    LM(MBarHook) = 0;
+    LM(MenuHook) = 0;
+    LM(HeapEnd) = 0;
+    LM(ApplLimit) = 0;
+    LM(SoundActive) = soundactiveoff;
+    LM(PortBUse) = 2; /* configured for Serial driver */
 
     LM(OneOne) = 0x00010001;
     LM(Lo3Bytes) = 0xFFFFFF;
     LM(DragHook) = 0;
-    LM(TopMapHndl) = 0;
-    LM(SysMapHndl) = 0;
     LM(MBDFHndl) = 0;
-    LM(MenuList) = 0;
     LM(MBSaveLoc) = 0;
+    LM(SysFontFam) = 0;
 
     LM(SysVersion) = system_version;
-    //LM(FSFCBLen) = 94;   // inited in ROMlib_fileinit
-    LM(ScrapState) = -1;
 
-    LM(TheZone) = LM(SysZone);
-    LM(UTableBase) = (DCtlHandlePtr)NewPtr(4 * NDEVICES);
-    memset(LM(UTableBase), 0, 4 * NDEVICES);
-    LM(UnitNtryCnt) = NDEVICES;
-    LM(TheZone) = LM(ApplZone);
 
     LM(TEDoText) = (ProcPtr)&ROMlib_dotext; /* where should this go ? */
 
+    LM(WWExist) = LM(QDExist) = EXIST_NO;
     LM(SCSIFlags) = 0xEC00; /* scsi+clock+xparam+mmu+adb
 				 (no fpu,aux or pwrmgr) */
+
+    LM(MMUType) = 5;
+    LM(KbdType) = 2;
 
     LM(MCLKPCmiss1) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 72 (MacLinkPC starts
 			   adding the 72 byte offset to VCB pointers too
@@ -324,6 +442,14 @@ void Executor::InitLowMem()
     LM(JSwapFont) = (ProcPtr)&FMSwapFont;
     LM(JInitCrsr) = (ProcPtr)&InitCursor;
 
+    LM(JHideCursor) = (ProcPtr)&HideCursor;
+    LM(JShowCursor) = (ProcPtr)&ShowCursor;
+    LM(JShieldCursor) = (ProcPtr)&ShieldCursor;
+    LM(JSetCrsr) = (ProcPtr)&SetCursor;
+    LM(JCrsrObscure) = (ProcPtr)&ObscureCursor;
+
+    LM(JUnknown574) = (ProcPtr)&stub_SwapMMUMode;
+
     LM(Key1Trans) = (Ptr)&stub_Key1Trans;
     LM(Key2Trans) = (Ptr)&stub_Key2Trans;
     LM(JFLUSH) = &FlushCodeCache;
@@ -332,36 +458,35 @@ void Executor::InitLowMem()
 				   us to worry about the cache flushing
 				   overhead */
 
-    //LM(CPUFlag) = 2; /* mc68020 */
     LM(CPUFlag) = 4; /* mc68040 */
-
-
-        // #### UnitNtryCnt should be 32, but gets overridden here
-        //      this does not seem to make any sense.
     LM(UnitNtryCnt) = 0; /* how many units in the table */
 
-    LM(TheZone) = LM(SysZone);
-    LM(VIA) = NewPtr(16 * 512); /* IMIII-43 */
-    memset(LM(VIA), 0, (LONGINT)16 * 512);
-    *(char *)LM(VIA) = 0x80; /* Sound Off */
 
-#define SCC_SIZE 1024
 
-    LM(SCCRd) = NewPtrSysClear(SCC_SIZE);
-    LM(SCCWr) = NewPtrSysClear(SCC_SIZE);
-
-    LM(SoundBase) = NewPtr(370 * sizeof(INTEGER));
-#if 0
-    memset(LM(SoundBase), 0, (LONGINT) 370 * sizeof(INTEGER));
-#else /* !0 */
-    for(int i = 0; i < 370; ++i)
-        ((GUEST<INTEGER> *)LM(SoundBase))[i] = 0x8000; /* reference 0 sound */
-#endif /* !0 */
-    LM(TheZone) = LM(ApplZone);
-    LM(HiliteMode) = 0xFF;
-    /* Mac II has 0x3FFF here */
-    LM(ROM85) = 0x3FFF;
-
+    LM(HiliteMode) = 0xFF; /* I think this is correct */
+    LM(ROM85) = 0x3FFF; /* We be color now */
+#ifdef TWENTYFOUR_BIT_ADDRESSING
+    LM(MMU32Bit) = 0x00;
+#else
+    LM(MMU32Bit) = 0x01;
+#endif
     LM(loadtrap) = 0;
-    LM(WWExist) = LM(QDExist) = EXIST_NO;
+    *(GUEST<LONGINT> *)SYN68K_TO_US(0x1008) = 0x4; /* Quark XPress 3.0 references 0x1008
+					explicitly.  It takes the value
+					found there, subtracts four from
+					it and dereferences that value.
+					Yahoo */
+    *(GUEST<int16_t> *)SYN68K_TO_US(4) = 0x4e75; /* RTS, so when we dynamically recompile
+				    code starting at 0 we won't get far */
+
+    /* Micro-cap dereferences location one of the LM(AppPacks) locations */
+
+    {
+        int i;
+
+        for(i = 0; i < (int)std::size(LM(AppPacks)); ++i)
+            LM(AppPacks)[i] = 0;
+    }
+    LM(SysEvtMask) = ~(1L << keyUp); /* EVERYTHING except keyUp */
+    LM(SdVolume) = 7; /* for Beebop 2 */
 }

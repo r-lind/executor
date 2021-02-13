@@ -11,33 +11,18 @@
 #include <SegmentLdr.h>
 #include <MemoryMgr.h>
 #include <StdFilePkg.h>
-#include <EventMgr.h>
 #include <VRetraceMgr.h>
 #include <OSUtil.h>
-#include <FontMgr.h>
-#include <ScrapMgr.h>
 #include <ToolboxUtil.h>
 #include <FileMgr.h>
-#include <ControlMgr.h>
-#include <DeviceMgr.h>
 #include <SoundDvr.h>
-#include <TextEdit.h>
 #include <SysErr.h>
-#include <MenuMgr.h>
-#include <ScriptMgr.h>
 #include <DeskMgr.h>
-#include <AppleTalk.h>
-#include <PrintMgr.h>
 #include <StartMgr.h>
-#include <ToolboxEvent.h>
 #include <TimeMgr.h>
 #include <ProcessMgr.h>
 #include <AppleEvents.h>
 #include <Gestalt.h>
-#include <Package.h>
-#include <AliasMgr.h>
-#include <OSEvent.h>
-#include <ADB.h>
 #include <LowMem.h>
 
 #include <base/trapglue.h>
@@ -46,12 +31,10 @@
 #include <prefs/prefs.h>
 #include <commandline/flags.h>
 #include <rsys/segment.h>
-#include <textedit/tesave.h>
 #include <res/resource.h>
 #include <hfs/hfs.h>
 #include <rsys/osutil.h>
 #include <rsys/stdfile.h>
-#include <ctl/ctl.h>
 #include <vdriver/refresh.h>
 
 #include <prefs/options.h>
@@ -74,8 +57,6 @@
 #include <appleevent/apple_events.h>
 #include <rsys/cfm.h>
 #include <rsys/launch.h>
-#include <rsys/version.h>
-#include <rsys/appearance.h>
 #include <time/vbl.h>
 
 #include <base/logging.h>
@@ -433,318 +414,6 @@ void Executor::Chain(ConstStringPtr fName, INTEGER vRefNum)
     launchchain(fName, vRefNum, false, 0);
 }
 
-static void reset_low_globals(void)
-{
-    /*
-     * we're about to smash applzone ... we may want to verify a few low-mem
-     * globals beforehand
-     */
-
-    auto saveSysZone = LM(SysZone);
-    auto saveTicks = LM(Ticks);
-    auto saveBootDrive = LM(BootDrive);
-    auto saveLo3Bytes = LM(Lo3Bytes);
-    auto save20 = *(GUEST<LONGINT> *)SYN68K_TO_US(0x20);
-    auto save28 = *(GUEST<LONGINT> *)SYN68K_TO_US(0x28);
-    auto save58 = *(GUEST<LONGINT> *)SYN68K_TO_US(0x58);
-    auto save5C = *(GUEST<LONGINT> *)SYN68K_TO_US(0x5C);
-    auto saveVIA = LM(VIA);
-    auto saveSCCRd = LM(SCCRd);
-    auto saveSCCWr = LM(SCCWr);
-    auto saveSoundBase = LM(SoundBase);
-    auto saveAppParmHandle = LM(AppParmHandle);
-    auto saveVCBQHdr = LM(VCBQHdr);
-    auto saveFSQHdr = LM(FSQHdr);
-    auto saveDrvQHdr = LM(DrvQHdr);
-    auto saveFCBSPtr = LM(FCBSPtr);
-    auto saveWDCBsPtr = LM(WDCBsPtr);
-    auto saveSFSaveDisk = LM(SFSaveDisk);
-    auto saveCurDirStore = LM(CurDirStore);
-    auto saveEventQueue = LM(EventQueue);
-    auto saveVBLQueue = LM(VBLQueue);
-    auto saveDefVCBPtr = LM(DefVCBPtr);
- 
-    GUEST<char> saveCurApName[sizeof(LM(CurApName))];
-    memcpy(saveCurApName, LM(CurApName), sizeof(LM(CurApName)));
-    
-    auto saveCurApRefNum = LM(CurApRefNum);
-    auto saveCurMap = LM(CurMap);
-    auto saveTopMapHndl = LM(TopMapHndl);
-    auto saveSysMapHndl = LM(SysMapHndl);
-    auto saveSysMap = LM(SysMap);
-    auto saveScrapSize = LM(ScrapSize);
-    auto saveScrapHandle = LM(ScrapHandle);
-    auto saveScrapCount = LM(ScrapCount);
-    auto saveScrapState = LM(ScrapState);
-    auto saveScrapName = LM(ScrapName);
-    auto saveROMFont0 = LM(ROMFont0);
-    auto saveWidthListHand = LM(WidthListHand);
-    auto saveSPValid = LM(SPValid);
-    auto saveSPATalkA = LM(SPATalkA);
-    auto saveSPATalkB = LM(SPATalkB);
-    auto saveSPConfig = LM(SPConfig);
-    auto saveSPPortA = LM(SPPortA);
-    auto saveSPPortB = LM(SPPortB);
-    auto saveSPAlarm = LM(SPAlarm);
-    auto saveSPFont = LM(SPFont);
-    auto saveSPKbd = LM(SPKbd);
-    auto saveSPPrint = LM(SPPrint);
-    auto saveSPVolCtl = LM(SPVolCtl);
-    auto saveSPClikCaret = LM(SPClikCaret);
-    auto saveSPMisc2 = LM(SPMisc2);
-    auto saveKeyThresh = LM(KeyThresh);
-    auto saveKeyRepThresh = LM(KeyRepThresh);
-    auto saveMenuFlash = LM(MenuFlash);
-    auto saveCaretTime = LM(CaretTime);
-    auto saveDoubleTime = LM(DoubleTime);
-    auto saveDefDirID = DefDirID;
- 
-    auto saveHiliteRGB = LM(HiliteRGB);
-    auto saveTheGDevice = LM(TheGDevice);
-    auto saveMainDevice = LM(MainDevice);
-    auto saveDeviceList = LM(DeviceList);
-    
-    GUEST<Handle> saveDAStrings[4];
-    saveDAStrings[0] = LM(DAStrings)[0];
-    saveDAStrings[1] = LM(DAStrings)[1];
-    saveDAStrings[2] = LM(DAStrings)[2];
-    saveDAStrings[3] = LM(DAStrings)[3];
-
-    auto saveMemTop = LM(MemTop);
-    auto saveUTableBase = LM(UTableBase);
-    auto saveUnitNtryCnt = LM(UnitNtryCnt);
- 
-    auto saveMouseLocation = LM(MouseLocation);
-    auto saveDABeeper = LM(DABeeper);
-
-    GUEST<Byte> saveFinderName[sizeof(LM(FinderName))];
-    memcpy(saveFinderName, LM(FinderName), sizeof(saveFinderName));
-    
-    auto saveWMgrCPort = LM(WMgrCPort);
-    auto saveMBDFHndl = LM(MBDFHndl);
-
-    auto saveJCrsrTask = LM(JCrsrTask);
-
-    auto saveAE_info = LM(AE_info);
-    
-    GUEST<char> saveKeyMap[sizeof_KeyMap];
-    memcpy(saveKeyMap, LM(KeyMap), sizeof_KeyMap);
-
-    /* Set low globals to 0xFF, but don't touch exception vectors. */
-    memset((char *)&LM(nilhandle) + 64 * sizeof(ULONGINT),
-           0xFF,
-           ((char *)&LM(lastlowglobal) - (char *)&LM(nilhandle)
-            - 64 * sizeof(ULONGINT)));
-
-    LM(AE_info) = saveAE_info;
-
-    LM(JCrsrTask) = saveJCrsrTask;
-
-    LM(MBDFHndl) = saveMBDFHndl;
-    LM(WMgrCPort) = saveWMgrCPort;
-    memcpy(LM(FinderName), saveFinderName, sizeof(LM(FinderName)));
-
-    LM(DABeeper) = saveDABeeper;
-    LM(MouseLocation) = saveMouseLocation;
-    LM(MouseLocation2) = saveMouseLocation;
-
-    LM(UTableBase) = saveUTableBase;
-    LM(UnitNtryCnt) = saveUnitNtryCnt;
-    LM(MemTop) = saveMemTop;
-    LM(DAStrings)[3] = saveDAStrings[3];
-    LM(DAStrings)[2] = saveDAStrings[2];
-    LM(DAStrings)[1] = saveDAStrings[1];
-    LM(DAStrings)[0] = saveDAStrings[0];
-    DefDirID = saveDefDirID;
-    LM(DoubleTime) = saveDoubleTime;
-    LM(CaretTime) = saveCaretTime;
-    LM(MenuFlash) = saveMenuFlash;
-    LM(KeyRepThresh) = saveKeyRepThresh;
-    LM(KeyThresh) = saveKeyThresh;
-    LM(SPMisc2) = saveSPMisc2;
-    LM(SPClikCaret) = saveSPClikCaret;
-    LM(SPVolCtl) = saveSPVolCtl;
-    LM(SPPrint) = saveSPPrint;
-    LM(SPKbd) = saveSPKbd;
-    LM(SPFont) = saveSPFont;
-    LM(SPAlarm) = saveSPAlarm;
-    LM(SPPortB) = saveSPPortB;
-    LM(SPPortA) = saveSPPortA;
-    LM(SPConfig) = saveSPConfig;
-    LM(SPATalkB) = saveSPATalkB;
-    LM(SPATalkA) = saveSPATalkA;
-    LM(SPValid) = saveSPValid;
-    LM(WidthListHand) = saveWidthListHand;
-    LM(ROMFont0) = saveROMFont0;
-    LM(ScrapName) = saveScrapName;
-    LM(ScrapState) = saveScrapState;
-    LM(ScrapCount) = saveScrapCount;
-    LM(ScrapHandle) = saveScrapHandle;
-    LM(ScrapSize) = saveScrapSize;
-    LM(SysMap) = saveSysMap;
-    LM(SysMapHndl) = saveSysMapHndl;
-    LM(TopMapHndl) = saveTopMapHndl;
-    LM(CurMap) = saveCurMap;
-    LM(CurApRefNum) = saveCurApRefNum;
-    memcpy(LM(CurApName), saveCurApName, sizeof(LM(CurApName)));
-    LM(DefVCBPtr) = saveDefVCBPtr;
-    LM(VBLQueue) = saveVBLQueue;
-    LM(EventQueue) = saveEventQueue;
-    LM(CurDirStore) = saveCurDirStore;
-    LM(SFSaveDisk) = saveSFSaveDisk;
-    LM(WDCBsPtr) = saveWDCBsPtr;
-    LM(FCBSPtr) = saveFCBSPtr;
-    LM(DrvQHdr) = saveDrvQHdr;
-    LM(FSQHdr) = saveFSQHdr;
-    LM(VCBQHdr) = saveVCBQHdr;
-    LM(Lo3Bytes) = saveLo3Bytes;
-    LM(VIA) = saveVIA;
-    LM(SCCRd) = saveSCCRd;
-    LM(SCCWr) = saveSCCWr;
-    LM(SoundBase) = saveSoundBase;
-    LM(Ticks) = saveTicks;
-    LM(SysZone) = saveSysZone;
-    LM(BootDrive) = saveBootDrive;
-    LM(AppParmHandle) = saveAppParmHandle;
-
-    LM(HiliteRGB) = saveHiliteRGB;
-    LM(TheGDevice) = saveTheGDevice;
-    LM(MainDevice) = saveMainDevice;
-    LM(DeviceList) = saveDeviceList;
-
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x20) = save20;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x28) = save28;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x58) = save58;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x5C) = save5C;
-
-    LM(nilhandle) = 0; /* so nil dereferences "work" */
-    LM(WindowList) = nullptr;
-
-    LM(CrsrBusy) = 0;
-    LM(TESysJust) = 0;
-    LM(DSAlertTab) = 0;
-    LM(ResumeProc) = 0;
-    LM(GZRootHnd) = 0;
-    LM(ANumber) = 0;
-    LM(ResErrProc) = 0;
-#if 0
-    LM(FractEnable) = 0xff;	/* NEW MOD -- QUESTIONABLE */
-#else
-    LM(FractEnable) = 0;
-#endif
-    LM(SEvtEnb) = 0;
-    LM(MenuList) = 0;
-    LM(MBarEnable) = 0;
-    LM(MenuFlash) = 0;
-    LM(TheMenu) = 0;
-    LM(MBarHook) = 0;
-    LM(MenuHook) = 0;
-    LM(HeapEnd) = 0;
-    LM(ApplLimit) = 0;
-    LM(SoundActive) = soundactiveoff;
-    LM(PortBUse) = 2; /* configured for Serial driver */
-
-    memcpy(LM(KeyMap), saveKeyMap, sizeof_KeyMap);
-    LM(OneOne) = 0x00010001;
-    LM(DragHook) = 0;
-    LM(MBDFHndl) = 0;
-    LM(MenuList) = 0;
-    LM(MBSaveLoc) = 0;
-    LM(SysFontFam) = 0;
-
-    LM(SysVersion) = system_version;
-    LM(FSFCBLen) = 94;
-
-
-    LM(TEDoText) = (ProcPtr)&ROMlib_dotext; /* where should this go ? */
-
-    LM(WWExist) = LM(QDExist) = EXIST_NO; /* TODO:  LOOK HERE! */
-    LM(SCSIFlags) = 0xEC00; /* scsi+clock+xparam+mmu+adb
-				 (no fpu,aux or pwrmgr) */
-
-    LM(MMUType) = 5;
-    LM(KbdType) = 2;
-
-    LM(MCLKPCmiss1) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 72 (MacLinkPC starts
-			   adding the 72 byte offset to VCB pointers too
-			   soon, starting with 0x358, which is not the
-			   address of a VCB) */
-
-    LM(MCLKPCmiss2) = 0; /* &LM(MCLKPCmiss1) = 0x358 + 78 (MacLinkPC misses) */
-    LM(AuxCtlHead) = 0;
-    LM(CurDeactive) = 0;
-    LM(CurActivate) = 0;
-    LM(macfpstate)[0] = 0;
-    LM(fondid) = 0;
-    LM(PrintErr) = 0;
-    LM(mouseoffset) = 0;
-    LM(heapcheck) = 0;
-    LM(DefltStack) = 0x2000; /* nobody really cares about these two */
-    LM(MinStack) = 0x400; /* values ... */
-    LM(IAZNotify) = 0;
-    LM(CurPitch) = 0;
-    LM(JSwapFont) = (ProcPtr)&FMSwapFont;
-    LM(JInitCrsr) = (ProcPtr)&InitCursor;
-
-    LM(JHideCursor) = (ProcPtr)&HideCursor;
-    LM(JShowCursor) = (ProcPtr)&ShowCursor;
-    LM(JShieldCursor) = (ProcPtr)&ShieldCursor;
-    LM(JSetCrsr) = (ProcPtr)&SetCursor;
-    LM(JCrsrObscure) = (ProcPtr)&ObscureCursor;
-
-    LM(JUnknown574) = (ProcPtr)&stub_SwapMMUMode;
-
-    LM(Key1Trans) = (Ptr)&stub_Key1Trans;
-    LM(Key2Trans) = (Ptr)&stub_Key2Trans;
-    LM(JFLUSH) = &FlushCodeCache;
-    LM(JResUnknown1) = LM(JFLUSH); /* I don't know what these are supposed to */
-    LM(JResUnknown2) = LM(JFLUSH); /* do, but they're not called enough for
-				   us to worry about the cache flushing
-				   overhead */
-
-    LM(CPUFlag) = 4; /* mc68040 */
-    LM(UnitNtryCnt) = 0; /* how many units in the table */
-
-    LM(TheZone) = LM(ApplZone);
-
-
-    LM(HiliteMode) = 0xFF; /* I think this is correct */
-    LM(ROM85) = 0x3FFF; /* We be color now */
-#ifdef TWENTYFOUR_BIT_ADDRESSING
-    LM(MMU32Bit) = 0x00;
-#else
-    LM(MMU32Bit) = 0x01;
-#endif
-    LM(loadtrap) = 0;
-    *(GUEST<LONGINT> *)SYN68K_TO_US(0x1008) = 0x4; /* Quark XPress 3.0 references 0x1008
-					explicitly.  It takes the value
-					found there, subtracts four from
-					it and dereferences that value.
-					Yahoo */
-    *(GUEST<int16_t> *)SYN68K_TO_US(4) = 0x4e75; /* RTS, so when we dynamically recompile
-				    code starting at 0 we won't get far */
-
-    /* Micro-cap dereferences location one of the LM(AppPacks) locations */
-
-    {
-        int i;
-
-        for(i = 0; i < (int)std::size(LM(AppPacks)); ++i)
-            LM(AppPacks)[i] = 0;
-    }
-    LM(SysEvtMask) = ~(1L << keyUp); /* EVERYTHING except keyUp */
-    LM(SdVolume) = 7; /* for Beebop 2 */
-    LM(CurrentA5) = guest_cast<Ptr>(EM_A5);
-
-    /*
-     * TODO:  how does this relate to Launch?
-     */
-    /* Set up default floating point environment. */
-    {
-        INTEGER env = 0;
-        ROMlib_Fsetenv(inout(env), 0);
-    }
-}
 
 static void reset_traps(void)
 {
@@ -768,19 +437,6 @@ static void reset_traps(void)
         memcpy(ostraptable, saveostraptable, sizeof(saveostraptable));
         memcpy(tooltraptable, savetooltraptable, sizeof(savetooltraptable));
     }
-}
-
-static bool
-our_special_map(resmaphand map)
-{
-    bool retval;
-    Handle h;
-
-    LM(CurMap) = (*map)->resfn;
-    h = Get1Resource("nUSE"_4, 0);
-    retval = h ? true : false;
-
-    return retval;
 }
 
 void Executor::empty_timer_queues(void)
@@ -829,15 +485,7 @@ static void reinitialize_things(void)
         if((*map)->resfn == LM(SysMap))
             UpdateResFile((*map)->resfn);
         else
-        {
-            if(!our_special_map(map))
-                CloseResFile((*map)->resfn);
-            else
-            {
-                special_fn = (*map)->resfn;
-                UpdateResFile(special_fn);
-            }
-        }
+            CloseResFile((*map)->resfn);
     }
 
     length = *(GUEST<int16_t> *)LM(FCBSPtr);
@@ -935,7 +583,12 @@ Executor::NewLaunch(ConstStringPtr fName_arg, INTEGER vRefNum_arg, LaunchParamBl
         reset_adb_vector();
         reinitialize_things();
         reset_traps();
-        reset_low_globals();
+        InitPerProcessLowMem();
+        /* Set up default floating point environment. */
+        {
+            INTEGER env = 0;
+            ROMlib_Fsetenv(inout(env), 0);
+        }
         ROMlib_InitZones();
         ROMlib_InitGWorlds();
         hle_reinit();

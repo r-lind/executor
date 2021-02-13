@@ -151,8 +151,7 @@ OSErr Executor::ROMlib_dispatch(ParmBlkPtr p, Boolean async,
                 /* NOTE: It's not clear whether we should zero out this
 		   field or just check for DRIVEROPEN bit up above and never
 		   send messages except open to non-open drivers.  */
-                LM(UTableBase)
-                [devicen] = nullptr;
+                LM(UTableBase)[devicen] = nullptr;
             }
 
             if(routine < Close)
