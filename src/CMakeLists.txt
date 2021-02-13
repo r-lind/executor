@@ -297,6 +297,8 @@ add_custom_command(OUTPUT rawsrcstubs.ctable
         > rawsrcstubs.ctable)
 list(APPEND GENERATED_FILES rawpatstubs.ctable rawsrcstubs.ctable)
 
+list(TRANSFORM GENERATED_FILES PREPEND ${CMAKE_CURRENT_BINARY_DIR}/)
+source_group(Generated FILES ${GENERATED_FILES})
 
 set(res_sources
     res/resource.h
