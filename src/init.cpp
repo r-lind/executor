@@ -312,10 +312,6 @@ void Executor::InitPerProcessLowMem()
         TheZone,
         Ticks,
         BootDrive,
-        LowMemGlobal<LONGINT>{0x20},
-        LowMemGlobal<LONGINT>{0x28},
-        LowMemGlobal<LONGINT>{0x58},
-        LowMemGlobal<LONGINT>{0x5C},
         VIA,
         SCCRd,
         SCCWr,
@@ -381,6 +377,9 @@ void Executor::InitPerProcessLowMem()
      );
  
     LM(nilhandle) = 0; /* so nil dereferences "work" */
+    *(GUEST<int16_t> *)SYN68K_TO_US(4) = 0x4e75; /* RTS, so when we dynamically recompile
+				    code starting at 0 we won't get far */
+    
     LM(WindowList) = nullptr;
 
     LM(CrsrBusy) = 0;
@@ -476,8 +475,6 @@ void Executor::InitPerProcessLowMem()
 					found there, subtracts four from
 					it and dereferences that value.
 					Yahoo */
-    *(GUEST<int16_t> *)SYN68K_TO_US(4) = 0x4e75; /* RTS, so when we dynamically recompile
-				    code starting at 0 we won't get far */
 
     /* Micro-cap dereferences location one of the LM(AppPacks) locations */
 
