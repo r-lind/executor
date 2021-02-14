@@ -615,6 +615,7 @@ int main(int argc, char **argv)
 
             Executor::traps::init(logtraps);
             InitLowMem();
+            syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
 
             ROMlib_InitGDevices();
             
@@ -663,8 +664,6 @@ int main(int argc, char **argv)
                 INTEGER env = 0;
                 ROMlib_Fsetenv(inout(env), 0);
             }
-
-            syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
 
             sound_init();
 

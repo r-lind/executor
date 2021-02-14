@@ -180,7 +180,9 @@ void Executor::syncint_check_interrupt()
 
 SyncintTimer::SyncintTimer()
 {
-#if USE_SIGNALS
+#if USE_TIMER_THREAD
+    last_interrupt = scheduled_interrupt = clock::now();
+#else
     sigset_t sigs;
     sigemptyset(&sigs);
     sigaddset(&sigs, SIGALRM);
