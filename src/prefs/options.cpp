@@ -41,6 +41,8 @@ bool ROMlib_pretend_script = false;
 bool ROMlib_pretend_edition = false;
 bool ROMlib_speech_enabled = false;
 
+bool ROMlib_use_scan_codes = false;
+
 /* the system version that executor is currently reporting to
    applications, set through the `-system' options.  contains the
    version number in the form `0xABC' which corresponds to system

@@ -110,9 +110,6 @@ public:
 
     virtual void runEventLoop() = 0;
     virtual void endEventLoop() = 0;
-
-    virtual bool setOptions(std::unordered_map<std::string, std::string> options);
-    virtual void registerOptions();
     
     virtual void updateScreen(int top, int left, int bottom, int right);
     virtual bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p);

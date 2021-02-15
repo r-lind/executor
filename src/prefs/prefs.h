@@ -36,6 +36,8 @@ extern bool ROMlib_speech_enabled;
 
 extern bool ROMlib_sticky_menus_p;
 
+extern bool ROMlib_use_scan_codes;
+
 extern bool nodrivesearch_p;
 
 extern bool do_autorefresh_p;

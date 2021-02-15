@@ -217,6 +217,8 @@ capable of color.",
                     "menus.  For example \"executor -appearance windows\" will make each "
                     "window have a blue title bar",
       opt_sep, "" },
+    {"scancodes", "different form of key mapping (may be useful in "
+        "conjunction with -keyboard; not supported for all vdrivers)", opt_no_arg},
 
     { "logtraps", "print every operating system and toolbox calls and their arguments", opt_no_arg, "" },
     { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""},
@@ -508,6 +510,7 @@ static void parseCommandLine(int& argc, char **argv)
     opt_bool_val(opt_db, "break", &breakOnProcessStart, &bad_arg_p);
     opt_bool_val(opt_db, "logtraps", &logtraps, &bad_arg_p);
 
+    opt_bool_val(opt_db, "scancodes", &ROMlib_use_scan_codes, &bad_arg_p);
     opt_val(opt_db, "keyboard", &keyboard);
     opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
     if(list_keyboards_p)

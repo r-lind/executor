@@ -95,11 +95,6 @@ VideoDriver::~VideoDriver()
 {
 }
 
-bool VideoDriver::setOptions(std::unordered_map<std::string, std::string> options)
-{
-    return true;
-}
-
 bool VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscale_p)
 {
     if(width && width < VDRIVER_MIN_SCREEN_WIDTH)
@@ -111,10 +106,6 @@ bool VideoDriver::isAcceptableMode(int width, int height, int bpp, bool grayscal
     if(bpp > 32)
         return false;
     return true;
-}
-
-void VideoDriver::registerOptions()
-{
 }
 
 void VideoDriver::putScrap(OSType type, LONGINT length, char *p, int scrap_cnt)

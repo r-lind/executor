@@ -55,8 +55,6 @@
 
 #include <atomic>
 
-static int use_scan_codes = false;
-
 namespace Executor {
         // FIXME: not including rsys/paths.h because that pulls in boost/filesystem, which CMake doesn't know about yet
         // (the dependencies are the wrong way aroudn anyway)
@@ -122,15 +120,6 @@ static int shm_first_error;
 static int wakeup_fd[2] = {-1, -1};
 static std::atomic_bool exitMainLoop = false;
 static bool updateRequested = false;
-
-void X11VideoDriver::registerOptions(void)
-{
-    opt_register("vdriver", {
-            {"scancodes", "different form of key mapping (may be useful in "
-                "conjunction with -keyboard)", opt_no_arg},
-        });
-}
-
 
 int x_error_handler(Display *err_dpy, XErrorEvent *err_evt)
 {
@@ -264,7 +253,7 @@ x_keysym_to_mac_virt(unsigned int keysym, unsigned char *virt_out)
     int16_t mkvkey;
     int i;
 
-    if(use_scan_codes)
+    if(ROMlib_use_scan_codes)
     {
         if(keysym == 0xff)
             mkvkey = NOTKEY;
@@ -682,7 +671,7 @@ void X11VideoDriver::handleEvents()
                 unsigned keysym;
                 unsigned char virt;
 
-                if(use_scan_codes)
+                if(ROMlib_use_scan_codes)
                 {
                     uint8_t keycode;
 

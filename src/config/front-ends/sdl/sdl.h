@@ -14,8 +14,6 @@ public:
     SDLVideoDriver(Executor::IEventListener *listener, int& argc, char* argv[]);
     ~SDLVideoDriver();
 
-    void registerOptions() override;
-    bool setOptions(std::unordered_map<std::string, std::string> options) override;
     bool isAcceptableMode(int width, int height, int bpp, bool grayscale_p) override;
     bool setMode(int width, int height, int bpp, bool grayscale_p) override;
     void setColors(int num_colors, const Executor::vdriver_color_t *colors) override;

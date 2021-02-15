@@ -183,7 +183,7 @@ void SDL2VideoDriver::runEventLoop()
                 init_sdlk_to_mkv();
                 down_p = (event.key.state == SDL_PRESSED);
 
-                /*if(use_scan_codes)
+                /*if(ROMlib_use_scan_codes)
                     mkvkey = ibm_virt_to_mac_virt[event.key.keysym.scancode];
                 else*/
                 {

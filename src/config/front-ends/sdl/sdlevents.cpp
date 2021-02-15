@@ -20,12 +20,11 @@
 #include <rsys/scrap.h>
 #include <rsys/toolevent.h>
 #include <rsys/keyboard.h>
+#include <prefs/prefs.h>
 
 #include <SDL/SDL.h>
 
 using namespace Executor;
-
-extern bool use_scan_codes;
 
 #if SDL_MAJOR_VERSION == 0 && SDL_MINOR_VERSION < 9
 
@@ -487,7 +486,7 @@ void SDLVideoDriver::runEventLoop()
 
                     init_sdlk_to_mkv();
 
-                    if(use_scan_codes)
+                    if(ROMlib_use_scan_codes)
                         mkvkey = ibm_virt_to_mac_virt[event.key.keysym.scancode];
                     else
                         mkvkey = sdlk_to_mkv[event.key.keysym.sym];
