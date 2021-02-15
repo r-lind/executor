@@ -404,6 +404,7 @@ set(vdriver_sources
         vdriver/eventrecorder.h
         vdriver/eventrecorder.cpp
     )
+source_group(VDriver FILES ${vdriver_sources})
 
 set(mman_sources
     mman/memsize.h
@@ -414,6 +415,7 @@ set(mman_sources
     mman/mman.cpp mman/mmansubr.cpp
     mman/tempmem.cpp
 )
+source_group(MMan FILES ${mman_sources})
 
 set(time_sources
         time/time.h
@@ -424,6 +426,7 @@ set(time_sources
         time/vbl.cpp
         time/syncint.cpp
     )
+source_group(Time FILES ${time_sources})
 
 set(osevent_sources
         osevent/osevent.h
@@ -431,11 +434,14 @@ set(osevent_sources
         osevent/ibm_keycodes.cpp
         osevent/osevent.cpp
     )
+source_group(OSEvent FILES ${osevent_sources})
 
 set(error_sources
     error/error.h error/syserr.h error/system_error.h
     error/error.cpp error/syserr.cpp error/system_error.cpp
 )
+
+source_group(Error FILES ${error_sources})
 
 set(commandline_sources
     commandline/option.h
@@ -449,6 +455,8 @@ set(commandline_sources
     commandline/flags.h
     )
 
+source_group(Commandline FILES ${commandline_sources})
+
 set(prefs_sources
     prefs/prefs.h
     prefs/parse.h
@@ -460,6 +468,8 @@ set(prefs_sources
     prefs/options.cpp
     prefs/prefs.cpp
 )
+
+source_group(Prefs FILES ${prefs_sources})
 
 set(util_sources
     util/macstrings.h
@@ -474,6 +484,8 @@ set(util_sources
     util/handle_vector.h
     util/static_vector.h
 )
+
+source_group(Util FILES ${util_sources})
 
 set(misc_sources
   mon_debugger.cpp
