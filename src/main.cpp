@@ -396,11 +396,6 @@ static void parseCommandLine(int& argc, char **argv)
     if(opt_val(opt_db, "debug", &arg))
         bad_arg_p |= !error_parse_option_string(arg);
 
-#if defined(__APPLE__)
-    // sync() really takes a long time on Mac OS X.
-    ROMlib_nosync = true;
-#endif
-
     {
         int skip;
         skip = 0;

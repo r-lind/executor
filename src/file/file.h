@@ -63,7 +63,6 @@ typedef struct
 
 #define OURUFSDREF (-102)
 
-extern int ROMlib_nosync;
 extern GUEST<LONGINT> DefDirID;
 
 

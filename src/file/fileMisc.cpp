@@ -34,7 +34,6 @@ using namespace Executor;
 
 namespace Executor
 {
-int ROMlib_nosync = 0; /* if non-zero, we don't call sync () or fsync () */
 std::string ROMlib_appname;
 }
 

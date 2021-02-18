@@ -158,8 +158,7 @@ static OSErr readvolumeinfo(HVCB *vcbp) /* call once during mounting */
 void Executor::vcbsync(HVCB *vcbp)
 {
 #ifndef _WIN32
-    if(!ROMlib_nosync)
-        fsync(((VCBExtra *)vcbp)->u.hfs.fd);
+    fsync(((VCBExtra *)vcbp)->u.hfs.fd);
 #endif
 }
 
