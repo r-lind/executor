@@ -213,8 +213,6 @@ void setupprefvalues(DialogPtr dp)
              ROMlib_directdiskaccess ? SETSTATE : CLEARSTATE);
     modstate(dp, PREFFONTSUBSTITUTIONITEM,
              ROMlib_fontsubstitution ? SETSTATE : CLEARSTATE);
-    modstate(dp, PREFCACHEHEURISTICSITEM,
-             ROMlib_cacheheuristic ? SETSTATE : CLEARSTATE);
 
     modstate(dp, PREF_PRETEND_HELP,
              ROMlib_pretend_help ? SETSTATE : CLEARSTATE);
@@ -282,7 +280,6 @@ void readprefvalues(DialogPtr dp)
     ROMlib_newlinetocr = getvalue(dp, PREFNEWLINEMAPPINGITEM);
     ROMlib_directdiskaccess = getvalue(dp, PREFDIRECTDISKITEM);
     ROMlib_fontsubstitution = getvalue(dp, PREFFONTSUBSTITUTIONITEM);
-    ROMlib_cacheheuristic = getvalue(dp, PREFCACHEHEURISTICSITEM);
 
     ROMlib_pretend_help = getvalue(dp, PREF_PRETEND_HELP);
     ROMlib_pretend_edition = getvalue(dp, PREF_PRETEND_EDITION);

@@ -1102,8 +1102,6 @@ typedef struct
     float multiplier;
 } substitute_t;
 
-bool Executor::substitute_fonts_p = false;
-
 static float
 substitute_font_if_needed(char **fontp, LONGINT orig_size,
                           bool *need_to_freep)
@@ -1123,7 +1121,7 @@ substitute_font_if_needed(char **fontp, LONGINT orig_size,
 
     retval = orig_size;
     *need_to_freep = false;
-    if(substitute_fonts_p)
+    if(ROMlib_fontsubstitution)
     {
         int i;
         char *font;
@@ -2065,7 +2063,7 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
 #if 0
 		PSxshow(translated, fwidths, n);
 #else
-                if(substitute_fonts_p && (thePortp->txFont == geneva))
+                if(ROMlib_fontsubstitution && (thePortp->txFont == geneva))
                     doshow(translated, n);
                 else if((i = numspacesin(translated)))
                     dowidthshow(translated, n, i, total);
@@ -2074,7 +2072,7 @@ void Executor::NeXTPrText(LONGINT n, Ptr textbufp, Point num, Point den,
 #endif
                 if(thePortp->txFace & underline)
                     dopsunderline(thePortp, total,
-                                  substitute_fonts_p
+                                  ROMlib_fontsubstitution
                                       && (thePortp->txFont == geneva),
                                   translated, n);
                 thePortp->pnLoc.h = thePortp->pnLoc.h + total;

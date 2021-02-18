@@ -80,8 +80,6 @@ extern char *ROMlib_spool_file;
 extern ini_key_t ROMlib_printer;
 extern ini_key_t ROMlib_port;
 
-extern bool substitute_fonts_p;
-
 enum
 {
     GetRslData = 4,

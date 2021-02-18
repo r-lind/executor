@@ -410,7 +410,7 @@ static void parseCommandLine(int& argc, char **argv)
 
     use_native_code_p = !opt_val(opt_db, "notnative", nullptr);
 
-    substitute_fonts_p = !opt_val(opt_db, "cities", nullptr);
+    ROMlib_fontsubstitution = !opt_val(opt_db, "cities", nullptr);
 
     /* Parse the "-memory" option. */
     {

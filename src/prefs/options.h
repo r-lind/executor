@@ -60,7 +60,5 @@ enum
     ROMLIB_CLOSE_IS_QUIT_BIT = (1 << 27),
     ROMLIB_RECT_SCREEN_BIT = (1 << 28),
 };
-
-#define INITIALPAIRVALUE (-1000)
 }
 #endif

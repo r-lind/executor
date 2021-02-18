@@ -16,7 +16,6 @@ typedef enum {
 
 
 extern sound_t ROMlib_PretendSound;
-extern bool ROMlib_cacheheuristic;
 extern int ROMlib_clock;
 extern bool ROMlib_directdiskaccess;
 extern bool ROMlib_flushoften;

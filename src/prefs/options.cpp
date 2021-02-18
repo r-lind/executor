@@ -22,7 +22,6 @@ namespace Executor
 {
 // prefs.h 
 sound_t ROMlib_PretendSound = soundpretend;
-bool ROMlib_cacheheuristic = false;     // unused
 //int ROMlib_clock;   // maybe this is actually internal state of vbl.cpp
 bool ROMlib_directdiskaccess = false;
 bool ROMlib_flushoften = false;         // ROMlib_destroy_blocks always flushes all blocks
@@ -76,8 +75,6 @@ bool ROMlib_nobrowser = false;
    by `InitWindows ()' */
 bool system_file_version_skew_p = false;
 
-bool ROMlib_dirtyvariant = false;   // unused
-
 // options.h
 
 int32_t ROMlib_options = 0;
@@ -94,6 +91,4 @@ bool do_autorefresh_p = false;
 
 uint32_t ROMlib_PrDrvrVers = 70;
 
-/* true iff we should try to log errors to RAM when possible. */
-bool log_err_to_ram_p = false;
 }
