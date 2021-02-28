@@ -82,6 +82,15 @@ void EventSink::requestQuit()
     runOnEmulatorThread(&ROMlib_send_quit);
 }
 
+void EventSink::about()
+{
+    
+}
+
+void EventSink::settings()
+{
+}
+
 void EventSink::wake()
 {
     eventInterrupt.trigger();

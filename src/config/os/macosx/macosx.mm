@@ -2,6 +2,10 @@
 #include <Cocoa/Cocoa.h>
 #include <algorithm>
 
+#if ! __has_feature(objc_arc)
+#error THIS CODE MUST BE COMPILED WITH ARC ENABLED!
+#endif
+
 static bool inited = false;
 static bool dock = false;
 
@@ -86,4 +90,100 @@ void macosx_autorelease_pool(const std::function<void ()>& fun)
     {
         fun();
     }
+}
+
+@interface TouchBarProvider: NSResponder <NSTouchBarDelegate, NSApplicationDelegate>
+{
+    NSSegmentedControl *_fullscreenControl;
+}
+@property (strong) NSObject *qtDelegate;
+
+
+@end
+
+@implementation TouchBarProvider
+- (TouchBarProvider*)init
+{
+    if(self = [super init])
+    {
+        auto app = [NSApplication sharedApplication];
+        _qtDelegate = app.delegate;
+        app.delegate = self;
+    }
+    return self;
+}
+- (BOOL)respondsToSelector:(SEL)aSelector
+{
+    return [_qtDelegate respondsToSelector:aSelector] || [super respondsToSelector:aSelector];
+}
+
+- (void)forwardInvocation:(NSInvocation *)anInvocation
+{
+    [anInvocation invokeWithTarget:_qtDelegate];
+}
+
+- (NSTouchBarItem*)makeItemWithView: (NSView*)view
+    identifier: (NSString*) identifier
+{
+    NSCustomTouchBarItem *item = [[NSCustomTouchBarItem alloc] initWithIdentifier:identifier];
+    item.view = view;
+    return item;
+}
+
+- (NSTouchBarItem*)makeButtonItemWithTitle: (NSString*)title
+    identifier: (NSString*) identifier
+    action: (SEL) sel
+{
+    return [self makeItemWithView:[NSButton buttonWithTitle:title target:self action:sel] identifier:identifier];
+}
+
+- (void)settingsClicked
+{
+    NSLog(@"settings");
+}
+
+- (void)aboutClicked
+{
+    NSLog(@"settings");
+}
+
+- (void)fullscreenClicked
+{
+    NSLog(@"fullscreen");
+}
+
+- (NSTouchBar *)makeTouchBar
+{
+    NSTouchBar *bar = [[NSTouchBar alloc] init];
+    bar.delegate = self;
+    
+    auto aboutItem = @"com.github.autc04.executor.about";
+    auto settingsItem = @"com.github.autc04.executor.settings";
+    auto fullscreenItem = @"com.github.autc04.executor.fullscreen";
+    
+    bar.defaultItemIdentifiers = @[settingsItem];//, fullscreenItem];
+    
+    _fullscreenControl = [NSSegmentedControl segmentedControlWithLabels:@[@"Rootless",@"Fullscreen",@"Window"]
+                                trackingMode:NSSegmentSwitchTrackingSelectOne target:self action:@selector(fullscreenClicked)];
+    
+    bar.templateItems = [NSSet setWithObjects:
+                         [self makeButtonItemWithTitle:@"Settings"
+                            identifier:settingsItem action:@selector(settingsClicked)],
+                         [self makeButtonItemWithTitle:@"About"
+                            identifier:aboutItem action:@selector(aboutClicked)],
+                         [self makeItemWithView:
+                            _fullscreenControl
+                            identifier:fullscreenItem],
+                         nil
+                         ];
+    
+    return bar;
+}
+@end
+
+static __strong TouchBarProvider* touchBarProvider;
+
+void macosx_init_touchbar()
+{
+    touchBarProvider = [[TouchBarProvider alloc] init];
 }

@@ -37,13 +37,13 @@
 
 using namespace Executor;
 
-static NSSpeechSynthesizer *internalSynthesizer;
-static NSArray *speechVoices;
-static std::map<Executor::LONGINT, NSSpeechSynthesizer *> synthesizerMap;
+static __strong NSSpeechSynthesizer *internalSynthesizer;
+static __strong NSArray *speechVoices;
+static std::map<Executor::LONGINT, __strong NSSpeechSynthesizer *> synthesizerMap;
 static dispatch_once_t initSpeech = 0;
 
 static dispatch_block_t initSpeechBlock= ^{
-  synthesizerMap = std::map<Executor::LONGINT, NSSpeechSynthesizer *>();
+  synthesizerMap = {};
   NSMutableArray *tmpVoices = [[NSMutableArray alloc] init];
   @autoreleasepool {
     // Contains a dictionary of voices where the creator and ID aren't included in Cocoa.
@@ -158,7 +158,6 @@ static dispatch_block_t initSpeechBlock= ^{
   }
   
   speechVoices = [tmpVoices copy];
-  [tmpVoices release];
   internalSynthesizer = [[NSSpeechSynthesizer alloc] init];
 };
 
@@ -206,7 +205,6 @@ Executor::OSErr MacBridge::DisposeSpeechChannel(Executor::SpeechChannel chan)
   Executor::LONGINT ourDat = chan->data[0];
   NSSpeechSynthesizer *synth = synthesizerMap[ourDat];
   Executor::DisposePtr((Executor::Ptr)chan);
-  [synth release];
   synthesizerMap.erase(ourDat);
 
   return Executor::noErr;
@@ -662,7 +660,6 @@ Executor::OSErr MacBridge::TextToPhonemes (Executor::SpeechChannel chan, const v
     NSSpeechSynthesizer *synth = synthesizerMap[chan->data[0]];
     NSString *aStr = [[NSString alloc] initWithBytes:textBuf length:textSize encoding:NSMacOSRomanStringEncoding];
     NSString *phonemes = [synth phonemesFromText:aStr];
-    [aStr release];
     Executor::LONGINT lengthInMacRoman = (Executor::LONGINT)[phonemes lengthOfBytesUsingEncoding:NSMacOSRomanStringEncoding];
     
     if (lengthInMacRoman == 0) {

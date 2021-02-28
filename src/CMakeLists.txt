@@ -69,6 +69,7 @@ if(WIN32)
         config/os/win32/win_stat.cpp)
     set(host_os_libs)
 elseif(APPLE AND UNIX)
+    add_compile_options(-fobjc-arc)
     set(HOST_OS "macosx")
     set(host_os_sources
         config/os/macosx/macosx.mm)

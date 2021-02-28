@@ -29,6 +29,7 @@
 #ifdef __APPLE__
 void macosx_hide_menu_bar(int mouseX, int mouseY, int width, int height);
 void macosx_autorelease_pool(const std::function<void ()>& fun);
+void macosx_init_touchbar();
 #endif
 #include <../x/x_keycodes.h>
 
@@ -167,6 +168,7 @@ QtVideoDriver::QtVideoDriver(Executor::IEventListener *eventListener, int& argc,
     : VideoDriver(eventListener)
 {
     qapp = new QGuiApplication(argc, argv);
+    macosx_init_touchbar();
 }
 
 QtVideoDriver::~QtVideoDriver()

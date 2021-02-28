@@ -75,6 +75,9 @@ public:
     virtual void resumeEvent(bool updateClipboard /* TODO: does this really make sense? */) = 0;
     virtual void requestQuit() = 0;
     virtual void wake() = 0;
+    
+    virtual void about() {};
+    virtual void settings() {};
 };
 
 class EventSink : public IEventListener
@@ -87,6 +90,9 @@ public:
     virtual void resumeEvent(bool updateClipboard) override;
     virtual void requestQuit() override;
     virtual void wake() override;
+
+    virtual void about() override;
+    virtual void settings() override;
 
     void pumpEvents();
 
