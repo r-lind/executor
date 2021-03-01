@@ -1,4 +1,4 @@
-#include <rsys/mon_debugger.h>
+#include <debug/mon_debugger.h>
 #include <base/debugger.h>
 #include <OSUtil.h>
 
@@ -169,20 +169,6 @@ auto MonDebugger::interact(DebuggerEntry entry) -> DebuggerExit
     breakpoints = active_break_points;
 
     return { entry.addr, mon_singlestep };
-}
-
-void Executor::C_DebugStr(ConstStringPtr p)
-{
-    int i;
-
-    fprintf(stderr, "debugstr: ");
-    for(i = *p++; i-- > 0; fprintf(stderr, "%c", (LONGINT)*p++))
-        ;
-    fprintf(stderr, "\n");
-}
-
-void Executor::C_Debugger()
-{
 }
 
 void Executor::InitMonDebugger()

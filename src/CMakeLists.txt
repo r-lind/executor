@@ -487,8 +487,15 @@ set(util_sources
 
 source_group(Util FILES ${util_sources})
 
+set(debug_sources
+    debug/mon_debugger.h
+    debug/mon_debugger.cpp
+)
+
+source_group(Debugger FILES ${debug_sources})
+
+
 set(misc_sources
-  mon_debugger.cpp
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp
   gestalt.cpp iu.cpp launch.cpp  notify.cpp 
    osutil.cpp pack.cpp scrap.cpp script.cpp segment.cpp serial.cpp
@@ -507,6 +514,7 @@ set(misc_sources
   toolmath.cpp
   init.cpp
   )
+
 
 set(include_sources 
                   include/rsys/aboutbox.h
@@ -527,7 +535,6 @@ set(include_sources
                   include/rsys/keyboard.h
                   include/rsys/launch.h
                   include/rsys/macros.h
-                  include/rsys/mon_debugger.h
                   include/rsys/noreturn.h
                   include/rsys/osutil.h
                   include/rsys/paths.h
@@ -547,6 +554,8 @@ set(include_sources
                   mkvol/mkvol.h
                   mkvol/mkvol_internal.h)
 
+source_group(APIHeaders FILES ${api_headers})
+source_group(TrapInstances FILES ${trap_instance_sources})
 
 set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${ctl_sources} ${dial_sources} 
@@ -556,7 +565,7 @@ set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${sound_sources} ${num_sources} ${misc_sources}
     ${file_sources} ${hfs_sources} ${time_sources} ${osevent_sources}
     ${error_sources} ${commandline_sources} ${prefs_sources}
-    ${util_sources}
+    ${util_sources} ${debug_sources}
     ${api_headers} ${trap_instance_sources} ${host_os_sources}
     ${include_sources})
 

@@ -55,7 +55,7 @@
 #include <hfs/hfs_plus.h>
 #include <base/cpu.h>
 #include <base/debugger.h>
-#include <rsys/mon_debugger.h>
+#include <debug/mon_debugger.h>
 #include <PowerCore.h>
 #include <vdriver/eventrecorder.h>
 
