@@ -27,6 +27,8 @@ namespace Executor
             void initProcess(uint32_t entrypoint);
 
             void setBreakOnProcessEntry(bool dobreak) { breakOnProcessEntry = dobreak; }
+            
+            
         protected:
             enum class Reason
             {

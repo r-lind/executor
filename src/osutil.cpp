@@ -987,3 +987,18 @@ LONGINT Executor::SetA5(LONGINT newA5)
     EM_A5 = newA5;
     return oldA5;
 }
+
+void Executor::C_DebugStr(ConstStringPtr p)
+{
+    int i;
+
+    fprintf(stderr, "debugstr: ");
+    for(i = *p++; i-- > 0; fprintf(stderr, "%c", (LONGINT)*p++))
+        ;
+    fprintf(stderr, "\n");
+}
+
+void Executor::C_Debugger()
+{
+}
+
