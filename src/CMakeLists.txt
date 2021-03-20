@@ -490,6 +490,8 @@ source_group(Util FILES ${util_sources})
 set(debug_sources
     debug/mon_debugger.h
     debug/mon_debugger.cpp
+    debug/gdb_debugger.h
+    debug/gdb_debugger.cpp
 )
 
 source_group(Debugger FILES ${debug_sources})

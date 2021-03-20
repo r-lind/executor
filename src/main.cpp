@@ -56,6 +56,7 @@
 #include <base/cpu.h>
 #include <base/debugger.h>
 #include <debug/mon_debugger.h>
+#include <debug/gdb_debugger.h>
 #include <PowerCore.h>
 #include <vdriver/eventrecorder.h>
 
@@ -667,7 +668,7 @@ int main(int argc, char **argv)
 
             set_refresh_rate(ROMlib_refresh);
 
-            InitMonDebugger();
+            InitGdbDebugger();
             base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
 
             executor_main();
