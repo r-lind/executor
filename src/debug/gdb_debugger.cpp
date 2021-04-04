@@ -1,6 +1,8 @@
 #include <debug/gdb_debugger.h>
 
 #include <base/debugger.h>
+#include <res/resource.h>
+#include <SegmentLdr.h>
 
 #include <boost/asio.hpp>
 
@@ -317,6 +319,22 @@ auto GdbDebugger::interact(DebuggerEntry entry) -> DebuggerExit
                 regs += tmp;
             }
             connection->send(regs);
+        }
+        else if(request == "qOffsets")
+        {
+            auto map = ROMlib_rntohandl(LM(CurApRefNum), nullptr);
+            resref *rr = nullptr;
+
+            if(map && ROMlib_maptypidtop(map, "CODE"_4, 1, &rr) == noErr && rr && rr->rhand && *rr->rhand)
+            {
+                uint32_t base = guest_cast<uint32_t>(*rr->rhand);
+                char response[64];
+                sprintf(response, "TextSeg=%x;DataSeg=0", (unsigned)base + 4);
+                connection->send(response);
+            }
+            else
+                connection->send("");
+            
         }
         else if(request[0] == 'm')
         {
