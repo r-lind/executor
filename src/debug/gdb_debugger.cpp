@@ -366,6 +366,35 @@ auto GdbDebugger::interact(DebuggerEntry entry) -> DebuggerExit
             }
             connection->send(mem);
         }
+        else if(request[0] == 'M')
+        {
+            char *p;
+            uint32_t addr = std::strtoul(request.data() + 1, &p, 16);
+            uint32_t count = std::strtoul(p + 1, &p, 16);
+            ++p;
+            for(uint32_t i = 0; i < count; i++)
+            {
+                
+                uint32_t stripped = (addr + i) & ADDRESS_MASK;
+                uint32_t segment = stripped >> (ADDRESS_BITS - OFFSET_TABLE_BITS);
+                
+                if((stripped & ((1 << (ADDRESS_BITS - OFFSET_TABLE_BITS))-1)) > ROMlib_sizes[segment])
+                    break;
+
+                uint8_t *native = (uint8_t*)( (uintptr_t)stripped + ROMlib_offsets[segment] );
+
+                uint8_t data;
+                if(!safeRead(native, data))
+                    break;
+                
+                char tmp[3] = { p[0], p[1], 0 };
+                unsigned val;
+                sscanf(tmp, "%X", &val);
+                *native = val;
+                p+=2;
+            }
+            connection->send("OK");
+        }
         else if(request[0] == 'c')
         {
             return { entry.addr, false };
