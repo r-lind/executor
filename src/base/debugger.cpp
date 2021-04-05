@@ -112,6 +112,12 @@ uint32_t Debugger::trapBreak68K(uint32_t addr, const char *name)
     return newAddr;
 }
 
+uint32_t Debugger::trap15(uint32_t addr)
+{
+    uint32_t newAddr = interact1({ Reason::breakpoint, nullptr, CPUMode::m68k, addr - 2 });
+    return newAddr;
+}
+
 uint32_t Debugger::trapBreakPPC(PowerCore& cpu, const char *name)
 {
     if(continuingFromEntrypoint)
@@ -153,6 +159,11 @@ uint32_t Debugger::getNextBreakpoint(uint32_t addr, uint32_t nextOffset)
 
 void Debugger::initProcess(uint32_t entrypoint)
 {
+    trap_install_handler(47, [](syn68k_addr_t pc, void *userData) -> syn68k_addr_t {
+        Debugger *self = (Debugger*)userData;
+        return self->trap15(pc);
+    }, this);
+
     breakpoints.clear();
     if(breakOnProcessEntry)
         breakpoints.insert(entrypoint);

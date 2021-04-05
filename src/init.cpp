@@ -167,7 +167,7 @@ setup_trap_vectors(void)
 #if defined(M68K_SOUND_VECTOR)
            && i != M68K_SOUND_VECTOR
 #endif
-
+           && i != 47   /* TRAP 15 */
            && i != 0x58 / 4) /* Magic ARDI vector. */
         {
             syn68k_addr_t c;

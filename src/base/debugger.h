@@ -65,6 +65,9 @@ namespace Executor
             bool continuingFromEntrypoint = false;
             uint32_t singlestepFrom;
             bool breakOnProcessEntry = false;
+
+            uint32_t trap15(uint32_t addr);
+
         };
     }
 }
