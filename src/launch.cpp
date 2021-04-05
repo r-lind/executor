@@ -398,6 +398,8 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, Boolean resetmemo
         set_refresh_rate(save_ROMlib_refresh);
     }
 
+    GetResource('CODE', 1); // ###
+
     if(code0)
         beginexecutingat(guest_cast<LONGINT>(LM(CurrentA5)) + LM(CurJTOffset) + 2);
     else
