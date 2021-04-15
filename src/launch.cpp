@@ -398,7 +398,9 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, Boolean resetmemo
         set_refresh_rate(save_ROMlib_refresh);
     }
 
-    GetResource('CODE', 1); // ###
+        // preload CODE resources
+    for(int i = 1, n = Count1Resources("CODE"_4); i <= n; i++)
+        HLock(Get1IndResource("CODE"_4, i));
 
     if(code0)
         beginexecutingat(guest_cast<LONGINT>(LM(CurrentA5)) + LM(CurJTOffset) + 2);
