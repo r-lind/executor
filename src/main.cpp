@@ -668,6 +668,7 @@ int main(int argc, char **argv)
 
             set_refresh_rate(ROMlib_refresh);
 
+            InitMonDebugger();
             InitGdbDebugger();
             base::Debugger::instance->setBreakOnProcessEntry(breakOnProcessStart);
 

@@ -428,6 +428,13 @@ GdbDebugger::~GdbDebugger()
 
 void Executor::InitGdbDebugger()
 {
-    base::Debugger::instance = new GdbDebugger();
+    try
+    {
+        base::Debugger::instance = new GdbDebugger();
+    }
+    catch(const boost::system::system_error& err)
+    {
+        std::cout << "Error opening listener socket.\n";
+    }
 }
 
