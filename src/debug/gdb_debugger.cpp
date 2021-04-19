@@ -2,7 +2,9 @@
 
 #include <base/debugger.h>
 #include <res/resource.h>
+#include <util/macstrings.h>
 #include <SegmentLdr.h>
+#include <MemoryMgr.h>
 
 #include <boost/asio.hpp>
 
@@ -278,7 +280,7 @@ auto GdbDebugger::interact(DebuggerEntry entry) -> DebuggerExit
         if(request.empty())
             ;
         else if(request.substr(0,10) == "qSupported")
-            connection->send("requestSize=47ff");
+            connection->send("requestSize=47ff;qXfer:libraries:read+");
         else if(request == "qAttached")
             connection->send("1");
         else if(request == "qfThreadInfo")
@@ -335,6 +337,78 @@ auto GdbDebugger::interact(DebuggerEntry entry) -> DebuggerExit
             else
                 connection->send("");
             
+        }
+        else if(request.substr(0, 22) == "qXfer:libraries:read::")
+        {
+            char *p;
+            uint32_t addr = std::strtoul(request.data() + 22, &p, 16);
+            uint32_t count = std::strtoul(p + 1, nullptr, 16);
+
+            auto appname = toUnicodeFilename(mac_string_view(LM(CurApName)));
+            auto debugSymbolsStr = appname.filename().stem().string() + ".code.bin.gdb";
+
+            auto map = ROMlib_rntohandl(LM(CurApRefNum), nullptr);
+            resref *rr = nullptr;
+
+            std::vector<uint32_t> sections;            
+            for(int id = 1;
+                map && ROMlib_maptypidtop(map, "CODE"_4, id, &rr) == noErr && rr && rr->rhand && *rr->rhand;
+                id++)
+            {
+                uint32_t base = guest_cast<uint32_t>(*rr->rhand);
+                sections.push_back(id == 1 ? base + 4 : base + 40);
+            }
+
+            size_t dataSize = 0;
+            if(map && ROMlib_maptypidtop(map, "DATA"_4, 0, &rr) == noErr && rr && rr->rhand && *rr->rhand)
+            {
+                dataSize = GetHandleSize(rr->rhand);    // ### modifies MemErr
+                dataSize = (dataSize + 3) & ~3;
+            }
+
+            sections.push_back(ptr_to_longint(LM(CurStackBase)));
+            sections.push_back(ptr_to_longint(LM(CurStackBase)) + dataSize);
+
+            std::ostringstream stream;
+
+            stream << R"raw(
+                <library-list>
+                <library name=")raw" << debugSymbolsStr << "\">";
+            for(uint32_t base : sections)
+                stream << "<section address=\"0x" << std::hex << base << "\"/>";
+            stream << R"raw(</library>
+                </library-list>
+            )raw";
+
+            auto libsxml = stream.str();
+
+            if(addr > libsxml.size())
+                connection->send("E00");
+            else
+            {
+                std::string response;
+                if(addr + count >= libsxml.size())
+                    response = "l";
+                else
+                    response = "m";
+
+                for(char c : libsxml.substr(addr, count))
+                {
+                    switch(c)
+                    {
+                        case '}':
+                        case '*':
+                        case '#':
+                        case '$':
+                            response += '}';
+                            response += (char) (c ^ 0x20);
+                            break;
+                        default:
+                            response += c;
+                    }
+                }
+                connection->send(response);
+            }
         }
         else if(request[0] == 'm')
         {
