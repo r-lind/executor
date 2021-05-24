@@ -359,15 +359,7 @@ auto GdbDebugger::interact(DebuggerEntry entry) -> DebuggerExit
                 sections.push_back(id == 1 ? base + 4 : base + 40);
             }
 
-            size_t dataSize = 0;
-            if(map && ROMlib_maptypidtop(map, "DATA"_4, 0, &rr) == noErr && rr && rr->rhand && *rr->rhand)
-            {
-                dataSize = GetHandleSize(rr->rhand);    // ### modifies MemErr
-                dataSize = (dataSize + 3) & ~3;
-            }
-
             sections.push_back(ptr_to_longint(LM(CurStackBase)));
-            sections.push_back(ptr_to_longint(LM(CurStackBase)) + dataSize);
 
             std::ostringstream stream;
 
@@ -375,7 +367,7 @@ auto GdbDebugger::interact(DebuggerEntry entry) -> DebuggerExit
                 <library-list>
                 <library name=")raw" << debugSymbolsStr << "\">";
             for(uint32_t base : sections)
-                stream << "<section address=\"0x" << std::hex << base << "\"/>";
+                stream << "<segment address=\"0x" << std::hex << base << "\"/>";
             stream << R"raw(</library>
                 </library-list>
             )raw";
