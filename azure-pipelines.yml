@@ -20,6 +20,9 @@ jobs:
       cd \
       python -m aqt install -O C:\Qt 5.15.0 windows desktop win64_msvc2019_64
     displayName: 'install qt'
+  - script: |
+     vcpkg install boost
+    displayName: 'install boost'
   - checkout: self
     submodules: true
   - script: |
@@ -28,7 +31,7 @@ jobs:
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
       call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
-      set PATH=C:\Program Files\LLVM\bin;C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
+      set PATH=C:\Program Files\LLVM\bin;%PATH%
 
       cmake ^
           ..  ^
@@ -38,9 +41,8 @@ jobs:
           -DCMAKE_CXX_COMPILER:FILEPATH=clang-cl.exe ^
           -DCMAKE_LINKER:FILEPATH=lld-link.exe ^
           -DCMAKE_PREFIX_PATH=C:\Qt\5.15.0\msvc2019_64\lib\cmake ^
-          -DBOOST_ROOT=%BOOST_ROOT_1_72_0% ^
           -DBISON_COMMAND=c:\tools\msys64\usr\bin\bison.exe ^
-          -DBoost_COMPILER=-vc142
+          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
 
       type CMakeCache.txt
 
@@ -139,7 +141,7 @@ jobs:
   - checkout: self
     submodules: true
   - script: |
-      brew install boost qt ninja ruby
+      brew install boost qt@5 ninja ruby
     displayName: 'Brew prerequisites'
   - script: |
       mkdir build
