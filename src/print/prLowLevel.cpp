@@ -67,18 +67,18 @@ PASCAL_FUNCTION_PTR(ROMlib_mystlproc);
 
 void Executor::C_PrDrvrOpen() /* TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_PrDrvrClose() /* TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_PrCtlCall(INTEGER iWhichCtl, LONGINT lParam1, LONGINT lParam2,
                            LONGINT lParam3) /* TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 Handle Executor::C_PrDrvrDCE() /* TODO */
@@ -1254,7 +1254,7 @@ void Executor::C_PrGeneral(Ptr pData) /* IMV-410 */
             warning_unimplemented("GetRotn");
             break;
         default:
-            warning_unimplemented(NULL_STRING);
+            warning_unimplemented("");
             break;
     }
 }

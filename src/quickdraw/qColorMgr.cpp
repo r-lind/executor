@@ -1003,7 +1003,7 @@ void Executor::C_AddSearch(ProcPtr searchProc)
 
 void Executor::C_AddComp(ProcPtr compProc)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_DelSearch(ProcPtr searchProc)
@@ -1032,12 +1032,12 @@ void Executor::C_DelSearch(ProcPtr searchProc)
     }
 
     if(s == nullptr)
-        warning_unimplemented(NULL_STRING);
+        warning_unimplemented("");
 }
 
 void Executor::C_DelComp(ProcPtr compProc)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_SetClientID(INTEGER id)

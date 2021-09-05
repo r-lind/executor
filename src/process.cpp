@@ -228,27 +228,27 @@ OSErr Executor::C_GetFrontProcess(ProcessSerialNumber *serial_number, int32_t du
 
 OSErr Executor::C_SetFrontProcess(ProcessSerialNumber *serial_number)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 
 OSErr Executor::C_WakeUpProcess(ProcessSerialNumber *serial_number)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 
 OSErr Executor::C_GetProcessSerialNumberFromPortName(
     PPCPortPtr port_name, ProcessSerialNumber *serial_number)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 
 OSErr Executor::C_GetPortNameFromProcessSerialNumber(
     PPCPortPtr port_name, ProcessSerialNumber *serial_number)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 

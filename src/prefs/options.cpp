@@ -64,9 +64,6 @@ int flag_bpp;
 /* Initial grayscale flag. */
 bool flag_grayscale;
 
-/* Approximate command line; argv[] elements separated by spaces. */
-const char *ROMlib_command_line;
-
 /* 0 means try running browser, 1 means don't */
 bool ROMlib_nobrowser = false;
 

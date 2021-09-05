@@ -25,7 +25,7 @@ void Executor::C_ROMlib_Fdec2str(DecForm *volatile sp2, Decimal *volatile sp,
 #define MAXDECSTRLEN 80
     char backwardsexp[MAXEXPSIZE];
 
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
     digits = sp2->digits;
     style = sp2->style;
 

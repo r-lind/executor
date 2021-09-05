@@ -772,33 +772,33 @@ void Executor::C_GDeviceChanged(GDHandle graphics_device)
 {
     /* #warning GDeviceChanged not implemented */
     ROMlib_invalidate_conversion_tables();
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_PortChanged(GrafPtr port)
 {
     /* #warning "PortChanged not implemented; worked around for hypercard" */
     ROMlib_invalidate_conversion_tables();
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_PixPatChanged(PixPatHandle pixpat)
 {
     /* #warning "PixPatChanged not implemented" */
     ROMlib_invalidate_conversion_tables();
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_CTabChanged(CTabHandle ctab)
 {
     /* #warning "CTabChanged not implemented" */
     ROMlib_invalidate_conversion_tables();
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 Boolean Executor::C_QDDone(GrafPtr port)
 {
     /* #warning "QDDone not implemented" */
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return true;
 }

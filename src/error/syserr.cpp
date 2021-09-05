@@ -247,13 +247,6 @@ void Executor::C_SysError(short errorcode)
 
     if(!LM(DSAlertTab))
     {
-#if defined(CLIFF_CENTERING_ALGORITHM)
-        LM(DSAlertTab) = (Ptr)&myalerttab;
-        LM(DSAlertRect).top = 64;
-        LM(DSAlertRect).left = 32;
-        LM(DSAlertRect).bottom = 190;
-        LM(DSAlertRect).right = 480;
-#else
         INTEGER screen_width = main_gd_rect.right;
         INTEGER screen_height = main_gd_rect.bottom;
 
@@ -262,7 +255,6 @@ void Executor::C_SysError(short errorcode)
         LM(DSAlertRect).left = (screen_width - 448) / 2;
         LM(DSAlertRect).bottom = LM(DSAlertRect).top + 126;
         LM(DSAlertRect).right = LM(DSAlertRect).left + 448;
-#endif
 
         offsetx = LM(DSAlertRect).left - 32;
         offsety = LM(DSAlertRect).top - 64;

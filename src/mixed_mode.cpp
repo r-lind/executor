@@ -54,26 +54,26 @@ UniversalProcPtr Executor::C_NewRoutineDescriptor(
 void Executor::C_DisposeRoutineDescriptor(UniversalProcPtr ptr)
 {
     DisposePtr((Ptr)ptr);
-    warning_trace_info(NULL_STRING);
+    warning_trace_info("");
 }
 
 UniversalProcPtr Executor::C_NewFatRoutineDescriptor(
     ProcPtr m68k, ProcPtr ppc, ProcInfoType info)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     *(long *)-1 = -1; /* abort */
     return nullptr;
 }
 
 OSErr Executor::C_SaveMixedModeState(void *statep, uint32_t vers)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 
 OSErr Executor::C_RestoreMixedModeState(void *statep, uint32_t vers)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 

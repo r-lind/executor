@@ -44,20 +44,20 @@ static bool enableADBSupport = false;
 void
 Executor::ADBReInit(void)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 OSErr
 Executor::ADBOp(Ptr data, ProcPtr procp, Ptr buffer, INTEGER command)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
 INTEGER
 Executor::CountADBs(void)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return enableADBSupport ? 1 : 0;
 }
 
@@ -85,7 +85,7 @@ Executor::GetIndADB(ADBDataBlock *adbp, INTEGER index)
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     if(!enableADBSupport || index != 1)
         retval = -1;
     else
@@ -106,7 +106,7 @@ Executor::GetADBInfo(ADBDataBlock *adbp, INTEGER address)
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     if(!enableADBSupport || address != SPOOFED_MOUSE_ADDR)
         retval = -1;
     else
@@ -119,7 +119,7 @@ Executor::SetADBInfo(ADBSetInfoBlock *adbp, INTEGER address)
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     if(!enableADBSupport || address != SPOOFED_MOUSE_ADDR)
         retval = -1;
     else

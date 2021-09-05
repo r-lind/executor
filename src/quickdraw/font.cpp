@@ -741,7 +741,7 @@ static void newwidthtable(FMInput *fmip)
                 WIDTHPTR->tabFont = GetResource("FONT"_4,
                                                    FONTRESID(family, WIDTHPTR->fSize));
             if(!WIDTHPTR->tabFont)
-                warning_unexpected(NULL_STRING);
+                warning_unexpected("");
         }
         if(!WIDTHPTR->tabFont)
         {

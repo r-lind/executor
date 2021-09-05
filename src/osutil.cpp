@@ -511,7 +511,7 @@ Executor::date_to_swapped_fields(long long mactime, GUEST<INTEGER> *yearp, GUEST
     }
 
     if(mactime < 0)
-        warning_unexpected(NULL_STRING);
+        warning_unexpected("");
 
     if(dayofweekp)
         *dayofweekp = (mactime / N_SECS_IN_DAY + 5) % 7 + 1;

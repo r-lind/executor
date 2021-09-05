@@ -60,12 +60,12 @@ void Executor::C_ReadPartialResource(Handle res, int32_t offset, Ptr buffer,
 void Executor::C_WritePartialResource(Handle resource, int32_t offset,
                                       Ptr buffer, int32_t count)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_SetResourceSize(Handle resource, int32_t size)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 /* Word6 has this lovely code in it
@@ -84,7 +84,7 @@ void Executor::C_SetResourceSize(Handle resource, int32_t size)
 Handle Executor::C_GetNextFOND(Handle fondHandle)
 {
     Handle retval;
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 
     retval = 0;
     return retval;

@@ -364,7 +364,7 @@ OSErr Executor::C_CountSymbols(ConnectionID id, GUEST<LONGINT> *countp)
     OSErr retval;
 
     /* TODO */
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = paramErr;
     return retval;
 }
@@ -375,7 +375,7 @@ OSErr Executor::C_GetIndSymbol(ConnectionID id, LONGINT index, Str255 name,
     OSErr retval;
 
     /* TODO */
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = paramErr;
     return retval;
 }

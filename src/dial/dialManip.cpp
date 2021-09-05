@@ -275,7 +275,7 @@ void Executor::C_SetDialogItem(DialogPtr dp, INTEGER itemno, INTEGER itype,
             if(item)
                 settexth((DialogPeek)dp, ip, itemno);
             else
-                warning_unexpected(NULL_STRING);
+                warning_unexpected("");
         }
     }
     HSetState(((DialogPeek)dp)->items, flags);

@@ -929,7 +929,7 @@ OSErr Executor::C_SndControl(INTEGER id, SndCommand *cmdp)
     SignedByte state;
 #endif /* defined(OLD_BROKEN_NEXTSTEP_SOUND) */
 
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 
     switch(ROMlib_PretendSound)
     {

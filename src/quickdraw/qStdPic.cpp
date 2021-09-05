@@ -56,7 +56,7 @@ void Executor::C_StdComment(INTEGER kind, INTEGER size, Handle hand)
 
 void Executor::C_StdGetPic(void *dp, INTEGER bc) /* TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_StdPutPic(const void  *sp, INTEGER bc)

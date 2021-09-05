@@ -214,7 +214,7 @@ Handle Executor::C_GetIntlResource(INTEGER id) /* IMI-505 */
     {
         static Handle h = 0;
 
-        warning_unimplemented(NULL_STRING);
+        warning_unimplemented("");
         if(!h)
             h = NewHandleClear(100);
         retval = h;
@@ -619,14 +619,14 @@ INTEGER Executor::IUEqualString(ConstStringPtr str1, ConstStringPtr str2) /* IMI
 void Executor::C_IULDateString(LongDateTime *datetimep, DateForm longflag,
                                Str255 result, Handle intlhand)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
 }
 
 void Executor::C_IULTimeString(LongDateTime *datetimep, Boolean wantseconds,
                                Str255 result, Handle intlhand)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
 }
 
@@ -637,7 +637,7 @@ void Executor::C_ClearIntlResourceCache()
 INTEGER Executor::C_IUMagPString(Ptr ptra, Ptr ptrb, INTEGER lena,
                                  INTEGER lenb, Handle itl2hand)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
     return 0;
 }
@@ -645,21 +645,21 @@ INTEGER Executor::C_IUMagPString(Ptr ptra, Ptr ptrb, INTEGER lena,
 INTEGER Executor::C_IUMagIDPString(Ptr ptra, Ptr ptrb, INTEGER lena,
                                    INTEGER lenb, Handle itl2hand)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
     return 0;
 }
 
 INTEGER Executor::C_IUScriptOrder(ScriptCode script1, ScriptCode script2)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
     return 0;
 }
 
 INTEGER Executor::C_IULangOrder(LangCode l1, LangCode l2)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
     return 0;
 }
@@ -668,7 +668,7 @@ INTEGER Executor::C_IUTextOrder(Ptr ptra, Ptr ptrb, INTEGER lena, INTEGER lenb,
                                 ScriptCode scripta, ScriptCode bscript,
                                 LangCode langa, LangCode langb)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
     return 0;
 }
@@ -677,6 +677,6 @@ void Executor::C_GetIntlResourceTable(ScriptCode script, INTEGER tablecode,
                                GUEST<Handle> *itlhandlep, GUEST<LONGINT> *offsetp,
                                GUEST<LONGINT> *lengthp)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ROMlib_hook(iu_unimplementednumber);
 }

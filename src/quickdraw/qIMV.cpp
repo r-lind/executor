@@ -19,7 +19,7 @@ void Executor::C_CharExtra(Fixed Extra) /* IMV-77 */
 {
     /* TODO */
     /* #warning CharExtra not implemented */
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_SetStdCProcs(CQDProcs *cProcs) /* IMV-77 */

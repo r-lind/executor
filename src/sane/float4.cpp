@@ -406,7 +406,7 @@ void Executor::C_ROMlib_Fprocentry(GUEST<INTEGER> *dp, INTEGER sel)
 {
     static GUEST<INTEGER> default_environment = 0; /* Always == 0. */
 
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
     /* Save the old environment. */
     C_ROMlib_Fgetenv(dp, 0);
 
@@ -423,7 +423,7 @@ void Executor::C_ROMlib_Fprocexit(GUEST<INTEGER> *dp, INTEGER sel)
    * the cases where exceptions are lurking, waiting to be signaled.
    */
 
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
 #define EXCEPTION_BITS_MASK 0x1F00
 
     /* Get the old environment. */
@@ -441,7 +441,7 @@ void Executor::C_ROMlib_Ftestxcp(GUEST<INTEGER> *dp, INTEGER sel)
 {
     INTEGER env;
 
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
     /* Fetch the current environment. */
     C_ROMlib_Fgetenv(out(env), 0);
     
@@ -486,7 +486,7 @@ void Executor::C_ROMlib_FlogbX(x80_t *dp, unsigned short sel)
 
 void Executor::C_ROMlib_FabsX(x80_t *dp, unsigned short sel)
 {
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
     SET_X80_SGN(dp, 0);
 }
 
@@ -503,7 +503,7 @@ void Executor::C_ROMlib_FnegX(x80_t *dp, unsigned short sel)
 
 void Executor::C_ROMlib_Fcpysgnx(x80_t *sp, x80_t *dp, unsigned short sel)
 {
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
     /* This looks strange because we are copying dst's sign to src, but
    * that is what the Apple Numerics Manual specifies (p. 150), and is
    * what the old float4.c used to do.
@@ -804,7 +804,7 @@ void Executor::C_ROMlib_Fcmpx(
 void Executor::C_ROMlib_FcpXx(
     void *sp, x80_t *dp, unsigned short sel)
 {
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
     /* FIXME - this should signal; calling Fcmpx is only a stopgap hack
    * so we can keep testing stuff.
    */
@@ -1091,12 +1091,12 @@ void Executor::C_ROMlib_Fclassx(void *sp, GUEST<INTEGER> *dp, unsigned short sel
     static const unsigned char eight_zeros[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
     unsigned short first_word = CW_RAW(*(unsigned short *)sp);
 
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
 
     /* Default to normal number. */
     *dp = NormalNum;
 
-    warning_floating_point(NULL_STRING);
+    warning_floating_point("");
 
     switch(sel & OPCODE_MASK)
     {

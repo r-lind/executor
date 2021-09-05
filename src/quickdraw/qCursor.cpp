@@ -396,7 +396,7 @@ void Executor::C_SetCCursor(CCrsrHandle ccrsr)
 void Executor::C_DisposeCCursor(CCrsrHandle ccrsr)
 {
     /* #warning "implement DisposeCCursor" */
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_AllocCursor()

@@ -12,7 +12,7 @@ OSErr Executor::C_EnterMovies()
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
 
     return retval;
@@ -20,19 +20,19 @@ OSErr Executor::C_EnterMovies()
 
 void Executor::C_ExitMovies()
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_MoviesTask(Movie movie, LONGINT maxmillisecs)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 OSErr Executor::C_PrerollMovie(Movie movie, TimeValue time, Fixed rate)
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
 
     return retval;
@@ -40,34 +40,34 @@ OSErr Executor::C_PrerollMovie(Movie movie, TimeValue time, Fixed rate)
 
 void Executor::C_SetMovieActive(Movie movie, Boolean active)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_StartMovie(Movie movie)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_StopMovie(Movie movie)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_GoToBeginningOfMovie(Movie movie)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_SetMovieGWorld(Movie movie, CGrafPtr cgrafp, GDHandle gdh)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 OSErr Executor::C_UpdateMovie(Movie movie)
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
 
     return retval;
@@ -75,14 +75,14 @@ OSErr Executor::C_UpdateMovie(Movie movie)
 
 void Executor::C_DisposeMovie(Movie movie)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 INTEGER Executor::C_GetMovieVolume(Movie movie)
 {
     INTEGER retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = 1;
 
     return retval;
@@ -92,7 +92,7 @@ OSErr Executor::C_CloseMovieFile(INTEGER refnum)
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
 
     return retval;
@@ -102,7 +102,7 @@ Boolean Executor::C_IsMovieDone(Movie movie)
 {
     Boolean retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = true;
 
     return retval;
@@ -114,7 +114,7 @@ OSErr Executor::C_NewMovieFromFile(GUEST<Movie> *moviep, INTEGER refnum,
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
 
     return retval;
@@ -124,7 +124,7 @@ Fixed Executor::C_GetMoviePreferredRate(Movie movie)
 {
     Fixed retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = 0;
 
     return retval;
@@ -132,12 +132,12 @@ Fixed Executor::C_GetMoviePreferredRate(Movie movie)
 
 void Executor::C_GetMovieBox(Movie movie, Rect *boxp)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_SetMovieBox(Movie movie, const Rect *boxp)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 ComponentInstance Executor::C_NewMovieController(
@@ -145,7 +145,7 @@ ComponentInstance Executor::C_NewMovieController(
 {
     ComponentInstance retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = 0;
 
     return retval;
@@ -153,7 +153,7 @@ ComponentInstance Executor::C_NewMovieController(
 
 void Executor::C_DisposeMovieController(ComponentInstance controller)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 OSErr Executor::C_OpenMovieFile(const FSSpec *filespecp, GUEST<INTEGER> *refnump,
@@ -161,7 +161,7 @@ OSErr Executor::C_OpenMovieFile(const FSSpec *filespecp, GUEST<INTEGER> *refnump
 {
     OSErr retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = fnfErr;
 
     return retval;

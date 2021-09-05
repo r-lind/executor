@@ -430,7 +430,7 @@ Executor::serial_bios_serxhshake(LONGINT fd, SerShk *sershkp)
 {
     int32_t retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }
@@ -446,7 +446,7 @@ Executor::serial_bios_setbaud(LONGINT fd, INTEGER baud)
 {
     int32_t retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }
@@ -456,7 +456,7 @@ Executor::serial_bios_ctlbrk(LONGINT fd, INTEGER flag)
 {
     int32_t retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }
@@ -466,7 +466,7 @@ Executor::serial_bios_setflow(LONGINT fd, LONGINT flag)
 {
     int32_t retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }
@@ -476,7 +476,7 @@ Executor::serial_bios_setdtr(LONGINT fd)
 {
     int32_t retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }
@@ -486,7 +486,7 @@ Executor::serial_bios_clrdtr(LONGINT fd)
 {
     int32_t retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }

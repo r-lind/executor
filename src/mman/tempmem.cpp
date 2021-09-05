@@ -52,7 +52,7 @@ Size Executor::C_TempMaxMem(GUEST<Size> *grow_s)
 
 Ptr Executor::C_TempTopMem()
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return nullptr;
 }
 

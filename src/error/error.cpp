@@ -199,16 +199,14 @@ err_vprintf(const char *fmt, va_list ap)
         fprintf(fp,
                 "This is %s.\n"
                 "Using %u.%02u MB for applzone, "
-                "%u.%02u MB for syszone, %u.%02u MB for stack\n"
-                "Approximate command line: %s\n",
+                "%u.%02u MB for syszone, %u.%02u MB for stack\n",
                 ROMlib_executor_full_name,
                 ROMlib_applzone_size / MB,
                 (ROMlib_applzone_size % MB) * 100 / MB,
                 ROMlib_syszone_size / MB,
                 (ROMlib_syszone_size % MB) * 100 / MB,
                 ROMlib_stack_size / MB,
-                (ROMlib_stack_size % MB) * 100 / MB,
-                ROMlib_command_line);
+                (ROMlib_stack_size % MB) * 100 / MB);
         beenhere_p = true;
     }
 

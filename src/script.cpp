@@ -63,19 +63,19 @@ OSErr Executor::C_SetScriptManagerVariable(INTEGER verb, LONGINT param)
 
 LONGINT Executor::C_GetScriptVariable(INTEGER script, INTEGER verb)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return 0;
 }
 
 OSErr Executor::C_SetScriptVariable(INTEGER script, INTEGER verb, LONGINT param)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return smVerbNotFound;
 }
 
 INTEGER Executor::C_FontToScript(INTEGER fontnum)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return 0;
 }
 
@@ -149,19 +149,19 @@ INTEGER Executor::C_Transliterate(Handle srch, Handle dsth, INTEGER target,
 
 INTEGER Executor::C_FontScript()
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return smRoman;
 }
 
 INTEGER Executor::C_IntlScript()
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return smRoman;
 }
 
 void Executor::C_KeyScript(INTEGER scriptcode)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 INTEGER Executor::C_CharType(Ptr textbufp, INTEGER offset)
@@ -237,7 +237,7 @@ Boolean Executor::C_FillParseTable(CharByteTable table, ScriptCode script)
 INTEGER Executor::C_CharacterByteType(Ptr textBuf, INTEGER textOffset,
                                       ScriptCode script)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     /* Single-byte character */
     return 0;
 }
@@ -245,14 +245,14 @@ INTEGER Executor::C_CharacterByteType(Ptr textBuf, INTEGER textOffset,
 INTEGER Executor::C_CharacterType(Ptr textbufp, INTEGER offset,
                                   ScriptCode script)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return CharType(textbufp, offset);
 }
 
 INTEGER Executor::C_TransliterateText(Handle srch, Handle dsth, INTEGER target,
                                       LONGINT srcmask, ScriptCode script)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return Transliterate(srch, dsth, target, srcmask);
 }
 
@@ -395,7 +395,7 @@ String2DateStatus Executor::C_StringToTime(
     Ptr textp, LONGINT len, Ptr cachep, GUEST<LONGINT> *lenusedp,
     GUEST<Ptr> *datetimep)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     *lenusedp = 0;
     return (String2DateStatus)dateTimeNotFound;
 }
@@ -466,10 +466,10 @@ String2DateStatus Executor::C_StringToDate(
     else
     {
         *length_used_ret = 0;
-        warning_unexpected(NULL_STRING);
+        warning_unexpected("");
         retval = (String2DateStatus)dateTimeNotFound;
     }
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return retval;
 }
 
@@ -581,7 +581,7 @@ FormatStatus Executor::C_StringToExtended(
     buf[string[0]] = 0;
     sscanf(buf, "%lg", &d);
     ieee_to_x80((ieee_t)d, xp);
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }
@@ -602,7 +602,7 @@ FormatStatus Executor::C_ExtendedToString(
     sprintf(buf, "%g", (double)val);
 #endif
     str255_from_c_string(string, buf);
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = noErr;
     return retval;
 }
@@ -613,7 +613,7 @@ FormatStatus Executor::C_StringToFormatRec(
 {
     FormatStatus retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = 0;
     return retval;
 }
@@ -624,7 +624,7 @@ ToggleResults Executor::C_ToggleDate(LongDateTime *lsecsp, LongDateField field,
 {
     ToggleResults retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = 0;
     return retval;
 }
@@ -632,7 +632,7 @@ ToggleResults Executor::C_ToggleDate(LongDateTime *lsecsp, LongDateField field,
 INTEGER Executor::C_TruncString(INTEGER width, Str255 string,
                                 TruncCode code) /* TTS TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 
     /* ### claim we didn't have to truncate the string */
     return Truncated;
@@ -738,13 +738,13 @@ GetFormatOrder
 
 OSErr Executor::C_InitDateCache(DateCachePtr cache) /* TTS TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
 INTEGER Executor::C_CharByte(Ptr textBuf, INTEGER textOffset)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     /* Single-byte character */
     return 0;
 }
@@ -755,7 +755,7 @@ Fixed Executor::C_PortionLine(Ptr textPtr, LONGINT textLen,
 {
     Fixed retval;
 
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     retval = 0x10000;
     return retval;
 }
@@ -779,7 +779,7 @@ void Executor::C_DrawJustified(Ptr textPtr, LONGINT textLength, Fixed slop,
 ScriptRunStatus Executor::C_FindScriptRun(
     Ptr textPtr, LONGINT textLen, GUEST<LONGINT> *lenUsedp)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     *lenUsedp = 1;
     return 0;
 }

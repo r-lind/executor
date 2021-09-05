@@ -53,7 +53,7 @@ bool Executor::hle_get_event(EventRecord *evt, bool remflag)
 
         if(current_hle_msg != nullptr)
         {
-            warning_unexpected("current_hle_msg != NULL_STRING");
+            warning_unexpected("current_hle_msg != """);
             hle_reset();
         }
 

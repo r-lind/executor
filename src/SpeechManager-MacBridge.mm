@@ -448,7 +448,7 @@ Executor::OSErr MacBridge::UseDictionary (Executor::SpeechChannel chan, Executor
     NSSpeechSynthesizer *aSynth = synthesizerMap[chan];
   }
 #endif
-  warning_unimplemented (NULL_STRING);
+  warning_unimplemented ("");
   return Executor::paramErr;
 }
 
@@ -568,7 +568,7 @@ Executor::OSErr MacBridge::GetVoiceInfo (const Executor::VoiceSpec *voice, Execu
   switch (selector) {
     case soVoiceFile:
       //TODO: implement?
-      warning_unimplemented (NULL_STRING);
+      warning_unimplemented ("");
 	  toRet = Executor::fnfErr;
       break;
       
@@ -607,7 +607,7 @@ Executor::OSErr MacBridge::SetSpeechInfo (
   //::OSErr toRet = ::SetSpeechInfo((::SpeechChannel)chan, BigEndianValue(selector), speechInfo);
   ::OSErr toRet = ::noErr;
   
-  warning_unimplemented (NULL_STRING);
+  warning_unimplemented ("");
   return toRet;
 }
 
@@ -620,7 +620,7 @@ Executor::OSErr MacBridge::GetSpeechInfo (
   //::OSErr toRet = ::GetSpeechInfo((::SpeechChannel)chan, BigEndianValue(selector), speechInfo);
   ::OSErr toRet = ::noErr;
 
-  warning_unimplemented (NULL_STRING);
+  warning_unimplemented ("");
   return toRet;
 }
 

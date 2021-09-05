@@ -920,7 +920,7 @@ Boolean Executor::C_TEContinuousStyle(GUEST<INTEGER> *modep, TextStyle *ts_out,
 
     if(!TE_STYLIZED_P(teh))
     {
-        warning_unimplemented(NULL_STRING);
+        warning_unimplemented("");
         if(*modep & doFont)
             TS_FONT(ts_out) = PORT_TX_FONT(qdGlobals().thePort);
         if(*modep & doFace)
@@ -1072,18 +1072,18 @@ void Executor::C_TEUseStyleScrap(int32_t start, int32_t stop,
                               TEHandle teh)
 {
     ROMlib_hook(te_notsupported);
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void Executor::C_TECustomHook(int16_t sel, GUEST<ProcPtr> *addr, TEHandle te)
 {
     ROMlib_hook(te_notsupported);
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 LONGINT Executor::C_TENumStyles(int32_t start, int32_t stop, TEHandle te)
 {
     ROMlib_hook(te_notsupported);
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return 0;
 }

@@ -498,7 +498,7 @@ open_ps_file(bool *need_pclosep)
         {
             if(!ROMlib_spool_file)
             {
-                warning_unexpected(NULL_STRING);
+                warning_unexpected("");
                 retval = nullptr;
             }
             else
@@ -698,7 +698,7 @@ void Executor::C_PrCloseDoc(TPPrPort port)
 void Executor::C_PrPicFile(THPrint hPrint, TPPrPort pPrPort, Ptr pIOBuf,
                            Ptr pDevBuf, TPrStatus *prStatus) /* TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }
 
 void

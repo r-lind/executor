@@ -36,12 +36,12 @@ OSErr Executor::C_SetDialogDefaultItem(DialogPtr dialog, int16_t new_item)
 
 OSErr Executor::C_SetDialogCancelItem(DialogPtr dialog, int16_t new_item)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr; /* noErr is likely to be less upsetting than paramErr -- ctm */
 }
 
 OSErr Executor::C_SetDialogTracksCursor(DialogPtr dialog, Boolean tracks)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr; /* paramErr is too harsh */
 }

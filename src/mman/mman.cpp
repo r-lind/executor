@@ -1062,7 +1062,7 @@ void ReallocateHandle(Handle h, Size size)
     MM_SLAM("entry");
 
     if(h == nullptr)
-        warning_unexpected("called with NULL_STRING handle");
+        warning_unexpected("called with "" handle");
 
     oldb = HANDLE_TO_BLOCK(h);
 
@@ -1219,7 +1219,7 @@ void DisposePtr(Ptr p)
             ROMlib_freeblock(block);
         }
         else
-            warning_unexpected(NULL_STRING);
+            warning_unexpected("");
     }
     SET_MEM_ERR(noErr);
     MM_SLAM("exit");
@@ -1254,7 +1254,7 @@ void SetPtrSize(Ptr p, Size newsize)
     MM_SLAM("entry");
 
     if(p == nullptr)
-        warning_unexpected("attempt to set NULL_STRING pointer size");
+        warning_unexpected("attempt to set "" pointer size");
 
     newsize += HDRSIZE;
     block = POINTER_TO_BLOCK(p);
@@ -1270,7 +1270,7 @@ void SetPtrSize(Ptr p, Size newsize)
 
     if(!current_zone)
     {
-        warning_unexpected(NULL_STRING);
+        warning_unexpected("");
         SET_MEM_ERR(memWZErr); /* Not really sure what we should return in
 				 this case.  It's not like the Mac has any
 				 decent error semantics */
@@ -1349,7 +1349,7 @@ THz PtrZone(Ptr p)
     MM_SLAM("entry");
 
     if(p == nullptr)
-        warning_unexpected("attempt to set NULL_STRING pointer size");
+        warning_unexpected("attempt to set "" pointer size");
 
     block = POINTER_TO_BLOCK(p);
 

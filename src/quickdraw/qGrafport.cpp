@@ -115,7 +115,7 @@ void Executor::ROMlib_initport(GrafPtr p) /* INTERNAL */
 void Executor::C_SetPort(GrafPtr p)
 {
     if(p == nullptr)
-        warning_unexpected("SetPort(NULL_STRING)");
+        warning_unexpected("SetPort("")");
     qdGlobals().thePort = p;
 }
 

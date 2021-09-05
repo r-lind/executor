@@ -50,7 +50,7 @@ OSErr Executor::C_PlotIconMethod(const Rect *rect, IconAlignmentType align,
                                  IconTransformType transform,
                                  IconGetterUPP method, void *data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
@@ -546,7 +546,7 @@ OSErr Executor::C_PlotIconSuite(const Rect *rect, IconAlignmentType align,
 OSErr Executor::C_ForEachIconDo(Handle suite, IconSelectorValue selector,
                                 IconActionUPP action, void *data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
@@ -692,14 +692,14 @@ OSErr Executor::C_DisposeIconSuite(Handle suite, Boolean dispose_data_p)
 OSErr Executor::C_IconSuiteToRgn(RgnHandle rgn, const Rect *rect,
                                  IconAlignmentType align, Handle suite)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
 OSErr Executor::C_IconIDToRgn(RgnHandle rgn, const Rect *rect,
                               IconAlignmentType align, short icon_id)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
@@ -707,14 +707,14 @@ OSErr Executor::C_IconMethodToRgn(RgnHandle rgn, const Rect *rect,
                                   IconAlignmentType align,
                                   IconGetterUPP method, void *data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
 Boolean Executor::C_PtInIconSuite(Point test_pt, const Rect *rect,
                                   IconAlignmentType align, Handle suite)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return false;
 }
 
@@ -732,21 +732,21 @@ Boolean Executor::C_PtInIconMethod(Point test_pt, const Rect *rect,
                                    IconAlignmentType align,
                                    IconGetterUPP method, void *data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return false;
 }
 
 Boolean Executor::C_RectInIconSuite(const Rect *test_rect, const Rect *rect,
                                     IconAlignmentType align, Handle suite)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return false;
 }
 
 Boolean Executor::C_RectInIconID(const Rect *test_rect, const Rect *rect,
                                  IconAlignmentType align, short icon_id)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return false;
 }
 
@@ -754,44 +754,44 @@ Boolean Executor::C_RectInIconMethod(const Rect *test_rect, const Rect *rect,
                                      IconAlignmentType align,
                                      IconGetterUPP method, void *data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return false;
 }
 
 OSErr Executor::C_MakeIconCache(GUEST<Handle> *cache, IconGetterUPP make_icon,
                                 void *data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
 OSErr Executor::C_LoadIconCache(const Rect *rect, IconAlignmentType align,
                                 IconTransformType transform, Handle cache)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
 OSErr Executor::C_GetIconCacheData(Handle cache, GUEST<void *>*data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
 OSErr Executor::C_SetIconCacheData(Handle cache, void *data)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
 OSErr Executor::C_GetIconCacheProc(Handle cache, GUEST<IconGetterUPP> *proc)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }
 
 OSErr Executor::C_SetIconCacheProc(Handle cache, IconGetterUPP proc)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     ICON_RETURN_ERROR(paramErr);
 }

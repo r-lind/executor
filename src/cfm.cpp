@@ -922,7 +922,7 @@ load_loader_section(const void *addr,
 #if defined(powerpc) || defined(__ppc__)
         retval = ppc_call(init_toc, init_routine, (uint32_t)&init_block);
 #else
-        warning_unexpected(NULL_STRING);
+        warning_unexpected("");
         retval = paramErr;
 #endif
         if(retval)

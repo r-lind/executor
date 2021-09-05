@@ -378,7 +378,7 @@ blt_pixpat_to_pixmap_simple_mode(RgnHandle rh, INTEGER mode,
             xh = (xdata_handle_t)src->patXData;
             if(!xh)
             {
-                warning_unexpected("xdata handle NULL_STRING");
+                warning_unexpected("xdata handle """);
                 xh = (xdata_handle_t)NewHandle(sizeof(xdata_t));
                 (*xh)->raw_pat_bits_mem = nullptr;
                 src->patXData = (Handle)xh;

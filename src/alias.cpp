@@ -142,7 +142,7 @@ static OSErr
 create_directory(INTEGER sys_vref, LONGINT sys_dirid, const char *sub_dirp,
                  LONGINT *new_idp)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 
@@ -235,7 +235,7 @@ OSErr Executor::C_NewAlias(FSSpecPtr fromFile, FSSpecPtr target,
 OSErr Executor::C_UpdateAlias(FSSpecPtr fromFile, FSSpecPtr target,
                               AliasHandle alias, Boolean *wasChanged)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 
@@ -313,14 +313,14 @@ OSErr Executor::C_MatchAlias(FSSpecPtr fromFile, int32_t rulesMask,
                              FSSpecArrayPtr aliasList, Boolean *needsUpdate,
                              AliasFilterUPP aliasFilter, Ptr yourDataPtr)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 
 OSErr Executor::C_GetAliasInfo(AliasHandle alias, AliasTypeInfo index,
                                Str63 theString)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return paramErr;
 }
 

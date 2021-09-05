@@ -8,9 +8,6 @@ extern int flag_bpp;
 
 extern bool flag_grayscale;
 
-/* Approximate command line; argv[] elements separated by spaces. */
-extern const char *ROMlib_command_line;
-
 /* 0 means try running browser, 1 means don't */
 extern bool ROMlib_nobrowser;
 

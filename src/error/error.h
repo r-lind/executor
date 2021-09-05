@@ -185,8 +185,6 @@ extern void _errno_warning(const char *file, int line, const char *fn,
 #define warning_errno(fmt, args...)
 #endif
 
-//extern const char NULL_STRING[];
-#define NULL_STRING ""
 #ifdef __cplusplus
 }
 #endif

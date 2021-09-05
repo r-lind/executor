@@ -648,7 +648,7 @@ pict_from_lp(const void *lp)
                 memcpy(p, (char *)lp + sizeof(int), len);
             else
             {
-                warning_unexpected(NULL_STRING);
+                warning_unexpected("");
                 DisposeHandle((Handle)retval);
                 retval = nullptr;
             }

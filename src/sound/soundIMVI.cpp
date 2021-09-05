@@ -27,20 +27,20 @@ start_playing(SndChannelPtr chanp, SndDoubleBufferHeaderPtr paramp,
 void Executor::C_SndGetSysBeepState(GUEST<INTEGER> *statep)
 {
     /* #warning SndGetSysBeepState not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 }
 
 OSErr Executor::C_SndSetSysBeepState(INTEGER state)
 {
     /* #warning SndSetSysBeepState not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SndManagerStatus(INTEGER length, SMStatusPtr statusp)
 {
     /* #warning SndManagerStatus not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -48,7 +48,7 @@ NumVersion Executor::C_SndSoundManagerVersion()
 {
     NumVersion ret;
 
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     switch(ROMlib_PretendSound)
     {
         case soundoff:
@@ -69,14 +69,14 @@ NumVersion Executor::C_SndSoundManagerVersion()
 NumVersion Executor::C_MACEVersion()
 {
     /* #warning MACEVersion not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? 0x2000000 : 0;
 }
 
 NumVersion Executor::C_SPBVersion()
 {
     /* #warning SPBVersion not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? 0x1000000 : 0;
 }
 
@@ -87,21 +87,21 @@ OSErr Executor::C_SndStartFilePlay(SndChannelPtr chanp, INTEGER refnum,
                                    ProcPtr completionp, Boolean async)
 {
     /* #warning SndStartFilePlay not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SndPauseFilePlay(SndChannelPtr chanp)
 {
     /* #warning SndPauseFilePlay not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SndStopFilePlay(SndChannelPtr chanp, Boolean async)
 {
     /* #warning SndStopFilePlay not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -247,7 +247,7 @@ void Executor::C_Comp3to1(Ptr inp, Ptr outp, LONGINT cnt, Ptr instatep,
                           LONGINT whichchannel)
 {
     /* #warning Comp3to1 not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 }
 
 void Executor::C_Comp6to1(Ptr inp, Ptr outp, LONGINT cnt, Ptr instatep,
@@ -255,7 +255,7 @@ void Executor::C_Comp6to1(Ptr inp, Ptr outp, LONGINT cnt, Ptr instatep,
                           LONGINT whichchannel)
 {
     /* #warning Comp6to1 not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 }
 
 void Executor::C_Exp1to3(Ptr inp, Ptr outp, LONGINT cnt, Ptr instatep,
@@ -263,7 +263,7 @@ void Executor::C_Exp1to3(Ptr inp, Ptr outp, LONGINT cnt, Ptr instatep,
                          LONGINT whichchannel)
 {
     /* #warning Exp1to3 not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 }
 
 void Executor::C_Exp1to6(Ptr inp, Ptr outp, LONGINT cnt, Ptr instatep,
@@ -271,14 +271,14 @@ void Executor::C_Exp1to6(Ptr inp, Ptr outp, LONGINT cnt, Ptr instatep,
                          LONGINT whichchannel)
 {
     /* #warning Exp1to6 not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 }
 
 OSErr Executor::C_SndRecord(ProcPtr filterp, Point corner, OSType quality,
                             GUEST<Handle> *sndhandlep)
 {
     /* #warning SPBRecord not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -286,7 +286,7 @@ OSErr Executor::C_SndRecordToFile(ProcPtr filterp, Point corner,
                                   OSType quality, INTEGER refnum)
 {
     /* #warning SPBRecordToFile not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -294,21 +294,21 @@ OSErr Executor::C_SPBOpenDevice(ConstStringPtr name, INTEGER permission,
                                 GUEST<LONGINT> *inrefnump)
 {
     /* #warning SPBOpenDevice not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBCloseDevice(LONGINT inrefnum)
 {
     /* #warning SPBCloseDevice not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBRecord(SPBPtr inparamp, Boolean async)
 {
     /* #warning SPBRecord not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -316,28 +316,28 @@ OSErr Executor::C_SPBRecordToFile(INTEGER refnum, SPBPtr inparamp,
                                   Boolean async)
 {
     /* #warning SPBRecordToFile not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBPauseRecording(LONGINT refnum)
 {
     /* #warning SPBPauseRecording not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBResumeRecording(LONGINT refnum)
 {
     /* #warning SPBResumeRecording not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBStopRecording(LONGINT refnum)
 {
     /* #warning PPBStopRecording not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -350,21 +350,21 @@ OSErr Executor::C_SPBGetRecordingStatus(LONGINT refnum,
                                         GUEST<LONGINT> *numbermsecsrecorded)
 {
     /* #warning SPBGetRecordingStatus not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBGetDeviceInfo(LONGINT refnum, OSType info, Ptr infop)
 {
     /* #warning SPBGetDeviceInfo not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBSetDeviceInfo(LONGINT refnum, OSType info, Ptr infop)
 {
     /* #warning SPBSetDeviceInfo not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -374,7 +374,7 @@ OSErr Executor::C_SetupSndHeader(Handle sndhandle, INTEGER numchannels,
                                  GUEST<INTEGER> *headerlenp)
 {
     /* #warning SetupSndHeader not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -384,21 +384,21 @@ OSErr Executor::C_SetupAIFFHeader(INTEGER refnum, INTEGER numchannels,
                                   LONGINT numframes)
 {
     /* #warning SetupAIFFHeader not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBSignInDevice(INTEGER refnum, ConstStringPtr name)
 {
     /* #warning SPBSignInDevice not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBSignOutDevice(INTEGER refnum)
 {
     /* #warning SPBSignOutDevice not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -406,14 +406,14 @@ OSErr Executor::C_SPBGetIndexedDevice(INTEGER count, ConstStringPtr name,
                                       GUEST<Handle> *deviceiconhandlep)
 {
     /* #warning SPBGetIndexedDevice not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 OSErr Executor::C_SPBMillisecondsToBytes(LONGINT refnum, GUEST<LONGINT> *millip)
 {
     /* #warning SPBMillisecondsToBytes not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -421,20 +421,20 @@ OSErr Executor::C_SPBBytesToMilliseconds(
     LONGINT refnum, GUEST<LONGINT> *bytecountp)
 {
     /* #warning SPBBytesToMilliseconds not implemented */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
 void Executor::C_FinaleUnknown1()
 {
     /* Finale calls this */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 }
 
 OSErr Executor::C_FinaleUnknown2(ResType arg1, LONGINT arg2, Ptr arg3, Ptr arg4)
 {
     /* Finale calls this */
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return ROMlib_PretendSound == soundpretend ? noErr : notEnoughHardware;
 }
 
@@ -443,14 +443,14 @@ OSErr Executor::C_FinaleUnknown2(ResType arg1, LONGINT arg2, Ptr arg3, Ptr arg4)
 
 LONGINT Executor::C_DirectorUnknown3()
 {
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return 0;
 }
 
 INTEGER Executor::C_DirectorUnknown4(ResType arg1, INTEGER arg2, Ptr arg3,
                                      Ptr arg4)
 {
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     return paramErr;
 }
 
@@ -465,7 +465,7 @@ OSErr Executor::C_GetSysBeepVolume(GUEST<LONGINT> *levelp)
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     *levelp = half_volume;
     retval = noErr;
     return retval;
@@ -475,7 +475,7 @@ OSErr Executor::C_SetSysBeepVolume(LONGINT level)
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     retval = noErr;
     return retval;
 }
@@ -484,7 +484,7 @@ OSErr Executor::C_GetDefaultOutputVolume(GUEST<LONGINT> *levelp)
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     *levelp = half_volume;
     retval = noErr;
     return retval;
@@ -494,7 +494,7 @@ OSErr Executor::C_SetDefaultOutputVolume(LONGINT level)
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
     retval = noErr;
     return retval;
 }
@@ -506,7 +506,7 @@ OSErr Executor::C_GetSoundHeaderOffset(Handle sndHandle, GUEST<LONGINT> *offset)
     SndCommand *cmds;
     int i;
 
-    warning_sound_log(NULL_STRING);
+    warning_sound_log("");
 
     num_commands = ROMlib_get_snd_cmds(sndHandle, &cmds);
 
@@ -529,8 +529,8 @@ UnsignedFixed Executor::C_UnsignedFixedMulDiv(
 {
     UnsignedFixed retval;
 
-    warning_sound_log(NULL_STRING);
-    warning_unimplemented(NULL_STRING);
+    warning_sound_log("");
+    warning_unimplemented("");
     retval = 0;
     return retval;
 }
@@ -541,8 +541,8 @@ OSErr Executor::C_GetCompressionInfo(INTEGER compressionID, OSType format,
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
-    warning_unimplemented(NULL_STRING);
+    warning_sound_log("");
+    warning_unimplemented("");
     retval = paramErr;
     return retval;
 }
@@ -552,8 +552,8 @@ OSErr Executor::C_SetSoundPreference(OSType theType, ConstStringPtr name,
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
-    warning_unimplemented(NULL_STRING);
+    warning_sound_log("");
+    warning_unimplemented("");
     retval = paramErr;
     return retval;
 }
@@ -563,8 +563,8 @@ OSErr Executor::C_GetSoundPreference(OSType theType, ConstStringPtr name,
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
-    warning_unimplemented(NULL_STRING);
+    warning_sound_log("");
+    warning_unimplemented("");
     retval = paramErr;
     return retval;
 }
@@ -575,8 +575,8 @@ OSErr Executor::C_SndGetInfo(SndChannelPtr chan, OSType selector, void *infoPtr)
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
-    warning_unimplemented(NULL_STRING);
+    warning_sound_log("");
+    warning_unimplemented("");
     retval = paramErr;
     return retval;
 }
@@ -585,8 +585,8 @@ OSErr Executor::C_SndSetInfo(SndChannelPtr chan, OSType selector, void *infoPtr)
 {
     OSErr retval;
 
-    warning_sound_log(NULL_STRING);
-    warning_unimplemented(NULL_STRING);
+    warning_sound_log("");
+    warning_unimplemented("");
     retval = paramErr;
     return retval;
 }

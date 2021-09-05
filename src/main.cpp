@@ -289,23 +289,6 @@ note_memory_syntax(const char *arg, unsigned val)
     bad_arg_p = true;
 }
 
-/* Concatenates all strings in the array, separated by spaces. */
-static const char *
-construct_command_line_string(int argc, char **argv)
-{
-    char *s;
-    unsigned long string_length;
-    int i, j;
-
-    for(i = 0, string_length = 0; i < argc; i++)
-        string_length += strlen(argv[i]) + 1;
-    s = (char *)malloc(string_length + 1);
-    s[0] = '\0';
-    for(j = 0; j < argc; j++)
-        sprintf(s + strlen(s), "%s%s", j ? " " : "", argv[j]);
-    return s;
-}
-
 static void reportBadArgs()
 {
     fprintf(stderr,
@@ -574,8 +557,6 @@ int main(int argc, char **argv)
             execv(argv[0], argv);
     }
 #endif
-
-    ROMlib_command_line = construct_command_line_string(argc, argv);
 
     /* Guarantee various time variables are set up properly. */
     msecs_elapsed();

@@ -258,7 +258,7 @@ OSErr Executor::C_AESend(AppleEvent *evt, AppleEvent *reply,
 
 OSErr Executor::C_AESuspendTheCurrentEvent(AppleEvent *evt)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
@@ -266,19 +266,19 @@ OSErr Executor::C_AEResumeTheCurrentEvent(
     AppleEvent *evt, AppleEvent *reply, AEEventHandlerUPP dispatcher,
     int32_t refcon)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
 OSErr Executor::C_AEGetTheCurrentEvent(AppleEvent *return_evt)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
 OSErr Executor::C_AESetTheCurrentEvent(AppleEvent *evt)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
@@ -290,7 +290,7 @@ OSErr Executor::C_AEGetArray(AEDescList *list, AEArrayType array_type,
                              GUEST<Size> *return_item_size,
                              GUEST<int32_t> *return_item_count)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
@@ -298,7 +298,7 @@ OSErr Executor::C_AEPutArray(AEDescList *list, AEArrayType type,
                              AEArrayDataPointer array_data, DescType item_type,
                              Size item_size, int32_t item_count)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
@@ -325,13 +325,13 @@ OSErr Executor::C_AEGetInteractionAllowed(AEInteractionAllowed *level_out)
 OSErr Executor::C_AEInteractWithUser(int32_t timeout, NMRecPtr nm_req,
                                      IdleUPP idle_proc)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
 OSErr Executor::C_AEResetTimer(AppleEvent *evt)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     AE_RETURN_ERROR(noErr);
 }
 
@@ -552,14 +552,14 @@ OSErr Executor::C_AEManagerInfo(GUEST<LONGINT> *resultp)
 
 OSErr Executor::C_AEDisposeToken(AEDesc *theToken)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
 OSErr Executor::C_AEResolve(AEDesc *objectSpecifier, INTEGER callbackFlags,
                              AEDesc *theToken)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
@@ -567,7 +567,7 @@ OSErr Executor::C_AERemoveObjectAccessor(
     DescType desiredClass, DescType containerType, ProcPtr theAccessor,
     Boolean isSysHandler)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
@@ -575,7 +575,7 @@ OSErr Executor::C_AEInstallObjectAccessor(
     DescType desiredClass, DescType containerType, ProcPtr theAccessor,
     LONGINT refcon, Boolean isSysHandler)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
@@ -585,7 +585,7 @@ OSErr Executor::C_AEGetObjectAccessor(DescType desiredClass,
                                       GUEST<LONGINT> *accessorRefcon,
                                       Boolean isSysHandler)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
@@ -595,7 +595,7 @@ OSErr Executor::C_AECallObjectAccessor(DescType desiredClass,
                                        DescType keyForm, AEDesc *keyData,
                                        AEDesc *theToken)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }
 
@@ -607,6 +607,6 @@ OSErr Executor::C_AESetObjectCallbacks(ProcPtr myCompareProc,
                                        ProcPtr myAdjustMarksProc,
                                        ProcPtr myGetErrDescProc)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     return noErr;
 }

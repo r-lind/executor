@@ -243,7 +243,7 @@ RAW_68K_IMPLEMENTATION(CommToolboxDispatch)
             EM_D0 = InitCRM();
             break;
         default:
-            warning_unimplemented(NULL_STRING); /* now Quicken 6 will limp */
+            warning_unimplemented(""); /* now Quicken 6 will limp */
             EM_D0 = 0;
             break;
     }

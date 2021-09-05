@@ -30,7 +30,7 @@ OSErr Executor::C_OutlineMetrics(int16_t byte_count, Ptr text, Point numer,
                                  GUEST<Fixed> *aw_array, GUEST<Fixed> *lsb_array,
                                  Rect *bounds_array)
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     /* ### paramErr */
     return -50;
 }
@@ -49,7 +49,7 @@ Boolean Executor::C_GetPreserveGlyph()
 
 OSErr Executor::C_FlushFonts()
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
     /* ### paramErr */
     return -50;
 }

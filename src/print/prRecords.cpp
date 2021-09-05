@@ -131,5 +131,5 @@ Boolean Executor::C_PrJobDialog(THPrint hPrint)
 
 void Executor::C_PrJobMerge(THPrint hPrintSrc, THPrint hPrintDst) /* TODO */
 {
-    warning_unimplemented(NULL_STRING);
+    warning_unimplemented("");
 }

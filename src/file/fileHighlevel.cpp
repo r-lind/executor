@@ -209,7 +209,7 @@ open_helper(FSSpecPtr spec, SignedByte perms, GUEST<int16_t> *refoutp,
     hpb.ioParam.ioNamePtr = (StringPtr)spec->name;
     if(perms == fsWrPerm)
     {
-        warning_unexpected(NULL_STRING);
+        warning_unexpected("");
         perms = fsRdWrPerm;
     }
     hpb.ioParam.ioPermssn = perms;
