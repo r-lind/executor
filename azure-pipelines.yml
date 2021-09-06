@@ -20,8 +20,10 @@ jobs:
       cd \
       python -m aqt install -O C:\Qt 5.15.0 windows desktop win64_msvc2019_64
     displayName: 'install qt'
-  - script: |
-     vcpkg install boost
+  - powershell: |
+      $Url = "https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0/boost_1_72_0-msvc-14.2-64.exe"
+      (New-Object System.Net.WebClient).DownloadFile($Url, "$env:TEMP\boost.exe")
+      Start-Process -Wait -FilePath "$env:TEMP\boost.exe" "/SILENT","/SP-","/SUPPRESSMSGBOXES","/DIR=C:\hostedtoolcache\windows\Boost\1.72.0\x86_64"
     displayName: 'install boost'
   - checkout: self
     submodules: true
@@ -31,7 +33,7 @@ jobs:
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
       call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
-      set PATH=C:\Program Files\LLVM\bin;%PATH%
+      set PATH=C:\Program Files\LLVM\bin;C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
 
       cmake ^
           ..  ^
@@ -41,8 +43,9 @@ jobs:
           -DCMAKE_CXX_COMPILER:FILEPATH=clang-cl.exe ^
           -DCMAKE_LINKER:FILEPATH=lld-link.exe ^
           -DCMAKE_PREFIX_PATH=C:\Qt\5.15.0\msvc2019_64\lib\cmake ^
+          -DBOOST_ROOT=:\hostedtoolcache\windows\Boost\1.72.0 ^
           -DBISON_COMMAND=c:\tools\msys64\usr\bin\bison.exe ^
-          -DCMAKE_TOOLCHAIN_FILE=C:/vcpkg/scripts/buildsystems/vcpkg.cmake
+          -DBoost_COMPILER=-vc142
 
       type CMakeCache.txt
 
@@ -146,7 +149,7 @@ jobs:
   - script: |
       mkdir build
       cd build
-      cmake .. -G Ninja -DCMAKE_PREFIX_PATH=/usr/local/opt/qt/lib/cmake
+      cmake .. -G Ninja -DCMAKE_PREFIX_PATH=/usr/local/opt/qt@5/lib/cmake
       cmake --build .
     displayName: Build
   - script: |
@@ -163,7 +166,7 @@ jobs:
       # hack: for some reason homebrew write-locks this framework.
       # it is then copied by the fixup_bundle command, preserving the write-lock
       # ... and that causes it to fail.
-      chmod +w /usr/local/Cellar/qt/*/Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport
+      chmod +w /usr/local/Cellar/qt@5/*/Frameworks/QtPrintSupport.framework/Versions/5/QtPrintSupport
       cpack
   - task: PublishBuildArtifacts@1
     inputs:
@@ -173,7 +176,7 @@ jobs:
 - job: Linux
   condition: true
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-latest'
   steps:
   - checkout: self
     submodules: true
@@ -201,7 +204,7 @@ jobs:
 - job: Linux32
   condition: true
   pool:
-    vmImage: 'ubuntu-16.04'
+    vmImage: 'ubuntu-latest'
   steps:
   - checkout: self
     submodules: true
