@@ -231,7 +231,8 @@ Executor::ROMlib_parse_appearance(const char *appearance_str)
         appearance = appearance_sys7;
     else if(strcmp(appearance_str, "windows") == 0)
     {
-        ROMlib_options |= ROMLIB_RECT_SCREEN_BIT;
+        ROMlib_rect_screen = true;
+        ROMlib_rect_buttons = true;
         appearance = appearance_win3;
     }
     else

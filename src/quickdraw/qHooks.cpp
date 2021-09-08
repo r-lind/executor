@@ -18,7 +18,7 @@ static bool text_is_enabled_p = true;
 void
 Executor::disable_stdtext(void)
 {
-    if(ROMlib_options & ROMLIB_TEXT_DISABLE_BIT)
+    if(ROMlib_text_disable_hack)
         text_is_enabled_p = false;
 }
 

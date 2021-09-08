@@ -22,13 +22,15 @@ extern int ROMlib_AppleChar;
 
 extern int ROMlib_desired_bpp;
 
+extern bool ROMlib_rect_screen;
+extern bool ROMlib_rect_buttons;
+extern bool ROMlib_text_disable_hack;
 
 enum
 {
     ROMLIB_NOCLOCK_BIT = (1 << 0),
     ROMLIB_REFRESH_BIT = (1 << 2),
     ROMLIB_PRETENDSOUND_BIT = (1 << 8),
-    ROMLIB_PASSPOSTSCRIPT_BIT = (1 << 9),
     ROMLIB_NEWLINETOCR_BIT = (1 << 10),
     ROMLIB_DIRECTDISKACCESS_BIT = (1 << 11),
 
@@ -41,8 +43,7 @@ enum
     ROMLIB_PRETEND_SCRIPT_BIT = (1 << 19),
     ROMLIB_PRETEND_ALIAS_BIT = (1 << 20),
 
-    ROMLIB_TEXT_DISABLE_BIT = (1 << 21),
-    ROMLIB_RECT_SCREEN_BIT = (1 << 28),
+    ROMLIB_TEXT_DISABLE_BIT = (1 << 21)
 };
 }
 #endif

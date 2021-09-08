@@ -811,7 +811,7 @@ static void C_ROMlib_circle_ok(DialogPtr dp, INTEGER which)
     PenNormal();
     PenSize(3, 3);
     InsetRect(&r, -4, -4);
-    if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
+    if(!ROMlib_rect_buttons)
         FrameRoundRect(&r, 16, 16);
     else
         FrameRect(&r);

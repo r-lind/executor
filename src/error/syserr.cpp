@@ -185,7 +185,7 @@ static void dobuttons(INTEGER id, INTEGER offsetx, INTEGER offsety)
                        (bp->buts[i].butloc.top + bp->buts[i].butloc.bottom) / 2 + 4);
                 DrawText((Ptr)textp, 0, tcnt);
             }
-            if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
+            if(!ROMlib_rect_buttons)
                 FrameRoundRect(&bp->buts[i].butloc, 10, 10);
             else
                 FrameRect(&bp->buts[i].butloc);

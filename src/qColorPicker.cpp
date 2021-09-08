@@ -986,7 +986,7 @@ event_loop(void)
                     oval = RECT_HEIGHT(&r) / 2 - 4;
                     /* ### frame in the frame color for the `ok_button'
                  control */
-                    if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
+                    if(!ROMlib_rect_buttons)
                         FrameRoundRect(&r, oval, oval);
                     else
                         FrameRect(&r);

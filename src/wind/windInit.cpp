@@ -54,7 +54,7 @@ void Executor::ROMLib_InitGrayRgn()
     RectRgn(PORT_VIS_REGION(wmgr_port), &PORT_RECT(wmgr_port));
     RectRgn(PORT_CLIP_REGION(wmgr_port), &PORT_RECT(wmgr_port));
     OpenRgn();
-    if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
+    if(!ROMlib_rect_screen)
         FrameRoundRect(&GD_BOUNDS(LM(TheGDevice)), 16, 16);
     else
         FrameRect(&GD_BOUNDS(LM(TheGDevice)));

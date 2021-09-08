@@ -102,7 +102,7 @@ event_loop(void)
                 for(i = 0; i < N_BUTTONS; i++)
                     if(buttons[i].hilite_p)
                     {
-                        if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
+                        if(!ROMlib_rect_buttons)
                             FrameRoundRect(&buttons[i].hilite_rect,
                                            buttons[i].oval,
                                            buttons[i].oval);

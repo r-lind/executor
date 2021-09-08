@@ -205,8 +205,6 @@ void setupprefvalues(DialogPtr dp)
     }
     setoneofthree(dp, toset, PREFSOUNDOFFITEM, PREFSOUNDPRETENDITEM,
                   PREFSOUNDONITEM);
-    modstate(dp, PREFPASSPOSTSCRIPTITEM,
-             ROMlib_passpostscript ? SETSTATE : CLEARSTATE);
     modstate(dp, PREFNEWLINEMAPPINGITEM,
              ROMlib_newlinetocr ? SETSTATE : CLEARSTATE);
     modstate(dp, PREFDIRECTDISKITEM,
@@ -273,10 +271,6 @@ void readprefvalues(DialogPtr dp)
     else
         ROMlib_PretendSound = soundoff;
 
-    ROMlib_passpostscript = getvalue(dp, PREFPASSPOSTSCRIPTITEM);
-#if 1
-    ROMlib_passpostscript = true; /* wired down for now */
-#endif
     ROMlib_newlinetocr = getvalue(dp, PREFNEWLINEMAPPINGITEM);
     ROMlib_directdiskaccess = getvalue(dp, PREFDIRECTDISKITEM);
     ROMlib_fontsubstitution = getvalue(dp, PREFFONTSUBSTITUTIONITEM);
@@ -411,7 +405,7 @@ static void ROMlib_circledefault(DialogPtr dp)
     GetDialogItem(dp, 1, &type, &h, &r);
     PenSize(3, 3);
     InsetRect(&r, -4, -4);
-    if(!(ROMlib_options & ROMLIB_RECT_SCREEN_BIT))
+    if(!ROMlib_rect_buttons)
         FrameRoundRect(&r, 16, 16);
     else
         FrameRect(&r);

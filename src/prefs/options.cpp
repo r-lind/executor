@@ -88,4 +88,9 @@ bool do_autorefresh_p = false;
 
 uint32_t ROMlib_PrDrvrVers = 70;
 
+bool ROMlib_rect_screen = false;
+bool ROMlib_rect_buttons = false;
+bool ROMlib_text_disable_hack = false;
+
+
 }

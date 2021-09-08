@@ -29,9 +29,6 @@ void Executor::ParseConfigFile(std::string appname, OSType type)
     {
         yyparse();
 
-        if(ROMlib_get_appearance() == appearance_win3)
-            ROMlib_options |= ROMLIB_RECT_SCREEN_BIT;
-
 #if 0	
 	if (ROMlib_options & ROMLIB_NOCLOCK_BIT)
 	    ROMlib_noclock = true;
@@ -44,15 +41,6 @@ void Executor::ParseConfigFile(std::string appname, OSType type)
             ROMlib_PretendSound = soundpretend;
         if(ROMlib_options & ROMLIB_SOUNDON_BIT)
             ROMlib_PretendSound = sound_driver->sound_works() ? soundon : soundpretend;
-#if 0
-	if (ROMlib_options & ROMLIB_PASSPOSTSCRIPT_BIT)
-	    ROMlib_passpostscript = true;
-	else
-	    ROMlib_passpostscript = false;
-#else
-        /* #warning ROMlib_passpostscript wired to true */
-        ROMlib_passpostscript = true;
-#endif
         if(ROMlib_options & ROMLIB_NEWLINETOCR_BIT)
             ROMlib_newlinetocr = true;
         else
@@ -161,8 +149,6 @@ int Executor::saveprefvalues(const char *savefilename)
                 fprintf(fp, "SoundOn");
                 break;
         }
-        if(ROMlib_passpostscript)
-            fprintf(fp, ", PassPostscript");
         if(ROMlib_newlinetocr)
             fprintf(fp, ", NewLineToCR");
         if(ROMlib_directdiskaccess)
