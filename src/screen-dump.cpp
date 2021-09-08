@@ -4,7 +4,7 @@
 
 /* screen-dump.c; dump the mac screen to a tiff file */
 
-#include <base/common.h>
+#include <rsys/screen-dump.h>
 
 #include <stdarg.h>
 
@@ -18,9 +18,40 @@
 #include <prefs/prefs.h>
 #include <util/uniquefile.h>
 #include <file/file.h>
-#include <rsys/screen-dump.h>
 #include <rsys/paths.h>
 #include <rsys/unixio.h>
+
+
+namespace
+{
+struct header
+{
+    int16_t byte_order;
+    int16_t magic_number;
+    int32_t ifd_offset;
+};
+
+struct __attribute__((packed)) directory_entry
+{
+    int16_t tag;
+    int16_t type;
+    int32_t count;
+    union {
+        int16_t value_offset_16;
+        int32_t value_offset;
+    };
+};
+
+struct __attribute__((packed)) ifd 
+{
+    int16_t count;
+    struct directory_entry entries[1];
+};
+
+static_assert(sizeof(header) == 8);
+static_assert(sizeof(directory_entry) == 12);
+static_assert(sizeof(ifd) == 14);
+}
 
 using namespace Executor;
 
@@ -299,7 +330,7 @@ dump_fn_t dump_fns[] = {
     dump_direct_pm, dump_direct_pm,
 };
 
-void Executor::do_dump_screen(void)
+void Executor::do_dump_screen()
 {
     GDHandle gd;
     PixMapHandle gd_pmh;

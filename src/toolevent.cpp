@@ -45,6 +45,7 @@
 #include <time/time.h>
 #include <menu/menu.h>
 #include <base/traps.impl.h>
+#include <rsys/screen-dump.h>
 
 #include <algorithm>
 
