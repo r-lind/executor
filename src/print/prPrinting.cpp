@@ -670,14 +670,6 @@ void Executor::C_PrCloseDoc(TPPrPort port)
     else if(ROMlib_printfile)
     {
         fclose(ROMlib_printfile);
-#if defined(CYGWIN32)
-        warning_trace_info("ROMlib_printer = %s, WIN32_TOKEN = %s",
-                           ROMlib_printer, WIN32_TOKEN);
-        if(strcmp(ROMlib_printer, WIN32_TOKEN) == 0)
-        {
-            print_file(ROMlib_wp, ROMlib_spool_file, nullptr);
-        }
-#endif
     }
     ROMlib_printfile = 0;
 

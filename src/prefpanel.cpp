@@ -425,75 +425,72 @@ void Executor::dopreferences(void)
     INTEGER ihit;
     GUEST<INTEGER> ihit_s;
 
-    if(!(ROMlib_options & ROMLIB_NOPREFS_BIT))
+    if(LM(WWExist) != EXIST_YES)
+        SysBeep(5);
+    else
     {
-        if(LM(WWExist) != EXIST_YES)
-            SysBeep(5);
-        else
+        static Boolean am_already_here = false;
+
+        if(!am_already_here)
         {
-            static Boolean am_already_here = false;
+            am_already_here = true;
 
-            if(!am_already_here)
+            ParamText(LM(CurApName), 0, 0, 0);
+
+            dp = GetNewDialog(PREFDIALID, (Ptr)0, (WindowPtr)-1);
+            enable_disable_pref_items(dp);
+            setupprefvalues(dp);
+            ROMlib_circledefault(dp);
+            do
             {
-                am_already_here = true;
-
-                ParamText(LM(CurApName), 0, 0, 0);
-
-                dp = GetNewDialog(PREFDIALID, (Ptr)0, (WindowPtr)-1);
-                enable_disable_pref_items(dp);
-                setupprefvalues(dp);
-                ROMlib_circledefault(dp);
-                do
+                ModalDialog(nullptr, &ihit_s);
+                ihit = ihit_s;
+                switch(ihit)
                 {
-                    ModalDialog(nullptr, &ihit_s);
-                    ihit = ihit_s;
-                    switch(ihit)
-                    {
-                        case PREFNORMALITEM:
-                        case PREFINBETWEENITEM:
-                        case PREFANIMATIONITEM:
-                            setoneofthree(dp, ihit, PREFNORMALITEM, PREFINBETWEENITEM,
-                                          PREFANIMATIONITEM);
-                            break;
-                        case PREFSOUNDOFFITEM:
-                        case PREFSOUNDPRETENDITEM:
-                        case PREFSOUNDONITEM:
-                            setoneofthree(dp, ihit, PREFSOUNDOFFITEM,
-                                          PREFSOUNDPRETENDITEM, PREFSOUNDONITEM);
-                            break;
-                        case PREF_COLORS_2:
-                        case PREF_COLORS_4:
-                        case PREF_COLORS_16:
-                        case PREF_COLORS_256:
-                        case PREF_COLORS_THOUSANDS:
-                        case PREF_COLORS_MILLIONS:
-                            set_depth(dp, ihit);
-                            break;
-                        case PREFNOCLOCKITEM:
-                        case PREFPASSPOSTSCRIPTITEM:
-                        case PREFNEWLINEMAPPINGITEM:
-                        case PREFFLUSHCACHEITEM:
-                        case PREFDIRECTDISKITEM:
-                        case PREFNO32BITWARNINGSITEM:
-                        case PREFFONTSUBSTITUTIONITEM:
-                        case PREFCACHEHEURISTICSITEM:
-                        case PREF_PRETEND_HELP:
-                        case PREF_PRETEND_EDITION:
-                        case PREF_PRETEND_SCRIPT:
-                        case PREF_PRETEND_ALIAS:
-                            modstate(dp, ihit, FLIPSTATE);
-                            break;
-                    }
-                } while(ihit != PREFOKITEM && ihit != PREFCANCELITEM && ihit != PREFSAVEITEM);
-                if(ihit == PREFOKITEM || ihit == PREFSAVEITEM)
-                {
-                    readprefvalues(dp);
-                    if(ihit == PREFSAVEITEM)
-                        saveprefvalues(ROMlib_configfilename.c_str());
+                    case PREFNORMALITEM:
+                    case PREFINBETWEENITEM:
+                    case PREFANIMATIONITEM:
+                        setoneofthree(dp, ihit, PREFNORMALITEM, PREFINBETWEENITEM,
+                                        PREFANIMATIONITEM);
+                        break;
+                    case PREFSOUNDOFFITEM:
+                    case PREFSOUNDPRETENDITEM:
+                    case PREFSOUNDONITEM:
+                        setoneofthree(dp, ihit, PREFSOUNDOFFITEM,
+                                        PREFSOUNDPRETENDITEM, PREFSOUNDONITEM);
+                        break;
+                    case PREF_COLORS_2:
+                    case PREF_COLORS_4:
+                    case PREF_COLORS_16:
+                    case PREF_COLORS_256:
+                    case PREF_COLORS_THOUSANDS:
+                    case PREF_COLORS_MILLIONS:
+                        set_depth(dp, ihit);
+                        break;
+                    case PREFNOCLOCKITEM:
+                    case PREFPASSPOSTSCRIPTITEM:
+                    case PREFNEWLINEMAPPINGITEM:
+                    case PREFFLUSHCACHEITEM:
+                    case PREFDIRECTDISKITEM:
+                    case PREFNO32BITWARNINGSITEM:
+                    case PREFFONTSUBSTITUTIONITEM:
+                    case PREFCACHEHEURISTICSITEM:
+                    case PREF_PRETEND_HELP:
+                    case PREF_PRETEND_EDITION:
+                    case PREF_PRETEND_SCRIPT:
+                    case PREF_PRETEND_ALIAS:
+                        modstate(dp, ihit, FLIPSTATE);
+                        break;
                 }
-                DisposeDialog(dp);
-                am_already_here = false;
+            } while(ihit != PREFOKITEM && ihit != PREFCANCELITEM && ihit != PREFSAVEITEM);
+            if(ihit == PREFOKITEM || ihit == PREFSAVEITEM)
+            {
+                readprefvalues(dp);
+                if(ihit == PREFSAVEITEM)
+                    saveprefvalues(ROMlib_configfilename.c_str());
             }
+            DisposeDialog(dp);
+            am_already_here = false;
         }
     }
 }

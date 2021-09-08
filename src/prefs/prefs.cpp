@@ -172,8 +172,6 @@ int Executor::saveprefvalues(const char *savefilename)
             fprintf(fp, ", NoWarn32");
         if(ROMlib_flushoften)
             fprintf(fp, ", FlushOften");
-        if(ROMlib_options & ROMLIB_DEBUG_BIT)
-            fprintf(fp, ", Debug");
 
         if(ROMlib_pretend_help)
             fprintf(fp, ", PretendHelp");

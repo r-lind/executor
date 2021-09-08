@@ -171,25 +171,6 @@ static void C_ROMlib_myjobproc(DialogPtr dp, INTEGER itemno)
                 num_copies = GetDILong(dp, PRINT_COPIES_BOX_NO, 1);
                 (*hPrint)->prJob.iCopies = num_copies;
             }
-#if defined(CYGWIN32)
-            // FIXME: #warning TODO use better x and y coords
-            warning_trace_info("ROMlib_printer = %s, WIN32_TOKEN = %s",
-                               ROMlib_printer, WIN32_TOKEN);
-            if(strcmp(ROMlib_printer, WIN32_TOKEN) == 0)
-            {
-                orientation_t orient;
-
-                if(strcmp(ROMlib_paper_orientation, "Portrait") == 0)
-                    orient = WIN_PRINT_PORTRAIT;
-                else
-                    orient = WIN_PRINT_LANDSCAPE;
-                get_info(&ROMlib_wp, ROMlib_paper_x, ROMlib_paper_y, orient,
-                         num_copies, nullptr);
-                (*hPrint)->prJob.iCopies = 1; /* Win32 driver handles
-						     the multiple copies
-						     for us */
-            }
-#endif
         }
         break;
         case PRINT_ALL_RADIO_NO:
@@ -417,8 +398,6 @@ get_popup_bounding_box(Rect *rp, DialogPtr dp, INTEGER itemno)
 typedef enum {
     PRINT_TO_PORT,
     PRINT_TO_FILE,
-    PRINT_TO_WIN32,
-    PRINT_TO_NEXTSTEP
 } print_where_t;
 
 static print_where_t print_where;
@@ -461,23 +440,6 @@ update_port(DialogPtr dp)
             print_where = PRINT_TO_FILE;
         }
     }
-#if defined(CYGWIN32)
-    else if(strcmp(keyp, WIN32_TOKEN) == 0)
-    {
-        if(print_where != PRINT_TO_WIN32)
-        {
-            Rect r;
-
-            get_popup_bounding_box(&r, dp, LAYOUT_PORT_MENU_NO);
-            EraseRect(&r);
-            HideDialogItem(dp, LAYOUT_PORT_LABEL_NO);
-            HideDialogItem(dp, LAYOUT_PORT_MENU_NO);
-            HideDialogItem(dp, LAYOUT_FILENAME_LABEL_NO);
-            HideDialogItem(dp, LAYOUT_FILENAME_NO);
-            print_where = PRINT_TO_WIN32;
-        }
-    }
-#endif
     else
     {
         if(print_where != PRINT_TO_PORT)
@@ -701,13 +663,6 @@ adjust_num_copies(TPPrDlg dlg, THPrint hPrint)
     NumToString((*hPrint)->prJob.iCopies, text);
     SetDialogItemText(GetDIText((DialogPtr)dlg, PRINT_COPIES_BOX_NO), text);
     SelectDialogItemText((DialogPtr)dlg, PRINT_COPIES_BOX_NO, 0, 100);
-#if defined(CYGWIN32)
-    if(strcmp(ROMlib_printer, WIN32_TOKEN) == 0)
-    {
-        HideDialogItem((DialogPtr)dlg, PRINT_COPIES_LABEL_NO);
-        HideDialogItem((DialogPtr)dlg, PRINT_COPIES_BOX_NO);
-    }
-#endif
 }
 
 static void
@@ -1039,26 +994,6 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
 
                 str255assignc(appname, ROMlib_appname.c_str());
 
-                if(!(ROMlib_options & ROMLIB_NOLOWER_BIT))
-                {
-                    char *p;
-                    bool all_upper;
-                    int n;
-
-                    /* convert all upper (e.g. EXECUTOR.EXE) to 
-		 all lower (e.g. executor.exe) */
-
-                    all_upper = true;
-                    for(p = (char *)appname + 1, n = appname[0];
-                        n > 0 && all_upper; ++p, --n)
-                        if(islower(*p))
-                            all_upper = false;
-                    if(all_upper)
-                        for(p = (char *)appname + 1, n = appname[0];
-                            n > 0; ++p, --n)
-                            *p = tolower(*p);
-                }
-
 /* remove trailing .exe */
 #define EXE_SUFFIX ".exe"
 #ifndef _MSC_VER
@@ -1068,47 +1003,10 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
                    == 0)
                     appname[0] -= sizeof EXE_SUFFIX - 1;
 #endif
-                /* Capitalize first character */
-                if(islower(appname[1]))
-                    appname[1] = toupper((unsigned char)appname[1]);
 
                 ParamText(appname, 0, 0, 0);
             }
-            if(!ROMlib_new_printer_name.empty() || !ROMlib_new_label.empty())
-            {
-                Rect r;
-                GUEST<INTEGER> item_type;
-                GUEST<Handle> hh;
-                Handle h;
-                Str255 str;
-                int orig, new1;
-                Str255 new_printer_name;
-                Str255 new_type_label;
-
-#define NEW_PRINTER_NAME "Print Selection"
-#define NEW_TYPE_LABEL "Print to:"
-
-                str255_from_c_string(new_printer_name, ROMlib_new_printer_name.empty() ? NEW_PRINTER_NAME : ROMlib_new_printer_name.c_str());
-                str255_from_c_string(new_type_label, ROMlib_new_label.empty() ? NEW_TYPE_LABEL : ROMlib_new_label.c_str());
-
-                GetDialogItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
-                         &item_type, &hh, &r);
-
-                h = hh;
-                GetDialogItemText(h, str);
-                orig = StringWidth(str);
-                new1 = StringWidth(new_type_label);
-                HUnlock(h);
-
-                r.left = r.left + orig - new1;
-                SetDialogItem((DialogPtr)retval, LAYOUT_PRINTER_TYPE_LABEL_NO,
-                         item_type, h, &r);
-                SetDialogItemText(GetDIText((DialogPtr)retval, LAYOUT_PRINTER_NAME_NO),
-                         new_printer_name);
-                SetDialogItemText(GetDIText((DialogPtr)retval,
-                                   LAYOUT_PRINTER_TYPE_LABEL_NO),
-                         new_type_label);
-            }
+            
             adjust_paper_menu(retval);
             adjust_printer_type_menu(retval);
             update_port((DialogPtr)retval);
@@ -1131,11 +1029,8 @@ TPPrDlg Executor::C_PrStlInit(THPrint hPrint)
     return retval;
 }
 
-#define SUNPATH_HACK (ROMlib_options & ROMLIB_PRINTING_HACK_BIT)
-
 Boolean Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
 {
-    GUEST<INTEGER> item_swapped;
     INTEGER item;
     TPPrDlg prrecptr;
     Boolean retval;
@@ -1145,41 +1040,13 @@ Boolean Executor::C_PrDlgMain(THPrint hPrint, ProcPtr initfptr)
 
     if((prrecptr = CALLPRINITPROC(hPrint, (prinitprocp) initfptr)))
     {
-        if(!SUNPATH_HACK || (((pritemprocp)prrecptr->pItemProc
-                              != (pritemprocp)&ROMlib_myjobproc)
-                             || ROMlib_printer != std::string(WIN32_TOKEN)))
-        {
-            ShowWindow((WindowPtr)prrecptr);
-            SelectWindow((WindowPtr)prrecptr);
-        }
+        ShowWindow((WindowPtr)prrecptr);
+        SelectWindow((WindowPtr)prrecptr);
+
         do
         {
-            if(SUNPATH_HACK && (((pritemprocp)prrecptr->pItemProc
-                                 == (pritemprocp)&ROMlib_myjobproc)
-                                && ROMlib_printer == std::string(WIN32_TOKEN)))
-                item = 1;
-            else
-            {
-                ModalDialog(prrecptr->pFltrProc, &item_swapped);
-                item = item_swapped;
-            }
+            ModalDialog(prrecptr->pFltrProc, out(item));
             CALLPRITEMPROC(prrecptr, item, prrecptr->pItemProc);
-
-#if defined(CYGWIN32)
-            /* Don't allow them to continue Win32 stuff if we can't
-	       initialize the Win32 subsystem */
-            if(((pritemprocp)prrecptr->pItemProc
-                == (pritemprocp)&ROMlib_myjobproc)
-               && item == 1
-               && strcmp(ROMlib_printer, WIN32_TOKEN) == 0
-               && !ROMlib_wp)
-            {
-                if(SUNPATH_HACK)
-                    item = 2;
-                else
-                    item = 999;
-            }
-#endif
         } while(item != 1 && item != 2);
         if(item == 1)
         {

@@ -612,15 +612,7 @@ Executor::sendsuspendevent(void)
     shouldBeSuspended = true;
     if(
         (size_info.size_flags & SZacceptSuspendResumeEvents)
-        && !debug_supress_suspend_resume
-        /* NOTE: Since Executor can currently only run one app at a time,
-	 suspending an app that can background causes trouble with apps
-	 like StuffIt Expander, since it makes it impossible to do work
-	 in another window while waiting for StuffIt Expander to expand
-	 a file.  It's not clear that the next two lines are the best solution,
-	 but it's *a* solution. */
-        && (!(ROMlib_options & ROMLIB_NOSUSPEND_BIT) /* ||
-	  !(size_info.size_flags & SZcanBackground) */))
+        && !debug_supress_suspend_resume)
     {
         PostEvent(osEvt, SUSPENDRESUMEBITS | SUSPEND | CONVERTCLIPBOARD);
     }

@@ -234,8 +234,6 @@ extern char *cstring_from_str255(Str255 text);
 extern void disable_stdtext(void);
 extern void enable_stdtext(void);
 
-#define WIN32_TOKEN (ROMlib_win32_token.empty() ? "Win32" : ROMlib_win32_token.c_str())
-
 extern void ROMlib_rotatebegin(LONGINT flippage, LONGINT angle);
 extern void ROMlib_rotatecenter(double yoffset, double xoffset);
 extern void ROMlib_rotateend(void);

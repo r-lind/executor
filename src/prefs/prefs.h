@@ -47,8 +47,6 @@ extern uint32_t ROMlib_PrDrvrVers;
 
 extern uint32_t system_version;
 
-#define ROMLIB_DEBUG_BIT (1 << 1)
-
 extern void do_dump_screen(void);
 extern std::string ROMlib_configfilename;
 extern FILE *configfile;

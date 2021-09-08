@@ -741,14 +741,9 @@ done:
     return newh;
 }
 
-#define TTS_HACK (ROMlib_options & ROMLIB_DISPOSHANDLE_HACK_BIT)
-
 void DisposeHandle(Handle h)
 {
     MM_SLAM("entry");
-
-    if(TTS_HACK && h == (*(GUEST<Handle> *)SYN68K_TO_US(256)))
-        h = 0;
 
     if(h)
     {
