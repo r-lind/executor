@@ -4,6 +4,7 @@
 #include <OSUtil.h>
 #include <set>
 #include <iostream>
+#include <algorithm>
 
 using namespace Executor;
 
