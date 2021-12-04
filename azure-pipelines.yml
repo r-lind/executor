@@ -9,16 +9,13 @@ jobs:
 
   steps:
   - script: |
-      choco install msys2 llvm --yes
-    displayName: 'choco install msys2, llvm'
-  - script: |
-      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm bison"
+      C:\msys64\usr\bin\bash --login -c "pacman -S --noconfirm bison"
     displayName: 'msys/pacman install bison'
   - script: |
       pip install aqtinstall
       C:
       cd \
-      python -m aqt install -O C:\Qt 5.15.0 windows desktop win64_msvc2019_64
+      python -m aqt install -O C:\Qt 5.15.2 windows desktop win64_msvc2019_64
     displayName: 'install qt'
   - powershell: |
       $Url = "https://sourceforge.net/projects/boost/files/boost-binaries/1.72.0/boost_1_72_0-msvc-14.2-64.exe"
@@ -33,7 +30,7 @@ jobs:
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
       call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
-      set PATH=C:\Program Files\LLVM\bin;C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
+      set PATH=C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
 
       cmake ^
           ..  ^
@@ -42,9 +39,9 @@ jobs:
           -DCMAKE_C_COMPILER:FILEPATH=clang-cl.exe  ^
           -DCMAKE_CXX_COMPILER:FILEPATH=clang-cl.exe ^
           -DCMAKE_LINKER:FILEPATH=lld-link.exe ^
-          -DCMAKE_PREFIX_PATH=C:\Qt\5.15.0\msvc2019_64\lib\cmake ^
+          -DCMAKE_PREFIX_PATH=C:\Qt\5.15.2\msvc2019_64\lib\cmake ^
           -DBOOST_ROOT=:\hostedtoolcache\windows\Boost\1.72.0 ^
-          -DBISON_COMMAND=c:\tools\msys64\usr\bin\bison.exe ^
+          -DBISON_COMMAND=c:\msys64\usr\bin\bison.exe ^
           -DBoost_COMPILER=-vc142
 
       type CMakeCache.txt
@@ -57,7 +54,7 @@ jobs:
 
       set STUDIO=C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
       call "%STUDIO%\VC\Auxiliary\Build\vcvars64.bat"
-      set PATH=C:\Program Files\LLVM\bin;C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
+      set PATH=C:\hostedtoolcache\windows\Boost\1.72.0\lib;%PATH%
 
       ctest . -LE xfail --no-compress-output -T test
 
