@@ -1,6 +1,8 @@
 #include "appledouble.h"
 #include "plain.h"
 
+#include <algorithm>
+
 using namespace Executor;
 
 static fs::path makeADPath(AppleDoubleScheme scheme, const fs::path& p)

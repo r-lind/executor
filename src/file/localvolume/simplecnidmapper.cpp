@@ -1,6 +1,8 @@
 #include "simplecnidmapper.h"
-#include <set>
 #include <OSUtil.h>
+
+#include <algorithm>
+#include <set>
 
 using namespace Executor;
 

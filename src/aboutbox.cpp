@@ -30,6 +30,8 @@
 
 #include <cmrc/cmrc.hpp>
 
+#include <algorithm>
+
 CMRC_DECLARE(resources);
 
 #define ABOUT_BOX_WIDTH 500
