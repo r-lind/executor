@@ -424,14 +424,13 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         pb->dirInfo.ioDrNmFls = dirItem->countItems();
 
         // TODO:
-        // ioACUser
-        // ioDrUserWds
-        // ioDrCrDat
-        // ioDrMdDat
-        // ioDrBkDat
-        // ioDrFndrInfo
-
         pb->dirInfo.ioACUser = 0;
+        pb->dirInfo.ioDrUsrWds = {};
+        pb->dirInfo.ioDrCrDat = 0;
+        pb->dirInfo.ioDrMdDat = 0;
+        pb->dirInfo.ioDrBkDat = 0;
+        pb->dirInfo.ioDrFndrInfo = {};
+
 
     }
     else if(FileItem *fileItem = dynamic_cast<FileItem*>(item.get()))
