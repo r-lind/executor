@@ -87,13 +87,10 @@ jobs:
 
   steps:
   - script: |
-      choco install msys2 --yes
-    displayName: 'install msys2'
-  - script: |
       set MSYSTEM=MINGW64
-      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm bison perl ruby"
-      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-cmake"
-      C:\tools\msys64\usr\bin\bash --login -c "pacman -S --noconfirm mingw-w64-x86_64-qt5 mingw-w64-x86_64-boost"
+      C:\msys64\usr\bin\bash --login -c "pacman -S --noconfirm bison perl ruby"
+      C:\msys64\usr\bin\bash --login -c "pacman -S --noconfirm mingw-w64-x86_64-gcc mingw-w64-x86_64-make mingw-w64-x86_64-cmake"
+      C:\msys64\usr\bin\bash --login -c "pacman -S --noconfirm mingw-w64-x86_64-qt5 mingw-w64-x86_64-boost"
     displayName: 'install msys packages'
 
   - checkout: self
@@ -105,7 +102,7 @@ jobs:
 
       set MSYSTEM=MINGW64
       set CHERE_INVOKING=1
-      C:\tools\msys64\usr\bin\bash --login -c "cmake .. -G 'MinGW Makefiles'  -DCMAKE_BUILD_TYPE=Release && cmake --build ."
+      C:\msys64\usr\bin\bash --login -c "cmake .. -G 'MinGW Makefiles'  -DCMAKE_BUILD_TYPE=Release && cmake --build ."
     displayName: 'Build'
 
   - script: |
@@ -113,7 +110,7 @@ jobs:
 
       set MSYSTEM=MINGW64
       set CHERE_INVOKING=1
-      C:\tools\msys64\usr\bin\bash --login -c "ctest . -LE xfail --no-compress-output -T test || true"
+      C:\msys64\usr\bin\bash --login -c "ctest . -LE xfail --no-compress-output -T test || true"
     displayName: 'Run tests'
 
   - task: PublishTestResults@2
@@ -125,7 +122,7 @@ jobs:
       cd build
       set MSYSTEM=MINGW64
       set CHERE_INVOKING=1
-      C:\tools\msys64\usr\bin\bash --login -c "cpack"
+      C:\msys64\usr\bin\bash --login -c "cpack"
     displayName: 'CPack'
 
   - task: PublishBuildArtifacts@1
