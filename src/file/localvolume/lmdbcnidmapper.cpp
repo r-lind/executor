@@ -1,9 +1,11 @@
 #include "lmdbcnidmapper.h"
 #include <file/file.h>
-#include <set>
 #include <OSUtil.h>
-#include <iostream>
 #include <rsys/paths.h>
+
+#include <algorithm>
+#include <iostream>
+#include <set>
 
 using namespace Executor;
 
