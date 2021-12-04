@@ -17,7 +17,7 @@ public:
     struct create_t {};
     static constexpr create_t create = {};
 
-    MacResourceFork(fs::path path);
+    MacResourceFork(fs::path path, int8_t permission);
     MacResourceFork(fs::path path, create_t);
     ~MacResourceFork();
 
