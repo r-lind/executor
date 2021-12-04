@@ -14,8 +14,8 @@ public:
     virtual ItemInfo getInfo() override;
     virtual void setInfo(ItemInfo info) override;
 
-    virtual std::unique_ptr<OpenFile> open() override;
-    virtual std::unique_ptr<OpenFile> openRF() override;
+    virtual std::unique_ptr<OpenFile> open(int8_t permission) override;
+    virtual std::unique_ptr<OpenFile> openRF(int8_t permission) override;
 };
 
 class PlainDataFork : public OpenFile
@@ -27,7 +27,7 @@ public:
     struct create_t {};
     static constexpr create_t create = {};
 
-    PlainDataFork(fs::path path);
+    PlainDataFork(fs::path path, int8_t permission);
     PlainDataFork(fs::path path, create_t);
     ~PlainDataFork();
 

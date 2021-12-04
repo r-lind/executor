@@ -20,6 +20,8 @@ public:
     virtual void setEOF(size_t sz) { throw UpgradeRequiredException(); }
     virtual size_t read(size_t offset, void *p, size_t n) = 0;
     virtual size_t write(size_t offset, void *p, size_t n) { throw UpgradeRequiredException(); }
+
+    virtual bool canWrite() const { return true; }
 };
 
 class EmptyFork : public OpenFile

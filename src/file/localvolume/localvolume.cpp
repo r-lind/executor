@@ -299,8 +299,8 @@ FileItemPtr LocalVolume::upgradeItem(FileItemPtr item, ItemFactory *betterFactor
 
     try
     {
-        copydata(item->open(), newItem->open());
-        copydata(item->openRF(), newItem->openRF());
+        copydata(item->open(fsRdPerm), newItem->open(fsRdWrPerm));
+        copydata(item->openRF(fsRdPerm), newItem->openRF(fsRdWrPerm));
     }
     catch(const std::exception& e)
     {
@@ -322,10 +322,12 @@ FileItemPtr LocalVolume::upgradeItem(FileItemPtr item, ItemFactory *betterFactor
             assert(fcbx.refNum == i * 94 + 2);
             fcbx.file = newItem;
 
+            int8_t perm = (fcbx.fcb->fcbMdRByt & WRITEBIT) ? fsRdWrPerm : fsRdPerm;
+
             if(fcbx.fcb->fcbMdRByt & RESOURCEBIT)
-                fcbx.access = newItem->openRF();
+                fcbx.access = newItem->openRF(perm);
             else
-                fcbx.access = newItem->open();
+                fcbx.access = newItem->open(perm);
         }
     }
 
@@ -347,14 +349,14 @@ void LocalVolume::openCommon(GUEST<short>& refNum, ItemPtr item, Fork fork, int8
             }
         }
 
-        auto access = fork == Fork::resource ? fileItem->openRF() : fileItem->open();
+        auto access = fork == Fork::resource ? fileItem->openRF(permission) : fileItem->open(permission);
         FCBExtension& fcbx = openFCBX();
         fcbx.access = std::move(access);
         fcbx.fcb->fcbFlNum = fileItem->cnid();
         fcbx.fcb->fcbMdRByt = 0;
         if(fork == Fork::resource)
             fcbx.fcb->fcbMdRByt |= RESOURCEBIT;
-        if(permission != fsRdPerm)
+        if(fcbx.access->canWrite())
             fcbx.fcb->fcbMdRByt |= WRITEBIT;
         fcbx.file = fileItem;
         refNum = fcbx.refNum;
@@ -438,8 +440,8 @@ void LocalVolume::getInfoCommon(CInfoPBPtr pb, InfoKind infoKind)
         auto info = fileItem->getInfo();
         pb->hFileInfo.ioFlFndrInfo = info.file.info;
         
-        size_t dsize = fileItem->open()->getEOF();
-        size_t rsize = fileItem->openRF()->getEOF();
+        size_t dsize = fileItem->open(fsRdPerm)->getEOF();
+        size_t rsize = fileItem->openRF(fsRdPerm)->getEOF();
         
         pb->hFileInfo.ioFlLgLen = dsize;
         pb->hFileInfo.ioFlPyLen = dsize;

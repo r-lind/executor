@@ -124,8 +124,8 @@ class FileItem : public Item
 public:
     using Item::Item;
 
-    virtual std::unique_ptr<OpenFile> open() = 0;
-    virtual std::unique_ptr<OpenFile> openRF() = 0;
+    virtual std::unique_ptr<OpenFile> open(int8_t permission) = 0;
+    virtual std::unique_ptr<OpenFile> openRF(int8_t permission) = 0;
 };
 
 }

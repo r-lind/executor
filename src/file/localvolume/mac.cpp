@@ -38,9 +38,21 @@ public:
 // a resource fork is 16MB, we just read the whole thing into RAM,
 // remove the attribute, and write it again at the desired size.
 
-MacResourceFork::MacResourceFork(fs::path path)
+MacResourceFork::MacResourceFork(fs::path path, int8_t permission)
 {
-    fd = open(path.string().c_str(), O_RDWR, 0644);
+    fd = -1;
+    if (permission == fsRdWrPerm || permission == fsWrPerm || permission == fsCurPerm
+        || permission == fsRdWrShPerm || permission == fsWrDenyPerm)
+    {
+        fd = open(path.string().c_str(), O_RDWR | O_BINARY, 0644);
+    }
+
+    if (fd == -1 &&
+        (permission == fsCurPerm || permission == fsRdPerm
+        || permission == fsRdDenyPerm))
+    {
+        fd = open(path.string().c_str(), O_RDONLY | O_BINARY, 0644);
+    }
 }
 
 MacResourceFork::MacResourceFork(fs::path path, create_t)
@@ -132,13 +144,13 @@ void MacItemFactory::createFile(const fs::path& path)
     MacResourceFork data(path, MacResourceFork::create);
 }
 
-std::unique_ptr<OpenFile> MacFileItem::open()
+std::unique_ptr<OpenFile> MacFileItem::open(int8_t permission)
 {
-    return std::make_unique<PlainDataFork>(path());
+    return std::make_unique<PlainDataFork>(path(), permission);
 }
-std::unique_ptr<OpenFile> MacFileItem::openRF()
+std::unique_ptr<OpenFile> MacFileItem::openRF(int8_t permission)
 {
-    return std::make_unique<MacResourceFork>(path());
+    return std::make_unique<MacResourceFork>(path(), permision);
 }
 
 ItemInfo MacFileItem::getInfo()

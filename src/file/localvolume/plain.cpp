@@ -9,9 +9,22 @@
 using namespace Executor;
 
 #if 1
-PlainDataFork::PlainDataFork(fs::path path)
+PlainDataFork::PlainDataFork(fs::path path, int8_t permission)
 {
-    fd = open(path.string().c_str(), O_RDWR | O_BINARY, 0644);
+    fd = -1;
+    if (permission == fsRdWrPerm || permission == fsWrPerm || permission == fsCurPerm
+        || permission == fsRdWrShPerm || permission == fsWrDenyPerm)
+    {
+        fd = open(path.string().c_str(), O_RDWR | O_BINARY, 0644);
+    }
+
+    if (fd == -1 &&
+        (permission == fsCurPerm || permission == fsRdPerm
+        || permission == fsRdDenyPerm))
+    {
+        fd = open(path.string().c_str(), O_RDONLY | O_BINARY, 0644);
+    }
+
     //std::cout << "ACCESSING FILE: " << fd << " = " << path << std::endl;
 }
 
@@ -62,7 +75,7 @@ size_t PlainDataFork::write(size_t offset, void *p, size_t n)
     return done;
 }
 #else
-PlainDataFork::PlainDataFork(fs::path path)
+PlainDataFork::PlainDataFork(fs::path path, int8_t permission)
     : stream(path, std::ios::binary)
 {
     std::cout << "ACCESSING FILE: " << path << std::endl;
@@ -96,11 +109,11 @@ size_t PlainDataFork::write(size_t offset, void *p, size_t n)
 #endif
 
 
-std::unique_ptr<OpenFile> PlainFileItem::open()
+std::unique_ptr<OpenFile> PlainFileItem::open(int8_t permission)
 {
-    return std::make_unique<PlainDataFork>(path_);
+    return std::make_unique<PlainDataFork>(path_, permission);
 }
-std::unique_ptr<OpenFile> PlainFileItem::openRF()
+std::unique_ptr<OpenFile> PlainFileItem::openRF(int8_t permission)
 {
     return std::make_unique<EmptyFork>();
 }

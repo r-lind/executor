@@ -28,14 +28,14 @@ class AppleDoubleFileItem : public FileItem
     std::weak_ptr<AppleSingleDoubleFile> openedFile;
     AppleDoubleScheme scheme;
 
-    std::shared_ptr<AppleSingleDoubleFile> access();
+    std::shared_ptr<AppleSingleDoubleFile> access(int8_t permission);
 public:
     AppleDoubleFileItem(AppleDoubleScheme scheme, ItemCache& itemcache, CNID parID, CNID cnid, fs::path p, mac_string_view name = {});
 
     virtual ItemInfo getInfo() override;
     virtual void setInfo(ItemInfo info) override;
-    virtual std::unique_ptr<OpenFile> open() override;
-    virtual std::unique_ptr<OpenFile> openRF() override;
+    virtual std::unique_ptr<OpenFile> open(int8_t permission) override;
+    virtual std::unique_ptr<OpenFile> openRF(int8_t permission) override;
 
     virtual void deleteItem() override;
     virtual void moveItem(const fs::path& newPath, mac_string_view newName) override;
@@ -53,14 +53,14 @@ class AppleSingleFileItem : public FileItem
 {
     std::weak_ptr<AppleSingleDoubleFile> openedFile;
 
-    std::shared_ptr<AppleSingleDoubleFile> access();
+    std::shared_ptr<AppleSingleDoubleFile> access(int8_t permission);
 public:
     using FileItem::FileItem;
 
     virtual ItemInfo getInfo() override;
     virtual void setInfo(ItemInfo info) override;
-    virtual std::unique_ptr<OpenFile> open() override;
-    virtual std::unique_ptr<OpenFile> openRF() override;
+    virtual std::unique_ptr<OpenFile> open(int8_t permission) override;
+    virtual std::unique_ptr<OpenFile> openRF(int8_t permission) override;
 };
 
 class AppleSingleDoubleFile

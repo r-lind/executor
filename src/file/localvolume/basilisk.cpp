@@ -42,14 +42,14 @@ void BasiliskItemFactory::createFile(const fs::path& newPath)
     fs::ofstream(parentPath / ".finf" / fn, std::ios::binary).write((char*)&info, sizeof(info));
 }
 
-std::unique_ptr<OpenFile> BasiliskFileItem::open()
+std::unique_ptr<OpenFile> BasiliskFileItem::open(int8_t permission)
 {
-    return std::make_unique<PlainDataFork>(path_);
+    return std::make_unique<PlainDataFork>(path_, permission);
 }
-std::unique_ptr<OpenFile> BasiliskFileItem::openRF()
+std::unique_ptr<OpenFile> BasiliskFileItem::openRF(int8_t permission)
 {
     fs::path rsrc = path().parent_path() / ".rsrc" / path().filename();
-    return std::make_unique<PlainDataFork>(rsrc);
+    return std::make_unique<PlainDataFork>(rsrc, permission);
 }
 
 ItemInfo BasiliskFileItem::getInfo()

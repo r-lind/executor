@@ -12,8 +12,8 @@ public:
 
     virtual ItemInfo getInfo() override;
     virtual void setInfo(ItemInfo info) override;
-    virtual std::unique_ptr<OpenFile> open() override;
-    virtual std::unique_ptr<OpenFile> openRF() override;
+    virtual std::unique_ptr<OpenFile> open(int8_t permission) override;
+    virtual std::unique_ptr<OpenFile> openRF(int8_t permission) override;
 };
 
 
