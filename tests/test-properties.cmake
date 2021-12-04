@@ -4,7 +4,7 @@
 
 set_tests_properties(
             # get info on directories doesn't work yet
-        FileTest.GetFIno
+        FileTest.GetFInfo
 
             # creation dates not supported by linux filesystem
         FileTest.SetFInfo_CrDat 
