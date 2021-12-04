@@ -1377,7 +1377,7 @@ TEST_F(FileTest, SetFInfo)
 
 TEST_F(FileTest, SetFInfo_MdDat)
 {
-    constexpr uint32_t date = 86400U * 365U * 100U + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
+    constexpr uint32_t date = 86400U * 365U * 80U + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
 
     testSetFInfoCommon(
         [date](auto& hpb) {
@@ -1390,7 +1390,7 @@ TEST_F(FileTest, SetFInfo_MdDat)
 }
 TEST_F(FileTest, SetFInfo_CrDat)
 {
-    constexpr uint32_t date = 86400 * 100 + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
+    constexpr uint32_t date = 86400U * 365U * 80U + 20 * 86400 + 23 * 86400;    // Jan 24, 1984
 
     testSetFInfoCommon(
         [date](auto& hpb) {
