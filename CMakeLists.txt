@@ -104,6 +104,7 @@ set(DIRS)
 list(APPEND DIRS ${CMAKE_BINARY_DIR})
 list(APPEND DIRS ${Boost_LIBRARY_DIRS})
 
+if(TARGET front-end-qt)
 if(TARGET front-end-${FRONT_END})
     get_target_property(QT_GUI_LOCATION Qt5::Gui LOCATION)
     get_filename_component(QT_GUI_LOCATION "${QT_GUI_LOCATION}" PATH)
@@ -122,12 +123,12 @@ set(CPACK_RESOURCE_FILE_README "${CMAKE_SOURCE_DIR}/README.md")
 if(WIN32)
     set(CPACK_GENERATOR "ZIP")
 
-    if(TARGET front-end-${FRONT_END})
+    if(TARGET front-end-qt)
         install_qt5_plugin("Qt5::QWindowsIntegrationPlugin" QT_PLUGINS "bin/")
-    endif()
 
     set(APPS "\${CMAKE_INSTALL_PREFIX}/bin/executor.exe")
     install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
+    endif()
 
     if(NOT MSVC)
         set(CPACK_SYSTEM_NAME win64-mingw)
@@ -135,12 +136,12 @@ if(WIN32)
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
 
-    if(TARGET front-end-${FRONT_END})
+    if(TARGET front-end-qt)
         install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS "Executor 2000.app/Contents/PlugIns")
-    endif()
 
     set(APPS "\${CMAKE_INSTALL_PREFIX}/Executor\ 2000.app")
     install(CODE "include(BundleUtilities)\nfixup_bundle(\"${APPS}\" \"${QT_PLUGINS}\" \"${DIRS}\")")
+    endif()
 
     set(CPACK_SYSTEM_NAME macOS)
     set(CPACK_DMG_VOLUME_NAME "Executor 2000")
