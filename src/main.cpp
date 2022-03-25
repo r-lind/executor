@@ -368,7 +368,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
             "argument must be a list of comma-separated words describing which "
             "debug options you want enabled.  You can abbreviate the debug "
             "options as long as the abbreviation is unambiguous.  Here is a "
-            "list of the options (some of which will may do nothing):  "
+            "list of the options (some of which may do nothing):  "
             "\"all\" enables all debugging options, "
             "\"fslog\" enables filesystem call logging, "
             "\"memcheck\" enables heap consistency checking (slow!), "
