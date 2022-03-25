@@ -34,6 +34,7 @@
 #include <rsys/executor.h>
 #include <prefs/options.h>
 #include <rsys/launch.h>
+#include <res/resource.h>
 
 #include <algorithm>
 
@@ -203,7 +204,7 @@ Executor may die without warning because of this mismatch",
                      "It is quite possible that this program will not work "
                      "under Executor.",
                      0,
-                     "Continue", "Restart", nullptr,
+                     "Continue", "Quit", nullptr,
                      nullptr, C_ExitToShell, nullptr);
     }
 #endif

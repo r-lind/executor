@@ -19,6 +19,11 @@
 
 using namespace Executor;
 
+/* true if there is a version skew between the system file version and
+   the required system version.  set by `InitResources ()', and used
+   by `InitWindows ()' */
+bool Executor::system_file_version_skew_p = false;
+
 /* extracts an int32_t from a string of the form [^(]*([0-9]*).*
  * () == 0, any invalid string == -1
  */

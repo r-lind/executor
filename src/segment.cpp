@@ -84,7 +84,7 @@ static Boolean argv_to_appfile(const char *uname, AppFile *ap)
     return true;
 }
 
-void Executor::InitAppFiles(int argc, char **argv)
+void Executor::InitAppFiles(const std::vector<std::string>& files)
 {
     LM(CurApRefNum) = -1;
     assignPString(LM(CurApName), toMacRomanFilename(ROMlib_appname), sizeof(LM(CurApName)) - 1);
@@ -99,10 +99,10 @@ void Executor::InitAppFiles(int argc, char **argv)
     (*fh)->count = 0;
     (*fh)->message = ROMlib_print ? appPrint : appOpen;
 
-    for(int i = 1; i < argc; i++)
+    for(const std::string& file : files)
     {
         AppFile appFile;
-        if(argv_to_appfile(argv[i], &appFile))
+        if(argv_to_appfile(file.c_str(), &appFile))
         {
             ROMlib_exit = true;
             INTEGER newcount = (*fh)->count + 1;

@@ -39,6 +39,7 @@ bool ROMlib_pretend_alias = false;
 bool ROMlib_pretend_script = false;
 bool ROMlib_pretend_edition = false;
 bool ROMlib_speech_enabled = false;
+bool ROMlib_prefer_ppc = false;
 
 bool ROMlib_use_scan_codes = false;
 
@@ -47,9 +48,6 @@ bool ROMlib_use_scan_codes = false;
    version number in the form `0xABC' which corresponds to system
    version A.B.C */
 uint32_t system_version = 0x700; /* keep this in sync with Browser's .ecf file */
-
-std::string ROMlib_configfilename;
-FILE *configfile;   // hidden parameter for options parser
 
 // flags.h
 
@@ -66,11 +64,6 @@ bool flag_grayscale;
 
 /* 0 means try running browser, 1 means don't */
 bool ROMlib_nobrowser = false;
-
-/* true if there is a version skew between the system file version and
-   the required system version.  set by `InitResources ()', and used
-   by `InitWindows ()' */
-bool system_file_version_skew_p = false;
 
 // options.h
 

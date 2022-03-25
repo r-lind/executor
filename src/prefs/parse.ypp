@@ -21,6 +21,8 @@ static void freestring( char *string );
 static char validblock = 1;
 static unsigned short crcval;
 
+FILE *configfile;
+
 namespace Executor
 {
     int ROMlib_AppleChar = 0;

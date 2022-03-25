@@ -72,14 +72,6 @@
 
 using namespace Executor;
 
-static bool ppc_launch_p = false;
-
-void Executor::ROMlib_set_ppc(bool val)
-{
-    ppc_launch_p = val;
-}
-
-
 static void beginexecutingat(LONGINT startpc)
 {
     EM_D0 = 0;
@@ -297,7 +289,7 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, Boolean resetmemo
             && ROMlib_find_cfrg(cfrg0, "pwpc"_4,
                                 kApplicationCFrag, (StringPtr) "");
 
-    if(havePowerPCCode && ppc_launch_p)
+    if(havePowerPCCode && ROMlib_prefer_ppc)
         code0 = nullptr;
     
     if(!havePowerPCCode && !code0)

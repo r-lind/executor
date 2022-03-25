@@ -13,7 +13,7 @@ if(NOT RUBY_EXECUTABLE)
     message(FATAL_ERROR "Cannot find command: 'ruby' (needed for building!)")
 endif()
 
-find_package(Boost REQUIRED COMPONENTS filesystem system)
+find_package(Boost REQUIRED COMPONENTS filesystem system program_options)
 
 find_package(Threads REQUIRED)
 
@@ -603,12 +603,14 @@ endif()
 foreach(FRONT_END ${FRONT_ENDS})
     if(TARGET front-end-${FRONT_END})
         add_executable(executor-${FRONT_END} main.cpp ${platform_resource_files})
-        target_link_libraries(executor-${FRONT_END} romlib front-end-headless)
+        target_link_libraries(executor-${FRONT_END} romlib front-end-headless Boost::program_options)
         if(NOT ${FRONT_END} STREQUAL headless)
             target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
         endif()
         set_target_properties(executor-${FRONT_END} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+        target_compile_options(executor-${FRONT_END} PRIVATE -fvisibility=hidden)
 
         if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
             set_target_properties(executor-${FRONT_END} PROPERTIES

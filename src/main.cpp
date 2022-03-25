@@ -58,6 +58,7 @@
 #include <debug/mon_debugger.h>
 #include <PowerCore.h>
 #include <vdriver/eventrecorder.h>
+#include <commandline/parsenum.h>
 
 #include "default_vdriver.h"
 #include "headless.h"
@@ -77,9 +78,21 @@
 #include <vector>
 #include <thread>
 
+#include <boost/any.hpp>
+namespace boost::program_options {
+template<class T, class charT>
+void validate(boost::any& v,
+                const std::vector<std::basic_string<charT> >& s,
+                std::optional<T>*,
+                int);
+}
+#include <boost/program_options.hpp>
+#include <iostream>
+
 using namespace Executor;
 using namespace std;
 
+namespace po = boost::program_options;
 
 /* Set to true if there was any error parsing arguments. */
 static bool bad_arg_p = false;
@@ -112,7 +125,7 @@ static const option_vec common_opts = {
        "\"fslog\" enables filesystem call logging, "
        "\"memcheck\" enables heap consistency checking (slow!), "
        "\"textcheck\" enables text record consistency checking (slow!), "
-       "\"trace\" enables miscellaneous trace information, "
+       "\"trace\" enables miscellaneous  trace information, "
        "\"sound\" enables miscellaneous sound logging information, "
        "\"trapfailure\" enables warnings when traps return error codes, "
        "\"errno\" enables some C library-related warnings, "
@@ -297,21 +310,21 @@ static void reportBadArgs()
     exit(-10);
 }
 
-static void checkBadArgs(int argc, char **argv)
+static void checkBadArgs(const std::vector<std::string>& args)
 {
-    if(argc >= 2)
+    if(!args.empty())
     {
         int a;
 
         /* Only complain if we see something with a leading dash; anything
          * else might be a file to launch.
          */
-        for(a = 1; a < argc; a++)
+        for(const auto& arg : args)
         {
-            if(argv[a][0] == '-')
+            if(arg[0] == '-')
             {
                 fprintf(stderr, "%s: unknown option `%s'\n",
-                        ROMlib_appname.c_str(), argv[a]);
+                        ROMlib_appname.c_str(), arg.c_str());
                 bad_arg_p = true;
             }
         }
@@ -324,8 +337,193 @@ static void checkBadArgs(int argc, char **argv)
 bool flag_headless = false;
 std::optional<fs::path> flag_record, flag_playback;
 
-static void parseCommandLine(int& argc, char **argv)
+
+namespace boost::filesystem
 {
+    void validate(boost::any& v, const std::vector<std::string>& s, fs::path*, int)
+    {
+        v = fs::path(po::validators::get_single_string(s));
+    }
+}
+
+/** Validates optional arguments. */
+template<class T, class charT>
+void boost::program_options::validate(boost::any& v,
+                const std::vector<std::basic_string<charT> >& s,
+                std::optional<T>*,
+                int)
+{
+    boost::program_options::validators::check_first_occurrence(v);
+    boost::program_options::validators::get_single_string(s);
+    boost::any a;
+    validate(a, s, (T*)0, 0);
+    v = boost::any(std::optional<T>(boost::any_cast<T>(a)));
+}
+
+
+template<typename T>
+class extended_typed_value : public po::typed_value<T>
+{
+    std::function<T(const std::string&)> parser_;
+public:
+    using po::typed_value<T>::typed_value;
+
+    extended_typed_value<T>* parser(std::function<T(const std::string&)> p)
+    {
+        parser_ = std::move(p);
+        return this;
+    }
+
+    virtual void xparse(boost::any& value_store, 
+                const std::vector< std::string >& new_tokens) 
+        const override
+    {
+        if (parser_)
+            value_store = parser_(po::validators::get_single_string(new_tokens));
+        else
+            po::typed_value<T>::xparse(value_store, new_tokens);
+    }
+};
+
+template<typename T>
+extended_typed_value<T>* xvalue(T *p = nullptr)
+{
+    return new extended_typed_value<int>(p);
+}
+
+po::typed_value<bool>* inverted_bool_switch(bool *p = nullptr)
+{
+    return po::bool_switch(p)->default_value(true)->implicit_value(false);
+}
+
+static void updateArgcArgv(int& argc, char **argv, std::vector<std::string>& args)
+{
+    for(int i = 0; i < args.size(); i++)
+        argv[i + 1] = args[i].data();
+    argc = args.size() + 1;
+    argv[argc] = nullptr;
+}
+
+struct SilentBadArgException {};
+
+static std::vector<std::string> parseCommandLine(int& argc, char **argv)
+{
+    po::options_description desc;
+
+    bool modeHelp = false, modeKeyboards = false, modeVersion = false;
+
+    po::options_description modes("Getting Information");
+    modes.add_options()
+        ("help,h", po::bool_switch(&modeHelp))
+        ("version,v", po::bool_switch(&modeVersion))
+        ("keyboards", po::bool_switch(&modeKeyboards))
+        ;
+    desc.add(modes);
+ 
+    po::options_description screen("Screen");
+    screen.add_options()
+        ("bpp", po::value(&flag_bpp)->notifier([](int d) {
+            if(d > 32 || d < 1 || (d & (d-1)))
+                throw po::invalid_option_value("foobar");
+        }), "screen depth (1,2,4,8,16,32)")
+        ("size", po::value<std::string>()->notifier([&](const std::string& s) {
+            if(!parse_size_opt("size", s))
+                throw SilentBadArgException();
+        }), "screen size in pixels")
+        ("grayscale", po::bool_switch(&flag_grayscale), "grayscale graphics (for use with --bpp 2,4,8)");
+    desc.add(screen);
+
+
+    po::options_description printing("Printing");
+    printing.add_options()
+        ("print", po::bool_switch(&ROMlib_print), "tell emulated application to print the specified document(s)")
+        ("cities", inverted_bool_switch(&ROMlib_fontsubstitution), "do not substitute standard PostScript fonts for classic Mac fonts")
+        ("prvers", po::value<std::string>(), "printer driver version to report to the application")
+        ("prres", po::value<std::string>()->notifier([&](const std::string& s) {
+            if(!parse_prres_opt(&ROMlib_optional_res_x, &ROMlib_optional_res_y, s))
+                throw SilentBadArgException();
+        }), "printer resolution");
+    desc.add(printing);
+
+    po::options_description testing("Automated Testing");
+    testing.add_options()
+        ("headless", po::bool_switch(&flag_headless), "disable all graphics output")
+        ("record", po::value(&flag_record), "record events to file")
+        ("playback", po::value(&flag_playback), "play back events from file")
+        ("timewarp", po::value(&flag_playback), "speed up or slow down time")
+        ;
+    desc.add(testing);
+
+    po::options_description debugging("Debugging");
+    debugging.add_options()
+        ("logtraps", po::bool_switch(&logtraps), "print all operating system and toolbox calls and their arguments")
+        ("break", po::bool_switch(&breakOnProcessStart), "break into debugger at program start")
+        ("debug", po::value<std::string>()->notifier([](const std::string& s) {
+            if (!error_parse_option_string(s.c_str()))
+                throw SilentBadArgException();
+        }), "debug flags")
+        ;
+    desc.add(debugging);
+
+
+    po::options_description emulation("Emulation");
+    emulation.add_options()
+        ("ppc", po::bool_switch(&ROMlib_prefer_ppc), "prefer PowerPC code in FAT binaries")
+#ifdef GENERATE_NATIVE_CODE
+        ("no-jit", inverted_bool_switch(&use_native_code_p), "enable JIT compiler")
+#endif
+      // ("memory", po::value<std::size_t>()->notify([](size_t x) { std::cout << "a\n"; }), "")
+        ("applzone", xvalue(&ROMlib_applzone_size)->parser([](const std::string& s) {
+            int32_t tmp;
+            if (!parse_number(s, &tmp, 1))
+                throw po::invalid_option_value(s);
+            return tmp;
+        }), "")
+        ("syszone", po::value(&ROMlib_syszone_size), "")
+        ("stack", po::value(&ROMlib_stack_size), "")
+        ;
+    desc.add(emulation);
+
+    po::variables_map vm;
+    auto parsed = po::command_line_parser(argc, argv)
+          .options(desc)
+          .allow_unregistered()
+          .run();
+    po::store(parsed, vm);
+    po::notify(vm);
+
+    std::cout << argc << ":";
+    for(int i = 0; i < argc; i++)
+        std::cout << " " << argv[i];
+    std::cout << std::endl;
+
+    std::vector<std::string> unrecognized = po::collect_unrecognized(parsed.options, po::include_positional);
+
+    for(auto x : unrecognized)
+        std::cout << " " << x;
+    std::cout << std::endl;
+    if(modeHelp)
+    {
+        std::cout << desc;
+        exit(0);
+    }
+    else if(modeVersion)
+    {
+        fprintf(stdout, "%s\n", EXECUTOR_VERSION);
+        exit(0);
+    }
+
+    if(flag_bpp != 0 && flag_bpp != 1
+       && flag_bpp != 2 && flag_bpp != 4 && flag_bpp != 8
+       && flag_bpp != 16 && flag_bpp != 32)
+    {
+        fprintf(stderr, "Bits per pixel must be 1, 2, 4, 8, 16 or 32.\n");
+        bad_arg_p = true;
+    }
+
+    return unrecognized;
+
+#if 0
     opt_database_t opt_db;
     string arg;
 
@@ -367,7 +565,7 @@ static void parseCommandLine(int& argc, char **argv)
     }
 
     if(opt_val(opt_db, "ppc", nullptr))
-        ROMlib_set_ppc(true);
+        ROMlib_prefer_ppc = true;
 
     if(opt_val(opt_db, "size", &arg))
         bad_arg_p |= !parse_size_opt("size", arg);
@@ -540,6 +738,7 @@ static void parseCommandLine(int& argc, char **argv)
 
     if(bad_arg_p)
         reportBadArgs();
+#endif
 }
 
 int main(int argc, char **argv)
@@ -562,8 +761,7 @@ int main(int argc, char **argv)
     msecs_elapsed();
 
     ROMlib_appname = fs::path(argv[0]).filename().string();
-
-    parseCommandLine(argc, argv);
+    auto remainingArgs = parseCommandLine(argc, argv);
 
     if(flag_playback)
         EventSink::instance = std::make_unique<EventPlayback>(*flag_playback);
@@ -572,12 +770,16 @@ int main(int argc, char **argv)
     else
         EventSink::instance = std::make_unique<EventSink>();
 
+    updateArgcArgv(argc, argv, remainingArgs);
+
     if(flag_headless)
         vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());
     else
         vdriver = std::make_unique<DefaultVDriver>(EventSink::instance.get(), argc, argv);
-        
-    checkBadArgs(argc, argv);
+    
+    remainingArgs = std::vector<std::string>(argv + 1, argv + argc);
+    
+    checkBadArgs(remainingArgs);
 
     auto executorThread = std::thread([&] {
         try
@@ -623,7 +825,7 @@ int main(int argc, char **argv)
                     display_keyboard_choices();
             }
 
-            InitAppFiles(argc, argv);
+            InitAppFiles(remainingArgs);
 
             InitFonts();
 

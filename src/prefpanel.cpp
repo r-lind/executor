@@ -481,7 +481,7 @@ void Executor::dopreferences(void)
             {
                 readprefvalues(dp);
                 if(ihit == PREFSAVEITEM)
-                    saveprefvalues(ROMlib_configfilename.c_str());
+                    SaveConfigFile();
             }
             DisposeDialog(dp);
             am_already_here = false;
