@@ -120,8 +120,6 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
 
         unsigned char empty[] = { 0 };
 
-        //ROMlib_release_tracking_values();
-
         if(CFIR_LOCATION(cfirp) == kOnDiskFlat)
         {
             // #warning were ignoring a lot of the cfir attributes
