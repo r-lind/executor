@@ -295,9 +295,9 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
 
     po::options_description modes("Getting Information");
     modes.add_options()
-        ("help,h", po::bool_switch(&modeHelp))
-        ("version,v", po::bool_switch(&modeVersion))
-        ("keyboards", po::bool_switch(&modeKeyboards))
+        ("help,h", po::bool_switch(&modeHelp), "display help message")
+        ("version,v", po::bool_switch(&modeVersion), "display version")
+        ("keyboards", po::bool_switch(&modeKeyboards), "display all supported keyboard layouts")
         ;
     desc.add(modes);
  
@@ -497,7 +497,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     }
     else if(modeVersion)
     {
-        fprintf(stdout, "%s\n", EXECUTOR_VERSION);
+        fprintf(stdout, "%s\n", ROMlib_executor_full_name);
         exit(0);
     }
     else if(modeKeyboards)

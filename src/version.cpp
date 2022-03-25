@@ -13,6 +13,10 @@
 
 using namespace Executor;
 
+#if !defined(EXECUTOR_VERSION)
+#define EXECUTOR_VERSION ""
+#endif
+
 /* A simple version number like "1.99q" */
 const char ROMlib_executor_version[] = EXECUTOR_VERSION;
 

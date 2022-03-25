@@ -24,64 +24,6 @@ using namespace Executor;
    by `InitWindows ()' */
 bool Executor::system_file_version_skew_p = false;
 
-/* extracts an int32_t from a string of the form [^(]*([0-9]*).*
- * () == 0, any invalid string == -1
- */
-
-static int32_t
-extract_vers_num(Handle h)
-{
-    uint32_t retval, old_retval;
-    const char *p, *ep;
-    bool seen_left, seen_right, done;
-
-    retval = old_retval = 0;
-    seen_left = false;
-    seen_right = false;
-    done = false;
-    for(p = (char *)*h, ep = p + GetHandleSize(h);
-        !done && p < ep; ++p)
-    {
-        switch(*p)
-        {
-            case '(':
-                if(seen_left)
-                    done = true;
-                else
-                    seen_left = true;
-                break;
-            case ')':
-                seen_right = true;
-                done = true;
-                break;
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
-                if(seen_left)
-                    retval = retval * 10 + *p - '0';
-                if(retval < old_retval)
-                    done = true;
-                else
-                    old_retval = retval;
-                break;
-            default:
-                if(seen_left)
-                    done = true;
-                break;
-        }
-    }
-    if(!seen_right)
-        retval = -1;
-    return retval;
-}
-
 INTEGER Executor::C_InitResources()
 {
     TheZoneGuard guard(LM(SysZone));
@@ -107,10 +49,15 @@ INTEGER Executor::C_InitResources()
     LM(SysMapHndl) = LM(TopMapHndl);
     ROMlib_resTypesChanged();
     SetResLoad(true);
+
+    /*
+    TODO: decide whether to re-instate a system file version check
+        (or whether to handle the system file differently)
     versh = GetResource("vers"_4, 1);
     versnum = extract_vers_num(versh);
     if(versnum < MINIMUM_SYSTEM_FILE_NEEDED)
         system_file_version_skew_p = true;
+    */
 
     ROMlib_set_appearance();
 
