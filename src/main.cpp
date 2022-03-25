@@ -406,6 +406,14 @@ static void updateArgcArgv(int& argc, char **argv, std::vector<std::string>& arg
 
 struct SilentBadArgException {};
 
+static int parseMemoryArgument(const std::string& s)
+{
+    int32_t tmp;
+    if (!parse_number(s, &tmp, 1))
+        throw po::invalid_option_value(s);
+    return tmp;
+}
+
 static std::vector<std::string> parseCommandLine(int& argc, char **argv)
 {
     po::options_description desc;
@@ -424,7 +432,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     screen.add_options()
         ("bpp", po::value(&flag_bpp)->notifier([](int d) {
             if(d > 32 || d < 1 || (d & (d-1)))
-                throw po::invalid_option_value("foobar");
+                throw po::invalid_option_value("Argument to --bpp must be 1,2,4,8,16 or 32.");
         }), "screen depth (1,2,4,8,16,32)")
         ("size", po::value<std::string>()->notifier([&](const std::string& s) {
             if(!parse_size_opt("size", s))
@@ -438,7 +446,14 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     printing.add_options()
         ("print", po::bool_switch(&ROMlib_print), "tell emulated application to print the specified document(s)")
         ("cities", inverted_bool_switch(&ROMlib_fontsubstitution), "do not substitute standard PostScript fonts for classic Mac fonts")
-        ("prvers", po::value<std::string>(), "printer driver version to report to the application")
+        ("prvers", po::value<std::string>()->notifier([&](const std::string& s) {
+            uint32_t vers;
+
+            if(!ROMlib_parse_version(s, &vers))
+                throw SilentBadArgException();
+            else
+                ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
+        }), "printer driver version to report to the application")
         ("prres", po::value<std::string>()->notifier([&](const std::string& s) {
             if(!parse_prres_opt(&ROMlib_optional_res_x, &ROMlib_optional_res_y, s))
                 throw SilentBadArgException();
@@ -450,7 +465,35 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         ("headless", po::bool_switch(&flag_headless), "disable all graphics output")
         ("record", po::value(&flag_record), "record events to file")
         ("playback", po::value(&flag_playback), "play back events from file")
-        ("timewarp", po::value(&flag_playback), "speed up or slow down time")
+        /* TODO: */ 
+        ("timewarp", po::value<std::string>()->notifier([&](const std::string& str) {
+            std::string numerStr, denomStr;
+            if(auto pos = str.find('/'); pos != std::string::npos)
+            {
+                numerStr = str.substr(0, pos);
+                denomStr = str.substr(pos + 1);
+            }
+            else
+            {
+                numerStr = str;
+                denomStr = "1";
+            }
+
+            int numer = 0, denom = 0;
+            try
+            {
+                numer = std::stoi(numerStr);
+                denom = std::stoi(denomStr);
+            }
+            catch(...)
+            {
+            }
+
+            if(numer > 0 && denom > 0)
+                ROMlib_SetTimewarp(numer, denom);
+            else
+                throw po::invalid_option_value("bad arguments to --timewarp");
+        }), "speed up or slow down time")
         ;
     desc.add(testing);
 
@@ -461,7 +504,26 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         ("debug", po::value<std::string>()->notifier([](const std::string& s) {
             if (!error_parse_option_string(s.c_str()))
                 throw SilentBadArgException();
-        }), "debug flags")
+        }), 
+            "enable certain debugging output and consistency checks.  This "
+            "is primarily used by ARDI developers, but we are making it "
+            "available during the pre-beta period to expert users.  The next "
+            "argument must be a list of comma-separated words describing which "
+            "debug options you want enabled.  You can abbreviate the debug "
+            "options as long as the abbreviation is unambiguous.  Here is a "
+            "list of the options (some of which will may do nothing):  "
+            "\"all\" enables all debugging options, "
+            "\"fslog\" enables filesystem call logging, "
+            "\"memcheck\" enables heap consistency checking (slow!), "
+            "\"textcheck\" enables text record consistency checking (slow!), "
+            "\"trace\" enables miscellaneous  trace information, "
+            "\"sound\" enables miscellaneous sound logging information, "
+            "\"trapfailure\" enables warnings when traps return error codes, "
+            "\"errno\" enables some C library-related warnings, "
+            "\"unexpected\" enables warnings for unexpected events, "
+            "\"unimplemented\" enables warnings for unimplemented traps.  "
+            "Example: \"executor -debug unimp,trace\""
+        )
         ;
     desc.add(debugging);
 
@@ -472,17 +534,69 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
 #ifdef GENERATE_NATIVE_CODE
         ("no-jit", inverted_bool_switch(&use_native_code_p), "enable JIT compiler")
 #endif
-      // ("memory", po::value<std::size_t>()->notify([](size_t x) { std::cout << "a\n"; }), "")
-        ("applzone", xvalue(&ROMlib_applzone_size)->parser([](const std::string& s) {
-            int32_t tmp;
-            if (!parse_number(s, &tmp, 1))
-                throw po::invalid_option_value(s);
-            return tmp;
-        }), "")
-        ("syszone", po::value(&ROMlib_syszone_size), "")
-        ("stack", po::value(&ROMlib_stack_size), "")
+        /* TODO: ("memory", po::value<std::size_t>()->notify([](size_t x) { std::cout << "a\n"; }), 
+            "specify the total memory you want reserved for use by the programs "
+            "run under Executor and for Executor's internal system software.  "
+            "For example, \"executor -memory 5.5M\" would "
+            "make five and a half megabytes available to the virtual machine.  "
+            "Executor will require extra memory above and beyond this amount "
+            "for other uses."
+        )*/
+        ("applzone", xvalue(&ROMlib_applzone_size)->parser(&parseMemoryArgument), 
+            "specify the memory to allocate for the application being run, "
+            "e.g. \"executor -applzone 4M\" would make four megabytes "
+            "of RAM available to the application.  \"applzone\" stands for "
+            "\"application zone\".")
+        ("syszone", xvalue(&ROMlib_syszone_size)->parser(&parseMemoryArgument),
+            "like -applzone, but specifies the amount of memory to make "
+            "available to Executor's internal system software."
+        )
+        ("stack", xvalue(&ROMlib_stack_size)->parser(&parseMemoryArgument), 
+            "like -applzone, but specifies the amount of stack memory to allocate."
+        )
+        ("system", po::value<std::string>()->notifier([&](const std::string& s) {
+            if (!parse_system_version(s))
+                throw SilentBadArgException();
+        }), "specify the system version that executor reports to applications")
         ;
     desc.add(emulation);
+
+    po::options_description sound("Sound");
+    sound.add_options()
+        ("nosound", inverted_bool_switch(&sound_disabled_p), "disabe sound output")
+        ;
+    desc.add(sound);
+
+    po::options_description misc("Miscellaneous");
+    misc.add_options()
+        ("noclock", po::bool_switch(&ROMlib_noclock), "disable timer interrupt")
+        ("speech", po::bool_switch(&ROMlib_speech_enabled), "enable speech manager (mac hosts only)")
+        ("noautorefresh", inverted_bool_switch(&do_autorefresh_p), "turns off automatic detection of programs that bypass QuickDraw")
+        ("refresh", po::value(&ROMlib_refresh)
+            ->implicit_value(10),
+            "Handle programs that bypass QuickDraw, at a performance penalty."
+            "Follow -refresh with an number indicating how many 60ths of a second "
+            "to wait between each screen refresh, e.g. \"executor -refresh 10\".")
+        ("appearance", po::value<std::string>()->notifier([&](const std::string& s) {
+            if(!ROMlib_parse_appearance(s.c_str()))
+                throw SilentBadArgException();
+        }), "(mac or windows) specify the appearance of windows and "
+                    "menus.  For example \"executor -appearance windows\" will make each "
+                    "window have a blue title bar")
+        ("scancodes", po::bool_switch(&ROMlib_use_scan_codes), 
+            "different form of key mapping (may be useful in "
+            "conjunction with -keyboard; not supported for all vdrivers)")
+        ("keyboard", po::value(&keyboard), "choose a specific keyboard map")
+#if defined(__linux__)
+        ("nodrivesearch", po::bool_switch(&nodrivesearch_p), 
+            "Do not look for a floppy drive, CD-ROM drive or any other drive "
+            "except as specified by the MacVolumes environment variable"
+        )
+#endif
+        ("nobrowser", po::bool_switch(&ROMlib_nobrowser), "don't run Browser")
+        ("sticky", po::bool_switch(&ROMlib_sticky_menus_p), "sticky menus")
+        ;
+    desc.add(misc);
 
     po::variables_map vm;
     auto parsed = po::command_line_parser(argc, argv)
@@ -512,13 +626,10 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         fprintf(stdout, "%s\n", EXECUTOR_VERSION);
         exit(0);
     }
-
-    if(flag_bpp != 0 && flag_bpp != 1
-       && flag_bpp != 2 && flag_bpp != 4 && flag_bpp != 8
-       && flag_bpp != 16 && flag_bpp != 32)
+    else if(modeKeyboards)
     {
-        fprintf(stderr, "Bits per pixel must be 1, 2, 4, 8, 16 or 32.\n");
-        bad_arg_p = true;
+        list_keyboards_p = true;
+        flag_headless = true;
     }
 
     return unrecognized;
