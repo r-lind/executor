@@ -51,6 +51,8 @@ extern uint32_t system_version;
 bool SaveConfigFile();
 void ParseConfigFile(std::string appname, OSType type);
 
+#define CREATE_SYSTEM_VERSION(a, b, c) \
+    ((((a)&0xF) << 8) | (((b)&0xF) << 4) | ((c)&0xF))
 
 #define C_STRING_FROM_SYSTEM_VERSION()        \
     ({                                        \

@@ -5,7 +5,6 @@
 #include <rsys/version.h>
 #include <prefs/crc.h>
 #include <prefs/parse.h>
-#include <commandline/parseopt.h>
 #include <rsys/gestalt.h>
 #include <rsys/launch.h>
 #include <print/print.h>

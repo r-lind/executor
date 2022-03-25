@@ -36,7 +36,6 @@
 #include <rsys/dump.h>
 #include <file/file.h>
 #include <ctl/ctl.h>
-#include <commandline/parseopt.h>
 #include <print/print.h>
 #include <mman/memsize.h>
 #include <vdriver/autorefresh.h>
@@ -92,8 +91,6 @@ using namespace std;
 
 namespace po = boost::program_options;
 
-/* Set to true if there was any error parsing arguments. */
-static bool bad_arg_p = false;
 
 
 static bool use_native_code_p = true;
@@ -102,47 +99,19 @@ static bool logtraps = false;
 static std::string keyboard;
 static bool list_keyboards_p = false;
 
-/* This is to tell people about the switch from "-applzone 4096" to
- * "-applzone 4M".
- */
-static void
-note_memory_syntax(const char *arg, unsigned val)
-{
-    /* Make sane error messages when the supplied value is insane.
-   * Otherwise, try to print an example that illustrates how to
-   * use the value they are trying to generate.
-   */
-    if(val < 100 || val > 1000000)
-        val = 2048;
-
-    fprintf(stderr, "Specified %s is too small. "
-                    "For a %u.%02u\nmegabyte %s you would "
-                    "say \"-%s ",
-            arg, val / 1024, (val % 1024) * 100 / 1024,
-            arg, arg);
-
-    if(val % 1024 == 0)
-        fprintf(stderr, "%uM", val / 1024);
-    else if(val < 1024)
-        fprintf(stderr, "%uK", val);
-    else
-        fprintf(stderr, "%u.%02uM", val / 1024, (val % 1024) * 100 / 1024);
-
-    fputs("\"\n", stderr);
-
-    bad_arg_p = true;
-}
 
 static void reportBadArgs()
 {
     fprintf(stderr,
-            "Type \"%s -help\" for a list of command-line options.\n",
+            "Type \"%s --help\" for a list of command-line options.\n",
             ROMlib_appname.c_str());
     exit(-10);
 }
 
 static void checkBadArgs(const std::vector<std::string>& args)
 {
+    bool bad_arg_p = false;
+
     if(!args.empty())
     {
         int a;
@@ -258,21 +227,62 @@ struct Ratio
 {
     int numer, denom;
 
-    friend std::istream& operator>>(std::istream& in, Ratio& r)
+    friend std::istream& operator>>(std::istream& in, Ratio& out)
     {
-        in >> r.numer;
-        if (!in)
-            return in;
+        in >> out.numer;
         char c;
         in >> c;
         if (in.eof() || c != '/')
         {
             in.unget();
-            r.denom = 1;
+            out.denom = 1;
             return in;
         }
 
-        in >> r.denom;
+        in >> out.denom;
+        return in;
+    }
+};
+
+struct Size2D
+{
+    unsigned width, height;
+
+    friend std::istream& operator>>(std::istream& in, Size2D& out)
+    {
+        in >> out.width;
+        char c;
+        in >> c;
+        if (in.eof() || c != 'x')
+            in.setstate(std::ios::failbit);
+        in >> out.height;
+        return in;
+    }
+};
+
+struct VersionNumber
+{
+    unsigned major = 0, minor = 0, patch = 0;
+
+    friend std::istream& operator>>(std::istream& in, VersionNumber& out)
+    {
+        out = {};
+        in >> out.major;
+        char c;
+        in >> c;
+        if (in.eof() || c != '.')
+        {
+            in.unget();
+            return in;
+        }
+        in >> out.minor;
+        in >> c;
+        if (in.eof() || c != '.')
+        {
+            in.unget();
+            return in;
+        }
+        in >> out.patch;
         return in;
     }
 };
@@ -296,10 +306,15 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         ("bpp", xvalue(&flag_bpp)->validator([](int d) {
             return !(d > 32 || d < 1 || (d & (d-1)));
         }), "screen depth (1,2,4,8,16,32)")
-        ("size", po::value<std::string>()->notifier([&](const std::string& s) {
-            if(!parse_size_opt("size", s))
-                throw SilentBadArgException();
-        }), "screen size in pixels")
+        ("size", xvalue<Size2D>()
+            ->validator([](Size2D s) {
+                return s.width >= 512 && s.height >= 342;
+            })
+            ->notifier([](Size2D s) {
+                flag_width = s.width;
+                flag_height = s.height;
+            })
+        , "screen size in pixels")
         ("grayscale", po::bool_switch(&flag_grayscale), "grayscale graphics (for use with --bpp 2,4,8)");
     desc.add(screen);
 
@@ -308,18 +323,23 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     printing.add_options()
         ("print", po::bool_switch(&ROMlib_print), "tell emulated application to print the specified document(s)")
         ("cities", inverted_bool_switch(&ROMlib_fontsubstitution), "do not substitute standard PostScript fonts for classic Mac fonts")
-        ("prvers", po::value<std::string>()->notifier([&](const std::string& s) {
-            uint32_t vers;
-
-            if(!ROMlib_parse_version(s, &vers))
-                throw SilentBadArgException();
-            else
-                ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
-        }), "printer driver version to report to the application")
-        ("prres", po::value<std::string>()->notifier([&](const std::string& s) {
-            if(!parse_prres_opt(&ROMlib_optional_res_x, &ROMlib_optional_res_y, s))
-                throw SilentBadArgException();
-        }), "printer resolution");
+        ("prvers", xvalue<VersionNumber>()
+            ->validator([](VersionNumber v) {
+                return v.minor < 10 && v.patch == 0;
+            })
+            ->notifier([](VersionNumber v) {
+                ROMlib_PrDrvrVers = v.major * 10 + v.minor;
+            })
+        , "printer driver version to report to the application")
+        ("prres", xvalue<Size2D>()
+            ->validator([](Size2D s) {
+                return s.width >= 60 && s.height >= 60;
+            })
+            ->notifier([](Size2D s) {
+                ROMlib_optional_res_x = s.width;
+                ROMlib_optional_res_y = s.height;
+            })
+        , "printer resolution");
     desc.add(printing);
 
     po::options_description testing("Automated Testing");
@@ -391,10 +411,14 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         ("stack", xvalue(&ROMlib_stack_size)->parser(&parseMemoryArgument), 
             "like -applzone, but specifies the amount of stack memory to allocate."
         )
-        ("system", po::value<std::string>()->notifier([&](const std::string& s) {
-            if (!parse_system_version(s))
-                throw SilentBadArgException();
-        }), "specify the system version that executor reports to applications")
+        ("system", xvalue<VersionNumber>()
+            ->validator([](VersionNumber v) {
+                return v.major < 10 && v.minor < 16 && v.patch < 16;
+            })
+            ->notifier([](VersionNumber v) {
+                system_version = CREATE_SYSTEM_VERSION(v.major, v.minor, v.patch);
+            })
+        , "specify the system version that executor reports to applications")
         ;
     desc.add(emulation);
 

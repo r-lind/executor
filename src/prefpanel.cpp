@@ -283,7 +283,7 @@ void readprefvalues(DialogPtr dp)
         std::string system_string;
 
         update_string_from_edit_text(system_string, dp, PREF_SYSTEM);
-        parse_system_version(system_string.c_str());
+        parse_version(system_string.c_str(), &system_version);
     }
 }
 
