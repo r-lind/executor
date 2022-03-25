@@ -196,12 +196,18 @@ template<typename T>
 class extended_typed_value : public po::typed_value<T>
 {
     std::function<T(const std::string&)> parser_;
+    std::function<bool (const T&)> validator_;
 public:
     using po::typed_value<T>::typed_value;
 
-    extended_typed_value<T>* parser(std::function<T(const std::string&)> p)
+    extended_typed_value<T>* parser(std::function<T(const std::string&)> f)
     {
-        parser_ = std::move(p);
+        parser_ = std::move(f);
+        return this;
+    }
+    extended_typed_value<T>* validator(std::function<bool (const T&)> f)
+    {
+        validator_ = std::move(f);
         return this;
     }
 
@@ -213,13 +219,16 @@ public:
             value_store = parser_(po::validators::get_single_string(new_tokens));
         else
             po::typed_value<T>::xparse(value_store, new_tokens);
+        if (validator_)
+            if (!validator_(boost::any_cast<const T&>(value_store)))
+                throw po::invalid_option_value(new_tokens.front());
     }
 };
 
 template<typename T>
 extended_typed_value<T>* xvalue(T *p = nullptr)
 {
-    return new extended_typed_value<int>(p);
+    return new extended_typed_value<T>(p);
 }
 
 po::typed_value<bool>* inverted_bool_switch(bool *p = nullptr)
@@ -245,6 +254,29 @@ static int parseMemoryArgument(const std::string& s)
     return tmp;
 }
 
+struct Ratio
+{
+    int numer, denom;
+
+    friend std::istream& operator>>(std::istream& in, Ratio& r)
+    {
+        in >> r.numer;
+        if (!in)
+            return in;
+        char c;
+        in >> c;
+        if (in.eof() || c != '/')
+        {
+            in.unget();
+            r.denom = 1;
+            return in;
+        }
+
+        in >> r.denom;
+        return in;
+    }
+};
+
 static std::vector<std::string> parseCommandLine(int& argc, char **argv)
 {
     po::options_description desc;
@@ -261,9 +293,8 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
  
     po::options_description screen("Screen");
     screen.add_options()
-        ("bpp", po::value(&flag_bpp)->notifier([](int d) {
-            if(d > 32 || d < 1 || (d & (d-1)))
-                throw po::invalid_option_value("Argument to --bpp must be 1,2,4,8,16 or 32.");
+        ("bpp", xvalue(&flag_bpp)->validator([](int d) {
+            return !(d > 32 || d < 1 || (d & (d-1)));
         }), "screen depth (1,2,4,8,16,32)")
         ("size", po::value<std::string>()->notifier([&](const std::string& s) {
             if(!parse_size_opt("size", s))
@@ -296,34 +327,10 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         ("headless", po::bool_switch(&flag_headless), "disable all graphics output")
         ("record", po::value(&flag_record), "record events to file")
         ("playback", po::value(&flag_playback), "play back events from file")
-        ("timewarp", po::value<std::string>()->notifier([&](const std::string& str) {
-            std::string numerStr, denomStr;
-            if(auto pos = str.find('/'); pos != std::string::npos)
-            {
-                numerStr = str.substr(0, pos);
-                denomStr = str.substr(pos + 1);
-            }
-            else
-            {
-                numerStr = str;
-                denomStr = "1";
-            }
-
-            int numer = 0, denom = 0;
-            try
-            {
-                numer = std::stoi(numerStr);
-                denom = std::stoi(denomStr);
-            }
-            catch(...)
-            {
-            }
-
-            if(numer > 0 && denom > 0)
-                ROMlib_SetTimewarp(numer, denom);
-            else
-                throw po::invalid_option_value("bad arguments to --timewarp");
-        }), "speed up or slow down time")
+        ("timewarp", xvalue<Ratio>()
+            ->validator([](Ratio r) { return r.numer > 0 && r.denom > 0; })
+            ->notifier([&](Ratio r) { ROMlib_SetTimewarp(r.numer, r.denom); })
+        , "speed up or slow down time")
         ;
     desc.add(testing);
 
@@ -428,21 +435,34 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         ;
     desc.add(misc);
 
-    po::variables_map vm;
-    auto parsed = po::command_line_parser(argc, argv)
-          .options(desc)
-          .allow_unregistered()
-          .run();
-    po::store(parsed, vm);
-    po::notify(vm);
+    std::vector<std::string> unrecognized;
 
-    std::cout << argc << ":";
-    for(int i = 0; i < argc; i++)
-        std::cout << " " << argv[i];
-    std::cout << std::endl;
+    try
+    {
+        auto parsed = po::command_line_parser(argc, argv)
+            .options(desc)
+            .allow_unregistered()
+            .run();
+        po::variables_map vm;
+        po::store(parsed, vm);
+        po::notify(vm);
 
-    std::vector<std::string> unrecognized = po::collect_unrecognized(parsed.options, po::include_positional);
+        std::cout << argc << ":";
+        for(int i = 0; i < argc; i++)
+            std::cout << " " << argv[i];
+        std::cout << std::endl;
 
+        unrecognized = po::collect_unrecognized(parsed.options, po::include_positional);
+    }
+    catch (const po::error& err)
+    {
+        std::cerr << err.what();
+        exit(1);
+    }
+    catch (const SilentBadArgException&)
+    {
+        exit(1);
+    }
     for(auto x : unrecognized)
         std::cout << " " << x;
     std::cout << std::endl;
