@@ -10,7 +10,6 @@
 #include <CQuickDraw.h>
 
 #include <vdriver/vdriver.h>
-#include <commandline/option.h>
 #include <error/system_error.h>
 #include <sound/soundopts.h>
 #include <rsys/version.h>

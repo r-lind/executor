@@ -444,9 +444,6 @@ set(error_sources
 source_group(Error FILES ${error_sources})
 
 set(commandline_sources
-    commandline/option.h
-    commandline/option.cpp
-
     commandline/parseopt.h
     commandline/parsenum.h
     commandline/parseopt.cpp

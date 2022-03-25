@@ -46,7 +46,6 @@
 #include <base/m68kint.h>
 #include <quickdraw/depthconv.h>
 #include <quickdraw/rgbutil.h>
-#include <commandline/option.h>
 #include <commandline/flags.h>
 #include <osevent/osevent.h>
 
