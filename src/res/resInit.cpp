@@ -28,9 +28,6 @@ INTEGER Executor::C_InitResources()
 {
     TheZoneGuard guard(LM(SysZone));
 
-    Handle versh;
-    int32_t versnum;
-
     LM(TopMapHndl) = nullptr;
 
     ROMlib_setreserr(noErr);
@@ -53,8 +50,8 @@ INTEGER Executor::C_InitResources()
     /*
     TODO: decide whether to re-instate a system file version check
         (or whether to handle the system file differently)
-    versh = GetResource("vers"_4, 1);
-    versnum = extract_vers_num(versh);
+    Handle versh = GetResource("vers"_4, 1);
+    int32_t versnum = extract_vers_num(versh);
     if(versnum < MINIMUM_SYSTEM_FILE_NEEDED)
         system_file_version_skew_p = true;
     */
