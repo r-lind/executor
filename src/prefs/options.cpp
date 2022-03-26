@@ -56,10 +56,8 @@ bool ROMlib_nobrowser = false;
 
 // options.h
 
-int32_t ROMlib_options = 0;
 std::string ROMlib_WindowName;
 std::string ROMlib_Comments;      // unused on purpose
-int ROMlib_desired_bpp = 0;
 
 bool ROMlib_sticky_menus_p = false;
 
@@ -73,5 +71,5 @@ uint32_t ROMlib_PrDrvrVers = 70;
 bool ROMlib_rect_screen = false;
 bool ROMlib_rect_buttons = false;
 
-
+int ROMlib_AppleChar = 0;
 }

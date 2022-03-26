@@ -21,11 +21,8 @@ static char validblock = 1;
 static unsigned short crcval;
 
 FILE *configfile;
-
-namespace Executor
-{
-    int ROMlib_AppleChar = 0;
-}
+int32_t ROMlib_options = 0;
+int ROMlib_desired_bpp = 0;
 
 void yyerror(const char *str);
 %}
