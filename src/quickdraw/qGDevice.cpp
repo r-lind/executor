@@ -539,10 +539,10 @@ OSErr Executor::C_SetDepth(GDHandle gdh, INTEGER bpp, INTEGER which_flags,
     return noErr;
 }
 
-void Executor::ROMlib_InitGDevices()
+void Executor::ROMlib_InitGDevices(int width, int height, int bpp, bool grayscale)
 {
     /* Set up the current graphics mode appropriately. */
-    if(!vdriver->setMode(flag_width, flag_height, flag_bpp, flag_grayscale))
+    if(!vdriver->setMode(width, height, bpp, grayscale))
     {
         fprintf(stderr, "Could not set graphics mode.\n");
         exit(-12);

@@ -24,7 +24,6 @@ extern int ROMlib_desired_bpp;
 
 extern bool ROMlib_rect_screen;
 extern bool ROMlib_rect_buttons;
-extern bool ROMlib_text_disable_hack;
 
 enum
 {

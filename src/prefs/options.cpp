@@ -51,17 +51,6 @@ uint32_t system_version = 0x700; /* keep this in sync with Browser's .ecf file *
 
 // flags.h
 
-/* Initial screen size.  This can be changed dynamically. */
-/* 0 means "use default". */
-int flag_width, flag_height;
-
-/* Initial bits per pixel.  The screen depth can be changed dynamically. */
-/* 0 means "use default". */
-int flag_bpp;
-
-/* Initial grayscale flag. */
-bool flag_grayscale;
-
 /* 0 means try running browser, 1 means don't */
 bool ROMlib_nobrowser = false;
 
@@ -83,7 +72,6 @@ uint32_t ROMlib_PrDrvrVers = 70;
 
 bool ROMlib_rect_screen = false;
 bool ROMlib_rect_buttons = false;
-bool ROMlib_text_disable_hack = false;
 
 
 }

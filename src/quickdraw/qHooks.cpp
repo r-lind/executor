@@ -13,6 +13,7 @@
 using namespace Executor;
 
 
+const bool ROMlib_text_disable_hack = false;
 static bool text_is_enabled_p = true;
 
 void

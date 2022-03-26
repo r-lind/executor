@@ -99,6 +99,15 @@ static bool logtraps = false;
 static std::string keyboard;
 static bool list_keyboards_p = false;
 
+static bool flag_headless = false;
+static std::optional<fs::path> flag_record, flag_playback;
+
+/* 0 means "use default". */
+static int flag_width, flag_height;
+/* 0 means "use default". */
+static int flag_bpp;
+static bool flag_grayscale;
+
 
 static void reportBadArgs()
 {
@@ -133,9 +142,6 @@ static void checkBadArgs(const std::vector<std::string>& args)
     if(bad_arg_p)
         reportBadArgs();
 }
-
-bool flag_headless = false;
-std::optional<fs::path> flag_record, flag_playback;
 
 
 namespace boost::filesystem
@@ -566,7 +572,7 @@ int main(int argc, char **argv)
             InitLowMem();
             syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
 
-            ROMlib_InitGDevices();
+            ROMlib_InitGDevices(flag_width, flag_height, flag_bpp, flag_grayscale);
             
             ROMlib_eventinit();
             hle_init();
