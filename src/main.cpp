@@ -123,8 +123,6 @@ static void checkBadArgs(const std::vector<std::string>& args)
 
     if(!args.empty())
     {
-        int a;
-
         /* Only complain if we see something with a leading dash; anything
          * else might be a file to launch.
          */
@@ -231,17 +229,18 @@ static int parseMemoryArgument(const std::string& s)
 
 struct Ratio
 {
-    int numer, denom;
+    int numer, denom = 1;
 
     friend std::istream& operator>>(std::istream& in, Ratio& out)
     {
         in >> out.numer;
+        if (in.eof())
+            return in;
         char c;
         in >> c;
         if (in.eof() || c != '/')
         {
             in.unget();
-            out.denom = 1;
             return in;
         }
 
