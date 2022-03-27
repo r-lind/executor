@@ -44,7 +44,6 @@ inline boost::program_options::typed_value<bool>* inverted_bool_switch(bool *p =
 template<typename T>
 class extended_typed_value : public boost::program_options::typed_value<T>
 {
-    std::function<T(const std::string&)> parser_;
     std::function<bool (const T&)> validator_;
     void *casted_store_location_ = nullptr;
     void (*casted_storer_)(void *dst, const T& src) = nullptr;
@@ -60,11 +59,6 @@ public:
         };
     }
 
-    extended_typed_value<T>* parser(std::function<T(const std::string&)> f)
-    {
-        parser_ = std::move(f);
-        return this;
-    }
     extended_typed_value<T>* validator(std::function<bool (const T&)> f)
     {
         validator_ = std::move(f);
@@ -76,10 +70,7 @@ public:
         const override
     {
         using namespace boost::program_options;
-        if (parser_)
-            value_store = parser_(validators::get_single_string(new_tokens));
-        else
-            typed_value<T>::xparse(value_store, new_tokens);
+        typed_value<T>::xparse(value_store, new_tokens);
         if (validator_)
             if (!validator_(boost::any_cast<const T&>(value_store)))
                 throw invalid_option_value(new_tokens.front());
