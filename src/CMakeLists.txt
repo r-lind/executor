@@ -586,8 +586,12 @@ if(WIN32 AND NOT MSVC)
 endif()
 
 target_link_libraries(romlib resources)
-
 target_link_libraries(romlib ${host_os_libs})
+
+if(APPLE)
+    # the way boost is compiled in homebrew, this seems to be required
+    target_compile_options(romlib PRIVATE -fvisibility=hidden)
+endif()
 
 if(APPLE)
     set(platform_resource_files ../icon/executor.icns)
@@ -606,7 +610,10 @@ foreach(FRONT_END ${FRONT_ENDS})
         set_target_properties(executor-${FRONT_END} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-        target_compile_options(executor-${FRONT_END} PRIVATE -fvisibility=hidden)
+        if(APPLE)
+            # the way boost is compiled in homebrew, this seems to be required
+                target_compile_options(executor-${FRONT_END} PRIVATE -fvisibility=hidden)
+        endif()
 
         if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
             set_target_properties(executor-${FRONT_END} PROPERTIES
