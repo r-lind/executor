@@ -48,8 +48,6 @@ typedef enum { false,
                true } bool;
 #endif
 
-#include <commandline/parsenum.h>
-
 using namespace Executor;
 
 static bool write_zeros = false;
@@ -627,6 +625,7 @@ DONE:
 
 #if defined(MKVOL_PROGRAM)
 
+#include <commandline/parsenum.h>
 #include <ctype.h>
 
 //#define DEFAULT_SUFFIX ".hfv"
