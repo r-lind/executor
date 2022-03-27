@@ -55,7 +55,7 @@
 #include <debug/mon_debugger.h>
 #include <PowerCore.h>
 #include <vdriver/eventrecorder.h>
-#include <commandline/parsenum.h>
+#include <commandline/program_options_extended.h>
 
 #include "default_vdriver.h"
 #include "headless.h"
@@ -75,22 +75,13 @@
 #include <vector>
 #include <thread>
 
-#include <boost/any.hpp>
-namespace boost::program_options {
-template<class T, class charT>
-void validate(boost::any& v,
-                const std::vector<std::basic_string<charT> >& s,
-                std::optional<T>*,
-                int);
-}
-#include <boost/program_options.hpp>
 #include <iostream>
 
 using namespace Executor;
 using namespace std;
 
 namespace po = boost::program_options;
-
+namespace pox = program_options_extended;
 
 
 static bool use_native_code_p = true;
@@ -141,74 +132,6 @@ static void checkBadArgs(const std::vector<std::string>& args)
         reportBadArgs();
 }
 
-
-namespace boost::filesystem
-{
-    void validate(boost::any& v, const std::vector<std::string>& s, fs::path*, int)
-    {
-        v = fs::path(po::validators::get_single_string(s));
-    }
-}
-
-/** Validates optional arguments. */
-template<class T, class charT>
-void boost::program_options::validate(boost::any& v,
-                const std::vector<std::basic_string<charT> >& s,
-                std::optional<T>*,
-                int)
-{
-    boost::program_options::validators::check_first_occurrence(v);
-    boost::program_options::validators::get_single_string(s);
-    boost::any a;
-    validate(a, s, (T*)0, 0);
-    v = boost::any(std::optional<T>(boost::any_cast<T>(a)));
-}
-
-
-template<typename T>
-class extended_typed_value : public po::typed_value<T>
-{
-    std::function<T(const std::string&)> parser_;
-    std::function<bool (const T&)> validator_;
-public:
-    using po::typed_value<T>::typed_value;
-
-    extended_typed_value<T>* parser(std::function<T(const std::string&)> f)
-    {
-        parser_ = std::move(f);
-        return this;
-    }
-    extended_typed_value<T>* validator(std::function<bool (const T&)> f)
-    {
-        validator_ = std::move(f);
-        return this;
-    }
-
-    virtual void xparse(boost::any& value_store, 
-                const std::vector< std::string >& new_tokens) 
-        const override
-    {
-        if (parser_)
-            value_store = parser_(po::validators::get_single_string(new_tokens));
-        else
-            po::typed_value<T>::xparse(value_store, new_tokens);
-        if (validator_)
-            if (!validator_(boost::any_cast<const T&>(value_store)))
-                throw po::invalid_option_value(new_tokens.front());
-    }
-};
-
-template<typename T>
-extended_typed_value<T>* xvalue(T *p = nullptr)
-{
-    return new extended_typed_value<T>(p);
-}
-
-po::typed_value<bool>* inverted_bool_switch(bool *p = nullptr)
-{
-    return po::bool_switch(p)->default_value(true)->implicit_value(false);
-}
-
 static void updateArgcArgv(int& argc, char **argv, std::vector<std::string>& args)
 {
     for(int i = 0; i < args.size(); i++)
@@ -219,13 +142,44 @@ static void updateArgcArgv(int& argc, char **argv, std::vector<std::string>& arg
 
 struct SilentBadArgException {};
 
-static int parseMemoryArgument(const std::string& s)
+struct MemorySize
 {
-    int32_t tmp;
-    if (!parse_number(s, &tmp, 1))
-        throw po::invalid_option_value(s);
-    return tmp;
-}
+    static const int32_t min = 0, max = 0x7FFFFFFF;
+    int32_t size;
+
+    friend std::istream& operator>>(std::istream& in, MemorySize& out)
+    {
+        double tmp;
+        in >> tmp;
+        if (!in.eof())
+        {
+            char c;
+            in >> std::ws >> c;
+            if (!in.eof())
+            {
+                if (c == 'K' || c == 'k')
+                    tmp *= 1024;
+                else if (c == 'M' || c == 'm')
+                    tmp *= 1024 * 1024;
+                else if (c == 'G' || c == 'g')
+                    tmp *= 1024 * 1024 * 1024;
+                else
+                    tmp = -1;
+            }
+        }
+        if (tmp >= (double)min && tmp <= (double)max)
+        {
+            out.size = static_cast<int32_t>(tmp + 0.5);
+        }
+        else
+            in.setstate(std::ios::failbit);
+
+        return in;
+    }
+
+    template<typename T>
+    operator T() { return static_cast<T>(size); }
+};
 
 struct Ratio
 {
@@ -312,10 +266,10 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
  
     po::options_description screen("Screen");
     screen.add_options()
-        ("bpp", xvalue(&flag_bpp)->validator([](int d) {
+        ("bpp", pox::value(&flag_bpp)->validator([](int d) {
             return !(d > 32 || d < 1 || (d & (d-1)));
         }), "screen depth (1,2,4,8,16,32)")
-        ("size", xvalue<Size2D>()
+        ("size", pox::value<Size2D>()
             ->validator([](Size2D s) {
                 return s.width >= 512 && s.height >= 342;
             })
@@ -331,8 +285,8 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     po::options_description printing("Printing");
     printing.add_options()
         ("print", po::bool_switch(&ROMlib_print), "tell emulated application to print the specified document(s)")
-        ("cities", inverted_bool_switch(&ROMlib_fontsubstitution), "do not substitute standard PostScript fonts for classic Mac fonts")
-        ("prvers", xvalue<VersionNumber>()
+        ("cities", pox::inverted_bool_switch(&ROMlib_fontsubstitution), "do not substitute standard PostScript fonts for classic Mac fonts")
+        ("prvers", pox::value<VersionNumber>()
             ->validator([](VersionNumber v) {
                 return v.minor < 10 && v.patch == 0;
             })
@@ -340,7 +294,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
                 ROMlib_PrDrvrVers = v.major * 10 + v.minor;
             })
         , "printer driver version to report to the application")
-        ("prres", xvalue<Size2D>()
+        ("prres", pox::value<Size2D>()
             ->validator([](Size2D s) {
                 return s.width >= 60 && s.height >= 60;
             })
@@ -356,7 +310,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
         ("headless", po::bool_switch(&flag_headless), "disable all graphics output")
         ("record", po::value(&flag_record), "record events to file")
         ("playback", po::value(&flag_playback), "play back events from file")
-        ("timewarp", xvalue<Ratio>()
+        ("timewarp", pox::value<Ratio>()
             ->validator([](Ratio r) { return r.numer > 0 && r.denom > 0; })
             ->notifier([&](Ratio r) { ROMlib_SetTimewarp(r.numer, r.denom); })
         , "speed up or slow down time")
@@ -398,7 +352,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     emulation.add_options()
         ("ppc", po::bool_switch(&ROMlib_prefer_ppc), "prefer PowerPC code in FAT binaries")
 #ifdef GENERATE_NATIVE_CODE
-        ("no-jit", inverted_bool_switch(&use_native_code_p), "enable JIT compiler")
+        ("no-jit", pox::inverted_bool_switch(&use_native_code_p), "enable JIT compiler")
 #endif
         /* TODO: ("memory", po::value<std::size_t>()->notify([](size_t x) { std::cout << "a\n"; }), 
             "specify the total memory you want reserved for use by the programs "
@@ -408,22 +362,22 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
             "Executor will require extra memory above and beyond this amount "
             "for other uses."
         )*/
-        ("applzone", xvalue(&ROMlib_applzone_size)->parser(&parseMemoryArgument), 
+        ("applzone", pox::value<MemorySize>(&ROMlib_applzone_size), 
             "specify the memory to allocate for the application being run, "
             "e.g. \"executor -applzone 4M\" would make four megabytes "
             "of RAM available to the application.  \"applzone\" stands for "
             "\"application zone\".")
-        ("syszone", xvalue(&ROMlib_syszone_size)->parser(&parseMemoryArgument),
+        ("syszone", pox::value(&ROMlib_syszone_size),
             "like -applzone, but specifies the amount of memory to make "
             "available to Executor's internal system software."
         )
-        ("stack", xvalue(&ROMlib_stack_size)->parser(&parseMemoryArgument), 
+        ("stack", pox::value(&ROMlib_stack_size), 
             "like -applzone, but specifies the amount of stack memory to allocate."
         )
-        ("system", xvalue<VersionNumber>()
+        ("system", pox::value<VersionNumber>()
             ->validator([](VersionNumber v) {
                 return v.major < 10 && v.minor < 16 && v.patch < 16;
-            })
+            }) 
             ->notifier([](VersionNumber v) {
                 system_version = CREATE_SYSTEM_VERSION(v.major, v.minor, v.patch);
             })
@@ -433,7 +387,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
 
     po::options_description sound("Sound");
     sound.add_options()
-        ("nosound", inverted_bool_switch(&sound_disabled_p), "disabe sound output")
+        ("nosound", pox::inverted_bool_switch(&sound_disabled_p), "disabe sound output")
         ;
     desc.add(sound);
 
@@ -441,7 +395,7 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     misc.add_options()
         ("noclock", po::bool_switch(&ROMlib_noclock), "disable timer interrupt")
         ("speech", po::bool_switch(&ROMlib_speech_enabled), "enable speech manager (mac hosts only)")
-        ("noautorefresh", inverted_bool_switch(&do_autorefresh_p), "turns off automatic detection of programs that bypass QuickDraw")
+        ("noautorefresh", pox::inverted_bool_switch(&do_autorefresh_p), "turns off automatic detection of programs that bypass QuickDraw")
         ("refresh", po::value(&ROMlib_refresh)
             ->implicit_value(10),
             "Handle programs that bypass QuickDraw, at a performance penalty."

@@ -448,7 +448,8 @@ set(commandline_sources
     commandline/parsenum.h
     commandline/parseopt.cpp
     commandline/parsenum.cpp
-
+    commandline/program_options_extended.h
+    commandline/program_options_extended.cpp
     commandline/flags.h
     )
 
