@@ -273,6 +273,8 @@ struct VersionNumber
     {
         out = {};
         in >> out.major;
+        if (in.eof())
+            return in;
         char c;
         in >> c;
         if (in.eof() || c != '.')
@@ -281,6 +283,8 @@ struct VersionNumber
             return in;
         }
         in >> out.minor;
+        if (in.eof())
+            return in;
         in >> c;
         if (in.eof() || c != '.')
         {
