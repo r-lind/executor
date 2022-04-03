@@ -3,6 +3,8 @@
 #include <boost/any.hpp>
 #include <boost/filesystem.hpp>
 
+#include <optional>
+
 namespace boost::program_options
 {
     template<class T, class charT>
