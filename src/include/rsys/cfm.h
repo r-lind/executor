@@ -80,7 +80,6 @@ extern cfir_t *ROMlib_find_cfrg(Handle cfrg, OSType arch, uint8_t type,
 
 
 extern ConnectionID ROMlib_new_connection(uint32_t n_sects);
-extern void ROMlib_release_tracking_values(void);
 
 extern PEFLoaderInfoHeader *ROMlib_build_pef_hash(const map_entry_t table[],
                                                     int count);

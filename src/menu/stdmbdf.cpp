@@ -103,11 +103,7 @@ draw_menu_title(muelem *elt,
         PORT_TX_MODE(qdGlobals().thePort) = srcCopy;
         MoveTo(elt->muleft + MENULEFT - 3, 14);
         if(ROMlib_AppleChar && title[0] == 1 && title[1] == APPLE_CHAR)
-        {
-            title[1] = (char)ROMlib_AppleChar;
-            DrawString((StringPtr)title);
-            title[1] = APPLE_CHAR;
-        }
+            DrawChar((char)ROMlib_AppleChar);
         else
             DrawString((StringPtr)title);
         if(dither_title_p)

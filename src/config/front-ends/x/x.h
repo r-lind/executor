@@ -2,6 +2,8 @@
 
 #include <vdriver/vdriver.h>
 
+#include <optional>
+
 class X11VideoDriver : public Executor::VideoDriver
 {
 public:    

@@ -39,6 +39,7 @@ bool ROMlib_pretend_alias = false;
 bool ROMlib_pretend_script = false;
 bool ROMlib_pretend_edition = false;
 bool ROMlib_speech_enabled = false;
+bool ROMlib_prefer_ppc = false;
 
 bool ROMlib_use_scan_codes = false;
 
@@ -48,36 +49,15 @@ bool ROMlib_use_scan_codes = false;
    version A.B.C */
 uint32_t system_version = 0x700; /* keep this in sync with Browser's .ecf file */
 
-std::string ROMlib_configfilename;
-FILE *configfile;   // hidden parameter for options parser
-
 // flags.h
-
-/* Initial screen size.  This can be changed dynamically. */
-/* 0 means "use default". */
-int flag_width, flag_height;
-
-/* Initial bits per pixel.  The screen depth can be changed dynamically. */
-/* 0 means "use default". */
-int flag_bpp;
-
-/* Initial grayscale flag. */
-bool flag_grayscale;
 
 /* 0 means try running browser, 1 means don't */
 bool ROMlib_nobrowser = false;
 
-/* true if there is a version skew between the system file version and
-   the required system version.  set by `InitResources ()', and used
-   by `InitWindows ()' */
-bool system_file_version_skew_p = false;
-
 // options.h
 
-int32_t ROMlib_options = 0;
 std::string ROMlib_WindowName;
 std::string ROMlib_Comments;      // unused on purpose
-int ROMlib_desired_bpp = 0;
 
 bool ROMlib_sticky_menus_p = false;
 
@@ -90,7 +70,6 @@ uint32_t ROMlib_PrDrvrVers = 70;
 
 bool ROMlib_rect_screen = false;
 bool ROMlib_rect_buttons = false;
-bool ROMlib_text_disable_hack = false;
 
-
+int ROMlib_AppleChar = 0;
 }

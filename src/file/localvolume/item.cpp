@@ -77,7 +77,7 @@ void DirectoryItem::populateCache(std::vector<ItemPtr> items)
         ROMlib_UprString(nameUpr.data(), false, nameUpr.size());
 
         assert(nameUpr.size());
-        auto inserted = contents_by_name_.emplace(nameUpr, item).second;
+        [[maybe_unused]] auto inserted = contents_by_name_.emplace(nameUpr, item).second;
         assert(inserted);
 
         if(!dynamic_cast<DirectoryItem*>(item.get()))

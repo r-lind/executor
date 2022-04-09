@@ -5,7 +5,6 @@
 #include <base/common.h>
 #include <quickdraw/srcblt.h>
 #include <vdriver/refresh.h>
-#include <commandline/option.h>
 
 #include <SDL/SDL.h>
 

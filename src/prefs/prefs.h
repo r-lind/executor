@@ -26,6 +26,7 @@ extern bool ROMlib_passpostscript;
 extern int ROMlib_refresh;
 extern int ROMlib_delay;
 extern bool ROMlib_noclock;
+extern bool ROMlib_prefer_ppc;
 
 extern bool ROMlib_pretend_help;
 extern bool ROMlib_pretend_alias;
@@ -47,12 +48,11 @@ extern uint32_t ROMlib_PrDrvrVers;
 
 extern uint32_t system_version;
 
-extern std::string ROMlib_configfilename;
-extern FILE *configfile;
-
-int saveprefvalues(const char *savefilename);
+bool SaveConfigFile();
 void ParseConfigFile(std::string appname, OSType type);
 
+#define CREATE_SYSTEM_VERSION(a, b, c) \
+    ((((a)&0xF) << 8) | (((b)&0xF) << 4) | ((c)&0xF))
 
 #define C_STRING_FROM_SYSTEM_VERSION()        \
     ({                                        \

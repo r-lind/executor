@@ -20,7 +20,6 @@
 #include <menu/menu.h>
 #include <prefs/prefs.h>
 #include <commandline/flags.h>
-#include <commandline/option.h>
 #include <time/syncint.h>
 #include <vdriver/vdriver.h>
 #include <time/vbl.h>
@@ -37,13 +36,11 @@
 #include <rsys/dump.h>
 #include <file/file.h>
 #include <ctl/ctl.h>
-#include <commandline/parseopt.h>
 #include <print/print.h>
 #include <mman/memsize.h>
 #include <vdriver/autorefresh.h>
 #include <sound/sounddriver.h>
 #include <error/system_error.h>
-#include <commandline/option.h>
 #include <base/emustubs.h>
 #include <sane/float.h>
 #include <rsys/paths.h>
@@ -58,6 +55,8 @@
 #include <debug/mon_debugger.h>
 #include <PowerCore.h>
 #include <vdriver/eventrecorder.h>
+#include <commandline/program_options_extended.h>
+#include <commandline/option_arguments.h>
 
 #include "default_vdriver.h"
 #include "headless.h"
@@ -77,12 +76,13 @@
 #include <vector>
 #include <thread>
 
+#include <iostream>
+
 using namespace Executor;
 using namespace std;
 
-
-/* Set to true if there was any error parsing arguments. */
-static bool bad_arg_p = false;
+namespace po = boost::program_options;
+namespace pox = program_options_extended;
 
 
 static bool use_native_code_p = true;
@@ -91,227 +91,39 @@ static bool logtraps = false;
 static std::string keyboard;
 static bool list_keyboards_p = false;
 
-static const option_vec common_opts = {
-    { "headless", "no graphics output", opt_no_arg, "" },
-    { "record", "record events to file", opt_sep, "" },
-    { "playback", "play back events from file", opt_sep, "" },
-    { "timewarp", "speed up or slow down time", opt_sep, "1/1" },
-    { "sticky", "sticky menus", opt_no_arg, "" },
-    { "nobrowser", "don't run Browser", opt_no_arg, "" },
-    { "bpp", "default screen depth", opt_sep, "" },
-    { "size", "default screen size", opt_sep, "" },
-    { "debug",
-      ("enable certain debugging output and consistency checks.  This "
-       "is primarily used by ARDI developers, but we are making it "
-       "available during the pre-beta period to expert users.  The next "
-       "argument must be a list of comma-separated words describing which "
-       "debug options you want enabled.  You can abbreviate the debug "
-       "options as long as the abbreviation is unambiguous.  Here is a "
-       "list of the options (some of which will may do nothing):  "
-       "\"all\" enables all debugging options, "
-       "\"fslog\" enables filesystem call logging, "
-       "\"memcheck\" enables heap consistency checking (slow!), "
-       "\"textcheck\" enables text record consistency checking (slow!), "
-       "\"trace\" enables miscellaneous trace information, "
-       "\"sound\" enables miscellaneous sound logging information, "
-       "\"trapfailure\" enables warnings when traps return error codes, "
-       "\"errno\" enables some C library-related warnings, "
-       "\"unexpected\" enables warnings for unexpected events, "
-       "\"unimplemented\" enables warnings for unimplemented traps.  "
-       "Example: \"executor -debug unimp,trace\""),
+static bool flag_headless = false;
+static std::optional<fs::path> flag_record, flag_playback;
 
-      opt_sep, "" },
-    { "nosound", "disable any sound hardware",
-      opt_no_arg, "" },
+/* 0 means "use default". */
+static int flag_width, flag_height;
+/* 0 means "use default". */
+static int flag_bpp;
+static bool flag_grayscale;
 
-#if defined(__linux__)
-    { "nodrivesearch",
-      "Do not look for a floppy drive, CD-ROM drive or any other drive "
-      "except as specified by the MacVolumes environment variable",
-      opt_no_arg, "" },
-#endif /* __linux__ */
-    { "keyboards", "list available keyboard mappings",
-      opt_no_arg, "" },
-    { "keyboard", "choose a specific keyboard map", opt_sep, "" },
-    { "print",
-      "tell program to print file; not useful unless you also "
-      "specify a program to run and one or more documents to print.",
-      opt_no_arg, "" },
-
-  { "noclock",     "disable timer",               opt_no_arg,   "" },
-
-    { "noautorefresh",
-      "turns off automatic detection of programs that bypass QuickDraw.",
-      opt_no_arg, "" },
-    {
-        "refresh",
-        "handle programs that bypass QuickDraw, at a performance penalty.  "
-        "Follow -refresh with an number indicating how many 60ths of a second "
-        "to wait between each screen refresh, e.g. \"executor -refresh 10\".",
-        opt_optional, "10",
-    },
-    {
-        "help", "print this help message", opt_no_arg, "",
-    },
-    {
-        "version", "print the Executor version", opt_no_arg, "",
-    },
-    {
-        "memory",
-        "specify the total memory you want reserved for use by the programs "
-        "run under Executor and for Executor's internal system software.  "
-        "For example, \"executor -memory 5.5M\" would "
-        "make five and a half megabytes available to the virtual machine.  "
-        "Executor will require extra memory above and beyond this amount "
-        "for other uses.",
-        opt_sep, "",
-    },
-    {
-        "applzone",
-        "specify the memory to allocate for the application being run, "
-        "e.g. \"executor -applzone 4M\" would make four megabytes "
-        "of RAM available to the application.  \"applzone\" stands for "
-        "\"application zone\".",
-        opt_sep, "",
-    },
-    {
-        "stack",
-        "like -applzone, but specifies the amount of stack memory to allocate.",
-        opt_sep, "",
-    },
-    {
-        "syszone", "like -applzone, but specifies the amount of memory to make "
-                   "available to Executor's internal system software.",
-        opt_sep, "",
-    },
-    { "system",
-      "specify the system version that executor reports to applications",
-      opt_sep, "" },
-    { "notnative",
-      "don't use native code in syn68k",
-      opt_no_arg, "" },
-
-    { "grayscale", "\
-specify that executor should run in grayscale mode even if it is \
-capable of color.",
-      opt_no_arg, "" },
-
-    { "cities", "Don't use Helvetica for Geneva, Courier for Monaco and Times "
-                "for New York when generating PostScript",
-      opt_no_arg, "" },
-
-    { "prvers",
-      "specify the printer version that executor reports to applications",
-      opt_sep, "" },
-
-    { "prres",
-      "specify an additional resolution available for printing, e.g. "
-      "\"executor -prres 600x600\" will make 600dpi resolution available "
-      "in addition to the standard 72dpi.  Not all apps will be able to use "
-      "this additional resolution.",
-      opt_sep, "" },
-
-    { "ppc", "prefer PPC code to 68K code when both are available", opt_no_arg, "" },
-
-    { "appearance", "(mac or windows) specify the appearance of windows and "
-                    "menus.  For example \"executor -appearance windows\" will make each "
-                    "window have a blue title bar",
-      opt_sep, "" },
-    {"scancodes", "different form of key mapping (may be useful in "
-        "conjunction with -keyboard; not supported for all vdrivers)", opt_no_arg},
-
-    { "logtraps", "print every operating system and toolbox calls and their arguments", opt_no_arg, "" },
-    { "speech", "enable speech manager (mac hosts only)", opt_no_arg, ""},
-    { "break", "break into debugger at program start", opt_no_arg, ""}
-};
-
-/* Prints the specified value in a representation appropriate for command
- * line switches.
- */
-static void
-print_command_line_value(FILE *fp, int v)
-{
-    if(v > 0 && v % 1024 == 0)
-    {
-        if(v % (1024 * 1024) == 0)
-            fprintf(fp, "%dM", v / (1024 * 1024));
-        else
-            fprintf(fp, "%dK", v / 1024);
-    }
-    else
-        fprintf(fp, "%d", v);
-}
-
-static void
-check_arg(string argname, int *arg, int min, int max)
-{
-    if(*arg < min || *arg > max)
-    {
-        fprintf(stderr, "%s: invalid value for `%s': must be between ",
-                ROMlib_appname.c_str(), argname.c_str());
-        print_command_line_value(stderr, min);
-        fputs(" and ", stderr);
-        print_command_line_value(stderr, max);
-        fputs(" inclusive.\n", stderr);
-        bad_arg_p = true;
-    }
-}
-
-
-/* This is to tell people about the switch from "-applzone 4096" to
- * "-applzone 4M".
- */
-static void
-note_memory_syntax(const char *arg, unsigned val)
-{
-    /* Make sane error messages when the supplied value is insane.
-   * Otherwise, try to print an example that illustrates how to
-   * use the value they are trying to generate.
-   */
-    if(val < 100 || val > 1000000)
-        val = 2048;
-
-    fprintf(stderr, "Specified %s is too small. "
-                    "For a %u.%02u\nmegabyte %s you would "
-                    "say \"-%s ",
-            arg, val / 1024, (val % 1024) * 100 / 1024,
-            arg, arg);
-
-    if(val % 1024 == 0)
-        fprintf(stderr, "%uM", val / 1024);
-    else if(val < 1024)
-        fprintf(stderr, "%uK", val);
-    else
-        fprintf(stderr, "%u.%02uM", val / 1024, (val % 1024) * 100 / 1024);
-
-    fputs("\"\n", stderr);
-
-    bad_arg_p = true;
-}
 
 static void reportBadArgs()
 {
     fprintf(stderr,
-            "Type \"%s -help\" for a list of command-line options.\n",
+            "Type \"%s --help\" for a list of command-line options.\n",
             ROMlib_appname.c_str());
     exit(-10);
 }
 
-static void checkBadArgs(int argc, char **argv)
+static void checkBadArgs(const std::vector<std::string>& args)
 {
-    if(argc >= 2)
-    {
-        int a;
+    bool bad_arg_p = false;
 
+    if(!args.empty())
+    {
         /* Only complain if we see something with a leading dash; anything
          * else might be a file to launch.
          */
-        for(a = 1; a < argc; a++)
+        for(const auto& arg : args)
         {
-            if(argv[a][0] == '-')
+            if(arg[0] == '-')
             {
                 fprintf(stderr, "%s: unknown option `%s'\n",
-                        ROMlib_appname.c_str(), argv[a]);
+                        ROMlib_appname.c_str(), arg.c_str());
                 bad_arg_p = true;
             }
         }
@@ -321,225 +133,237 @@ static void checkBadArgs(int argc, char **argv)
         reportBadArgs();
 }
 
-bool flag_headless = false;
-std::optional<fs::path> flag_record, flag_playback;
-
-static void parseCommandLine(int& argc, char **argv)
+static void updateArgcArgv(int& argc, char **argv, std::vector<std::string>& args)
 {
-    opt_database_t opt_db;
-    string arg;
+    for(int i = 0; i < args.size(); i++)
+        argv[i + 1] = args[i].data();
+    argc = args.size() + 1;
+    argv[argc] = nullptr;
+}
 
-    opt_register("common", common_opts);
+struct SilentBadArgException {};
 
-    opt_register_pre_note("welcome to the executor help message.");
-    opt_register_pre_note("usage: `executor [option...] "
-                          "[program [document1 document2 ...]]'");
 
-    if(!bad_arg_p)
-        bad_arg_p = opt_parse(opt_db, &argc, argv);
+static std::vector<std::string> parseCommandLine(int& argc, char **argv)
+{
+    po::options_description desc;
 
-    if(opt_val(opt_db, "version", nullptr))
-    {
-        fprintf(stdout, "%s\n", EXECUTOR_VERSION);
-        exit(0);
-    }
+    bool modeHelp = false, modeKeyboards = false, modeVersion = false;
 
-    /*
-   * If they ask for help, it's not an error -- it should go to stdout
-   */
+    po::options_description modes("Getting Information");
+    modes.add_options()
+        ("help,h", po::bool_switch(&modeHelp), "display help message")
+        ("version,v", po::bool_switch(&modeVersion), "display version")
+        ("keyboards", po::bool_switch(&modeKeyboards), "display all supported keyboard layouts")
+        ;
+    desc.add(modes);
+ 
+    po::options_description screen("Screen");
+    screen.add_options()
+        ("bpp", pox::value(&flag_bpp)->validator([](int d) {
+            return !(d > 32 || d < 1 || (d & (d-1)));
+        }), "screen depth (1,2,4,8,16,32)")
+        ("size", pox::value<Size2D>()
+            ->validator([](Size2D s) {
+                return s.width >= 512 && s.height >= 342;
+            })
+            ->notifier([](Size2D s) {
+                flag_width = s.width;
+                flag_height = s.height;
+            })
+        , "screen size in pixels")
+        ("grayscale", po::bool_switch(&flag_grayscale), "grayscale graphics (for use with --bpp 2,4,8)");
+    desc.add(screen);
 
-    if(opt_val(opt_db, "help", nullptr))
-    {
-        fprintf(stdout, "%s", opt_help_message());
-        exit(0);
-    }
 
-    /* Verify that the user input a legal bits per pixel.  "0" is a legal
-   * value here; that means "use the vdriver's default."
-   */
-    opt_int_val(opt_db, "bpp", &flag_bpp, &bad_arg_p);
-    if(flag_bpp != 0 && flag_bpp != 1
-       && flag_bpp != 2 && flag_bpp != 4 && flag_bpp != 8
-       && flag_bpp != 16 && flag_bpp != 32)
-    {
-        fprintf(stderr, "Bits per pixel must be 1, 2, 4, 8, 16 or 32.\n");
-        bad_arg_p = true;
-    }
+    po::options_description printing("Printing");
+    printing.add_options()
+        ("print", po::bool_switch(&ROMlib_print), "tell emulated application to print the specified document(s)")
+        ("cities", pox::inverted_bool_switch(&ROMlib_fontsubstitution), "do not substitute standard PostScript fonts for classic Mac fonts")
+        ("prvers", pox::value<VersionNumber>()
+            ->validator([](VersionNumber v) {
+                return v.minor < 10 && v.patch == 0;
+            })
+            ->notifier([](VersionNumber v) {
+                ROMlib_PrDrvrVers = v.major * 10 + v.minor;
+            })
+        , "printer driver version to report to the application")
+        ("prres", pox::value<Size2D>()
+            ->validator([](Size2D s) {
+                return s.width >= 60 && s.height >= 60;
+            })
+            ->notifier([](Size2D s) {
+                ROMlib_optional_res_x = s.width;
+                ROMlib_optional_res_y = s.height;
+            })
+        , "printer resolution");
+    desc.add(printing);
 
-    if(opt_val(opt_db, "ppc", nullptr))
-        ROMlib_set_ppc(true);
+    po::options_description testing("Automated Testing");
+    testing.add_options()
+        ("headless", po::bool_switch(&flag_headless), "disable all graphics output")
+        ("record", po::value(&flag_record), "record events to file")
+        ("playback", po::value(&flag_playback), "play back events from file")
+        ("timewarp", pox::value<Ratio>()
+            ->validator([](Ratio r) { return r.numer > 0 && r.denom > 0; })
+            ->notifier([&](Ratio r) { ROMlib_SetTimewarp(r.numer, r.denom); })
+        , "speed up or slow down time")
+        ;
+    desc.add(testing);
 
-    if(opt_val(opt_db, "size", &arg))
-        bad_arg_p |= !parse_size_opt("size", arg);
+    po::options_description debugging("Debugging");
+    debugging.add_options()
+        ("logtraps", po::bool_switch(&logtraps), "print all operating system and toolbox calls and their arguments")
+        ("break", po::bool_switch(&breakOnProcessStart), "break into debugger at program start")
+        ("debug", po::value<std::string>()->notifier([](const std::string& s) {
+            if (!error_parse_option_string(s.c_str()))
+                throw SilentBadArgException();
+        }), 
+            "enable certain debugging output and consistency checks.  This "
+            "is primarily used by ARDI developers, but we are making it "
+            "available during the pre-beta period to expert users.  The next "
+            "argument must be a list of comma-separated words describing which "
+            "debug options you want enabled.  You can abbreviate the debug "
+            "options as long as the abbreviation is unambiguous.  Here is a "
+            "list of the options (some of which may do nothing):  "
+            "\"all\" enables all debugging options, "
+            "\"fslog\" enables filesystem call logging, "
+            "\"memcheck\" enables heap consistency checking (slow!), "
+            "\"textcheck\" enables text record consistency checking (slow!), "
+            "\"trace\" enables miscellaneous  trace information, "
+            "\"sound\" enables miscellaneous sound logging information, "
+            "\"trapfailure\" enables warnings when traps return error codes, "
+            "\"errno\" enables some C library-related warnings, "
+            "\"unexpected\" enables warnings for unexpected events, "
+            "\"unimplemented\" enables warnings for unimplemented traps.  "
+            "Example: \"executor -debug unimp,trace\""
+        )
+        ;
+    desc.add(debugging);
 
-    if(opt_val(opt_db, "prres", &arg))
-        bad_arg_p |= !parse_prres_opt(&ROMlib_optional_res_x,
-                                      &ROMlib_optional_res_y, arg);
 
-    if(opt_val(opt_db, "debug", &arg))
-        bad_arg_p |= !error_parse_option_string(arg);
-
-    {
-        int skip;
-        skip = 0;
-        opt_int_val(opt_db, "nosound", &skip, &bad_arg_p);
-        sound_disabled_p = (skip != 0);
-    }
-
-    use_native_code_p = !opt_val(opt_db, "notnative", nullptr);
-
-    ROMlib_fontsubstitution = !opt_val(opt_db, "cities", nullptr);
-
-    /* Parse the "-memory" option. */
-    {
-        int total_memory;
-        if(opt_int_val(opt_db, "memory", &total_memory, &bad_arg_p))
-        {
-            check_arg("memory", &total_memory,
-                      (MIN_APPLZONE_SIZE + DEFAULT_SYSZONE_SIZE
-                       + DEFAULT_STACK_SIZE),
-                      (MAX_APPLZONE_SIZE + DEFAULT_SYSZONE_SIZE
-                       + DEFAULT_STACK_SIZE));
-
-            /* Set up the three memory sizes appropriately.  For now we
-       * just allocate the defaults for syszone and stack, and
-       * put everything else in -applzone.
-       */
-            ROMlib_syszone_size = DEFAULT_SYSZONE_SIZE;
-            ROMlib_stack_size = DEFAULT_STACK_SIZE;
-            ROMlib_applzone_size = (total_memory - ROMlib_syszone_size
-                                    - ROMlib_stack_size);
-        }
-    }
-
-    /* I bumped the minimal ROMlib_applzone to 512, since Loser needs
-   more than 256.  I guess it's a little unfair to people who bypass
-   Loser, but it will prevent confusion.  */
-    opt_int_val(opt_db, "applzone", &ROMlib_applzone_size, &bad_arg_p);
-    if(ROMlib_applzone_size < 65536)
-        note_memory_syntax("applzone", ROMlib_applzone_size);
-    else
-        check_arg("applzone", &ROMlib_applzone_size, MIN_APPLZONE_SIZE,
-                  MAX_APPLZONE_SIZE);
-
-    opt_int_val(opt_db, "syszone", &ROMlib_syszone_size, &bad_arg_p);
-    if(ROMlib_syszone_size < 65536)
-        note_memory_syntax("syszone", ROMlib_syszone_size);
-    else
-        check_arg("syszone", &ROMlib_syszone_size, MIN_SYSZONE_SIZE,
-                  MAX_SYSZONE_SIZE);
-
-    opt_int_val(opt_db, "stack", &ROMlib_stack_size, &bad_arg_p);
-    if(ROMlib_stack_size < 32768)
-        note_memory_syntax("stack", ROMlib_stack_size);
-    else
-        check_arg("stack", &ROMlib_stack_size, MIN_STACK_SIZE, MAX_STACK_SIZE);
-
-    opt_bool_val(opt_db, "sticky", &ROMlib_sticky_menus_p, &bad_arg_p);
-    opt_bool_val(opt_db, "nobrowser", &ROMlib_nobrowser, &bad_arg_p);
-    opt_bool_val(opt_db, "print", &ROMlib_print, &bad_arg_p);
-    opt_bool_val(opt_db, "speech", &ROMlib_speech_enabled, &bad_arg_p);
-    opt_bool_val (opt_db, "noclock", &ROMlib_noclock,   &bad_arg_p);
-    {
-        int no_auto = false;
-        opt_int_val(opt_db, "noautorefresh", &no_auto, &bad_arg_p);
-        do_autorefresh_p = !no_auto;
-    }
-
-    opt_int_val(opt_db, "refresh", &ROMlib_refresh, &bad_arg_p);
-    check_arg("refresh", &ROMlib_refresh, 0, 60);
-
-    opt_bool_val(opt_db, "grayscale", &flag_grayscale, &bad_arg_p);
-
-#if defined(__linux__)
-    opt_bool_val(opt_db, "nodrivesearch", &nodrivesearch_p, &bad_arg_p);
+    po::options_description emulation("Emulation");
+    emulation.add_options()
+        ("ppc", po::bool_switch(&ROMlib_prefer_ppc), "prefer PowerPC code in FAT binaries")
+#ifdef GENERATE_NATIVE_CODE
+        ("no-jit", pox::inverted_bool_switch(&use_native_code_p), "enable JIT compiler")
 #endif
+        /* TODO: ("memory", po::value<std::size_t>()->notify([](size_t x) { std::cout << "a\n"; }), 
+            "specify the total memory you want reserved for use by the programs "
+            "run under Executor and for Executor's internal system software.  "
+            "For example, \"executor -memory 5.5M\" would "
+            "make five and a half megabytes available to the virtual machine.  "
+            "Executor will require extra memory above and beyond this amount "
+            "for other uses."
+        )*/
+        ("applzone", pox::value<MemorySize>(&ROMlib_applzone_size), 
+            "specify the memory to allocate for the application being run, "
+            "e.g. \"executor -applzone 4M\" would make four megabytes "
+            "of RAM available to the application.  \"applzone\" stands for "
+            "\"application zone\".")
+        ("syszone", pox::value(&ROMlib_syszone_size),
+            "like -applzone, but specifies the amount of memory to make "
+            "available to Executor's internal system software."
+        )
+        ("stack", pox::value(&ROMlib_stack_size), 
+            "like -applzone, but specifies the amount of stack memory to allocate."
+        )
+        ("system", pox::value<VersionNumber>()
+            ->validator([](VersionNumber v) {
+                return v.major < 10 && v.minor < 16 && v.patch < 16;
+            }) 
+            ->notifier([](VersionNumber v) {
+                system_version = CREATE_SYSTEM_VERSION(v.major, v.minor, v.patch);
+            })
+        , "specify the system version that executor reports to applications")
+        ;
+    desc.add(emulation);
 
+    po::options_description sound("Sound");
+    sound.add_options()
+        ("nosound", pox::inverted_bool_switch(&sound_disabled_p), "disabe sound output")
+        ;
+    desc.add(sound);
+
+    po::options_description misc("Miscellaneous");
+    misc.add_options()
+        ("noclock", po::bool_switch(&ROMlib_noclock), "disable timer interrupt")
+        ("speech", po::bool_switch(&ROMlib_speech_enabled), "enable speech manager (mac hosts only)")
+        ("noautorefresh", pox::inverted_bool_switch(&do_autorefresh_p), "turns off automatic detection of programs that bypass QuickDraw")
+        ("refresh", po::value(&ROMlib_refresh)
+            ->implicit_value(10),
+            "Handle programs that bypass QuickDraw, at a performance penalty."
+            "Follow -refresh with an number indicating how many 60ths of a second "
+            "to wait between each screen refresh, e.g. \"executor -refresh 10\".")
+        ("appearance", po::value<std::string>()->notifier([&](const std::string& s) {
+            if(!ROMlib_parse_appearance(s.c_str()))
+                throw SilentBadArgException();
+        }), "(mac or windows) specify the appearance of windows and "
+                    "menus.  For example \"executor -appearance windows\" will make each "
+                    "window have a blue title bar")
+        ("scancodes", po::bool_switch(&ROMlib_use_scan_codes), 
+            "different form of key mapping (may be useful in "
+            "conjunction with -keyboard; not supported for all vdrivers)")
+        ("keyboard", po::value(&keyboard), "choose a specific keyboard map")
+#if defined(__linux__)
+        ("nodrivesearch", po::bool_switch(&nodrivesearch_p), 
+            "Do not look for a floppy drive, CD-ROM drive or any other drive "
+            "except as specified by the MacVolumes environment variable"
+        )
+#endif
+        ("nobrowser", po::bool_switch(&ROMlib_nobrowser), "don't run Browser")
+        ("sticky", po::bool_switch(&ROMlib_sticky_menus_p), "sticky menus")
+        ;
+    desc.add(misc);
+
+    std::vector<std::string> unrecognized;
+
+    try
     {
-        string str;
+        auto parsed = po::command_line_parser(argc, argv)
+            .options(desc)
+            .allow_unregistered()
+            .run();
+        po::variables_map vm;
+        po::store(parsed, vm);
+        po::notify(vm);
 
-        if(opt_val(opt_db, "prvers", &str))
-        {
-            uint32_t vers;
+        std::cout << argc << ":";
+        for(int i = 0; i < argc; i++)
+            std::cout << " " << argv[i];
+        std::cout << std::endl;
 
-            if(!ROMlib_parse_version(str, &vers))
-                bad_arg_p = true;
-            else
-                ROMlib_PrDrvrVers = (vers >> 8) * 10 + ((vers >> 4) & 0xF);
-        }
+        unrecognized = po::collect_unrecognized(parsed.options, po::include_positional);
     }
-
+    catch (const po::error& err)
     {
-        string appearance_str;
-
-        if(opt_val(opt_db, "appearance", &appearance_str))
-            bad_arg_p |= !ROMlib_parse_appearance(appearance_str.c_str());
+        std::cerr << err.what();
+        exit(1);
     }
-
-
-    /* parse the `-system' option */
+    catch (const SilentBadArgException&)
     {
-        string system_str;
-
-        if(opt_val(opt_db, "system", &system_str))
-            bad_arg_p |= !parse_system_version(system_str);
+        exit(1);
     }
-
-    opt_bool_val(opt_db, "break", &breakOnProcessStart, &bad_arg_p);
-    opt_bool_val(opt_db, "logtraps", &logtraps, &bad_arg_p);
-
-    opt_bool_val(opt_db, "scancodes", &ROMlib_use_scan_codes, &bad_arg_p);
-    opt_val(opt_db, "keyboard", &keyboard);
-    opt_bool_val(opt_db, "keyboards", &list_keyboards_p, &bad_arg_p);
-    if(list_keyboards_p)
+    for(auto x : unrecognized)
+        std::cout << " " << x;
+    std::cout << std::endl;
+    if(modeHelp)
+    {
+        std::cout << desc;
+        exit(0);
+    }
+    else if(modeVersion)
+    {
+        fprintf(stdout, "%s\n", ROMlib_executor_full_name);
+        exit(0);
+    }
+    else if(modeKeyboards)
+    {
+        list_keyboards_p = true;
         flag_headless = true;
-
-    if(opt_val(opt_db, "headless", nullptr))
-        flag_headless = true;
-
-    if(std::string str; opt_val(opt_db, "record", &str))
-        flag_record = fs::path(str);
-
-    if(std::string str; opt_val(opt_db, "playback", &str))
-        flag_playback = fs::path(str);
-
-    if(std::string str; opt_val(opt_db, "timewarp", &str))
-    {
-        std::string numerStr, denomStr;
-        if(auto pos = str.find('/'); pos != std::string::npos)
-        {
-            numerStr = str.substr(0, pos);
-            denomStr = str.substr(pos + 1);
-        }
-        else
-        {
-            numerStr = str;
-            denomStr = "1";
-        }
-
-        int numer = 0, denom = 0;
-        try
-        {
-            numer = std::stoi(numerStr);
-            denom = std::stoi(denomStr);
-        }
-        catch(...)
-        {
-        }
-
-        if(numer > 0 && denom > 0)
-            ROMlib_SetTimewarp(numer, denom);
-        else
-        {
-            fprintf(stderr, "%s: bad arguments to -timewarp\n",
-                    ROMlib_appname.c_str());
-            bad_arg_p = true;
-        }
     }
 
-
-    if(bad_arg_p)
-        reportBadArgs();
+    return unrecognized;
 }
 
 int main(int argc, char **argv)
@@ -562,8 +386,7 @@ int main(int argc, char **argv)
     msecs_elapsed();
 
     ROMlib_appname = fs::path(argv[0]).filename().string();
-
-    parseCommandLine(argc, argv);
+    auto remainingArgs = parseCommandLine(argc, argv);
 
     if(flag_playback)
         EventSink::instance = std::make_unique<EventPlayback>(*flag_playback);
@@ -572,12 +395,16 @@ int main(int argc, char **argv)
     else
         EventSink::instance = std::make_unique<EventSink>();
 
+    updateArgcArgv(argc, argv, remainingArgs);
+
     if(flag_headless)
         vdriver = std::make_unique<HeadlessVideoDriver>(EventSink::instance.get());
     else
         vdriver = std::make_unique<DefaultVDriver>(EventSink::instance.get(), argc, argv);
-        
-    checkBadArgs(argc, argv);
+    
+    remainingArgs = std::vector<std::string>(argv + 1, argv + argc);
+    
+    checkBadArgs(remainingArgs);
 
     auto executorThread = std::thread([&] {
         try
@@ -596,7 +423,7 @@ int main(int argc, char **argv)
             InitLowMem();
             syncint_init(); // timer interrupts: must not be inited before cpu & trapvevtors
 
-            ROMlib_InitGDevices();
+            ROMlib_InitGDevices(flag_width, flag_height, flag_bpp, flag_grayscale);
             
             ROMlib_eventinit();
             hle_init();
@@ -623,7 +450,7 @@ int main(int argc, char **argv)
                     display_keyboard_choices();
             }
 
-            InitAppFiles(argc, argv);
+            InitAppFiles(remainingArgs);
 
             InitFonts();
 

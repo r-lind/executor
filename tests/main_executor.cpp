@@ -93,7 +93,7 @@ public:
         }
 
         InitResources();
-        ROMlib_InitGDevices();
+        ROMlib_InitGDevices(512, 342, 1, false);
         ROMlib_eventinit();
 
         ROMlib_color_init();

@@ -5,7 +5,7 @@
 #include <vdriver/refresh.h>
 #include <util/string.h>
 #include <quickdraw/cquick.h>
-#include <commandline/parseopt.h>
+#include <commandline/option_arguments.h>
 #include <time/vbl.h>
 
 #include <DialogMgr.h>
@@ -16,7 +16,7 @@
 #include <CQuickDraw.h>
 #include <BinaryDecimal.h>
 
-
+#include <boost/lexical_cast.hpp>
 
 using namespace Executor;
 
@@ -279,11 +279,16 @@ void readprefvalues(DialogPtr dp)
     ROMlib_pretend_edition = getvalue(dp, PREF_PRETEND_EDITION);
     ROMlib_pretend_script = getvalue(dp, PREF_PRETEND_SCRIPT);
     ROMlib_pretend_alias = getvalue(dp, PREF_PRETEND_ALIAS);
+
+    try
     {
         std::string system_string;
-
         update_string_from_edit_text(system_string, dp, PREF_SYSTEM);
-        parse_system_version(system_string.c_str());
+        auto vn = boost::lexical_cast<VersionNumber>(system_string);
+        system_version = CREATE_SYSTEM_VERSION(vn.major, vn.minor, vn.patch);
+    }
+    catch(boost::bad_lexical_cast&)
+    {
     }
 }
 
@@ -481,7 +486,7 @@ void Executor::dopreferences(void)
             {
                 readprefvalues(dp);
                 if(ihit == PREFSAVEITEM)
-                    saveprefvalues(ROMlib_configfilename.c_str());
+                    SaveConfigFile();
             }
             DisposeDialog(dp);
             am_already_here = false;

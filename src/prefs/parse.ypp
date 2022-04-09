@@ -5,7 +5,6 @@
 #include <rsys/version.h>
 #include <prefs/crc.h>
 #include <prefs/parse.h>
-#include <commandline/parseopt.h>
 #include <rsys/gestalt.h>
 #include <rsys/launch.h>
 #include <print/print.h>
@@ -21,10 +20,9 @@ static void freestring( char *string );
 static char validblock = 1;
 static unsigned short crcval;
 
-namespace Executor
-{
-    int ROMlib_AppleChar = 0;
-}
+FILE *configfile;
+int32_t ROMlib_options = 0;
+int ROMlib_desired_bpp = 0;
 
 void yyerror(const char *str);
 %}

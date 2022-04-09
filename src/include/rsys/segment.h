@@ -16,8 +16,8 @@ struct finderinfo
     GUEST<AppFile[1]> files;
 };
 
-extern void InitAppFiles(int argc, char **argv);
-extern void empty_timer_queues(void);
+extern void InitAppFiles(const std::vector<std::string>&);
+extern void empty_timer_queues();
 
 extern void C_LoadSeg(INTEGER segno);
 

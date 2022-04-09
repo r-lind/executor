@@ -13,7 +13,7 @@ if(NOT RUBY_EXECUTABLE)
     message(FATAL_ERROR "Cannot find command: 'ruby' (needed for building!)")
 endif()
 
-find_package(Boost REQUIRED COMPONENTS filesystem system)
+find_package(Boost REQUIRED COMPONENTS filesystem system program_options)
 
 find_package(Threads REQUIRED)
 
@@ -444,14 +444,9 @@ set(error_sources
 source_group(Error FILES ${error_sources})
 
 set(commandline_sources
-    commandline/option.h
-    commandline/option.cpp
-
-    commandline/parseopt.h
-    commandline/parsenum.h
-    commandline/parseopt.cpp
-    commandline/parsenum.cpp
-
+    commandline/program_options_extended.h
+    commandline/program_options_extended.cpp
+    commandline/option_arguments.h
     commandline/flags.h
     )
 
@@ -590,8 +585,12 @@ if(WIN32 AND NOT MSVC)
 endif()
 
 target_link_libraries(romlib resources)
-
 target_link_libraries(romlib ${host_os_libs})
+
+if(APPLE)
+    # the way boost is compiled in homebrew, this seems to be required
+    target_compile_options(romlib PRIVATE -fvisibility=hidden)
+endif()
 
 if(APPLE)
     set(platform_resource_files ../icon/executor.icns)
@@ -603,12 +602,17 @@ endif()
 foreach(FRONT_END ${FRONT_ENDS})
     if(TARGET front-end-${FRONT_END})
         add_executable(executor-${FRONT_END} main.cpp ${platform_resource_files})
-        target_link_libraries(executor-${FRONT_END} romlib front-end-headless)
+        target_link_libraries(executor-${FRONT_END} romlib front-end-headless Boost::program_options)
         if(NOT ${FRONT_END} STREQUAL headless)
             target_link_libraries(executor-${FRONT_END} romlib front-end-${FRONT_END})
         endif()
         set_target_properties(executor-${FRONT_END} PROPERTIES
             RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+        if(APPLE)
+            # the way boost is compiled in homebrew, this seems to be required
+                target_compile_options(executor-${FRONT_END} PRIVATE -fvisibility=hidden)
+        endif()
 
         if(APPLE AND NOT ${FRONT_END} STREQUAL headless)
             set_target_properties(executor-${FRONT_END} PROPERTIES

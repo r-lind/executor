@@ -6,6 +6,7 @@
 
 #include <chrono>
 #include <array>
+#include <optional>
 
 #if defined(_WIN32)
 #define USE_TIMER_THREAD 1

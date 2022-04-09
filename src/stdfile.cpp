@@ -2029,7 +2029,7 @@ void spfcommon(Point p, ConstStringPtr prompt, ConstStringPtr name, dialog_hook_
         int done, sav;
         Rect r, scrollrect;
         GUEST<Handle> tmpH;
-        Handle pnhand, ejhand, drhand, sahand;
+        Handle pnhand = nullptr, ejhand, drhand, sahand;
         OSErr err;
         ControlHandle scrollh;
         // FIXME: #warning structure referenced using 32 bit pointer from refcon

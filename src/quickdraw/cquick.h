@@ -631,7 +631,7 @@ extern RGBColor *ROMlib_qd_color_to_rgb(LONGINT);
 extern void gd_vdriver_mode_changed();
 extern void gd_update_colors();
 extern void ROMlib_InitGWorlds(void);
-extern void ROMlib_InitGDevices();
+extern void ROMlib_InitGDevices(int width, int height, int bpp, bool grayscale);
 extern void ResetToInitialDepth();
 
 extern void pixmap_set_pixel_fields(PixMap *pixmap, int bpp);

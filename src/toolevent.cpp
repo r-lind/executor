@@ -36,7 +36,6 @@
 #include <osevent/osevent.h>
 #include <rsys/keyboard.h>
 #include <vdriver/refresh.h>
-#include <commandline/parseopt.h>
 #include <vdriver/vdriver.h>
 #include <rsys/aboutbox.h>
 #include <rsys/redrawscreen.h>

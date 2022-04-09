@@ -17,6 +17,8 @@ namespace Executor
 extern bool ROMlib_ultima_iii_hack;
 #endif
 
+extern bool system_file_version_skew_p;
+
 struct reshead
 {
     GUEST_STRUCT;
