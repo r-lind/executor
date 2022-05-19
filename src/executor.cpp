@@ -88,7 +88,7 @@ void Executor::executor_main(void)
     {
         GetAppFiles(1, &thefile);
     
-        if(thefile.fType == "APPL"_4)
+        if(thefile.fType == "APPL"_4 || thefile.fType == "MPST"_4)
         {
             ClrAppFiles(1);
             Munger(LM(AppParmHandle), 2L * sizeof(INTEGER), (Ptr)0,

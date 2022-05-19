@@ -58,6 +58,7 @@
 #include <rsys/cfm.h>
 #include <rsys/launch.h>
 #include <time/vbl.h>
+#include <mpw/mpw.h>
 
 #include <base/logging.h>
 
@@ -387,6 +388,9 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, Boolean resetmemo
         set_refresh_rate(0);
         set_refresh_rate(save_ROMlib_refresh);
     }
+
+    if(finfo.fdType == "MPST"_4)
+        mpw::SetupTool();
 
     if(code0)
         beginexecutingat(guest_cast<LONGINT>(LM(CurrentA5)) + LM(CurJTOffset) + 2);

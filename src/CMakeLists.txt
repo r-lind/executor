@@ -490,6 +490,13 @@ set(debug_sources
 source_group(Debugger FILES ${debug_sources})
 
 
+set(mpw_sources
+    mpw/mpw.h
+    mpw/mpw.cpp
+    )
+source_group(MPW FILES ${mpw_sources})
+
+
 set(misc_sources
   desk.cpp device.cpp disk.cpp diskinit.cpp dump.cpp
   gestalt.cpp iu.cpp launch.cpp  notify.cpp 
@@ -562,6 +569,7 @@ set(sources ${base_sources} ${mman_sources} ${vdriver_sources}
     ${error_sources} ${commandline_sources} ${prefs_sources}
     ${util_sources} ${debug_sources}
     ${api_headers} ${trap_instance_sources} ${host_os_sources}
+    ${mpw_sources}
     ${include_sources})
 
 add_library(romlib ${sources}
