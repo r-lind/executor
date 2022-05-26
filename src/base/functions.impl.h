@@ -242,6 +242,44 @@ namespace callfrom68K
         }
     };
 
+    template<typename Arg>
+    void readCArg(Arg& arg, syn68k_addr_t ptr)
+    {
+        arg = *ptr_from_longint<GUEST<Arg>*>(ptr);
+        ptr += (sizeof(GUEST<Arg>) + 1) & ~1;
+    }
+
+    template<typename F, typename... Args, std::size_t... Indices>
+    auto readCArgsAndCall(std::tuple<Args...>& args, const F& fptr, syn68k_addr_t ptr, std::index_sequence<Indices...>)
+    {
+        (readCArg(std::get<Indices>(args), ptr),...);
+        return fptr(std::get<Indices>(args)...);
+    }
+
+    template<typename Ret, typename... Args>
+    struct Invoker<Ret (Args...), callconv::CCall>
+    {
+        template<typename F>
+        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, const F& fptr)
+        {
+            std::tuple<Args...> args;
+            EM_D0 = readCArgsAndCall(args, fptr, EM_A7 + 4, std::index_sequence_for<Args...>());
+            return callconv::stack::pop<syn68k_addr_t>();
+        }
+    };
+
+    template<typename... Args>
+    struct Invoker<void (Args...), callconv::CCall>
+    {
+        template<typename F>
+        static syn68k_addr_t invokeFrom68K(syn68k_addr_t addr, const F& fptr)
+        {
+            std::tuple<Args...> args;
+            readCArgsAndCall(args, fptr, EM_A7 + 4, std::index_sequence_for<Args...>());
+            return callconv::stack::pop<syn68k_addr_t>();
+        }
+    };
+
     template<>
     struct Invoker<syn68k_addr_t (syn68k_addr_t addr, void *), callconv::Raw>
     {

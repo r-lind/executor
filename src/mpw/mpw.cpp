@@ -24,52 +24,61 @@ MPWFile files[3] = {};
 devtable devTable;
 }
 
-RAW_68K_IMPLEMENTATION(stdioQuit)
+static void C_stdioQuit()
 {
     printf("quitting something\n");
     fflush(stdout);
-    return POPADDR();
+    exit(0);
 }
-RAW_68K_IMPLEMENTATION(stdioAccess)
+
+static int C_stdioAccess(char *name, int op, uint32_t param)
 {
-    printf("accessig something\n");
+    printf("accessing something\n");
     fflush(stdout);
-    return POPADDR();
+    return -1;
 }
-RAW_68K_IMPLEMENTATION(stdioClose)
+
+static int C_stdioClose(MPWFile* file)
 {
-    printf("closing something\n");    
+    printf("closing something\n");
     fflush(stdout);
-    return POPADDR();
+    return -1;
 }
-RAW_68K_IMPLEMENTATION(stdioRead)
+
+static int C_stdioRead(MPWFile* file)
 {
     printf("reading something\n");
     fflush(stdout);
-    return POPADDR();
+    return -1;
 }
 
-RAW_68K_IMPLEMENTATION(stdioWrite)
+static int C_stdioWrite(MPWFile* file)
 {
     printf("writing something\n");
     fflush(stdout);
-
-    MPWFile *file = *ptr_from_longint<GUEST<GUEST<MPWFile*>*>>(EM_A7 + 4);
 
     printf("writing %d bytes from %p\n", (int) file->count, (void*) file->buffer);
     fwrite(file->buffer, file->count, 1, stdout);
     fflush(stdout);
 
     printf("\n\nwriting %d bytes from %p done\n", (int) file->count, (void*) file->buffer);
-    return POPADDR();
+
+    return 0;
 }
 
-RAW_68K_IMPLEMENTATION(stdioIoctl)
+static int C_stdioIOCtl(int fd, int cmd, uint32_t param)
 {
     printf("controlling something\n");
     fflush(stdout);
-    return POPADDR();
+    return -1;
 }
+
+CCALL_FUNCTION_PTR(stdioQuit);
+CCALL_FUNCTION_PTR(stdioAccess);
+CCALL_FUNCTION_PTR(stdioClose);
+CCALL_FUNCTION_PTR(stdioRead);
+CCALL_FUNCTION_PTR(stdioWrite);
+CCALL_FUNCTION_PTR(stdioIOCtl);
 
 QDGlobals mpwQD;
 
@@ -97,19 +106,19 @@ void mpw::SetupTool()
     pgm2.ioptr = files;
     for (int i = 0; i < 3; i++)
     {
-        files[i].cookie = 42;
+        files[i].cookie = i;
         files[i].functions = &devTable.table;
     }
+    files[0].flags = 1;
+    files[1].flags = 2;
+    files[1].flags = 2;
     pgm2.devptr = &devTable;
 
-//    stdioFunctions.write = ProcPtr(&stub_stdioWrite);
-
     devTable.magic = "FSYS"_4;
-    devTable.table.quit = ProcPtr(&stub_stdioQuit);
-    devTable.table.access = ProcPtr(&stub_stdioAccess);
-    devTable.table.close = ProcPtr(&stub_stdioClose);
-    devTable.table.read = ProcPtr(&stub_stdioRead);
-    devTable.table.write = ProcPtr(&stub_stdioWrite);
-    devTable.table.ioctl = ProcPtr(&stub_stdioIoctl);
-
+    devTable.table.quit = &stdioQuit;
+    devTable.table.access = &stdioAccess;
+    devTable.table.close = &stdioClose;
+    devTable.table.read = &stdioRead;
+    devTable.table.write = &stdioWrite;
+    devTable.table.ioctl = &stdioIOCtl;
 }

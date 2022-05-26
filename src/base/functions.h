@@ -14,6 +14,7 @@ namespace callconv
 {
 class Pascal { };
 class Raw { };
+class CCall { };
 
 template<typename T, typename... Extras>
 class Register { };

@@ -247,10 +247,14 @@ private:
     DEFINE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME>)
 #define REGISTER_FUNCTION_PTR(NAME, ...) \
     DEFINE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA callconv::Register<__VA_ARGS__>>)
+#define CCALL_FUNCTION_PTR(NAME, ...) \
+    DEFINE_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA callconv::CCall>)
 #define EXTERN_PASCAL_FUNCTION_PTR(NAME) \
     EXTERN_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME>)
 #define EXTERN_REGISTER_FUNCTION_PTR(NAME, ...) \
     EXTERN_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA callconv::Register<__VA_ARGS__>>)
+#define EXTERN_CCALL_FUNCTION_PTR(NAME) \
+    EXTERN_FUNCTION_WRAPPER(NAME, &C_##NAME, (#NAME), WrappedFunction<decltype(C_##NAME) COMMA &C_##NAME COMMA callconv::CCall>)
 
 #define RAW_68K_FUNCTION(NAME) \
     syn68k_addr_t RAW_##NAME(syn68k_addr_t, void *); \
