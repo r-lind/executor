@@ -24,35 +24,35 @@ MPWFile files[3] = {};
 devtable devTable;
 }
 
-static void C_stdioQuit()
+static void C_mpwQuit()
 {
     printf("quitting something\n");
     fflush(stdout);
     exit(0);
 }
 
-static int C_stdioAccess(char *name, int op, uint32_t param)
+static int C_mpwAccess(char *name, int op, uint32_t param)
 {
     printf("accessing something\n");
     fflush(stdout);
     return -1;
 }
 
-static int C_stdioClose(MPWFile* file)
+static int C_mpwClose(MPWFile* file)
 {
     printf("closing something\n");
     fflush(stdout);
     return -1;
 }
 
-static int C_stdioRead(MPWFile* file)
+static int C_mpwRead(MPWFile* file)
 {
     printf("reading something\n");
     fflush(stdout);
     return -1;
 }
 
-static int C_stdioWrite(MPWFile* file)
+static int C_mpwWrite(MPWFile* file)
 {
     printf("writing something\n");
     fflush(stdout);
@@ -66,19 +66,19 @@ static int C_stdioWrite(MPWFile* file)
     return 0;
 }
 
-static int C_stdioIOCtl(int fd, int cmd, uint32_t param)
+static int C_mpwIOCtl(int fd, int cmd, uint32_t param)
 {
     printf("controlling something\n");
     fflush(stdout);
     return -1;
 }
 
-CCALL_FUNCTION_PTR(stdioQuit);
-CCALL_FUNCTION_PTR(stdioAccess);
-CCALL_FUNCTION_PTR(stdioClose);
-CCALL_FUNCTION_PTR(stdioRead);
-CCALL_FUNCTION_PTR(stdioWrite);
-CCALL_FUNCTION_PTR(stdioIOCtl);
+CCALL_FUNCTION_PTR(mpwQuit);
+CCALL_FUNCTION_PTR(mpwAccess);
+CCALL_FUNCTION_PTR(mpwClose);
+CCALL_FUNCTION_PTR(mpwRead);
+CCALL_FUNCTION_PTR(mpwWrite);
+CCALL_FUNCTION_PTR(mpwIOCtl);
 
 QDGlobals mpwQD;
 
@@ -115,10 +115,10 @@ void mpw::SetupTool()
     pgm2.devptr = &devTable;
 
     devTable.magic = "FSYS"_4;
-    devTable.table.quit = &stdioQuit;
-    devTable.table.access = &stdioAccess;
-    devTable.table.close = &stdioClose;
-    devTable.table.read = &stdioRead;
-    devTable.table.write = &stdioWrite;
-    devTable.table.ioctl = &stdioIOCtl;
+    devTable.table.quit = &mpwQuit;
+    devTable.table.access = &mpwAccess;
+    devTable.table.close = &mpwClose;
+    devTable.table.read = &mpwRead;
+    devTable.table.write = &mpwWrite;
+    devTable.table.ioctl = &mpwIOCtl;
 }
