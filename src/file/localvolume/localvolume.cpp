@@ -893,8 +893,8 @@ static void MountLocalVolume(fs::path root)
     vp->vcb.vcbVolBkUp = 0;
     vp->vcb.vcbAtrb = VNONEJECTABLEBIT;
     vp->vcb.vcbNmFls = 100;
-    vp->vcb.vcbNmAlBlks = 300;
-    vp->vcb.vcbAlBlkSiz = 512;
+    vp->vcb.vcbNmAlBlks = 20480;
+    vp->vcb.vcbAlBlkSiz = 10240;
     vp->vcb.vcbClpSiz = 1;
     vp->vcb.vcbAlBlSt = 10;
     vp->vcb.vcbNxtCNID = 1000;
