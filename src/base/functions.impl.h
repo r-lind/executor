@@ -243,7 +243,7 @@ namespace callfrom68K
     };
 
     template<typename Arg>
-    void readCArg(Arg& arg, syn68k_addr_t ptr)
+    void readCArg(Arg& arg, syn68k_addr_t& ptr)
     {
         arg = *ptr_from_longint<GUEST<Arg>*>(ptr);
         ptr += (sizeof(GUEST<Arg>) + 1) & ~1;
