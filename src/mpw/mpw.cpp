@@ -94,7 +94,7 @@ static int C_mpwRead(MPWFile* file)
     if(auto *e = getEntry(file->cookie))
     {
         if (e->stdfile)
-            size = fread(file->buffer, file->count, 1, e->stdfile);
+            size = fread(file->buffer, 1, file->count, e->stdfile);
     }
     
     printf("--> %d\n", (int) size);
@@ -113,18 +113,38 @@ static int C_mpwRead(MPWFile* file)
 
 static int C_mpwWrite(MPWFile* file)
 {
-    printf("writing something\n");
-    fflush(stdout);
+    //printf("writing something\n");
+    //fflush(stdout);
 
-    printf("writing %d bytes from %p\n", (int) file->count, (void*) file->buffer);
+    //printf("writing %d bytes from %p\n", (int) file->count, (void*) file->buffer);
 
     ssize_t size = 0;
 
     if(auto *e = getEntry(file->cookie))
     {
         if (e->stdfile)
-            size = fwrite(file->buffer, file->count, 1, e->stdfile);
+        {
+            const char *buf = (const char*)file->buffer;
+
+            std::string temp(buf, buf + file->count);
+            for(char& c : temp)
+                if (c == '\r')
+                    c = '\n';
+
+            //fprintf(e->stdfile,"{");
+            //fflush(e->stdfile);
+            size = fwrite(temp.data(), 1, file->count, e->stdfile);
+            //for (int i = 0; i < file->count; i++)
+            //    fputc(buf[i], e->stdfile);
+            //fprintf(e->stdfile,"}");
+            fflush(e->stdfile);
+            //printf("written: %ld\n", size);
+        }
+        else
+            printf("no stdfile.\n");
     }
+    else
+        printf("no entry\n");
     fflush(stdout);
 
     if (size < 0)
@@ -132,10 +152,10 @@ static int C_mpwWrite(MPWFile* file)
         file->err = -99;
         return kEIO;
     }
-    file->count -= size;
+    file->count = file->count - size;
     file->err = 0;
 
-    printf("\n\nwriting %d bytes from %p done\n", (int) file->count, (void*) file->buffer);
+    //printf("\n\nwriting %d bytes from %p done\n", (int) file->count, (void*) file->buffer);
 
     return 0;
 }
@@ -156,14 +176,15 @@ static int C_mpwIOCtl(MPWFile *file, int cmd, uint32_t param)
                 return 0;
             }
             break;
-/*
+
         case kFIOINTERACTIVE:
             if (auto *e = getEntry(file->cookie))
             {
-                
+                file->err = 0;
+                return 0;
             }
             break;
-*/
+
 
     }
 
