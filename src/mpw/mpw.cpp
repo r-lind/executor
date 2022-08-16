@@ -12,6 +12,8 @@
 #include <MenuMgr.h>
 #include <DialogMgr.h>
 
+#include <unistd.h>
+
 using namespace Executor;
 using namespace Executor::mpw;
 
@@ -28,11 +30,11 @@ struct MPWFDEntry
 {
     int refCount = 1;
     
-    FILE *stdfile = nullptr;
+    int nativeFd = -1;
     short macRefNum = 0;
 
-    MPWFDEntry(FILE* f)
-        : stdfile(f)
+    MPWFDEntry(int fd)
+        : nativeFd(fd)
     {
     }
 
@@ -40,8 +42,8 @@ struct MPWFDEntry
 
     ~MPWFDEntry()
     {
-        if (refCount <= 1 && stdfile)
-            fclose(stdfile);
+        if (refCount <= 1 && nativeFd != -1)
+            close(nativeFd);
     }
 };
 
@@ -58,7 +60,7 @@ static MPWFDEntry* getEntry(int fd)
 
 static void C_mpwQuit()
 {
-    printf("quitting something\n");
+    //printf("quitting something\n");
     fflush(stdout);
     exit(0);
 }
@@ -72,7 +74,7 @@ static int C_mpwAccess(char *name, int op, uint32_t param)
 
 static int C_mpwClose(MPWFile* file)
 {
-    printf("close(cookie=%d)\n", (int)file->cookie);
+    //printf("close(cookie=%d)\n", (int)file->cookie);
     fflush(stdout);
 
     if (auto *e = getEntry(file->cookie))
@@ -86,19 +88,28 @@ static int C_mpwClose(MPWFile* file)
 
 static int C_mpwRead(MPWFile* file)
 {
-    printf("mpwRead(cookie=%d, %d)\n", (int) file->cookie, (int) file->count);
-    fflush(stdout);
+    //printf("mpwRead(cookie=%d, %d)\n", (int) file->cookie, (int) file->count);
+    //fflush(stdout);
 
     ssize_t size = 0;
 
     if(auto *e = getEntry(file->cookie))
     {
-        if (e->stdfile)
-            size = fread(file->buffer, 1, file->count, e->stdfile);
+        //if (e->stdfile)
+        //    size = fread(file->buffer, 1, file->count, e->stdfile);
+
+        if (e->nativeFd != -1)
+        {
+            do
+            {
+                errno = 0;
+                size = read(e->nativeFd ,file->buffer, file->count);
+            } while (errno == EINTR);
+        }
     }
     
-    printf("--> %d\n", (int) size);
-    fflush(stdout);
+    //printf("--> %d (errno == %d)\n", (int) size, (int) errno);
+    //fflush(stdout);
 
     if (size < 0)
     {
@@ -122,7 +133,7 @@ static int C_mpwWrite(MPWFile* file)
 
     if(auto *e = getEntry(file->cookie))
     {
-        if (e->stdfile)
+        if (e->nativeFd != -1)
         {
             const char *buf = (const char*)file->buffer;
 
@@ -133,11 +144,12 @@ static int C_mpwWrite(MPWFile* file)
 
             //fprintf(e->stdfile,"{");
             //fflush(e->stdfile);
-            size = fwrite(temp.data(), 1, file->count, e->stdfile);
+            //size = fwrite(temp.data(), 1, file->count, e->stdfile);
+            size = write(e->nativeFd, temp.data(), file->count);
             //for (int i = 0; i < file->count; i++)
             //    fputc(buf[i], e->stdfile);
             //fprintf(e->stdfile,"}");
-            fflush(e->stdfile);
+            //fflush(e->stdfile);
             //printf("written: %ld\n", size);
         }
         else
@@ -162,8 +174,8 @@ static int C_mpwWrite(MPWFile* file)
 
 static int C_mpwIOCtl(MPWFile *file, int cmd, uint32_t param)
 {
-    printf("mpwIOCtl(cookie = %d, %x, %x)\n", (int)file->cookie, (int)cmd, (int)param);
-    fflush(stdout);
+    //printf("mpwIOCtl(cookie = %d, %x, %x)\n", (int)file->cookie, (int)cmd, (int)param);
+    //fflush(stdout);
 
     switch(cmd)
     {
@@ -221,9 +233,9 @@ void mpw::SetupTool()
     pgm2.exitCode = 0;
     pgm2.tableSize = 3;
 
-    fdEntries.emplace_back(std::make_unique<MPWFDEntry>(stdin));
-    fdEntries.emplace_back(std::make_unique<MPWFDEntry>(stdout));
-    fdEntries.emplace_back(std::make_unique<MPWFDEntry>(stderr));
+    fdEntries.emplace_back(std::make_unique<MPWFDEntry>(0));
+    fdEntries.emplace_back(std::make_unique<MPWFDEntry>(1));
+    fdEntries.emplace_back(std::make_unique<MPWFDEntry>(2));
     pgm2.ioptr = files;
     for (int i = 0; i < 3; i++)
     {
