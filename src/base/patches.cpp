@@ -90,8 +90,9 @@ RAW_68K_IMPLEMENTATION(Unimplemented)
         ExitToShell();
     }
 
-    if(auto ret = base::Debugger::instance->trapBreak68K(trap_address, "Unimplemented"); ~ret)
-        return ret;
+    if(base::Debugger::instance)
+        if(auto ret = base::Debugger::instance->trapBreak68K(trap_address, "Unimplemented"); ~ret)
+            return ret;
 
     return POPADDR();
 }

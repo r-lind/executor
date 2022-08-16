@@ -93,7 +93,8 @@ static void beginexecutingat(LONGINT startpc)
 					   initialized above */
     EM_A6 = 0x1EF;
 
-    base::Debugger::instance->initProcess(startpc);
+    if(base::Debugger::instance)
+        base::Debugger::instance->initProcess(startpc);
     execute68K(startpc);
     C_ExitToShell();
 }
@@ -173,7 +174,8 @@ cfm_launch(Handle cfrg0, OSType desired_arch, FSSpecPtr fsp)
             cpu.memoryBases[3] = (void*)ROMlib_offsets[3];
 #endif
 
-            base::Debugger::instance->initProcess(new_pc);
+            if(base::Debugger::instance)
+                base::Debugger::instance->initProcess(new_pc);
             executePPC(new_pc);
         }
     }
@@ -360,7 +362,7 @@ static void launchchain(ConstStringPtr fName, INTEGER vRefNum, Boolean resetmemo
         memcpy(LM(CurrentA5) + jumpoff, lp, jumplen); /* copy in the
 							 jump table */
     }
-    EM_A7 = ptr_to_longint(LM(CurStackBase));
+    EM_A7 = ptr_to_longint(LM(CurStackBase)) - 4096;
     EM_A5 = ptr_to_longint(LM(CurrentA5));
 
     ROMlib_destroy_blocks(0, ~0, false);
