@@ -54,7 +54,7 @@ static void SFSaveDisk_Update(INTEGER vrefnum, Str255 filename)
     LM(SFSaveDisk) = -pbr.volumeParam.ioVRefNum;
 }
 
-void Executor::executor_main(void)
+void Executor::executor_main()
 {
     QDGlobals quickbytes;
     LONGINT tmpA5;
