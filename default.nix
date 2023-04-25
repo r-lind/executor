@@ -5,7 +5,7 @@
 
 
 pkgs.libsForQt5.callPackage(
-    { mkDerivation, cmake, bison, perl, ruby, qt5, boost, readline, SDL2, SDL, lib, wayland, waylandpp, pkgconfig }:
+    { mkDerivation, stdenv, darwin, cmake, bison, perl, ruby, qt5, boost, readline, SDL2, SDL, lib, wayland, waylandpp, pkgconfig }:
 
     mkDerivation {
         name = "executor2000";
@@ -15,11 +15,16 @@ pkgs.libsForQt5.callPackage(
             boost
             readline
             SDL2
+        ] ++ lib.optionals stdenv.isLinux (
             SDL
             wayland
             waylandpp
-        ];
+        ) ++ lib.optionals stdenv.isDarwin (with darwin.apple_sdk.frameworks; [
+            Carbon
+            Cocoa
+        ]);
         src = pkgs.nix-gitignore.gitignoreSource [] ./.;
         hardeningDisable = [ "all" ];
+        cmakeFlags = ["-DRUN_FIXUP_BUNDLE=NO" "-DFORCE_SYSTEM_BOOST=YES"];
     }
 ) {}

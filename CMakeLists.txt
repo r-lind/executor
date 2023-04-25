@@ -45,7 +45,8 @@ endif()
 
 enable_testing()
 
-if(APPLE OR NOT UNIX)
+option(FORCE_SYSTEM_BOOST NO)
+if((APPLE OR NOT UNIX) AND NOT FORCE_SYSTEM_BOOST)
    set(Boost_USE_STATIC_LIBS YES)
 endif()
 add_compile_definitions(BOOST_ALL_NO_LIB)
@@ -135,7 +136,8 @@ if(WIN32)
 elseif(APPLE)
     set(CPACK_GENERATOR "DragNDrop")
 
-    if(TARGET front-end-qt)
+    option(RUN_FIXUP_BUNDLE YES)
+    if(TARGET front-end-qt AND RUN_FIXUP_BUNDLE)
         install_qt5_plugin("Qt5::QCocoaIntegrationPlugin" QT_PLUGINS "Executor 2000.app/Contents/PlugIns")
 
         set(APPS "\${CMAKE_INSTALL_PREFIX}/Executor\ 2000.app")
