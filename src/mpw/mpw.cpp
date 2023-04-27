@@ -11,6 +11,7 @@
 #include <FontMgr.h>
 #include <MenuMgr.h>
 #include <DialogMgr.h>
+#include <MemoryMgr.h>
 
 #include <unistd.h>
 
@@ -212,6 +213,9 @@ CCALL_FUNCTION_PTR(mpwIOCtl);
 
 QDGlobals mpwQD;
 
+std::vector<std::string> argsHack;
+extern char **environ;
+
 void mpw::SetupTool()
 {
     ROMlib_nowarn32 = true;
@@ -227,9 +231,40 @@ void mpw::SetupTool()
     pgm1.pgmInfo2 = &pgm2;
 
     pgm2.magic2 = 0x5348;
-    pgm2.argc = 0;
-    pgm2.argv = nullptr;
-    pgm2.envp = nullptr;
+    pgm2.argc = argsHack.size();
+
+    GUEST<char*>* mpwArgs = (GUEST<char*>*) NewPtr((argsHack.size() + 1) * 4);
+    pgm2.argv = mpwArgs;
+    
+    for(const std::string& arg : argsHack)
+    {
+        Ptr p = NewPtr(arg.size() + 1);
+        *mpwArgs++ = p;
+        memcpy(p, arg.c_str(), arg.size() + 1);
+        std::cout << "argument: " << arg << std::endl;
+    }
+    *mpwArgs++ = nullptr;
+
+    int nEnv = 0;
+    for (char** e = environ; *e; ++e)
+        nEnv++;
+
+    GUEST<char*>* mpwEnv = (GUEST<char*>*) NewPtr((nEnv + 1) * 4);
+    pgm2.envp = mpwEnv;
+
+    for (char** e = environ; *e; ++e)
+    {
+        int len = strlen(*e);
+        Ptr p = NewPtr(len + 1);
+        *mpwEnv++ = p;
+        memcpy(p, *e, len + 1);
+        if (char *q = strchr(p, '='))
+            *q = '\0';
+        //std::cout << "environment: " << *e << std::endl;
+    }
+    *mpwEnv = nullptr;
+
+
     pgm2.exitCode = 0;
     pgm2.tableSize = 3;
 

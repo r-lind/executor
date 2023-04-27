@@ -126,6 +126,8 @@ static void checkBadArgs(const std::vector<std::string>& args)
                         ROMlib_appname.c_str(), arg.c_str());
                 bad_arg_p = true;
             }
+            else
+                break;
         }
     }
 
@@ -366,6 +368,8 @@ static std::vector<std::string> parseCommandLine(int& argc, char **argv)
     return unrecognized;
 }
 
+extern std::vector<std::string> argsHack;
+
 int main(int argc, char **argv)
 {
 #if defined(__linux__) && defined(PERSONALITY_HACK)
@@ -405,6 +409,7 @@ int main(int argc, char **argv)
     remainingArgs = std::vector<std::string>(argv + 1, argv + argc);
     
     checkBadArgs(remainingArgs);
+    argsHack = remainingArgs;
 
     auto executorThread = std::thread([&] {
         try
