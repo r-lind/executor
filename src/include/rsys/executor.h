@@ -13,7 +13,7 @@
 namespace Executor
 {
 extern LONGINT ROMlib_creator;
-extern void executor_main(void);
+extern void executor_main();
 extern void InitLowMem();
 extern void InitPerProcessLowMem();
 }
