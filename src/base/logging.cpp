@@ -174,7 +174,7 @@ void logging::dumpRegsAndStack()
     //std::clog << std::noshowbase;
     std::clog << "Stack: ";
     uint8_t *p = (uint8_t*)SYN68K_TO_US(EM_A7);
-    for(int i = 0; i < 12; i++)
+    for(int i = 0; i < 12 && validAddress(p+i); i++)
         std::clog << std::setfill('0') << std::setw(2) << (unsigned)p[i] << " ";
     std::clog << std::dec;
 }
