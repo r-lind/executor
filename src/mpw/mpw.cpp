@@ -14,6 +14,7 @@
 #include <MemoryMgr.h>
 
 #include <unistd.h>
+#include <fcntl.h>
 
 using namespace Executor;
 using namespace Executor::mpw;
@@ -66,16 +67,66 @@ static void C_mpwQuit()
     exit(0);
 }
 
-static int C_mpwAccess(char *name, int op, uint32_t param)
+static int C_mpwAccess(char *name, int op, MPWFile *file)
 {
-    printf("mpwAccess(%s, %x, %x)\n", name, op, param);
+    printf("mpwAccess(%s, %x)\n", name, op);
     fflush(stdout);
+
+    switch (op)
+    {
+        case kF_OPEN:
+            {
+                int nativeFlags;
+                switch (file->flags & 0x03)
+                {
+                    case 0x01:
+                        nativeFlags = O_RDONLY;
+                        break;
+                    case 0x02:
+                        nativeFlags = O_WRONLY;
+                        break;
+                    case 0x00: // ????
+                    case 0x03:
+                        nativeFlags = O_RDWR;
+                        break;
+                }
+
+                if (file->flags & kO_APPEND) nativeFlags |= O_APPEND;
+                if (file->flags & kO_CREAT) nativeFlags |= O_CREAT;
+                if (file->flags & kO_TRUNC) nativeFlags |= O_TRUNC;
+                if (file->flags & kO_EXCL) nativeFlags |= O_EXCL;
+
+                printf("native flags: %x\n", nativeFlags);
+
+                int nativeFd = ::open(name, nativeFlags, 0644);
+
+                if (nativeFd < 0)
+                {
+                    file->err = -36;    // ###
+                    file->cookie = 0;
+                    return 0x40000000 | kENOENT;
+                }
+
+                int fd = fdEntries.size();
+                printf("file opened: %d\n", fd);
+
+                //file->flags = 1;
+                file->cookie = fd;
+                file->functions = &devTable.fsys;
+                fdEntries.emplace_back(std::make_unique<MPWFDEntry>(nativeFd));
+                file->err = 0;
+                return 0;
+            }
+            break;
+        case kF_DELETE:
+            return 0;
+    }
     return kEINVAL;
 }
 
 static int C_mpwClose(MPWFile* file)
 {
-    //printf("close(cookie=%d)\n", (int)file->cookie);
+    printf("close(cookie=%d)\n", (int)file->cookie);
     fflush(stdout);
 
     if (auto *e = getEntry(file->cookie))
@@ -89,8 +140,8 @@ static int C_mpwClose(MPWFile* file)
 
 static int C_mpwRead(MPWFile* file)
 {
-    //printf("mpwRead(cookie=%d, %d)\n", (int) file->cookie, (int) file->count);
-    //fflush(stdout);
+    printf("mpwRead(cookie=%d, %d)\n", (int) file->cookie, (int) file->count);
+    fflush(stdout);
 
     ssize_t size = 0;
 
@@ -197,8 +248,6 @@ static int C_mpwIOCtl(MPWFile *file, int cmd, uint32_t param)
                 return 0;
             }
             break;
-
-
     }
 
     return mpw::kEINVAL;
@@ -275,18 +324,20 @@ void mpw::SetupTool()
     for (int i = 0; i < 3; i++)
     {
         files[i].cookie = i;
-        files[i].functions = &devTable.table;
+        files[i].functions = &devTable.fsys;
     }
     files[0].flags = 1;
     files[1].flags = 2;
     files[1].flags = 2;
     pgm2.devptr = &devTable;
 
-    devTable.magic = "FSYS"_4;
-    devTable.table.quit = &mpwQuit;
-    devTable.table.access = &mpwAccess;
-    devTable.table.close = &mpwClose;
-    devTable.table.read = &mpwRead;
-    devTable.table.write = &mpwWrite;
-    devTable.table.ioctl = &mpwIOCtl;
+    //devTable.table.quit = &mpwQuit;
+    devTable.fsys.magic = "FSYS"_4;
+    devTable.fsys.access = &mpwAccess;
+    devTable.fsys.close = &mpwClose;
+    devTable.fsys.read = &mpwRead;
+    devTable.fsys.write = &mpwWrite;
+    devTable.fsys.ioctl = &mpwIOCtl;
+    devTable.econ.magic = "ECON"_4;
+    devTable.syst.magic = "SYST"_4;
 }
