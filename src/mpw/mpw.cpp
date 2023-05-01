@@ -293,6 +293,11 @@ extern char **environ;
 
 void mpw::SetupTool()
 {
+    fprintf(stderr, "*******************************************************\n");
+    fprintf(stderr, "* WARNING: MPW Tool support is incomplete.            *\n");
+    fprintf(stderr, "*          No 'real' MPW Tools are known to work yet. *\n");
+    fprintf(stderr, "*******************************************************\n");
+    
     ROMlib_nowarn32 = true;
     InitGraf(&mpwQD.thePort);
     InitFonts();
