@@ -224,14 +224,40 @@ static int C_mpwWrite(MPWFile* file)
     return 0;
 }
 
-static int C_mpwIOCtl(MPWFile *file, int cmd, uint32_t param)
+static int C_mpwIOCtl(MPWFile *file, int cmd, void* param)
 {
-    //printf("mpwIOCtl(cookie = %d, %x, %x)\n", (int)file->cookie, (int)cmd, (int)param);
-    //fflush(stdout);
+    printf("mpwIOCtl(cookie = %d, %x)\n", (int)file->cookie, (int)cmd);
+    fflush(stdout);
 
     switch(cmd)
     {
-        //case k
+        case kFIOLSEEK:
+            if (auto *e = getEntry(file->cookie))
+            {
+                const MPWSeekParamBlock *spb = (const MPWSeekParamBlock*)param;
+                
+                printf("whence: %d offset: %d\n", (int)spb->whence, (int)spb->offset);
+                int whence;
+                switch(spb->whence)
+                {
+                    case kSEEK_CUR: 
+                        whence = SEEK_CUR;
+                        break;
+                    case kSEEK_END:
+                        whence = SEEK_END;
+                        break;
+                    case kSEEK_SET:
+                        whence = SEEK_SET;
+                        break;
+                    default:
+                        return mpw::kEINVAL;
+                }
+                if (e->nativeFd != -1)
+                    lseek(e->nativeFd, spb->offset, whence);
+                file->err = 0;
+                return 0;
+            }
+            break;
         case kFIODUPFD:
             if (auto *e = getEntry(file->cookie))
             {
