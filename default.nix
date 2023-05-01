@@ -25,6 +25,6 @@ pkgs.libsForQt5.callPackage(
         ]);
         src = pkgs.nix-gitignore.gitignoreSource [] ./.;
         hardeningDisable = [ "all" ];
-        cmakeFlags = ["-DRUN_FIXUP_BUNDLE=NO" "-DFORCE_SYSTEM_BOOST=YES"];
+        cmakeFlags = ["-DRUN_FIXUP_BUNDLE=NO" "-DNO_STATIC_BOOST=YES"];
     }
 ) {}

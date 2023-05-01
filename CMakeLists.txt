@@ -45,8 +45,8 @@ endif()
 
 enable_testing()
 
-option(FORCE_SYSTEM_BOOST NO)
-if((APPLE OR NOT UNIX) AND NOT FORCE_SYSTEM_BOOST)
+option(NO_STATIC_BOOST NO)
+if((APPLE OR NOT UNIX) AND NOT NO_STATIC_BOOST)
    set(Boost_USE_STATIC_LIBS YES)
 endif()
 add_compile_definitions(BOOST_ALL_NO_LIB)
