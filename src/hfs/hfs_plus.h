@@ -1,5 +1,7 @@
-#if !defined(__RSYS_HFS_PLUS__)
-#define __RSYS_HFS_PLUS__
+#pragma once
+
+#include <base/mactype.h>
+#include <FileMgr.h>
 
 /*
  * Copyright 2000 by Abacus Research and Development, Inc.
@@ -9,7 +11,6 @@
  */
 namespace Executor
 {
-#if 1
 typedef uint8_t UInt8;
 typedef uint16_t UInt16;
 typedef uint32_t UInt32;
@@ -23,7 +24,6 @@ typedef int64_t SInt64;
 typedef uint16_t UniChar;
 
 typedef UInt32 HFSCatalogNodeID;
-#endif
 
 struct HFSUniStr255
 {
@@ -226,4 +226,3 @@ static_assert(sizeof(HFSPlusExtentKey) == 12);
 static_assert(sizeof(HFSPlusAttrForkData) == 88);
 static_assert(sizeof(HFSPlusAttrExtents) == 72);
 }
-#endif

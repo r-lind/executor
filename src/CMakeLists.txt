@@ -636,3 +636,9 @@ if(TARGET executor-qt)
         set_target_properties(executor-qt PROPERTIES OUTPUT_NAME executor)
     endif()
 endif()
+
+add_executable(mkhfsplus mkhfsplus/mkhfsplus.cpp)
+target_link_libraries(mkhfsplus romlib front-end-headless Boost::program_options)
+set_target_properties(mkhfsplus PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+install(TARGETS mkhfsplus RUNTIME DESTINATION bin)
+
