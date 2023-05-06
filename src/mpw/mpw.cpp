@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <memory>
+
 using namespace Executor;
 using namespace Executor::mpw;
 
